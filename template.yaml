@@ -18,13 +18,13 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Location: ./infrastructure/api.yaml
-      Parameters:
-        StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
-        DynamoDBArn: !Ref DynamoDB
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: !Ref Name
+      Parameters:
+        StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
+        DynamoDBArn: !GetAtt DynamoDB.Arn
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:
@@ -33,6 +33,8 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: !Ref Name
+      Parameters:
+        DynamoDBArn: !GetAtt DynamoDB.Arn
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
