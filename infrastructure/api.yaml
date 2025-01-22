@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: API Lambda Functions
+
+Parameters:
+  Owner:
+    Type: String
+    Default: Antoine Berger
+  Project:
+    Type: String
+    Default: WAFR Automation Tool
+  Name:
+    Type: String
+    Default: wafr-automation-tool
+  StateMachineArn:
+    Type: String
+  DynamoDBArn:
+    Type: String
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      StageName: prod
+      Cors: "'*'"
+  RetrieveResultsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Handler: main.lambda_handler
+      Runtime: python3.13
+      CodeUri: ../backend/src/api/retrieve_results
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref DynamoDBArn
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBArn
+      Events:
+        RetrieveResults:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /results
+            Method: GET
+  RetrieveProcessStepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Handler: main.lambda_handler
+      Runtime: python3.13
+      CodeUri: ../backend/src/api/retrieve_process_step
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref DynamoDBArn
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBArn
+      Events:
+        RetrieveProcessStep:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /process-step
+            Method: GET
+  StartSfnFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Handler: main.lambda_handler
+      Runtime: python3.13
+      CodeUri: ../backend/src/api/start_sfn
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref StateMachineArn
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource: !Ref StateMachineArn
+      Events:
+        StartStep:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /start
+            Method: POST

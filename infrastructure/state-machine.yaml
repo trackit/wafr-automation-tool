@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: State Machine
+
+Parameters:
+  Owner:
+    Type: String
+    Default: Antoine Berger
+  Project:
+    Type: String
+    Default: WAFR Automation Tool
+  Name:
+    Type: String
+    Default: wafr-automation-tool
+
+Resources:
+  PrepareScanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Handler: main.lambda_handler
+      Runtime: python3.13
+      CodeUri: ../backend/src/state_machine/prepare_scan
+  ProwlerCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  PreparePromptFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Handler: main.lambda_handler
+      Runtime: python3.13
+      CodeUri: ../backend/src/state_machine/prepare_prompt
+  StateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub "${AWS::StackName}-StateMachine"
+      Tags:
+        Project: !Ref Project
+        Owner: !Ref Owner
+        Name: !Ref Name
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource:
+                - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-StateMachine"
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: cluster:CreateCluster
+              Resource:
+                - !GetAtt ProwlerCluster.Arn
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource:
+                - "*"
+      Definition:
+        Comment: "To be defined"
+        QueryLanguage: "JSONata"
+        StartAt: "Start"
+        States:
+          Start:
+            Type: "Pass"
+            Output: {}
+            End: true
+
+Outputs:
+  StateMachineArn:
+    Description: State Machine Arn
+    Value: !Ref StateMachine

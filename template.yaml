@@ -1,17 +1,52 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: A sample CloudFormation template with YAML comments.
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: wafr-automation-tool
+
+Parameters:
+  Owner:
+    Type: String
+    Default: Antoine Berger
+  Project:
+    Type: String
+    Default: WAFR Automation Tool
+  Name:
+    Type: String
+    Default: wafr-automation-tool
+
 Resources:
-  MyEC2Instance:
-    Type: AWS::EC2::Instance
+  Api:
+    Type: AWS::Serverless::Application
     Properties:
-      # Linux AMI
-      ImageId: ami-1234567890abcdef0
-      InstanceType: t2.micro
-      KeyName: MyKey
-      BlockDeviceMappings:
-        - DeviceName: /dev/sdm
-          Ebs:
-            VolumeType: io1
-            Iops: 200
-            DeleteOnTermination: false
-            VolumeSize: 20
+      Location: ./infrastructure/api.yaml
+      Parameters:
+        StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
+        DynamoDBArn: !Ref DynamoDB
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+  StateMachine:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/state-machine.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
