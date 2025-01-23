@@ -217,15 +217,8 @@ Resources:
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
-        StartAt: PrepareScan
+        StartAt: ScanningTools
         States:
-          PrepareScan:
-            Type: Task
-            Resource: !GetAtt PrepareScanFunction.Arn
-            Output: "{% $states.result.Payload %}"
-            Arguments:
-              Payload: "{% $states.input %}"
-            Next: ScanningTools
           ScanningTools:
             Type: Parallel
             Branches:
