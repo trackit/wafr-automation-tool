@@ -34,6 +34,7 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Parameters:
+        ParentStackName: !Sub "${AWS::StackName}"
         DynamoDBArn: !GetAtt DynamoDB.Arn
   DynamoDB:
     Type: AWS::DynamoDB::Table
