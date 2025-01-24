@@ -1,0 +1,2 @@
+py-ocsf-models
+types-boto3[full]>=1.36.5

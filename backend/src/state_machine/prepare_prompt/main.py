@@ -1,5 +1,9 @@
-from typing import Any, Dict
+from typing import Any
 
+import boto3
+from prowler import create_prowler_prompt
 
-def lambda_handler(event: Dict[str, Any], _context: Any) -> None:
-    pass
+s3_client = boto3.client("s3")
+
+def lambda_handler(event: dict[str, Any], _context: Any):
+    create_prowler_prompt(s3_client, event["prowlerOutputS3"])
