@@ -108,8 +108,20 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Handler: main.lambda_handler
-      Runtime: python3.13
+      Runtime: python3.12
       CodeUri: ../backend/src/state_machine/prepare_prompt
+      Timeout: 30
+      Policies:
+        - PolicyName: PreparePromptFunctionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Join ["", [!GetAtt S3Bucket.Arn, "/*"]]
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -286,7 +298,11 @@ Resources:
                   ProwlerScan:
                     Type: Task
                     Resource: arn:aws:states:::ecs:runTask.sync
-                    Output: "{% $states.result %}"
+                    Output:
+                      outputS3: $join([
+                        !Sub "${ParentStackName}-${AWS::AccountId}",
+                        "scan/prowler/json-ocf/report.ocsf.json"
+                        ], "/")
                     Arguments:
                       LaunchType: FARGATE
                       Cluster: !Ref ECSCluster
