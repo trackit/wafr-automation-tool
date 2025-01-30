@@ -46,7 +46,7 @@ def create_prompt(chunk: list[dict[str, Any]]) -> str:
     prompt += "\n" + json.dumps(chunk, separators=(',', ':'))
     return prompt
 
-def create_prowler_prompt(s3_client: S3Client, s3_uri: str) -> None:
+def create_prowler_prompt(s3_client: S3Client, s3_uri: str) -> list[str]:
     s3_bucket, s3_key = parse_s3_uri(s3_uri)
     response = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
     content = response["Body"].read().decode("utf-8")
@@ -54,9 +54,12 @@ def create_prowler_prompt(s3_client: S3Client, s3_uri: str) -> None:
     formatted_content = format_content(json_content)
     chunks = chunk_content(formatted_content)
 
+    prompts: list[str] = []
     for i, chunk in enumerate(chunks):
+        prompts.append(f"s3://{s3_bucket}/prompts/chunk_{i}.txt")
         s3_client.put_object(
             Bucket=s3_bucket,
-            Key=f"prompts/chunk_{i}.json",
+            Key=f"prompts/chunk_{i}.txt",
             Body=create_prompt(chunk),
         );
+    return prompts
