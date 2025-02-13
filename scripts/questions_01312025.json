@@ -1,0 +1,1049 @@
+{
+  "Operational excellence": {
+    "How do you determine what your priorities are?": {
+      "Evaluate external customer needs": {
+        "risk": "High"
+      },
+      "Evaluate internal customer needs": {
+        "risk": "High"
+      },
+      "Evaluate governance requirements": {
+        "risk": "High"
+      },
+      "Evaluate compliance requirements": {
+        "risk": "High"
+      },
+      "Evaluate threat landscape": {
+        "risk": "Medium"
+      },
+      "Evaluate tradeoffs while managing benefits and risks": {
+        "risk": "Medium"
+      }
+    },
+    "How do you structure your organization to support your business outcomes?": {
+      "Resources have identified owners": {
+        "risk": "High"
+      },
+      "Processes and procedures have identified owners": {
+        "risk": "High"
+      },
+      "Operations activities have identified owners responsible for their performance": {
+        "risk": "High"
+      },
+      "Mechanisms exist to manage responsibilities and ownership": {
+        "risk": "High"
+      },
+      "Mechanisms exist to request additions, changes, and exceptions": {
+        "risk": "Medium"
+      },
+      "Responsibilities between teams are predefined or negotiated": {
+        "risk": "Low"
+      }
+    },
+    "How does your organizational culture support your business outcomes?": {
+      "Provide executive sponsorship": {
+        "risk": "High"
+      },
+      "Team members are empowered to take action when outcomes are at risk": {
+        "risk": "Medium"
+      },
+      "Escalation is encouraged": {
+        "risk": "High"
+      },
+      "Communications are timely, clear, and actionable": {
+        "risk": "High"
+      },
+      "Experimentation is encouraged": {
+        "risk": "Medium"
+      },
+      "Team members are encouraged to maintain and grow their skill sets": {
+        "risk": "Medium"
+      },
+      "Resource teams appropriately": {
+        "risk": "Medium"
+      }
+    },
+    "How do you implement observability in your workload?": {
+      "Identify key performance indicators": {
+        "risk": "High"
+      },
+      "Implement application telemetry": {
+        "risk": "High"
+      },
+      "Implement user experience telemetry": {
+        "risk": "High"
+      },
+      "Implement dependency telemetry": {
+        "risk": "High"
+      },
+      "Implement distributed tracing": {
+        "risk": "High"
+      }
+    },
+    "How do you reduce defects, ease remediation, and improve flow into production?": {
+      "Use version control": {
+        "risk": "High"
+      },
+      "Test and validate changes": {
+        "risk": "High"
+      },
+      "Use configuration management systems": {
+        "risk": "Medium"
+      },
+      "Use build and deployment management systems": {
+        "risk": "Medium"
+      },
+      "Perform patch management": {
+        "risk": "Medium"
+      },
+      "Share design standards": {
+        "risk": "Medium"
+      },
+      "Implement practices to improve code quality": {
+        "risk": "Medium"
+      },
+      "Use multiple environments": {
+        "risk": "Medium"
+      },
+      "Make frequent, small, reversible changes": {
+        "risk": "Low"
+      },
+      "Fully automate integration and deployment": {
+        "risk": "Low"
+      }
+    },
+    "How do you mitigate deployment risks?": {
+      "Plan for unsuccessful changes": {
+        "risk": "High"
+      },
+      "Test deployments": {
+        "risk": "High"
+      },
+      "Employ safe deployment strategies": {
+        "risk": "Medium"
+      },
+      "Automate testing and rollback": {
+        "risk": "Medium"
+      }
+    },
+    "How do you know that you are ready to support a workload?": {
+      "Ensure personnel capability": {
+        "risk": "High"
+      },
+      "Ensure a consistent review of operational readiness": {
+        "risk": "High"
+      },
+      "Use runbooks to perform procedures": {
+        "risk": "Medium"
+      },
+      "Use playbooks to investigate issues": {
+        "risk": "Medium"
+      },
+      "Make informed decisions to deploy systems and changes": {
+        "risk": "Low"
+      },
+      "Create support plans for production workloads": {
+        "risk": "Low"
+      }
+    },
+    "How do you utilize workload observability in your organization?": {
+      "Analyze workload metrics": {
+        "risk": "Medium"
+      },
+      "Analyze workload logs": {
+        "risk": "Medium"
+      },
+      "Analyze workload traces": {
+        "risk": "Medium"
+      },
+      "Create actionable alerts": {
+        "risk": "High"
+      },
+      "Create dashboards": {
+        "risk": "Medium"
+      }
+    },
+    "How do you understand the health of your operations?": {
+      "Measure operations goals and KPIs with metrics": {
+        "risk": "Medium"
+      },
+      "Communicate status and trends to ensure visibility into operation": {
+        "risk": "Medium"
+      },
+      "Review operations metrics and prioritize improvement": {
+        "risk": "Medium"
+      }
+    },
+    "How do you manage workload and operations events?": {
+      "Use a process for event, incident, and problem management": {
+        "risk": "High"
+      },
+      "Have a process per alert": {
+        "risk": "High"
+      },
+      "Prioritize operational events based on business impact": {
+        "risk": "High"
+      },
+      "Define escalation paths": {
+        "risk": "Medium"
+      },
+      "Define a customer communication plan for service-impacting events": {
+        "risk": "Medium"
+      },
+      "Communicate status through dashboards": {
+        "risk": "Medium"
+      },
+      "Automate responses to events": {
+        "risk": "Medium"
+      }
+    },
+    "How do you evolve operations?": {
+      "Have a process for continuous improvement": {
+        "risk": "High"
+      },
+      "Perform post-incident analysis": {
+        "risk": "High"
+      },
+      "Implement feedback loops": {
+        "risk": "High"
+      },
+      "Perform knowledge management": {
+        "risk": "High"
+      },
+      "Define drivers for improvement": {
+        "risk": "Medium"
+      },
+      "Validate insights": {
+        "risk": "Medium"
+      },
+      "Perform operations metrics reviews": {
+        "risk": "Medium"
+      },
+      "Document and share lessons learned": {
+        "risk": "Low"
+      },
+      "Allocate time to make improvements": {
+        "risk": "Low"
+      }
+    }
+  },
+  "Security": {
+    "How do you securely operate your workload?": {
+      "Separate workloads using accounts": {
+        "risk": "High"
+      },
+      "Secure account root user and properties": {
+        "risk": "High"
+      },
+      "Identify and validate control objectives": {
+        "risk": "High"
+      },
+      "Stay up to date with security threats and recommendations": {
+        "risk": "High"
+      },
+      "Reduce security management scope": {
+        "risk": "Medium"
+      },
+      "Automate deployment of standard security controls": {
+        "risk": "Medium"
+      },
+      "Identify threats and prioritize mitigations using a threat model": {
+        "risk": "High"
+      },
+      "Evaluate and implement new security services and features regularly": {
+        "risk": "Low"
+      }
+    },
+    "How do you manage authentication for people and machines?": {
+      "Use strong sign-in mechanisms": {
+        "risk": "High"
+      },
+      "Use temporary credentials": {
+        "risk": "High"
+      },
+      "Store and use secrets securely": {
+        "risk": "High"
+      },
+      "Rely on a centralized identity provider": {
+        "risk": "High"
+      },
+      "Audit and rotate credentials periodically": {
+        "risk": "High"
+      },
+      "Employ user groups and attributes": {
+        "risk": "Medium"
+      }
+    },
+    "How do you manage permissions for people and machines?": {
+      "Define access requirements": {
+        "risk": "High"
+      },
+      "Grant least privilege access": {
+        "risk": "High"
+      },
+      "Establish emergency access process": {
+        "risk": "Medium"
+      },
+      "Reduce permissions continuously": {
+        "risk": "Medium"
+      },
+      "Define permission guardrails for your organization": {
+        "risk": "Medium"
+      },
+      "Manage access based on lifecycle": {
+        "risk": "Medium"
+      },
+      "Analyze public and cross-account access": {
+        "risk": "Low"
+      },
+      "Share resources securely within your organization": {
+        "risk": "Medium"
+      },
+      "Share resources securely with a third party": {
+        "risk": "Medium"
+      }
+    },
+    "How do you detect and investigate security events?": {
+      "Configure service and application logging": {
+        "risk": "High"
+      },
+      "Capture logs, findings, and metrics in standardized locations": {
+        "risk": "Medium"
+      },
+      "Correlate and enrich security alerts": {
+        "risk": "Low"
+      },
+      "Initiate remediation for non-compliant resources": {
+        "risk": "Medium"
+      }
+    },
+    "How do you protect your network resources?": {
+      "Create network layers": {
+        "risk": "High"
+      },
+      "Control traffic flow within your network layers": {
+        "risk": "High"
+      },
+      "Implement inspection-based protection": {
+        "risk": "Medium"
+      },
+      "Automate network protection": {
+        "risk": "Medium"
+      }
+    },
+    "How do you protect your compute resources?": {
+      "Perform vulnerability management": {
+        "risk": "High"
+      },
+      "Provision compute from hardened images": {
+        "risk": "High"
+      },
+      "Reduce manual management and interactive access": {
+        "risk": "Medium"
+      },
+      "Validate software integrity": {
+        "risk": "Medium"
+      },
+      "Automate compute protection": {
+        "risk": "Medium"
+      }
+    },
+    "How do you classify your data?": {
+      "Understand your data classification scheme": {
+        "risk": "High"
+      },
+      "Apply data protection controls based on data sensitivity": {
+        "risk": "High"
+      },
+      "Automate identification and classification": {
+        "risk": "Medium"
+      },
+      "Define scalable data lifecycle management": {
+        "risk": "High"
+      }
+    },
+    "How do you protect your data at rest?": {
+      "Implement secure key management": {
+        "risk": "High"
+      },
+      "Enforce encryption at rest": {
+        "risk": "High"
+      },
+      "Automate data at rest protection": {
+        "risk": "Medium"
+      },
+      "Enforce access control": {
+        "risk": "High"
+      }
+    },
+    "How do you protect your data in transit?": {
+      "Implement secure key and certificate management": {
+        "risk": "High"
+      },
+      "Enforce encryption in transit": {
+        "risk": "High"
+      },
+      "Authenticate network communications": {
+        "risk": "Low"
+      }
+    },
+    "How do you anticipate, respond to, and recover from incidents?": {
+      "Identify key personnel and external resources": {
+        "risk": "High"
+      },
+      "Develop incident management plans": {
+        "risk": "High"
+      },
+      "Prepare forensic capabilities": {
+        "risk": "Medium"
+      },
+      "Develop and test security incident response playbooks": {
+        "risk": "Medium"
+      },
+      "Pre-provision access": {
+        "risk": "Medium"
+      },
+      "Pre-deploy tools": {
+        "risk": "Medium"
+      },
+      "Run simulations": {
+        "risk": "Medium"
+      },
+      "Establish a framework for learning from incidents": {
+        "risk": "Medium"
+      }
+    },
+    "How do you incorporate and validate the security properties of applications throughout the design, development, and deployment lifecycle?": {
+      "Train for application security": {
+        "risk": "Medium"
+      },
+      "Automate testing throughout the development and release lifecycle": {
+        "risk": "Medium"
+      },
+      "Perform regular penetration testing": {
+        "risk": "High"
+      },
+      "Conduct code reviews": {
+        "risk": "Medium"
+      },
+      "Centralize services for packages and dependencies": {
+        "risk": "Medium"
+      },
+      "Deploy software programmatically": {
+        "risk": "High"
+      },
+      "Regularly assess security properties of the pipelines": {
+        "risk": "High"
+      },
+      "Build a program that embeds security ownership in workload teams": {
+        "risk": "Low"
+      }
+    }
+  },
+  "Reliability": {
+    "How do you manage Service Quotas and constraints?": {
+      "Aware of service quotas and constraints": {
+        "risk": "High"
+      },
+      "Manage service quotas across accounts and regions": {
+        "risk": "High"
+      },
+      "Accommodate fixed service quotas and constraints through architecture": {
+        "risk": "Medium"
+      },
+      "Monitor and manage quotas": {
+        "risk": "Medium"
+      },
+      "Automate quota management": {
+        "risk": "Medium"
+      },
+      "Ensure that a sufficient gap exists between the current quotas and the maximum usage to accommodate failover": {
+        "risk": "Medium"
+      }
+    },
+    "How do you plan your network topology?": {
+      "Use highly available network connectivity for your workload public endpoints": {
+        "risk": "High"
+      },
+      "Provision redundant connectivity between private networks in the cloud and on-premises environments": {
+        "risk": "High"
+      },
+      "Ensure IP subnet allocation accounts for expansion and availability": {
+        "risk": "Medium"
+      },
+      "Prefer hub-and-spoke topologies over many-to-many mesh": {
+        "risk": "Medium"
+      },
+      "Enforce non-overlapping private IP address ranges in all private address spaces where they are connected": {
+        "risk": "Medium"
+      }
+    },
+    "How do you design your workload service architecture?": {
+      "Choose how to segment your workload": {
+        "risk": "High"
+      },
+      "Build services focused on specific business domains and functionality": {
+        "risk": "High"
+      },
+      "Provide service contracts per API": {
+        "risk": "Medium"
+      }
+    },
+    "How do you design interactions in a distributed system to prevent failures?": {
+      "Identify the kind of distributed systems you depend on": {
+        "risk": "High"
+      },
+      "Implement loosely coupled dependencies": {
+        "risk": "High"
+      },
+      "Do constant work": {
+        "risk": "Low"
+      },
+      "Make mutating operations idempotent": {
+        "risk": "Medium"
+      }
+    },
+    "How do you design interactions in a distributed system to mitigate or withstand failures?": {
+      "Implement graceful degradation to transform applicable hard dependencies into soft dependencies": {
+        "risk": "High"
+      },
+      "Throttle requests": {
+        "risk": "High"
+      },
+      "Control and limit retry calls": {
+        "risk": "High"
+      },
+      "Fail fast and limit queues": {
+        "risk": "High"
+      },
+      "Set client timeouts": {
+        "risk": "High"
+      },
+      "Make systems stateless where possible": {
+        "risk": "Medium"
+      },
+      "Implement emergency levers": {
+        "risk": "Medium"
+      }
+    },
+    "How do you monitor workload resources?": {
+      "Monitor all components for the workload (Generation)": {
+        "risk": "High"
+      },
+      "Define and calculate metrics (Aggregation)": {
+        "risk": "High"
+      },
+      "Send notifications (Real-time processing and alarming)": {
+        "risk": "High"
+      },
+      "Automate responses (Real-time processing and alarming)": {
+        "risk": "Medium"
+      },
+      "Analyze logs": {
+        "risk": "Medium"
+      },
+      "Regularly review monitoring scope and metrics": {
+        "risk": "Medium"
+      },
+      "Monitor end-to-end tracing of requests through your system": {
+        "risk": "Medium"
+      }
+    },
+    "How do you design your workload to adapt to changes in demand?": {
+      "Use automation when obtaining or scaling resources": {
+        "risk": "High"
+      },
+      "Obtain resources upon detection of impairment to a workload": {
+        "risk": "Medium"
+      },
+      "Obtain resources upon detection that more resources are needed for a workload": {
+        "risk": "Medium"
+      },
+      "Load test your workload": {
+        "risk": "Medium"
+      }
+    },
+    "How do you implement change?": {
+      "Use runbooks for standard activities such as deployment": {
+        "risk": "High"
+      },
+      "Integrate functional testing as part of your deployment": {
+        "risk": "High"
+      },
+      "Integrate resiliency testing as part of your deployment": {
+        "risk": "Medium"
+      },
+      "Deploy using immutable infrastructure": {
+        "risk": "Medium"
+      },
+      "Deploy changes with automation": {
+        "risk": "Medium"
+      }
+    },
+    "How do you back up data?": {
+      "Identify and back up all data that needs to be backed up, or reproduce the data from sources": {
+        "risk": "High"
+      },
+      "Secure and encrypt backups": {
+        "risk": "High"
+      },
+      "Perform data backup automatically": {
+        "risk": "Medium"
+      },
+      "Perform periodic recovery of the data to verify backup integrity and processes": {
+        "risk": "Medium"
+      }
+    },
+    "How do you use fault isolation to protect your workload?": {
+      "Deploy the workload to multiple locations": {
+        "risk": "High"
+      },
+      "Automate recovery for components constrained to a single location": {
+        "risk": "Medium"
+      },
+      "Use bulkhead architectures to limit scope of impact": {
+        "risk": "High"
+      }
+    },
+    "How do you design your workload to withstand component failures?": {
+      "Monitor all components of the workload to detect failures": {
+        "risk": "High"
+      },
+      "Fail over to healthy resources": {
+        "risk": "High"
+      },
+      "Automate healing on all layers": {
+        "risk": "High"
+      },
+      "Rely on the data plane and not the control plane during recovery": {
+        "risk": "Medium"
+      },
+      "Use static stability to prevent bimodal behavior": {
+        "risk": "Medium"
+      },
+      "Send notifications when events impact availability": {
+        "risk": "Medium"
+      },
+      "Architect your product to meet availability targets and uptime service level agreements (SLAs)": {
+        "risk": "Medium"
+      }
+    },
+    "How do you test reliability?": {
+      "Use playbooks to investigate failures": {
+        "risk": "High"
+      },
+      "Perform post-incident analysis": {
+        "risk": "High"
+      },
+      "Test scalability and performance requirements": {
+        "risk": "High"
+      },
+      "Test resiliency using chaos engineering": {
+        "risk": "Medium"
+      },
+      "Conduct game days regularly": {
+        "risk": "Medium"
+      }
+    },
+    "How do you plan for disaster recovery (DR)?": {
+      "Define recovery objectives for downtime and data loss": {
+        "risk": "High"
+      },
+      "Use defined recovery strategies to meet the recovery objectives": {
+        "risk": "High"
+      },
+      "Test disaster recovery implementation to validate the implementation": {
+        "risk": "High"
+      },
+      "Manage configuration drift at the DR site or Region": {
+        "risk": "High"
+      },
+      "Automate recovery": {
+        "risk": "Medium"
+      }
+    }
+  },
+  "Performance efficiency": {
+    "How do you select appropriate cloud resources and architecture for your workload?": {
+      "Learn about and understand available cloud services and features": {
+        "risk": "High"
+      },
+      "Use guidance from your cloud provider or an appropriate partner to learn about architecture patterns and best practices": {
+        "risk": "Medium"
+      },
+      "Factor cost into architectural decisions": {
+        "risk": "Medium"
+      },
+      "Evaluate how trade-offs impact customers and architecture efficiency": {
+        "risk": "High"
+      },
+      "Use policies and reference architectures": {
+        "risk": "Medium"
+      },
+      "Use benchmarking to drive architectural decisions": {
+        "risk": "Medium"
+      },
+      "Use a data-driven approach for architectural choices": {
+        "risk": "Medium"
+      }
+    },
+    "How do you select and use compute resources in your workload?": {
+      "Select the best compute options for your workload": {
+        "risk": "High"
+      },
+      "Understand the available compute configuration and features": {
+        "risk": "Medium"
+      },
+      "Collect compute-related metrics": {
+        "risk": "High"
+      },
+      "Configure and right-size compute resources": {
+        "risk": "Medium"
+      },
+      "Scale your compute resources dynamically": {
+        "risk": "High"
+      },
+      "Use optimized hardware-based compute accelerators": {
+        "risk": "Medium"
+      }
+    },
+    "How do you store, manage, and access data in your workload?": {
+      "Use a purpose-built data store that best supports your data access and storage requirements": {
+        "risk": "High"
+      },
+      "Evaluate available configuration options for data store": {
+        "risk": "Medium"
+      },
+      "Collect and record data store performance metrics": {
+        "risk": "High"
+      },
+      "Implement strategies to improve query performance in data store": {
+        "risk": "Medium"
+      },
+      "Implement data access patterns that utilize caching": {
+        "risk": "Medium"
+      }
+    },
+    "How do you select and configure networking resources in your workload?": {
+      "Understand how networking impacts performance": {
+        "risk": "High"
+      },
+      "Evaluate available networking features": {
+        "risk": "High"
+      },
+      "Choose appropriate dedicated connectivity or VPN for your workload": {
+        "risk": "High"
+      },
+      "Use load balancing to distribute traffic across multiple resources": {
+        "risk": "High"
+      },
+      "Choose network protocols to improve performance": {
+        "risk": "Medium"
+      },
+      "Choose your workload's location based on network requirements": {
+        "risk": "Medium"
+      },
+      "Optimize network configuration based on metrics": {
+        "risk": "Low"
+      }
+    },
+    "How do your organizational practices and culture contribute to performance efficiency in your workload?": {
+      "Establish key performance indicators (KPIs) to measure workload health and performance": {
+        "risk": "High"
+      },
+      "Use monitoring solutions to understand the areas where performance is most critical": {
+        "risk": "High"
+      },
+      "Define a process to improve workload performance": {
+        "risk": "Medium"
+      },
+      "Load test your workload": {
+        "risk": "Low"
+      },
+      "Use automation to proactively remediate performance-related issues": {
+        "risk": "Low"
+      },
+      "Keep your workload and services up-to-date": {
+        "risk": "Low"
+      },
+      "Review metrics at regular intervals": {
+        "risk": "Medium"
+      }
+    }
+  },
+  "Cost optimization": {
+    "How do you implement cloud financial management?": {
+      "Establish ownership of cost optimization": {
+        "risk": "High"
+      },
+      "Establish a partnership between finance and technology": {
+        "risk": "High"
+      },
+      "Establish cloud budgets and forecasts": {
+        "risk": "High"
+      },
+      "Implement cost awareness in your organizational processes": {
+        "risk": "High"
+      },
+      "Report and notify on cost optimization": {
+        "risk": "Low"
+      },
+      "Monitor cost proactively": {
+        "risk": "Medium"
+      },
+      "Keep up-to-date with new service releases": {
+        "risk": "Medium"
+      },
+      "Create a cost-aware culture": {
+        "risk": "Low"
+      },
+      "Quantify business value from cost optimization": {
+        "risk": "Medium"
+      }
+    },
+    "How do you govern usage?": {
+      "Develop policies based on your organization requirements": {
+        "risk": "High"
+      },
+      "Implement goals and targets": {
+        "risk": "High"
+      },
+      "Implement an account structure": {
+        "risk": "High"
+      },
+      "Implement groups and roles": {
+        "risk": "Low"
+      },
+      "Implement cost controls": {
+        "risk": "Medium"
+      },
+      "Track project lifecycle": {
+        "risk": "Low"
+      }
+    },
+    "How do you monitor your cost and usage?": {
+      "Configure detailed information sources": {
+        "risk": "High"
+      },
+      "Add organization information to cost and usage": {
+        "risk": "Medium"
+      },
+      "Identify cost attribution categories": {
+        "risk": "High"
+      },
+      "Establish organization metrics": {
+        "risk": "High"
+      },
+      "Configure billing and cost management tools": {
+        "risk": "High"
+      },
+      "Allocate costs based on workload metrics": {
+        "risk": "Low"
+      }
+    },
+    "How do you decommission resources?": {
+      "Track resources over their lifetime": {
+        "risk": "High"
+      },
+      "Implement a decommissioning process": {
+        "risk": "High"
+      },
+      "Decommission resources": {
+        "risk": "Medium"
+      },
+      "Decommission resources automatically": {
+        "risk": "Low"
+      },
+      "Enforce data retention policies": {
+        "risk": "Medium"
+      }
+    },
+    "How do you evaluate cost when you select services?": {
+      "Identify organization requirements for cost": {
+        "risk": "High"
+      },
+      "Analyze all components of the workload": {
+        "risk": "High"
+      },
+      "Perform a thorough analysis of each component": {
+        "risk": "High"
+      },
+      "Select software with cost-effective licensing": {
+        "risk": "Low"
+      },
+      "Select components of this workload to optimize cost in line with organization priorities": {
+        "risk": "Medium"
+      },
+      "Perform cost analysis for different usage over time": {
+        "risk": "Medium"
+      }
+    },
+    "How do you meet cost targets when you select resource type, size and number?": {
+      "Perform cost modeling": {
+        "risk": "High"
+      },
+      "Select resource type, size, and number based on data": {
+        "risk": "Medium"
+      },
+      "Select resource type, size, and number automatically based on metrics": {
+        "risk": "Low"
+      },
+      "Consider using shared resources": {
+        "risk": "Medium"
+      }
+    },
+    "How do you use pricing models to reduce cost?": {
+      "Perform pricing model analysis": {
+        "risk": "High"
+      },
+      "Choose Regions based on cost": {
+        "risk": "Medium"
+      },
+      "Select third-party agreements with cost-efficient terms": {
+        "risk": "Medium"
+      },
+      "Implement pricing models for all components of this workload": {
+        "risk": "Low"
+      },
+      "Perform pricing model analysis at the management account level": {
+        "risk": "Low"
+      }
+    },
+    "How do you plan for data transfer charges?": {
+      "Perform data transfer modeling": {
+        "risk": "High"
+      },
+      "Select components to optimize data transfer cost": {
+        "risk": "Medium"
+      },
+      "Implement services to reduce data transfer costs": {
+        "risk": "Medium"
+      }
+    },
+    "How do you manage demand, and supply resources?": {
+      "Perform an analysis on the workload demand": {
+        "risk": "High"
+      },
+      "Implement a buffer or throttle to manage demand": {
+        "risk": "Medium"
+      },
+      "Supply resources dynamically": {
+        "risk": "Low"
+      }
+    },
+    "How do you evaluate new services?": {
+      "Develop a workload review process": {
+        "risk": "High"
+      },
+      "Review and analyze this workload regularly": {
+        "risk": "Medium"
+      }
+    },
+    "How do you evaluate the cost of effort?": {
+      "Perform automation for operations": {
+        "risk": "Low"
+      }
+    }
+  },
+  "Sustainability": {
+    "How do you select Regions for your workload?": {
+      "Choose Region based on both business requirements and sustainability goals": {
+        "risk": "Medium"
+      }
+    },
+    "How do you align cloud resources to your demand?": {
+      "Scale workload infrastructure dynamically": {
+        "risk": "Medium"
+      },
+      "Align SLAs with sustainability goals": {
+        "risk": "Low"
+      },
+      "Stop the creation and maintenance of unused assets": {
+        "risk": "Low"
+      },
+      "Optimize geographic placement of workloads based on their networking requirements": {
+        "risk": "Medium"
+      },
+      "Optimize team member resources for activities performed": {
+        "risk": "Low"
+      },
+      "Implement buffering or throttling to flatten the demand curve": {
+        "risk": "Low"
+      }
+    },
+    "How do you take advantage of software and architecture patterns to support your sustainability goals?": {
+      "Optimize software and architecture for asynchronous and scheduled jobs": {
+        "risk": "Medium"
+      },
+      "Remove or refactor workload components with low or no use": {
+        "risk": "Medium"
+      },
+      "Optimize areas of code that consume the most time or resources": {
+        "risk": "Medium"
+      },
+      "Optimize impact on devices and equipment": {
+        "risk": "Medium"
+      },
+      "Use software patterns and architectures that best support data access and storage patterns": {
+        "risk": "Medium"
+      }
+    },
+    "How do you take advantage of data management policies and patterns to support your sustainability goals?": {
+      "Implement a data classification policy": {
+        "risk": "Medium"
+      },
+      "Use technologies that support data access and storage patterns": {
+        "risk": "Low"
+      },
+      "Use policies to manage the lifecycle of your datasets": {
+        "risk": "Medium"
+      },
+      "Use elasticity and automation to expand block storage or file system": {
+        "risk": "Medium"
+      },
+      "Remove unneeded or redundant data": {
+        "risk": "Medium"
+      },
+      "Use shared file systems or storage to access common data": {
+        "risk": "Medium"
+      },
+      "Minimize data movement across networks": {
+        "risk": "Medium"
+      },
+      "Back up data only when difficult to recreate": {
+        "risk": "Medium"
+      }
+    },
+    "How do you select and use cloud hardware and services in your architecture to support your sustainability goals?": {
+      "Use the minimum amount of hardware to meet your needs": {
+        "risk": "Medium"
+      },
+      "Use instance types with the least impact": {
+        "risk": "Medium"
+      },
+      "Use managed services": {
+        "risk": "Medium"
+      },
+      "Optimize your use of hardware-based compute accelerators": {
+        "risk": "Medium"
+      }
+    },
+    "How do your organizational processes support your sustainability goals?": {
+      "Communicate and cascade your sustainability goals": {
+        "risk": "Medium"
+      },
+      "Adopt methods that can rapidly introduce sustainability improvements": {
+        "risk": "Medium"
+      },
+      "Keep your workload up-to-date": {
+        "risk": "Low"
+      },
+      "Increase utilization of build environments": {
+        "risk": "Low"
+      },
+      "Use managed device farms for testing": {
+        "risk": "Low"
+      }
+    }
+  }
+}
