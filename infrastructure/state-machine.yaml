@@ -14,18 +14,92 @@ Parameters:
     Default: wafr-automation-tool
   DynamoDBArn:
     Type: String
+  ParentStackName:
+    Type: String
 
 Resources:
-  PrepareScanFunction:
-    Type: AWS::Serverless::Function
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Sub ${AWS::Region}a
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: !Ref Name
-      Handler: main.lambda_handler
-      Runtime: python3.13
-      CodeUri: ../backend/src/state_machine/prepare_scan
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  Route:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ECS
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
   PreparePromptFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -39,7 +113,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub "${AWS::StackName}-ecs-cluster"
+      ClusterName: !Sub "${ParentStackName}-cluster"
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -71,10 +145,71 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
-  ProwlerECR:
-    Type: AWS::ECR::Repository
+  ECSTaskRole:
+    Type: AWS::IAM::Role
     Properties:
-      RepositoryName: "prowler-ecr"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSTaskPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource:
+                  - !Join ["", [!GetAtt S3Bucket.Arn, "/*"]]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${ParentStackName}-logs"
+      RetentionInDays: 14
+  ProwlerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ParentStackName}-prowler"
+      Cpu: "1024"
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: prowler-container
+          Image: "toniblyx/prowler:5.1.5"
+          Essential: true
+          Cpu: 1024
+          Memory: 4096
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: prowler
+          Command:
+            - aws
+            - -M
+            - json-ocsf
+            - -B
+            - !Sub "${ParentStackName}-${AWS::AccountId}"
+            - -o
+            - scan/prowler
+            - -z
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ParentStackName}-${AWS::AccountId}"
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -82,26 +217,10 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: !Ref Name
-  ProwlerTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      Family: !Sub "${AWS::StackName}-prowler"
-      Cpu: "256"
-      Memory: "1024"
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - FARGATE
-      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
-      ContainerDefinitions:
-        - Name: prowler-container
-          Image: !Sub "${ProwlerECR.RepositoryUri}:latest"
-          Essential: true
-          Cpu: 256
-          Memory: 1024
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
-      Name: !Sub "${AWS::StackName}-StateMachine"
+      Name: !Sub "${ParentStackName}-StateMachine"
       Tags:
         Project: !Ref Project
         Owner: !Ref Owner
@@ -111,12 +230,12 @@ Resources:
             Effect: Allow
             Action: states:StartExecution
             Resource:
-              - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-StateMachine"
+              - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
             Effect: Allow
             Action: ecs:RunTask
             Resource:
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${AWS::StackName}-prowler:*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
         - Statement:
             Effect: Allow
             Action: bedrock:InvokeModel
@@ -131,6 +250,7 @@ Resources:
             Action: iam:PassRole
             Resource:
               - !GetAtt ECSExecutionRole.Arn
+              - !GetAtt ECSTaskRole.Arn
         - Statement:
             Effect: Allow
             Action:
@@ -140,18 +260,24 @@ Resources:
               - events:DeleteRule
               - events:RemoveTargets
             Resource: "*"
+        - Statement:
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource:
+              - !Join ["", [!GetAtt S3Bucket.Arn, "/*"]]
+        - Statement:
+            Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource:
+              - !GetAtt PreparePromptFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
-        StartAt: PrepareScan
+        StartAt: ScanningTools
         States:
-          PrepareScan:
-            Type: Task
-            Resource: !GetAtt PrepareScanFunction.Arn
-            Output: "{% $states.result.Payload %}"
-            Arguments:
-              Payload: "{% $states.input %}"
-            Next: ScanningTools
           ScanningTools:
             Type: Parallel
             Branches:
@@ -165,6 +291,13 @@ Resources:
                       LaunchType: FARGATE
                       Cluster: !Ref ECSCluster
                       TaskDefinition: !Ref ProwlerTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
                     End: true
             Next: PreparePrompt
           PreparePrompt:
