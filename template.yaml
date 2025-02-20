@@ -14,6 +14,17 @@ Parameters:
     Default: wafr-automation-tool
 
 Resources:
+  SharedLibs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "${AWS::StackName}-SharedLibs"
+      Description: Shared libs used by Lambdas
+      ContentUri: ./backend/src/shared_lib
+      CompatibleRuntimes:
+        - python3.12
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: python3.12
   Api:
     Type: AWS::Serverless::Application
     Properties:
@@ -34,8 +45,10 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Parameters:
-        ParentStackName: !Sub "${AWS::StackName}"
+        ParentStackName: !Ref "AWS::StackName"
         DynamoDBArn: !GetAtt DynamoDB.Arn
+        S3BucketName: !Ref S3Bucket
+        SharedLibsLayer: !Ref SharedLibs
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -53,3 +66,14 @@ Resources:
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}"
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name

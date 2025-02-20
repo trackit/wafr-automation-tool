@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = "==3.12.*"
 
 [[package]]
@@ -209,6 +210,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "py-ocsf-models" },
+    { name = "pydantic" },
     { name = "types-boto3", extra = ["full"] },
 ]
 
@@ -216,5 +218,6 @@ dependencies = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.36.5" },
     { name = "py-ocsf-models" },
+    { name = "pydantic", specifier = ">=1.10.15" },
     { name = "types-boto3", extras = ["full"], specifier = ">=1.36.5" },
 ]
