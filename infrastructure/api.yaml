@@ -35,7 +35,7 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Handler: main.lambda_handler
-      Runtime: python3.13
+      Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_results
       Environment:
         Variables:
@@ -58,7 +58,7 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Handler: main.lambda_handler
-      Runtime: python3.13
+      Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_process_step
       Environment:
         Variables:
@@ -81,7 +81,7 @@ Resources:
         Project: !Ref Project
         Name: !Ref Name
       Handler: main.lambda_handler
-      Runtime: python3.13
+      Runtime: python3.12
       CodeUri: ../backend/src/api/start_sfn
       Environment:
         Variables:
