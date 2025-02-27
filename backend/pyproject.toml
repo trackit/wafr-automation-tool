@@ -3,6 +3,11 @@ name = "wafr-automation-tool"
 version = "0.1.0"
 description = ""
 readme = "../README.md"
-requires-python = ">=3.13"
+requires-python = "==3.12.*"
 dependencies = [
+    "boto3>=1.36.5",
+    "py-ocsf-models",
+    "pydantic>=1.10.15",
+    "regex>=2024.11.6",
+    "types-boto3[full]>=1.36.5",
 ]

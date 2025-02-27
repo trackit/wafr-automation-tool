@@ -1,0 +1,114 @@
+import json
+from typing import Any, override
+
+from common.config import DYNAMODB_TABLE
+from common.event import StoreResultsInput
+from common.task import Task
+from types_boto3_dynamodb import DynamoDBServiceResource
+from types_boto3_s3 import S3Client
+from utils import s3
+
+
+class StoreResults(Task[StoreResultsInput, None]):
+    def __init__(self, dynamodb_client: DynamoDBServiceResource, s3_client: S3Client):
+        super().__init__()
+        self.dynamodb_table = dynamodb_client.Table(DYNAMODB_TABLE)
+        self.s3_client = s3_client
+
+    def retrieve_findings_data(
+        self, id: str, index: int, s3_bucket: str
+    ) -> list[dict[str, Any]]:
+        chunk_content = (
+            self.s3_client.get_object(
+                Bucket=s3_bucket, Key=f"{id}/prompts/chunks/chunk-{index}.json"
+            )["Body"]
+            .read()
+            .decode("utf-8")
+        )
+        return json.loads(chunk_content)
+
+    def store_findings_id(
+        self,
+        id: str,
+        pillar_name: str,
+        question_name: str,
+        bp_name: str,
+        bp_findings: list[str],
+    ) -> None:
+        self.dynamodb_table.update_item(
+            Key={"id": id, "finding_id": "0"},
+            UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
+            ExpressionAttributeNames={
+                "#pillar": pillar_name,
+                "#question": question_name,
+                "#bp": bp_name,
+            },
+            ExpressionAttributeValues={
+                ":new_findings": bp_findings,
+                ":empty_list": [],
+            },
+        )
+
+    def store_findings(
+        self,
+        id: str,
+        bp_findings: list[str],
+        findings_data: list[dict[str, Any]],
+    ) -> None:
+        for finding in bp_findings:
+            finding_data: dict[str, Any] | None = next(
+                (item for item in findings_data if item["id"] == finding),
+                None,
+            )
+            if finding_data is None:
+                raise ValueError(f"Finding data not found for id: {finding}")
+            self.dynamodb_table.put_item(
+                Item={
+                    **finding_data,
+                    "id": id,
+                    "finding_id": str(finding),
+                }
+            )
+
+    def store_results(
+        self, findings: dict[str, Any], findings_data: list[dict[str, Any]], id: str
+    ) -> None:
+        for pillar_name, pillar in findings.items():
+            for question_name, question in pillar.items():
+                for bp_name, _ in question.items():
+                    bp_findings: list[str] = findings[pillar_name][question_name][
+                        bp_name
+                    ]
+                    self.store_findings_id(
+                        id, pillar_name, question_name, bp_name, bp_findings
+                    )
+                    self.store_findings(id, bp_findings, findings_data)
+
+    def ensure_text_format(self, llm_response: str) -> str:
+        llm_response = llm_response.replace("\n", "")
+        # llm_response = re.sub("\\{(?:(?>[^{}]+)|(?R))*\\}", "", llm_response, 1)
+        return llm_response
+
+    def concat_results(self, llm_response: str) -> dict[str, Any]:
+        json_body = json.loads(llm_response)
+        contents = json_body["content"]
+        findings: dict[str, Any] = {}
+        for content in contents:
+            llm_result = self.ensure_text_format(content["text"])
+            try:
+                obj = json.loads(llm_result)
+                findings.update(obj)
+            except json.JSONDecodeError:
+                continue
+        return findings
+
+    def get_index(self, prompt_uri: str) -> int:
+        return int(prompt_uri.split("-")[-1].split(".")[0])
+
+    @override
+    def execute(self, event: StoreResultsInput) -> None:
+        findings = self.concat_results(event.llm_response)
+        index = self.get_index(event.prompt_uri)
+        s3_bucket, _ = s3.parse_s3_uri(event.prompt_uri)
+        findings_data = self.retrieve_findings_data(event.id, index, s3_bucket)
+        self.store_results(findings, findings_data, event.id)

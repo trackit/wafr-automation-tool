@@ -14,8 +14,28 @@ Parameters:
     Default: wafr-automation-tool
   DynamoDBArn:
     Type: String
+  S3BucketName:
+    Type: String
   ParentStackName:
     Type: String
+  SharedLibsLayer:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: python3.12
+    Layers:
+      - !Ref SharedLibsLayer
+    Tags:
+      Project: !Ref Project
+      Owner: !Ref Owner
+      Name: !Ref Name
+    Environment:
+      Variables:
+        S3_BUCKET: !Ref S3BucketName
+        DYNAMODB_TABLE: !Ref DynamoDBArn
 
 Resources:
   VPC:
@@ -100,20 +120,70 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: !Ref Name
-  PreparePromptFunction:
+  PreparePromptsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: !Ref Name
       Handler: main.lambda_handler
-      Runtime: python3.13
-      CodeUri: ../backend/src/state_machine/prepare_prompt
+      Runtime: python3.12
+      CodeUri: ../backend/src/state_machine/prepare_prompts/app
+      Timeout: 300
+      MemorySize: 512
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !Ref DynamoDBArn
+  InvokeLLMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/state_machine/invoke_llm/app
+      Timeout: 300
+      MemorySize: 128
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:RetrieveAndGenerate
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:PutItem
+              Resource:
+                - !Ref DynamoDBArn
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub "${ParentStackName}-cluster"
+      ClusterName: !Sub "${ParentStackName}-ecs-cluster"
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -165,7 +235,7 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                 Resource:
-                  - !Join ["", [!GetAtt S3Bucket.Arn, "/*"]]
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
         - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
@@ -199,24 +269,15 @@ Resources:
               awslogs-stream-prefix: prowler
           Command:
             - aws
-            - -M
+            - --output-modes
             - json-ocsf
-            - -B
-            - !Sub "${ParentStackName}-${AWS::AccountId}"
-            - -o
+            - --output-bucket
+            - !Ref S3BucketName
+            - --output-directory
             - scan/prowler
-            - -z
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${ParentStackName}-${AWS::AccountId}"
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: !Ref Name
+            - --output-filename
+            - "prowler-output-$ID"
+            - --ignore-exit-code-3
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -238,11 +299,9 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
         - Statement:
             Effect: Allow
-            Action: bedrock:InvokeModel
-            Resource: "*"
-        - Statement:
-            Effect: Allow
-            Action: dynamodb:UpdateItem
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:PutItem
             Resource:
               - !Ref DynamoDBArn
         - Statement:
@@ -263,21 +322,35 @@ Resources:
         - Statement:
             Effect: Allow
             Action:
-              - s3:PutObject
-              - s3:GetObject
-            Resource:
-              - !Join ["", [!GetAtt S3Bucket.Arn, "/*"]]
-        - Statement:
-            Effect: Allow
-            Action:
               - lambda:InvokeFunction
             Resource:
-              - !GetAtt PreparePromptFunction.Arn
+              - !GetAtt PreparePromptsFunction.Arn
+              - !GetAtt InvokeLLMFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
-        StartAt: ScanningTools
+        StartAt: CreateItem
         States:
+          CreateItem:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:putItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Item:
+                id:
+                  S: "{% $states.input.id %}"
+                finding_id:
+                  S: "0"
+                name:
+                  S: "{% $states.input.name %}"
+                role:
+                  S: "{% $states.input.role %}"
+                step:
+                  S: "0"
+            Assign:
+              id: "{% $states.input.id %}"
+              role: "{% $states.input.role %}"
+            Next: ScanningTools
           ScanningTools:
             Type: Parallel
             Branches:
@@ -286,7 +359,6 @@ Resources:
                   ProwlerScan:
                     Type: Task
                     Resource: arn:aws:states:::ecs:runTask.sync
-                    Output: "{% $states.result %}"
                     Arguments:
                       LaunchType: FARGATE
                       Cluster: !Ref ECSCluster
@@ -298,45 +370,52 @@ Resources:
                           SecurityGroups:
                             - !Ref SecurityGroup
                           AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: prowler-container
+                            Environment:
+                              - Name: ID
+                                Value: "{% $id %}"
+                              - Name: ROLE
+                                Value: "{% $role %}"
                     End: true
-            Next: PreparePrompt
-          PreparePrompt:
-            Type: Task
-            Resource: !GetAtt PreparePromptFunction.Arn
-            Output: "{% $states.result.Payload %}"
-            Arguments:
-              Payload: "{% $states.input %}"
-            Next: InvokeLLM
-          InvokeLLM:
-            Type: Task
-            Resource: arn:aws:states:::bedrock:invokeModel
-            Output: "{% $states.result.Payload %}"
-            Arguments:
-              ModelId: >-
-                arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0
-              Body:
-                anthropic_version: bedrock-2023-05-31
-                max_tokens: 200
-                messages:
-                  - role: user
-                    content:
-                      - type: text
-                        text: "{% $states.input %}"
-            Next: StoreResults
-          StoreResults:
+            Next: UpdateItem
+          UpdateItem:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
               TableName: !Ref DynamoDBArn
               Key:
-                Column:
-                  S: MyEntry
-              UpdateExpression: SET MyKey = :myValueRef
+                id:
+                  S: "{% $id %}"
+                finding_id:
+                  S: "0"
+              UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
-                ":myValueRef":
-                  S: MyValue
+                ":newStep":
+                  N: "1"
+            Next: PreparePrompt
+          PreparePrompt:
+            Type: Task
+            Resource: !GetAtt PreparePromptsFunction.Arn
+            Arguments:
+              id: "{% $id %}"
+            Next: BedrockMap
+          BedrockMap:
+            Type: Map
+            ItemProcessor:
+              ProcessorConfig:
+                Mode: INLINE
+              StartAt: InvokeLLM
+              States:
+                InvokeLLM:
+                  Type: Task
+                  Resource: !GetAtt InvokeLLMFunction.Arn
+                  Arguments:
+                    id: "{% $id %}"
+                    prompt_uri: "{% $states.input %}"
+                  End: true
             End: true
-
 Outputs:
   StateMachineArn:
     Description: State Machine Arn
