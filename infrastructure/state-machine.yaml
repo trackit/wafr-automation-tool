@@ -35,6 +35,7 @@ Globals:
     Environment:
       Variables:
         S3_BUCKET: !Ref S3BucketName
+        DYNAMODB_TABLE: !Ref DynamoDBArn
 
 Resources:
   VPC:
@@ -141,6 +142,11 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !Ref DynamoDBArn
   InvokeLLMFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -168,6 +174,12 @@ Resources:
                 - bedrock:InvokeModel
                 - bedrock:RetrieveAndGenerate
               Resource: "*"
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:PutItem
+              Resource:
+                - !Ref DynamoDBArn
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -264,7 +276,7 @@ Resources:
             - --output-directory
             - scan/prowler
             - --output-filename
-            - !Sub "prowler-output-${AWS::AccountId}"
+            - "prowler-output-$ID"
             - --ignore-exit-code-3
   StateMachine:
     Type: AWS::Serverless::StateMachine
@@ -287,7 +299,9 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
         - Statement:
             Effect: Allow
-            Action: dynamodb:UpdateItem
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:PutItem
             Resource:
               - !Ref DynamoDBArn
         - Statement:
@@ -315,8 +329,28 @@ Resources:
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
-        StartAt: ScanningTools
+        StartAt: CreateItem
         States:
+          CreateItem:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:putItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Item:
+                id:
+                  S: "{% $states.input.id %}"
+                finding_id:
+                  S: "0"
+                name:
+                  S: "{% $states.input.name %}"
+                role:
+                  S: "{% $states.input.role %}"
+                step:
+                  S: "0"
+            Assign:
+              id: "{% $states.input.id %}"
+              role: "{% $states.input.role %}"
+            Next: ScanningTools
           ScanningTools:
             Type: Parallel
             Branches:
@@ -336,13 +370,36 @@ Resources:
                           SecurityGroups:
                             - !Ref SecurityGroup
                           AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: prowler-container
+                            Environment:
+                              - Name: ID
+                                Value: "{% $id %}"
+                              - Name: ROLE
+                                Value: "{% $role %}"
                     End: true
+            Next: UpdateItem
+          UpdateItem:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:updateItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Key:
+                id:
+                  S: "{% $id %}"
+                finding_id:
+                  S: "0"
+              UpdateExpression: SET step = :newStep
+              ExpressionAttributeValues:
+                ":newStep":
+                  N: "1"
             Next: PreparePrompt
           PreparePrompt:
             Type: Task
             Resource: !GetAtt PreparePromptsFunction.Arn
             Arguments:
-              account_id: !Ref AWS::AccountId
+              id: "{% $id %}"
             Next: BedrockMap
           BedrockMap:
             Type: Map
@@ -355,22 +412,9 @@ Resources:
                   Type: Task
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
-                    account_id: !Ref AWS::AccountId
+                    id: "{% $id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
-            Next: StoreResults
-          StoreResults:
-            Type: Task
-            Resource: arn:aws:states:::dynamodb:updateItem
-            Arguments:
-              TableName: !Ref DynamoDBArn
-              Key:
-                Column:
-                  S: MyEntry
-              UpdateExpression: SET MyKey = :myValueRef
-              ExpressionAttributeValues:
-                ":myValueRef":
-                  S: MyValue
             End: true
 Outputs:
   StateMachineArn:
