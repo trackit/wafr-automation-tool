@@ -172,7 +172,6 @@ Resources:
             - Effect: Allow
               Action:
                 - bedrock:InvokeModel
-                - bedrock:RetrieveAndGenerate
               Resource: "*"
             - Effect: Allow
               Action:
@@ -236,9 +235,10 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/SecurityAudit
-        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: "*"
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -267,17 +267,26 @@ Resources:
               awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: prowler
+          Environment:
+            - Name: S3_BUCKET
+              Value: !Ref S3BucketName
+          EntryPoint:
+            - "/bin/sh"
+            - "-c"
           Command:
-            - aws
-            - --output-modes
-            - json-ocsf
-            - --output-bucket
-            - !Ref S3BucketName
-            - --output-directory
-            - scan/prowler
-            - --output-filename
-            - "prowler-output-$ID"
-            - --ignore-exit-code-3
+            - prowler
+              aws
+              --output-modes
+              json-ocsf
+              --output-bucket-no-assume
+              $S3_BUCKET
+              --output-directory
+              scan/prowler
+              --output-filename
+              "prowler-output-$ID"
+              --ignore-exit-code-3
+              --role
+              "$ROLE"
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
