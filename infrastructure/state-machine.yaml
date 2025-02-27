@@ -179,6 +179,20 @@ Resources:
                 - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
+  ErrorHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/state_machine/error_handler/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !Ref DynamoDBArn
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -338,9 +352,9 @@ Resources:
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
-        StartAt: CreateItem
+        StartAt: CreateAssessment
         States:
-          CreateItem:
+          CreateAssessment:
             Type: Task
             Resource: arn:aws:states:::dynamodb:putItem
             Arguments:
@@ -360,6 +374,11 @@ Resources:
               id: "{% $states.input.id %}"
               role: "{% $states.input.role %}"
             Next: ScanningTools
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanOnError
+                Output: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
             Branches:
@@ -388,8 +407,22 @@ Resources:
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
-            Next: UpdateItem
-          UpdateItem:
+                    Catch:
+                      - ErrorEquals:
+                          - States.ALL
+                        Next: ScanningToolsCleanOnError
+                        Output: "{% $states.errorOutput %}"
+                  ScanningToolsCleanOnError:
+                    Type: Task
+                    Resource: !GetAtt ErrorHandlerFunction.Arn
+                    End: true
+            Next: UpdateStep
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanOnError
+                Output: "{% $states.errorOutput %}"
+          UpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
@@ -404,13 +437,23 @@ Resources:
                 ":newStep":
                   N: "1"
             Next: PreparePrompt
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanOnError
+                Output: "{% $states.errorOutput %}"
           PreparePrompt:
             Type: Task
             Resource: !GetAtt PreparePromptsFunction.Arn
             Arguments:
               id: "{% $id %}"
             Next: BedrockMap
-          BedrockMap:
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanOnError
+                Output: "{% $states.errorOutput %}"
+          PromptMap:
             Type: Map
             ItemProcessor:
               ProcessorConfig:
@@ -424,7 +467,26 @@ Resources:
                     id: "{% $id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
+                  Catch:
+                    - ErrorEquals:
+                        - States.ALL
+                      Next: LLMCleanOnError
+                      Output: "{% $states.errorOutput %}"
+                LLMCleanOnError:
+                  Type: Task
+                  Resource: !GetAtt ErrorHandlerFunction.Arn
+                  End: true
             End: true
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanOnError
+                Output: "{% $states.errorOutput %}"
+          CleanOnError:
+            Type: Task
+            Resource: !GetAtt ErrorHandlerFunction.Arn
+            End: true
+
 Outputs:
   StateMachineArn:
     Description: State Machine Arn
