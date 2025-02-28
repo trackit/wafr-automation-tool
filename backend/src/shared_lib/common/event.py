@@ -19,3 +19,13 @@ class StoreResultsInput(BaseModel):
     id: str
     llm_response: str
     prompt_uri: str
+
+
+class StateMachineError(BaseModel):
+    Error: str
+    Cause: str
+
+
+class StateMachineException(BaseModel):
+    id: str
+    error: StateMachineError

@@ -193,6 +193,16 @@ Resources:
                 - dynamodb:UpdateItem
               Resource:
                 - !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -246,7 +256,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:PutObject
-                  - s3:GetObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
               - Effect: Allow
@@ -349,6 +358,7 @@ Resources:
             Resource:
               - !GetAtt PreparePromptsFunction.Arn
               - !GetAtt InvokeLLMFunction.Arn
+              - !GetAtt ErrorHandlerFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
@@ -378,7 +388,9 @@ Resources:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
-                Output: "{% $states.errorOutput %}"
+                Output:
+                  id: "{% $states.input.id %}"
+                  error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
             Branches:
@@ -411,7 +423,9 @@ Resources:
                       - ErrorEquals:
                           - States.ALL
                         Next: ScanningToolsCleanOnError
-                        Output: "{% $states.errorOutput %}"
+                        Output:
+                          id: "{% $id %}"
+                          error: "{% $states.errorOutput %}"
                   ScanningToolsCleanOnError:
                     Type: Task
                     Resource: !GetAtt ErrorHandlerFunction.Arn
@@ -421,7 +435,9 @@ Resources:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
-                Output: "{% $states.errorOutput %}"
+                Output:
+                  id: "{% $id %}"
+                  error: "{% $states.errorOutput %}"
           UpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
@@ -441,18 +457,22 @@ Resources:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
-                Output: "{% $states.errorOutput %}"
+                Output:
+                  id: "{% $id %}"
+                  error: "{% $states.errorOutput %}"
           PreparePrompt:
             Type: Task
             Resource: !GetAtt PreparePromptsFunction.Arn
             Arguments:
               id: "{% $id %}"
-            Next: BedrockMap
+            Next: PromptMap
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
-                Output: "{% $states.errorOutput %}"
+                Output:
+                  id: "{% $id %}"
+                  error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
             ItemProcessor:
@@ -471,7 +491,9 @@ Resources:
                     - ErrorEquals:
                         - States.ALL
                       Next: LLMCleanOnError
-                      Output: "{% $states.errorOutput %}"
+                      Output:
+                        id: "{% $id %}"
+                        error: "{% $states.errorOutput %}"
                 LLMCleanOnError:
                   Type: Task
                   Resource: !GetAtt ErrorHandlerFunction.Arn
@@ -481,7 +503,9 @@ Resources:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
-                Output: "{% $states.errorOutput %}"
+                Output:
+                  id: "{% $id %}"
+                  error: "{% $states.errorOutput %}"
           CleanOnError:
             Type: Task
             Resource: !GetAtt ErrorHandlerFunction.Arn

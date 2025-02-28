@@ -1,5 +1,58 @@
 from typing import Any
 
+import boto3
+from common.config import (
+    DYNAMODB_TABLE,
+    PROWLER_COMPLIANCE_PATH,
+    PROWLER_OCSF_PATH,
+    S3_BUCKET,
+)
+from common.event import StateMachineException
+
+s3_client = boto3.client("s3")
+s3_resource = boto3.resource("s3")
+s3_bucket = s3_resource.Bucket(S3_BUCKET)
+dynamodb_client = boto3.resource("dynamodb", region_name="us-west-2")
+dynamodb_table = dynamodb_client.Table(DYNAMODB_TABLE)
+
+
+def update_assessment_item(exception: StateMachineException) -> None:
+    dynamodb_table.update_item(
+        Key={"id": exception.id, "finding_id": "0"},
+        UpdateExpression="SET step = :step",
+        ExpressionAttributeValues={":step": exception.error.dict()},
+    )
+
+
+def clean_prowler_scan(exception: StateMachineException) -> None:
+    prowler_key = PROWLER_OCSF_PATH.format(exception.id)
+    prowler_compliance_key = PROWLER_COMPLIANCE_PATH.format(exception.id)
+    print(f"Cleaning Prowler scan {prowler_key}")
+    s3_client.delete_object(Bucket=S3_BUCKET, Key=prowler_key)
+
+    compliance_objects = s3_bucket.objects.filter(Prefix=prowler_compliance_key)
+    delete_keys: dict[str, Any] = {
+        "Objects": [{"Key": obj.key} for obj in compliance_objects],
+        "Quiet": True,
+    }
+    if delete_keys["Objects"]:
+        s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
+
+
+def clean_assessment(exception: StateMachineException) -> None:
+    print(f"Cleaning assessment {exception.id}")
+    objects = s3_bucket.objects.filter(Prefix=exception.id)
+    delete_keys: dict[str, Any] = {
+        "Objects": [{"Key": obj.key} for obj in objects],
+        "Quiet": True,
+    }
+    if delete_keys["Objects"]:
+        s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
+
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:
-    return None
+    exception = StateMachineException(**event)
+
+    update_assessment_item(exception)
+    clean_prowler_scan(exception)
+    clean_assessment(exception)
