@@ -36,6 +36,7 @@ Resources:
       Parameters:
         StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
         DynamoDBArn: !GetAtt DynamoDB.Arn
+        SharedLibsLayer: !Ref SharedLibs
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:

@@ -16,6 +16,24 @@ Parameters:
     Type: String
   DynamoDBArn:
     Type: String
+  SharedLibsLayer:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: python3.12
+    Layers:
+      - !Ref SharedLibsLayer
+    Tags:
+      Project: !Ref Project
+      Owner: !Ref Owner
+      Name: !Ref Name
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref DynamoDBArn
+        STATE_MACHINE_ARN: !Ref StateMachineArn
 
 Resources:
   Api:
@@ -37,9 +55,6 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_results
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref DynamoDBArn
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBArn
@@ -60,9 +75,6 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_process_step
-      Environment:
-        Variables:
-          DYNAMODB_TABLE: !Ref DynamoDBArn
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref DynamoDBArn
@@ -73,19 +85,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /process-step
             Method: GET
-  StartSfnFunction:
+  StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: !Ref Name
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/start_sfn
-      Environment:
-        Variables:
-          STATE_MACHINE_ARN: !Ref StateMachineArn
+      CodeUri: ../backend/src/api/start_assessment/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -93,9 +98,9 @@ Resources:
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
       Events:
-        StartStep:
+        StartAssessment:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /start
+            Path: /assessments
             Method: POST
