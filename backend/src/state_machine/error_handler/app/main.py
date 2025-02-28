@@ -1,19 +1,20 @@
 from typing import Any
 
 import boto3
-from common.config import (
-    DYNAMODB_TABLE,
+from state_machine.config import (
+    DDB_TABLE,
     PROWLER_COMPLIANCE_PATH,
     PROWLER_OCSF_PATH,
+    REGION,
     S3_BUCKET,
 )
-from common.event import StateMachineException
+from state_machine.event import StateMachineException
 
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
 s3_bucket = s3_resource.Bucket(S3_BUCKET)
-dynamodb_client = boto3.resource("dynamodb", region_name="us-west-2")
-dynamodb_table = dynamodb_client.Table(DYNAMODB_TABLE)
+dynamodb_client = boto3.resource("dynamodb", region_name=REGION)
+dynamodb_table = dynamodb_client.Table(DDB_TABLE)
 
 
 def update_assessment_item(exception: StateMachineException) -> None:

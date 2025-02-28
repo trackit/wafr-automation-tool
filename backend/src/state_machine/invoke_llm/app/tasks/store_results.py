@@ -1,9 +1,9 @@
 import json
 from typing import Any, override
 
-from common.config import DYNAMODB_TABLE
-from common.event import StoreResultsInput
 from common.task import Task
+from state_machine.config import DDB_TABLE
+from state_machine.event import StoreResultsInput
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_s3 import S3Client
 from utils import s3
@@ -12,7 +12,7 @@ from utils import s3
 class StoreResults(Task[StoreResultsInput, None]):
     def __init__(self, dynamodb_client: DynamoDBServiceResource, s3_client: S3Client):
         super().__init__()
-        self.dynamodb_table = dynamodb_client.Table(DYNAMODB_TABLE)
+        self.dynamodb_table = dynamodb_client.Table(DDB_TABLE)
         self.s3_client = s3_client
 
     def retrieve_findings_data(

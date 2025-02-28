@@ -1,7 +1,8 @@
 from typing import Any
 
 import boto3
-from common.event import InvokeLLMInput
+from state_machine.config import REGION
+from state_machine.event import InvokeLLMInput
 from tasks.invoke_llm import InvokeLLM
 
 s3_client = boto3.client("s3")

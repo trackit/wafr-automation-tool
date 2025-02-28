@@ -3,9 +3,9 @@ import os
 from datetime import datetime
 from typing import Any, override
 
-from common.config import DYNAMODB_TABLE, S3_BUCKET
-from common.event import FormatProwlerInput, PreparePromptsInput
 from common.task import Task
+from state_machine.config import DDB_TABLE, S3_BUCKET
+from state_machine.event import FormatProwlerInput, PreparePromptsInput
 from tasks.format_prowler import FormatProwler
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_s3 import S3Client
@@ -23,7 +23,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         super().__init__()
         self.s3_client = s3_client
         self.s3_bucket = S3_BUCKET
-        self.dynamodb_table = dynamodb_client.Table(DYNAMODB_TABLE)
+        self.dynamodb_table = dynamodb_client.Table(DDB_TABLE)
         self.format_prowler_task = FormatProwler(self.s3_client)
         self.questions = self.retrieve_questions()
 

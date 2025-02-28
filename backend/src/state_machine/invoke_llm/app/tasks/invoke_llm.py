@@ -1,7 +1,7 @@
 import json
 from typing import override
 
-from common.event import InvokeLLMInput, StoreResultsInput
+from state_machine.event import InvokeLLMInput, StoreResultsInput
 from common.task import Task
 from tasks.store_results import StoreResults
 from types_boto3_bedrock_runtime import BedrockRuntimeClient

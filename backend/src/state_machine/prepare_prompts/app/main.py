@@ -1,7 +1,8 @@
 from typing import Any
 
 import boto3
-from common.event import PreparePromptsInput
+from state_machine.config import REGION
+from state_machine.event import PreparePromptsInput
 from tasks.prepare_prompts import PreparePrompts
 
 s3_client = boto3.client("s3")

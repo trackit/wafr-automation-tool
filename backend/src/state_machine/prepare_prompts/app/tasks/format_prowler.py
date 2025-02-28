@@ -1,10 +1,10 @@
 import json
 from typing import Any, Type, TypeVar, Union, override
 
-from common.config import S3_BUCKET
-from common.event import FormatProwlerInput
+from state_machine.config import S3_BUCKET
+from state_machine.event import FormatProwlerInput
 from common.task import Task
-from prowler.findings import ChunkFormat, ChunkFormatForRetrieve
+from state_machine.findings import ChunkFormat, ChunkFormatForRetrieve
 from py_ocsf_models.events.findings.detection_finding import DetectionFinding
 from types_boto3_s3 import S3Client
 from utils.s3 import parse_s3_uri
