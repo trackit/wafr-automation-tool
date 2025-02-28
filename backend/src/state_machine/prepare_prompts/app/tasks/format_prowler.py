@@ -56,7 +56,6 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
             if not DetectionFinding.validate(item):
                 raise ValueError(f"Item {i} is not a DetectionFinding")
             finding = self.remove_null_recursively(item)
-            print(finding)
             new_chunk.append(format.parse_obj(finding).dict())
         return new_chunk
 

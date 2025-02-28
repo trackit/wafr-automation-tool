@@ -41,6 +41,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         question_set.sort(
             key=lambda x: datetime.strptime(x.split("_")[1].split(".")[0], "%m%d%Y")
         )
+        self.question_version = question_set[-1].split(".")[0]
         with open(f"{SCRIPTS_PATH}/{question_set[-1]}", "r") as f:
             questions = json.load(f)
             for p, pillar in questions.items():
@@ -52,9 +53,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def populate_dynamodb(self, id: str) -> None:
         self.dynamodb_table.update_item(
             Key={"id": id, "finding_id": "0"},
-            UpdateExpression="SET #findings = :findings",
-            ExpressionAttributeNames={"#findings": "findings"},
-            ExpressionAttributeValues={":findings": self.questions},
+            UpdateExpression="SET findings = :findings, questionVersion = :questionVersion",
+            ExpressionAttributeValues={
+                ":findings": self.questions,
+                ":questionVersion": self.question_version,
+            },
         )
 
     def retrieve_prowler_prompt(self) -> str:
