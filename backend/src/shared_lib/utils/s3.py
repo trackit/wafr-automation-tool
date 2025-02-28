@@ -6,3 +6,7 @@ def parse_s3_uri(s3_uri: str) -> tuple[str, str]:
     bucket = parsed.netloc
     key = parsed.path.lstrip("/")
     return bucket, key
+
+
+def get_s3_uri(bucket: str, key: str) -> str:
+    return f"s3://{bucket}/{key}"

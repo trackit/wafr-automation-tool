@@ -4,14 +4,19 @@ from datetime import datetime
 from typing import Any, override
 
 from common.task import Task
-from state_machine.config import DDB_TABLE, S3_BUCKET
+from state_machine.config import (
+    DDB_TABLE,
+    PROMPT_PATH,
+    PROWLER_OCSF_PATH,
+    S3_BUCKET,
+    SCRIPTS_PATH,
+    STORE_PROMPT_PATH,
+)
 from state_machine.event import FormatProwlerInput, PreparePromptsInput
 from tasks.format_prowler import FormatProwler
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_s3 import S3Client
-
-PROMPT_PATH = "./prompt.txt"
-SCRIPTS_PATH = "./scripts"
+from utils.s3 import get_s3_uri
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
@@ -74,7 +79,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         return prompts
 
     def create_prowler_prompt(self, event: PreparePromptsInput) -> list[str]:
-        prowler_output_uri = f"s3://{self.s3_bucket}/scan/prowler/json-ocsf/prowler-output-{event.id}.ocsf.json"
+        key = PROWLER_OCSF_PATH.format(event.id)
+        prowler_output_uri = get_s3_uri(self.s3_bucket, key)
         prowler_output_chunks = self.format_prowler_task.execute(
             FormatProwlerInput(prowler_output=prowler_output_uri, id=event.id)
         )
@@ -84,10 +90,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def store_prompts(self, s3_bucket: str, prompts: list[str], id: str) -> list[str]:
         prompts_uri: list[str] = []
         for i, prompt in enumerate(prompts):
-            prompts_uri.append(f"s3://{s3_bucket}/{id}/prompts/prompt-{i}.txt")
+            key = STORE_PROMPT_PATH.format(id, i)
+            prompts_uri.append(get_s3_uri(s3_bucket, key))
             self.s3_client.put_object(
                 Bucket=s3_bucket,
-                Key=f"{id}/prompts/prompt-{i}.txt",
+                Key=key,
                 Body=prompt,
             )
         return prompts_uri

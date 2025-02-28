@@ -2,7 +2,7 @@ import json
 from typing import Any, override
 
 from common.task import Task
-from state_machine.config import DDB_TABLE
+from state_machine.config import DDB_TABLE, STORE_CHUNK_PATH
 from state_machine.event import StoreResultsInput
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_s3 import S3Client
@@ -18,10 +18,9 @@ class StoreResults(Task[StoreResultsInput, None]):
     def retrieve_findings_data(
         self, id: str, index: int, s3_bucket: str
     ) -> list[dict[str, Any]]:
+        key = STORE_CHUNK_PATH.format(id, index)
         chunk_content = (
-            self.s3_client.get_object(
-                Bucket=s3_bucket, Key=f"{id}/prompts/chunks/chunk-{index}.json"
-            )["Body"]
+            self.s3_client.get_object(Bucket=s3_bucket, Key=key)["Body"]
             .read()
             .decode("utf-8")
         )

@@ -1,11 +1,11 @@
 import json
 from typing import Any, Type, TypeVar, Union, override
 
-from state_machine.config import S3_BUCKET
-from state_machine.event import FormatProwlerInput
 from common.task import Task
-from state_machine.findings import ChunkFormat, ChunkFormatForRetrieve
 from py_ocsf_models.events.findings.detection_finding import DetectionFinding
+from state_machine.config import S3_BUCKET, STORE_CHUNK_PATH
+from state_machine.event import FormatProwlerInput
+from state_machine.findings import ChunkFormat, ChunkFormatForRetrieve
 from types_boto3_s3 import S3Client
 from utils.s3 import parse_s3_uri
 
@@ -64,9 +64,10 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
         self, index: int, chunk: list[dict[str, Any]], id: str
     ) -> None:
         retrieve_chunk = self.format_chunk(chunk, ChunkFormatForRetrieve)
+        key = STORE_CHUNK_PATH.format(id, index)
         self.s3_client.put_object(
             Bucket=S3_BUCKET,
-            Key=f"{id}/prompts/chunks/chunk-{index}.json",
+            Key=key,
             Body=json.dumps(retrieve_chunk, separators=(",", ":")),
         )
 
