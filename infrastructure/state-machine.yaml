@@ -191,6 +191,9 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+                - dynamodb:BatchWriteItem
               Resource:
                 - !Ref DynamoDBArn
             - Effect: Allow

@@ -39,6 +39,28 @@ def clean_prowler_scan(exception: StateMachineException) -> None:
         s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
 
 
+def clean_assessment_dynamodb(exception: StateMachineException) -> None:
+    response = dynamodb_table.query(
+        KeyConditionExpression="id = :id",
+        ExpressionAttributeValues={":id": exception.id},
+    )
+    items = response.get("Items", [])
+
+    while "LastEvaluatedKey" in response:
+        response = dynamodb_table.query(
+            KeyConditionExpression="id = :id",
+            ExpressionAttributeValues={":id": exception.id},
+            ExclusiveStartKey=response["LastEvaluatedKey"],
+        )
+        items.extend(response.get("Items", []))
+
+    with dynamodb_table.batch_writer() as batch:
+        for item in items:
+            if item.get("finding_id", "0") != "0":
+                key = {"id": item["id"], "finding_id": item["finding_id"]}
+                batch.delete_item(Key=key)
+
+
 def clean_assessment(exception: StateMachineException) -> None:
     print(f"Cleaning assessment {exception.id}")
     objects = s3_bucket.objects.filter(Prefix=exception.id)
@@ -48,6 +70,7 @@ def clean_assessment(exception: StateMachineException) -> None:
     }
     if delete_keys["Objects"]:
         s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
+    clean_assessment_dynamodb(exception)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:
