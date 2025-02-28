@@ -65,26 +65,6 @@ Resources:
             RestApiId: !Ref Api
             Path: /results
             Method: GET
-  RetrieveProcessStepFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: !Ref Name
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_process_step
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref DynamoDBArn
-      Events:
-        RetrieveProcessStep:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /process-step
-            Method: GET
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -104,6 +84,26 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+  RetrieveAssessmentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/retrieve_assessment/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        RetrieveProcessStep:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}
+            Method: GET
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:

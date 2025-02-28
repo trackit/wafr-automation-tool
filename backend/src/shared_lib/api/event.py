@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -31,9 +31,14 @@ class Assessment(BaseModel):
     id: str
     name: str
     role: str
-    currentStep: str
+    step: str
     questionVersion: str
+    findings: Optional[dict[str, Any]]
 
 
 class DeleteAssessmentInput(BaseModel):
+    id: str
+
+
+class RetrieveAssessmentInput(BaseModel):
     id: str
