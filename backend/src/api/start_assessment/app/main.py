@@ -11,8 +11,8 @@ start_assessment_task = StartAssessment(sfn_client)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     body = json.loads(event["body"])
-    reponse = start_assessment_task.execute(StartAssessmentInput(**body))
+    response = start_assessment_task.execute(StartAssessmentInput(**body))
     return {
-        "statusCode": reponse.statusCode,
-        "body": json.dumps(reponse.body.dict()) if reponse.body else None,
+        "statusCode": response.statusCode,
+        "body": json.dumps(response.body.dict()) if response.body else None,
     }
