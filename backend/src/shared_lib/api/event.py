@@ -25,3 +25,15 @@ class StateMachineInput(BaseModel):
     id: str
     name: str
     role: str
+
+
+class Assessment(BaseModel):
+    id: str
+    name: str
+    role: str
+    currentStep: str
+    questionVersion: str
+
+
+class DeleteAssessmentInput(BaseModel):
+    id: str

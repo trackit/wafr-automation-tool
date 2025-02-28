@@ -104,3 +104,29 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+  DeleteAssessmentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/delete_assessment/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - states:StopExecution
+              Resource: !Ref StateMachineArn
+            - Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+                - dynamodb:BatchWriteItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        DeleteAssessment:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}
+            Method: DELETE
