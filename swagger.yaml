@@ -1,0 +1,349 @@
+openapi: 3.0.3
+info:
+  title: Assessment API
+  version: 1.0.0
+  description: |
+    This documentation describes the endpoints for managing assessments,
+    including creation, retrieval, deletion, and the management of
+    associated Findings.
+paths:
+  /assessments:
+    get:
+      tags:
+        - Assessments
+      summary: Retrieve all assessments
+      operationId: getAllAssessments
+      responses:
+        "200":
+          description: List of all assessments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+
+    post:
+      tags:
+        - Assessments
+      summary: Start a new assessment
+      description: Initiates a new assessment process for the specified role.
+      operationId: startAssessment
+      parameters:
+        - name: Name
+          in: query
+          description: Name of the assessment
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: Role for which to start the assessment
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Assessment successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assessmentId:
+                    type: integer
+                    description: The created assessment ID
+        "400":
+          description: Missing or invalid parameters
+        "500":
+          description: Internal server error
+
+  /assessments/{assessmentId}:
+    get:
+      tags:
+        - Assessments
+      summary: Retrieve details of a specific assessment
+      operationId: getAssessment
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The ID of the assessment to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Assessment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentContent"
+        "404":
+          description: Assessment not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - Assessments
+      summary: Delete an assessment
+      operationId: deleteAssessment
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The ID of the assessment to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Assessment successfully deleted
+        "404":
+          description: Assessment not found
+        "500":
+          description: Internal server error
+
+  /assessments/{assessmentId}/best-practices/{bestPracticeName}:
+    get:
+      tags:
+        - Best Practices
+      summary: Retrieve all findings for a specific best pratice
+      operationId: getAllFindingsByBestPractice
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment
+          schema:
+            type: integer
+        - name: bestPracticeName
+          in: path
+          required: true
+          description: The name of the best practice
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of finding for the specific best practice
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Finding"
+        "404":
+          description: Best practice not found
+
+  /assessments/{assessmentId}/findings:
+    get:
+      tags:
+        - Findings
+      summary: Retrieve all findings for a specific assessment (paginated)
+      operationId: getAllFindings
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: Page number (starting at 1)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of findings to return per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        "200":
+          description: Paginated list of findings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FindingPaginationResponse"
+        "404":
+          description: Assessment not found
+        "500":
+          description: Internal server error
+
+  /assessments/{assessmentId}/findings/{findingId}:
+    get:
+      tags:
+        - Findings
+      summary: Retrieve the details of a specific finding
+      operationId: getFindingById
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment
+          schema:
+            type: integer
+        - name: findingId
+          in: path
+          required: true
+          description: The ID of the finding
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Details of the finding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Finding"
+        "404":
+          description: Assessment or finding not found
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the assessment
+        name:
+          type: string
+          description: Name of the assessment
+        role:
+          type: string
+          description: Role associated with the assessment
+        currentStep:
+          type: string
+          description: Current step of the assessment
+        questionVersion:
+          type: string
+          description: The version of questions used
+    AssessmentContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the assessment
+        name:
+          type: string
+          description: Name of the assessment
+        role:
+          type: string
+          description: Role associated with the assessment
+        currentStep:
+          type: string
+          description: Current step of the assessment
+        questionVersion:
+          type: string
+          description: The version of questions used
+        findings:
+          type: object
+          description: JSONObject containing each pillar
+          additionalProperties: false
+          properties:
+            pillars:
+              type: object
+              description: JSONObject containing questions for each pillar
+              additionalProperties: false
+              properties:
+                questions:
+                  type: object
+                  description: JSONObject containing best practices for each question
+                  additionalProperties: false
+                  properties:
+                    best_practices:
+                      type: array
+                      description: JSONObject containing findings id for each best pratice
+                      items:
+                        type: integer
+                        description: Findings id
+    Finding:
+      type: object
+      description: Finding definition
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: Finding id
+        severity:
+          type: string
+          description: Textual severity (e.g., Low, Medium, High)
+        status_code:
+          type: string
+          description: Short status code (e.g., PASS, FAIL)
+        status_detail:
+          type: string
+          description: Explanation for the status
+        resources:
+          type: array
+          description: List of resources associated with the finding
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              uid:
+                type: string
+                description: ARN or unique ID of the resource
+              name:
+                type: string
+                description: Resource name
+              type:
+                type: string
+                description: Simple resource type (e.g., Other, S3Bucket)
+              region:
+                type: string
+                description: AWS region or other location
+        remediation:
+          type: object
+          description: Recommended steps for remediation
+          additionalProperties: false
+          properties:
+            desc:
+              type: string
+              description: Textual remediation guidance
+            references:
+              type: array
+              description: List of URLs or CLI commands
+              items:
+                type: string
+        risk_details:
+          type: string
+          description: Explanation of the security risk or reason for the finding
+    FindingPaginationResponse:
+      type: object
+      description: Paginated findings response
+      properties:
+        items:
+          type: array
+          description: The list of findings for the current page
+          items:
+            $ref: "#/components/schemas/Finding"
+        currentPage:
+          type: integer
+          description: Current page number
+          example: 1
+        pageSize:
+          type: integer
+          description: Number of findings per page
+          example: 10
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 5
+        totalItems:
+          type: integer
+          description: Total number of findings
+          example: 45
