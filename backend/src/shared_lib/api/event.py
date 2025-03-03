@@ -1,3 +1,5 @@
+import json
+from decimal import Decimal
 from typing import Any, Optional
 
 from pydantic import BaseModel
@@ -7,9 +9,26 @@ class APIResponseBody(BaseModel):
     pass
 
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o: Any):
+        if isinstance(o, Decimal):
+            return int(o)
+        return super(DecimalEncoder, self).default(o)
+
+
 class APIResponse[T: Optional[APIResponseBody]](BaseModel):
     statusCode: int
     body: Optional[T]
+
+    def build(self) -> dict[str, Any]:
+        return {
+            "statusCode": self.statusCode,
+            "body": (
+                None
+                if self.body is None
+                else json.dumps(self.body.dict(), cls=DecimalEncoder)
+            ),
+        }
 
 
 class StartAssessmentInput(BaseModel):
@@ -32,7 +51,7 @@ class Assessment(BaseModel):
     name: str
     role: str
     step: str
-    questionVersion: str
+    question_version: str
     findings: Optional[dict[str, Any]]
 
 
@@ -42,3 +61,6 @@ class DeleteAssessmentInput(BaseModel):
 
 class RetrieveAssessmentInput(BaseModel):
     id: str
+
+
+class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):

@@ -1,20 +1,14 @@
-import json
-from decimal import Decimal
+from http.client import INTERNAL_SERVER_ERROR
 from typing import Any, Dict
 
 import boto3
 from api.event import RetrieveAssessmentInput
-from tasks.RetrieveAssessment import RetrieveAssessment
+from backend.src.api.retrieve_assessment.app.tasks.retrieve_assessment import (
+    RetrieveAssessment,
+)
 
 ddb_resource = boto3.resource("dynamodb")
 retrieve_assessment_task = RetrieveAssessment(ddb_resource)
-
-
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o: Any):
-        if isinstance(o, Decimal):
-            return int(o)
-        return super(DecimalEncoder, self).default(o)
 
 
 def lambda_handler(event: Dict[str, Any], _context: Any) -> dict[str, Any]:
@@ -25,10 +19,7 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> dict[str, Any]:
         print(response)
     except Exception as e:
         return {
-            "statusCode": 400,
+            "statusCode": INTERNAL_SERVER_ERROR,
             "body": str(e),
         }
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response.dict(), cls=DecimalEncoder) if response else None,
-    }
+    return response.build()

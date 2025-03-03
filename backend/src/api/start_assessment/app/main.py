@@ -3,7 +3,7 @@ from typing import Any
 
 import boto3
 from api.event import StartAssessmentInput
-from tasks.StartAssessment import StartAssessment
+from backend.src.api.start_assessment.app.tasks.start_assessment import StartAssessment
 
 sfn_client = boto3.client("stepfunctions")
 start_assessment_task = StartAssessment(sfn_client)
@@ -12,7 +12,4 @@ start_assessment_task = StartAssessment(sfn_client)
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     body = json.loads(event["body"])
     response = start_assessment_task.execute(StartAssessmentInput(**body))
-    return {
-        "statusCode": response.statusCode,
-        "body": json.dumps(response.body.dict()) if response.body else None,
-    }
+    return response.build()

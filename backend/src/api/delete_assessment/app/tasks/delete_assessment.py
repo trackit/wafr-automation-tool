@@ -1,3 +1,4 @@
+from http.client import NO_CONTENT, NOT_FOUND
 from typing import override
 
 from api.config import DDB_TABLE
@@ -29,12 +30,12 @@ class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
             for item in items:
                 key = {"id": item["id"], "finding_id": item["finding_id"]}
                 batch.delete_item(Key=key)
-        return 204 if items else 404
+        return NO_CONTENT if items else NOT_FOUND
 
     @override
     def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
         status_code = self.delete_assessment(event)
-        return APIResponse[None](
+        return APIResponse(
             statusCode=status_code,
             body=None,
         )

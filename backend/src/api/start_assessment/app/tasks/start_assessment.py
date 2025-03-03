@@ -1,4 +1,5 @@
 import time
+from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import override
 
 from api.config import STATE_MACHINE_ARN
@@ -33,7 +34,7 @@ class StartAssessment(
             stateMachineArn=STATE_MACHINE_ARN,
             input=input_json.json(),
         )
-        return response.get("ResponseMetadata").get("HTTPStatusCode") == 200
+        return response.get("ResponseMetadata").get("HTTPStatusCode") == OK
 
     @override
     def execute(
@@ -43,10 +44,10 @@ class StartAssessment(
         step_function_response = self.start_step_functions(assessment_id, event)
 
         if not step_function_response:
-            return APIResponse[StartAssessmentResponseBody](
-                statusCode=500,
+            return APIResponse(
+                statusCode=INTERNAL_SERVER_ERROR,
                 body=None,
             )
-        return APIResponse[StartAssessmentResponseBody](
-            statusCode=200, body=StartAssessmentResponseBody(assessmentId=assessment_id)
+        return APIResponse(
+            statusCode=OK, body=StartAssessmentResponseBody(assessmentId=assessment_id)
         )
