@@ -65,7 +65,7 @@ class StoreResults(Task[StoreResultsInput, None]):
                 Item={
                     **finding_data,
                     "id": id,
-                    "finding_id": str(finding),
+                    "finding_id": finding,
                 }
             )
 

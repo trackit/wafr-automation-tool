@@ -28,7 +28,6 @@ def update_assessment_item(exception: StateMachineException) -> None:
 def clean_prowler_scan(exception: StateMachineException) -> None:
     prowler_key = PROWLER_OCSF_PATH.format(exception.id)
     prowler_compliance_key = PROWLER_COMPLIANCE_PATH.format(exception.id)
-    print(f"Cleaning Prowler scan {prowler_key}")
     s3_client.delete_object(Bucket=S3_BUCKET, Key=prowler_key)
 
     compliance_objects = s3_bucket.objects.filter(Prefix=prowler_compliance_key)
@@ -63,8 +62,7 @@ def clean_assessment_dynamodb(exception: StateMachineException) -> None:
 
 
 def clean_assessment(exception: StateMachineException) -> None:
-    print(f"Cleaning assessment {exception.id}")
-    objects = s3_bucket.objects.filter(Prefix=exception.id)
+    objects = s3_bucket.objects.filter(Prefix=str(exception.id))
     delete_keys: dict[str, Any] = {
         "Objects": [{"Key": obj.key} for obj in objects],
         "Quiet": True,

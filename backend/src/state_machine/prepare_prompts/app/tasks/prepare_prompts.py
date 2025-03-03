@@ -56,7 +56,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             UpdateExpression="SET findings = :findings, questionVersion = :questionVersion",
             ExpressionAttributeValues={
                 ":findings": self.questions,
-                ":questionVersion": self.question_version,
+                ":question_version": self.question_version,
             },
         )
 

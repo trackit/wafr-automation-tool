@@ -1,41 +1,20 @@
-from http.client import NO_CONTENT, NOT_FOUND
+from http.client import NOT_FOUND, OK
 from typing import override
 
-from api.config import DDB_TABLE
-from api.event import APIResponse, DeleteAssessmentInput
+from api.assessment import IAssessmentRepository
+from api.event import DeleteAssessmentInput
 from common.task import Task
-from types_boto3_dynamodb import DynamoDBServiceResource
+from utils.api import APIResponse
 
 
 class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
-    def __init__(self, ddb_resource: DynamoDBServiceResource) -> None:
-        self.ddb_table = ddb_resource.Table(DDB_TABLE)
-
-    def delete_assessment(self, event: DeleteAssessmentInput) -> int:
-        response = self.ddb_table.query(
-            KeyConditionExpression="id = :id",
-            ExpressionAttributeValues={":id": event.id},
-        )
-        items = response.get("Items", [])
-
-        while "LastEvaluatedKey" in response:
-            response = self.ddb_table.query(
-                KeyConditionExpression="id = :id",
-                ExpressionAttributeValues={":id": event.id},
-                ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
-            items.extend(response.get("Items", []))
-
-        with self.ddb_table.batch_writer() as batch:
-            for item in items:
-                key = {"id": item["id"], "finding_id": item["finding_id"]}
-                batch.delete_item(Key=key)
-        return NO_CONTENT if items else NOT_FOUND
+    def __init__(self, assessment_repository: IAssessmentRepository) -> None:
+        self.assessment_repository = assessment_repository
 
     @override
     def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
-        status_code = self.delete_assessment(event)
+        delete_response = self.assessment_repository.delete_assessment(event.id)
         return APIResponse(
-            statusCode=status_code,
+            statusCode=OK if delete_response else NOT_FOUND,
             body=None,
         )

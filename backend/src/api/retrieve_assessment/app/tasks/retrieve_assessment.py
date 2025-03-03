@@ -1,42 +1,28 @@
 from http.client import NOT_FOUND, OK
-from typing import Any, Optional, override
+from typing import override
 
-from api.config import DDB_TABLE
-from api.event import (
-    APIResponse,
-    RetrieveAssessmentInput,
-    RetrieveAssessmentResponseBody,
-)
+from api.assessment import IAssessmentRepository
+from api.event import RetrieveAssessmentInput, RetrieveAssessmentResponseBody
 from common.task import Task
-from types_boto3_dynamodb import DynamoDBServiceResource
+from utils.api import APIResponse
 
 
 class RetrieveAssessment(
     Task[RetrieveAssessmentInput, APIResponse[RetrieveAssessmentResponseBody]]
 ):
-    def __init__(self, ddb_resource: DynamoDBServiceResource) -> None:
-        self.ddb_table = ddb_resource.Table(DDB_TABLE)
-
-    def retrieve_assessment(
-        self, event: RetrieveAssessmentInput
-    ) -> APIResponse[RetrieveAssessmentResponseBody]:
-        assessment_data = self.ddb_table.get_item(
-            Key={"id": event.id, "finding_id": "0"}
-        )
-        item: Optional[dict[str, Any]] = assessment_data.get("Item", None)
-        if not item:
-            return APIResponse(statusCode=NOT_FOUND, body=None)
-        findings: Optional[dict[str, Any]] = item.get("findings", None)
-        return APIResponse(
-            statusCode=OK,
-            body=RetrieveAssessmentResponseBody(
-                **item,
-                findings=findings,
-            ),
-        )
+    def __init__(self, assessment_repository: IAssessmentRepository) -> None:
+        self.assessment_repository = assessment_repository
 
     @override
     def execute(
         self, event: RetrieveAssessmentInput
     ) -> APIResponse[RetrieveAssessmentResponseBody]:
-        return self.retrieve_assessment(event)
+        assessment = self.assessment_repository.retrieve_assessment(event.id)
+        if not assessment:
+            return APIResponse(statusCode=NOT_FOUND, body=None)
+        return APIResponse(
+            statusCode=OK,
+            body=RetrieveAssessmentResponseBody(
+                **assessment.dict(),
+            ),
+        )

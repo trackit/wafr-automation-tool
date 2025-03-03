@@ -1,34 +1,6 @@
-import json
-from decimal import Decimal
-from typing import Any, Optional
-
+from common.entities import Assessment, FindingExtra
 from pydantic import BaseModel
-
-
-class APIResponseBody(BaseModel):
-    pass
-
-
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o: Any):
-        if isinstance(o, Decimal):
-            return int(o)
-        return super(DecimalEncoder, self).default(o)
-
-
-class APIResponse[T: Optional[APIResponseBody]](BaseModel):
-    statusCode: int
-    body: Optional[T]
-
-    def build(self) -> dict[str, Any]:
-        return {
-            "statusCode": self.statusCode,
-            "body": (
-                None
-                if self.body is None
-                else json.dumps(self.body.dict(), cls=DecimalEncoder)
-            ),
-        }
+from utils.api import APIResponseBody
 
 
 class StartAssessmentInput(BaseModel):
@@ -37,22 +9,13 @@ class StartAssessmentInput(BaseModel):
 
 
 class StartAssessmentResponseBody(APIResponseBody):
-    assessmentId: int
+    assessmentId: str
 
 
 class StateMachineInput(BaseModel):
     id: str
     name: str
     role: str
-
-
-class Assessment(BaseModel):
-    id: str
-    name: str
-    role: str
-    step: str
-    question_version: str
-    findings: Optional[dict[str, Any]]
 
 
 class DeleteAssessmentInput(BaseModel):
@@ -64,4 +27,21 @@ class RetrieveAssessmentInput(BaseModel):
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
+    pass
+
+
+class RetrieveBestPracticeInput(BaseModel):
+    id: str
+    bestPractice: str
+
+
+RetrieveBestPracticeResponseBody = list[FindingExtra]
+
+
+class RetrieveFindingInput(BaseModel):
+    id: str
+    findingId: str
+
+
+class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
     pass

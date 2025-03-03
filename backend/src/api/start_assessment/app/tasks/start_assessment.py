@@ -4,13 +4,13 @@ from typing import override
 
 from api.config import STATE_MACHINE_ARN
 from api.event import (
-    APIResponse,
     StartAssessmentInput,
     StartAssessmentResponseBody,
     StateMachineInput,
 )
 from common.task import Task
 from types_boto3_stepfunctions import SFNClient
+from utils.api import APIResponse
 
 
 class StartAssessment(
@@ -19,14 +19,14 @@ class StartAssessment(
     def __init__(self, sfn_client: SFNClient) -> None:
         self.sfn_client = sfn_client
 
-    def generate_assessment_id(self) -> int:
-        return int(time.time() * 1000)
+    def generate_assessment_id(self) -> str:
+        return str(int(time.time() * 1000))
 
     def start_step_functions(
-        self, assessment_id: int, event: StartAssessmentInput
+        self, assessment_id: str, event: StartAssessmentInput
     ) -> bool:
         input_json = StateMachineInput(
-            id=str(assessment_id),
+            id=assessment_id,
             name=event.name,
             role=event.role,
         )
