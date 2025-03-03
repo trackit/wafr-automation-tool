@@ -34,7 +34,7 @@ paths:
       description: Initiates a new assessment process for the specified role.
       operationId: startAssessment
       parameters:
-        - name: Name
+        - name: name
           in: query
           description: Name of the assessment
           required: true
