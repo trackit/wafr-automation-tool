@@ -45,26 +45,6 @@ Resources:
         Name: !Ref Name
       StageName: prod
       Cors: "'*'"
-  RetrieveResultsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: !Ref Name
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_results
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref DynamoDBArn
-      Events:
-        RetrieveResults:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /results
-            Method: GET
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
