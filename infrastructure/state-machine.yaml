@@ -423,17 +423,6 @@ Resources:
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
-                    Catch:
-                      - ErrorEquals:
-                          - States.ALL
-                        Next: ScanningToolsCleanOnError
-                        Output:
-                          id: "{% $id %}"
-                          error: "{% $states.errorOutput %}"
-                  ScanningToolsCleanOnError:
-                    Type: Task
-                    Resource: !GetAtt ErrorHandlerFunction.Arn
-                    End: true
             Next: UpdateStep
             Catch:
               - ErrorEquals:
@@ -490,17 +479,6 @@ Resources:
                   Arguments:
                     id: "{% $id %}"
                     prompt_uri: "{% $states.input %}"
-                  End: true
-                  Catch:
-                    - ErrorEquals:
-                        - States.ALL
-                      Next: LLMCleanOnError
-                      Output:
-                        id: "{% $id %}"
-                        error: "{% $states.errorOutput %}"
-                LLMCleanOnError:
-                  Type: Task
-                  Resource: !GetAtt ErrorHandlerFunction.Arn
                   End: true
             End: true
             Catch:
