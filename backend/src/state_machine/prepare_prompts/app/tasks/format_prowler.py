@@ -4,7 +4,7 @@ from typing import Any, Type, TypeVar, Union, override
 from common.entities import Finding, FindingExtra
 from common.task import Task
 from py_ocsf_models.events.findings.detection_finding import DetectionFinding
-from state_machine.config import S3_BUCKET, STORE_CHUNK_PATH
+from common.config import S3_BUCKET, STORE_CHUNK_PATH
 from state_machine.event import FormatProwlerInput
 from types_boto3_s3 import S3Client
 from utils.s3 import parse_s3_uri

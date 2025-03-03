@@ -2,12 +2,12 @@ import time
 from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import override
 
-from api.config import STATE_MACHINE_ARN
 from api.event import (
     StartAssessmentInput,
     StartAssessmentResponseBody,
     StateMachineInput,
 )
+from common.config import STATE_MACHINE_ARN
 from common.task import Task
 from types_boto3_stepfunctions import SFNClient
 from utils.api import APIResponse

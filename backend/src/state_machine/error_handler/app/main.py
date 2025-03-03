@@ -1,7 +1,11 @@
 from typing import Any
 
 import boto3
-from state_machine.config import (
+from boto3.dynamodb.conditions import Key
+from common.config import (
+    DDB_ASSESSMENT_SK,
+    DDB_KEY,
+    DDB_SORT_KEY,
     DDB_TABLE,
     PROWLER_COMPLIANCE_PATH,
     PROWLER_OCSF_PATH,
@@ -19,7 +23,7 @@ dynamodb_table = dynamodb_client.Table(DDB_TABLE)
 
 def update_assessment_item(exception: StateMachineException) -> None:
     dynamodb_table.update_item(
-        Key={"id": exception.id, "finding_id": "0"},
+        Key={DDB_KEY: exception.id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
         UpdateExpression="SET step = :step",
         ExpressionAttributeValues={":step": exception.error.dict()},
     )
@@ -41,15 +45,13 @@ def clean_prowler_scan(exception: StateMachineException) -> None:
 
 def clean_assessment_dynamodb(exception: StateMachineException) -> None:
     response = dynamodb_table.query(
-        KeyConditionExpression="id = :id",
-        ExpressionAttributeValues={":id": exception.id},
+        KeyConditionExpression=Key(DDB_KEY).eq(exception.id),
     )
     items = response.get("Items", [])
 
     while "LastEvaluatedKey" in response:
         response = dynamodb_table.query(
-            KeyConditionExpression="id = :id",
-            ExpressionAttributeValues={":id": exception.id},
+            KeyConditionExpression=Key(DDB_KEY).eq(exception.id),
             ExclusiveStartKey=response["LastEvaluatedKey"],
         )
         items.extend(response.get("Items", []))
@@ -57,7 +59,7 @@ def clean_assessment_dynamodb(exception: StateMachineException) -> None:
     with dynamodb_table.batch_writer() as batch:
         for item in items:
             if item.get("finding_id", "0") != "0":
-                key = {"id": item["id"], "finding_id": item["finding_id"]}
+                key = {DDB_KEY: item["id"], DDB_SORT_KEY: item["finding_id"]}
                 batch.delete_item(Key=key)
 
 

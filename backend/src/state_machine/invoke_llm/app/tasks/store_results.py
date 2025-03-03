@@ -1,8 +1,9 @@
 import json
 from typing import Any, override
 
+from common.config import DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
+from common.entities import FindingExtra
 from common.task import Task
-from state_machine.config import DDB_TABLE, STORE_CHUNK_PATH
 from state_machine.event import StoreResultsInput
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_s3 import S3Client
@@ -17,7 +18,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def retrieve_findings_data(
         self, id: str, index: int, s3_bucket: str
-    ) -> list[dict[str, Any]]:
+    ) -> list[FindingExtra]:
         key = STORE_CHUNK_PATH.format(id, index)
         chunk_content = (
             self.s3_client.get_object(Bucket=s3_bucket, Key=key)["Body"]
@@ -52,25 +53,25 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         id: str,
         bp_findings: list[str],
-        findings_data: list[dict[str, Any]],
+        findings_data: list[FindingExtra],
     ) -> None:
         for finding in bp_findings:
-            finding_data: dict[str, Any] | None = next(
-                (item for item in findings_data if item["id"] == finding),
+            finding_data: FindingExtra | None = next(
+                (item for item in findings_data if item.id == finding),
                 None,
             )
             if finding_data is None:
                 raise ValueError(f"Finding data not found for id: {finding}")
             self.dynamodb_table.put_item(
                 Item={
-                    **finding_data,
-                    "id": id,
-                    "finding_id": finding,
+                    **finding_data.dict(),
+                    DDB_KEY: id,
+                    DDB_SORT_KEY: finding,
                 }
             )
 
     def store_results(
-        self, findings: dict[str, Any], findings_data: list[dict[str, Any]], id: str
+        self, findings: dict[str, Any], findings_data: list[FindingExtra], id: str
     ) -> None:
         for pillar_name, pillar in findings.items():
             for question_name, question in pillar.items():

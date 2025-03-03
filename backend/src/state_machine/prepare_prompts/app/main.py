@@ -1,7 +1,7 @@
 from typing import Any
 
 import boto3
-from state_machine.config import REGION
+from common.config import REGION
 from state_machine.event import PreparePromptsInput
 from tasks.prepare_prompts import PreparePrompts
 

@@ -374,9 +374,9 @@ Resources:
             Arguments:
               TableName: !Ref DynamoDBArn
               Item:
-                id:
+                PK:
                   S: "{% $states.input.id %}"
-                finding_id:
+                SK:
                   S: "0"
                 name:
                   S: "{% $states.input.name %}"
@@ -437,9 +437,9 @@ Resources:
             Arguments:
               TableName: !Ref DynamoDBArn
               Key:
-                id:
+                PK:
                   S: "{% $id %}"
-                finding_id:
+                SK:
                   S: "0"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:

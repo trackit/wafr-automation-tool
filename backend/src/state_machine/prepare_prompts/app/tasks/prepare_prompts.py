@@ -3,8 +3,10 @@ import os
 from datetime import datetime
 from typing import Any, override
 
-from common.task import Task
-from state_machine.config import (
+from common.config import (
+    DDB_ASSESSMENT_SK,
+    DDB_KEY,
+    DDB_SORT_KEY,
     DDB_TABLE,
     PROMPT_PATH,
     PROWLER_OCSF_PATH,
@@ -12,6 +14,7 @@ from state_machine.config import (
     SCRIPTS_PATH,
     STORE_PROMPT_PATH,
 )
+from common.task import Task
 from state_machine.event import FormatProwlerInput, PreparePromptsInput
 from tasks.format_prowler import FormatProwler
 from types_boto3_dynamodb import DynamoDBServiceResource
@@ -52,7 +55,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
     def populate_dynamodb(self, id: str) -> None:
         self.dynamodb_table.update_item(
-            Key={"id": id, "finding_id": "0"},
+            Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
             UpdateExpression="SET findings = :findings, questionVersion = :questionVersion",
             ExpressionAttributeValues={
                 ":findings": self.questions,
