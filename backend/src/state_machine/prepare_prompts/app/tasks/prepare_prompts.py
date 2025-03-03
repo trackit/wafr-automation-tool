@@ -56,7 +56,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def populate_dynamodb(self, id: str) -> None:
         self.dynamodb_table.update_item(
             Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
-            UpdateExpression="SET findings = :findings, questionVersion = :questionVersion",
+            UpdateExpression="SET findings = :findings, question_version = :question_version",
             ExpressionAttributeValues={
                 ":findings": self.questions,
                 ":question_version": self.question_version,
