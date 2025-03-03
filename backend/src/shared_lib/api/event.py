@@ -45,3 +45,6 @@ class RetrieveFindingInput(BaseModel):
 
 class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
     pass
+
+
+RetrieveAllAssessmentsResponseBody = list[Assessment]

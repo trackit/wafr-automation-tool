@@ -15,6 +15,10 @@ class IAssessmentRepository:
         raise NotImplementedError
 
     @abstractmethod
+    def retrieve_all_assessments(self) -> Optional[list[Assessment]]:
+        raise NotImplementedError
+
+    @abstractmethod
     def retrieve_best_practice(
         self, assessment: Assessment, bestPracticeName: str
     ) -> Optional[list[FindingExtra]]:
@@ -45,6 +49,28 @@ class AssessmentRepository(IAssessmentRepository):
         return Assessment(
             **formatted_item,
         )
+
+    @override
+    def retrieve_all_assessments(self) -> Optional[list[Assessment]]:
+        response = self.ddb_table.query(
+            KeyConditionExpression=Key(DDB_SORT_KEY).eq(DDB_ASSESSMENT_SK),
+        )
+        items = response.get("Items", [])
+        while "LastEvaluatedKey" in response:
+            response = self.ddb_table.query(
+                KeyConditionExpression=Key(DDB_SORT_KEY).eq(DDB_ASSESSMENT_SK),
+                ExclusiveStartKey=response["LastEvaluatedKey"],
+            )
+            items.extend(response.get("Items", []))
+        if not items:
+            return None
+        assessments: list[Assessment] = []
+        for item in items:
+            formatted_item = json.loads(json.dumps(item, cls=DecimalEncoder))
+            assessment = Assessment(**formatted_item)
+            assessment.findings = None
+            assessments.append(assessment)
+        return assessments
 
     @override
     def retrieve_best_practice(
