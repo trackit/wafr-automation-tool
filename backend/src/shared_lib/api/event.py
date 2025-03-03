@@ -64,3 +64,4 @@ class RetrieveAssessmentInput(BaseModel):
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
+    pass

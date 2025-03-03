@@ -3,7 +3,7 @@ from typing import Any
 
 import boto3
 from api.event import StartAssessmentInput
-from backend.src.api.start_assessment.app.tasks.start_assessment import StartAssessment
+from tasks.start_assessment import StartAssessment
 
 sfn_client = boto3.client("stepfunctions")
 start_assessment_task = StartAssessment(sfn_client)

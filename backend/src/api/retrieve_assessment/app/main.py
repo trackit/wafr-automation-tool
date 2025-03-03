@@ -3,9 +3,7 @@ from typing import Any, Dict
 
 import boto3
 from api.event import RetrieveAssessmentInput
-from backend.src.api.retrieve_assessment.app.tasks.retrieve_assessment import (
-    RetrieveAssessment,
-)
+from tasks.retrieve_assessment import RetrieveAssessment
 
 ddb_resource = boto3.resource("dynamodb")
 retrieve_assessment_task = RetrieveAssessment(ddb_resource)

@@ -3,10 +3,7 @@ from typing import Any, Dict
 
 import boto3
 from api.event import DeleteAssessmentInput
-
-from backend.src.api.delete_assessment.app.tasks.delete_assessment import (
-    DeleteAssessment,
-)
+from tasks.delete_assessment import DeleteAssessment
 
 ddb_resource = boto3.resource("dynamodb")
 delete_assessments_task = DeleteAssessment(ddb_resource)
