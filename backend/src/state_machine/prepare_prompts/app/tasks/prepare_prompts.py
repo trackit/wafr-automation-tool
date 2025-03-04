@@ -77,11 +77,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         for i, prompt in enumerate(prompts):
             key = STORE_PROMPT_PATH.format(assessment_id, i)
             prompts_uri.append(get_s3_uri(s3_bucket, key))
-            self.insert_questions(prompt)
+            prompt_with_questions = self.insert_questions(prompt)
             self.storage_service.put(
                 Bucket=s3_bucket,
                 Key=key,
-                Body=prompt,
+                Body=prompt_with_questions,
             )
         return prompts_uri
 

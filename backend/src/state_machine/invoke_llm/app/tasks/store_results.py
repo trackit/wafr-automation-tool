@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, override
 
 from common.config import (
@@ -15,6 +16,8 @@ from services.storage import IStorageService
 from utils import s3
 
 from state_machine.event import StoreResultsInput
+
+logger = logging.getLogger("StoreResults")
 
 
 class StoreResults(Task[StoreResultsInput, None]):
@@ -37,25 +40,27 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def store_findings_id(
+    def store_finding_ids(
         self,
         assessment_id: str,
         pillar_name: str,
         question_name: str,
         bp_name: str,
-        bp_findings: list[str],
+        bp_finding_ids: list[str],
     ) -> None:
+        if not bp_finding_ids:
+            return
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: assessment_id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
-            UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
+            UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": pillar_name,
                 "#question": question_name,
                 "#bp": bp_name,
             },
             ExpressionAttributeValues={
-                ":new_findings": bp_findings,
+                ":new_findings": bp_finding_ids,
                 ":empty_list": [],
             },
         )
@@ -63,22 +68,25 @@ class StoreResults(Task[StoreResultsInput, None]):
     def store_findings(
         self,
         assessment_id: str,
-        bp_findings: list[str],
+        bp_finding_ids: list[str],
         findings_data: list[FindingExtra],
     ) -> None:
-        for finding in bp_findings:
+        for finding_id in bp_finding_ids:
             finding_data: FindingExtra | None = next(
-                (item for item in findings_data if item.id == finding),
+                (item for item in findings_data if item.id == finding_id),
                 None,
             )
             if finding_data is None:
-                raise ValueError(f"Finding data not found for id: {finding}")
+                logger.error("Finding with id %s not found", finding_id)
+                continue
+            finding_dict = finding_data.dict().copy()
+            del finding_dict["id"]
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
-                    **finding_data.dict(),
+                    **finding_dict,
                     DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: finding,
+                    DDB_SORT_KEY: finding_id,
                 },
             )
 
@@ -91,15 +99,11 @@ class StoreResults(Task[StoreResultsInput, None]):
         for pillar_name, pillar in findings.items():
             for question_name, question in pillar.items():
                 for bp_name in question:
-                    bp_findings: list[str] = findings[pillar_name][question_name][bp_name]
-                    self.store_findings_id(
-                        assessment_id,
-                        pillar_name,
-                        question_name,
-                        bp_name,
-                        bp_findings,
-                    )
-                    self.store_findings(assessment_id, bp_findings, findings_data)
+                    bp_finding_ids: list[str] = [
+                        str(finding_id) for finding_id in findings[pillar_name][question_name][bp_name]
+                    ]
+                    self.store_finding_ids(assessment_id, pillar_name, question_name, bp_name, bp_finding_ids)
+                    self.store_findings(assessment_id, bp_finding_ids, findings_data)
 
     def ensure_text_format(self, llm_response: str) -> str:
         return llm_response.replace("\n", "")

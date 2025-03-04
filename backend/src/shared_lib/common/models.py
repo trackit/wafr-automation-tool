@@ -12,7 +12,7 @@ class IModel(ABC):
         raise NotImplementedError
 
 
-class Claude3_5Sonnet(BaseModel, IModel):
+class Claude3Dot5Sonnet(BaseModel, IModel):
     model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
     prompt_format: str = "\\n\\nHuman:{}\\n\\nAssistant:"
     temperature: float = 0
