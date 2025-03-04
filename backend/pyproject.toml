@@ -13,6 +13,8 @@ dependencies = [
 ]
 
 [tool.ruff]
+include = ["pyproject.toml", "src/**/*.py"]
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
