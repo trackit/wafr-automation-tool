@@ -17,8 +17,8 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     try:
         response = retrieve_finding_task.execute(
             RetrieveFindingInput(
-                id=event["pathParameters"]["assessmentId"],
-                findingId=event["pathParameters"]["findingId"],
+                assessment_id=event["pathParameters"]["assessmentId"],
+                finding_id=event["pathParameters"]["findingId"],
             )
         )
     except Exception as e:

@@ -12,7 +12,8 @@ class IAIService(ABC):
 
 
 class BedrockService(IAIService):
-    def __init__(self, bedrock_client: BedrockRuntimeClient):
+    def __init__(self, bedrock_client: BedrockRuntimeClient) -> None:
+        super().__init__()
         self.bedrock_client = bedrock_client
 
     @override

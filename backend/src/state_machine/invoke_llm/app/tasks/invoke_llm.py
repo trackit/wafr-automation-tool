@@ -4,8 +4,9 @@ from common.models import IModel
 from common.task import Task
 from services.ai import IAIService
 from services.storage import IStorageService
-from state_machine.event import InvokeLLMInput
 from utils.s3 import parse_s3_uri
+
+from state_machine.event import InvokeLLMInput
 
 
 class InvokeLLM(Task[InvokeLLMInput, str]):
@@ -14,7 +15,7 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
         storage_service: IStorageService,
         ai_service: IAIService,
         model: IModel,
-    ):
+    ) -> None:
         super().__init__()
         self.storage_service = storage_service
         self.ai_service = ai_service

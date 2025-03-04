@@ -1,27 +1,30 @@
 from http.client import NOT_FOUND, OK
 from typing import override
 
-from api.event import RetrieveFindingInput, RetrieveFindingResponseBody
 from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
+from api.event import RetrieveFindingInput, RetrieveFindingResponseBody
+
 
 class RetrieveFinding(
-    Task[RetrieveFindingInput, APIResponse[RetrieveFindingResponseBody]]
+    Task[RetrieveFindingInput, APIResponse[RetrieveFindingResponseBody]],
 ):
     def __init__(self, assessment_service: IAssessmentService) -> None:
+        super().__init__()
         self.assessment_service = assessment_service
 
     @override
     def execute(
-        self, event: RetrieveFindingInput
+        self,
+        event: RetrieveFindingInput,
     ) -> APIResponse[RetrieveFindingResponseBody]:
-        finding = self.assessment_service.retrieve_finding(event.id, event.findingId)
+        finding = self.assessment_service.retrieve_finding(event.assessment_id, event.finding_id)
         if not finding:
-            return APIResponse(statusCode=NOT_FOUND, body=None)
+            return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
-            statusCode=OK,
+            status_code=OK,
             body=RetrieveFindingResponseBody(
                 **finding.dict(),
             ),

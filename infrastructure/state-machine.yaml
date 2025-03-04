@@ -36,7 +36,7 @@ Globals:
       Variables:
         REGION: !Ref AWS::Region
         S3_BUCKET: !Ref S3BucketName
-        DYNAMODB_TABLE: !Ref DynamoDBArn
+        DDB_TABLE: !Ref DynamoDBArn
 
 Resources:
   VPC:
@@ -303,6 +303,8 @@ Resources:
           Command:
             - prowler
               aws
+              --no-banner
+              --no-color
               --output-modes
               json-ocsf
               --output-bucket-no-assume
@@ -310,7 +312,7 @@ Resources:
               --output-directory
               scan/prowler
               --output-filename
-              "prowler-output-$ID"
+              "prowler-output-$ASSESSMENT_ID"
               --ignore-exit-code-3
               --role
               "$ROLE"
@@ -375,7 +377,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: "{% $states.input.id %}"
+                  S: "{% $states.input.assessment_id %}"
                 SK:
                   S: "0"
                 name:
@@ -385,7 +387,7 @@ Resources:
                 step:
                   S: "0"
             Assign:
-              id: "{% $states.input.id %}"
+              assessment_id: "{% $states.input.assessment_id %}"
               role: "{% $states.input.role %}"
             Next: ScanningTools
             Catch:
@@ -393,7 +395,7 @@ Resources:
                   - States.ALL
                 Next: CleanOnError
                 Output:
-                  id: "{% $states.input.id %}"
+                  assessment_id: "{% $states.input.assessment_id %}"
                   error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
@@ -418,8 +420,8 @@ Resources:
                         ContainerOverrides:
                           - Name: prowler-container
                             Environment:
-                              - Name: ID
-                                Value: "{% $id %}"
+                              - Name: ASSESSMENT_ID
+                                Value: "{% $assessment_id %}"
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
@@ -429,7 +431,7 @@ Resources:
                   - States.ALL
                 Next: CleanOnError
                 Output:
-                  id: "{% $id %}"
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           UpdateStep:
             Type: Task
@@ -438,7 +440,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "{% $id %}"
+                  S: "{% $assessment_id %}"
                 SK:
                   S: "0"
               UpdateExpression: SET step = :newStep
@@ -451,20 +453,20 @@ Resources:
                   - States.ALL
                 Next: CleanOnError
                 Output:
-                  id: "{% $id %}"
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PreparePrompt:
             Type: Task
             Resource: !GetAtt PreparePromptsFunction.Arn
             Arguments:
-              id: "{% $id %}"
+              assessment_id: "{% $assessment_id %}"
             Next: PromptMap
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanOnError
                 Output:
-                  id: "{% $id %}"
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
@@ -477,7 +479,7 @@ Resources:
                   Type: Task
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
-                    id: "{% $id %}"
+                    assessment_id: "{% $assessment_id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
             End: true
@@ -486,7 +488,7 @@ Resources:
                   - States.ALL
                 Next: CleanOnError
                 Output:
-                  id: "{% $id %}"
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           CleanOnError:
             Type: Task

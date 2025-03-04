@@ -1,6 +1,6 @@
 import json
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any, override
 
 from pydantic import BaseModel
 
@@ -10,15 +10,16 @@ class APIResponseBody(BaseModel):
 
 
 class DecimalEncoder(json.JSONEncoder):
-    def default(self, o: Any):
+    @override
+    def default(self, o: Any) -> int:
         if isinstance(o, Decimal):
             return int(o)
-        return super(DecimalEncoder, self).default(o)
+        return super(__class__, self).default(o)
 
 
-class APIResponse[T: Optional[APIResponseBody | list[Any]]](BaseModel):
-    statusCode: int
-    body: Optional[T]
+class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
+    status_code: int
+    body: T | None
 
     def build(self) -> dict[str, Any]:
         body = None
@@ -30,6 +31,6 @@ class APIResponse[T: Optional[APIResponseBody | list[Any]]](BaseModel):
             else:
                 body = json.dumps(self.body.dict(), separators=(",", ":"))
         return {
-            "statusCode": self.statusCode,
+            "statusCode": self.status_code,
             "body": body,
         }

@@ -9,21 +9,21 @@ class StartAssessmentInput(BaseModel):
 
 
 class StartAssessmentResponseBody(APIResponseBody):
-    assessmentId: str
+    assessmentId: str  # noqa: N815
 
 
 class StateMachineInput(BaseModel):
-    id: str
+    assessment_id: str
     name: str
     role: str
 
 
 class DeleteAssessmentInput(BaseModel):
-    id: str
+    assessment_id: str
 
 
 class RetrieveAssessmentInput(BaseModel):
-    id: str
+    assessment_id: str
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
@@ -31,16 +31,16 @@ class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
 
 
 class RetrieveBestPracticeInput(BaseModel):
-    id: str
-    bestPractice: str
+    assessment_id: str
+    best_practice: str
 
 
 RetrieveBestPracticeResponseBody = list[FindingExtra]
 
 
 class RetrieveFindingInput(BaseModel):
-    id: str
-    findingId: str
+    assessment_id: str
+    finding_id: str
 
 
 class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):

@@ -6,14 +6,15 @@ from common.models import Claude3_5Sonnet
 from services.ai import BedrockService
 from services.database import DDBService
 from services.storage import S3Service
-from state_machine.event import InvokeLLMInput, StoreResultsInput
 from tasks.invoke_llm import InvokeLLM
 from tasks.store_results import StoreResults
 
-s3_client = boto3.client("s3")  # type: ignore
-s3_resource = boto3.resource("s3")  # type: ignore
-ddb_client = boto3.resource("dynamodb", region_name=REGION)  # type: ignore
-bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)  # type: ignore
+from state_machine.event import InvokeLLMInput, StoreResultsInput
+
+s3_client = boto3.client("s3")
+s3_resource = boto3.resource("s3")
+ddb_client = boto3.resource("dynamodb", region_name=REGION)
+bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
 database_service = DDBService(ddb_client)
 storage_service = S3Service(s3_client, s3_resource)
 ai_service = BedrockService(bedrock_client)

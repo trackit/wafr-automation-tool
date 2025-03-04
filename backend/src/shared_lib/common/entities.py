@@ -1,31 +1,29 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class Finding(BaseModel):
     id: str
-    status_code: Optional[str]
-    status_detail: Optional[str]
+    status_code: str | None
+    status_detail: str | None
 
 
 class FindingResource(BaseModel):
-    uid: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
-    region: Optional[str]
+    uid: str | None
+    name: str | None
+    type: str | None
+    region: str | None
 
 
 class FindingRemediation(BaseModel):
-    desc: Optional[str]
-    references: Optional[list[str]]
+    desc: str | None
+    references: list[str] | None
 
 
 class FindingExtra(Finding):
-    severity: Optional[str]
-    resources: Optional[list[FindingResource]]
-    remediation: Optional[FindingRemediation]
-    risk_details: Optional[str]
+    severity: str | None
+    resources: list[FindingResource] | None
+    remediation: FindingRemediation | None
+    risk_details: str | None
 
 
 BEST_PRACTICE = list[int]
@@ -39,4 +37,4 @@ class Assessment(BaseModel):
     role: str
     step: str
     question_version: str
-    findings: Optional[dict[str, PILLAR]]
+    findings: dict[str, PILLAR] | None

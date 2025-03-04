@@ -23,7 +23,9 @@ class IDatabaseService(ABC):
 
     @abstractmethod
     def update(
-        self, table_name: str, **kwargs: Unpack[UpdateItemInputTableUpdateItemTypeDef]
+        self,
+        table_name: str,
+        **kwargs: Unpack[UpdateItemInputTableUpdateItemTypeDef],
     ) -> None:
         raise NotImplementedError
 
@@ -33,13 +35,17 @@ class IDatabaseService(ABC):
 
     @abstractmethod
     def delete(
-        self, table_name: str, key: Mapping[str, TableAttributeValueTypeDef]
+        self,
+        table_name: str,
+        key: Mapping[str, TableAttributeValueTypeDef],
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def query(
-        self, table_name: str, **kwargs: Unpack[QueryInputTableQueryTypeDef]
+        self,
+        table_name: str,
+        **kwargs: Unpack[QueryInputTableQueryTypeDef],
     ) -> list[dict[str, TableAttributeValueTypeDef]]:
         raise NotImplementedError
 
@@ -53,13 +59,15 @@ class IDatabaseService(ABC):
 
 
 class DDBService(IDatabaseService):
-    def __init__(self, resource: DynamoDBServiceResource):
+    def __init__(self, resource: DynamoDBServiceResource) -> None:
         super().__init__()
         self.resource = resource
 
     @override
     def get(
-        self, table_name: str, **kwargs: Unpack[GetItemInputTableGetItemTypeDef]
+        self,
+        table_name: str,
+        **kwargs: Unpack[GetItemInputTableGetItemTypeDef],
     ) -> Mapping[str, TableAttributeValueTypeDef] | None:
         try:
             table = self.resource.Table(table_name)
@@ -72,8 +80,10 @@ class DDBService(IDatabaseService):
 
     @override
     def update(
-        self, table_name: str, **kwargs: Unpack[UpdateItemInputTableUpdateItemTypeDef]
-    ):
+        self,
+        table_name: str,
+        **kwargs: Unpack[UpdateItemInputTableUpdateItemTypeDef],
+    ) -> None:
         try:
             table = self.resource.Table(table_name)
             table.update_item(**kwargs)
@@ -81,7 +91,7 @@ class DDBService(IDatabaseService):
             raise e
 
     @override
-    def put(self, table_name: str, item: dict[str, Any]):
+    def put(self, table_name: str, item: dict[str, Any]) -> None:
         try:
             table = self.resource.Table(table_name)
             table.put_item(Item=item)
@@ -89,7 +99,11 @@ class DDBService(IDatabaseService):
             raise e
 
     @override
-    def delete(self, table_name: str, key: Mapping[str, TableAttributeValueTypeDef]):
+    def delete(
+        self,
+        table_name: str,
+        key: Mapping[str, TableAttributeValueTypeDef],
+    ) -> None:
         table = self.resource.Table(table_name)
         try:
             table.delete_item(Key=key)
@@ -98,7 +112,9 @@ class DDBService(IDatabaseService):
 
     @override
     def query(
-        self, table_name: str, **kwargs: Unpack[QueryInputTableQueryTypeDef]
+        self,
+        table_name: str,
+        **kwargs: Unpack[QueryInputTableQueryTypeDef],
     ) -> list[dict[str, TableAttributeValueTypeDef]]:
         table = self.resource.Table(table_name)
         try:

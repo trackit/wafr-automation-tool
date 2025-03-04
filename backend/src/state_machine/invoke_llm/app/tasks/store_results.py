@@ -12,8 +12,9 @@ from common.entities import FindingExtra
 from common.task import Task
 from services.database import IDatabaseService
 from services.storage import IStorageService
-from state_machine.event import StoreResultsInput
 from utils import s3
+
+from state_machine.event import StoreResultsInput
 
 
 class StoreResults(Task[StoreResultsInput, None]):
@@ -21,21 +22,24 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-    ):
+    ) -> None:
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
 
     def retrieve_findings_data(
-        self, id: str, index: int, s3_bucket: str
+        self,
+        assessment_id: str,
+        chunk_id: int,
+        s3_bucket: str,
     ) -> list[FindingExtra]:
-        key = STORE_CHUNK_PATH.format(id, index)
+        key = STORE_CHUNK_PATH.format(assessment_id, chunk_id)
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
-        return json.loads(chunk_content)
+        return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
     def store_findings_id(
         self,
-        id: str,
+        assessment_id: str,
         pillar_name: str,
         question_name: str,
         bp_name: str,
@@ -43,7 +47,7 @@ class StoreResults(Task[StoreResultsInput, None]):
     ) -> None:
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
+            Key={DDB_KEY: assessment_id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
             UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
             ExpressionAttributeNames={
                 "#pillar": pillar_name,
@@ -58,7 +62,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def store_findings(
         self,
-        id: str,
+        assessment_id: str,
         bp_findings: list[str],
         findings_data: list[FindingExtra],
     ) -> None:
@@ -73,29 +77,32 @@ class StoreResults(Task[StoreResultsInput, None]):
                 table_name=DDB_TABLE,
                 item={
                     **finding_data.dict(),
-                    DDB_KEY: id,
+                    DDB_KEY: assessment_id,
                     DDB_SORT_KEY: finding,
                 },
             )
 
     def store_results(
-        self, findings: dict[str, Any], findings_data: list[FindingExtra], id: str
+        self,
+        assessment_id: str,
+        findings: dict[str, Any],
+        findings_data: list[FindingExtra],
     ) -> None:
         for pillar_name, pillar in findings.items():
             for question_name, question in pillar.items():
-                for bp_name, _ in question.items():
-                    bp_findings: list[str] = findings[pillar_name][question_name][
-                        bp_name
-                    ]
+                for bp_name in question:
+                    bp_findings: list[str] = findings[pillar_name][question_name][bp_name]
                     self.store_findings_id(
-                        id, pillar_name, question_name, bp_name, bp_findings
+                        assessment_id,
+                        pillar_name,
+                        question_name,
+                        bp_name,
+                        bp_findings,
                     )
-                    self.store_findings(id, bp_findings, findings_data)
+                    self.store_findings(assessment_id, bp_findings, findings_data)
 
     def ensure_text_format(self, llm_response: str) -> str:
-        llm_response = llm_response.replace("\n", "")
-        # llm_response = re.sub("\\{(?:(?>[^{}]+)|(?R))*\\}", "", llm_response, 1)
-        return llm_response
+        return llm_response.replace("\n", "")
 
     def concat_results(self, llm_response: str) -> dict[str, Any]:
         json_body = json.loads(llm_response)
@@ -118,5 +125,5 @@ class StoreResults(Task[StoreResultsInput, None]):
         findings = self.concat_results(event.llm_response)
         index = self.get_index(event.prompt_uri)
         s3_bucket, _ = s3.parse_s3_uri(event.prompt_uri)
-        findings_data = self.retrieve_findings_data(event.id, index, s3_bucket)
-        self.store_results(findings, findings_data, event.id)
+        findings_data = self.retrieve_findings_data(event.assessment_id, index, s3_bucket)
+        self.store_results(event.assessment_id, findings, findings_data)

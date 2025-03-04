@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Unpack, override
+from typing import Any, Unpack, override
 
 from types_boto3_s3 import S3Client, S3ServiceResource
 from types_boto3_s3.type_defs import (
@@ -30,46 +30,51 @@ class IStorageService(ABC):
 
     @abstractmethod
     def bulk_delete(
-        self, bucket_name: str, objects: list[Any], quiet: bool = True
-    ) -> Optional[DeleteObjectsOutputTypeDef]:
+        self,
+        bucket_name: str,
+        objects: list[Any],
+    ) -> DeleteObjectsOutputTypeDef | None:
         raise NotImplementedError
 
 
 class S3Service(IStorageService):
-    def __init__(self, client: S3Client, resource: S3ServiceResource):
+    def __init__(self, client: S3Client, resource: S3ServiceResource) -> None:
         super().__init__()
-        self.client = client
+        self.s3_client = client
         self.resource = resource
 
     @override
     def get(self, **kwargs: Unpack[GetObjectRequestTypeDef]) -> str:
-        reponse = self.client.get_object(**kwargs)
+        reponse = self.s3_client.get_object(**kwargs)
         return reponse["Body"].read().decode("utf-8")
 
     @override
     def put(self, **kwargs: Unpack[PutObjectRequestTypeDef]) -> None:
-        self.client.put_object(**kwargs)
+        self.s3_client.put_object(**kwargs)
 
     @override
     def delete(self, **kwargs: Unpack[DeleteObjectRequestTypeDef]) -> None:
-        self.client.delete_object(**kwargs)
+        self.s3_client.delete_object(**kwargs)
 
     @override
     def filter(self, bucket_name: str, prefix: str) -> list[Any]:
         bucket = self.resource.Bucket(bucket_name)
-        return [obj for obj in bucket.objects.filter(Prefix=prefix)]
+        return list(bucket.objects.filter(Prefix=prefix))
 
     @override
     def bulk_delete(
-        self, bucket_name: str, objects: list[Any], quiet: bool = True
-    ) -> Optional[DeleteObjectsOutputTypeDef]:
+        self,
+        bucket_name: str,
+        objects: list[Any],
+        quiet: bool = True,
+    ) -> DeleteObjectsOutputTypeDef | None:
+        if not objects:
+            return None
         delete_keys: DeleteTypeDef = {
             "Objects": [{"Key": obj.key} for obj in objects],
-            "Quiet": quiet,
+            "Quiet": True,
         }
-        if delete_keys["Objects"]:
-            return self.client.delete_objects(
-                Bucket=bucket_name,
-                Delete=delete_keys,
-            )
-        return None
+        return self.s3_client.delete_objects(
+            Bucket=bucket_name,
+            Delete=delete_keys,
+        )

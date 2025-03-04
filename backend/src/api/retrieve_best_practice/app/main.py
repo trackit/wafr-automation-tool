@@ -17,8 +17,8 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     try:
         response = retrieve_best_practice_task.execute(
             RetrieveBestPracticeInput(
-                id=event["pathParameters"]["assessmentId"],
-                bestPractice=event["pathParameters"]["bestPracticeName"],
+                assessment_id=event["pathParameters"]["assessmentId"],
+                best_practice=event["pathParameters"]["bestPracticeName"],
             )
         )
     except Exception as e:

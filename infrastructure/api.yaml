@@ -32,7 +32,7 @@ Globals:
       Name: !Ref Name
     Environment:
       Variables:
-        DYNAMODB_TABLE: !Ref DynamoDBArn
+        DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
 
 Resources:
