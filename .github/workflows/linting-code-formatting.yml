@@ -12,5 +12,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
+          args: "check"
+          src: "./backend"
+      - uses: astral-sh/ruff-action@v3
+        with:
           args: "format --check"
           src: "./backend"
