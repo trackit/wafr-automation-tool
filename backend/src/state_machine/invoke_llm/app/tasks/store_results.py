@@ -1,30 +1,36 @@
 import json
 from typing import Any, override
 
-from common.config import DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
+from common.config import (
+    DDB_ASSESSMENT_SK,
+    DDB_KEY,
+    DDB_SORT_KEY,
+    DDB_TABLE,
+    STORE_CHUNK_PATH,
+)
 from common.entities import FindingExtra
 from common.task import Task
+from services.database import IDatabaseService
+from services.storage import IStorageService
 from state_machine.event import StoreResultsInput
-from types_boto3_dynamodb import DynamoDBServiceResource
-from types_boto3_s3 import S3Client
 from utils import s3
 
 
 class StoreResults(Task[StoreResultsInput, None]):
-    def __init__(self, dynamodb_client: DynamoDBServiceResource, s3_client: S3Client):
+    def __init__(
+        self,
+        database_service: IDatabaseService,
+        storage_service: IStorageService,
+    ):
         super().__init__()
-        self.dynamodb_table = dynamodb_client.Table(DDB_TABLE)
-        self.s3_client = s3_client
+        self.database_service = database_service
+        self.storage_service = storage_service
 
     def retrieve_findings_data(
         self, id: str, index: int, s3_bucket: str
     ) -> list[FindingExtra]:
         key = STORE_CHUNK_PATH.format(id, index)
-        chunk_content = (
-            self.s3_client.get_object(Bucket=s3_bucket, Key=key)["Body"]
-            .read()
-            .decode("utf-8")
-        )
+        chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return json.loads(chunk_content)
 
     def store_findings_id(
@@ -35,8 +41,9 @@ class StoreResults(Task[StoreResultsInput, None]):
         bp_name: str,
         bp_findings: list[str],
     ) -> None:
-        self.dynamodb_table.update_item(
-            Key={"id": id, "finding_id": "0"},
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
             UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
             ExpressionAttributeNames={
                 "#pillar": pillar_name,
@@ -62,12 +69,13 @@ class StoreResults(Task[StoreResultsInput, None]):
             )
             if finding_data is None:
                 raise ValueError(f"Finding data not found for id: {finding}")
-            self.dynamodb_table.put_item(
-                Item={
+            self.database_service.put(
+                table_name=DDB_TABLE,
+                item={
                     **finding_data.dict(),
                     DDB_KEY: id,
                     DDB_SORT_KEY: finding,
-                }
+                },
             )
 
     def store_results(

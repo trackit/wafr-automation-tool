@@ -2,13 +2,28 @@ from typing import Any
 
 import boto3
 from common.config import REGION
-from state_machine.event import PreparePromptsInput
+from services.database import DDBService
+from services.storage import S3Service
+from state_machine.event import CreateProwlerPromptInput, PreparePromptsInput
 from tasks.prepare_prompts import PreparePrompts
+from tasks.prowler.create_prowler_prompt import CreateProwlerPrompt
 
-s3_client = boto3.client("s3")
-dynamodb_client = boto3.resource("dynamodb", region_name=REGION)
-prepare_prompts_task = PreparePrompts(s3_client, dynamodb_client)
+s3_client = boto3.client("s3")  # type: ignore
+s3_resource = boto3.resource("s3")  # type: ignore
+ddb_client = boto3.resource("dynamodb", region_name=REGION)  # type: ignore
+database_service = DDBService(ddb_client)
+storage_service = S3Service(s3_client, s3_resource)
+
+create_prowler_prompt_task = CreateProwlerPrompt(storage_service)
+
+prepare_prompts_task = PreparePrompts(database_service, storage_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:
-    return prepare_prompts_task.execute(PreparePromptsInput(**event))
+    prowler_prompts = create_prowler_prompt_task.execute(
+        CreateProwlerPromptInput(**event)
+    )
+    prepare_prompts_input = PreparePromptsInput(
+        **event, prowler_prompts=prowler_prompts
+    )
+    return prepare_prompts_task.execute(prepare_prompts_input)

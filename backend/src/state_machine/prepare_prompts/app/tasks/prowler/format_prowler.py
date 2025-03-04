@@ -1,13 +1,12 @@
 import json
 from typing import Any, Type, TypeVar, Union, override
 
+from common.config import S3_BUCKET, STORE_CHUNK_PATH
 from common.entities import Finding, FindingExtra
 from common.task import Task
 from py_ocsf_models.events.findings.detection_finding import DetectionFinding
-from common.config import S3_BUCKET, STORE_CHUNK_PATH
+from services.storage import IStorageService
 from state_machine.event import FormatProwlerInput
-from types_boto3_s3 import S3Client
-from utils.s3 import parse_s3_uri
 
 CHUNK_SIZE = 400
 
@@ -17,21 +16,10 @@ FORMAT_TYPE = TypeVar("FORMAT_TYPE", bound=Finding)
 class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
     def __init__(
         self,
-        s3_client: S3Client,
+        storage_service: IStorageService,
     ):
         super().__init__()
-        self.s3_client = s3_client
-
-    def add_findings_id(self, content: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        for i, item in enumerate(content):
-            item["id"] = i + 1
-        return content
-
-    def retrieve_prowler_output(self, prowlerOutput: str) -> list[dict[str, Any]]:
-        s3_bucket, s3_key = parse_s3_uri(prowlerOutput)
-        response = self.s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
-        content = response["Body"].read().decode("utf-8")
-        return self.add_findings_id(json.loads(content))
+        self.storage_service = storage_service
 
     def remove_null_recursively(
         self, obj: Union[dict[str, Any], list[Any], str, int, float, bool, None]
@@ -64,7 +52,7 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
     ) -> None:
         retrieve_chunk = self.format_chunk(chunk, FindingExtra)
         key = STORE_CHUNK_PATH.format(id, index)
-        self.s3_client.put_object(
+        self.storage_service.put(
             Bucket=S3_BUCKET,
             Key=key,
             Body=json.dumps(retrieve_chunk, separators=(",", ":")),
@@ -83,5 +71,4 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
 
     @override
     def execute(self, event: FormatProwlerInput) -> list[list[dict[str, Any]]]:
-        prowler_content = self.retrieve_prowler_output(event.prowler_output)
-        return self.create_chunks(prowler_content, event.id)
+        return self.create_chunks(event.prowler_output, event.id)

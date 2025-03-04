@@ -8,31 +8,27 @@ from common.config import (
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
-    PROMPT_PATH,
-    PROWLER_OCSF_PATH,
     S3_BUCKET,
     SCRIPTS_PATH,
     STORE_PROMPT_PATH,
+    WAFR_JSON_PLACEHOLDER,
 )
 from common.task import Task
-from state_machine.event import FormatProwlerInput, PreparePromptsInput
-from tasks.format_prowler import FormatProwler
-from types_boto3_dynamodb import DynamoDBServiceResource
-from types_boto3_s3 import S3Client
+from services.database import IDatabaseService
+from services.storage import IStorageService
+from state_machine.event import PreparePromptsInput
 from utils.s3 import get_s3_uri
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def __init__(
         self,
-        s3_client: S3Client,
-        dynamodb_client: DynamoDBServiceResource,
+        database_service: IDatabaseService,
+        storage_service: IStorageService,
     ):
         super().__init__()
-        self.s3_client = s3_client
-        self.s3_bucket = S3_BUCKET
-        self.dynamodb_table = dynamodb_client.Table(DDB_TABLE)
-        self.format_prowler_task = FormatProwler(self.s3_client)
+        self.database_service = database_service
+        self.storage_service = storage_service
         self.questions = self.retrieve_questions()
 
     def retrieve_questions(self) -> dict[str, Any]:
@@ -54,7 +50,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         return questions
 
     def populate_dynamodb(self, id: str) -> None:
-        self.dynamodb_table.update_item(
+        self.database_service.update(
+            table_name=DDB_TABLE,
             Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
             UpdateExpression="SET findings = :findings, question_version = :question_version",
             ExpressionAttributeValues={
@@ -63,42 +60,20 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             },
         )
 
-    def retrieve_prowler_prompt(self) -> str:
-        with open(PROMPT_PATH, "r") as f:
-            prompt = f.read()
+    def insert_questions(self, prompt: str) -> str:
         prompt = prompt.replace(
-            "[WAFRJSON]",
+            WAFR_JSON_PLACEHOLDER,
             json.dumps(self.questions, separators=(",", ":")).replace(":{}", ""),
         )
         return prompt
-
-    def create_prowler_prompt_from_chunks(
-        self, prompt: str, chunks: list[list[dict[str, Any]]]
-    ) -> list[str]:
-        prompts: list[str] = []
-        for chunk in chunks:
-            chunk_prompt = prompt
-            chunk_prompt = chunk_prompt.replace(
-                "[ProwlerJSON]", json.dumps(chunk, separators=(",", ":"))
-            )
-            prompts.append(chunk_prompt)
-        return prompts
-
-    def create_prowler_prompt(self, event: PreparePromptsInput) -> list[str]:
-        key = PROWLER_OCSF_PATH.format(event.id)
-        prowler_output_uri = get_s3_uri(self.s3_bucket, key)
-        prowler_output_chunks = self.format_prowler_task.execute(
-            FormatProwlerInput(prowler_output=prowler_output_uri, id=event.id)
-        )
-        prompt = self.retrieve_prowler_prompt()
-        return self.create_prowler_prompt_from_chunks(prompt, prowler_output_chunks)
 
     def store_prompts(self, s3_bucket: str, prompts: list[str], id: str) -> list[str]:
         prompts_uri: list[str] = []
         for i, prompt in enumerate(prompts):
             key = STORE_PROMPT_PATH.format(id, i)
             prompts_uri.append(get_s3_uri(s3_bucket, key))
-            self.s3_client.put_object(
+            self.insert_questions(prompt)
+            self.storage_service.put(
                 Bucket=s3_bucket,
                 Key=key,
                 Body=prompt,
@@ -109,5 +84,5 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def execute(self, event: PreparePromptsInput) -> list[str]:
         prompts: list[str] = []
         self.populate_dynamodb(event.id)
-        prompts.extend(self.create_prowler_prompt(event))
-        return self.store_prompts(self.s3_bucket, prompts, event.id)
+        prompts.extend(event.prowler_prompts)
+        return self.store_prompts(S3_BUCKET, prompts, event.id)

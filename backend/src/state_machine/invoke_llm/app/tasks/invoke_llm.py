@@ -1,56 +1,33 @@
-import json
 from typing import override
 
-from state_machine.event import InvokeLLMInput, StoreResultsInput
+from common.models import IModel
 from common.task import Task
-from tasks.store_results import StoreResults
-from types_boto3_bedrock_runtime import BedrockRuntimeClient
-from types_boto3_dynamodb import DynamoDBServiceResource
-from types_boto3_s3 import S3Client
+from services.ai import IAIService
+from services.storage import IStorageService
+from state_machine.event import InvokeLLMInput
 from utils.s3 import parse_s3_uri
 
 
-class InvokeLLM(Task[InvokeLLMInput, None]):
+class InvokeLLM(Task[InvokeLLMInput, str]):
     def __init__(
         self,
-        s3_client: S3Client,
-        bedrock_client: BedrockRuntimeClient,
-        dynamodb_client: DynamoDBServiceResource,
+        storage_service: IStorageService,
+        ai_service: IAIService,
+        model: IModel,
     ):
         super().__init__()
-        self.s3_client = s3_client
-        self.bedrock_client = bedrock_client
-        self.store_results_task = StoreResults(dynamodb_client, s3_client)
+        self.storage_service = storage_service
+        self.ai_service = ai_service
+        self.model = model
 
     def retrieve_prompt(self, prompt_uri: str) -> str:
         s3_bucket, s3_key = parse_s3_uri(prompt_uri)
-        return (
-            self.s3_client.get_object(Bucket=s3_bucket, Key=s3_key)["Body"]
-            .read()
-            .decode("utf-8")
-        )
-
-    def invoke_llm(self, prompt: str) -> str:
-        formatted_prompt = "\n\nHuman:" + prompt + "\n\nAssistant:"
-        response = self.bedrock_client.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
-            body=json.dumps(
-                {
-                    "anthropic_version": "bedrock-2023-05-31",
-                    "messages": [{"role": "user", "content": formatted_prompt}],
-                    "temperature": 0,
-                    "max_tokens": 4000,
-                }
-            ),
-        )
-        return response["body"].read().decode("utf-8")
+        return self.storage_service.get(Bucket=s3_bucket, Key=s3_key)
 
     @override
-    def execute(self, event: InvokeLLMInput) -> None:
+    def execute(self, event: InvokeLLMInput) -> str:
         prompt = self.retrieve_prompt(event.prompt_uri)
-        llm_response = self.invoke_llm(prompt)
-        self.store_results_task.execute(
-            StoreResultsInput(
-                id=event.id, llm_response=llm_response, prompt_uri=event.prompt_uri
-            )
+        return self.ai_service.invoke_model(
+            self.model,
+            prompt,
         )

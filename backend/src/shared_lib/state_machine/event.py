@@ -1,13 +1,16 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
 class PreparePromptsInput(BaseModel):
     id: str
+    prowler_prompts: list[str]
 
 
 class FormatProwlerInput(BaseModel):
     id: str
-    prowler_output: str
+    prowler_output: list[dict[str, Any]]
 
 
 class InvokeLLMInput(BaseModel):
@@ -29,3 +32,7 @@ class StateMachineError(BaseModel):
 class StateMachineException(BaseModel):
     id: str
     error: StateMachineError
+
+
+class CreateProwlerPromptInput(BaseModel):
+    id: str

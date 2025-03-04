@@ -9,11 +9,14 @@ DDB_KEY = "PK"
 DDB_SORT_KEY = "SK"
 DDB_ASSESSMENT_SK = "0"
 
+WAFR_JSON_PLACEHOLDER = "[WAFRJSON]"
+PROWLER_JSON_PLACEHOLDER = "[ProwlerJSON]"
+
 PROWLER_OCSF_PATH = "scan/prowler/json-ocsf/prowler-output-{}.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "scan/prowler/compliance/prowler-output-{}"
 
 STORE_CHUNK_PATH = "{}/chunks/chunk-{}.json"
 STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"
 
-PROMPT_PATH = "./prompt.txt"
+PROWLER_PROMPT_PATH = "./prompts/prowler.txt"
 SCRIPTS_PATH = "./scripts"

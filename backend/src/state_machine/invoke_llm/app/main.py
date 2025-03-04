@@ -2,14 +2,26 @@ from typing import Any
 
 import boto3
 from common.config import REGION
-from state_machine.event import InvokeLLMInput
+from common.models import Claude3_5Sonnet
+from services.ai import BedrockService
+from services.database import DDBService
+from services.storage import S3Service
+from state_machine.event import InvokeLLMInput, StoreResultsInput
 from tasks.invoke_llm import InvokeLLM
+from tasks.store_results import StoreResults
 
-s3_client = boto3.client("s3")
-dynamodb_client = boto3.resource("dynamodb", region_name=REGION)
-bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
-invoke_llm_task = InvokeLLM(s3_client, bedrock_client, dynamodb_client)
+s3_client = boto3.client("s3")  # type: ignore
+s3_resource = boto3.resource("s3")  # type: ignore
+ddb_client = boto3.resource("dynamodb", region_name=REGION)  # type: ignore
+bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)  # type: ignore
+database_service = DDBService(ddb_client)
+storage_service = S3Service(s3_client, s3_resource)
+ai_service = BedrockService(bedrock_client)
+model = Claude3_5Sonnet()
+invoke_llm_task = InvokeLLM(storage_service, ai_service, model)
+store_results_task = StoreResults(database_service, storage_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:
-    return invoke_llm_task.execute(InvokeLLMInput(**event))
+    llm_response = invoke_llm_task.execute(InvokeLLMInput(**event))
+    store_results_task.execute(StoreResultsInput(**event, llm_response=llm_response))

@@ -1,15 +1,15 @@
 import json
 from abc import abstractmethod
-from typing import Any, Optional, override
+from typing import Optional, override
 
 from boto3.dynamodb.conditions import Key
 from common.config import DDB_ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from common.entities import Assessment, FindingExtra
-from types_boto3_dynamodb import DynamoDBServiceResource
+from services.database import IDatabaseService
 from utils.api import DecimalEncoder
 
 
-class IAssessmentRepository:
+class IAssessmentService:
     @abstractmethod
     def retrieve_assessment(self, id: str) -> Optional[Assessment]:
         raise NotImplementedError
@@ -33,35 +33,28 @@ class IAssessmentRepository:
         raise NotImplementedError
 
 
-class AssessmentRepository(IAssessmentRepository):
-    def __init__(self, ddb_resource: DynamoDBServiceResource) -> None:
-        self.ddb_table = ddb_resource.Table(DDB_TABLE)
+class AssessmentService(IAssessmentService):
+    def __init__(self, database_service: IDatabaseService) -> None:
+        self.database_service = database_service
 
     @override
     def retrieve_assessment(self, id: str) -> Optional[Assessment]:
-        assessment_data = self.ddb_table.get_item(
-            Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK}
+        assessment_data = self.database_service.get(
+            table_name=DDB_TABLE, Key={DDB_KEY: id, DDB_SORT_KEY: DDB_ASSESSMENT_SK}
         )
-        item: Optional[dict[str, Any]] = assessment_data.get("Item", None)
-        if not item:
+        if not assessment_data:
             return None
-        formatted_item = json.loads(json.dumps(item, cls=DecimalEncoder))
+        formatted_item = json.loads(json.dumps(assessment_data, cls=DecimalEncoder))
         return Assessment(
             **formatted_item,
         )
 
     @override
     def retrieve_all_assessments(self) -> Optional[list[Assessment]]:
-        response = self.ddb_table.query(
+        items = self.database_service.query(
+            table_name=DDB_TABLE,
             KeyConditionExpression=Key(DDB_SORT_KEY).eq(DDB_ASSESSMENT_SK),
         )
-        items = response.get("Items", [])
-        while "LastEvaluatedKey" in response:
-            response = self.ddb_table.query(
-                KeyConditionExpression=Key(DDB_SORT_KEY).eq(DDB_ASSESSMENT_SK),
-                ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
-            items.extend(response.get("Items", []))
         if not items:
             return None
         assessments: list[Assessment] = []
@@ -84,7 +77,6 @@ class AssessmentRepository(IAssessmentRepository):
                 if bestPracticeName in question:
                     bp_findings = question[bestPracticeName]
                     break
-        print(f"Best practice findings: {bp_findings}")
         findings: list[FindingExtra] = []
         for finding_id in bp_findings:
             finding = self.retrieve_finding(assessment.id, str(finding_id))
@@ -95,34 +87,26 @@ class AssessmentRepository(IAssessmentRepository):
 
     @override
     def retrieve_finding(self, id: str, finding_id: str) -> Optional[FindingExtra]:
-        finding_data = self.ddb_table.get_item(
-            Key={DDB_KEY: id, DDB_SORT_KEY: finding_id}
+        item = self.database_service.get(
+            table_name=DDB_TABLE, Key={DDB_KEY: id, DDB_SORT_KEY: finding_id}
         )
-        item: Optional[dict[str, Any]] = finding_data.get("Item", None)
         if not item:
             return None
+        formatted_item = json.loads(json.dumps(item, cls=DecimalEncoder))
         return FindingExtra(
-            **item,
+            **formatted_item,
         )
 
     @override
     def delete_assessment(self, id: str) -> bool:
-        response = self.ddb_table.query(
+        items = self.database_service.query(
+            table_name=DDB_TABLE,
             KeyConditionExpression=Key(DDB_KEY).eq(id),
         )
-        items = response.get("Items", [])
-
-        while "LastEvaluatedKey" in response:
-            response = self.ddb_table.query(
-                KeyConditionExpression=Key(DDB_KEY).eq(id),
-                ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
-            items.extend(response.get("Items", []))
-
         if not items:
             return False
-        with self.ddb_table.batch_writer() as batch:
-            for item in items:
-                key = {DDB_KEY: item["id"], DDB_SORT_KEY: item["finding_id"]}
-                batch.delete_item(Key=key)
+        keys = [
+            {DDB_KEY: item["id"], DDB_SORT_KEY: item["finding_id"]} for item in items
+        ]
+        self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
         return True

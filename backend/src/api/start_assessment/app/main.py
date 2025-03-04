@@ -5,7 +5,7 @@ import boto3
 from api.event import StartAssessmentInput
 from tasks.start_assessment import StartAssessment
 
-sfn_client = boto3.client("stepfunctions")
+sfn_client = boto3.client("stepfunctions")  # type: ignore
 start_assessment_task = StartAssessment(sfn_client)
 
 

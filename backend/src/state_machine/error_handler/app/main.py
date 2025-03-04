@@ -1,82 +1,21 @@
 from typing import Any
 
 import boto3
-from boto3.dynamodb.conditions import Key
 from common.config import (
-    DDB_ASSESSMENT_SK,
-    DDB_KEY,
-    DDB_SORT_KEY,
-    DDB_TABLE,
-    PROWLER_COMPLIANCE_PATH,
-    PROWLER_OCSF_PATH,
     REGION,
-    S3_BUCKET,
 )
+from services.database import DDBService
+from services.storage import S3Service
 from state_machine.event import StateMachineException
+from tasks.error_handler import ErrorHandler
 
-s3_client = boto3.client("s3")
-s3_resource = boto3.resource("s3")
-s3_bucket = s3_resource.Bucket(S3_BUCKET)
-dynamodb_client = boto3.resource("dynamodb", region_name=REGION)
-dynamodb_table = dynamodb_client.Table(DDB_TABLE)
-
-
-def update_assessment_item(exception: StateMachineException) -> None:
-    dynamodb_table.update_item(
-        Key={DDB_KEY: exception.id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
-        UpdateExpression="SET step = :step",
-        ExpressionAttributeValues={":step": exception.error.dict()},
-    )
-
-
-def clean_prowler_scan(exception: StateMachineException) -> None:
-    prowler_key = PROWLER_OCSF_PATH.format(exception.id)
-    prowler_compliance_key = PROWLER_COMPLIANCE_PATH.format(exception.id)
-    s3_client.delete_object(Bucket=S3_BUCKET, Key=prowler_key)
-
-    compliance_objects = s3_bucket.objects.filter(Prefix=prowler_compliance_key)
-    delete_keys: dict[str, Any] = {
-        "Objects": [{"Key": obj.key} for obj in compliance_objects],
-        "Quiet": True,
-    }
-    if delete_keys["Objects"]:
-        s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
-
-
-def clean_assessment_dynamodb(exception: StateMachineException) -> None:
-    response = dynamodb_table.query(
-        KeyConditionExpression=Key(DDB_KEY).eq(exception.id),
-    )
-    items = response.get("Items", [])
-
-    while "LastEvaluatedKey" in response:
-        response = dynamodb_table.query(
-            KeyConditionExpression=Key(DDB_KEY).eq(exception.id),
-            ExclusiveStartKey=response["LastEvaluatedKey"],
-        )
-        items.extend(response.get("Items", []))
-
-    with dynamodb_table.batch_writer() as batch:
-        for item in items:
-            if item.get("finding_id", "0") != "0":
-                key = {DDB_KEY: item["id"], DDB_SORT_KEY: item["finding_id"]}
-                batch.delete_item(Key=key)
-
-
-def clean_assessment(exception: StateMachineException) -> None:
-    objects = s3_bucket.objects.filter(Prefix=str(exception.id))
-    delete_keys: dict[str, Any] = {
-        "Objects": [{"Key": obj.key} for obj in objects],
-        "Quiet": True,
-    }
-    if delete_keys["Objects"]:
-        s3_client.delete_objects(Bucket=S3_BUCKET, Delete=delete_keys)  # type: ignore
-    clean_assessment_dynamodb(exception)
+s3_client = boto3.client("s3")  # type: ignore
+s3_resource = boto3.resource("s3")  # type: ignore
+dynamodb_client = boto3.resource("dynamodb", region_name=REGION)  # type: ignore
+storage_service = S3Service(s3_client, s3_resource)
+database_service = DDBService(dynamodb_client)
+error_handler_task = ErrorHandler(storage_service, database_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:
-    exception = StateMachineException(**event)
-
-    update_assessment_item(exception)
-    clean_prowler_scan(exception)
-    clean_assessment(exception)
+    error_handler_task.execute(StateMachineException(**event))
