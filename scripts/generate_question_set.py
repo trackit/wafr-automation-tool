@@ -11,34 +11,40 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 chrome_options = Options()
-chrome_options.add_argument("--headless") # type: ignore
-chrome_options.add_argument("--no-sandbox") # type: ignore
-chrome_options.add_argument("--disable-dev-shm-usage") # type: ignore
+chrome_options.add_argument("--headless")  # type: ignore
+chrome_options.add_argument("--no-sandbox")  # type: ignore
+chrome_options.add_argument("--disable-dev-shm-usage")  # type: ignore
 
-service = Service('/usr/bin/chromedriver')
+service = Service("/usr/bin/chromedriver")
 driver = webdriver.Chrome(service=service, options=chrome_options)
-driver.get("https://docs.aws.amazon.com/wellarchitected/latest/framework/general-design-principles.html")
+driver.get(
+    "https://docs.aws.amazon.com/wellarchitected/latest/framework/general-design-principles.html"
+)
+
 
 def get_text_from_li(li: WebElement):
-    return li.find_element(By.XPATH, ".//a/span").get_attribute("textContent").strip() # type: ignore
+    return li.find_element(By.XPATH, ".//a/span").get_attribute("textContent").strip()  # type: ignore
+
 
 def get_formatted_text_question(question: WebElement):
     text = get_text_from_li(question)
     return re.sub(r"^[A-Z]+\s\d+\.?\s*", "", text)
 
+
 def get_formatted_text_statement(statement: WebElement):
     text = get_text_from_li(statement)
     return re.sub(r"^[A-Z]+\d+-[A-Z]+\d+:?\s*", "", text)
 
+
 def get_best_practice_risk(best_practice: WebElement) -> str | None:
-    link_element = best_practice.find_element(By.XPATH, ".//a") # type: ignore
-    url = link_element.get_attribute("href") # type: ignore
-    driver.execute_script(f"window.open('{url}', '_blank');") # type: ignore
+    link_element = best_practice.find_element(By.XPATH, ".//a")  # type: ignore
+    url = link_element.get_attribute("href")  # type: ignore
+    driver.execute_script(f"window.open('{url}', '_blank');")  # type: ignore
     driver.switch_to.window(driver.window_handles[1])
     page_content = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.XPATH, "//*[@id='main-col-body']"))
     )
-    paragraphs = page_content.find_elements(By.TAG_NAME, "p") # type: ignore
+    paragraphs = page_content.find_elements(By.TAG_NAME, "p")  # type: ignore
     for text in paragraphs:
         content = text.text
         if "Level of risk" in content:
@@ -49,29 +55,35 @@ def get_best_practice_risk(best_practice: WebElement) -> str | None:
     driver.switch_to.window(driver.window_handles[0])
     return None
 
+
 try:
     element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/main/div[1]/nav[2]/div/div[2]/div[2]/div/ul/li[8]/div/div[2]/ul"))
+        EC.presence_of_element_located(
+            (
+                By.XPATH,
+                "/html/body/div[2]/div/div/div[2]/main/div[1]/nav[2]/div/div[2]/div[2]/div/ul/li[8]/div/div[2]/ul",
+            )
+        )
     )
     json_output = {}
-    pillars = element.find_elements(By.XPATH, "./li") # type: ignore
+    pillars = element.find_elements(By.XPATH, "./li")  # type: ignore
     for pillar in pillars:
         pillar_text = get_text_from_li(pillar)
         json_output[pillar_text] = {}
-        categories = pillar.find_elements(By.XPATH, "./div/div[2]/ul/li") # type: ignore
+        categories = pillar.find_elements(By.XPATH, "./div/div[2]/ul/li")  # type: ignore
         for category in categories:
-            questions = category.find_elements(By.XPATH, "./div/div[2]/ul/li") # type: ignore
+            questions = category.find_elements(By.XPATH, "./div/div[2]/ul/li")  # type: ignore
             for question in questions:
                 question_text = get_formatted_text_question(question)
                 json_output[pillar_text][question_text] = {}
-                best_practices = question.find_elements(By.XPATH, "./div/div[2]/ul/li") # type: ignore
+                best_practices = question.find_elements(By.XPATH, "./div/div[2]/ul/li")  # type: ignore
                 for best_practice in best_practices:
                     best_practice_text = get_formatted_text_statement(best_practice)
                     json_output[pillar_text][question_text][best_practice_text] = {
                         "risk": get_best_practice_risk(best_practice)
                     }
     current_date = datetime.now().strftime("%m%d%Y")
-    with open(f"questions_{current_date}.json", "w") as f:
+    with open(f"questions/questions_{current_date}.json", "w") as f:
         f.write(json.dumps(json_output, indent=4))
 
 except Exception as e:

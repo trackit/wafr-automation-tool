@@ -14,6 +14,7 @@ from common.task import Task
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
+from utils.questions import retrieve_questions
 
 from state_machine.event import StoreResultsInput
 
@@ -29,6 +30,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
+        self.questions = retrieve_questions().questions
 
     def retrieve_findings_data(
         self,
@@ -40,6 +42,13 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
+    def verify_data(self, pillar_name: str, question_name: str, bp_name: str) -> bool:
+        return (
+            pillar_name in self.questions
+            and question_name in self.questions[pillar_name]
+            and bp_name in self.questions[pillar_name][question_name]
+        )
+
     def store_finding_ids(
         self,
         assessment_id: str,
@@ -49,6 +58,14 @@ class StoreResults(Task[StoreResultsInput, None]):
         bp_finding_ids: list[str],
     ) -> None:
         if not bp_finding_ids:
+            return
+        if not self.verify_data(pillar_name, question_name, bp_name):
+            logger.error(
+                "Data not found for pillar: %s, question: %s, best practice: %s",
+                pillar_name,
+                question_name,
+                bp_name,
+            )
             return
         self.database_service.update(
             table_name=DDB_TABLE,

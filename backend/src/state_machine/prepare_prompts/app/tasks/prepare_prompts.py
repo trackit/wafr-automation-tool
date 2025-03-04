@@ -1,8 +1,5 @@
-import datetime
 import json
-import os
-from pathlib import Path
-from typing import Any, override
+from typing import override
 
 from common.config import (
     DDB_ASSESSMENT_SK,
@@ -10,13 +7,13 @@ from common.config import (
     DDB_SORT_KEY,
     DDB_TABLE,
     S3_BUCKET,
-    SCRIPTS_PATH,
     STORE_PROMPT_PATH,
     WAFR_JSON_PLACEHOLDER,
 )
 from common.task import Task
 from services.database import IDatabaseService
 from services.storage import IStorageService
+from utils.questions import retrieve_questions
 from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
@@ -31,24 +28,9 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
-        self.questions = self.retrieve_questions()
-
-    def retrieve_questions(self) -> dict[str, Any]:
-        question_set = [f for f in os.listdir(SCRIPTS_PATH) if f.endswith(".json") and f.startswith("questions")]
-        question_set.sort(
-            key=lambda x: datetime.datetime.strptime(
-                x.split("_")[1].split(".")[0],
-                "%m%d%Y",
-            ).astimezone(datetime.UTC),
-        )
-        self.question_version = question_set[-1].split(".")[0]
-        with Path(f"{SCRIPTS_PATH}/{question_set[-1]}").open() as f:
-            questions = json.load(f)
-            for p, pillar in questions.items():
-                for q, question in pillar.items():
-                    for bp in question:
-                        questions[p][q][bp] = []
-        return questions
+        questions_ouput = retrieve_questions()
+        self.questions = questions_ouput.questions
+        self.question_version = questions_ouput.question_version
 
     def populate_dynamodb(self, assessment_id: str) -> None:
         self.database_service.update(

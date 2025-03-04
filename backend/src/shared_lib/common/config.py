@@ -19,4 +19,4 @@ STORE_CHUNK_PATH = "{}/chunks/chunk-{}.json"
 STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"
 
 PROWLER_PROMPT_PATH = "./prompts/prowler.txt"
-SCRIPTS_PATH = "./scripts"
+QUESTIONS_PATH = "./questions"
