@@ -30,12 +30,12 @@ class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
     pass
 
 
-class RetrieveBestPracticeInput(BaseModel):
+class RetrieveBestPracticeFindingsInput(BaseModel):
     assessment_id: str
     best_practice: str
 
 
-RetrieveBestPracticeResponseBody = list[FindingExtra]
+RetrieveBestPracticeFindingsResponseBody = list[FindingExtra]
 
 
 class RetrieveFindingInput(BaseModel):

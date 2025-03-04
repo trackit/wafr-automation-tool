@@ -25,7 +25,7 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
         body = None
         if self.body is not None:
             if isinstance(self.body, list):
-                body = [item.dict() for item in self.body]
+                body = json.dumps([item.dict() for item in self.body])
             elif isinstance(self.body, dict):
                 body = json.dumps(self.body, separators=(",", ":"))
             else:

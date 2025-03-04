@@ -1,6 +1,6 @@
 import json
 from abc import abstractmethod
-from typing import override
+from typing import Any, override
 
 from boto3.dynamodb.conditions import Key
 from common.config import DDB_ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
@@ -53,10 +53,7 @@ class AssessmentService(IAssessmentService):
         )
         if not assessment_data:
             return None
-        formatted_item = json.loads(json.dumps(assessment_data, cls=DecimalEncoder))
-        return Assessment(
-            **formatted_item,
-        )
+        return self._create_assessment(assessment_data)
 
     @override
     def retrieve_all_assessments(self) -> list[Assessment] | None:
@@ -68,8 +65,7 @@ class AssessmentService(IAssessmentService):
             return None
         assessments: list[Assessment] = []
         for item in items:
-            formatted_item = json.loads(json.dumps(item, cls=DecimalEncoder))
-            assessment = Assessment(**formatted_item)
+            assessment = self._create_assessment(item)
             assessment.findings = None
             assessments.append(assessment)
         return assessments
@@ -108,19 +104,30 @@ class AssessmentService(IAssessmentService):
         )
         if not item:
             return None
-        formatted_item = json.loads(json.dumps(item, cls=DecimalEncoder))
-        return FindingExtra(
-            **formatted_item,
-        )
+        return self._create_finding(item)
 
     @override
     def delete_assessment(self, assessment_id: str) -> bool:
         items = self.database_service.query(
             table_name=DDB_TABLE,
-            KeyConditionExpression=Key(DDB_KEY).eq(id),
+            KeyConditionExpression=Key(DDB_KEY).eq(assessment_id),
         )
         if not items:
             return False
-        keys = [{DDB_KEY: item["id"], DDB_SORT_KEY: item["finding_id"]} for item in items]
+        keys = [{DDB_KEY: item[DDB_KEY], DDB_SORT_KEY: item[DDB_SORT_KEY]} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
         return True
+
+    def _create_assessment(self, item: dict[str, Any]) -> Assessment:
+        formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
+        formatted_item["id"] = formatted_item.pop(DDB_KEY)
+        return Assessment(
+            **formatted_item,
+        )
+
+    def _create_finding(self, item: dict[str, Any]) -> FindingExtra:
+        formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
+        formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
+        return FindingExtra(
+            **formatted_item,
+        )

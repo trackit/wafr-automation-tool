@@ -5,11 +5,11 @@ from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.event import RetrieveBestPracticeInput, RetrieveBestPracticeResponseBody
+from api.event import RetrieveBestPracticeFindingsInput, RetrieveBestPracticeFindingsResponseBody
 
 
-class RetrieveBestPractice(
-    Task[RetrieveBestPracticeInput, APIResponse[RetrieveBestPracticeResponseBody]],
+class RetrieveBestPracticeFindings(
+    Task[RetrieveBestPracticeFindingsInput, APIResponse[RetrieveBestPracticeFindingsResponseBody]],
 ):
     def __init__(self, assessment_service: IAssessmentService) -> None:
         super().__init__()
@@ -18,8 +18,8 @@ class RetrieveBestPractice(
     @override
     def execute(
         self,
-        event: RetrieveBestPracticeInput,
-    ) -> APIResponse[RetrieveBestPracticeResponseBody]:
+        event: RetrieveBestPracticeFindingsInput,
+    ) -> APIResponse[RetrieveBestPracticeFindingsResponseBody]:
         assessment = self.assessment_service.retrieve_assessment(event.assessment_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)

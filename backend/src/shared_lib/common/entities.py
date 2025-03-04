@@ -35,6 +35,6 @@ class Assessment(BaseModel):
     id: str
     name: str
     role: str
-    step: str
+    step: int
     question_version: str
     findings: dict[str, PILLAR] | None

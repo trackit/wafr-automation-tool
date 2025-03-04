@@ -18,7 +18,7 @@ class IDatabaseService(ABC):
         self,
         table_name: str,
         **kwargs: Unpack[GetItemInputTableGetItemTypeDef],
-    ) -> Mapping[str, TableAttributeValueTypeDef] | None:
+    ) -> dict[str, TableAttributeValueTypeDef] | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -68,7 +68,7 @@ class DDBService(IDatabaseService):
         self,
         table_name: str,
         **kwargs: Unpack[GetItemInputTableGetItemTypeDef],
-    ) -> Mapping[str, TableAttributeValueTypeDef] | None:
+    ) -> dict[str, TableAttributeValueTypeDef] | None:
         try:
             table = self.resource.Table(table_name)
             response = table.get_item(**kwargs)

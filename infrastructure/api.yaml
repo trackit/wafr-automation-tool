@@ -110,12 +110,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: DELETE
-  RetrieveBestPracticeFunction:
+  RetrieveBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_best_practice/app
+      CodeUri: ../backend/src/api/retrieve_best_practice_findings/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -124,7 +124,7 @@ Resources:
                 - dynamodb:GetItem
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        RetrieveBestPracticeFindings:
           Type: Api
           Properties:
             RestApiId: !Ref Api
