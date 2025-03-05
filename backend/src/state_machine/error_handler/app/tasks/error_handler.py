@@ -1,16 +1,13 @@
 from typing import override
 
-from boto3.dynamodb.conditions import Key
 from common.config import (
-    DDB_ASSESSMENT_SK,
-    DDB_KEY,
-    DDB_SORT_KEY,
-    DDB_TABLE,
     PROWLER_COMPLIANCE_PATH,
     PROWLER_OCSF_PATH,
     S3_BUCKET,
 )
+from common.entities import AssessmentDto
 from common.task import Task
+from services.assessment import IAssessmentService
 from services.database import IDatabaseService
 from services.storage import IStorageService
 
@@ -22,18 +19,18 @@ class ErrorHandler(Task[StateMachineException, None]):
         self,
         storage_service: IStorageService,
         database_service: IDatabaseService,
+        assessment_service: IAssessmentService,
     ) -> None:
         super().__init__()
         self.storage_service = storage_service
         self.database_service = database_service
+        self.assessment_service = assessment_service
 
     def update_assessment_item(self, exception: StateMachineException) -> None:
-        self.database_service.update(
-            table_name=DDB_TABLE,
-            Key={DDB_KEY: exception.assessment_id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
-            UpdateExpression="SET step = :step",
-            ExpressionAttributeValues={":step": exception.error.dict()},
+        assessment_dto = AssessmentDto(
+            step=-1,
         )
+        self.assessment_service.update(exception.assessment_id, assessment_dto)
 
     def clean_prowler_scan(self, exception: StateMachineException) -> None:
         prowler_key = PROWLER_OCSF_PATH.format(exception.assessment_id)
@@ -46,20 +43,13 @@ class ErrorHandler(Task[StateMachineException, None]):
         )
         self.storage_service.bulk_delete(S3_BUCKET, compliance_objects)
 
-    def clean_assessment_dynamodb(self, exception: StateMachineException) -> None:
-        items = self.database_service.query(
-            table_name=DDB_TABLE,
-            KeyConditionExpression=Key(DDB_KEY).eq(exception.assessment_id),
-        )
-        if not items:
-            return
-        keys = [{DDB_KEY: item[DDB_KEY], DDB_SORT_KEY: item[DDB_SORT_KEY]} for item in items]
-        self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
-
-    def clean_assessment(self, exception: StateMachineException) -> None:
+    def clean_assessment_storage(self, exception: StateMachineException) -> None:
         objects = self.storage_service.filter(S3_BUCKET, str(exception.assessment_id))
         self.storage_service.bulk_delete(S3_BUCKET, objects)
-        self.clean_assessment_dynamodb(exception)
+
+    def clean_assessment(self, exception: StateMachineException) -> None:
+        self.assessment_service.delete_findings(exception.assessment_id)
+        self.clean_assessment_storage(exception)
 
     @override
     def execute(self, event: StateMachineException) -> None:
