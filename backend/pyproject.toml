@@ -79,6 +79,7 @@ convention = "google"
     "ERA001",
     "PLR2004",
     "S101",
+    "S105",
     "TID252",
 ]
 
