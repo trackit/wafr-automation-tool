@@ -185,7 +185,7 @@ Resources:
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/error_handler/app
+      CodeUri: ../backend/src/state_machine/cleanup/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -393,8 +393,9 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: Cleanup
+                Next: CleanupOnError
                 Output:
+                  assessment_id: "{% $states.input.assessment_id %}"
                   error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
@@ -428,8 +429,9 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: Cleanup
+                Next: CleanupOnError
                 Output:
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           UpdateStep:
             Type: Task
@@ -449,8 +451,9 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: Cleanup
+                Next: CleanupOnError
                 Output:
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PreparePrompt:
             Type: Task
@@ -461,8 +464,9 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: Cleanup
+                Next: CleanupOnError
                 Output:
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
@@ -478,13 +482,18 @@ Resources:
                     assessment_id: "{% $assessment_id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
-            End: true
+            Next: Cleanup
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: Cleanup
+                Next: CleanupOnError
                 Output:
+                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
+          CleanupOnError:
+            Type: Task
+            Resource: !GetAtt CleanupFunction.Arn
+            End: true
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn

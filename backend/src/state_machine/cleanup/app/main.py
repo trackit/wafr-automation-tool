@@ -1,13 +1,13 @@
 from typing import Any
 
 import boto3
-from backend.src.state_machine.cleanup.app.tasks.cleanup import Cleanup
 from common.config import (
     REGION,
 )
 from services.assessment import AssessmentService
 from services.database import DDBService
 from services.storage import S3Service
+from tasks.cleanup import Cleanup
 
 from state_machine.event import CleanupInput
 
