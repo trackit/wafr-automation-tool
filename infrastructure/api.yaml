@@ -64,6 +64,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+  RetrieveAllAssessmentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/retrieve_all_assessments/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Query
+              Resource: !Ref DynamoDBArn
+      Events:
+        RetrieveBestPractice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments
+            Method: GET
   RetrieveAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:

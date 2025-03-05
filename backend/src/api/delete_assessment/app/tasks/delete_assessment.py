@@ -15,8 +15,14 @@ class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
-        delete_response = self.assessment_service.delete_assessment(event.assessment_id)
+        if not self.assessment_service.delete(event.assessment_id) or not self.assessment_service.delete_findings(
+            event.assessment_id
+        ):
+            return APIResponse(
+                status_code=NOT_FOUND,
+                body=None,
+            )
         return APIResponse(
-            status_code=OK if delete_response else NOT_FOUND,
+            status_code=OK,
             body=None,
         )

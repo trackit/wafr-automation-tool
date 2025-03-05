@@ -20,7 +20,7 @@ class RetrieveBestPracticeFindings(
         self,
         event: RetrieveBestPracticeFindingsInput,
     ) -> APIResponse[RetrieveBestPracticeFindingsResponseBody]:
-        assessment = self.assessment_service.retrieve_assessment(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         findings = self.assessment_service.retrieve_best_practice(

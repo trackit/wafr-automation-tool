@@ -25,7 +25,10 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
         body = None
         if self.body is not None:
             if isinstance(self.body, list):
-                body = json.dumps([item.dict() for item in self.body])
+                if isinstance(self.body[0], dict):
+                    body = json.dumps(self.body, cls=DecimalEncoder)
+                else:
+                    body = json.dumps([item.dict() for item in self.body])
             elif isinstance(self.body, dict):
                 body = json.dumps(self.body, separators=(",", ":"))
             else:

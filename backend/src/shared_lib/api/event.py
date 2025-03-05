@@ -1,3 +1,5 @@
+from typing import Any
+
 from common.entities import Assessment, FindingExtra
 from pydantic import BaseModel
 from utils.api import APIResponseBody
@@ -47,4 +49,4 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
     pass
 
 
-RetrieveAllAssessmentsResponseBody = list[Assessment]
+RetrieveAllAssessmentsResponseBody = list[dict[str, Any]]

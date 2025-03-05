@@ -20,7 +20,7 @@ class RetrieveAssessment(
         self,
         event: RetrieveAssessmentInput,
     ) -> APIResponse[RetrieveAssessmentResponseBody]:
-        assessment = self.assessment_service.retrieve_assessment(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
