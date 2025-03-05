@@ -90,9 +90,11 @@ docstring-code-format = false
 # enabled.
 docstring-code-line-length = "dynamic"
 
-[tool.basedpyright]
-include = ["src/**/*.py"]
-executionEnvironments = [{ root = ".", extraPaths = ["src/shared_lib"] }]
+[tool.pyright]
+include = ["src"]
+venvPath = "."
+venv = ".venv"
+extraPaths = ["src/shared_lib"]
 reportUnannotatedClassAttribute = false
 reportAny = false
 reportUnusedCallResult = false
