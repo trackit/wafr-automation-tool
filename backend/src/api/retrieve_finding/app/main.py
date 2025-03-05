@@ -15,16 +15,10 @@ retrieve_finding_task = RetrieveFinding(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
-    try:
-        response = retrieve_finding_task.execute(
-            RetrieveFindingInput(
-                assessment_id=event["pathParameters"]["assessmentId"],
-                finding_id=event["pathParameters"]["findingId"],
-            )
+    response = retrieve_finding_task.execute(
+        RetrieveFindingInput(
+            assessment_id=event["pathParameters"]["assessmentId"],
+            finding_id=event["pathParameters"]["findingId"],
         )
-    except Exception as e:  # noqa: BLE001
-        return {
-            "statusCode": INTERNAL_SERVER_ERROR,
-            "body": str(e),
-        }
+    )
     return response.build()

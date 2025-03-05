@@ -17,16 +17,10 @@ retrieve_best_practice_findings_task = RetrieveBestPracticeFindings(assessment_s
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
-    try:
-        response = retrieve_best_practice_findings_task.execute(
-            RetrieveBestPracticeFindingsInput(
-                assessment_id=event["pathParameters"]["assessmentId"],
-                best_practice=event["pathParameters"]["bestPracticeName"],
-            )
+    response = retrieve_best_practice_findings_task.execute(
+        RetrieveBestPracticeFindingsInput(
+            assessment_id=event["pathParameters"]["assessmentId"],
+            best_practice=event["pathParameters"]["bestPracticeName"],
         )
-    except Exception as e:  # noqa: BLE001
-        return {
-            "statusCode": INTERNAL_SERVER_ERROR,
-            "body": str(e),
-        }
+    )
     return response.build()

@@ -15,13 +15,7 @@ retrieve_assessment_task = RetrieveAssessment(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
-    try:
-        response = retrieve_assessment_task.execute(
-            RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
-        )
-    except Exception as e:  # noqa: BLE001
-        return {
-            "statusCode": INTERNAL_SERVER_ERROR,
-            "body": str(e),
-        }
+    response = retrieve_assessment_task.execute(
+        RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
+    )
     return response.build()

@@ -15,13 +15,7 @@ delete_assessments_task = DeleteAssessment(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
-    try:
-        response = delete_assessments_task.execute(
-            DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
-        )
-        return response.build()
-    except Exception as e:  # noqa: BLE001
-        return {
-            "statusCode": INTERNAL_SERVER_ERROR,
-            "body": str(e),
-        }
+    response = delete_assessments_task.execute(
+        DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
+    )
+    return response.build()
