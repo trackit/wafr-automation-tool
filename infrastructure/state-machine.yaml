@@ -180,7 +180,7 @@ Resources:
                 - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
-  ErrorHandlerFunction:
+  CleanupFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
@@ -364,7 +364,7 @@ Resources:
             Resource:
               - !GetAtt PreparePromptsFunction.Arn
               - !GetAtt InvokeLLMFunction.Arn
-              - !GetAtt ErrorHandlerFunction.Arn
+              - !GetAtt CleanupFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
@@ -393,9 +393,8 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: CleanOnError
+                Next: Cleanup
                 Output:
-                  assessment_id: "{% $states.input.assessment_id %}"
                   error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
@@ -429,9 +428,8 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: CleanOnError
+                Next: Cleanup
                 Output:
-                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           UpdateStep:
             Type: Task
@@ -451,9 +449,8 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: CleanOnError
+                Next: Cleanup
                 Output:
-                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PreparePrompt:
             Type: Task
@@ -464,9 +461,8 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: CleanOnError
+                Next: Cleanup
                 Output:
-                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
@@ -486,13 +482,14 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: CleanOnError
+                Next: Cleanup
                 Output:
-                  assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          CleanOnError:
+          Cleanup:
             Type: Task
-            Resource: !GetAtt ErrorHandlerFunction.Arn
+            Resource: !GetAtt CleanupFunction.Arn
+            Arguments:
+              assessment_id: "{% $assessment_id %}"
             End: true
 
 Outputs:

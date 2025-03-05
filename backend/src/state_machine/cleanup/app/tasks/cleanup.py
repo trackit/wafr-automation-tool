@@ -11,10 +11,10 @@ from services.assessment import IAssessmentService
 from services.database import IDatabaseService
 from services.storage import IStorageService
 
-from state_machine.event import StateMachineException
+from state_machine.event import CleanupInput
 
 
-class ErrorHandler(Task[StateMachineException, None]):
+class Cleanup(Task[CleanupInput, None]):
     def __init__(
         self,
         storage_service: IStorageService,
@@ -26,15 +26,9 @@ class ErrorHandler(Task[StateMachineException, None]):
         self.database_service = database_service
         self.assessment_service = assessment_service
 
-    def update_assessment_item(self, exception: StateMachineException) -> None:
-        assessment_dto = AssessmentDto(
-            step=-1,
-        )
-        self.assessment_service.update(exception.assessment_id, assessment_dto)
-
-    def clean_prowler_scan(self, exception: StateMachineException) -> None:
-        prowler_key = PROWLER_OCSF_PATH.format(exception.assessment_id)
-        prowler_compliance_key = PROWLER_COMPLIANCE_PATH.format(exception.assessment_id)
+    def clean_prowler_scan(self, event: CleanupInput) -> None:
+        prowler_key = PROWLER_OCSF_PATH.format(event.assessment_id)
+        prowler_compliance_key = PROWLER_COMPLIANCE_PATH.format(event.assessment_id)
         self.storage_service.delete(Bucket=S3_BUCKET, Key=prowler_key)
 
         compliance_objects = self.storage_service.filter(
@@ -43,16 +37,20 @@ class ErrorHandler(Task[StateMachineException, None]):
         )
         self.storage_service.bulk_delete(S3_BUCKET, [obj.key for obj in compliance_objects])
 
-    def clean_assessment_storage(self, exception: StateMachineException) -> None:
-        objects = self.storage_service.filter(S3_BUCKET, str(exception.assessment_id))
+    def clean_assessment_storage(self, event: CleanupInput) -> None:
+        objects = self.storage_service.filter(S3_BUCKET, str(event.assessment_id))
         self.storage_service.bulk_delete(S3_BUCKET, [obj.key for obj in objects])
 
-    def clean_assessment(self, exception: StateMachineException) -> None:
-        self.assessment_service.delete_findings(exception.assessment_id)
-        self.clean_assessment_storage(exception)
+    def update_assessment_item(self, event: CleanupInput) -> None:
+        assessment_dto = AssessmentDto(
+            step=-1,
+        )
+        self.assessment_service.update(event.assessment_id, assessment_dto)
 
     @override
-    def execute(self, event: StateMachineException) -> None:
-        self.update_assessment_item(event)
+    def execute(self, event: CleanupInput) -> None:
         self.clean_prowler_scan(event)
-        self.clean_assessment(event)
+        self.clean_assessment_storage(event)
+        if event.error:
+            self.assessment_service.delete_findings(event.assessment_id)
+            self.update_assessment_item(event)

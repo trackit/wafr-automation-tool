@@ -29,9 +29,9 @@ class StateMachineError(BaseModel):
     Cause: str
 
 
-class StateMachineException(BaseModel):
+class CleanupInput(BaseModel):
     assessment_id: str
-    error: StateMachineError
+    error: StateMachineError | None = None
 
 
 class CreateProwlerPromptInput(BaseModel):
