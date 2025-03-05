@@ -1,0 +1,42 @@
+from typing import override
+
+from common.entities import Assessment, AssessmentDto, FindingExtra
+from services.assessment import IAssessmentService
+
+
+class FakeAssessmentService(IAssessmentService):
+    @override
+    def retrieve(self, assessment_id: str) -> Assessment | None:
+        raise NotImplementedError
+
+    @override
+    def retrieve_all(self) -> list[Assessment] | None:
+        raise NotImplementedError
+
+    @override
+    def retrieve_best_practice(
+        self,
+        assessment: Assessment,
+        best_practice_name: str,
+    ) -> list[FindingExtra] | None:
+        raise NotImplementedError
+
+    @override
+    def retrieve_finding(
+        self,
+        assessment_id: str,
+        finding_id: str,
+    ) -> FindingExtra | None:
+        raise NotImplementedError
+
+    @override
+    def update(self, assessment_id: str, assessment_dto: AssessmentDto) -> None:
+        raise NotImplementedError
+
+    @override
+    def delete_findings(self, assessment_id: str) -> bool:
+        raise NotImplementedError
+
+    @override
+    def delete(self, assessment_id: str) -> bool:
+        raise NotImplementedError
