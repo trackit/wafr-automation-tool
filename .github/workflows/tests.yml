@@ -8,10 +8,11 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
       - uses: actions/checkout@v4
-      - name: Navigate to backend
-        run: cd backend
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
         with:
