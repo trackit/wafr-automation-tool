@@ -1,4 +1,3 @@
-from http.client import INTERNAL_SERVER_ERROR
 from typing import Any
 
 import boto3
@@ -14,7 +13,7 @@ assessment_service = AssessmentService(database_service)
 retrieve_finding_task = RetrieveFinding(assessment_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
+def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     response = retrieve_finding_task.execute(
         RetrieveFindingInput(
             assessment_id=event["pathParameters"]["assessmentId"],

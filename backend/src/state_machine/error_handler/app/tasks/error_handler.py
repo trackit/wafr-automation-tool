@@ -41,11 +41,11 @@ class ErrorHandler(Task[StateMachineException, None]):
             S3_BUCKET,
             prowler_compliance_key,
         )
-        self.storage_service.bulk_delete(S3_BUCKET, compliance_objects)
+        self.storage_service.bulk_delete(S3_BUCKET, [obj.key for obj in compliance_objects])
 
     def clean_assessment_storage(self, exception: StateMachineException) -> None:
         objects = self.storage_service.filter(S3_BUCKET, str(exception.assessment_id))
-        self.storage_service.bulk_delete(S3_BUCKET, objects)
+        self.storage_service.bulk_delete(S3_BUCKET, [obj.key for obj in objects])
 
     def clean_assessment(self, exception: StateMachineException) -> None:
         self.assessment_service.delete_findings(exception.assessment_id)

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Unpack, override
+from typing import Unpack, override
 
 from types_boto3_s3 import S3Client, S3ServiceResource
+from types_boto3_s3.service_resource import ObjectSummary
 from types_boto3_s3.type_defs import (
     DeleteObjectRequestTypeDef,
     DeleteObjectsOutputTypeDef,
@@ -25,14 +26,14 @@ class IStorageService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def filter(self, bucket_name: str, prefix: str) -> list[Any]:
+    def filter(self, bucket_name: str, prefix: str) -> list[ObjectSummary]:
         raise NotImplementedError
 
     @abstractmethod
     def bulk_delete(
         self,
         bucket_name: str,
-        objects: list[Any],
+        keys: list[str],
     ) -> DeleteObjectsOutputTypeDef | None:
         raise NotImplementedError
 
@@ -57,7 +58,7 @@ class S3Service(IStorageService):
         self.s3_client.delete_object(**kwargs)
 
     @override
-    def filter(self, bucket_name: str, prefix: str) -> list[Any]:
+    def filter(self, bucket_name: str, prefix: str) -> list[ObjectSummary]:
         bucket = self.resource.Bucket(bucket_name)
         return list(bucket.objects.filter(Prefix=prefix))
 
@@ -65,13 +66,12 @@ class S3Service(IStorageService):
     def bulk_delete(
         self,
         bucket_name: str,
-        objects: list[Any],
-        quiet: bool = True,
+        keys: list[str],
     ) -> DeleteObjectsOutputTypeDef | None:
-        if not objects:
+        if not keys:
             return None
         delete_keys: DeleteTypeDef = {
-            "Objects": [{"Key": obj.key} for obj in objects],
+            "Objects": [{"Key": key} for key in keys],
             "Quiet": True,
         }
         return self.s3_client.delete_objects(

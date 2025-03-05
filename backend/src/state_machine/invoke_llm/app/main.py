@@ -23,6 +23,6 @@ invoke_llm_task = InvokeLLM(storage_service, ai_service, model)
 store_results_task = StoreResults(database_service, storage_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> None:
+def lambda_handler(event: dict[str, Any], _context: Any) -> None:  # noqa: ANN401
     llm_response = invoke_llm_task.execute(InvokeLLMInput(**event))
     store_results_task.execute(StoreResultsInput(**event, llm_response=llm_response))

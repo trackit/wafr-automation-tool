@@ -20,5 +20,5 @@ assessment_service = AssessmentService(database_service)
 error_handler_task = ErrorHandler(storage_service, database_service, assessment_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> None:
+def lambda_handler(event: dict[str, Any], _context: Any) -> None:  # noqa: ANN401
     error_handler_task.execute(StateMachineException(**event))

@@ -26,7 +26,7 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
     def remove_null_recursively(
         self,
         obj: dict[str, Any] | list[Any] | str | float | bool | None,
-    ) -> Any:
+    ) -> dict[str, Any] | list[Any] | str | float | bool | None:
         if isinstance(obj, dict):
             result: dict[str, Any] = {
                 k: self.remove_null_recursively(v) for k, v in obj.items() if v is not None and v != ""

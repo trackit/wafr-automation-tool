@@ -20,7 +20,7 @@ create_prowler_prompt_task = CreateProwlerPrompt(storage_service)
 prepare_prompts_task = PreparePrompts(database_service, storage_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:
+def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:  # noqa: ANN401
     prowler_prompts = create_prowler_prompt_task.execute(
         CreateProwlerPromptInput(**event),
     )
