@@ -377,9 +377,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: "{% $states.input.assessment_id %}"
+                  S: "ASSESSMENT"
                 SK:
-                  S: "0"
+                  S: "{% $states.input.assessment_id %}"
                 name:
                   S: "{% $states.input.name %}"
                 role:
@@ -440,9 +440,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "{% $assessment_id %}"
+                  S: "ASSESSMENT"
                 SK:
-                  S: "0"
+                  S: "{% $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":

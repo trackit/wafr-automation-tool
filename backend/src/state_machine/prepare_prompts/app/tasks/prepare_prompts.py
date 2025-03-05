@@ -1,8 +1,8 @@
 import json
-from typing import override
+from typing import Any, override
 
 from common.config import (
-    DDB_ASSESSMENT_SK,
+    ASSESSMENT_PK,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
@@ -33,14 +33,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.question_version = questions_ouput.question_version
 
     def populate_dynamodb(self, assessment_id: str) -> None:
-        self.database_service.update(
+        attrs: dict[str, Any] = {"findings": self.questions, "question_version": self.question_version}
+        self.database_service.update_attrs(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: assessment_id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
-            UpdateExpression="SET findings = :findings, question_version = :question_version",
-            ExpressionAttributeValues={
-                ":findings": self.questions,
-                ":question_version": self.question_version,
-            },
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            attrs=attrs,
         )
 
     def insert_questions(self, prompt: str) -> str:

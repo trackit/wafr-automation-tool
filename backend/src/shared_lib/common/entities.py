@@ -31,6 +31,14 @@ QUESTION = dict[str, BEST_PRACTICE]
 PILLAR = dict[str, QUESTION]
 
 
+class AssessmentDto(BaseModel):
+    name: str | None = None
+    role: str | None = None
+    step: int | None = None
+    question_version: str | None = None
+    findings: dict[str, PILLAR] | None = None
+
+
 class Assessment(BaseModel):
     id: str
     name: str

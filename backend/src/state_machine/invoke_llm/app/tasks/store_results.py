@@ -3,7 +3,7 @@ import logging
 from typing import Any, override
 
 from common.config import (
-    DDB_ASSESSMENT_SK,
+    ASSESSMENT_PK,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
@@ -69,7 +69,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             return
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: assessment_id, DDB_SORT_KEY: DDB_ASSESSMENT_SK},
+            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
             UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": pillar_name,
