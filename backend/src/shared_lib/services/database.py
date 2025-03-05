@@ -34,6 +34,15 @@ class IDatabaseService(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_attrs(
+        self,
+        table_name: str,
+        key: Mapping[str, TableAttributeValueTypeDef],
+        attrs: dict[str, Any],
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def put(self, table_name: str, item: dict[str, Any]) -> None:
         raise NotImplementedError
 
@@ -95,6 +104,28 @@ class DDBService(IDatabaseService):
         except ClientError as e:
             logger.exception("Error while updating item in DynamoDB")
             raise DynamoDBError from e
+
+    @override
+    def update_attrs(
+        self,
+        table_name: str,
+        key: Mapping[str, TableAttributeValueTypeDef],
+        attrs: dict[str, Any],
+    ) -> None:
+        update_expression = "SET "
+        expression_attribute_names = {}
+        expression_attribute_values = {}
+        for attr_name, attr_value in attrs.items():
+            update_expression += f"#{attr_name} = :{attr_name}, "
+            expression_attribute_names[f"#{attr_name}"] = attr_name
+            expression_attribute_values[f":{attr_name}"] = attr_value
+        update_params: UpdateItemInputTableUpdateItemTypeDef = {
+            "Key": key,
+            "UpdateExpression": update_expression[:-2],
+            "ExpressionAttributeNames": expression_attribute_names,
+            "ExpressionAttributeValues": expression_attribute_values,
+        }
+        self.update(table_name, **update_params)
 
     @override
     def put(self, table_name: str, item: dict[str, Any]) -> None:
