@@ -20,7 +20,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
             DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
         )
         return response.build()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {
             "statusCode": INTERNAL_SERVER_ERROR,
             "body": str(e),

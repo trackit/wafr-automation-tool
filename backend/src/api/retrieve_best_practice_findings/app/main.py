@@ -24,7 +24,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
                 best_practice=event["pathParameters"]["bestPracticeName"],
             )
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {
             "statusCode": INTERNAL_SERVER_ERROR,
             "body": str(e),

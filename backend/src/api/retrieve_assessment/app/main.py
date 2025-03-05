@@ -19,7 +19,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
         response = retrieve_assessment_task.execute(
             RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"]),
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {
             "statusCode": INTERNAL_SERVER_ERROR,
             "body": str(e),

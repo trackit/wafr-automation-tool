@@ -5,6 +5,7 @@ from typing import Any, override
 from boto3.dynamodb.conditions import Key
 from common.config import DDB_ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from common.entities import Assessment, FindingExtra
+from exceptions.assessment import FindingNotFoundError
 from utils.api import DecimalEncoder
 
 from services.database import IDatabaseService
@@ -88,7 +89,7 @@ class AssessmentService(IAssessmentService):
         for finding_id in bp_findings:
             finding = self.retrieve_finding(assessment.id, str(finding_id))
             if not finding:
-                raise Exception(f"Finding {finding_id} not found")
+                raise FindingNotFoundError(assessment.id, str(finding_id))
             findings.append(finding)
         return findings
 

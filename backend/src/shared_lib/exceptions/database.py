@@ -1,0 +1,2 @@
+class DynamoDBError(Exception):
+    pass

@@ -4,6 +4,7 @@ from typing import Any, TypeVar, override
 from common.config import S3_BUCKET, STORE_CHUNK_PATH
 from common.entities import Finding, FindingExtra
 from common.task import Task
+from exceptions.prowler import NotDetectionFindingError
 from py_ocsf_models.events.findings.detection_finding import DetectionFinding
 from services.storage import IStorageService
 
@@ -43,7 +44,7 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
         new_chunk: list[dict[str, Any]] = []
         for i, item in enumerate(chunk):
             if not DetectionFinding.validate(item):
-                raise ValueError(f"Item {i} is not a DetectionFinding")
+                raise NotDetectionFindingError(i)
             finding = self.remove_null_recursively(item)
             new_chunk.append(schema_type.parse_obj(finding).dict())
         return new_chunk

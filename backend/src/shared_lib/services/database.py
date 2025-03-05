@@ -1,8 +1,10 @@
+import logging
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Any, Unpack, override
 
 from botocore.exceptions import ClientError
+from exceptions.database import DynamoDBError
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_dynamodb.type_defs import (
     GetItemInputTableGetItemTypeDef,
@@ -10,6 +12,8 @@ from types_boto3_dynamodb.type_defs import (
     TableAttributeValueTypeDef,
     UpdateItemInputTableUpdateItemTypeDef,
 )
+
+logger = logging.getLogger("DatabaseService")
 
 
 class IDatabaseService(ABC):
@@ -74,7 +78,8 @@ class DDBService(IDatabaseService):
             response = table.get_item(**kwargs)
             item = response.get("Item")
         except ClientError as e:
-            raise e
+            logger.exception("Error while getting item from DynamoDB")
+            raise DynamoDBError from e
         else:
             return item
 
@@ -88,7 +93,8 @@ class DDBService(IDatabaseService):
             table = self.resource.Table(table_name)
             table.update_item(**kwargs)
         except ClientError as e:
-            raise e
+            logger.exception("Error while updating item in DynamoDB")
+            raise DynamoDBError from e
 
     @override
     def put(self, table_name: str, item: dict[str, Any]) -> None:
@@ -96,7 +102,8 @@ class DDBService(IDatabaseService):
             table = self.resource.Table(table_name)
             table.put_item(Item=item)
         except ClientError as e:
-            raise e
+            logger.exception("Error while putting item in DynamoDB")
+            raise DynamoDBError from e
 
     @override
     def delete(
@@ -108,7 +115,8 @@ class DDBService(IDatabaseService):
         try:
             table.delete_item(Key=key)
         except ClientError as e:
-            raise e
+            logger.exception("Error while deleting item from DynamoDB")
+            raise DynamoDBError from e
 
     @override
     def query(
@@ -125,7 +133,8 @@ class DDBService(IDatabaseService):
                 response = table.query(**kwargs)
                 items.extend(response["Items"])
         except ClientError as e:
-            raise e
+            logger.exception("Error while querying DynamoDB")
+            raise DynamoDBError from e
         else:
             return items
 
@@ -137,7 +146,8 @@ class DDBService(IDatabaseService):
                 for item in items:
                     batch.put_item(Item=item)
         except ClientError as e:
-            raise e
+            logger.exception("Error while bulk putting items in DynamoDB")
+            raise DynamoDBError from e
 
     @override
     def bulk_delete(self, table_name: str, keys: list[dict[str, Any]]) -> None:
@@ -147,4 +157,5 @@ class DDBService(IDatabaseService):
                 for key in keys:
                     batch.delete_item(Key=key)
         except ClientError as e:
-            raise e
+            logger.exception("Error while bulk deleting items from DynamoDB")
+            raise DynamoDBError from e

@@ -2,12 +2,13 @@ from http.client import INTERNAL_SERVER_ERROR
 from typing import Any
 
 import boto3
-from api.event import RetrieveFindingInput
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.retrieve_finding import RetrieveFinding
 
-ddb_resource = boto3.resource("dynamodb")  # type: ignore
+from api.event import RetrieveFindingInput
+
+ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
 assessment_service = AssessmentService(database_service)
 retrieve_finding_task = RetrieveFinding(assessment_service)
@@ -21,7 +22,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
                 finding_id=event["pathParameters"]["findingId"],
             )
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {
             "statusCode": INTERNAL_SERVER_ERROR,
             "body": str(e),
