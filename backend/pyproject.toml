@@ -76,6 +76,7 @@ convention = "google"
 "**/{tests,docs,tools}/*" = [
     "ANN201",
     "E402",
+    "E501",
     "ERA001",
     "PLR2004",
     "S101",
