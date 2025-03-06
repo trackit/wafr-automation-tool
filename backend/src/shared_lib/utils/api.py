@@ -26,13 +26,17 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
         if self.body is not None:
             if isinstance(self.body, list):
                 if isinstance(self.body[0], dict):
-                    body = json.dumps(self.body, cls=DecimalEncoder)
+                    body = json.dumps(self.body, separators=(",", ":"), cls=DecimalEncoder)
+                elif isinstance(self.body[0], BaseModel):
+                    body = json.dumps(
+                        [item.model_dump() for item in self.body],
+                        separators=(",", ":"),
+                        cls=DecimalEncoder,
+                    )
                 else:
-                    body = json.dumps([item.dict() for item in self.body])
-            elif isinstance(self.body, dict):
-                body = json.dumps(self.body, separators=(",", ":"))
+                    body = json.dumps(self.body, separators=(",", ":"), cls=DecimalEncoder)
             else:
-                body = json.dumps(self.body.model_dump(), separators=(",", ":"))
+                body = json.dumps(self.body.model_dump(), separators=(",", ":"), cls=DecimalEncoder)
         return {
             "statusCode": self.status_code,
             "body": body,
