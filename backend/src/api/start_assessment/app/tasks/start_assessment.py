@@ -7,6 +7,7 @@ from common.task import Task
 from types_boto3_stepfunctions import SFNClient
 from utils.api import APIResponse
 
+from api.config import DEFAULT_ASSESSMENT_ROLE
 from api.event import (
     StartAssessmentInput,
     StartAssessmentResponseBody,
@@ -29,10 +30,11 @@ class StartAssessment(
         assessment_id: str,
         event: StartAssessmentInput,
     ) -> bool:
+        role = event.role if event.role else DEFAULT_ASSESSMENT_ROLE
         input_json = StateMachineInput(
             assessment_id=assessment_id,
             name=event.name,
-            role=event.role,
+            role=role,
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,

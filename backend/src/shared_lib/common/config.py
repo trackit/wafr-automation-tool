@@ -3,7 +3,7 @@ import os
 REGION = os.getenv("REGION", "us-west-2")
 S3_BUCKET = os.getenv("S3_BUCKET", "NONE")
 DDB_TABLE = os.getenv("DDB_TABLE", "test-table")
-STATE_MACHINE_ARN = os.getenv("STATE_MACHINE_ARN", "NONE")
+STATE_MACHINE_ARN = os.getenv("STATE_MACHINE_ARN", "test-state-machine")
 
 DDB_KEY = "PK"
 DDB_SORT_KEY = "SK"

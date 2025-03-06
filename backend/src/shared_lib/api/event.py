@@ -7,7 +7,7 @@ from utils.api import APIResponseBody
 
 class StartAssessmentInput(BaseModel):
     name: str
-    role: str
+    role: str | None = None
 
 
 class StartAssessmentResponseBody(APIResponseBody):
