@@ -14,7 +14,7 @@ from common.task import Task
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
-from utils.questions import retrieve_questions
+from utils.questions import QuestionsOutput
 
 from state_machine.event import StoreResultsInput
 
@@ -26,11 +26,12 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
+        questions: QuestionsOutput,
     ) -> None:
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
-        self.questions = retrieve_questions().questions
+        self.questions = questions.questions
 
     def retrieve_findings_data(
         self,
