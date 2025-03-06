@@ -46,8 +46,8 @@ class S3Service(IStorageService):
 
     @override
     def get(self, **kwargs: Unpack[GetObjectRequestTypeDef]) -> str:
-        reponse = self.s3_client.get_object(**kwargs)
-        return reponse["Body"].read().decode("utf-8")
+        response = self.s3_client.get_object(**kwargs)
+        return response["Body"].read().decode("utf-8")
 
     @override
     def put(self, **kwargs: Unpack[PutObjectRequestTypeDef]) -> None:
