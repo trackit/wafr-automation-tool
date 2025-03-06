@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Scanning Tools
+
+Parameters:
+  Owner:
+    Type: String
+    Default: Antoine Berger
+  Project:
+    Type: String
+    Default: WAFR Automation Tool
+  Name:
+    Type: String
+    Default: scanning-tools
+  S3BucketName:
+    Type: String
+  ParentStackName:
+    Type: String
+
+Resources:
+  DefaultAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt ProwlerTaskRole.Arn
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSTaskPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowMoreReadOnly
+                Effect: Allow
+                Action:
+                  - account:Get*
+                  - appstream:Describe*
+                  - appstream:List*
+                  - backup:List*
+                  - backup:Get*
+                  - bedrock:List*
+                  - bedrock:Get*
+                  - cloudtrail:GetInsightSelectors
+                  - codeartifact:List*
+                  - codebuild:BatchGet*
+                  - codebuild:ListReportGroups
+                  - cognito-idp:GetUserPoolMfaConfig
+                  - dlm:Get*
+                  - drs:Describe*
+                  - ds:Get*
+                  - ds:Describe*
+                  - ds:List*
+                  - dynamodb:GetResourcePolicy
+                  - ec2:GetEbsEncryptionByDefault
+                  - ec2:GetSnapshotBlockPublicAccessState
+                  - ec2:GetInstanceMetadataDefaults
+                  - ecr:Describe*
+                  - ecr:GetRegistryScanningConfiguration
+                  - elasticfilesystem:DescribeBackupPolicy
+                  - glue:GetConnections
+                  - glue:GetSecurityConfiguration*
+                  - glue:SearchTables
+                  - glue:GetMLTransforms
+                  - lambda:GetFunction*
+                  - logs:FilterLogEvents
+                  - lightsail:GetRelationalDatabases
+                  - macie2:GetMacieSession
+                  - macie2:GetAutomatedDiscoveryConfiguration
+                  - s3:GetAccountPublicAccessBlock
+                  - shield:DescribeProtection
+                  - shield:GetSubscriptionState
+                  - securityhub:BatchImportFindings
+                  - securityhub:GetFindings
+                  - servicecatalog:Describe*
+                  - servicecatalog:List*
+                  - ssm:GetDocument
+                  - ssm-incidents:List*
+                  - states:ListTagsForResource
+                  - support:Describe*
+                  - tag:GetTagKeys
+                  - wellarchitected:List*
+                Resource: "*"
+              - Sid: AllowAPIGatewayReadOnly
+                Effect: Allow
+                Action:
+                  - apigateway:GET
+                Resource:
+                  - arn:aws:apigateway:::*/restapis/*
+                  - arn:aws:apigateway:::*/apis/*
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${ParentStackName}-ecs-cluster"
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: !Ref Name
+  ECSExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+  ProwlerTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSTaskPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: "*"
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${ParentStackName}-logs"
+      RetentionInDays: 14
+  ProwlerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ParentStackName}-prowler"
+      Cpu: "1024"
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt ProwlerTaskRole.Arn
+      ContainerDefinitions:
+        - Name: prowler-container
+          Image: "toniblyx/prowler:5.1.5"
+          Essential: true
+          Cpu: 1024
+          Memory: 4096
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: prowler
+          Environment:
+            - Name: S3_BUCKET
+              Value: !Ref S3BucketName
+          EntryPoint:
+            - "/bin/sh"
+            - "-c"
+          Command:
+            - prowler
+              aws
+              --no-banner
+              --no-color
+              --output-modes
+              json-ocsf
+              --output-bucket-no-assume
+              $S3_BUCKET
+              --output-directory
+              scan/prowler
+              --output-filename
+              "prowler-output-$ASSESSMENT_ID"
+              --ignore-exit-code-3
+              --role
+              "$ROLE"
+
+Outputs:
+  DefaultAssessmentRole:
+    Description: Default Assessment Role
+    Value: !GetAtt DefaultAssessmentRole.Arn
+  ECSCluster:
+    Description: ECS Cluster
+    Value: !Ref ECSCluster
+  ECSExecutionRole:
+    Description: ECS Execution Role
+    Value: !GetAtt ECSExecutionRole.Arn
+  ProwlerTaskDefinition:
+    Description: Prowler Task Definition
+    Value: !Ref ProwlerTaskDefinition
+  ProwlerTaskRole:
+    Description: Prowler Task Role
+    Value: !GetAtt ProwlerTaskRole.Arn

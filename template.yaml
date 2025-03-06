@@ -37,6 +37,26 @@ Resources:
         StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
         DynamoDBArn: !GetAtt DynamoDB.Arn
         SharedLibsLayer: !Ref SharedLibs
+        DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
+  Network:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/network.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+  ScanningTools:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/scanning-tools.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Parameters:
+        ParentStackName: !Ref "AWS::StackName"
+        S3BucketName: !Ref S3Bucket
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:
@@ -50,6 +70,12 @@ Resources:
         DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
         SharedLibsLayer: !Ref SharedLibs
+        ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
+        ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
+        ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition
+        ProwlerTaskRole: !GetAtt ScanningTools.Outputs.ProwlerTaskRole
+        Subnet: !GetAtt Network.Outputs.Subnet
+        SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
