@@ -1,11 +1,16 @@
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel
 
 
+class ScanningTool(StrEnum):
+    PROWLER = "prowler"
+
+
 class PreparePromptsInput(BaseModel):
     assessment_id: str
-    prowler_prompts: list[str]
+    scanning_tool: ScanningTool
 
 
 class FormatProwlerInput(BaseModel):
@@ -34,5 +39,5 @@ class CleanupInput(BaseModel):
     error: StateMachineError | None = None
 
 
-class CreateProwlerPromptInput(BaseModel):
+class CreatePromptsInput(BaseModel):
     assessment_id: str

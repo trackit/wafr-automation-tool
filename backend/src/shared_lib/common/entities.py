@@ -46,3 +46,7 @@ class Assessment(BaseModel):
     step: int
     question_version: str
     findings: dict[str, PILLAR] | None = None
+
+
+Prompt = str
+PromptS3Uri = str

@@ -460,6 +460,7 @@ Resources:
             Resource: !GetAtt PreparePromptsFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+              scanning_tool: "prowler"
             Next: PromptMap
             Catch:
               - ErrorEquals:

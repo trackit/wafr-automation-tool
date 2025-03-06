@@ -12,14 +12,17 @@ from utils.questions import retrieve_questions
 
 from state_machine.event import InvokeLLMInput, StoreResultsInput
 
+ddb_client = boto3.resource("dynamodb", region_name=REGION)
+database_service = DDBService(ddb_client)
+
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
-ddb_client = boto3.resource("dynamodb", region_name=REGION)
-bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
-database_service = DDBService(ddb_client)
 storage_service = S3Service(s3_client, s3_resource)
+
+bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
 ai_service = BedrockService(bedrock_client)
 model = Claude3Dot5Sonnet()
+
 invoke_llm_task = InvokeLLM(storage_service, ai_service, model)
 store_results_task = StoreResults(database_service, storage_service, retrieve_questions())
 

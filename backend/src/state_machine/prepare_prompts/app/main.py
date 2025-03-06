@@ -5,27 +5,21 @@ from common.config import REGION
 from services.database import DDBService
 from services.storage import S3Service
 from tasks.prepare_prompts import PreparePrompts
-from tasks.prowler.create_prowler_prompt import CreateProwlerPrompt
+from utils.questions import retrieve_questions
 
-from state_machine.event import CreateProwlerPromptInput, PreparePromptsInput
+from state_machine.event import PreparePromptsInput
 
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
 ddb_client = boto3.resource("dynamodb", region_name=REGION)
 database_service = DDBService(ddb_client)
 storage_service = S3Service(s3_client, s3_resource)
+question_set = retrieve_questions()
 
-create_prowler_prompt_task = CreateProwlerPrompt(storage_service)
-
-prepare_prompts_task = PreparePrompts(database_service, storage_service)
+prepare_prompts_task = PreparePrompts(
+    database_service=database_service, storage_service=storage_service, question_set=question_set
+)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:  # noqa: ANN401
-    prowler_prompts = create_prowler_prompt_task.execute(
-        CreateProwlerPromptInput(**event),
-    )
-    prepare_prompts_input = PreparePromptsInput(
-        **event,
-        prowler_prompts=prowler_prompts,
-    )
-    return prepare_prompts_task.execute(prepare_prompts_input)
+    return prepare_prompts_task.execute(PreparePromptsInput(**event))

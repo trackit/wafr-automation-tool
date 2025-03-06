@@ -2,18 +2,18 @@ import datetime
 import json
 import os
 from pathlib import Path
-from typing import Any
 
 from common.config import QUESTIONS_PATH
+from common.entities import PILLAR
 from pydantic import BaseModel
 
 
-class QuestionsOutput(BaseModel):
-    questions: dict[str, Any]
-    question_version: str
+class QuestionSet(BaseModel):
+    data: dict[str, PILLAR]
+    version: str
 
 
-def retrieve_questions() -> QuestionsOutput:
+def retrieve_questions() -> QuestionSet:
     question_set = [f for f in os.listdir(QUESTIONS_PATH) if f.endswith(".json") and f.startswith("questions")]
     question_set.sort(
         key=lambda x: datetime.datetime.strptime(
@@ -28,4 +28,4 @@ def retrieve_questions() -> QuestionsOutput:
             for q, question in pillar.items():
                 for bp in question:
                     questions[p][q][bp] = []
-    return QuestionsOutput(questions=questions, question_version=question_version)
+    return QuestionSet(data=questions, version=question_version)

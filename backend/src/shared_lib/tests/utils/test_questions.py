@@ -29,8 +29,8 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
 
     output = retrieve_questions()
 
-    assert output.question_version == "questions_01312025"
-    assert output.questions == {
+    assert output.version == "questions_01312025"
+    assert output.data == {
         "pillar-1": {
             "question-1": {
                 "best-practice-1": [],
