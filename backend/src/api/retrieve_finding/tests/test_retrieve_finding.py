@@ -1,3 +1,4 @@
+from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from common.entities import FindingExtra
@@ -26,6 +27,20 @@ def test_retrieve_finding():
     response = task.execute(task_input)
 
     assessment_service.retrieve_finding.assert_called_once()
-    assert response.status_code == 200
+    assert response.status_code == OK
     assert response.body is not None
     assert response.body == RetrieveFindingResponseBody(**finding.model_dump())
+
+
+def test_retrieve_finding_not_found():
+    finding = None
+    assessment_service = FakeAssessmentService()
+    assessment_service.retrieve_finding = MagicMock(return_value=finding)
+
+    task_input = RetrieveFindingInput(assessment_id="AID", finding_id="FID")
+    task = RetrieveFinding(assessment_service)
+    response = task.execute(task_input)
+
+    assessment_service.retrieve_finding.assert_called_once()
+    assert response.status_code == NOT_FOUND
+    assert not response.body

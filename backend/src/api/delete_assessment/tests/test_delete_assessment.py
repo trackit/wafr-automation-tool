@@ -1,3 +1,4 @@
+from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
@@ -18,5 +19,20 @@ def test_delete_assessment():
 
     assessment_service.delete.assert_called_once_with("AID")
     assessment_service.delete_findings.assert_called_once_with("AID")
-    assert response.status_code == 200
+    assert response.status_code == OK
+    assert not response.body
+
+
+def test_delete_assessment_not_found():
+    assessment_service = FakeAssessmentService()
+    assessment_service.delete = MagicMock(return_value=True)
+    assessment_service.delete_findings = MagicMock(return_value=False)
+
+    task_input = DeleteAssessmentInput(assessment_id="AID")
+    task = DeleteAssessment(assessment_service)
+    response = task.execute(task_input)
+
+    assessment_service.delete.assert_called_once_with("AID")
+    assessment_service.delete_findings.assert_called_once_with("AID")
+    assert response.status_code == NOT_FOUND
     assert not response.body

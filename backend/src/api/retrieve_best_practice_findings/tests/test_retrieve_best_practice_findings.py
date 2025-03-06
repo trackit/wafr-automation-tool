@@ -1,3 +1,4 @@
+from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from common.entities import Assessment, FindingExtra
@@ -34,5 +35,42 @@ def test_retrieve_best_practice_findings():
 
     assessment_service.retrieve.assert_called_once_with("AID")
     assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "BP")
-    assert response.status_code == 200
+    assert response.status_code == OK
     assert response.body == assessment_service.retrieve_best_practice.return_value
+
+
+def test_retrieve_best_practice_findings_not_found_assessment():
+    assessment = None
+    assessment_service = FakeAssessmentService()
+    assessment_service.retrieve = MagicMock(return_value=assessment)
+
+    task_input = RetrieveBestPracticeFindingsInput(
+        assessment_id="AID",
+        best_practice="BP",
+    )
+    task = RetrieveBestPracticeFindings(assessment_service)
+    response = task.execute(task_input)
+
+    assessment_service.retrieve.assert_called_once_with("AID")
+    assert response.status_code == NOT_FOUND
+    assert not response.body
+
+
+def test_retrieve_best_practice_findings_not_found_findings():
+    assessment = Assessment(id="AID", name="AN", role="AR", step=0, question_version="QV", findings=None)
+    finding = None
+    assessment_service = FakeAssessmentService()
+    assessment_service.retrieve = MagicMock(return_value=assessment)
+    assessment_service.retrieve_best_practice = MagicMock(return_value=finding)
+
+    task_input = RetrieveBestPracticeFindingsInput(
+        assessment_id="AID",
+        best_practice="BP",
+    )
+    task = RetrieveBestPracticeFindings(assessment_service)
+    response = task.execute(task_input)
+
+    assessment_service.retrieve.assert_called_once_with("AID")
+    assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "BP")
+    assert response.status_code == NOT_FOUND
+    assert not response.body
