@@ -6,8 +6,7 @@ readme = "../README.md"
 requires-python = "==3.12.*"
 dependencies = [
     "boto3>=1.37.5",
-    "py-ocsf-models",
-    "pydantic>=1.10.15",
+    "pydantic>=2.10.6",
     "regex>=2024.11.6",
     "types-boto3[bedrock-runtime,dynamodb,s3,stepfunctions]>=1.37.5",
 ]
@@ -51,6 +50,7 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "src/shared_lib/entities/prowler",
 ]
 
 # Same as Black.
@@ -113,6 +113,7 @@ docstring-code-line-length = "dynamic"
 
 [tool.pyright]
 include = ["src"]
+exclude = ["src/shared_lib/entities/prowler"]
 venvPath = "."
 venv = ".venv"
 extraPaths = ["src/shared_lib"]

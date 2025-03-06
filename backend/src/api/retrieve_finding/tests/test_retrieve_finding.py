@@ -23,8 +23,9 @@ def test_retrieve_finding():
 
     task_input = RetrieveFindingInput(assessment_id="AID", finding_id="FID")
     task = RetrieveFinding(assessment_service)
-    reponse = task.execute(task_input)
+    response = task.execute(task_input)
 
     assessment_service.retrieve_finding.assert_called_once()
-    assert reponse.status_code == 200
-    assert reponse.body == RetrieveFindingResponseBody(**finding.dict())
+    assert response.status_code == 200
+    assert response.body is not None
+    assert response.body == RetrieveFindingResponseBody(**finding.model_dump())

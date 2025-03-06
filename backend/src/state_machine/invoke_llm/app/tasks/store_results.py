@@ -96,8 +96,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             if finding_data is None:
                 logger.error("Finding with id %s not found", finding_id)
                 continue
-            finding_dict = finding_data.dict().copy()
-            del finding_dict["id"]
+            finding_dict = finding_data.model_dump(exclude={"id"}).copy()
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={

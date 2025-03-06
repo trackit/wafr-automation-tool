@@ -21,4 +21,5 @@ def test_retrieve_assessment():
 
     assessment_service.retrieve.assert_called_once_with("AID")
     assert response.status_code == 200
-    assert response.body == assessment.dict()
+    assert response.body is not None
+    assert response.body.model_dump_json() == assessment.model_dump_json()

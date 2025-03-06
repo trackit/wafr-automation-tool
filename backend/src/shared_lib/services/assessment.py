@@ -116,8 +116,7 @@ class AssessmentService(IAssessmentService):
 
     @override
     def update(self, assessment_id: str, assessment_dto: AssessmentDto) -> None:
-        attrs = assessment_dto.dict()
-        attrs = {k: v for k, v in attrs.items() if v is not None}
+        attrs = assessment_dto.model_dump(exclude_none=True)
         self.database_service.update_attrs(
             table_name=DDB_TABLE, key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id}, attrs=attrs
         )
@@ -143,13 +142,13 @@ class AssessmentService(IAssessmentService):
     def _create_assessment(self, item: dict[str, Any]) -> Assessment:
         formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
         formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
-        return Assessment(
-            **formatted_item,
+        return Assessment.model_validate(
+            formatted_item,
         )
 
     def _create_finding(self, item: dict[str, Any]) -> FindingExtra:
         formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
         formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
-        return FindingExtra(
-            **formatted_item,
+        return FindingExtra.model_validate(
+            formatted_item,
         )

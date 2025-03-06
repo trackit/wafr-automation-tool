@@ -36,7 +36,7 @@ class StartAssessment(
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
-            input=input_json.json(),
+            input=input_json.model_dump_json(),
         )
         return response.get("ResponseMetadata").get("HTTPStatusCode") == OK
 

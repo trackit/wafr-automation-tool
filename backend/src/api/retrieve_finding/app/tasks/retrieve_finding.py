@@ -26,6 +26,6 @@ class RetrieveFinding(
         return APIResponse(
             status_code=OK,
             body=RetrieveFindingResponseBody(
-                **finding.dict(),
+                **finding.model_dump(exclude_none=True),
             ),
         )

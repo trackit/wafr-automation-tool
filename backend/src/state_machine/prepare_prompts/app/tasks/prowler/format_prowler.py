@@ -4,8 +4,6 @@ from typing import Any, TypeVar, override
 from common.config import S3_BUCKET, STORE_CHUNK_PATH
 from common.entities import Finding, FindingExtra
 from common.task import Task
-from exceptions.prowler import NotDetectionFindingError
-from py_ocsf_models.events.findings.detection_finding import DetectionFinding
 from services.storage import IStorageService
 
 from state_machine.event import FormatProwlerInput
@@ -23,30 +21,15 @@ class FormatProwler(Task[FormatProwlerInput, list[list[dict[str, Any]]]]):
         super().__init__()
         self.storage_service = storage_service
 
-    def remove_null_recursively(
-        self,
-        obj: dict[str, Any] | list[Any] | str | float | bool | None,
-    ) -> dict[str, Any] | list[Any] | str | float | bool | None:
-        if isinstance(obj, dict):
-            result: dict[str, Any] = {
-                k: self.remove_null_recursively(v) for k, v in obj.items() if v is not None and v != ""
-            }
-            return {k: v for k, v in result.items() if v}
-        if isinstance(obj, list):
-            return [self.remove_null_recursively(v) for v in obj if v is not None]
-        return obj
-
     def format_chunk(
         self,
         chunk: list[dict[str, Any]],
         schema_type: type[FORMAT_TYPE],
     ) -> list[dict[str, Any]]:
         new_chunk: list[dict[str, Any]] = []
-        for i, item in enumerate(chunk):
-            if not DetectionFinding.validate(item):
-                raise NotDetectionFindingError(i)
-            finding = self.remove_null_recursively(item)
-            new_chunk.append(schema_type.parse_obj(finding).dict())
+        for item in chunk:
+            finding = schema_type(**item)
+            new_chunk.append(finding.model_dump(exclude_none=True))
         return new_chunk
 
     def save_chunk_for_retrieve(

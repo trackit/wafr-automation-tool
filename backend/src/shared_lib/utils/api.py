@@ -32,7 +32,7 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
             elif isinstance(self.body, dict):
                 body = json.dumps(self.body, separators=(",", ":"))
             else:
-                body = json.dumps(self.body.dict(), separators=(",", ":"))
+                body = json.dumps(self.body.model_dump(), separators=(",", ":"))
         return {
             "statusCode": self.status_code,
             "body": body,

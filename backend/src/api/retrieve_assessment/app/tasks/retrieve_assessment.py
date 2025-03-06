@@ -26,6 +26,6 @@ class RetrieveAssessment(
         return APIResponse(
             status_code=OK,
             body=RetrieveAssessmentResponseBody(
-                **assessment.dict(),
+                **assessment.model_dump(),
             ),
         )

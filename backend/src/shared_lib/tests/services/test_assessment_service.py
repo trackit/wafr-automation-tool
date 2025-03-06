@@ -27,14 +27,14 @@ def test_assessment_service_retrieve():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment = assessment_service.retrieve("test-assessment-id")
-    assert assessment == {
-        "id": "test-assessment-id",
-        "name": "test-assessment-name",
-        "role": "test-assessment-role",
-        "step": 1,
-        "question_version": "test-question-version",
-        "findings": {"pillar-1": {"question-1": {"best-practice-1": [1, 2, 3]}}},
-    }
+    assert assessment == Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role="test-assessment-role",
+        step=1,
+        question_version="test-question-version",
+        findings={"pillar-1": {"question-1": {"best-practice-1": [1, 2, 3]}}},
+    )
 
     fake_database_service.get.assert_called_once_with(
         table_name="test-table",

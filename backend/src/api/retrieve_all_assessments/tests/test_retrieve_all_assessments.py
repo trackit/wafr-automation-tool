@@ -8,8 +8,7 @@ from ..app.tasks.retrieve_all_assessments import RetrieveAllAssessments
 
 def test_retrieve_all_assessments():
     assessments = [Assessment(id="AID", name="AN", role="AR", step=0, question_version="QV", findings=None)]
-    assessments_dict = [assessment.dict() for assessment in assessments]
-    del assessments_dict[0]["findings"]
+    assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(return_value=assessments)
 
@@ -18,4 +17,4 @@ def test_retrieve_all_assessments():
 
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == 200
-    assert response.body == assessments_dict
+    assert response.body == assessments_dicts

@@ -3,27 +3,27 @@ from pydantic import BaseModel
 
 class Finding(BaseModel):
     id: str
-    status_code: str | None
-    status_detail: str | None
+    status_code: str | None = None
+    status_detail: str | None = None
 
 
 class FindingResource(BaseModel):
-    uid: str | None
-    name: str | None
-    type: str | None
-    region: str | None
+    uid: str | None = None
+    name: str | None = None
+    type: str | None = None
+    region: str | None = None
 
 
 class FindingRemediation(BaseModel):
-    desc: str | None
-    references: list[str] | None
+    desc: str | None = None
+    references: list[str] | None = None
 
 
 class FindingExtra(Finding):
-    severity: str | None
-    resources: list[FindingResource] | None
-    remediation: FindingRemediation | None
-    risk_details: str | None
+    severity: str | None = None
+    resources: list[FindingResource] | None = None
+    remediation: FindingRemediation | None = None
+    risk_details: str | None = None
 
 
 BEST_PRACTICE = list[int]
@@ -45,4 +45,4 @@ class Assessment(BaseModel):
     role: str
     step: int
     question_version: str
-    findings: dict[str, PILLAR] | None
+    findings: dict[str, PILLAR] | None = None

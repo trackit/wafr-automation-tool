@@ -19,7 +19,7 @@ class RetrieveAllAssessments(
     def remove_findings(self, assessments: list[Assessment]) -> list[dict[str, Any]]:
         result: list[dict[str, Any]] = []
         for assessment in assessments:
-            assessment_dict = assessment.dict()
+            assessment_dict = assessment.model_dump()
             del assessment_dict["findings"]
             result.append(assessment_dict)
         return result
