@@ -6,6 +6,7 @@ from common.config import (
     DDB_SORT_KEY,
     DDB_TABLE,
 )
+from common.entities import ScanningTool
 from common.task import CreatePromptsTask, Task
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
@@ -13,9 +14,9 @@ from services.storage import IStorageService
 from tasks.scanning_tools.prowler.create_prompts import CreateProwlerPrompts
 from utils.questions import QuestionSet
 
-from state_machine.event import CreatePromptsInput, PreparePromptsInput, ScanningTool
+from state_machine.event import CreatePromptsInput, PreparePromptsInput
 
-SCANNING_TOOL_TASK: dict[ScanningTool, type[CreatePromptsTask]] = {
+SCANNING_TOOL_TASK: dict[str, type[CreatePromptsTask]] = {
     ScanningTool.PROWLER: CreateProwlerPrompts,
 }
 
@@ -48,4 +49,4 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
         self.populate_dynamodb(event.assessment_id)
         task = scanning_tool_task(self.storage_service, self.question_set)
-        return task.execute(CreatePromptsInput(assessment_id=event.assessment_id))
+        return task.execute(CreatePromptsInput(assessment_id=event.assessment_id, scanning_tool=event.scanning_tool))

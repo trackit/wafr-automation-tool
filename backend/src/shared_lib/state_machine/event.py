@@ -1,11 +1,7 @@
-from enum import StrEnum
 from typing import Any
 
+from common.entities import ScanningTool
 from pydantic import BaseModel
-
-
-class ScanningTool(StrEnum):
-    PROWLER = "prowler"
 
 
 class PreparePromptsInput(BaseModel):
@@ -41,3 +37,4 @@ class CleanupInput(BaseModel):
 
 class CreatePromptsInput(BaseModel):
     assessment_id: str
+    scanning_tool: ScanningTool

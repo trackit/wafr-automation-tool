@@ -23,7 +23,7 @@ from state_machine.event import CreatePromptsInput
 logger = logging.getLogger("CreateProwlerPrompts")
 logger.setLevel(logging.DEBUG)
 
-CHUNK_SIZE = 400
+CHUNK_SIZE = 700
 
 FORMAT_TYPE = TypeVar("FORMAT_TYPE", bound=Finding)
 
@@ -41,10 +41,10 @@ class CreateProwlerPrompts(CreatePromptsTask):
     def save_chunk_for_retrieve(
         self,
         assessment_id: str,
-        chunk_id: int,
+        chunk_index: int,
         chunk: list[FindingExtra],
     ) -> None:
-        key = STORE_CHUNK_PATH.format(assessment_id, chunk_id)
+        key = STORE_CHUNK_PATH.format(assessment_id, f"prowler-{chunk_index}")
         self.storage_service.put(
             Bucket=S3_BUCKET,
             Key=key,
@@ -96,7 +96,7 @@ class CreateProwlerPrompts(CreatePromptsTask):
     ) -> list[PromptS3Uri]:
         prompt_uris: list[PromptS3Uri] = []
         for i, prompt in enumerate(prompts):
-            key = STORE_PROMPT_PATH.format(assessment_id, i)
+            key = STORE_PROMPT_PATH.format(assessment_id, f"prowler-{i}")
             prompt_uris.append(get_s3_uri(s3_bucket, key))
             prompt_with_questions = self.insert_questions_in_prompt(prompt)
             self.storage_service.put(

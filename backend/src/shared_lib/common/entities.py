@@ -28,6 +28,12 @@ class FindingExtra(Finding):
     risk_details: str | None = None
 
 
+class AnswerData(BaseModel):
+    pillar: str
+    question: str
+    best_practice: str
+
+
 BestPracticeDict = list[int]
 QuestionDict = dict[str, BestPracticeDict]
 PillarDict = dict[str, QuestionDict]
@@ -52,6 +58,11 @@ class Assessment(BaseModel):
 
 Prompt = str
 PromptS3Uri = str
+ChunkId = str
+
+
+class ScanningTool(StrEnum):
+    PROWLER = "prowler"
 
 
 class AIModel(StrEnum):
