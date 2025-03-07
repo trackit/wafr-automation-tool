@@ -25,7 +25,7 @@ def test_store_results():
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
     questions = MagicMock(
-        questions={
+        data={
             "Operational excellence": {
                 "How do you determine what your priorities are?": {"Evaluate external customer needs": []}
             }
@@ -82,7 +82,7 @@ def test_store_results_with_no_finding():
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
     questions = MagicMock(
-        questions={
+        data={
             "Operational excellence": {
                 "How do you determine what your priorities are?": {"Evaluate external customer needs": []}
             }
@@ -115,7 +115,7 @@ def test_store_results_with_invalid_questions():
 
     storage_service = FakeStorageService()
     database_service = FakeDatabaseService()
-    questions = MagicMock(questions={})
+    questions = MagicMock(data={})
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
     database_service.put = MagicMock(return_value=None)
@@ -141,7 +141,7 @@ def test_store_results_with_no_finding_data():
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
     questions = MagicMock(
-        questions={
+        data={
             "Operational excellence": {
                 "How do you determine what your priorities are?": {"Evaluate external customer needs": []}
             }
@@ -189,7 +189,7 @@ def test_store_results_with_invalid_llm_response():
 
     storage_service = FakeStorageService()
     database_service = FakeDatabaseService()
-    questions = MagicMock(questions={})
+    questions = MagicMock(data={})
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
     database_service.put = MagicMock(return_value=None)

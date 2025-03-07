@@ -75,6 +75,7 @@ convention = "google"
 "__init__.py" = ["E402"]
 "**/{tests,docs,tools}/*" = [
     "ANN201",
+    "ARG001",
     "E402",
     "E501",
     "ERA001",
