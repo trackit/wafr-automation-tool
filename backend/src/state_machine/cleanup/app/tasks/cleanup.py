@@ -1,6 +1,7 @@
 from typing import override
 
 from common.config import (
+    DEBUG,
     PROWLER_COMPLIANCE_PATH,
     PROWLER_OCSF_PATH,
     S3_BUCKET,
@@ -49,8 +50,10 @@ class Cleanup(Task[CleanupInput, None]):
 
     @override
     def execute(self, event: CleanupInput) -> None:
-        self.clean_prowler_scan(event)
-        self.clean_assessment_storage(event)
+        if not DEBUG:
+            self.clean_prowler_scan(event)
+            self.clean_assessment_storage(event)
         if event.error:
-            self.assessment_service.delete_findings(event.assessment_id)
+            if not DEBUG:
+                self.assessment_service.delete_findings(event.assessment_id)
             self.update_assessment_item(event)

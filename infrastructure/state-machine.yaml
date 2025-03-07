@@ -12,13 +12,19 @@ Parameters:
   Name:
     Type: String
     Default: state-machine
+  ParentStackName:
+      Type: String
+  Debug:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  SharedLibsLayer:
+    Type: String
   DynamoDBArn:
     Type: String
   S3BucketName:
-    Type: String
-  ParentStackName:
-    Type: String
-  SharedLibsLayer:
     Type: String
   ECSCluster:
     Type: String
@@ -46,6 +52,7 @@ Globals:
       Name: !Ref Name
     Environment:
       Variables:
+        DEBUG: !Ref Debug
         REGION: !Ref AWS::Region
         S3_BUCKET: !Ref S3BucketName
         DDB_TABLE: !Ref DynamoDBArn
@@ -110,6 +117,9 @@ Resources:
                 - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
+      Environment:
+        Variables:
+          AI_MODEL: claude-3-5-sonnet
   CleanupFunction:
     Type: AWS::Serverless::Function
     Properties:

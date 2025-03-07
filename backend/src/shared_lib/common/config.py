@@ -1,5 +1,6 @@
 import os
 
+DEBUG = os.getenv("DEBUG", "false") == "true"
 REGION = os.getenv("REGION", "us-west-2")
 S3_BUCKET = os.getenv("S3_BUCKET", "NONE")
 DDB_TABLE = os.getenv("DDB_TABLE", "test-table")

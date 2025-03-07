@@ -12,6 +12,12 @@ Parameters:
   Name:
     Type: String
     Default: wafr-automation-tool
+  Debug:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
 
 Resources:
   SharedLibs:
@@ -67,9 +73,10 @@ Resources:
         Name: !Ref Name
       Parameters:
         ParentStackName: !Ref "AWS::StackName"
+        Debug: !Ref Debug
+        SharedLibsLayer: !Ref SharedLibs
         DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
-        SharedLibsLayer: !Ref SharedLibs
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
         ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition

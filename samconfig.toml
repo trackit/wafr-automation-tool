@@ -42,6 +42,7 @@ confirm_changeset = true
 capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
 parameter_overrides = [
+  "Debug=true",
 ]
 
 [staging.deploy.parameters]
