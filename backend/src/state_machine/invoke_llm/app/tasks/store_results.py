@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, override
+from typing import override
 
 from common.config import (
     ASSESSMENT_PK,
@@ -9,7 +9,7 @@ from common.config import (
     DDB_TABLE,
     STORE_CHUNK_PATH,
 )
-from common.entities import FindingExtra
+from common.entities import FindingExtra, PillarDict
 from common.task import Task
 from services.database import IDatabaseService
 from services.storage import IStorageService
@@ -36,10 +36,10 @@ class StoreResults(Task[StoreResultsInput, None]):
     def retrieve_findings_data(
         self,
         assessment_id: str,
-        chunk_id: int,
+        chunk_index: int,
         s3_bucket: str,
     ) -> list[FindingExtra]:
-        key = STORE_CHUNK_PATH.format(assessment_id, chunk_id)
+        key = STORE_CHUNK_PATH.format(assessment_id, chunk_index)
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
@@ -50,7 +50,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             and bp_name in self.questions[pillar_name][question_name]
         )
 
-    def store_finding_ids(
+    def associate_finding_ids(
         self,
         assessment_id: str,
         pillar_name: str,
@@ -83,7 +83,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             },
         )
 
-    def store_findings(
+    def store_findings_in_db(
         self,
         assessment_id: str,
         bp_finding_ids: list[str],
@@ -110,25 +110,25 @@ class StoreResults(Task[StoreResultsInput, None]):
     def store_results(
         self,
         assessment_id: str,
-        findings: dict[str, Any],
+        llm_findings: dict[str, PillarDict],
         findings_data: list[FindingExtra],
     ) -> None:
-        for pillar_name, pillar in findings.items():
+        for pillar_name, pillar in llm_findings.items():
             for question_name, question in pillar.items():
                 for bp_name in question:
                     bp_finding_ids: list[str] = [
-                        str(finding_id) for finding_id in findings[pillar_name][question_name][bp_name]
+                        str(finding_id) for finding_id in llm_findings[pillar_name][question_name][bp_name]
                     ]
-                    self.store_finding_ids(assessment_id, pillar_name, question_name, bp_name, bp_finding_ids)
-                    self.store_findings(assessment_id, bp_finding_ids, findings_data)
+                    self.associate_finding_ids(assessment_id, pillar_name, question_name, bp_name, bp_finding_ids)
+                    self.store_findings_in_db(assessment_id, bp_finding_ids, findings_data)
 
     def ensure_text_format(self, llm_response: str) -> str:
         return llm_response.replace("\n", "")
 
-    def concat_results(self, llm_response: str) -> dict[str, Any]:
+    def merge_response(self, llm_response: str) -> dict[str, PillarDict]:
         json_body = json.loads(llm_response)
         contents = json_body["content"]
-        findings: dict[str, Any] = {}
+        findings: dict[str, PillarDict] = {}
         for content in contents:
             llm_result = self.ensure_text_format(content["text"])
             try:
@@ -138,13 +138,13 @@ class StoreResults(Task[StoreResultsInput, None]):
                 continue
         return findings
 
-    def get_index(self, prompt_uri: str) -> int:
+    def get_chunk_index(self, prompt_uri: str) -> int:
         return int(prompt_uri.split("-")[-1].split(".")[0])
 
     @override
     def execute(self, event: StoreResultsInput) -> None:
-        findings = self.concat_results(event.llm_response)
-        index = self.get_index(event.prompt_uri)
+        llm_findings = self.merge_response(event.llm_response)
+        chunk_index = self.get_chunk_index(event.prompt_uri)
         s3_bucket, _ = s3.parse_s3_uri(event.prompt_uri)
-        findings_data = self.retrieve_findings_data(event.assessment_id, index, s3_bucket)
-        self.store_results(event.assessment_id, findings, findings_data)
+        findings_data = self.retrieve_findings_data(event.assessment_id, chunk_index, s3_bucket)
+        self.store_results(event.assessment_id, llm_findings, findings_data)

@@ -4,12 +4,12 @@ import os
 from pathlib import Path
 
 from common.config import QUESTIONS_PATH
-from common.entities import PILLAR
+from common.entities import PillarDict
 from pydantic import BaseModel
 
 
 class QuestionSet(BaseModel):
-    data: dict[str, PILLAR]
+    data: dict[str, PillarDict]
     version: str
 
 

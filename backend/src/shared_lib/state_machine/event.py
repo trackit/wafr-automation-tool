@@ -25,8 +25,8 @@ class InvokeLLMInput(BaseModel):
 
 class StoreResultsInput(BaseModel):
     assessment_id: str
-    llm_response: str
     prompt_uri: str
+    llm_response: str
 
 
 class StateMachineError(BaseModel):

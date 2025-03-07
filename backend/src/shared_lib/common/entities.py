@@ -26,9 +26,9 @@ class FindingExtra(Finding):
     risk_details: str | None = None
 
 
-BEST_PRACTICE = list[int]
-QUESTION = dict[str, BEST_PRACTICE]
-PILLAR = dict[str, QUESTION]
+BestPracticeDict = list[int]
+QuestionDict = dict[str, BestPracticeDict]
+PillarDict = dict[str, QuestionDict]
 
 
 class AssessmentDto(BaseModel):
@@ -36,7 +36,7 @@ class AssessmentDto(BaseModel):
     role: str | None = None
     step: int | None = None
     question_version: str | None = None
-    findings: dict[str, PILLAR] | None = None
+    findings: dict[str, PillarDict] | None = None
 
 
 class Assessment(BaseModel):
@@ -45,7 +45,7 @@ class Assessment(BaseModel):
     role: str
     step: int
     question_version: str
-    findings: dict[str, PILLAR] | None = None
+    findings: dict[str, PillarDict] | None = None
 
 
 Prompt = str
