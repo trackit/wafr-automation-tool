@@ -1,5 +1,8 @@
 import os
 
+from common.entities import AIModel
+from common.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, IModel
+
 DEBUG = os.getenv("DEBUG", "false") == "true"
 REGION = os.getenv("REGION", "us-west-2")
 S3_BUCKET = os.getenv("S3_BUCKET", "NONE")
@@ -22,3 +25,10 @@ STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"
 
 PROWLER_PROMPT_PATH = "./prompts/prowler.txt"
 QUESTIONS_PATH = "./questions"
+
+
+AI_MODELS: dict[str, type[IModel]] = {
+    AIModel.Claude3Dot5Sonnet: Claude3Dot5Sonnet,
+    AIModel.Claude3Dot7Sonnet: Claude3Dot7Sonnet,
+}
+AI_MODEL = os.getenv("AI_MODEL", "claude-3-5-sonnet")

@@ -1,7 +1,8 @@
 from typing import override
 
-from common.models import IModel
+from common.config import AI_MODEL, AI_MODELS
 from common.task import Task
+from exceptions.ai import InvalidAIModelError
 from services.ai import IAIService
 from services.storage import IStorageService
 from utils.s3 import parse_s3_uri
@@ -14,12 +15,10 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
         self,
         storage_service: IStorageService,
         ai_service: IAIService,
-        model: IModel,
     ) -> None:
         super().__init__()
         self.storage_service = storage_service
         self.ai_service = ai_service
-        self.model = model
 
     def retrieve_prompt(self, prompt_uri: str) -> str:
         s3_bucket, s3_key = parse_s3_uri(prompt_uri)
@@ -27,8 +26,12 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
 
     @override
     def execute(self, event: InvokeLLMInput) -> str:
+        model_type = AI_MODELS.get(AI_MODEL)
+        if model_type is None:
+            raise InvalidAIModelError(AI_MODEL)
+
         prompt = self.retrieve_prompt(event.prompt_uri)
         return self.ai_service.invoke_model(
-            self.model,
+            model_type(),
             prompt,
         )

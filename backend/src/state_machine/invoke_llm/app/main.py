@@ -2,7 +2,6 @@ from typing import Any
 
 import boto3
 from common.config import REGION
-from common.models import Claude3Dot5Sonnet
 from services.ai import BedrockService
 from services.database import DDBService
 from services.storage import S3Service
@@ -21,9 +20,8 @@ storage_service = S3Service(s3_client, s3_resource)
 
 bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
 ai_service = BedrockService(bedrock_client)
-model = Claude3Dot5Sonnet()
 
-invoke_llm_task = InvokeLLM(storage_service, ai_service, model)
+invoke_llm_task = InvokeLLM(storage_service, ai_service)
 store_results_task = StoreResults(database_service, storage_service, retrieve_questions())
 
 

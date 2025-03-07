@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from pydantic import BaseModel
 
 
@@ -50,3 +52,8 @@ class Assessment(BaseModel):
 
 Prompt = str
 PromptS3Uri = str
+
+
+class AIModel(StrEnum):
+    Claude3Dot5Sonnet = "claude-3-5-sonnet"
+    Claude3Dot7Sonnet = "claude-3-7-sonnet"

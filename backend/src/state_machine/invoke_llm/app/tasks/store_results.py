@@ -9,8 +9,9 @@ from common.config import (
     DDB_TABLE,
     STORE_CHUNK_PATH,
 )
-from common.entities import FindingExtra, PillarDict
+from common.entities import AnswerData, ChunkId, FindingExtra, PillarDict, ScanningTool
 from common.task import Task
+from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
@@ -36,49 +37,48 @@ class StoreResults(Task[StoreResultsInput, None]):
     def retrieve_findings_data(
         self,
         assessment_id: str,
-        chunk_index: int,
         s3_bucket: str,
+        chunk_path: str,
     ) -> list[FindingExtra]:
-        key = STORE_CHUNK_PATH.format(assessment_id, chunk_index)
+        key = STORE_CHUNK_PATH.format(assessment_id, chunk_path)
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def verify_data(self, pillar_name: str, question_name: str, bp_name: str) -> bool:
+    def verify_answer_data(self, answer_data: AnswerData) -> bool:
         return (
-            pillar_name in self.questions
-            and question_name in self.questions[pillar_name]
-            and bp_name in self.questions[pillar_name][question_name]
+            answer_data.pillar in self.questions
+            and answer_data.question in self.questions[answer_data.pillar]
+            and answer_data.best_practice in self.questions[answer_data.pillar][answer_data.question]
         )
 
     def associate_finding_ids(
         self,
         assessment_id: str,
-        pillar_name: str,
-        question_name: str,
-        bp_name: str,
+        scanning_tool: ScanningTool,
+        answer_data: AnswerData,
         bp_finding_ids: list[str],
     ) -> None:
         if not bp_finding_ids:
             return
-        if not self.verify_data(pillar_name, question_name, bp_name):
+        if not self.verify_answer_data(answer_data):
             logger.error(
                 "Data not found for pillar: %s, question: %s, best practice: %s",
-                pillar_name,
-                question_name,
-                bp_name,
+                answer_data.pillar,
+                answer_data.question,
+                answer_data.best_practice,
             )
             return
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
-            UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",  # noqa: E501
+            UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
-                "#pillar": pillar_name,
-                "#question": question_name,
-                "#bp": bp_name,
+                "#pillar": answer_data.pillar,
+                "#question": answer_data.question,
+                "#best_practice": answer_data.best_practice,
             },
             ExpressionAttributeValues={
-                ":new_findings": bp_finding_ids,
+                ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in bp_finding_ids],
                 ":empty_list": [],
             },
         )
@@ -86,11 +86,12 @@ class StoreResults(Task[StoreResultsInput, None]):
     def store_findings_in_db(
         self,
         assessment_id: str,
-        bp_finding_ids: list[str],
+        scanning_tool: ScanningTool,
+        finding_ids: list[str],
         findings_data: list[FindingExtra],
     ) -> None:
-        for finding_id in bp_finding_ids:
-            finding_data: FindingExtra | None = next(
+        for finding_id in finding_ids:
+            finding_data = next(
                 (item for item in findings_data if item.id == finding_id),
                 None,
             )
@@ -103,24 +104,26 @@ class StoreResults(Task[StoreResultsInput, None]):
                 item={
                     **finding_dict,
                     DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: finding_id,
+                    DDB_SORT_KEY: f"{scanning_tool}:{finding_id}",
                 },
             )
 
     def store_results(
         self,
         assessment_id: str,
+        scanning_tool: ScanningTool,
         llm_findings: dict[str, PillarDict],
         findings_data: list[FindingExtra],
     ) -> None:
-        for pillar_name, pillar in llm_findings.items():
-            for question_name, question in pillar.items():
-                for bp_name in question:
-                    bp_finding_ids: list[str] = [
-                        str(finding_id) for finding_id in llm_findings[pillar_name][question_name][bp_name]
+        for pillar, pillar_data in llm_findings.items():
+            for question, question_data in pillar_data.items():
+                for best_practice in question_data:
+                    finding_ids: list[str] = [
+                        str(finding_id) for finding_id in llm_findings[pillar][question][best_practice]
                     ]
-                    self.associate_finding_ids(assessment_id, pillar_name, question_name, bp_name, bp_finding_ids)
-                    self.store_findings_in_db(assessment_id, bp_finding_ids, findings_data)
+                    answer_data = AnswerData(pillar=pillar, question=question, best_practice=best_practice)
+                    self.associate_finding_ids(assessment_id, scanning_tool, answer_data, finding_ids)
+                    self.store_findings_in_db(assessment_id, scanning_tool, finding_ids, findings_data)
 
     def ensure_text_format(self, llm_response: str) -> str:
         return llm_response.replace("\n", "")
@@ -138,13 +141,18 @@ class StoreResults(Task[StoreResultsInput, None]):
                 continue
         return findings
 
-    def get_chunk_index(self, prompt_uri: str) -> int:
-        return int(prompt_uri.split("-")[-1].split(".")[0])
+    def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
+        split = prompt_uri.split("-")
+        if len(split) != 3:  # noqa: PLR2004
+            raise InvalidPromptUriError(prompt_uri)
+        scanning_tool = ScanningTool(split[-2])
+        chunk_id = split[-1].split(".")[0]
+        return scanning_tool, chunk_id
 
     @override
     def execute(self, event: StoreResultsInput) -> None:
         llm_findings = self.merge_response(event.llm_response)
-        chunk_index = self.get_chunk_index(event.prompt_uri)
-        s3_bucket, _ = s3.parse_s3_uri(event.prompt_uri)
-        findings_data = self.retrieve_findings_data(event.assessment_id, chunk_index, s3_bucket)
-        self.store_results(event.assessment_id, llm_findings, findings_data)
+        s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
+        scanning_tool, chunk_id = self.get_uri_infos(s3_key)
+        findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}-{chunk_id}")
+        self.store_results(event.assessment_id, scanning_tool, llm_findings, findings_data)
