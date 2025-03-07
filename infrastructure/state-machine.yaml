@@ -13,7 +13,7 @@ Parameters:
     Type: String
     Default: state-machine
   ParentStackName:
-      Type: String
+    Type: String
   Debug:
     Type: String
     Default: false
@@ -33,6 +33,10 @@ Parameters:
   ProwlerTaskDefinition:
     Type: String
   ProwlerTaskRole:
+    Type: String
+  CloudCustodianTaskDefinition:
+    Type: String
+  CloudCustodianTaskRole:
     Type: String
   Subnet:
     Type: String
@@ -166,6 +170,7 @@ Resources:
             Action: ecs:RunTask
             Resource:
               - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
         - Statement:
             Effect: Allow
             Action:
@@ -179,6 +184,7 @@ Resources:
             Resource:
               - !Ref ECSExecutionRole
               - !Ref ProwlerTaskRole
+              - !Ref CloudCustodianTaskRole
         - Statement:
             Effect: Allow
             Action:
@@ -255,6 +261,23 @@ Resources:
                                 Value: "{% $assessment_id %}"
                               - Name: ROLE
                                 Value: "{% $role %}"
+                    End: true
+              - StartAt: CloudCustodianScan
+                States:
+                  CloudCustodianScan:
+                    Type: Task
+                    Resource: arn:aws:states:::ecs:runTask.sync
+                    Arguments:
+                      LaunchType: FARGATE
+                      Cluster: !Ref ECSCluster
+                      TaskDefinition: !Ref CloudCustodianTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
                     End: true
             Next: UpdateStep
             Catch:

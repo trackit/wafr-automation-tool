@@ -81,6 +81,8 @@ Resources:
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
         ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition
         ProwlerTaskRole: !GetAtt ScanningTools.Outputs.ProwlerTaskRole
+        CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
+        CloudCustodianTaskRole: !GetAtt ScanningTools.Outputs.CloudCustodianTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
   DynamoDB:

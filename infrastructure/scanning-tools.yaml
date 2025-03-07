@@ -128,6 +128,11 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${ParentStackName}-logs"
+      RetentionInDays: 14
   ProwlerTaskRole:
     Type: AWS::IAM::Role
     Properties:
@@ -152,11 +157,6 @@ Resources:
                 Action:
                   - sts:AssumeRole
                 Resource: "*"
-  ECSLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/ecs/${ParentStackName}-logs"
-      RetentionInDays: 14
   ProwlerTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -202,7 +202,66 @@ Resources:
               --ignore-exit-code-3
               --role
               "$ROLE"
-
+  CloudCustodianTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSTaskPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: "*"
+  CloudCustodianTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ParentStackName}-cloud-custodian"
+      Cpu: "1024"
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt CloudCustodianTaskRole.Arn
+      ContainerDefinitions:
+        - Name: cloud-custodian-container
+          Image: "cloudcustodian/c7n:0.9.42.0"
+          Essential: true
+          Cpu: 1024
+          Memory: 4096
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: cloud-custodian
+          Environment:
+            - Name: S3_BUCKET
+              Value: !Ref S3BucketName
+          EntryPoint:
+            - "/bin/sh"
+            - "-c"
+          Command:
+            - custodian
+              scan
+              --no-color
+              --no-fail-on-warn
+              --no-fail-on-error
+              --no-summary
 Outputs:
   DefaultAssessmentRole:
     Description: Default Assessment Role
@@ -219,3 +278,9 @@ Outputs:
   ProwlerTaskRole:
     Description: Prowler Task Role
     Value: !GetAtt ProwlerTaskRole.Arn
+  CloudCustodianTaskDefinition:
+    Description: Cloud Custodian Task Definition
+    Value: !Ref CloudCustodianTaskDefinition
+  CloudCustodianTaskRole:
+    Description: Cloud Custodian Task Role
+    Value: !GetAtt CloudCustodianTaskRole.Arn
