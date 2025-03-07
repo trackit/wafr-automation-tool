@@ -37,23 +37,23 @@ def test_store_results():
     database_service.put = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",
-            "#bp": "Evaluate external customer needs",
+            "#best_practice": "Evaluate external customer needs",
         },
         ExpressionAttributeValues={
-            ":new_findings": ["10"],
+            ":new_findings": ["prowler:10"],
             ":empty_list": [],
         },
     )
@@ -62,7 +62,7 @@ def test_store_results():
         item={
             **finding.model_dump(exclude={"id"}),
             DDB_KEY: invoke_llm_input.assessment_id,
-            DDB_SORT_KEY: finding.id,
+            DDB_SORT_KEY: f"prowler:{finding.id}",
         },
     )
     assert not result
@@ -92,12 +92,12 @@ def test_store_results_with_no_finding():
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
     assert not result
 
 
@@ -122,7 +122,7 @@ def test_store_results_with_invalid_questions():
 
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(
-        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-1.json")
+        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json")
     )
     assert not result
 
@@ -152,23 +152,23 @@ def test_store_results_with_no_finding_data():
     database_service.update = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#bp = list_append(if_not_exists(findings.#pillar.#question.#bp, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",
-            "#bp": "Evaluate external customer needs",
+            "#best_practice": "Evaluate external customer needs",
         },
         ExpressionAttributeValues={
-            ":new_findings": ["10"],
+            ":new_findings": ["prowler:10"],
             ":empty_list": [],
         },
     )
@@ -196,6 +196,6 @@ def test_store_results_with_invalid_llm_response():
 
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(
-        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-1.json")
+        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json")
     )
     assert not result
