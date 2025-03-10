@@ -83,6 +83,8 @@ Resources:
         ProwlerTaskRole: !GetAtt ScanningTools.Outputs.ProwlerTaskRole
         CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
         CloudCustodianTaskRole: !GetAtt ScanningTools.Outputs.CloudCustodianTaskRole
+        CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
+        CloudSploitTaskRole: !GetAtt ScanningTools.Outputs.CloudSploitTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
   DynamoDB:

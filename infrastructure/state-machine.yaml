@@ -38,6 +38,10 @@ Parameters:
     Type: String
   CloudCustodianTaskRole:
     Type: String
+  CloudSploitTaskDefinition:
+    Type: String
+  CloudSploitTaskRole:
+    Type: String
   Subnet:
     Type: String
   SecurityGroup:
@@ -171,6 +175,7 @@ Resources:
             Resource:
               - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
               - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
         - Statement:
             Effect: Allow
             Action:
@@ -185,6 +190,7 @@ Resources:
               - !Ref ECSExecutionRole
               - !Ref ProwlerTaskRole
               - !Ref CloudCustodianTaskRole
+              - !Ref CloudSploitTaskRole
         - Statement:
             Effect: Allow
             Action:
@@ -271,6 +277,31 @@ Resources:
                       LaunchType: FARGATE
                       Cluster: !Ref ECSCluster
                       TaskDefinition: !Ref CloudCustodianTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: prowler-container
+                            Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: "{% $assessment_id %}"
+                              - Name: ROLE
+                                Value: "{% $role %}"
+                    End: true
+              - StartAt: CloudSploitScan
+                States:
+                  CloudSploitScan:
+                    Type: Task
+                    Resource: arn:aws:states:::ecs:runTask.sync
+                    Arguments:
+                      LaunchType: FARGATE
+                      Cluster: !Ref ECSCluster
+                      TaskDefinition: !Ref CloudSploitTaskDefinition
                       NetworkConfiguration:
                         AwsvpcConfiguration:
                           Subnets:
