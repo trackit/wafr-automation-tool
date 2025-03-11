@@ -361,7 +361,7 @@ Resources:
               ExpressionAttributeValues:
                 ":newStep":
                   N: "1"
-            Next: PreparePrompt
+            Next: PreparePrompts
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -369,12 +369,28 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          PreparePrompt:
-            Type: Task
-            Resource: !GetAtt PreparePromptsFunction.Arn
-            Arguments:
-              assessment_id: "{% $assessment_id %}"
-              scanning_tool: "prowler"
+          PreparePrompts:
+            Type: Parallel
+            Branches:
+              - StartAt: PrepareProwlerPrompts
+                States:
+                  PrepareProwlerPrompts:
+                    Type: Task
+                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Arguments:
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "prowler"
+                    End: true
+              - StartAt: PrepareCloudCustodianPrompts
+                States:
+                  PrepareCloudCustodianPrompts:
+                    Type: Task
+                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Arguments:
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "cloud-custodian"
+                    End: true
+            Output: "{% $states.result %}"
             Next: PromptMap
             Catch:
               - ErrorEquals:
