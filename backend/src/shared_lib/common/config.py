@@ -17,8 +17,8 @@ ASSESSMENT_PK = "ASSESSMENT"
 WAFR_JSON_PLACEHOLDER = "[WAFRJSON]"
 PROWLER_JSON_PLACEHOLDER = "[ProwlerJSON]"
 
-PROWLER_OCSF_PATH = "scan/prowler/json-ocsf/prowler-output-{}.ocsf.json"
-PROWLER_COMPLIANCE_PATH = "scan/prowler/compliance/prowler-output-{}"
+PROWLER_OCSF_PATH = "scans/{}/prowler/json-ocsf/output.ocsf.json"
+PROWLER_COMPLIANCE_PATH = "scans/{}/prowler/compliance/output"
 
 STORE_CHUNK_PATH = "{}/chunks/chunk-{}.json"
 STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"

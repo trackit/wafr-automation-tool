@@ -196,9 +196,9 @@ Resources:
               --output-bucket-no-assume
               $S3_BUCKET
               --output-directory
-              scan/prowler
+              scans/$ASSESSMENT_ID/prowler
               --output-filename
-              "prowler-output-$ASSESSMENT_ID"
+              "output"
               --ignore-exit-code-3
               --role
               "$ROLE"

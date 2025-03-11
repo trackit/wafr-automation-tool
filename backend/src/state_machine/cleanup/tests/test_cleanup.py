@@ -28,12 +28,8 @@ def test_cleanup():
     assessment_service.delete_findings.assert_not_called()
     cleanup.update_assessment_item.assert_not_called()
 
-    storage_service.delete.assert_called_once_with(
-        Bucket="NONE", Key="scan/prowler/json-ocsf/prowler-output-ID.ocsf.json"
-    )
-    storage_service.filter.assert_has_calls(
-        [call("NONE", "scan/prowler/compliance/prowler-output-ID"), call("NONE", "ID")]
-    )
+    storage_service.delete.assert_called_once_with(Bucket="NONE", Key="scans/ID/prowler/json-ocsf/output.ocsf.json")
+    storage_service.filter.assert_has_calls([call("NONE", "scans/ID/prowler/compliance/output"), call("NONE", "ID")])
     storage_service.bulk_delete.assert_has_calls([call("NONE", ["TEST"]), call("NONE", ["TEST"])])
 
 
@@ -56,10 +52,6 @@ def test_cleanup_on_error():
     assessment_service.update.assert_called_once_with(
         "ID", AssessmentDto(name=None, role=None, step=-1, question_version=None, findings=None)
     )
-    storage_service.delete.assert_called_once_with(
-        Bucket="NONE", Key="scan/prowler/json-ocsf/prowler-output-ID.ocsf.json"
-    )
-    storage_service.filter.assert_has_calls(
-        [call("NONE", "scan/prowler/compliance/prowler-output-ID"), call("NONE", "ID")]
-    )
+    storage_service.delete.assert_called_once_with(Bucket="NONE", Key="scans/ID/prowler/json-ocsf/output.ocsf.json")
+    storage_service.filter.assert_has_calls([call("NONE", "scans/ID/prowler/compliance/output"), call("NONE", "ID")])
     storage_service.bulk_delete.assert_has_calls([call("NONE", ["TEST"]), call("NONE", ["TEST"])])
