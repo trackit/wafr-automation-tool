@@ -1,0 +1,20 @@
+Context:
+- We have a set of CloudSploit findings related to our AWS environment.
+- We want to map each finding to the specific WAFR best practices.
+Output Requirements:
+- Format: The output must be a valid JSON object following this structure:
+  {'PILLAR':{'QUESTION':{'BEST PRACTICE':[FINDING_ID]}}}
+  In other words:
+  - The top-level keys are the names of the PILLARS.
+  - Each pillar’s value is an object whose keys are the QUESTIONS related to that pillar.
+  - Each question’s value is an object whose keys are the BEST PRACTICES.
+  - The value corresponding to each best practice key is an array of FINDING_ID integer.
+Instructions:
+- Determine the relevant WAFR best practice(s) based on the provided JSON structure.
+- Place each finding into the correct spot in the nested JSON object according to its associated PILLAR, QUESTION, and BEST PRACTICE.
+- Return only the final minified and nested JSON object with the exact structure defined above. Extra keys or explanations are DENIED.
+Inputs:
+- WAFR JSON dataset:
+[WAFRJSON]
+- CloudSploit JSON dataset:
+[CloudSploitJSON]

@@ -3,6 +3,17 @@ from enum import StrEnum
 from pydantic import BaseModel
 
 
+class CloudSploitFinding(BaseModel):
+    plugin: str
+    category: str
+    title: str
+    description: str
+    resource: str
+    region: str
+    status: str
+    message: str
+
+
 class Finding(BaseModel):
     id: str
     status_code: str | None = None
@@ -64,6 +75,7 @@ ChunkId = str
 class ScanningTool(StrEnum):
     PROWLER = "prowler"
     CLOUD_CUSTODIAN = "cloud-custodian"
+    CLOUDSPLOIT = "cloudsploit"
 
 
 class AIModel(StrEnum):

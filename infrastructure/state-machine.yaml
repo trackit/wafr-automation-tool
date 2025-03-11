@@ -361,7 +361,7 @@ Resources:
               ExpressionAttributeValues:
                 ":newStep":
                   N: "1"
-            Next: PreparePrompts
+            Next: Prepare Prompts
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -369,29 +369,38 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          PreparePrompts:
+          Prepare Prompts:
             Type: Parallel
             Branches:
-              - StartAt: PrepareProwlerPrompts
+              - StartAt: Prepare Prowler Prompts
                 States:
-                  PrepareProwlerPrompts:
+                  Prepare Prowler Prompts:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "prowler"
                     End: true
-              - StartAt: PrepareCloudCustodianPrompts
+              - StartAt: Prepare Cloud Custodian Prompts
                 States:
-                  PrepareCloudCustodianPrompts:
+                  Prepare CloudSploit Prompts:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloud-custodian"
                     End: true
-            Output: "{% $states.result %}"
+              - StartAt: Prepare CloudSploit Prompts
+                States:
+                  Prepare CloudSploit Prompts:
+                    Type: Task
+                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Arguments:
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "cloudsploit"
+                    End: true
             Next: PromptMap
+            Output: '{% $spread($states.result) %}'
             Catch:
               - ErrorEquals:
                   - States.ALL

@@ -16,14 +16,18 @@ ASSESSMENT_PK = "ASSESSMENT"
 
 WAFR_JSON_PLACEHOLDER = "[WAFRJSON]"
 PROWLER_JSON_PLACEHOLDER = "[ProwlerJSON]"
+CLOUDSPLOIT_JSON_PLACEHOLDER = "[CloudSploitJSON]"
 
 PROWLER_OCSF_PATH = "scans/{}/prowler/json-ocsf/output.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "scans/{}/prowler/compliance/output"
+
+CLOUDSPLOIT_OUTPUT_PATH = "scans/{}/cloudsploit/output.json"
 
 STORE_CHUNK_PATH = "{}/chunks/chunk-{}.json"
 STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"
 
 PROWLER_PROMPT_PATH = "./prompts/prowler.txt"
+CLOUDSPLOIT_PROMPT_PATH = "./prompts/cloudsploit.txt"
 QUESTIONS_PATH = "./questions"
 
 

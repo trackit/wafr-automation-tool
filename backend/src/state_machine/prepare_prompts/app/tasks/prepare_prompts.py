@@ -12,6 +12,7 @@ from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from tasks.scanning_tools.cloud_custodian.create_prompts import CreateCloudCustodianPrompts
+from tasks.scanning_tools.cloudsploit.create_prompts import CloudSploitCreatePrompts
 from tasks.scanning_tools.prowler.create_prompts import CreateProwlerPrompts
 from utils.questions import QuestionSet
 
@@ -20,6 +21,7 @@ from state_machine.event import CreatePromptsInput, PreparePromptsInput
 SCANNING_TOOL_TASK: dict[str, type[CreatePromptsTask]] = {
     ScanningTool.PROWLER: CreateProwlerPrompts,
     ScanningTool.CLOUD_CUSTODIAN: CreateCloudCustodianPrompts,
+    ScanningTool.CLOUDSPLOIT: CloudSploitCreatePrompts,
 }
 
 
