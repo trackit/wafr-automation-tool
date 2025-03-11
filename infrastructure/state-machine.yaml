@@ -155,6 +155,20 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+  PrepareCustodianFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/state_machine/prepare_custodian/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource:
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
