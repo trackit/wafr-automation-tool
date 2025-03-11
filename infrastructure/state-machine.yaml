@@ -330,7 +330,7 @@ Resources:
                           AssignPublicIp: ENABLED
                       Overrides:
                         ContainerOverrides:
-                          - Name: prowler-container
+                          - Name: cloudsploit-container
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
