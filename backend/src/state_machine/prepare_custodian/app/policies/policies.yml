@@ -1,5 +1,5 @@
 policies:
-  - name: my-first-policy-event-stop-tagged-ec2
-    resource: aws.ec2
+  - name: wafr-automation-tool-lambda
+    resource: aws.lambda
     filters:
-      - tag:c7n-101: "my-first-policy-event"
+      - tag:Project: "WAFR Automation Tool"

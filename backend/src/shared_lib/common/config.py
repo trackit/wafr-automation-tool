@@ -20,6 +20,7 @@ CLOUDSPLOIT_JSON_PLACEHOLDER = "[CloudSploitJSON]"
 
 PROWLER_OCSF_PATH = "scans/{}/prowler/json-ocsf/output.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "scans/{}/prowler/compliance/output"
+CLOUD_CUSTODIAN_PATH = "scans/{}/cloud-custodian/"
 
 CLOUDSPLOIT_OUTPUT_PATH = "scans/{}/cloudsploit/output.json"
 
