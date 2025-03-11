@@ -28,6 +28,10 @@ Resources:
             Principal:
               AWS: !GetAtt ProwlerTaskRole.Arn
             Action: "sts:AssumeRole"
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt CloudCustodianTaskRole.Arn
+            Action: "sts:AssumeRole"
       Policies:
         - PolicyName: ECSTaskPolicy
           PolicyDocument:
@@ -219,6 +223,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - s3:GetObject
+                  - s3:HeadObject
                   - s3:PutObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
@@ -239,7 +245,7 @@ Resources:
       TaskRoleArn: !GetAtt CloudCustodianTaskRole.Arn
       ContainerDefinitions:
         - Name: cloud-custodian-container
-          Image: "cloudcustodian/c7n:0.9.42.0"
+          Image: 576872909007.dkr.ecr.us-west-2.amazonaws.com/wafr-automation-tool:latest
           Essential: true
           Cpu: 1024
           Memory: 4096
@@ -253,15 +259,14 @@ Resources:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
           EntryPoint:
-            - "/bin/sh"
+            - "/bin/bash"
             - "-c"
           Command:
-            - custodian
-              scan
-              --no-color
-              --no-fail-on-warn
-              --no-fail-on-error
-              --no-summary
+            - >-
+              aws s3 cp $POLICIES_URI /tmp/policies.yml
+              && (eval "$(aws sts assume-role --role-arn $ROLE --role-session-name "cloud-custodian-session" --query 'Credentials.{AWS_ACCESS_KEY_ID:AccessKeyId,AWS_SECRET_ACCESS_KEY:SecretAccessKey,AWS_SESSION_TOKEN:SessionToken}' --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1 "\nexport AWS_SECRET_ACCESS_KEY="$2 "\nexport AWS_SESSION_TOKEN="$3}')"
+              && custodian run --output-dir /tmp/cloud-custodian /tmp/policies.yml)
+              && aws s3 cp /tmp/cloud-custodian/ s3://$S3_BUCKET/scans/$ASSESSMENT_ID/cloud-custodian/
   CloudSploitTaskRole:
     Type: AWS::IAM::Role
     Properties:

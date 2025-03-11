@@ -222,6 +222,7 @@ Resources:
               - !GetAtt PreparePromptsFunction.Arn
               - !GetAtt InvokeLLMFunction.Arn
               - !GetAtt CleanupFunction.Arn
+              - !GetAtt PrepareCustodianFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
@@ -304,10 +305,10 @@ Resources:
                           AssignPublicIp: ENABLED
                       Overrides:
                         ContainerOverrides:
-                          - Name: prowler-container
+                          - Name: cloud-custodian-container
                             Environment:
-                              - Name: ASSESSMENT_ID
-                                Value: "{% $assessment_id %}"
+                              - Name: POLICIES_URI
+                                Value: "{% $states.input %}"
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
@@ -327,6 +328,14 @@ Resources:
                           SecurityGroups:
                             - !Ref SecurityGroup
                           AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: prowler-container
+                            Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: "{% $assessment_id %}"
+                              - Name: ROLE
+                                Value: "{% $role %}"
                     End: true
             Next: UpdateStep
             Catch:
