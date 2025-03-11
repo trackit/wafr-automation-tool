@@ -282,8 +282,12 @@ Resources:
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
-              - StartAt: CloudCustodianScan
+              - StartAt: PrepareCustodian
                 States:
+                  PrepareCustodian:
+                    Type: Task
+                    Resource: !GetAtt PrepareCustodianFunction.Arn
+                    Next: CloudCustodianScan
                   CloudCustodianScan:
                     Type: Task
                     Resource: arn:aws:states:::ecs:runTask.sync
