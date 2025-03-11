@@ -383,7 +383,7 @@ Resources:
                     End: true
               - StartAt: Prepare Cloud Custodian Prompts
                 States:
-                  Prepare CloudSploit Prompts:
+                  Prepare Cloud Custodian Prompts:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
