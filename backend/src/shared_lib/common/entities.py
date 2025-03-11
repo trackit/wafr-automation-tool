@@ -63,6 +63,7 @@ ChunkId = str
 
 class ScanningTool(StrEnum):
     PROWLER = "prowler"
+    CLOUD_CUSTODIAN = "cloud-custodian"
 
 
 class AIModel(StrEnum):
