@@ -307,6 +307,8 @@ Resources:
                         ContainerOverrides:
                           - Name: cloud-custodian-container
                             Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: "{% $assessment_id %}"
                               - Name: POLICIES_URI
                                 Value: "{% $states.input %}"
                               - Name: ROLE
