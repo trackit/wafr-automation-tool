@@ -2,7 +2,7 @@ import json
 from typing import override
 
 from common.config import PROWLER_OCSF_PATH, S3_BUCKET
-from common.entities import FindingExtra
+from common.entities import FindingExtra, ScanningTool
 
 from services.scanning_tools import IScanningToolService
 from services.storage import IStorageService
@@ -10,7 +10,7 @@ from services.storage import IStorageService
 
 class ProwlerService(IScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
-        super().__init__(storage_service=storage_service, name="prowler", title="Prowler")
+        super().__init__(storage_service=storage_service, name=ScanningTool.PROWLER, title="Prowler")
 
     @override
     def retrieve_findings(self, assessment_id: str) -> list[FindingExtra]:
