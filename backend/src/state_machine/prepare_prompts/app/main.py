@@ -3,7 +3,6 @@ from typing import Any
 import boto3
 from common.config import REGION
 from services.database import DDBService
-from services.prompt import PromptService
 from services.storage import S3Service
 from tasks.prepare_prompts import PreparePrompts
 from utils.questions import retrieve_questions
@@ -19,13 +18,10 @@ storage_service = S3Service(s3_client, s3_resource)
 
 question_set = retrieve_questions()
 
-prompt_service = PromptService(storage_service, question_set)
-
 prepare_prompts_task = PreparePrompts(
     database_service=database_service,
     storage_service=storage_service,
     question_set=question_set,
-    prompt_service=prompt_service,
 )
 
 
