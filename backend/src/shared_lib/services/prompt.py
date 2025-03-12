@@ -19,7 +19,7 @@ from utils.s3 import get_s3_uri
 from services.scanning_tools import IScanningToolService
 from services.storage import IStorageService
 
-CHUNK_SIZE = 700
+CHUNK_SIZE = 1000
 
 
 class IPromptService(ABC):
@@ -41,7 +41,7 @@ class PromptService(IPromptService):
         chunk_index: int,
         chunk: list[FindingExtra],
     ) -> None:
-        key = STORE_CHUNK_PATH.format(assessment_id, f"{scanning_tool_service.name}-{chunk_index}")
+        key = STORE_CHUNK_PATH.format(assessment_id, f"{scanning_tool_service.name}_{chunk_index}")
         self.storage_service.put(
             Bucket=S3_BUCKET,
             Key=key,
@@ -96,7 +96,7 @@ class PromptService(IPromptService):
     ) -> list[PromptS3Uri]:
         prompt_uris: list[PromptS3Uri] = []
         for i, prompt in enumerate(prompts):
-            key = STORE_PROMPT_PATH.format(assessment_id, f"{scanning_tool_service.name}-{i}")
+            key = STORE_PROMPT_PATH.format(assessment_id, f"{scanning_tool_service.name}_{i}")
             prompt_uris.append(get_s3_uri(S3_BUCKET, key))
             prompt_with_questions = self.insert_questions_in_prompt(prompt)
             self.storage_service.put(

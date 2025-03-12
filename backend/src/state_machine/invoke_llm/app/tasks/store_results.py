@@ -142,11 +142,14 @@ class StoreResults(Task[StoreResultsInput, None]):
         return findings
 
     def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
-        split = prompt_uri.split("-")
-        if len(split) != 3:  # noqa: PLR2004
+        split = prompt_uri.split("/")
+        if len(split) < 1:
             raise InvalidPromptUriError(prompt_uri)
-        scanning_tool = ScanningTool(split[-2])
-        chunk_id = split[-1].split(".")[0]
+        filename = split[-1]
+        without_extension = filename.split(".")[0]
+        split = without_extension.split("_")
+        scanning_tool = ScanningTool(split[0])
+        chunk_id = split[1]
         return scanning_tool, chunk_id
 
     @override
@@ -154,5 +157,5 @@ class StoreResults(Task[StoreResultsInput, None]):
         llm_findings = self.merge_response(event.llm_response)
         s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
-        findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}-{chunk_id}")
+        findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
         self.store_results(event.assessment_id, scanning_tool, llm_findings, findings_data)
