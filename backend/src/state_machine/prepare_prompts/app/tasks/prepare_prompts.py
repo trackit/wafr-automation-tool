@@ -6,23 +6,15 @@ from common.config import (
     DDB_SORT_KEY,
     DDB_TABLE,
 )
-from common.entities import ScanningTool
-from common.task import CreatePromptsTask, Task
+from common.task import Task
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
+from services.prompt import IPromptService
+from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
-from tasks.scanning_tools.cloud_custodian.create_prompts import CreateCloudCustodianPrompts
-from tasks.scanning_tools.cloudsploit.create_prompts import CloudSploitCreatePrompts
-from tasks.scanning_tools.prowler.create_prompts import CreateProwlerPrompts
 from utils.questions import QuestionSet
 
-from state_machine.event import CreatePromptsInput, PreparePromptsInput
-
-SCANNING_TOOL_TASK: dict[str, type[CreatePromptsTask]] = {
-    ScanningTool.PROWLER: CreateProwlerPrompts,
-    ScanningTool.CLOUD_CUSTODIAN: CreateCloudCustodianPrompts,
-    ScanningTool.CLOUDSPLOIT: CloudSploitCreatePrompts,
-}
+from state_machine.event import PreparePromptsInput
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
@@ -31,11 +23,13 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         database_service: IDatabaseService,
         storage_service: IStorageService,
         question_set: QuestionSet,
+        prompt_service: IPromptService,
     ) -> None:
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
         self.question_set = question_set
+        self.prompt_service = prompt_service
 
     def populate_dynamodb(self, assessment_id: str) -> None:
         attrs: dict[str, Any] = {"findings": self.question_set.data, "question_version": self.question_set.version}
@@ -47,10 +41,10 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
     @override
     def execute(self, event: PreparePromptsInput) -> list[str]:
-        scanning_tool_task = SCANNING_TOOL_TASK.get(event.scanning_tool)
-        if scanning_tool_task is None:
+        scanning_tool_service_type = SCANNING_TOOL_SERVICES.get(event.scanning_tool)
+        if scanning_tool_service_type is None:
             raise InvalidScanningToolError(event.scanning_tool)
 
         self.populate_dynamodb(event.assessment_id)
-        task = scanning_tool_task(self.storage_service, self.question_set)
-        return task.execute(CreatePromptsInput(assessment_id=event.assessment_id, scanning_tool=event.scanning_tool))
+        scanning_tool_service = scanning_tool_service_type(self.storage_service)
+        return self.prompt_service.create_prompts(scanning_tool_service, event.assessment_id)

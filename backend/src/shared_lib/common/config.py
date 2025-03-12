@@ -14,23 +14,20 @@ DDB_SORT_KEY = "SK"
 
 ASSESSMENT_PK = "ASSESSMENT"
 
-WAFR_JSON_PLACEHOLDER = "[WAFRJSON]"
-PROWLER_JSON_PLACEHOLDER = "[ProwlerJSON]"
-CLOUDSPLOIT_JSON_PLACEHOLDER = "[CloudSploitJSON]"
+SCANNING_TOOL_NAME_PLACEHOLDER = "[SCANNING_TOOL_NAME]"
+SCANNING_TOOL_DATA_PLACEHOLDER = "[SCANNING_TOOL_DATA]"
+QUESTION_SET_DATA_PLACEHOLDER = "[QUESTION_SET_DATA]"
+PROMPT_PATH = "./data/prompt.txt"
 
-PROWLER_OCSF_PATH = "scans/{}/prowler/json-ocsf/output.ocsf.json"
-PROWLER_COMPLIANCE_PATH = "scans/{}/prowler/compliance/output"
-CLOUD_CUSTODIAN_PATH = "scans/{}/cloud-custodian/"
+PROWLER_OCSF_PATH = "assessments/{}/scans/prowler/json-ocsf/output.ocsf.json"
+PROWLER_COMPLIANCE_PATH = "assessments/{}/scans/prowler/compliance/output"
+CLOUD_CUSTODIAN_PATH = "assessments/{}/scans/cloud-custodian/"
+CLOUDSPLOIT_OUTPUT_PATH = "assessments/{}/scans/cloudsploit/output.json"
 
-CLOUDSPLOIT_OUTPUT_PATH = "scans/{}/cloudsploit/output.json"
+STORE_CHUNK_PATH = "assessments/{}/chunks/chunk-{}.json"
+STORE_PROMPT_PATH = "assesments/{}/prompts/prompt-{}.txt"
 
-STORE_CHUNK_PATH = "{}/chunks/chunk-{}.json"
-STORE_PROMPT_PATH = "{}/prompts/prompt-{}.txt"
-
-PROWLER_PROMPT_PATH = "./prompts/prowler.txt"
-CLOUDSPLOIT_PROMPT_PATH = "./prompts/cloudsploit.txt"
 QUESTIONS_PATH = "./questions"
-
 
 AI_MODELS: dict[str, type[IModel]] = {
     AIModel.Claude3Dot5Sonnet: Claude3Dot5Sonnet,

@@ -1,5 +1,5 @@
 Context:
-- We have a set of CloudSploit findings related to our AWS environment.
+- We have a set of [SCANNING_TOOL_NAME] findings related to our AWS environment.
 - We want to map each finding to the specific WAFR best practices.
 Output Requirements:
 - Format: The output must be a valid JSON object following this structure:
@@ -15,6 +15,6 @@ Instructions:
 - Return only the final minified and nested JSON object with the exact structure defined above. Extra keys or explanations are DENIED.
 Inputs:
 - WAFR JSON dataset:
-[WAFRJSON]
-- CloudSploit JSON dataset:
-[CloudSploitJSON]
+[QUESTION_SET_DATA]
+- [SCANNING_TOOL_NAME] JSON dataset:
+[SCANNING_TOOL_DATA]
