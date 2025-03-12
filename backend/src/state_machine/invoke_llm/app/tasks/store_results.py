@@ -11,6 +11,7 @@ from common.config import (
 )
 from common.entities import AnswerData, ChunkId, FindingExtra, PillarDict, ScanningTool
 from common.task import Task
+from exceptions.ai import InvalidPromptResponseError
 from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
@@ -137,8 +138,8 @@ class StoreResults(Task[StoreResultsInput, None]):
             try:
                 obj = json.loads(llm_result)
                 findings.update(obj)
-            except json.JSONDecodeError:
-                continue
+            except json.JSONDecodeError as e:
+                raise InvalidPromptResponseError(llm_result) from e
         return findings
 
     def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
