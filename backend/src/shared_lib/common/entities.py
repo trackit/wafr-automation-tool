@@ -78,6 +78,10 @@ class ScanningTool(StrEnum):
     CLOUDSPLOIT = "cloudsploit"
 
 
+class CloudCustodianPolicy(StrEnum):
+    EC2_STOPPED_INSTANCE = "ec2-stopped-instance"
+
+
 class AIModel(StrEnum):
     Claude3Dot5Sonnet = "claude-3-5-sonnet"
     Claude3Dot7Sonnet = "claude-3-7-sonnet"
