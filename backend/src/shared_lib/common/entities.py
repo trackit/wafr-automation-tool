@@ -46,7 +46,7 @@ class AnswerData(BaseModel):
     best_practice: str
 
 
-BestPracticeDict = list[int]
+BestPracticeDict = list[str]
 QuestionDict = dict[str, BestPracticeDict]
 PillarDict = dict[str, QuestionDict]
 

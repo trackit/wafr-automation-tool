@@ -21,7 +21,7 @@ def test_assessment_service_retrieve():
             "role": "test-assessment-role",
             "step": Decimal("1"),
             "question_version": "test-question-version",
-            "findings": {"pillar-1": {"question-1": {"best-practice-1": [Decimal("1"), Decimal("2"), Decimal("3")]}}},
+            "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
         }
     )
 
@@ -33,7 +33,7 @@ def test_assessment_service_retrieve():
         role="test-assessment-role",
         step=1,
         question_version="test-question-version",
-        findings={"pillar-1": {"question-1": {"best-practice-1": [1, 2, 3]}}},
+        findings={"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
     )
 
     fake_database_service.get.assert_called_once_with(
@@ -106,7 +106,7 @@ def test_assessment_service_retrieve_best_practice():
             findings={
                 "pillar-1": {
                     "question-1": {
-                        "best-practice-1": [1, 2],
+                        "best-practice-1": ["1", "2"],
                     }
                 },
             },
@@ -227,7 +227,7 @@ def test_assessment_service_retrieve_inexistent_best_practice():
                 findings={
                     "pillar-1": {
                         "question-1": {
-                            "best-practice-1": [1, 2, 3],
+                            "best-practice-1": ["1", "2", "3"],
                         }
                     },
                 },
@@ -319,7 +319,7 @@ def test_assessment_service_update():
             findings={
                 "pillar-1": {
                     "question-1": {
-                        "best-practice-1": [1, 2, 3],
+                        "best-practice-1": ["1", "2", "3"],
                     }
                 }
             },
@@ -334,7 +334,7 @@ def test_assessment_service_update():
             "role": "test-assessment-role",
             "step": 1,
             "question_version": "test-question-version",
-            "findings": {"pillar-1": {"question-1": {"best-practice-1": [1, 2, 3]}}},
+            "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
         },
     )
 

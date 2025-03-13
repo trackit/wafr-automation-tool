@@ -86,7 +86,7 @@ class AssessmentService(IAssessmentService):
     ) -> list[FindingExtra] | None:
         if not assessment.findings:
             return None
-        bp_findings: list[int] = []
+        bp_findings: list[str] = []
         for pillar in assessment.findings.values():
             for question in pillar.values():
                 if best_practice_name in question:
