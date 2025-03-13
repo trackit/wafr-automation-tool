@@ -1,0 +1,50 @@
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
+from common.entities import ScanningTool
+from tests.__mocks__.fake_database_service import FakeDatabaseService
+from tests.__mocks__.fake_storage_service import FakeStorageService
+from utils.tests import load_file
+
+from state_machine.event import PreparePromptsInput
+
+
+@patch("utils.prompt.get_prompt", return_value="prompt")
+def test_prepare_prompts(get_prompt_mock: MagicMock):
+    from ..app.tasks.prepare_prompts import PreparePrompts
+
+    event = PreparePromptsInput(assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER)
+
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.update_attrs = MagicMock()
+
+    fake_storage_service = FakeStorageService()
+    fake_storage_service.get = MagicMock(return_value=load_file(Path(__file__).parent / "prowler_output.json"))
+    fake_storage_service.put = MagicMock()
+
+    fake_question_set = MagicMock(data={"pillar-1": {"question-1": {"best-practice-1": []}}})
+
+    task = PreparePrompts(
+        database_service=fake_database_service, storage_service=fake_storage_service, question_set=fake_question_set
+    )
+
+    prompt_list = task.execute(event)
+
+    fake_database_service.update_attrs.assert_called_once_with(
+        table_name="test-table",
+        key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test_assessment_id"},
+        attrs={
+            "findings": {"pillar-1": {"question-1": {"best-practice-1": []}}},
+            "question_version": fake_question_set.version,
+        },
+    )
+
+    fake_storage_service.get.assert_called_once_with(
+        Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format(event.assessment_id)
+    )
+    fake_storage_service.put.assert_called()
+
+    assert prompt_list == [
+        f"s3://{S3_BUCKET}/{STORE_PROMPT_PATH.format(event.assessment_id, 'prowler_0')}",
+    ]

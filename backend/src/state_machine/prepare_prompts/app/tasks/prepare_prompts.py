@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from typing import Any, override
 
 from common.config import (
@@ -7,7 +6,6 @@ from common.config import (
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
-    PROMPT_PATH,
     QUESTION_SET_DATA_PLACEHOLDER,
     S3_BUCKET,
     SCANNING_TOOL_DATA_PLACEHOLDER,
@@ -22,6 +20,7 @@ from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
+from utils.prompt import get_prompt
 from utils.questions import QuestionSet
 from utils.s3 import get_s3_uri
 
@@ -94,10 +93,6 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             prompts.append(chunk_prompt)
         return prompts
 
-    def retrieve_prompt(self) -> str:
-        with Path(PROMPT_PATH).open() as f:
-            return f.read()
-
     def insert_questions_in_prompt(self, prompt: Prompt) -> str:
         return prompt.replace(
             QUESTION_SET_DATA_PLACEHOLDER,
@@ -125,7 +120,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def create_prompts(self, scanning_tool_service: IScanningToolService, assessment_id: str) -> list[Prompt]:
         findings = scanning_tool_service.retrieve_findings(assessment_id)
         chunks = self.create_chunks(scanning_tool_service, assessment_id, findings)
-        prompts = self.create_prompts_from_chunks(scanning_tool_service, self.retrieve_prompt(), chunks)
+        prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
         return self.store_prompts(scanning_tool_service, assessment_id, prompts)
 
     @override
