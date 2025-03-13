@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -54,6 +55,7 @@ class AssessmentDto(BaseModel):
     name: str | None = None
     role: str | None = None
     step: int | None = None
+    error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
 
@@ -63,6 +65,7 @@ class Assessment(BaseModel):
     name: str
     role: str
     step: int
+    error: dict[str, Any] | None = None
     question_version: str
     findings: dict[str, PillarDict] | None = None
 
