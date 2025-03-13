@@ -53,7 +53,15 @@ def test_cleanup_on_error():
 
     assessment_service.delete_findings.assert_called_once_with("ID")
     assessment_service.update.assert_called_once_with(
-        "ID", AssessmentDto(name=None, role=None, step=-1, question_version=None, findings=None)
+        "ID",
+        AssessmentDto(
+            name=None,
+            role=None,
+            step=-1,
+            question_version=None,
+            findings=None,
+            error={"Error": "ERROR", "Cause": "CAUSE"},
+        ),
     )
     storage_service.delete.assert_called_once_with(Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("ID"))
     storage_service.filter.assert_has_calls(
