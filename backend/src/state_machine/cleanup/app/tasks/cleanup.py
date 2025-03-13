@@ -5,6 +5,7 @@ from common.config import (
     PROWLER_COMPLIANCE_PATH,
     PROWLER_OCSF_PATH,
     S3_BUCKET,
+    STEP_ERROR,
 )
 from common.entities import AssessmentDto
 from common.task import Task
@@ -47,7 +48,7 @@ class Cleanup(Task[CleanupInput, None]):
         if error is not None:
             error = error.model_dump()
         assessment_dto = AssessmentDto(
-            step=-1,
+            step=STEP_ERROR,
             error=error,
         )
         self.assessment_service.update(event.assessment_id, assessment_dto)

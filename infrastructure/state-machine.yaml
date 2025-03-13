@@ -243,7 +243,7 @@ Resources:
                 role:
                   S: "{% $states.input.role %}"
                 step:
-                  S: "0"
+                  S: "Start the scanning process"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
               role: "{% $states.input.role %}"
@@ -339,7 +339,7 @@ Resources:
                               - Name: ROLE
                                 Value: "{% $role %}"
                     End: true
-            Next: UpdateStep
+            Next: PreparePromptsUpdateStep
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -347,7 +347,7 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          UpdateStep:
+          PreparePromptsUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
@@ -360,7 +360,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
-                  N: "1"
+                  S: "Prepare all prompts"
             Next: Prepare Prompts
             Catch:
               - ErrorEquals:
@@ -399,8 +399,31 @@ Resources:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloudsploit"
                     End: true
-            Next: PromptMap
+            Next: InvokeLLMUpdateStep
             Output: "{% $spread($states.result) %}"
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+          InvokeLLMUpdateStep:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:updateItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Key:
+                PK:
+                  S: "ASSESSMENT"
+                SK:
+                  S: "{% $assessment_id %}"
+              UpdateExpression: SET step = :newStep
+              ExpressionAttributeValues:
+                ":newStep":
+                  S: "Invoke LLM"
+            Next: PromptMap
+            Output: "{% $states.input %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -426,19 +449,41 @@ Resources:
             Catch:
               - ErrorEquals:
                   - States.ALL
+                Next: FinishUpdateStep
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+          FinishUpdateStep:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:updateItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Key:
+                PK:
+                  S: "ASSESSMENT"
+                SK:
+                  S: "{% $assessment_id %}"
+              UpdateExpression: SET step = :newStep
+              ExpressionAttributeValues:
+                ":newStep":
+                  S: "Finish"
+            Next: Cleanup
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          CleanupOnError:
-            Type: Task
-            Resource: !GetAtt CleanupFunction.Arn
-            End: true
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+            End: true
+          CleanupOnError:
+            Type: Task
+            Resource: !GetAtt CleanupFunction.Arn
             End: true
 
 Outputs:

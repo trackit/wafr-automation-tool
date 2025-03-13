@@ -54,7 +54,7 @@ PillarDict = dict[str, QuestionDict]
 class AssessmentDto(BaseModel):
     name: str | None = None
     role: str | None = None
-    step: int | None = None
+    step: str | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
@@ -64,7 +64,7 @@ class Assessment(BaseModel):
     id: str
     name: str
     role: str
-    step: int
+    step: str
     error: dict[str, Any] | None = None
     question_version: str
     findings: dict[str, PillarDict] | None = None
