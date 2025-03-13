@@ -226,6 +226,8 @@ components:
         step:
           type: string
           description: Current step of the assessment
+        error:
+          $ref: "#/components/schemas/AssessmentError"
         question_version:
           type: string
           description: The version of questions used
@@ -345,3 +347,11 @@ components:
           type: integer
           description: Total number of findings
           example: 45
+    AssessmentError:
+      type: object
+      description: Present if an error has occurred during the process.
+      properties:
+        Error:
+          type: string
+        Cause:
+          type: string
