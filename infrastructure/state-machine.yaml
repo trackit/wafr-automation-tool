@@ -445,11 +445,11 @@ Resources:
                     assessment_id: "{% $assessment_id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
-            Next: Cleanup
+            Next: FinishUpdateStep
             Catch:
               - ErrorEquals:
                   - States.ALL
-                Next: FinishUpdateStep
+                Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
