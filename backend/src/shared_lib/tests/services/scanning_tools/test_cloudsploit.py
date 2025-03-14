@@ -1,7 +1,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from common.config import CLOUDSPLOIT_OUTPUT_PATH
+from common.config import CLOUDSPLOIT_OUTPUT_PATH, S3_BUCKET
+from common.entities import FindingExtra
 from services.scanning_tools.cloudsploit import CloudSploitService
 from utils.tests import load_file
 
@@ -17,7 +18,17 @@ def test_cloudsploit_retrieve_findings():
     findings = service.retrieve_findings(assessment_id="test-assessment-id")
 
     fake_storage_service.get.assert_called_once_with(
-        Bucket="NONE", Key=CLOUDSPLOIT_OUTPUT_PATH.format("test-assessment-id")
+        Bucket=S3_BUCKET, Key=CLOUDSPLOIT_OUTPUT_PATH.format("test-assessment-id")
     )
 
-    assert findings == []
+    assert findings == [
+        FindingExtra(
+            id="1",
+            status_code=None,
+            status_detail="Access Analyzer is not configured",
+            severity=None,
+            resources=[],
+            remediation=None,
+            risk_details="Ensure that IAM Access analyzer is enabled for all regions.",
+        ),
+    ]

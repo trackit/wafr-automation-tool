@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "plugin": "accessAnalyzerEnabled",
+    "category": "IAM",
+    "title": "Access Analyzer Enabled",
+    "description": "Ensure that IAM Access analyzer is enabled for all regions.",
+    "resource": "N/A",
+    "region": "us-east-1",
+    "status": "FAIL",
+    "message": "Access Analyzer is not configured"
+  }
+]
