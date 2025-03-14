@@ -17,4 +17,5 @@ class ProwlerService(IScanningToolService):
         key = PROWLER_OCSF_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
-        return [FindingExtra(**item, id=str(i + 1)) for i, item in enumerate(loaded_content)]
+        findings = [FindingExtra(**item, id=str(i + 1)) for i, item in enumerate(loaded_content)]
+        return [f for f in findings if f.status_code != "PASS"]
