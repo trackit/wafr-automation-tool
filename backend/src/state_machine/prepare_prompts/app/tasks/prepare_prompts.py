@@ -26,7 +26,7 @@ from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
 
-CHUNK_SIZE = 3000
+CHUNK_SIZE = 2000
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
