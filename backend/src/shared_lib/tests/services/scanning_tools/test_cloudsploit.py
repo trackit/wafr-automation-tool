@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from common.config import CLOUDSPLOIT_OUTPUT_PATH
 from services.scanning_tools.cloudsploit import CloudSploitService
 from utils.tests import load_file
 
@@ -15,6 +16,8 @@ def test_cloudsploit_retrieve_findings():
 
     findings = service.retrieve_findings(assessment_id="test-assessment-id")
 
-    fake_storage_service.get.assert_called_once_with(Bucket="test-bucket", Key="test-key")
+    fake_storage_service.get.assert_called_once_with(
+        Bucket="NONE", Key=CLOUDSPLOIT_OUTPUT_PATH.format("test-assessment-id")
+    )
 
     assert findings == []
