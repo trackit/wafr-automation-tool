@@ -4,7 +4,16 @@ import VerticalMenu from './vertical-menu';
 
 describe('VerticalMenu', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<VerticalMenu />);
+    const items = [
+      {
+        text: 'Test Item',
+        id: '1',
+        onClick: () => {
+          console.log('clicked');
+        },
+      },
+    ];
+    const { baseElement } = render(<VerticalMenu items={items} />);
     expect(baseElement).toBeTruthy();
   });
 });
