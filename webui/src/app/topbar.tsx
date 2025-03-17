@@ -1,4 +1,4 @@
-import { ThemeSwitcher } from '@webui/ui';
+// import { ThemeSwitcher } from '@webui/ui';
 
 const Topbar = () => {
   return (
@@ -15,7 +15,7 @@ const Topbar = () => {
         <h1>WAFR Automation</h1>
       </div>
       <div className="flex items-center gap-4 mr-8">
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
 
         {/*<div className="dropdown dropdown-end">*/}
         {/*  <button className="btn btn-link btn-sm text-black dark:text-white">*/}
