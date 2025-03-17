@@ -1,0 +1,4 @@
+.tabs-wrapper .tab-active:before {
+  left: 0;
+  width: 100%;
+}
