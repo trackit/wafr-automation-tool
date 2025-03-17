@@ -38,10 +38,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: role
+        - name: roleArn
           in: query
-          description: Role for which to start the assessment
-          required: true
+          description: |
+            Role for which to start the assessment \
+            If not set a default role will be used
           schema:
             type: string
       responses:
