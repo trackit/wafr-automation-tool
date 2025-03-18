@@ -14,7 +14,13 @@ from ..app.tasks.retrieve_best_practice_findings import (
 
 def test_retrieve_best_practice_findings():
     assessment = Assessment(
-        id="AID", name="AN", role="AR", step=STEP_START_SCANNING, question_version="QV", findings=None
+        id="AID",
+        name="AN",
+        role_arn="AR",
+        step=STEP_START_SCANNING,
+        created_at="",
+        question_version="QV",
+        findings=None,
     )
     finding: FindingExtra = FindingExtra(
         id="FID",
@@ -61,7 +67,13 @@ def test_retrieve_best_practice_findings_not_found_assessment():
 
 def test_retrieve_best_practice_findings_not_found_findings():
     assessment = Assessment(
-        id="AID", name="AN", role="AR", step=STEP_START_SCANNING, question_version="QV", findings=None
+        id="AID",
+        name="AN",
+        role_arn="AR",
+        step=STEP_START_SCANNING,
+        created_at="",
+        question_version="QV",
+        findings=None,
     )
     finding = None
     assessment_service = FakeAssessmentService()

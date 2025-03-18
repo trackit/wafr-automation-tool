@@ -1,3 +1,4 @@
+import datetime
 import time
 from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import override
@@ -35,6 +36,7 @@ class StartAssessment(
             assessment_id=assessment_id,
             name=event.name,
             role_arn=role_arn,
+            created_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,

@@ -56,7 +56,7 @@ def test_cleanup_on_error():
         "ID",
         AssessmentDto(
             name=None,
-            role=None,
+            role_arn=None,
             step=STEP_ERROR,
             question_version=None,
             findings=None,

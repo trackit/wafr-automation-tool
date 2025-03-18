@@ -12,7 +12,13 @@ from ..app.tasks.retrieve_assessment import RetrieveAssessment
 
 def test_retrieve_assessment():
     assessment = Assessment(
-        id="AID", name="AN", role="AR", step=STEP_START_SCANNING, question_version="QV", findings=None
+        id="AID",
+        name="AN",
+        role_arn="AR",
+        step=STEP_START_SCANNING,
+        created_at="",
+        question_version="QV",
+        findings=None,
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)

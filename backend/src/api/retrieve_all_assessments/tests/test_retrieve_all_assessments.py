@@ -10,7 +10,15 @@ from ..app.tasks.retrieve_all_assessments import RetrieveAllAssessments
 
 def test_retrieve_all_assessments():
     assessments = [
-        Assessment(id="AID", name="AN", role="AR", step=STEP_START_SCANNING, question_version="QV", findings=None)
+        Assessment(
+            id="AID",
+            name="AN",
+            role_arn="AR",
+            step=STEP_START_SCANNING,
+            created_at="",
+            question_version="QV",
+            findings=None,
+        )
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
     assessments_dicts[0]["error"] = None

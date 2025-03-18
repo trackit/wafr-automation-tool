@@ -53,7 +53,8 @@ PillarDict = dict[str, QuestionDict]
 
 class AssessmentDto(BaseModel):
     name: str | None = None
-    role: str | None = None
+    role_arn: str | None = None
+    created_at: str | None = None
     step: str | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
@@ -63,7 +64,8 @@ class AssessmentDto(BaseModel):
 class Assessment(BaseModel):
     id: str
     name: str
-    role: str
+    role_arn: str
+    created_at: str
     step: str
     error: dict[str, Any] | None = None
     question_version: str

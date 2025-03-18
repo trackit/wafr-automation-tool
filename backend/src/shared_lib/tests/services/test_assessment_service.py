@@ -17,8 +17,9 @@ def test_assessment_service_retrieve():
             DDB_KEY: "ASSESSMENT",
             DDB_SORT_KEY: "test-assessment-id",
             "name": "test-assessment-name",
-            "role": "test-assessment-role",
+            "role_arn": "test-assessment-role",
             "step": STEP_FINISH,
+            "created_at": "",
             "question_version": "test-question-version",
             "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
         }
@@ -29,8 +30,9 @@ def test_assessment_service_retrieve():
     assert assessment == Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
-        role="test-assessment-role",
+        role_arn="test-assessment-role",
         step=STEP_FINISH,
+        created_at="",
         question_version="test-question-version",
         findings={"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
     )
@@ -99,8 +101,9 @@ def test_assessment_service_retrieve_best_practice():
         assessment=Assessment(
             id="test-assessment-id",
             name="test-assessment-name",
-            role="test-assessment-role",
+            role_arn="test-assessment-role",
             step=STEP_FINISH,
+            created_at="",
             question_version="test-question-version",
             findings={
                 "pillar-1": {
@@ -220,8 +223,9 @@ def test_assessment_service_retrieve_inexistent_best_practice():
             assessment=Assessment(
                 id="test-assessment-id",
                 name="test-assessment-name",
-                role="test-assessment-role",
+                role_arn="test-assessment-role",
                 step=STEP_FINISH,
+                created_at="",
                 question_version="test-question-version",
                 findings={
                     "pillar-1": {
@@ -312,7 +316,7 @@ def test_assessment_service_update():
         assessment_id="test-assessment-id",
         assessment_dto=AssessmentDto(
             name="test-assessment-name",
-            role="test-assessment-role",
+            role_arn="test-assessment-role",
             step=STEP_FINISH,
             question_version="test-question-version",
             findings={
@@ -330,7 +334,7 @@ def test_assessment_service_update():
         key={DDB_KEY: "ASSESSMENT", DDB_SORT_KEY: "test-assessment-id"},
         attrs={
             "name": "test-assessment-name",
-            "role": "test-assessment-role",
+            "role_arn": "test-assessment-role",
             "step": STEP_FINISH,
             "question_version": "test-question-version",
             "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},

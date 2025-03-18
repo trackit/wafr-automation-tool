@@ -1,6 +1,6 @@
 from typing import Any
 
-from common.entities import Assessment, FindingExtra
+from common.entities import Assessment, AssessmentDto, FindingExtra
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -18,6 +18,7 @@ class StateMachineInput(BaseModel):
     assessment_id: str
     name: str
     role_arn: str
+    created_at: str
 
 
 class DeleteAssessmentInput(BaseModel):
@@ -50,3 +51,8 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
 
 
 RetrieveAllAssessmentsResponseBody = list[dict[str, Any]]
+
+
+class UpdateAssessmentInput(BaseModel):
+    assessment_id: str
+    assessment_dto: AssessmentDto
