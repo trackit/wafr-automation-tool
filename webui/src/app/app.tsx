@@ -166,23 +166,28 @@ export function App() {
   return (
     <div className="h-screen flex flex-col">
       <Topbar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Tabs
-          tabs={[
-            { label: 'Operational Excellence 0/5', id: 'tab1' },
-            { label: 'Security 0/5', id: 'tab2' },
-            { label: 'Reliability 0/5', id: 'tab3' },
-            { label: 'Cost Optimization 0/5', id: 'tab4' },
-            { label: 'Performance Efficiency 0/5', id: 'tab5' },
-          ]}
-          activeTab="tab1"
-          onChange={(tab) => {
-            console.log(tab);
-          }}
-        />
-        <div className="flex-1 flex flex-row overflow-auto  m-8 rounded-lg border border-neutral-content shadow-md ">
-          <VerticalMenu items={devMenuQuestions} />
-          <div className="flex-1 bg-primary/5 "></div>
+      <div className="flex-1 flex flex-col overflow-hidden items-center">
+        <div className="container py-8 overflow-auto flex-1 flex flex-col">
+          <div className="prose mb-4">
+            <h2 className="mt-0">Assessment 01 - Client</h2>
+          </div>
+          <Tabs
+            tabs={[
+              { label: 'Operational Excellence 0/5', id: 'tab1' },
+              { label: 'Security 0/5', id: 'tab2' },
+              { label: 'Reliability 0/5', id: 'tab3' },
+              { label: 'Cost Optimization 0/5', id: 'tab4' },
+              { label: 'Performance Efficiency 0/5', id: 'tab5' },
+            ]}
+            activeTab="tab1"
+            onChange={(tab) => {
+              console.log(tab);
+            }}
+          />
+          <div className="flex-1 flex flex-row overflow-auto  my-4 rounded-lg border border-neutral-content shadow-md ">
+            <VerticalMenu items={devMenuQuestions} />
+            <div className="flex-1 bg-primary/5 "></div>
+          </div>
         </div>
       </div>
     </div>
