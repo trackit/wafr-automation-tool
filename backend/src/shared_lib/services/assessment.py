@@ -76,6 +76,7 @@ class AssessmentService(IAssessmentService):
         for item in items:
             assessment = self._create_assessment(item)
             assessments.append(assessment)
+        assessments.sort(key=lambda x: x.created_at, reverse=True)
         return assessments
 
     @override

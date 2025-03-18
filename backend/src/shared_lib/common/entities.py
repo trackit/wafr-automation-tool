@@ -68,7 +68,7 @@ class Assessment(BaseModel):
     created_at: str
     step: str
     error: dict[str, Any] | None = None
-    question_version: str
+    question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
 
 
