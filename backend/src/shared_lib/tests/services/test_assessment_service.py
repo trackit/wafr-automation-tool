@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
-from common.entities import Assessment, BestPractice, BestPracticeData
+from common.entities import Assessment
 from common.enums import Steps
 from services.assessment import AssessmentService
 

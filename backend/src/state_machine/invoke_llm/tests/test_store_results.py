@@ -48,7 +48,7 @@ def test_store_results():
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",
@@ -165,7 +165,7 @@ def test_store_results_with_no_finding_data():
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",

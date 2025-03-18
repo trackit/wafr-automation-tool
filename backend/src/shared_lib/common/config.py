@@ -34,6 +34,3 @@ AI_MODELS: dict[str, type[IModel]] = {
     AIModel.Claude3Dot7Sonnet: Claude3Dot7Sonnet,
 }
 AI_MODEL = os.getenv("AI_MODEL", "claude-3-5-sonnet")
-
-
-
