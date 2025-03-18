@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any
+from typing import Any, TypedDict
 
 from pydantic import BaseModel
 from utils.api import APIResponseBody
@@ -47,13 +47,15 @@ class AnswerData(BaseModel):
     best_practice: str
 
 
-BestPracticeData = dict[str, str | bool]  # {"risk": str, "status": bool}
-
-BestPractice = dict[str, BestPracticeData | list[str]]  # {"data": BestPracticeData, "results": list[str]}
+class BestPractice(TypedDict):
+    risk: str
+    status: bool
+    results: list[str]
 
 
 class BestPracticeExtra(APIResponseBody):
-    data: BestPracticeData
+    risk: str
+    status: bool
     results: list[FindingExtra]
 
 

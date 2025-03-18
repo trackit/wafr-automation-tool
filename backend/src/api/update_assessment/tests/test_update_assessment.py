@@ -9,7 +9,7 @@ from api.event import UpdateAssessmentInput
 from ..app.tasks.update_assessment import UpdateAssessment
 
 
-def test_delete_assessment():
+def test_update_assessment():
     assessment_service = FakeAssessmentService()
     assessment_service.update = MagicMock(return_value=True)
     assessment_dto = AssessmentDto(

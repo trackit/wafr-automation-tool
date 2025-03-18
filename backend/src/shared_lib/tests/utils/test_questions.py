@@ -34,11 +34,13 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
         "pillar-1": {
             "question-1": {
                 "best-practice-1": {
-                    "data": {"risk": "Low", "status": False},
+                    "risk": "Low",
+                    "status": False,
                     "results": [],
                 },
                 "best-practice-2": {
-                    "data": {"risk": "Medium", "status": False},
+                    "risk": "Medium",
+                    "status": False,
                     "results": [],
                 },
             }
@@ -46,7 +48,8 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
         "pillar-2": {
             "question-2": {
                 "best-practice-1": {
-                    "data": {"risk": "High", "status": False},
+                    "risk": "High",
+                    "status": False,
                     "results": [],
                 },
             }

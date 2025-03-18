@@ -21,9 +21,7 @@ def test_assessment_service_retrieve():
             "question_version": "test-question-version",
             "findings": {
                 "pillar-1": {
-                    "question-1": {
-                        "best-practice-1": {"data": {"risk": "Low", "status": False}, "results": ["1", "2", "3"]}
-                    }
+                    "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
                 }
             },
         }
@@ -40,9 +38,7 @@ def test_assessment_service_retrieve():
         question_version="test-question-version",
         findings={
             "pillar-1": {
-                "question-1": {
-                    "best-practice-1": {"data": {"risk": "Low", "status": False}, "results": ["1", "2", "3"]}
-                }
+                "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
             }
         },
     )
