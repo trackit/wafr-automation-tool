@@ -328,18 +328,14 @@ components:
       description: Best practice object
       additionalProperties: false
       properties:
-        data:
-          type: object
-          additionalProperties: false
-          properties:
-            risk:
-              type: string
-              enum:
-                - "High"
-                - "Medium"
-                - "Low"
-            status:
-              type: boolean
+        risk:
+          type: string
+          enum:
+            - "High"
+            - "Medium"
+            - "Low"
+        status:
+          type: boolean
         results:
           type: array
           items:
@@ -349,18 +345,14 @@ components:
       description: Best practice object with finding content
       additionalProperties: false
       properties:
-        data:
-          type: object
-          additionalProperties: false
-          properties:
-            risk:
-              type: string
-              enum:
-                - "High"
-                - "Medium"
-                - "Low"
-            status:
-              type: boolean
+        risk:
+          type: string
+          enum:
+            - "High"
+            - "Medium"
+            - "Low"
+        status:
+          type: boolean
         results:
           type: array
           items:
