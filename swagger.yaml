@@ -131,9 +131,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Finding"
+                $ref: "#/components/schemas/BestPracticeExtra"
         "404":
           description: Best practice not found
 
@@ -230,11 +228,15 @@ components:
                   additionalProperties: false
                   properties:
                     best_practices:
-                      type: array
-                      description: JSONObject containing findings id for each best pratice
-                      items:
-                        type: string
-                        description: Findings id
+                      $ref: "#/components/schemas/BestPractice"
+    AssessmentError:
+      type: object
+      description: Present if an error has occurred during the process.
+      properties:
+        Error:
+          type: string
+        Cause:
+          type: string
     Finding:
       type: object
       description: Finding definition
@@ -287,36 +289,45 @@ components:
         risk_details:
           type: string
           description: Explanation of the security risk or reason for the finding
-    FindingPaginationResponse:
+    BestPractice:
       type: object
-      description: Paginated findings response
+      description: Best practice object
+      additionalProperties: false
       properties:
-        items:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            risk:
+              type: string
+              enum:
+                - "High"
+                - "Medium"
+                - "Low"
+            status:
+              type: boolean
+        results:
           type: array
-          description: The list of findings for the current page
+          items:
+            type: string
+    BestPracticeExtra:
+      type: object
+      description: Best practice object with finding content
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            risk:
+              type: string
+              enum:
+                - "High"
+                - "Medium"
+                - "Low"
+            status:
+              type: boolean
+        results:
+          type: array
           items:
             $ref: "#/components/schemas/Finding"
-        currentPage:
-          type: integer
-          description: Current page number
-          example: 1
-        pageSize:
-          type: integer
-          description: Number of findings per page
-          example: 10
-        totalPages:
-          type: integer
-          description: Total number of pages
-          example: 5
-        totalItems:
-          type: integer
-          description: Total number of findings
-          example: 45
-    AssessmentError:
-      type: object
-      description: Present if an error has occurred during the process.
-      properties:
-        Error:
-          type: string
-        Cause:
-          type: string
