@@ -135,6 +135,40 @@ paths:
         "404":
           description: Best practice not found
 
+  /assessments/{assessmentId}/best-practices/{bestPracticeName}/{status}:
+    put:
+      tags:
+        - Best Practices
+      summary: Retrieve all findings for a specific best pratice
+      operationId: getAllFindingsByBestPractice2
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment
+          schema:
+            type: integer
+        - name: bestPracticeName
+          in: path
+          required: true
+          description: The name of the best practice
+          schema:
+            type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of finding for the specific best practice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BestPracticeExtra"
+        "404":
+          description: Best practice not found
+
   /assessments/{assessmentId}/findings/{findingId}:
     get:
       tags:
