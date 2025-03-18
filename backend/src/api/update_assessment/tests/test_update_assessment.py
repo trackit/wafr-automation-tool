@@ -1,0 +1,25 @@
+from http.client import OK
+from unittest.mock import MagicMock
+
+from common.entities import AssessmentDto
+from tests.__mocks__.fake_assessment_service import FakeAssessmentService
+
+from api.event import UpdateAssessmentInput
+
+from ..app.tasks.update_assessment import UpdateAssessment
+
+
+def test_delete_assessment():
+    assessment_service = FakeAssessmentService()
+    assessment_service.update = MagicMock(return_value=True)
+    assessment_dto = AssessmentDto(
+        name="AN",
+    )
+
+    task_input = UpdateAssessmentInput(assessment_id="AID", assessment_dto=assessment_dto)
+    task = UpdateAssessment(assessment_service)
+    response = task.execute(task_input)
+
+    assessment_service.update.assert_called_once_with("AID", assessment_dto)
+    assert response.status_code == OK
+    assert not response.body

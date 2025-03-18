@@ -244,6 +244,8 @@ Resources:
                   S: "{% $states.input.role_arn %}"
                 step:
                   S: "Start the scanning process"
+                created_at:
+                  S: "{% $states.input.created_at %}"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
               role_arn: "{% $states.input.role_arn %}"
