@@ -41,6 +41,15 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def update_best_practice(
+        self,
+        assessment: Assessment,
+        best_practice_name: str,
+        status: bool | None,
+    ) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_findings(self, assessment_id: str) -> bool:
         raise NotImplementedError
 
@@ -96,12 +105,14 @@ class AssessmentService(IAssessmentService):
         if not bp_findings:
             return None
         findings: list[FindingExtra] = []
-        for finding_id in bp_findings.results:
+        for finding_id in bp_findings.get("results", []):
             finding = self.retrieve_finding(assessment.id, finding_id)
             if not finding:
                 raise FindingNotFoundError(assessment.id, finding_id)
             findings.append(finding)
-        return BestPracticeExtra(data=bp_findings.data, results=findings)
+        return BestPracticeExtra(
+            results=findings, risk=bp_findings.get("risk", ""), status=bp_findings.get("status", False)
+        )
 
     @override
     def retrieve_finding(
@@ -123,6 +134,41 @@ class AssessmentService(IAssessmentService):
         self.database_service.update_attrs(
             table_name=DDB_TABLE, key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id}, attrs=attrs
         )
+
+    @override
+    def update_best_practice(
+        self,
+        assessment: Assessment,
+        best_practice_name: str,
+        status: bool | None,
+    ) -> bool:
+        if not assessment.findings or status is None:
+            return False
+        bp_findings: BestPractice | None = None
+        for pillar_name, pillar in assessment.findings.items():
+            for question_name, question in pillar.items():
+                if best_practice_name in question:
+                    bp_findings = question[best_practice_name]
+                    self._pillar_name = pillar_name
+                    self._question_name = question_name
+                    break
+        if not bp_findings:
+            return False
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            UpdateExpression="SET findings.#pillar.#question.#best_practice.#status = :status",
+            ExpressionAttributeNames={
+                "#pillar": self._pillar_name,
+                "#question": self._question_name,
+                "#best_practice": best_practice_name,
+                "#status": "status",
+            },
+            ExpressionAttributeValues={
+                ":status": status,
+            },
+        )
+        return True
 
     @override
     def delete_findings(self, assessment_id: str) -> bool:

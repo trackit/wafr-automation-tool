@@ -56,3 +56,9 @@ RetrieveAllAssessmentsResponseBody = list[dict[str, Any]]
 class UpdateAssessmentInput(BaseModel):
     assessment_id: str
     assessment_dto: AssessmentDto
+
+
+class UpdateBestPracticeStatusInput(BaseModel):
+    assessment_id: str
+    best_practice_name: str
+    status: bool
