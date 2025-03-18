@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Any
 
 import boto3
@@ -17,7 +18,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
     response = task.execute(
         UpdateBestPracticeStatusInput(
             assessment_id=event["pathParameters"]["assessmentId"],
-            best_practice_name=event["pathParameters"]["bestPracticeName"],
+            best_practice_name=urllib.parse.unquote(event["pathParameters"]["bestPracticeName"]),
             status=event["pathParameters"]["status"],
         ),
     )
