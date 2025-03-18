@@ -240,13 +240,13 @@ Resources:
                   S: "{% $states.input.assessment_id %}"
                 name:
                   S: "{% $states.input.name %}"
-                role:
-                  S: "{% $states.input.role %}"
+                role_arn:
+                  S: "{% $states.input.role_arn %}"
                 step:
                   S: "Start the scanning process"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
-              role: "{% $states.input.role %}"
+              role_arn: "{% $states.input.role_arn %}"
             Next: ScanningTools
             Catch:
               - ErrorEquals:
@@ -280,8 +280,8 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: PrepareCustodian
                 States:
@@ -311,8 +311,8 @@ Resources:
                                 Value: "{% $assessment_id %}"
                               - Name: POLICIES_URI
                                 Value: "{% $states.input %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: CloudSploitScan
                 States:
@@ -336,8 +336,8 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
             Next: PreparePromptsUpdateStep
             Catch:

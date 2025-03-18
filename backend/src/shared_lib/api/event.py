@@ -7,7 +7,7 @@ from utils.api import APIResponseBody
 
 class StartAssessmentInput(BaseModel):
     name: str
-    role: str | None = None
+    roleArn: str | None = None  # noqa: N815
 
 
 class StartAssessmentResponseBody(APIResponseBody):
@@ -17,7 +17,7 @@ class StartAssessmentResponseBody(APIResponseBody):
 class StateMachineInput(BaseModel):
     assessment_id: str
     name: str
-    role: str
+    role_arn: str
 
 
 class DeleteAssessmentInput(BaseModel):
