@@ -72,7 +72,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
-            UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",  # noqa: E501
+            UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": answer_data.pillar,
                 "#question": answer_data.question,

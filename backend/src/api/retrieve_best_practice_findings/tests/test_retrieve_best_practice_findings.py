@@ -2,7 +2,7 @@ from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from common.entities import Assessment, FindingExtra
-from common.enums import STEPS
+from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import RetrieveBestPracticeFindingsInput
@@ -17,7 +17,7 @@ def test_retrieve_best_practice_findings():
         id="AID",
         name="AN",
         role_arn="AR",
-        step=STEPS.SCANNING_STARTED,
+        step=Steps.SCANNING_STARTED,
         created_at="",
         question_version="QV",
         findings=None,
@@ -70,7 +70,7 @@ def test_retrieve_best_practice_findings_not_found_findings():
         id="AID",
         name="AN",
         role_arn="AR",
-        step=STEPS.SCANNING_STARTED,
+        step=Steps.SCANNING_STARTED,
         created_at="",
         question_version="QV",
         findings=None,

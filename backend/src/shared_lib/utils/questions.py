@@ -27,5 +27,8 @@ def retrieve_questions() -> QuestionSet:
         for p, pillar in questions.items():
             for q, question in pillar.items():
                 for bp in question:
-                    questions[p][q][bp] = []
+                    questions[p][q][bp] = {
+                        "data": {"risk": question[bp]["risk"], "status": False},
+                        "results": [],
+                    }
     return QuestionSet(data=questions, version=question_version)

@@ -2,6 +2,7 @@ from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel
+from utils.api import APIResponseBody
 
 
 class CloudSploitFinding(BaseModel):
@@ -46,8 +47,17 @@ class AnswerData(BaseModel):
     best_practice: str
 
 
-BestPracticeDict = list[str]
-QuestionDict = dict[str, BestPracticeDict]
+BestPracticeData = dict[str, str | bool]  # {"risk": str, "status": bool}
+
+BestPractice = dict[str, BestPracticeData | list[str]]  # {"data": BestPracticeData, "results": list[str]}
+
+
+class BestPracticeExtra(APIResponseBody):
+    data: BestPracticeData
+    results: list[FindingExtra]
+
+
+QuestionDict = dict[str, BestPractice]
 PillarDict = dict[str, QuestionDict]
 
 

@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class STEPS(StrEnum):
+class Steps(StrEnum):
     SCANNING_STARTED = "SCANNING_STARTED"
     PREPARING_PROMPTS = "PREPARING_PROMPTS"
     INVOKING_LLM = "INVOKING_LLM"

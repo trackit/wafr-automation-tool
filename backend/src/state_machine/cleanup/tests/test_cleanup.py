@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, call
 
 from common.config import PROWLER_COMPLIANCE_PATH, PROWLER_OCSF_PATH, S3_BUCKET
 from common.entities import AssessmentDto
-from common.enums import STEPS
+from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
@@ -58,7 +58,7 @@ def test_cleanup_on_error():
         AssessmentDto(
             name=None,
             role_arn=None,
-            step=STEPS.ERRORED,
+            step=Steps.ERRORED,
             question_version=None,
             findings=None,
             error={"Error": "ERROR", "Cause": "CAUSE"},

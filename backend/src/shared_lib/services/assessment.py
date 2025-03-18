@@ -4,7 +4,7 @@ from typing import Any, override
 
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
-from common.entities import Assessment, AssessmentDto, FindingExtra
+from common.entities import Assessment, AssessmentDto, BestPractice, BestPracticeExtra, FindingExtra
 from exceptions.assessment import FindingNotFoundError
 from utils.api import DecimalEncoder
 
@@ -25,7 +25,7 @@ class IAssessmentService:
         self,
         assessment: Assessment,
         best_practice_name: str,
-    ) -> list[FindingExtra] | None:
+    ) -> BestPracticeExtra | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -84,22 +84,24 @@ class AssessmentService(IAssessmentService):
         self,
         assessment: Assessment,
         best_practice_name: str,
-    ) -> list[FindingExtra] | None:
+    ) -> BestPracticeExtra | None:
         if not assessment.findings:
             return None
-        bp_findings: list[str] = []
+        bp_findings: BestPractice | None = None
         for pillar in assessment.findings.values():
             for question in pillar.values():
                 if best_practice_name in question:
                     bp_findings = question[best_practice_name]
                     break
+        if not bp_findings:
+            return None
         findings: list[FindingExtra] = []
-        for finding_id in bp_findings:
-            finding = self.retrieve_finding(assessment.id, str(finding_id))
+        for finding_id in bp_findings.results:
+            finding = self.retrieve_finding(assessment.id, finding_id)
             if not finding:
-                raise FindingNotFoundError(assessment.id, str(finding_id))
+                raise FindingNotFoundError(assessment.id, finding_id)
             findings.append(finding)
-        return findings
+        return BestPracticeExtra(data=bp_findings.data, results=findings)
 
     @override
     def retrieve_finding(

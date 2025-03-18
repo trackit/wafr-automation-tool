@@ -1,6 +1,6 @@
 from typing import Any
 
-from common.entities import Assessment, AssessmentDto, FindingExtra
+from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -38,7 +38,7 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     best_practice: str
 
 
-RetrieveBestPracticeFindingsResponseBody = list[FindingExtra]
+RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
 
 
 class RetrieveFindingInput(BaseModel):

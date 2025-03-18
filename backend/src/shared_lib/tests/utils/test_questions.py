@@ -33,13 +33,22 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
     assert output.data == {
         "pillar-1": {
             "question-1": {
-                "best-practice-1": [],
-                "best-practice-2": [],
+                "best-practice-1": {
+                    "data": {"risk": "Low", "status": False},
+                    "results": [],
+                },
+                "best-practice-2": {
+                    "data": {"risk": "Medium", "status": False},
+                    "results": [],
+                },
             }
         },
         "pillar-2": {
             "question-2": {
-                "best-practice-1": [],
+                "best-practice-1": {
+                    "data": {"risk": "High", "status": False},
+                    "results": [],
+                },
             }
         },
     }
