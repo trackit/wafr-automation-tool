@@ -35,8 +35,5 @@ AI_MODELS: dict[str, type[IModel]] = {
 }
 AI_MODEL = os.getenv("AI_MODEL", "claude-3-5-sonnet")
 
-STEP_START_SCANNING = "Start the scanning process"
-STEP_PREPARE_PROMPTS = "Prepare all prompts"
-STEP_INVOKE_LLM = "Invoke LLM"
-STEP_FINISH = "Finish"
-STEP_ERROR = "An error occurred"
+
+

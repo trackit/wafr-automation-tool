@@ -2,8 +2,9 @@ from unittest.mock import MagicMock, call
 
 import pytest
 from boto3.dynamodb.conditions import Key
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, STEP_FINISH
+from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
 from common.entities import Assessment, AssessmentDto, FindingExtra, FindingRemediation, FindingResource
+from common.enums import STEPS
 from exceptions.assessment import FindingNotFoundError
 from services.assessment import AssessmentService
 
@@ -18,7 +19,7 @@ def test_assessment_service_retrieve():
             DDB_SORT_KEY: "test-assessment-id",
             "name": "test-assessment-name",
             "role_arn": "test-assessment-role",
-            "step": STEP_FINISH,
+            "step": STEPS.FINISHED,
             "created_at": "",
             "question_version": "test-question-version",
             "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
@@ -31,7 +32,7 @@ def test_assessment_service_retrieve():
         id="test-assessment-id",
         name="test-assessment-name",
         role_arn="test-assessment-role",
-        step=STEP_FINISH,
+        step=STEPS.FINISHED,
         created_at="",
         question_version="test-question-version",
         findings={"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
@@ -102,7 +103,7 @@ def test_assessment_service_retrieve_best_practice():
             id="test-assessment-id",
             name="test-assessment-name",
             role_arn="test-assessment-role",
-            step=STEP_FINISH,
+            step=STEPS.FINISHED,
             created_at="",
             question_version="test-question-version",
             findings={
@@ -224,7 +225,7 @@ def test_assessment_service_retrieve_inexistent_best_practice():
                 id="test-assessment-id",
                 name="test-assessment-name",
                 role_arn="test-assessment-role",
-                step=STEP_FINISH,
+                step=STEPS.FINISHED,
                 created_at="",
                 question_version="test-question-version",
                 findings={
@@ -317,7 +318,7 @@ def test_assessment_service_update():
         assessment_dto=AssessmentDto(
             name="test-assessment-name",
             role_arn="test-assessment-role",
-            step=STEP_FINISH,
+            step=STEPS.FINISHED,
             question_version="test-question-version",
             findings={
                 "pillar-1": {
@@ -335,7 +336,7 @@ def test_assessment_service_update():
         attrs={
             "name": "test-assessment-name",
             "role_arn": "test-assessment-role",
-            "step": STEP_FINISH,
+            "step": STEPS.FINISHED,
             "question_version": "test-question-version",
             "findings": {"pillar-1": {"question-1": {"best-practice-1": ["1", "2", "3"]}}},
         },

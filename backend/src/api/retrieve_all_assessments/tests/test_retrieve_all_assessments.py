@@ -1,8 +1,8 @@
 from http.client import INTERNAL_SERVER_ERROR, OK
 from unittest.mock import MagicMock
 
-from common.config import STEP_START_SCANNING
 from common.entities import Assessment
+from common.enums import STEPS
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from ..app.tasks.retrieve_all_assessments import RetrieveAllAssessments
@@ -14,7 +14,7 @@ def test_retrieve_all_assessments():
             id="AID",
             name="AN",
             role_arn="AR",
-            step=STEP_START_SCANNING,
+            step=STEPS.SCANNING_STARTED,
             created_at="",
             question_version="QV",
             findings=None,

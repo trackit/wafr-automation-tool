@@ -243,7 +243,7 @@ Resources:
                 role_arn:
                   S: "{% $states.input.role_arn %}"
                 step:
-                  S: "Start the scanning process"
+                  S: "SCANNING_STARTED"
                 created_at:
                   S: "{% $states.input.created_at %}"
             Assign:
@@ -362,7 +362,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
-                  S: "Prepare all prompts"
+                  S: "PREPARING_PROMPTS"
             Next: Prepare Prompts
             Catch:
               - ErrorEquals:
@@ -423,7 +423,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
-                  S: "Invoke LLM"
+                  S: "INVOKING_LLM"
             Next: PromptMap
             Output: "{% $states.input %}"
             Catch:
@@ -474,7 +474,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
-                  S: "Finish"
+                  S: "FINISHED"
             Next: Cleanup
             Catch:
               - ErrorEquals:

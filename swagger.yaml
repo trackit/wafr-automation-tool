@@ -205,6 +205,12 @@ components:
         step:
           type: string
           description: Current step of the assessment
+          enum:
+            - "SCANNING_STARTED"
+            - "PREPARING_PROMPTS"
+            - "INVOKING_LLM"
+            - "FINISHED"
+            - "ERRORED"
         question_version:
           type: string
           description: The version of questions used
