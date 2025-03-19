@@ -1,4 +1,4 @@
-from http.client import NOT_FOUND, OK
+from http.client import OK
 from unittest.mock import MagicMock
 
 from common.entities import Assessment, PaginationOutput
@@ -39,7 +39,6 @@ def test_retrieve_all_assessments():
 
 
 def test_retrieve_all_assessments_not_found():
-    assessments = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(return_value=PaginationOutput[Assessment](items=[], start_key=None))
 
@@ -48,5 +47,5 @@ def test_retrieve_all_assessments_not_found():
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
-    assert response.status_code == NOT_FOUND
-    assert response.body == assessments
+    assert response.status_code == OK
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], nextUrl=None)
