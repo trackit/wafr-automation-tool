@@ -1,6 +1,8 @@
 from http.client import INTERNAL_SERVER_ERROR, OK
 from unittest.mock import MagicMock
 
+from common.config import STATE_MACHINE_ARN
+
 from api.event import StartAssessmentInput, StartAssessmentResponseBody
 
 from ..app.tasks.start_assessment import StartAssessment
@@ -31,7 +33,10 @@ def test_start_assessment_with_default_role():
     response = task.execute(task_input)
 
     task.generate_assessment_id.assert_called_once()
-    sfn_client.start_execution.assert_called_once()
+    sfn_client.start_execution.assert_called_once_with(
+        stateMachineArn=STATE_MACHINE_ARN,
+        input='{"assessment_id":"ID","name":"NAME","role_arn":"test-role"}',
+    )
     assert response.status_code == OK
     assert response.body == StartAssessmentResponseBody(assessmentId="ID")
 
