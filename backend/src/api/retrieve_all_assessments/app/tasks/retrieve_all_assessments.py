@@ -31,7 +31,7 @@ class RetrieveAllAssessments(
     @override
     def execute(self, event: RetrieveAllAssessmentsInput) -> APIResponse[RetrieveAllAssessmentsResponseBody]:
         pagination = Pagination(limit=event.limit, start_key=event.start_key)
-        paginated = self.assessment_service.retrieve_paginated(pagination)
+        paginated = self.assessment_service.retrieve_all(pagination)
         if not paginated:
             return APIResponse(
                 status_code=INTERNAL_SERVER_ERROR,
@@ -52,8 +52,9 @@ class RetrieveAllAssessments(
             )
         else:
             next_url = None
-        body = RetrieveAllAssessmentsResponseBody(assessments=self.remove_findings(paginated.items), nextUrl=next_url)
         return APIResponse(
             status_code=OK,
-            body=body,
+            body=RetrieveAllAssessmentsResponseBody(
+                assessments=self.remove_findings(paginated.items), nextUrl=next_url
+            ),
         )

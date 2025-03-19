@@ -29,11 +29,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_all(self) -> list[Assessment] | None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def retrieve_paginated(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
+    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -90,30 +86,8 @@ class AssessmentService(IAssessmentService):
         return self._create_assessment(assessment_data)
 
     @override
-    def retrieve_all(self) -> list[Assessment] | None:
-        items = self.database_service.query_all(
-            table_name=DDB_TABLE,
-            KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
-        )
-        if not items:
-            return None
-        assessments: list[Assessment] = []
-        for item in items:
-            assessment = self._create_assessment(item)
-            assessments.append(assessment)
-        assessments.sort(key=lambda x: x.created_at, reverse=True)
-        return assessments
-
-    @override
-    def retrieve_paginated(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
-        start_key = json.loads(base64.b64decode(pagination.start_key).decode()) if pagination.start_key else {}
-        query_input = QueryInputTableQueryTypeDef(KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK))
-        if pagination.limit:
-            query_input["Limit"] = pagination.limit
-        if pagination.filter:
-            query_input["FilterExpression"] = pagination.filter
-        if start_key:
-            query_input["ExclusiveStartKey"] = start_key
+    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
+        query_input = self._create_retrieve_all_query_input(pagination)
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
         if not query_output:
             return None
@@ -124,6 +98,17 @@ class AssessmentService(IAssessmentService):
             assessments.append(assessment)
         assessments.sort(key=lambda x: x.created_at, reverse=True)
         return PaginationOutput[Assessment](items=assessments, start_key=start_key)
+
+    def _create_retrieve_all_query_input(self, pagination: Pagination) -> QueryInputTableQueryTypeDef:
+        start_key = json.loads(base64.b64decode(pagination.start_key).decode()) if pagination.start_key else {}
+        query_input = QueryInputTableQueryTypeDef(KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK))
+        if pagination.limit:
+            query_input["Limit"] = pagination.limit
+        if pagination.filter:
+            query_input["FilterExpression"] = pagination.filter
+        if start_key:
+            query_input["ExclusiveStartKey"] = start_key
+        return query_input
 
     @override
     def retrieve_best_practice(

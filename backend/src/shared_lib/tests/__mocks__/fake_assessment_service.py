@@ -10,10 +10,6 @@ class FakeAssessmentService(IAssessmentService):
         raise NotImplementedError
 
     @override
-    def retrieve_all(self) -> list[Assessment] | None:
-        raise NotImplementedError
-
-    @override
     def retrieve_best_practice(
         self,
         assessment: Assessment,

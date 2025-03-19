@@ -25,7 +25,7 @@ def test_retrieve_all_assessments():
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
     assessments_dicts[0]["error"] = None
     assessment_service = FakeAssessmentService()
-    assessment_service.retrieve_paginated = MagicMock(
+    assessment_service.retrieve_all = MagicMock(
         return_value=PaginationOutput[Assessment](items=assessments, start_key=None)
     )
 
@@ -33,7 +33,7 @@ def test_retrieve_all_assessments():
     task_input = RetrieveAllAssessmentsInput(limit=10, search=None, start_key=None, api_id="")
     response = task.execute(task_input)
 
-    assessment_service.retrieve_paginated.assert_called_once()
+    assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
     assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, nextUrl=None)
 
@@ -41,14 +41,12 @@ def test_retrieve_all_assessments():
 def test_retrieve_all_assessments_not_found():
     assessments = None
     assessment_service = FakeAssessmentService()
-    assessment_service.retrieve_paginated = MagicMock(
-        return_value=PaginationOutput[Assessment](items=[], start_key=None)
-    )
+    assessment_service.retrieve_all = MagicMock(return_value=PaginationOutput[Assessment](items=[], start_key=None))
 
     task = RetrieveAllAssessments(assessment_service)
     task_input = RetrieveAllAssessmentsInput(limit=10, search=None, start_key=None, api_id="")
     response = task.execute(task_input)
 
-    assessment_service.retrieve_paginated.assert_called_once()
+    assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == NOT_FOUND
     assert response.body == assessments
