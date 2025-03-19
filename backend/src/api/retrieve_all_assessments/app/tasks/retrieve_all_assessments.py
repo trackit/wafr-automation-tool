@@ -1,6 +1,6 @@
 import base64
 import json
-from http.client import INTERNAL_SERVER_ERROR, NOT_FOUND, OK
+from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import Any, override
 
 from common.config import REGION
@@ -35,11 +35,6 @@ class RetrieveAllAssessments(
         if not paginated:
             return APIResponse(
                 status_code=INTERNAL_SERVER_ERROR,
-                body=None,
-            )
-        if not paginated.items:
-            return APIResponse(
-                status_code=NOT_FOUND,
                 body=None,
             )
         if paginated.start_key:
