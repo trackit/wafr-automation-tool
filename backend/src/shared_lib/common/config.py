@@ -1,7 +1,7 @@
 import os
 
 from common.entities import AIModel
-from common.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, IModel
+from common.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, DeepSeekR1, IModel, NovaPro
 
 DEBUG = os.getenv("DEBUG", "false") == "true"
 REGION = os.getenv("REGION", "us-west-2")
@@ -29,8 +29,10 @@ STORE_PROMPT_PATH = "assessments/{}/prompts/{}.txt"
 
 QUESTIONS_PATH = "./questions"
 
-AI_MODELS: dict[str, type[IModel]] = {
-    AIModel.Claude3Dot5Sonnet: Claude3Dot5Sonnet,
-    AIModel.Claude3Dot7Sonnet: Claude3Dot7Sonnet,
+AI_MODELS: dict[str, IModel] = {
+    AIModel.Claude3Dot5Sonnet: Claude3Dot5Sonnet(),
+    AIModel.Claude3Dot7Sonnet: Claude3Dot7Sonnet(),
+    AIModel.DeepseekR1: DeepSeekR1(),
+    AIModel.NovaPro: NovaPro(),
 }
 AI_MODEL = os.getenv("AI_MODEL", "claude-3-5-sonnet")

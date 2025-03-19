@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.objects.group import Group
 from entities.prowler.objects.request_elements import RequestElements

@@ -1,54 +1,31 @@
-import json
-from abc import ABC, abstractmethod
-from typing import Any, override
-
 from pydantic import BaseModel
-from types_boto3_bedrock_runtime.type_defs import InvokeModelRequestTypeDef
 
 
-class IModel(ABC):
-    @abstractmethod
-    def build(self, prompt: str) -> InvokeModelRequestTypeDef:
-        raise NotImplementedError
+class IModel(BaseModel):
+    id: str
+    temperature: float
+    max_tokens: int
 
 
-class Claude3Dot5Sonnet(BaseModel, IModel):
-    model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-    prompt_format: str = "\\n\\nHuman:{}\\n\\nAssistant:"
+class Claude3Dot5Sonnet(IModel):
+    id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
     temperature: float = 0
     max_tokens: int = 8192
 
-    @override
-    def build(self, prompt: str) -> InvokeModelRequestTypeDef:
-        formatted_prompt = self.prompt_format.format(prompt)
-        body: dict[str, Any] = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "messages": [{"role": "user", "content": formatted_prompt}],
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-        }
-        return {
-            "modelId": self.model_id,
-            "body": json.dumps(body, separators=(",", ":")),
-        }
 
-
-class Claude3Dot7Sonnet(BaseModel, IModel):
-    model_id: str = "anthropic.claude-3-7-sonnet-20250219-v1:0"
-    prompt_format: str = "\\n\\nHuman:{}\\n\\nAssistant:"
+class Claude3Dot7Sonnet(IModel):
+    id: str = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
     temperature: float = 0
     max_tokens: int = 8192
 
-    @override
-    def build(self, prompt: str) -> InvokeModelRequestTypeDef:
-        formatted_prompt = self.prompt_format.format(prompt)
-        body: dict[str, Any] = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "messages": [{"role": "user", "content": formatted_prompt}],
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-        }
-        return {
-            "modelId": self.model_id,
-            "body": json.dumps(body, separators=(",", ":")),
-        }
+
+class DeepSeekR1(IModel):
+    id: str = "us.deepseek.r1-v1:0"
+    temperature: float = 0
+    max_tokens: int = 32768
+
+
+class NovaPro(IModel):
+    id: str = "us.amazon.nova-pro-v1:0"
+    temperature: float = 0
+    max_tokens: int = 5120

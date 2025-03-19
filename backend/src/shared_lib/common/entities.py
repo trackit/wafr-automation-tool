@@ -66,6 +66,19 @@ QuestionDict = dict[str, BestPractice]
 PillarDict = dict[str, QuestionDict]
 
 
+class BestPracticeInfo(BaseModel):
+    id: int
+    pillar: str
+    question: str
+    best_practice: str
+
+
+class AIFindingAssociation(TypedDict):
+    id: int
+    start: int
+    end: int
+
+
 class AssessmentDto(BaseModel):
     name: str | None = None
     role_arn: str | None = None
@@ -118,3 +131,7 @@ class CloudCustodianPolicy(StrEnum):
 class AIModel(StrEnum):
     Claude3Dot5Sonnet = "claude-3-5-sonnet"
     Claude3Dot7Sonnet = "claude-3-7-sonnet"
+    DeepseekR1 = "deepseek-r1"
+    NovaPro = "nova-pro"
+    NovaLite = "nova-lite"
+    NovaMicro = "nova-micro"

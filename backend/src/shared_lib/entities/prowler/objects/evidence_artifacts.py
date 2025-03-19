@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.objects.api import API
 from entities.prowler.objects.dns_query import DNSQuery

@@ -99,7 +99,7 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/invoke_llm/app
-      Timeout: 300
+      Timeout: 900
       MemorySize: 128
       Policies:
         - Version: "2012-10-17"
@@ -117,7 +117,7 @@ Resources:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
             - Effect: Allow
               Action:
-                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
               Resource: "*"
             - Effect: Allow
               Action:
@@ -127,7 +127,7 @@ Resources:
                 - !Ref DynamoDBArn
       Environment:
         Variables:
-          AI_MODEL: claude-3-5-sonnet
+          AI_MODEL: claude-3-7-sonnet
   CleanupFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -179,7 +179,7 @@ Resources:
         Name: !Ref Name
       Policies:
         - Statement:
-            Effect: Allow
+          - Effect: Allow
             Action: states:StartExecution
             Resource:
               - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
@@ -435,6 +435,7 @@ Resources:
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
+            MaxConcurrency: 5
             ItemProcessor:
               ProcessorConfig:
                 Mode: INLINE

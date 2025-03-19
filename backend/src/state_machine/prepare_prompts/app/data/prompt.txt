@@ -1,20 +1,27 @@
 Context:
-- We have a set of [SCANNING_TOOL_TITLE] findings related to our AWS environment.
-- We want to map each finding to the specific WAFR best practices.
-Output Requirements:
-- Format: The output must be a valid JSON object following this structure:
-  {'PILLAR':{'QUESTION':{'BEST PRACTICE':[FINDING_ID]}}}
-  In other words:
-  - The top-level keys are the names of the PILLARS.
-  - Each pillar’s value is an object whose keys are the QUESTIONS related to that pillar.
-  - Each question’s value is an object whose keys are the BEST PRACTICES.
-  - The value corresponding to each best practice key is an array of FINDING_ID integer.
+- We have a set of [SCANNING_TOOL_TITLE] findings from our AWS environment.
+- Each finding must be assessed and mapped to a specific WAFR best practice based on our predefined pillars and questions.
+
+Objective:
+- Transform the scanning tool findings into a JSON mapping where each mapping associates a contiguous range of findings with a unique WAFR best practice ID.
+
+Output Format:
+- The final output must be a minified JSON array containing objects with the following structure:
+  [
+    {"id": integer, "start": integer, "end": integer}
+  ]
+- Example:
+  [{"id":101,"start":201,"end":203}]
+
 Instructions:
-- Determine the relevant WAFR best practice(s) based on the provided JSON structure.
-- Place each finding into the correct spot in the nested JSON object according to its associated PILLAR, QUESTION, and BEST PRACTICE.
-- Return only the final minified and nested JSON object with the exact structure defined above. Extra keys or explanations are DENIED.
+1. For each best practice (defined as a unique combination of pillar, question, and best practice), determine the contiguous range of findings it applies to from the [SCANNING_TOOL_TITLE] Findings.
+2. Use the predefined unique ID from the WAFR question set for the "id" field.
+3. Define "start" as the starting index and "end" as the ending index (inclusive) of the range of findings for that best practice.
+4. Return ONLY the FINAL MINIFIED JSON object. No additional text, comments, or formatting is allowed.
+5. Do not prefix or suffix the output with any extra characters or messages. Any deviation from the exact specified structure will result in a failure of the state machine.
+
 Inputs:
-- WAFR JSON dataset:
-[QUESTION_SET_DATA]
-- [SCANNING_TOOL_TITLE] JSON dataset:
-[SCANNING_TOOL_DATA]
+- WAFR Pillars, Questions, and Best Practices:
+  [QUESTION_SET_DATA]
+- [SCANNING_TOOL_TITLE] Findings:
+  [SCANNING_TOOL_DATA]

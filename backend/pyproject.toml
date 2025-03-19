@@ -6,7 +6,7 @@ readme = "../README.md"
 requires-python = "==3.12.*"
 dependencies = [
     "boto3>=1.37.5",
-    "pydantic>=2.10.6",
+    "pydantic[email]>=2.10.6",
     "regex>=2024.11.6",
     "types-boto3[bedrock-runtime,dynamodb,s3,stepfunctions]>=1.37.5",
 ]
