@@ -2,14 +2,26 @@ from http.client import INTERNAL_SERVER_ERROR, OK
 from unittest.mock import MagicMock
 
 from common.entities import Assessment
+from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from ..app.tasks.retrieve_all_assessments import RetrieveAllAssessments
 
 
 def test_retrieve_all_assessments():
-    assessments = [Assessment(id="AID", name="AN", role="AR", step=0, question_version="QV", findings=None)]
+    assessments = [
+        Assessment(
+            id="AID",
+            name="AN",
+            role_arn="AR",
+            step=Steps.SCANNING_STARTED,
+            created_at="",
+            question_version="QV",
+            findings=None,
+        )
+    ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
+    assessments_dicts[0]["error"] = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(return_value=assessments)
 

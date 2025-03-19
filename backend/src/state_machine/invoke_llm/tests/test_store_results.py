@@ -1,8 +1,10 @@
 import json
 from unittest.mock import MagicMock
 
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
+import pytest
+from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
 from common.entities import FindingExtra
+from exceptions.ai import InvalidPromptResponseError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
 
@@ -37,16 +39,16 @@ def test_store_results():
     database_service.put = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",
@@ -92,12 +94,12 @@ def test_store_results_with_no_finding():
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
     assert not result
 
 
@@ -122,7 +124,9 @@ def test_store_results_with_invalid_questions():
 
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(
-        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json")
+        StoreResultsInput(
+            assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
+        )
     )
     assert not result
 
@@ -152,16 +156,16 @@ def test_store_results_with_no_finding_data():
     database_service.update = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
+        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
     )
     task = StoreResults(database_service, storage_service, questions)
     result = task.execute(invoke_llm_input)
 
-    storage_service.get.assert_called_once_with(Bucket="bucket", Key="AID/chunks/chunk-prowler-1.json")
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",
+        UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "Operational excellence",
             "#question": "How do you determine what your priorities are?",
@@ -195,7 +199,9 @@ def test_store_results_with_invalid_llm_response():
     database_service.put = MagicMock(return_value=None)
 
     task = StoreResults(database_service, storage_service, questions)
-    result = task.execute(
-        StoreResultsInput(assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json")
-    )
-    assert not result
+    with pytest.raises(InvalidPromptResponseError):
+        task.execute(
+            StoreResultsInput(
+                assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
+            )
+        )

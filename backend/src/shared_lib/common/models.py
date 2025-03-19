@@ -16,7 +16,7 @@ class Claude3Dot5Sonnet(BaseModel, IModel):
     model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
     prompt_format: str = "\\n\\nHuman:{}\\n\\nAssistant:"
     temperature: float = 0
-    max_tokens: int = 4000
+    max_tokens: int = 8192
 
     @override
     def build(self, prompt: str) -> InvokeModelRequestTypeDef:
@@ -37,7 +37,7 @@ class Claude3Dot7Sonnet(BaseModel, IModel):
     model_id: str = "anthropic.claude-3-7-sonnet-20250219-v1:0"
     prompt_format: str = "\\n\\nHuman:{}\\n\\nAssistant:"
     temperature: float = 0
-    max_tokens: int = 4000
+    max_tokens: int = 8192
 
     @override
     def build(self, prompt: str) -> InvokeModelRequestTypeDef:

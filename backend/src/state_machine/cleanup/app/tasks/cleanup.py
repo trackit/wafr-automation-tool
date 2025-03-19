@@ -7,6 +7,7 @@ from common.config import (
     S3_BUCKET,
 )
 from common.entities import AssessmentDto
+from common.enums import Steps
 from common.task import Task
 from services.assessment import IAssessmentService
 from services.database import IDatabaseService
@@ -43,8 +44,12 @@ class Cleanup(Task[CleanupInput, None]):
         self.storage_service.bulk_delete(S3_BUCKET, [obj.key for obj in objects])
 
     def update_assessment_item(self, event: CleanupInput) -> None:
+        error = event.error
+        if error is not None:
+            error = error.model_dump()
         assessment_dto = AssessmentDto(
-            step=-1,
+            step=Steps.ERRORED,
+            error=error,
         )
         self.assessment_service.update(event.assessment_id, assessment_dto)
 

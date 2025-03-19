@@ -1,5 +1,5 @@
 policies:
-  - name: wafr-automation-tool-lambda
-    resource: aws.lambda
+  - name: ec2-stopped-instance
+    resource: aws.ec2
     filters:
-      - tag:Project: "WAFR Automation Tool"
+      - "State.Name": stopped

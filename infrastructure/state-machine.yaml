@@ -240,13 +240,15 @@ Resources:
                   S: "{% $states.input.assessment_id %}"
                 name:
                   S: "{% $states.input.name %}"
-                role:
-                  S: "{% $states.input.role %}"
+                role_arn:
+                  S: "{% $states.input.role_arn %}"
                 step:
-                  S: "0"
+                  S: "SCANNING_STARTED"
+                created_at:
+                  S: "{% $states.input.created_at %}"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
-              role: "{% $states.input.role %}"
+              role_arn: "{% $states.input.role_arn %}"
             Next: ScanningTools
             Catch:
               - ErrorEquals:
@@ -280,8 +282,8 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: PrepareCustodian
                 States:
@@ -311,8 +313,8 @@ Resources:
                                 Value: "{% $assessment_id %}"
                               - Name: POLICIES_URI
                                 Value: "{% $states.input %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: CloudSploitScan
                 States:
@@ -336,10 +338,10 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
-                              - Name: ROLE
-                                Value: "{% $role %}"
+                              - Name: ROLE_ARN
+                                Value: "{% $role_arn %}"
                     End: true
-            Next: UpdateStep
+            Next: PreparePromptsUpdateStep
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -347,7 +349,7 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          UpdateStep:
+          PreparePromptsUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
@@ -360,7 +362,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
-                  N: "1"
+                  S: "PREPARING_PROMPTS"
             Next: Prepare Prompts
             Catch:
               - ErrorEquals:
@@ -399,8 +401,31 @@ Resources:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloudsploit"
                     End: true
+            Next: InvokeLLMUpdateStep
+            Output: "{% $spread($states.result) %}"
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+          InvokeLLMUpdateStep:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:updateItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Key:
+                PK:
+                  S: "ASSESSMENT"
+                SK:
+                  S: "{% $assessment_id %}"
+              UpdateExpression: SET step = :newStep
+              ExpressionAttributeValues:
+                ":newStep":
+                  S: "INVOKING_LLM"
             Next: PromptMap
-            Output: '{% $spread($states.result) %}'
+            Output: "{% $states.input %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -422,6 +447,34 @@ Resources:
                     assessment_id: "{% $assessment_id %}"
                     prompt_uri: "{% $states.input %}"
                   End: true
+                  Retry:
+                    - ErrorEquals:
+                        - States.TaskFailed
+                      BackoffRate: 2
+                      IntervalSeconds: 1
+                      MaxAttempts: 3
+            Next: FinishUpdateStep
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+          FinishUpdateStep:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:updateItem
+            Arguments:
+              TableName: !Ref DynamoDBArn
+              Key:
+                PK:
+                  S: "ASSESSMENT"
+                SK:
+                  S: "{% $assessment_id %}"
+              UpdateExpression: SET step = :newStep
+              ExpressionAttributeValues:
+                ":newStep":
+                  S: "FINISHED"
             Next: Cleanup
             Catch:
               - ErrorEquals:
@@ -430,15 +483,15 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
-          CleanupOnError:
-            Type: Task
-            Resource: !GetAtt CleanupFunction.Arn
-            End: true
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+            End: true
+          CleanupOnError:
+            Type: Task
+            Resource: !GetAtt CleanupFunction.Arn
             End: true
 
 Outputs:

@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock, call
 
+from common.config import PROWLER_COMPLIANCE_PATH, PROWLER_OCSF_PATH, S3_BUCKET
 from common.entities import AssessmentDto
+from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
@@ -28,9 +30,11 @@ def test_cleanup():
     assessment_service.delete_findings.assert_not_called()
     cleanup.update_assessment_item.assert_not_called()
 
-    storage_service.delete.assert_called_once_with(Bucket="NONE", Key="scans/ID/prowler/json-ocsf/output.ocsf.json")
-    storage_service.filter.assert_has_calls([call("NONE", "scans/ID/prowler/compliance/output"), call("NONE", "ID")])
-    storage_service.bulk_delete.assert_has_calls([call("NONE", ["TEST"]), call("NONE", ["TEST"])])
+    storage_service.delete.assert_called_once_with(Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("ID"))
+    storage_service.filter.assert_has_calls(
+        [call(S3_BUCKET, PROWLER_COMPLIANCE_PATH.format("ID")), call(S3_BUCKET, "ID")]
+    )
+    storage_service.bulk_delete.assert_has_calls([call(S3_BUCKET, ["TEST"]), call(S3_BUCKET, ["TEST"])])
 
 
 def test_cleanup_on_error():
@@ -50,8 +54,18 @@ def test_cleanup_on_error():
 
     assessment_service.delete_findings.assert_called_once_with("ID")
     assessment_service.update.assert_called_once_with(
-        "ID", AssessmentDto(name=None, role=None, step=-1, question_version=None, findings=None)
+        "ID",
+        AssessmentDto(
+            name=None,
+            role_arn=None,
+            step=Steps.ERRORED,
+            question_version=None,
+            findings=None,
+            error={"Error": "ERROR", "Cause": "CAUSE"},
+        ),
     )
-    storage_service.delete.assert_called_once_with(Bucket="NONE", Key="scans/ID/prowler/json-ocsf/output.ocsf.json")
-    storage_service.filter.assert_has_calls([call("NONE", "scans/ID/prowler/compliance/output"), call("NONE", "ID")])
-    storage_service.bulk_delete.assert_has_calls([call("NONE", ["TEST"]), call("NONE", ["TEST"])])
+    storage_service.delete.assert_called_once_with(Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("ID"))
+    storage_service.filter.assert_has_calls(
+        [call(S3_BUCKET, PROWLER_COMPLIANCE_PATH.format("ID")), call(S3_BUCKET, "ID")]
+    )
+    storage_service.bulk_delete.assert_has_calls([call(S3_BUCKET, ["TEST"]), call(S3_BUCKET, ["TEST"])])

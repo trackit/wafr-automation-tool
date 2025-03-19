@@ -1,3 +1,4 @@
+import datetime
 import time
 from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import override
@@ -30,11 +31,12 @@ class StartAssessment(
         assessment_id: str,
         event: StartAssessmentInput,
     ) -> bool:
-        role = event.role if event.role else DEFAULT_ASSESSMENT_ROLE
+        role_arn = event.roleArn if event.roleArn else DEFAULT_ASSESSMENT_ROLE
         input_json = StateMachineInput(
             assessment_id=assessment_id,
             name=event.name,
-            role=role,
+            role_arn=role_arn,
+            created_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,

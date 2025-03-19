@@ -1,13 +1,13 @@
 from typing import Any
 
-from common.entities import Assessment, FindingExtra
+from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
 
 class StartAssessmentInput(BaseModel):
     name: str
-    role: str | None = None
+    roleArn: str | None = None  # noqa: N815
 
 
 class StartAssessmentResponseBody(APIResponseBody):
@@ -17,7 +17,8 @@ class StartAssessmentResponseBody(APIResponseBody):
 class StateMachineInput(BaseModel):
     assessment_id: str
     name: str
-    role: str
+    role_arn: str
+    created_at: str
 
 
 class DeleteAssessmentInput(BaseModel):
@@ -37,7 +38,7 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     best_practice: str
 
 
-RetrieveBestPracticeFindingsResponseBody = list[FindingExtra]
+RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
 
 
 class RetrieveFindingInput(BaseModel):
@@ -50,3 +51,14 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
 
 
 RetrieveAllAssessmentsResponseBody = list[dict[str, Any]]
+
+
+class UpdateAssessmentInput(BaseModel):
+    assessment_id: str
+    assessment_dto: AssessmentDto
+
+
+class UpdateBestPracticeStatusInput(BaseModel):
+    assessment_id: str
+    best_practice_name: str
+    status: bool

@@ -2,6 +2,7 @@ from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from common.entities import Assessment
+from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import RetrieveAssessmentInput
@@ -10,7 +11,15 @@ from ..app.tasks.retrieve_assessment import RetrieveAssessment
 
 
 def test_retrieve_assessment():
-    assessment = Assessment(id="AID", name="AN", role="AR", step=0, question_version="QV", findings=None)
+    assessment = Assessment(
+        id="AID",
+        name="AN",
+        role_arn="AR",
+        step=Steps.SCANNING_STARTED,
+        created_at="",
+        question_version="QV",
+        findings=None,
+    )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
 

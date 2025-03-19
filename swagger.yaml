@@ -38,10 +38,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: role
+        - name: roleArn
           in: query
-          description: Role for which to start the assessment
-          required: true
+          description: |
+            Role for which to start the assessment \
+            If not set a default role will be used
           schema:
             type: string
       responses:
@@ -130,18 +131,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Finding"
+                $ref: "#/components/schemas/BestPracticeExtra"
         "404":
           description: Best practice not found
 
-  /assessments/{assessmentId}/findings:
-    get:
+  /assessments/{assessmentId}/best-practices/{bestPracticeName}/{status}:
+    put:
       tags:
-        - Findings
-      summary: Retrieve all findings for a specific assessment (paginated)
-      operationId: getAllFindings
+        - Best Practices
+      summary: Retrieve all findings for a specific best pratice
+      operationId: getAllFindingsByBestPractice2
       parameters:
         - name: assessmentId
           in: path
@@ -149,34 +148,26 @@ paths:
           description: The ID of the assessment
           schema:
             type: integer
-        - name: page
-          in: query
-          required: false
-          description: Page number (starting at 1)
+        - name: bestPracticeName
+          in: path
+          required: true
+          description: The name of the best practice
           schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: pageSize
-          in: query
-          required: false
-          description: Number of findings to return per page
+            type: string
+        - name: status
+          in: path
+          required: true
           schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 10
+            type: boolean
       responses:
         "200":
-          description: Paginated list of findings
+          description: List of finding for the specific best practice
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FindingPaginationResponse"
+                $ref: "#/components/schemas/BestPracticeExtra"
         "404":
-          description: Assessment not found
-        "500":
-          description: Internal server error
+          description: Best practice not found
 
   /assessments/{assessmentId}/findings/{findingId}:
     get:
@@ -226,6 +217,8 @@ components:
         step:
           type: string
           description: Current step of the assessment
+        error:
+          $ref: "#/components/schemas/AssessmentError"
         question_version:
           type: string
           description: The version of questions used
@@ -244,6 +237,12 @@ components:
         step:
           type: string
           description: Current step of the assessment
+          enum:
+            - "SCANNING_STARTED"
+            - "PREPARING_PROMPTS"
+            - "INVOKING_LLM"
+            - "FINISHED"
+            - "ERRORED"
         question_version:
           type: string
           description: The version of questions used
@@ -263,11 +262,15 @@ components:
                   additionalProperties: false
                   properties:
                     best_practices:
-                      type: array
-                      description: JSONObject containing findings id for each best pratice
-                      items:
-                        type: integer
-                        description: Findings id
+                      $ref: "#/components/schemas/BestPractice"
+    AssessmentError:
+      type: object
+      description: Present if an error has occurred during the process.
+      properties:
+        Error:
+          type: string
+        Cause:
+          type: string
     Finding:
       type: object
       description: Finding definition
@@ -320,28 +323,37 @@ components:
         risk_details:
           type: string
           description: Explanation of the security risk or reason for the finding
-    FindingPaginationResponse:
+    BestPractice:
       type: object
-      description: Paginated findings response
+      description: Best practice object
+      additionalProperties: false
       properties:
-        items:
+        risk:
+          type: string
+          enum:
+            - "High"
+            - "Medium"
+            - "Low"
+        status:
+          type: boolean
+        results:
           type: array
-          description: The list of findings for the current page
+          items:
+            type: string
+    BestPracticeExtra:
+      type: object
+      description: Best practice object with finding content
+      additionalProperties: false
+      properties:
+        risk:
+          type: string
+          enum:
+            - "High"
+            - "Medium"
+            - "Low"
+        status:
+          type: boolean
+        results:
+          type: array
           items:
             $ref: "#/components/schemas/Finding"
-        currentPage:
-          type: integer
-          description: Current page number
-          example: 1
-        pageSize:
-          type: integer
-          description: Number of findings per page
-          example: 10
-        totalPages:
-          type: integer
-          description: Total number of pages
-          example: 5
-        totalItems:
-          type: integer
-          description: Total number of findings
-          example: 45

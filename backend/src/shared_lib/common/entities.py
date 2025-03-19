@@ -1,6 +1,8 @@
 from enum import StrEnum
+from typing import Any, TypedDict
 
 from pydantic import BaseModel
+from utils.api import APIResponseBody
 
 
 class CloudSploitFinding(BaseModel):
@@ -45,15 +47,28 @@ class AnswerData(BaseModel):
     best_practice: str
 
 
-BestPracticeDict = list[int]
-QuestionDict = dict[str, BestPracticeDict]
+class BestPractice(TypedDict):
+    risk: str
+    status: bool
+    results: list[str]
+
+
+class BestPracticeExtra(APIResponseBody):
+    risk: str
+    status: bool
+    results: list[FindingExtra]
+
+
+QuestionDict = dict[str, BestPractice]
 PillarDict = dict[str, QuestionDict]
 
 
 class AssessmentDto(BaseModel):
     name: str | None = None
-    role: str | None = None
-    step: int | None = None
+    role_arn: str | None = None
+    created_at: str | None = None
+    step: str | None = None
+    error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
 
@@ -61,9 +76,11 @@ class AssessmentDto(BaseModel):
 class Assessment(BaseModel):
     id: str
     name: str
-    role: str
-    step: int
-    question_version: str
+    role_arn: str
+    created_at: str
+    step: str
+    error: dict[str, Any] | None = None
+    question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
 
 
@@ -76,6 +93,10 @@ class ScanningTool(StrEnum):
     PROWLER = "prowler"
     CLOUD_CUSTODIAN = "cloud-custodian"
     CLOUDSPLOIT = "cloudsploit"
+
+
+class CloudCustodianPolicy(StrEnum):
+    EC2_STOPPED_INSTANCE = "ec2-stopped-instance"
 
 
 class AIModel(StrEnum):

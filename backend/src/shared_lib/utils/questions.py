@@ -1,6 +1,5 @@
 import datetime
 import json
-import os
 from pathlib import Path
 
 from common.config import QUESTIONS_PATH
@@ -14,7 +13,9 @@ class QuestionSet(BaseModel):
 
 
 def retrieve_questions() -> QuestionSet:
-    question_set = [f for f in os.listdir(QUESTIONS_PATH) if f.endswith(".json") and f.startswith("questions")]
+    question_set = [
+        f.name for f in Path(QUESTIONS_PATH).iterdir() if f.name.endswith(".json") and f.name.startswith("questions")
+    ]
     question_set.sort(
         key=lambda x: datetime.datetime.strptime(
             x.split("_")[1].split(".")[0],
@@ -27,5 +28,9 @@ def retrieve_questions() -> QuestionSet:
         for p, pillar in questions.items():
             for q, question in pillar.items():
                 for bp in question:
-                    questions[p][q][bp] = []
+                    questions[p][q][bp] = {
+                        "risk": question[bp]["risk"],
+                        "status": False,
+                        "results": [],
+                    }
     return QuestionSet(data=questions, version=question_version)

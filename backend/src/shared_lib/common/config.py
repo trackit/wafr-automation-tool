@@ -14,7 +14,7 @@ DDB_SORT_KEY = "SK"
 
 ASSESSMENT_PK = "ASSESSMENT"
 
-SCANNING_TOOL_NAME_PLACEHOLDER = "[SCANNING_TOOL_NAME]"
+SCANNING_TOOL_TITLE_PLACEHOLDER = "[SCANNING_TOOL_TITLE]"
 SCANNING_TOOL_DATA_PLACEHOLDER = "[SCANNING_TOOL_DATA]"
 QUESTION_SET_DATA_PLACEHOLDER = "[QUESTION_SET_DATA]"
 PROMPT_PATH = "./data/prompt.txt"
@@ -24,8 +24,8 @@ PROWLER_COMPLIANCE_PATH = "assessments/{}/scans/prowler/compliance/output"
 CLOUD_CUSTODIAN_PATH = "assessments/{}/scans/cloud-custodian/"
 CLOUDSPLOIT_OUTPUT_PATH = "assessments/{}/scans/cloudsploit/output.json"
 
-STORE_CHUNK_PATH = "assessments/{}/chunks/chunk-{}.json"
-STORE_PROMPT_PATH = "assesments/{}/prompts/prompt-{}.txt"
+STORE_CHUNK_PATH = "assessments/{}/chunks/{}.json"
+STORE_PROMPT_PATH = "assessments/{}/prompts/{}.txt"
 
 QUESTIONS_PATH = "./questions"
 

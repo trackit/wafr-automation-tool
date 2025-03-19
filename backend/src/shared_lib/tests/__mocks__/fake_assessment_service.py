@@ -1,6 +1,6 @@
 from typing import override
 
-from common.entities import Assessment, AssessmentDto, FindingExtra
+from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra
 from services.assessment import IAssessmentService
 
 
@@ -18,7 +18,7 @@ class FakeAssessmentService(IAssessmentService):
         self,
         assessment: Assessment,
         best_practice_name: str,
-    ) -> list[FindingExtra] | None:
+    ) -> BestPracticeExtra | None:
         raise NotImplementedError
 
     @override

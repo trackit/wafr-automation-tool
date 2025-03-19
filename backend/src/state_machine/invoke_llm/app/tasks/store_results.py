@@ -11,6 +11,7 @@ from common.config import (
 )
 from common.entities import AnswerData, ChunkId, FindingExtra, PillarDict, ScanningTool
 from common.task import Task
+from exceptions.ai import InvalidPromptResponseError
 from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
@@ -71,7 +72,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
-            UpdateExpression="SET findings.#pillar.#question.#best_practice = list_append(if_not_exists(findings.#pillar.#question.#best_practice, :empty_list), :new_findings)",  # noqa: E501
+            UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": answer_data.pillar,
                 "#question": answer_data.question,
@@ -137,16 +138,19 @@ class StoreResults(Task[StoreResultsInput, None]):
             try:
                 obj = json.loads(llm_result)
                 findings.update(obj)
-            except json.JSONDecodeError:
-                continue
+            except json.JSONDecodeError as e:
+                raise InvalidPromptResponseError(llm_result) from e
         return findings
 
     def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
-        split = prompt_uri.split("-")
-        if len(split) != 3:  # noqa: PLR2004
+        split = prompt_uri.split("/")
+        if len(split) < 1:
             raise InvalidPromptUriError(prompt_uri)
-        scanning_tool = ScanningTool(split[-2])
-        chunk_id = split[-1].split(".")[0]
+        filename = split[-1]
+        without_extension = filename.split(".")[0]
+        split = without_extension.split("_")
+        scanning_tool = ScanningTool(split[0])
+        chunk_id = split[1]
         return scanning_tool, chunk_id
 
     @override
@@ -154,5 +158,5 @@ class StoreResults(Task[StoreResultsInput, None]):
         llm_findings = self.merge_response(event.llm_response)
         s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
-        findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}-{chunk_id}")
+        findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
         self.store_results(event.assessment_id, scanning_tool, llm_findings, findings_data)
