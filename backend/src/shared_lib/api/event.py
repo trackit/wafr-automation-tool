@@ -50,7 +50,16 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
     pass
 
 
-RetrieveAllAssessmentsResponseBody = list[dict[str, Any]]
+class RetrieveAllAssessmentsInput(BaseModel):
+    api_id: str
+    limit: int
+    search: str | None = None
+    start_key: str | None = None
+
+
+class RetrieveAllAssessmentsResponseBody(APIResponseBody):
+    assessments: list[dict[str, Any]]
+    nextUrl: str | None  # noqa: N815
 
 
 class UpdateAssessmentInput(BaseModel):

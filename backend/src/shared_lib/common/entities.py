@@ -2,6 +2,9 @@ from enum import StrEnum
 from typing import Any, TypedDict
 
 from pydantic import BaseModel
+from types_boto3_dynamodb.type_defs import (
+    TableAttributeValueTypeDef,
+)
 from utils.api import APIResponseBody
 
 
@@ -82,6 +85,19 @@ class Assessment(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, PillarDict] | None = None
+
+
+class Pagination(BaseModel):
+    limit: int
+    filter: str | None = None
+    start_key: str | None = None
+
+
+class PaginationOutput[T](BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
+    items: list[T]
+    start_key: dict[str, TableAttributeValueTypeDef] | None
 
 
 Prompt = str

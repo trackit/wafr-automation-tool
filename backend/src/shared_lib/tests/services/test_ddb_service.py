@@ -130,7 +130,7 @@ def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: D
     ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"})
     ddb_table.put_item(Item={DDB_KEY: "test-pk-1", DDB_SORT_KEY: "test#4"})
 
-    items = ddb_service.query(
+    items = ddb_service.query_all(
         table_name="test-table",
         KeyConditionExpression=(Key(DDB_KEY).eq("test-pk") & Key(DDB_SORT_KEY).begins_with("test#")),
     )
@@ -140,14 +140,14 @@ def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: D
         {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"},
     ]
 
-    items = ddb_service.query(
+    items = ddb_service.query_all(
         table_name="test-table",
         KeyConditionExpression=Key(DDB_KEY).eq("test-pk-inexistent"),
     )
     assert not items
 
     with pytest.raises(DynamoDBError):
-        ddb_service.query(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
+        ddb_service.query_all(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
 
 
 def test_ddb_service_bulk_put(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
