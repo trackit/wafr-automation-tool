@@ -105,7 +105,7 @@ class Pagination(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     limit: int
-    start_key: str | None = None
+    next_token: str | None = None
     filter: ConditionBaseImportTypeDef | None = None
     attribute_name: dict[str, str] | None = None
     attribute_value: dict[str, Any] | None = None
@@ -115,7 +115,7 @@ class PaginationOutput[T](BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     items: list[T]
-    start_key: dict[str, TableAttributeValueTypeDef] | None
+    next_token: dict[str, TableAttributeValueTypeDef] | None
 
 
 Prompt = str

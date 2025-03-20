@@ -91,23 +91,23 @@ class AssessmentService(IAssessmentService):
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
         if not query_output:
             return None
-        start_key = query_output.get("LastEvaluatedKey")
+        next_token = query_output.get("LastEvaluatedKey")
         assessments: list[Assessment] = []
         for item in query_output.get("Items", []):
             assessment = self._create_assessment(item)
             assessments.append(assessment)
         assessments.sort(key=lambda x: x.created_at, reverse=True)
-        return PaginationOutput[Assessment](items=assessments, start_key=start_key)
+        return PaginationOutput[Assessment](items=assessments, next_token=next_token)
 
     def _create_retrieve_all_query_input(self, pagination: Pagination) -> QueryInputTableQueryTypeDef:
-        start_key = json.loads(base64.b64decode(pagination.start_key).decode()) if pagination.start_key else {}
+        next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
         query_input = QueryInputTableQueryTypeDef(KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK))
         if pagination.limit:
             query_input["Limit"] = pagination.limit
         if pagination.filter:
             query_input["FilterExpression"] = pagination.filter
-        if start_key:
-            query_input["ExclusiveStartKey"] = start_key
+        if next_token:
+            query_input["ExclusiveStartKey"] = next_token
         if pagination.attribute_name:
             query_input["ExpressionAttributeNames"] = pagination.attribute_name
         if pagination.attribute_value:

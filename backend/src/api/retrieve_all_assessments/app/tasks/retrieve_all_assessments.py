@@ -3,13 +3,11 @@ import json
 from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import Any, override
 
-from common.config import REGION
 from common.entities import Assessment, Pagination
 from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.config import API_URL
 from api.event import RetrieveAllAssessmentsInput, RetrieveAllAssessmentsResponseBody
 
 
@@ -49,7 +47,7 @@ class RetrieveAllAssessments(
         )
         pagination = Pagination(
             limit=event.limit,
-            start_key=event.start_key,
+            next_token=event.next_token,
             filter=filter_expression,
             attribute_name=attribute_name,
             attribute_value=attribute_value,
@@ -60,19 +58,12 @@ class RetrieveAllAssessments(
                 status_code=INTERNAL_SERVER_ERROR,
                 body=None,
             )
-        if paginated.start_key:
-            start_key = base64.b64encode(json.dumps(paginated.start_key).encode()).decode()
-            next_url = API_URL.format(
-                event.api_id,
-                REGION,
-                "prod",
-                f"assessments?start_key={start_key}",
-            )
-        else:
-            next_url = None
+        next_token = (
+            base64.b64encode(json.dumps(paginated.next_token).encode()).decode() if paginated.next_token else None
+        )
         return APIResponse(
             status_code=OK,
             body=RetrieveAllAssessmentsResponseBody(
-                assessments=self.remove_findings(paginated.items), nextUrl=next_url
+                assessments=self.remove_findings(paginated.items), nextToken=next_token
             ),
         )
