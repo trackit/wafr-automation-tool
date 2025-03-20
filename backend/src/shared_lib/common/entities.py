@@ -3,6 +3,7 @@ from typing import Any, TypedDict
 
 from pydantic import BaseModel
 from types_boto3_dynamodb.type_defs import (
+    ConditionBaseImportTypeDef,
     TableAttributeValueTypeDef,
 )
 from utils.api import APIResponseBody
@@ -101,9 +102,13 @@ class Assessment(BaseModel):
 
 
 class Pagination(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
     limit: int
-    filter: str | None = None
     start_key: str | None = None
+    filter: ConditionBaseImportTypeDef | None = None
+    attribute_name: dict[str, str] | None = None
+    attribute_value: dict[str, Any] | None = None
 
 
 class PaginationOutput[T](BaseModel):

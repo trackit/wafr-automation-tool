@@ -179,10 +179,10 @@ Resources:
         Name: !Ref Name
       Policies:
         - Statement:
-          - Effect: Allow
-            Action: states:StartExecution
-            Resource:
-              - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource:
+                - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
             Effect: Allow
             Action: ecs:RunTask
@@ -237,6 +237,8 @@ Resources:
                 PK:
                   S: "ASSESSMENT"
                 SK:
+                  S: "{% $states.input.assessment_id %}"
+                id:
                   S: "{% $states.input.assessment_id %}"
                 name:
                   S: "{% $states.input.name %}"

@@ -108,6 +108,10 @@ class AssessmentService(IAssessmentService):
             query_input["FilterExpression"] = pagination.filter
         if start_key:
             query_input["ExclusiveStartKey"] = start_key
+        if pagination.attribute_name:
+            query_input["ExpressionAttributeNames"] = pagination.attribute_name
+        if pagination.attribute_value:
+            query_input["ExpressionAttributeValues"] = pagination.attribute_value
         return query_input
 
     @override

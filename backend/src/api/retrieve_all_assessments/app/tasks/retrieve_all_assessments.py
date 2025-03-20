@@ -28,9 +28,32 @@ class RetrieveAllAssessments(
             result.append(assessment_dict)
         return result
 
+    def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
+        filter_expression = "begins_with(#name, :name) OR begins_with(#id, :id) OR begins_with(#role_arn, :role_arn)"
+        attribute_name = {
+            "#name": "name",
+            "#id": "id",
+            "#role_arn": "role_arn",
+        }
+        attribute_value = {
+            ":name": event.search,
+            ":id": event.search,
+            ":role_arn": event.search,
+        }
+        return (filter_expression, attribute_name, attribute_value)
+
     @override
     def execute(self, event: RetrieveAllAssessmentsInput) -> APIResponse[RetrieveAllAssessmentsResponseBody]:
-        pagination = Pagination(limit=event.limit, start_key=event.start_key)
+        filter_expression, attribute_name, attribute_value = (
+            self.create_filter(event) if event.search else (None, None, None)
+        )
+        pagination = Pagination(
+            limit=event.limit,
+            start_key=event.start_key,
+            filter=filter_expression,
+            attribute_name=attribute_name,
+            attribute_value=attribute_value,
+        )
         paginated = self.assessment_service.retrieve_all(pagination)
         if not paginated:
             return APIResponse(
