@@ -59,7 +59,7 @@ class RetrieveAllAssessmentsInput(BaseModel):
 
 class RetrieveAllAssessmentsResponseBody(APIResponseBody):
     assessments: list[dict[str, Any]]
-    nextToken: str | None  # noqa: N815
+    next_token: str | None
 
 
 class UpdateAssessmentInput(BaseModel):

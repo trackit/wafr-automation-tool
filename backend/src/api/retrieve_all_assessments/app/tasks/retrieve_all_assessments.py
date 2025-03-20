@@ -64,6 +64,6 @@ class RetrieveAllAssessments(
         return APIResponse(
             status_code=OK,
             body=RetrieveAllAssessmentsResponseBody(
-                assessments=self.remove_findings(paginated.items), nextToken=next_token
+                assessments=self.remove_findings(paginated.items), next_token=next_token
             ),
         )

@@ -35,7 +35,7 @@ def test_retrieve_all_assessments():
 
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
-    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, nextToken=None)
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, next_token=None)
 
 
 def test_retrieve_all_assessments_not_found():
@@ -48,4 +48,4 @@ def test_retrieve_all_assessments_not_found():
 
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
-    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], nextToken=None)
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], next_token=None)
