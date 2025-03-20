@@ -94,7 +94,7 @@ Resources:
             Fn::GetAtt:
               - UserPool
               - ProviderName
-  IoTCoreAccessRole:
+  CognitoAuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -114,7 +114,7 @@ Resources:
     Properties:
       IdentityPoolId: !Ref IdentityPool
       Roles:
-        authenticated: !GetAtt IoTCoreAccessRole.Arn
+        authenticated: !GetAtt CognitoAuthenticatedRole.Arn
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -124,11 +124,7 @@ Resources:
         AllowHeaders: "'*'"
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
-        ApiKeyRequired: true
-        AddApiKeyRequiredToCorsPreflight: false
-        UsagePlan:
-          CreateUsagePlan: PER_API
-          UsagePlanName: GatewayAuthorization
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt UserPool.Arn
