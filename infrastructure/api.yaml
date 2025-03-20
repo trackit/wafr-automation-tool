@@ -43,7 +43,9 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
-      Cors: "'*'"
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'*'"
       Auth:
         ApiKeyRequired: true
         AddApiKeyRequiredToCorsPreflight: false
