@@ -1,2 +1,1 @@
-export * from './lib/getEvent';
-export * from './lib/listEvents';
+export * from './lib/getAssessment';

@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Tabs, VerticalMenu } from '@webui/ui';
+import { getAssessment } from '@webui/api-client';
 
 export function AssessmentDetails() {
   const [activeQuestion, setActiveQuestion] = useState<string>('id1');
@@ -160,6 +162,15 @@ export function AssessmentDetails() {
       onClick: () => setActiveQuestion('id25'),
     },
   ];
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['assessment', '1742328326706'],
+    queryFn: () => getAssessment('1742328326706'),
+  });
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
