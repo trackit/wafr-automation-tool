@@ -42,12 +42,17 @@ Resources:
   Api:
     Type: AWS::Serverless::Api
     Properties:
+      StageName: prod
+      Cors: "'*'"
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: GatewayAuthorization
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: !Ref Name
-      StageName: prod
-      Cors: "'*'"
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
