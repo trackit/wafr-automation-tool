@@ -46,6 +46,7 @@ Resources:
       Cors: "'*'"
       Auth:
         ApiKeyRequired: true
+        AddApiKeyRequiredToCorsPreflight: false
         UsagePlan:
           CreateUsagePlan: PER_API
           UsagePlanName: GatewayAuthorization

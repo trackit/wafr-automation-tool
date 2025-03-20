@@ -45,5 +45,6 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
                 "access-control-allow-methods": "*",
                 "access-control-allow-origin": "*",
                 "access-control-expose-headers": "*",
+                "access-control-allow-credentials": "true",
             },
         }
