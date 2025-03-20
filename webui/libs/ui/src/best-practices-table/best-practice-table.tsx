@@ -31,7 +31,9 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
         cell: (info) => (
           <input
             type="checkbox"
-            className="checkbox checkbox-sm"
+            className={`checkbox checkbox-sm ${
+              info.row.original.status ? 'checkbox-success' : 'checkbox-primary'
+            }`}
             checked={info.row.original.status || false}
             readOnly
           />
@@ -56,17 +58,42 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
             Severity
           </button>
         ),
+        cell: (info) => {
+          return (
+            <div
+              className={`badge badge-soft badge-sm ${
+                info.row.original.risk === 'High'
+                  ? 'badge-error'
+                  : info.row.original.risk === 'Medium'
+                  ? 'badge-warning'
+                  : 'badge-success'
+              }`}
+            >
+              {info.row.original.risk}
+            </div>
+          );
+        },
       }),
       columnHelper.accessor((row) => row.results?.length || 0, {
         id: 'failedFindings',
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 justify-center w-full"
             onClick={() => column.toggleSorting()}
           >
             Failed Findings
           </button>
         ),
+        cell: (info) => {
+          if (info.row.original.results?.length === 0) {
+            return <div className="text-base-content/50 text-center">0</div>;
+          }
+          return (
+            <div className="font-bold text-error text-center">
+              {info.row.original.results?.length || 0}
+            </div>
+          );
+        },
       }),
     ],
     []
@@ -122,7 +149,7 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
         {table.getRowModel().rows.map((row) => (
           <tr key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
+              <td key={cell.id} className="p-4 py-6">
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}

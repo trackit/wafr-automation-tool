@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Tabs, VerticalMenu, BestPracticeTable } from '@webui/ui';
 import { getAssessment } from '@webui/api-client';
 import { components } from '@webui/types';
+import { ArrowRight } from 'lucide-react';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = Record<string, { [key: string]: BestPractice }>;
@@ -13,6 +14,13 @@ export function AssessmentDetails() {
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionKey, setActiveQuestionKey] = useState<string>('id1');
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
+
+  // Helper function to extract AWS account ID from role ARN
+  const extractAccountId = (roleArn: string | undefined) => {
+    if (!roleArn) return '';
+    const match = roleArn.match(/arn:aws:iam::(\d+):/);
+    return match ? match[1] : '';
+  };
 
   // Helper function to calculate completed questions count
   const calculateCompletedQuestions = (pillarData: Question) => {
@@ -84,10 +92,29 @@ export function AssessmentDetails() {
       )
     : [];
 
+  const handleNextQuestion = () => {
+    if (!selectedPillar) return;
+    const questions = Object.keys(selectedPillar);
+    const currentIndex = questions.indexOf(activeQuestionKey);
+    if (currentIndex < questions.length - 1) {
+      setActiveQuestionKey(questions[currentIndex + 1]);
+    }
+  };
+
+  const isLastQuestion = selectedPillar
+    ? Object.keys(selectedPillar).indexOf(activeQuestionKey) ===
+      Object.keys(selectedPillar).length - 1
+    : false;
+
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
-      <div className="prose mb-4">
-        <h2 className="mt-0">Assessment 01 - Client</h2>
+      <div className="prose mb-2 w-full">
+        <h2 className="mt-0">
+          Assessment - {data?.name}{' '}
+          <span className="text-sm text-base-content/50">
+            ({extractAccountId(data?.role_arn)})
+          </span>
+        </h2>
       </div>
       <Tabs
         tabs={tabs}
@@ -127,6 +154,17 @@ export function AssessmentDetails() {
               />
             )}
           </div>
+          {!isLastQuestion && (
+            <div className="flex flex-row gap-2 justify-end mt-auto">
+              <button
+                className="btn btn-link no-underline"
+                onClick={handleNextQuestion}
+              >
+                Next
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
