@@ -2,6 +2,9 @@ from enum import StrEnum
 from typing import Any, TypedDict
 
 from pydantic import BaseModel
+from types_boto3_dynamodb.type_defs import (
+    TableAttributeValueTypeDef,
+)
 from utils.api import APIResponseBody
 
 
@@ -63,6 +66,19 @@ QuestionDict = dict[str, BestPractice]
 PillarDict = dict[str, QuestionDict]
 
 
+class BestPracticeInfo(BaseModel):
+    id: int
+    pillar: str
+    question: str
+    best_practice: str
+
+
+class AIFindingAssociation(TypedDict):
+    id: int
+    start: int
+    end: int
+
+
 class AssessmentDto(BaseModel):
     name: str | None = None
     role_arn: str | None = None
@@ -84,6 +100,19 @@ class Assessment(BaseModel):
     findings: dict[str, PillarDict] | None = None
 
 
+class Pagination(BaseModel):
+    limit: int
+    filter: str | None = None
+    start_key: str | None = None
+
+
+class PaginationOutput[T](BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
+    items: list[T]
+    start_key: dict[str, TableAttributeValueTypeDef] | None
+
+
 Prompt = str
 PromptS3Uri = str
 ChunkId = str
@@ -102,3 +131,7 @@ class CloudCustodianPolicy(StrEnum):
 class AIModel(StrEnum):
     Claude3Dot5Sonnet = "claude-3-5-sonnet"
     Claude3Dot7Sonnet = "claude-3-7-sonnet"
+    DeepseekR1 = "deepseek-r1"
+    NovaPro = "nova-pro"
+    NovaLite = "nova-lite"
+    NovaMicro = "nova-micro"

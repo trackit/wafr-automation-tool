@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.events.findings.finding import Finding
 from entities.prowler.objects.api import API

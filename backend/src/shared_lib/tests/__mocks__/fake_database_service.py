@@ -5,6 +5,7 @@ from services.database import IDatabaseService
 from types_boto3_dynamodb.type_defs import (
     GetItemInputTableGetItemTypeDef,
     QueryInputTableQueryTypeDef,
+    QueryOutputTableTypeDef,
     TableAttributeValueTypeDef,
     UpdateItemInputTableUpdateItemTypeDef,
 )
@@ -50,6 +51,14 @@ class FakeDatabaseService(IDatabaseService):
 
     @override
     def query(
+        self,
+        table_name: str,
+        **kwargs: Unpack[QueryInputTableQueryTypeDef],
+    ) -> QueryOutputTableTypeDef:
+        raise NotImplementedError
+
+    @override
+    def query_all(
         self,
         table_name: str,
         **kwargs: Unpack[QueryInputTableQueryTypeDef],

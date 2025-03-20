@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.objects.operating_system import OperatingSystem
 from entities.prowler.objects.product import Product

@@ -31,7 +31,7 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
             raise InvalidAIModelError(AI_MODEL)
 
         prompt = self.retrieve_prompt(event.prompt_uri)
-        return self.ai_service.invoke_model(
-            model_type(),
+        return self.ai_service.converse(
+            model_type,
             prompt,
         )

@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.events.base_event import BaseEvent
 from entities.prowler.objects.mitre_attack import MITREAttack

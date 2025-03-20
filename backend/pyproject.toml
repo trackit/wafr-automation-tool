@@ -6,13 +6,18 @@ readme = "../README.md"
 requires-python = "==3.12.*"
 dependencies = [
     "boto3>=1.37.5",
-    "pydantic>=2.10.6",
+    "pydantic[email]>=2.10.6",
     "regex>=2024.11.6",
     "types-boto3[bedrock-runtime,dynamodb,s3,stepfunctions]>=1.37.5",
 ]
 
 [dependency-groups]
-dev = ["moto>=5.1.1", "pytest>=8.3.5", "pytest-cov>=6.0.0"]
+dev = [
+    "freezegun>=1.5.1",
+    "moto>=5.1.1",
+ "pytest>=8.3.5",
+ "pytest-cov>=6.0.0",
+]
 
 [tool.pytest.ini_options]
 addopts = "--verbose"

@@ -9,7 +9,14 @@ from common.config import (
     DDB_TABLE,
     STORE_CHUNK_PATH,
 )
-from common.entities import AnswerData, ChunkId, FindingExtra, PillarDict, ScanningTool
+from common.entities import (
+    AIFindingAssociation,
+    AnswerData,
+    BestPracticeInfo,
+    ChunkId,
+    FindingExtra,
+    ScanningTool,
+)
 from common.task import Task
 from exceptions.ai import InvalidPromptResponseError
 from exceptions.assessment import InvalidPromptUriError
@@ -21,6 +28,7 @@ from utils.questions import QuestionSet
 from state_machine.event import StoreResultsInput
 
 logger = logging.getLogger("StoreResults")
+logger.setLevel(logging.DEBUG)
 
 
 class StoreResults(Task[StoreResultsInput, None]):
@@ -45,13 +53,6 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def verify_answer_data(self, answer_data: AnswerData) -> bool:
-        return (
-            answer_data.pillar in self.questions
-            and answer_data.question in self.questions[answer_data.pillar]
-            and answer_data.best_practice in self.questions[answer_data.pillar][answer_data.question]
-        )
-
     def associate_finding_ids(
         self,
         assessment_id: str,
@@ -60,14 +61,6 @@ class StoreResults(Task[StoreResultsInput, None]):
         bp_finding_ids: list[str],
     ) -> None:
         if not bp_finding_ids:
-            return
-        if not self.verify_answer_data(answer_data):
-            logger.error(
-                "Data not found for pillar: %s, question: %s, best practice: %s",
-                answer_data.pillar,
-                answer_data.question,
-                answer_data.best_practice,
-            )
             return
         self.database_service.update(
             table_name=DDB_TABLE,
@@ -113,33 +106,44 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         assessment_id: str,
         scanning_tool: ScanningTool,
-        llm_findings: dict[str, PillarDict],
+        ai_associations: list[AIFindingAssociation],
         findings_data: list[FindingExtra],
     ) -> None:
-        for pillar, pillar_data in llm_findings.items():
-            for question, question_data in pillar_data.items():
-                for best_practice in question_data:
-                    finding_ids: list[str] = [
-                        str(finding_id) for finding_id in llm_findings[pillar][question][best_practice]
-                    ]
-                    answer_data = AnswerData(pillar=pillar, question=question, best_practice=best_practice)
-                    self.associate_finding_ids(assessment_id, scanning_tool, answer_data, finding_ids)
-                    self.store_findings_in_db(assessment_id, scanning_tool, finding_ids, findings_data)
+        best_practices: dict[int, BestPracticeInfo] = {}
+        best_practice_id = 1
+        for pillar, pillar_data in self.questions.items():
+            for question, best_practice_data in pillar_data.items():
+                for best_practice in best_practice_data:
+                    best_practices[best_practice_id] = BestPracticeInfo(
+                        id=best_practice_id,
+                        pillar=pillar,
+                        question=question,
+                        best_practice=best_practice,
+                    )
+                    best_practice_id += 1
 
-    def ensure_text_format(self, llm_response: str) -> str:
-        return llm_response.replace("\n", "")
+        for ai_association in ai_associations:
+            best_practice = best_practices.get(ai_association["id"])
+            if best_practice is None:
+                logger.error("Best practice not found for id %d", ai_association["id"])
+                continue
 
-    def merge_response(self, llm_response: str) -> dict[str, PillarDict]:
-        json_body = json.loads(llm_response)
-        contents = json_body["content"]
-        findings: dict[str, PillarDict] = {}
-        for content in contents:
-            llm_result = self.ensure_text_format(content["text"])
-            try:
-                obj = json.loads(llm_result)
-                findings.update(obj)
-            except json.JSONDecodeError as e:
-                raise InvalidPromptResponseError(llm_result) from e
+            finding_start = ai_association["start"]
+            finding_end = ai_association["end"]
+            finding_ids: list[str] = [str(i) for i in range(finding_start, finding_end + 1)]
+            answer_data = AnswerData(
+                pillar=best_practice.pillar,
+                question=best_practice.question,
+                best_practice=best_practice.best_practice,
+            )
+            self.associate_finding_ids(assessment_id, scanning_tool, answer_data, finding_ids)
+            self.store_findings_in_db(assessment_id, scanning_tool, finding_ids, findings_data)
+
+    def load_response(self, llm_response: str) -> list[AIFindingAssociation]:
+        try:
+            findings = json.loads(llm_response)
+        except json.JSONDecodeError as e:
+            raise InvalidPromptResponseError(llm_response) from e
         return findings
 
     def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
@@ -155,8 +159,9 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     @override
     def execute(self, event: StoreResultsInput) -> None:
-        llm_findings = self.merge_response(event.llm_response)
+        ai_associations = self.load_response(event.llm_response)
         s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
         findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
-        self.store_results(event.assessment_id, scanning_tool, llm_findings, findings_data)
+        logger.info("Processing %s chunk %s", scanning_tool, chunk_id)
+        self.store_results(event.assessment_id, scanning_tool, ai_associations, findings_data)

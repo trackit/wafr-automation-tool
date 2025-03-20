@@ -6,5 +6,5 @@ from services.ai import IAIService
 
 class FakeAIService(IAIService):
     @override
-    def invoke_model(self, model: IModel, prompt: str) -> str:
+    def converse(self, model: IModel, prompt: str) -> str:
         raise NotImplementedError

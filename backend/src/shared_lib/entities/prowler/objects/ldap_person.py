@@ -3,7 +3,7 @@ from typing import Optional
 
 # FIXME(circular-dependency)
 # from entities.prowler.objects.user import User
-from pydantic import BaseModel, EmailStr
+from pydantic.v1 import BaseModel, EmailStr
 
 from entities.prowler.objects.geolocation import GeoLocation
 

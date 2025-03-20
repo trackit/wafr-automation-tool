@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from entities.prowler.objects.mitre_attack import MITREAttack
 from entities.prowler.objects.observable import Observable

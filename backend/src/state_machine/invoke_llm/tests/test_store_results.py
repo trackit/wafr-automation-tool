@@ -14,7 +14,7 @@ from ..app.tasks.store_results import StoreResults
 
 
 def test_store_results():
-    llm_response = '{"content":[{"text":"{\\"Operational excellence\\":{\\"How do you determine what your priorities are?\\":{\\"Evaluate external customer needs\\":[10]}}}"}]}'
+    llm_response = '[{"id":1,"start":10,"end":10}]'
     finding: FindingExtra = FindingExtra(
         id="10",
         status_code="200",
@@ -71,7 +71,7 @@ def test_store_results():
 
 
 def test_store_results_with_no_finding():
-    llm_response = '{"content":[{"text":"{\\"Operational excellence\\":{\\"How do you determine what your priorities are?\\":{\\"Evaluate external customer needs\\":[]}}}"}]}'
+    llm_response = "[]"
     finding: FindingExtra = FindingExtra(
         id="10",
         status_code="200",
@@ -82,6 +82,8 @@ def test_store_results_with_no_finding():
         risk_details="Risk details",
     )
     database_service = FakeDatabaseService()
+    database_service.update = MagicMock(return_value=None)
+
     storage_service = FakeStorageService()
     questions = MagicMock(
         data={
@@ -97,14 +99,14 @@ def test_store_results_with_no_finding():
         assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
     )
     task = StoreResults(database_service, storage_service, questions)
-    result = task.execute(invoke_llm_input)
+    task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
-    assert not result
+    database_service.update.assert_not_called()
 
 
 def test_store_results_with_invalid_questions():
-    llm_response = '{"content":[{"text":"{\\"Operational excellence\\":{\\"How do you determine what your priorities are?\\":{\\"INVALID\\":[10]}}}"}]}'
+    llm_response = '[{"id":1,"start":10,"end":10}]'
     finding: FindingExtra = FindingExtra(
         id="10",
         status_code="200",
@@ -123,16 +125,18 @@ def test_store_results_with_invalid_questions():
     database_service.put = MagicMock(return_value=None)
 
     task = StoreResults(database_service, storage_service, questions)
-    result = task.execute(
+    task.execute(
         StoreResultsInput(
             assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
         )
     )
-    assert not result
+
+    storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
+    database_service.put.assert_not_called()
 
 
 def test_store_results_with_no_finding_data():
-    llm_response = '{"content":[{"text":"{\\"Operational excellence\\":{\\"How do you determine what your priorities are?\\":{\\"Evaluate external customer needs\\":[10]}}}"}]}'
+    llm_response = '[{"id":1,"start":10,"end":10}]'
     finding: FindingExtra = FindingExtra(
         id="9",
         status_code="200",
@@ -159,7 +163,7 @@ def test_store_results_with_no_finding_data():
         assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
     )
     task = StoreResults(database_service, storage_service, questions)
-    result = task.execute(invoke_llm_input)
+    task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
     database_service.update.assert_called_once_with(
@@ -176,11 +180,10 @@ def test_store_results_with_no_finding_data():
             ":empty_list": [],
         },
     )
-    assert not result
 
 
 def test_store_results_with_invalid_llm_response():
-    llm_response = '{"content":[{"text":"HELLO WORLD"}]}'
+    llm_response = "Hello world!"
     finding: FindingExtra = FindingExtra(
         id="10",
         status_code="200",
@@ -202,6 +205,6 @@ def test_store_results_with_invalid_llm_response():
     with pytest.raises(InvalidPromptResponseError):
         task.execute(
             StoreResultsInput(
-                assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key-prowler-1.json"
+                assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key/prowler_1.json"
             )
         )

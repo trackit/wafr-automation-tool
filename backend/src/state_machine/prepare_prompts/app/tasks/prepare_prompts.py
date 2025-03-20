@@ -26,7 +26,7 @@ from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
 
-CHUNK_SIZE = 2000
+CHUNK_SIZE = 400
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
@@ -94,9 +94,23 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         return prompts
 
     def insert_questions_in_prompt(self, prompt: Prompt) -> str:
+        best_practices = []
+        best_practice_id = 1
+        for pillar, pillar_data in self.question_set.data.items():
+            for question, best_practice_data in pillar_data.items():
+                for best_practice in best_practice_data:
+                    best_practices.append(
+                        {
+                            "id": best_practice_id,
+                            "pillar": pillar,
+                            "question": question,
+                            "best_practice": best_practice,
+                        }
+                    )
+                    best_practice_id += 1
         return prompt.replace(
             QUESTION_SET_DATA_PLACEHOLDER,
-            json.dumps(self.question_set.data, separators=(",", ":")).replace(":{}", ""),
+            json.dumps(best_practices, separators=(",", ":")).replace(":{}", ""),
         )
 
     def store_prompts(

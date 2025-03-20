@@ -1,16 +1,20 @@
+import base64
+import json
 from http.client import INTERNAL_SERVER_ERROR, OK
 from typing import Any, override
 
-from common.entities import Assessment
+from common.config import REGION
+from common.entities import Assessment, Pagination
 from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.event import RetrieveAllAssessmentsResponseBody
+from api.config import API_URL
+from api.event import RetrieveAllAssessmentsInput, RetrieveAllAssessmentsResponseBody
 
 
 class RetrieveAllAssessments(
-    Task[None, APIResponse[RetrieveAllAssessmentsResponseBody]],
+    Task[RetrieveAllAssessmentsInput, APIResponse[RetrieveAllAssessmentsResponseBody]],
 ):
     def __init__(self, assessment_service: IAssessmentService) -> None:
         super().__init__()
@@ -25,14 +29,27 @@ class RetrieveAllAssessments(
         return result
 
     @override
-    def execute(self, event: None) -> APIResponse[RetrieveAllAssessmentsResponseBody]:
-        assessments = self.assessment_service.retrieve_all()
-        if not assessments:
+    def execute(self, event: RetrieveAllAssessmentsInput) -> APIResponse[RetrieveAllAssessmentsResponseBody]:
+        pagination = Pagination(limit=event.limit, start_key=event.start_key)
+        paginated = self.assessment_service.retrieve_all(pagination)
+        if not paginated:
             return APIResponse(
                 status_code=INTERNAL_SERVER_ERROR,
                 body=None,
             )
+        if paginated.start_key:
+            start_key = base64.b64encode(json.dumps(paginated.start_key).encode()).decode()
+            next_url = API_URL.format(
+                event.api_id,
+                REGION,
+                "prod",
+                f"assessments?start_key={start_key}",
+            )
+        else:
+            next_url = None
         return APIResponse(
             status_code=OK,
-            body=self.remove_findings(assessments),
+            body=RetrieveAllAssessmentsResponseBody(
+                assessments=self.remove_findings(paginated.items), nextUrl=next_url
+            ),
         )

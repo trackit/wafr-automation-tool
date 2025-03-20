@@ -9,6 +9,7 @@ from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_dynamodb.type_defs import (
     GetItemInputTableGetItemTypeDef,
     QueryInputTableQueryTypeDef,
+    QueryOutputTableTypeDef,
     TableAttributeValueTypeDef,
     UpdateItemInputTableUpdateItemTypeDef,
 )
@@ -55,11 +56,19 @@ class IDatabaseService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def query(
+    def query_all(
         self,
         table_name: str,
         **kwargs: Unpack[QueryInputTableQueryTypeDef],
     ) -> list[dict[str, TableAttributeValueTypeDef]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def query(
+        self,
+        table_name: str,
+        **kwargs: Unpack[QueryInputTableQueryTypeDef],
+    ) -> QueryOutputTableTypeDef:
         raise NotImplementedError
 
     @abstractmethod
@@ -150,7 +159,7 @@ class DDBService(IDatabaseService):
             raise DynamoDBError from e
 
     @override
-    def query(
+    def query_all(
         self,
         table_name: str,
         **kwargs: Unpack[QueryInputTableQueryTypeDef],
@@ -168,6 +177,21 @@ class DDBService(IDatabaseService):
             raise DynamoDBError from e
         else:
             return items
+
+    @override
+    def query(
+        self,
+        table_name: str,
+        **kwargs: Unpack[QueryInputTableQueryTypeDef],
+    ) -> QueryOutputTableTypeDef:
+        table = self.resource.Table(table_name)
+        try:
+            response = table.query(**kwargs)
+        except ClientError as e:
+            logger.exception("Error while querying DynamoDB")
+            raise DynamoDBError from e
+        else:
+            return response
 
     @override
     def bulk_put(self, table_name: str, items: list[dict[str, Any]]) -> None:
