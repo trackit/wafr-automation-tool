@@ -19,6 +19,6 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
     if query_string_parameters:
         task_input.limit = int(query_string_parameters.get("limit", 10))
         task_input.search = query_string_parameters.get("search", None)
-        task_input.start_key = query_string_parameters.get("start_key", None)
+        task_input.next_token = query_string_parameters.get("next_token", None)
     response = retrieve_assessment_task.execute(task_input)
     return response.build()

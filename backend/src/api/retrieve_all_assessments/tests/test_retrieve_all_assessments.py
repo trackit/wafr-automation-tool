@@ -26,26 +26,26 @@ def test_retrieve_all_assessments():
     assessments_dicts[0]["error"] = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(
-        return_value=PaginationOutput[Assessment](items=assessments, start_key=None)
+        return_value=PaginationOutput[Assessment](items=assessments, next_token=None)
     )
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, start_key=None, api_id="")
+    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, next_token=None, api_id="")
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
-    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, nextUrl=None)
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, next_token=None)
 
 
 def test_retrieve_all_assessments_not_found():
     assessment_service = FakeAssessmentService()
-    assessment_service.retrieve_all = MagicMock(return_value=PaginationOutput[Assessment](items=[], start_key=None))
+    assessment_service.retrieve_all = MagicMock(return_value=PaginationOutput[Assessment](items=[], next_token=None))
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, start_key=None, api_id="")
+    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, next_token=None, api_id="")
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
-    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], nextUrl=None)
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], next_token=None)

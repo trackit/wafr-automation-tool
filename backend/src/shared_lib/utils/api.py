@@ -40,4 +40,11 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
         return {
             "statusCode": self.status_code,
             "body": body,
+            "headers": {
+                "access-control-allow-headers": "*",
+                "access-control-allow-methods": "*",
+                "access-control-allow-origin": "*",
+                "access-control-expose-headers": "*",
+                "access-control-allow-credentials": "true",
+            },
         }

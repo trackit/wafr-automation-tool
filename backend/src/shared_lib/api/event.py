@@ -54,12 +54,12 @@ class RetrieveAllAssessmentsInput(BaseModel):
     api_id: str
     limit: int
     search: str | None = None
-    start_key: str | None = None
+    next_token: str | None = None
 
 
 class RetrieveAllAssessmentsResponseBody(APIResponseBody):
     assessments: list[dict[str, Any]]
-    nextUrl: str | None  # noqa: N815
+    next_token: str | None
 
 
 class UpdateAssessmentInput(BaseModel):
