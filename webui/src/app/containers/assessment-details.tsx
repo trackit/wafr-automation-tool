@@ -15,7 +15,7 @@ export function AssessmentDetails() {
   const queryClient = useQueryClient();
   const [selectedPillarKey, setSelectedPillarKey] = useState<string>('');
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
-  const [activeQuestionKey, setActiveQuestionKey] = useState<string>('id1');
+  const [activeQuestionKey, setActiveQuestionKey] = useState<string>('');
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -27,7 +27,70 @@ export function AssessmentDetails() {
       bestPractice: string;
       status: boolean;
     }) => updateStatus(assessmentId, bestPractice, status),
-    onSuccess: () => {
+    onMutate: async ({ assessmentId, bestPractice, status }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ['assessment', assessmentId],
+      });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData([
+        'assessment',
+        assessmentId,
+      ]) as components['schemas']['AssessmentContent'] | undefined;
+
+      if (!previousData?.findings) {
+        console.log('No previous data found');
+        return { previousData };
+      }
+
+      // Create a deep copy of the data
+      const newData = JSON.parse(
+        JSON.stringify(previousData)
+      ) as components['schemas']['AssessmentContent'];
+      const findings = newData.findings as Record<string, Pillar>;
+
+      // Find and update the specific best practice
+      let updated = false;
+      for (const pillarKey of Object.keys(findings)) {
+        const pillar = findings[pillarKey] as Record<string, Question>;
+        for (const questionKey of Object.keys(pillar)) {
+          const question = pillar[questionKey] as Record<string, BestPractice>;
+          if (bestPractice in question) {
+            console.log('Found best practice to update in:', {
+              pillarKey,
+              questionKey,
+            });
+            question[bestPractice] = {
+              ...question[bestPractice],
+              status,
+            };
+            updated = true;
+            break;
+          }
+        }
+        if (updated) break;
+      }
+
+      // Update the cache with our optimistic value
+      queryClient.setQueryData(['assessment', assessmentId], newData);
+
+      // Return a context object with the snapshotted value
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      console.log('Error occurred, rolling back to:', context?.previousData);
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          ['assessment', assessmentId],
+          context.previousData
+        );
+      }
+    },
+    onSettled: () => {
+      console.log('Mutation settled, refetching data');
+      // Always refetch after error or success to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['assessment', assessmentId] });
     },
   });
@@ -70,36 +133,36 @@ export function AssessmentDetails() {
     queryFn: () => getAssessment(assessmentId),
   });
 
-  // Set the first pillar key as the selected pillar key
+  // Set the first pillar key as the selected pillar key ONLY on initial load
   useEffect(() => {
-    // console.log(data);
-    if (data?.findings) {
+    if (data?.findings && !selectedPillarKey) {
       const pillars = data.findings as Record<string, Pillar>;
-      if (pillars && Object.keys(pillars).length > 0 && !selectedPillarKey) {
+      if (pillars && Object.keys(pillars).length > 0) {
         const firstPillarKey = Object.keys(pillars)[0];
         setSelectedPillarKey(firstPillarKey);
       }
     }
-  }, [data, selectedPillarKey]);
+  }, [data?.findings, selectedPillarKey]);
 
-  // Set pillar from the selected pillar key
+  // Set pillar and question from the selected keys
   useEffect(() => {
-    if (data?.findings && selectedPillarKey && selectedPillarKey !== '') {
+    if (data?.findings && selectedPillarKey) {
       const pillars = data.findings as Record<string, Pillar>;
       setSelectedPillar(pillars[selectedPillarKey]);
-      const questions = pillars[selectedPillarKey];
-      const questionKeys = Object.keys(questions);
-      setActiveQuestionKey(questionKeys[0]);
-      // console.log(pillars[selectedPillarKey]);
-    }
-  }, [data, selectedPillarKey]);
 
-  // Set active question from the active question key
-  useEffect(() => {
-    if (selectedPillar && activeQuestionKey) {
-      setActiveQuestion(selectedPillar[activeQuestionKey]);
+      // Set initial question key if not already set or if it doesn't exist in current pillar
+      const currentQuestions = pillars[selectedPillarKey];
+      if (!activeQuestionKey || !(activeQuestionKey in currentQuestions)) {
+        const questionKeys = Object.keys(currentQuestions);
+        setActiveQuestionKey(questionKeys[0]);
+      }
+
+      // Always update active question based on current keys
+      if (pillars[selectedPillarKey]) {
+        setActiveQuestion(pillars[selectedPillarKey][activeQuestionKey]);
+      }
     }
-  }, [selectedPillar, activeQuestionKey]);
+  }, [data?.findings, selectedPillarKey, activeQuestionKey]);
 
   // Create dynamic tabs from findings data
   const tabs = data?.findings
