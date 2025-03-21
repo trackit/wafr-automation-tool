@@ -66,6 +66,14 @@ class FakeDatabaseService(IDatabaseService):
         raise NotImplementedError
 
     @override
+    def bulk_get(
+        self,
+        table_name: str,
+        keys: list[dict[str, TableAttributeValueTypeDef]],
+    ) -> list[dict[str, TableAttributeValueTypeDef]]:
+        raise NotImplementedError
+
+    @override
     def bulk_put(self, table_name: str, items: list[dict[str, Any]]) -> None:
         raise NotImplementedError
 

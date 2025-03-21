@@ -14,7 +14,6 @@ from common.entities import (
     Pagination,
     PaginationOutput,
 )
-from exceptions.assessment import FindingNotFoundError
 from types_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
@@ -46,6 +45,14 @@ class IAssessmentService:
         assessment_id: str,
         finding_id: str,
     ) -> FindingExtra | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def retrieve_findings(
+        self,
+        assessment_id: str,
+        finding_ids: list[str],
+    ) -> list[FindingExtra] | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -122,22 +129,20 @@ class AssessmentService(IAssessmentService):
     ) -> BestPracticeExtra | None:
         if not assessment.findings:
             return None
-        bp_findings: BestPractice | None = None
+        best_practice: BestPractice | None = None
         for pillar in assessment.findings.values():
             for question in pillar.values():
                 if best_practice_name in question:
-                    bp_findings = question[best_practice_name]
+                    best_practice = question[best_practice_name]
                     break
-        if not bp_findings:
+        if not best_practice:
             return None
-        findings: list[FindingExtra] = []
-        for finding_id in bp_findings.get("results", []):
-            finding = self.retrieve_finding(assessment.id, finding_id)
-            if not finding:
-                raise FindingNotFoundError(assessment.id, finding_id)
-            findings.append(finding)
+        finding_ids = best_practice.get("results", [])
+        findings = self.retrieve_findings(assessment.id, finding_ids)
+        if not findings:
+            return None
         return BestPracticeExtra(
-            results=findings, risk=bp_findings.get("risk", ""), status=bp_findings.get("status", False)
+            results=findings, risk=best_practice.get("risk", ""), status=best_practice.get("status", False)
         )
 
     @override
@@ -153,6 +158,24 @@ class AssessmentService(IAssessmentService):
         if not item:
             return None
         return self._create_finding(item)
+
+    @override
+    def retrieve_findings(
+        self,
+        assessment_id: str,
+        finding_ids: list[str],
+    ) -> list[FindingExtra] | None:
+        items = self.database_service.bulk_get(
+            table_name=DDB_TABLE,
+            keys=[{DDB_KEY: assessment_id, DDB_SORT_KEY: finding_id} for finding_id in finding_ids],
+        )
+        if not items:
+            return None
+        findings: list[FindingExtra] = []
+        for item in items:
+            finding = self._create_finding(item)
+            findings.append(finding)
+        return findings
 
     @override
     def update(self, assessment_id: str, assessment_dto: AssessmentDto) -> None:
@@ -171,22 +194,24 @@ class AssessmentService(IAssessmentService):
         if not assessment.findings or status is None:
             return False
         bp_findings: BestPractice | None = None
+        final_pillar_name: str | None = None
+        final_question_name: str | None = None
         for pillar_name, pillar in assessment.findings.items():
             for question_name, question in pillar.items():
                 if best_practice_name in question:
                     bp_findings = question[best_practice_name]
-                    self._pillar_name = pillar_name
-                    self._question_name = question_name
+                    final_pillar_name = pillar_name
+                    final_question_name = question_name
                     break
-        if not bp_findings:
+        if not bp_findings or not final_pillar_name or not final_question_name:
             return False
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
             UpdateExpression="SET findings.#pillar.#question.#best_practice.#status = :status",
             ExpressionAttributeNames={
-                "#pillar": self._pillar_name,
-                "#question": self._question_name,
+                "#pillar": final_pillar_name,
+                "#question": final_question_name,
                 "#best_practice": best_practice_name,
                 "#status": "status",
             },
