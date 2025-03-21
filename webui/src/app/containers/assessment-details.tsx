@@ -1,22 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tabs, VerticalMenu, BestPracticeTable } from '@webui/ui';
+import { Tabs, VerticalMenu, DataTable, Modal } from '@webui/ui';
 import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
+import { createColumnHelper } from '@tanstack/react-table';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = Record<string, { [key: string]: BestPractice }>;
 type Pillar = Record<string, Question>;
+type TableRow = BestPractice & { name: string };
 
 const assessmentId = '1742328326706';
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
+  const [isFindingModalOpen, setIsFindingModalOpen] = useState(false);
   const [selectedPillarKey, setSelectedPillarKey] = useState<string>('');
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionKey, setActiveQuestionKey] = useState<string>('');
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
+  const [bestPractice, setBestPractice] = useState<string | null>(null);
+
   const updateStatusMutation = useMutation({
     mutationFn: ({
       assessmentId,
@@ -102,6 +107,91 @@ export function AssessmentDetails() {
       status,
     });
   };
+
+  const columnHelper = createColumnHelper<TableRow>();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.display({
+        id: 'status',
+        header: '',
+        cell: (info) => (
+          <div className="flex items-center justify-center">
+            <input
+              type="checkbox"
+              className={`checkbox checkbox-sm ${
+                info.row.original.status
+                  ? 'checkbox-success'
+                  : 'checkbox-primary'
+              }`}
+              checked={info.row.original.status || false}
+              readOnly
+              onChange={(e) =>
+                handleUpdateStatus(info.row.original.name, e.target.checked)
+              }
+            />
+          </div>
+        ),
+      }),
+      columnHelper.accessor('name', {
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => column.toggleSorting()}
+          >
+            Best Practice
+          </button>
+        ),
+      }),
+      columnHelper.accessor('risk', {
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => column.toggleSorting()}
+          >
+            Severity
+          </button>
+        ),
+        cell: (info) => {
+          return (
+            <div
+              className={`badge badge-soft badge-sm ${
+                info.row.original.risk === 'High'
+                  ? 'badge-error'
+                  : info.row.original.risk === 'Medium'
+                  ? 'badge-warning'
+                  : 'badge-success'
+              }`}
+            >
+              {info.row.original.risk}
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor((row) => row.results?.length || 0, {
+        id: 'failedFindings',
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1 justify-center w-full cursor-pointer"
+            onClick={() => column.toggleSorting()}
+          >
+            Failed Findings
+          </button>
+        ),
+        cell: (info) => {
+          if (info.row.original.results?.length === 0) {
+            return <div className="text-base-content/50 text-center">0</div>;
+          }
+          return (
+            <div className="font-bold text-error text-center">
+              {info.row.original.results?.length || 0}
+            </div>
+          );
+        },
+      }),
+    ],
+    [handleUpdateStatus]
+  );
 
   // Helper function to extract AWS account ID from role ARN
   const extractAccountId = (roleArn: string | undefined) => {
@@ -194,6 +284,14 @@ export function AssessmentDetails() {
       Object.keys(selectedPillar).length - 1
     : false;
 
+  const tableData = useMemo(() => {
+    if (!activeQuestion) return [];
+    return Object.entries(activeQuestion).map(([key, practice]) => ({
+      ...practice,
+      name: key,
+    }));
+  }, [activeQuestion]);
+
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
       <div className="prose mb-2 w-full">
@@ -241,10 +339,10 @@ export function AssessmentDetails() {
           </div>
           <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
             {activeQuestion && (
-              <BestPracticeTable
+              <DataTable
                 key={`${selectedPillarKey}-${activeQuestionKey}`}
-                bestPractices={activeQuestion}
-                onUpdateStatus={handleUpdateStatus}
+                data={tableData}
+                columns={columns}
               />
             )}
           </div>
@@ -261,6 +359,12 @@ export function AssessmentDetails() {
           )}
         </div>
       </div>
+      <Modal
+        open={isFindingModalOpen}
+        onClose={() => setIsFindingModalOpen(false)}
+      >
+        <div>Test</div>
+      </Modal>
     </div>
   );
 }

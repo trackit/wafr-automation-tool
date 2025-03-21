@@ -1,119 +1,21 @@
-import { components } from '@webui/types';
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
   SortingState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
-type BestPractice = components['schemas']['BestPractice'];
-
-interface BestPracticeTableProps {
-  bestPractices: Record<string, BestPractice>;
-  onUpdateStatus: (bestPractice: string, status: boolean) => void;
+interface DataTableProps<T> {
+  data: T[];
+  columns: ColumnDef<T, any>[];
 }
 
-type TableRow = BestPractice & { name: string };
-
-const columnHelper = createColumnHelper<TableRow>();
-
-export function BestPracticeTable({
-  bestPractices,
-  onUpdateStatus,
-}: BestPracticeTableProps) {
+export function DataTable<T>({ data, columns }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.display({
-        id: 'status',
-        header: '',
-        cell: (info) => (
-          <input
-            type="checkbox"
-            className={`checkbox checkbox-sm ${
-              info.row.original.status ? 'checkbox-success' : 'checkbox-primary'
-            }`}
-            checked={info.row.original.status || false}
-            readOnly
-            onChange={(e) =>
-              onUpdateStatus(info.row.original.name, e.target.checked)
-            }
-          />
-        ),
-      }),
-      columnHelper.accessor('name', {
-        header: ({ column }) => (
-          <button
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={() => column.toggleSorting()}
-          >
-            Best Practice
-          </button>
-        ),
-      }),
-      columnHelper.accessor('risk', {
-        header: ({ column }) => (
-          <button
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={() => column.toggleSorting()}
-          >
-            Severity
-          </button>
-        ),
-        cell: (info) => {
-          return (
-            <div
-              className={`badge badge-soft badge-sm ${
-                info.row.original.risk === 'High'
-                  ? 'badge-error'
-                  : info.row.original.risk === 'Medium'
-                  ? 'badge-warning'
-                  : 'badge-success'
-              }`}
-            >
-              {info.row.original.risk}
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor((row) => row.results?.length || 0, {
-        id: 'failedFindings',
-        header: ({ column }) => (
-          <button
-            className="flex items-center gap-1 justify-center w-full cursor-pointer"
-            onClick={() => column.toggleSorting()}
-          >
-            Failed Findings
-          </button>
-        ),
-        cell: (info) => {
-          if (info.row.original.results?.length === 0) {
-            return <div className="text-base-content/50 text-center">0</div>;
-          }
-          return (
-            <div className="font-bold text-error text-center">
-              {info.row.original.results?.length || 0}
-            </div>
-          );
-        },
-      }),
-    ],
-    [onUpdateStatus]
-  );
-
-  const data = useMemo(
-    () =>
-      Object.entries(bestPractices).map(([key, practice]) => ({
-        ...practice,
-        name: key,
-      })),
-    [bestPractices]
-  );
 
   const table = useReactTable({
     data,
@@ -167,4 +69,4 @@ export function BestPracticeTable({
   );
 }
 
-export default BestPracticeTable;
+export default DataTable;
