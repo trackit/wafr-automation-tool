@@ -14,13 +14,17 @@ type BestPractice = components['schemas']['BestPractice'];
 
 interface BestPracticeTableProps {
   bestPractices: Record<string, BestPractice>;
+  onUpdateStatus: (bestPractice: string, status: boolean) => void;
 }
 
 type TableRow = BestPractice & { name: string };
 
 const columnHelper = createColumnHelper<TableRow>();
 
-export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
+export function BestPracticeTable({
+  bestPractices,
+  onUpdateStatus,
+}: BestPracticeTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const columns = useMemo(
@@ -36,6 +40,9 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
             }`}
             checked={info.row.original.status || false}
             readOnly
+            onChange={(e) =>
+              onUpdateStatus(info.row.original.name, e.target.checked)
+            }
           />
         ),
       }),
@@ -96,7 +103,7 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
         },
       }),
     ],
-    []
+    [onUpdateStatus]
   );
 
   const data = useMemo(

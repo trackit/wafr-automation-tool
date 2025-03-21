@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Tabs, VerticalMenu, BestPracticeTable } from '@webui/ui';
-import { getAssessment } from '@webui/api-client';
+import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 
@@ -9,11 +9,36 @@ type BestPractice = components['schemas']['BestPractice'];
 type Question = Record<string, { [key: string]: BestPractice }>;
 type Pillar = Record<string, Question>;
 
+const assessmentId = '1742328326706';
+
 export function AssessmentDetails() {
+  const queryClient = useQueryClient();
   const [selectedPillarKey, setSelectedPillarKey] = useState<string>('');
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionKey, setActiveQuestionKey] = useState<string>('id1');
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
+  const updateStatusMutation = useMutation({
+    mutationFn: ({
+      assessmentId,
+      bestPractice,
+      status,
+    }: {
+      assessmentId: string;
+      bestPractice: string;
+      status: boolean;
+    }) => updateStatus(assessmentId, bestPractice, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', assessmentId] });
+    },
+  });
+
+  const handleUpdateStatus = (bestPractice: string, status: boolean) => {
+    updateStatusMutation.mutate({
+      assessmentId,
+      bestPractice,
+      status,
+    });
+  };
 
   // Helper function to extract AWS account ID from role ARN
   const extractAccountId = (roleArn: string | undefined) => {
@@ -41,8 +66,8 @@ export function AssessmentDetails() {
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['assessment', '1742328326706'],
-    queryFn: () => getAssessment('1742328326706'),
+    queryKey: ['assessment', assessmentId],
+    queryFn: () => getAssessment(assessmentId),
   });
 
   // Set the first pillar key as the selected pillar key
@@ -151,6 +176,7 @@ export function AssessmentDetails() {
               <BestPracticeTable
                 key={`${selectedPillarKey}-${activeQuestionKey}`}
                 bestPractices={activeQuestion}
+                onUpdateStatus={handleUpdateStatus}
               />
             )}
           </div>
