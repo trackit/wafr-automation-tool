@@ -5,7 +5,7 @@ import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
-
+import FindingsDetails from './findings-details';
 type BestPractice = components['schemas']['BestPractice'];
 type Question = Record<string, { [key: string]: BestPractice }>;
 type Pillar = Record<string, Question>;
@@ -15,7 +15,6 @@ const assessmentId = '1742328326706';
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
-  const [isFindingModalOpen, setIsFindingModalOpen] = useState(false);
   const [selectedPillarKey, setSelectedPillarKey] = useState<string>('');
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionKey, setActiveQuestionKey] = useState<string>('');
@@ -179,12 +178,20 @@ export function AssessmentDetails() {
           </button>
         ),
         cell: (info) => {
-          if (info.row.original.results?.length === 0) {
-            return <div className="text-base-content/50 text-center">0</div>;
-          }
           return (
-            <div className="font-bold text-error text-center">
-              {info.row.original.results?.length || 0}
+            <div className="font-bold text-center">
+              {info.row.original.results?.length ? (
+                <button
+                  className="btn btn-link text-error"
+                  onClick={() => {
+                    setBestPractice(info.row.original.name);
+                  }}
+                >
+                  {info.row.original.results?.length || 0}
+                </button>
+              ) : (
+                <div className="text-base-content/50 text-center">0</div>
+              )}
             </div>
           );
         },
@@ -359,12 +366,19 @@ export function AssessmentDetails() {
           )}
         </div>
       </div>
-      <Modal
-        open={isFindingModalOpen}
-        onClose={() => setIsFindingModalOpen(false)}
-      >
-        <div>Test</div>
-      </Modal>
+      {bestPractice && (
+        <Modal
+          open={bestPractice !== null}
+          onClose={() => setBestPractice(null)}
+          className="w-full max-w-5xl"
+          notCentered
+        >
+          <FindingsDetails
+            assessmentId={assessmentId}
+            bestPractice={bestPractice}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
