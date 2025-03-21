@@ -218,6 +218,11 @@ export function AssessmentDetails() {
             id: question,
             active: activeQuestionKey === question,
             onClick: () => setActiveQuestionKey(question),
+            completed: selectedPillar
+              ? Object.values(selectedPillar[question]).every(
+                  (bestPractice) => bestPractice.status ?? false
+                )
+              : false,
           }))}
         />
         <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">

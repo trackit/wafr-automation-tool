@@ -2,6 +2,7 @@ export type MenuItem = {
   text: React.ReactNode;
   id: string;
   active?: boolean;
+  completed?: boolean;
   onClick: () => void;
 };
 
@@ -20,6 +21,9 @@ function MenuItemComponent({ item, index }: { item: MenuItem; index: number }) {
     >
       {item.active && (
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+      )}
+      {item.completed && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
       )}
       <div className="flex">
         <div className="w-6 flex-shrink-0">{index}.</div>
