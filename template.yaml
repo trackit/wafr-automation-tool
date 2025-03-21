@@ -90,6 +90,7 @@ Resources:
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: !Ref AWS::StackName
       Tags:
         - Key: Project
           Value: !Ref Project
