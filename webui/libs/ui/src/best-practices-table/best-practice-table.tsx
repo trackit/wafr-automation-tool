@@ -42,7 +42,7 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
       columnHelper.accessor('name', {
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 cursor-pointer"
             onClick={() => column.toggleSorting()}
           >
             Best Practice
@@ -52,7 +52,7 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
       columnHelper.accessor('risk', {
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 cursor-pointer"
             onClick={() => column.toggleSorting()}
           >
             Severity
@@ -78,7 +78,7 @@ export function BestPracticeTable({ bestPractices }: BestPracticeTableProps) {
         id: 'failedFindings',
         header: ({ column }) => (
           <button
-            className="flex items-center gap-1 justify-center w-full"
+            className="flex items-center gap-1 justify-center w-full cursor-pointer"
             onClick={() => column.toggleSorting()}
           >
             Failed Findings
