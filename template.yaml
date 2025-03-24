@@ -18,6 +18,8 @@ Parameters:
     AllowedValues:
       - "true"
       - "false"
+  Repository:
+    Type: String
 
 Resources:
   SharedLibs:
@@ -120,3 +122,21 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: !Ref Name
+  Frontend:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/frontend.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: !Ref Name
+        ParentStackName: !Ref AWS::StackName
+        Repository: !Ref Repository
+        ApiEndpoint: !GetAtt Api.Outputs.ApiEndpoint
+        UserPoolId: !GetAtt Api.Outputs.UserPoolId
+        IdentityPoolId: !GetAtt Api.Outputs.IdentityPoolId
+        UserPoolClientId: !GetAtt Api.Outputs.UserPoolClientId

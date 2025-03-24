@@ -303,3 +303,17 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
+
+Outputs:
+  ApiEndpoint:
+    Description: API Endpoint
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Api.Stage}"
+  UserPoolId:
+    Description: User Pool ID
+    Value: !Ref UserPool
+  IdentityPoolId:
+    Description: Identity Pool ID
+    Value: !Ref IdentityPool
+  UserPoolClientId:
+    Description: User Pool Client ID
+    Value: !Ref UserPoolClient
