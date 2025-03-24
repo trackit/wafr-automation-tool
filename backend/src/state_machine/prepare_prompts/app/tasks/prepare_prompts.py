@@ -21,7 +21,7 @@ from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
 from utils.prompt import get_prompt
-from utils.questions import QuestionSet
+from utils.questions import FormattedQuestionSet
 from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
@@ -34,15 +34,18 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-        question_set: QuestionSet,
+        formatted_question_set: FormattedQuestionSet,
     ) -> None:
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
-        self.question_set = question_set
+        self.formatted_question_set = formatted_question_set
 
     def populate_dynamodb(self, assessment_id: str) -> None:
-        attrs: dict[str, Any] = {"findings": self.question_set.data, "question_version": self.question_set.version}
+        attrs: dict[str, Any] = {
+            "findings": self.formatted_question_set.data,
+            "question_version": self.formatted_question_set.version,
+        }
         self.database_service.update_attrs(
             table_name=DDB_TABLE,
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
@@ -96,15 +99,16 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def insert_questions_in_prompt(self, prompt: Prompt) -> str:
         best_practices = []
         best_practice_id = 1
-        for pillar, pillar_data in self.question_set.data.items():
-            for question, best_practice_data in pillar_data.items():
-                for best_practice in best_practice_data:
+
+        for pillar_name, pillar_data in self.formatted_question_set.data.items():
+            for question_name, question_data in pillar_data.get("questions").items():
+                for best_practice_data in question_data.get("best_practices").values():
                     best_practices.append(
                         {
                             "id": best_practice_id,
-                            "pillar": pillar,
-                            "question": question,
-                            "best_practice": best_practice,
+                            "pillar": pillar_name,
+                            "question": question_name,
+                            "best_practice": best_practice_data,
                         }
                     )
                     best_practice_id += 1

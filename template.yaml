@@ -14,10 +14,10 @@ Parameters:
     Default: wafr-automation-tool
   Debug:
     Type: String
-    Default: false
+    Default: "false"
     AllowedValues:
-      - true
-      - false
+      - "true"
+      - "false"
 
 Resources:
   SharedLibs:

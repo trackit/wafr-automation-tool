@@ -3,13 +3,41 @@ import json
 from pathlib import Path
 
 from common.config import QUESTIONS_PATH
-from common.entities import PillarDict
+from common.entities import BestPractice, FormattedPillar, FormattedQuestion, Pillar
 from pydantic import BaseModel
 
 
 class QuestionSet(BaseModel):
-    data: dict[str, PillarDict]
+    data: dict[str, Pillar]
     version: str
+
+
+class FormattedQuestionSet(BaseModel):
+    data: dict[str, FormattedPillar]
+    version: str
+
+
+def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
+    pillars: dict[str, FormattedPillar] = {}
+    for pillar_index, (pillar_name, pillar_data) in enumerate(question_set.data.items()):
+        questions: dict[str, FormattedQuestion] = {}
+        for question_index, (question_name, question_data) in enumerate(pillar_data.items()):
+            best_practices: dict[str, BestPractice] = {}
+            for best_practice_index, (best_practice_name, best_practice_data) in enumerate(
+                question_data.items(),
+            ):
+                best_practices[str(best_practice_index)] = BestPractice(
+                    id=str(best_practice_index),
+                    label=best_practice_name,
+                    risk=best_practice_data["risk"],
+                    status=False,
+                    results=[],
+                )
+            question = FormattedQuestion(id=str(question_index), label=question_name, best_practices=best_practices)
+            questions[str(question_index)] = question
+        pillar = FormattedPillar(id=str(pillar_index), label=pillar_name, questions=questions)
+        pillars[str(pillar_index)] = pillar
+    return FormattedQuestionSet(data=pillars, version=question_set.version)
 
 
 def retrieve_questions() -> QuestionSet:
@@ -25,11 +53,13 @@ def retrieve_questions() -> QuestionSet:
     question_version = question_set[-1].split(".")[0]
     with Path(f"{QUESTIONS_PATH}/{question_set[-1]}").open() as f:
         questions = json.load(f)
-        for p, pillar in questions.items():
-            for q, question in pillar.items():
-                for bp in question:
-                    questions[p][q][bp] = {
-                        "risk": question[bp]["risk"],
+        for pillar_name, pillar in questions.items():
+            for question_name, question in pillar.items():
+                for best_practice_name in question:
+                    questions[pillar_name][question_name][best_practice_name] = {
+                        "id": best_practice_name,
+                        "label": best_practice_name,
+                        "risk": question[best_practice_name]["risk"],
                         "status": False,
                         "results": [],
                     }

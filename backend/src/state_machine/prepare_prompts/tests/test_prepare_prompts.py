@@ -23,10 +23,31 @@ def test_prepare_prompts(get_prompt_mock: MagicMock):
     fake_storage_service.get = MagicMock(return_value=load_file(Path(__file__).parent / "prowler_output.json"))
     fake_storage_service.put = MagicMock()
 
-    fake_question_set = MagicMock(data={"pillar-1": {"question-1": {"best-practice-1": []}}})
+    fake_question_set = MagicMock(
+        data={
+            "pillar-1": {
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                            }
+                        },
+                    }
+                },
+            }
+        }
+    )
 
     task = PreparePrompts(
-        database_service=fake_database_service, storage_service=fake_storage_service, question_set=fake_question_set
+        database_service=fake_database_service,
+        storage_service=fake_storage_service,
+        formatted_question_set=fake_question_set,
     )
 
     prompt_list = task.execute(event)
@@ -35,7 +56,24 @@ def test_prepare_prompts(get_prompt_mock: MagicMock):
         table_name="test-table",
         key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test_assessment_id"},
         attrs={
-            "findings": {"pillar-1": {"question-1": {"best-practice-1": []}}},
+            "findings": {
+                "pillar-1": {
+                    "label": "Pillar 1",
+                    "questions": {
+                        "question-1": {
+                            "label": "Question 1",
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "label": "Best Practice 1",
+                                    "risk": "Low",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                }
+                            },
+                        }
+                    },
+                }
+            },
             "question_version": fake_question_set.version,
         },
     )

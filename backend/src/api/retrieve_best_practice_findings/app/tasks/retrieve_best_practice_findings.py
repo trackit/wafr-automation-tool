@@ -25,7 +25,9 @@ class RetrieveBestPracticeFindings(
             return APIResponse(status_code=NOT_FOUND, body=None)
         findings = self.assessment_service.retrieve_best_practice(
             assessment,
-            event.best_practice,
+            event.pillar_id,
+            event.question_id,
+            event.best_practice_id,
         )
         if not findings:
             return APIResponse(status_code=NOT_FOUND, body=None)

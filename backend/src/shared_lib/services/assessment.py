@@ -8,7 +8,6 @@ from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from common.entities import (
     Assessment,
     AssessmentDto,
-    BestPractice,
     BestPracticeExtra,
     FindingExtra,
     Pagination,
@@ -35,7 +34,9 @@ class IAssessmentService:
     def retrieve_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
     ) -> BestPracticeExtra | None:
         raise NotImplementedError
 
@@ -63,7 +64,9 @@ class IAssessmentService:
     def update_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
         status: bool | None,
     ) -> bool:
         raise NotImplementedError
@@ -125,24 +128,30 @@ class AssessmentService(IAssessmentService):
     def retrieve_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
     ) -> BestPracticeExtra | None:
         if not assessment.findings:
             return None
-        best_practice: BestPractice | None = None
-        for pillar in assessment.findings.values():
-            for question in pillar.values():
-                if best_practice_name in question:
-                    best_practice = question[best_practice_name]
-                    break
+        pillar = assessment.findings.get(pillar_id)
+        if not pillar:
+            return None
+        question = pillar.get("questions").get(question_id)
+        if not question:
+            return None
+        best_practice = question.get("best_practices").get(best_practice_id)
         if not best_practice:
             return None
-        finding_ids = best_practice.get("results", [])
-        findings = self.retrieve_findings(assessment.id, finding_ids)
+        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.get("results", []))
         if not findings:
             return None
         return BestPracticeExtra(
-            results=findings, risk=best_practice.get("risk", ""), status=best_practice.get("status", False)
+            id=best_practice_id,
+            label=best_practice.get("label", ""),
+            results=findings,
+            risk=best_practice.get("risk", ""),
+            status=best_practice.get("status", False),
         )
 
     @override
@@ -188,31 +197,21 @@ class AssessmentService(IAssessmentService):
     def update_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
         status: bool | None,
     ) -> bool:
-        if not assessment.findings or status is None:
-            return False
-        bp_findings: BestPractice | None = None
-        final_pillar_name: str | None = None
-        final_question_name: str | None = None
-        for pillar_name, pillar in assessment.findings.items():
-            for question_name, question in pillar.items():
-                if best_practice_name in question:
-                    bp_findings = question[best_practice_name]
-                    final_pillar_name = pillar_name
-                    final_question_name = question_name
-                    break
-        if not bp_findings or not final_pillar_name or not final_question_name:
+        if status is None:
             return False
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
-            UpdateExpression="SET findings.#pillar.#question.#best_practice.#status = :status",
+            UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
             ExpressionAttributeNames={
-                "#pillar": final_pillar_name,
-                "#question": final_question_name,
-                "#best_practice": best_practice_name,
+                "#pillar": pillar_id,
+                "#question": question_id,
+                "#best_practice": best_practice_id,
                 "#status": "status",
             },
             ExpressionAttributeValues={

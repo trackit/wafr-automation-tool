@@ -23,7 +23,7 @@ from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
-from utils.questions import QuestionSet
+from utils.questions import FormattedQuestionSet
 
 from state_machine.event import StoreResultsInput
 
@@ -36,12 +36,12 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-        question_set: QuestionSet,
+        formatted_question_set: FormattedQuestionSet,
     ) -> None:
         super().__init__()
         self.database_service = database_service
         self.storage_service = storage_service
-        self.questions = question_set.data
+        self.formatted_questions = formatted_question_set.data
 
     def retrieve_findings_data(
         self,
@@ -62,14 +62,25 @@ class StoreResults(Task[StoreResultsInput, None]):
     ) -> None:
         if not bp_finding_ids:
             return
+        pillar = next(
+            pillar for pillar in self.formatted_questions.values() if pillar.get("label") == answer_data.pillar
+        )
+        question = next(
+            question for question in pillar.get("questions").values() if question.get("label") == answer_data.question
+        )
+        best_practice = next(
+            best_practice
+            for best_practice in question.get("best_practices").values()
+            if best_practice.get("label") == answer_data.best_practice
+        )
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
-            UpdateExpression="SET findings.#pillar.#question.#best_practice.results = list_append(if_not_exists(findings.#pillar.#question.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
+            UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
-                "#pillar": answer_data.pillar,
-                "#question": answer_data.question,
-                "#best_practice": answer_data.best_practice,
+                "#pillar": pillar.get("id"),
+                "#question": question.get("id"),
+                "#best_practice": best_practice.get("id"),
             },
             ExpressionAttributeValues={
                 ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in bp_finding_ids],
@@ -111,20 +122,20 @@ class StoreResults(Task[StoreResultsInput, None]):
     ) -> None:
         best_practices: dict[int, BestPracticeInfo] = {}
         best_practice_id = 1
-        for pillar, pillar_data in self.questions.items():
-            for question, best_practice_data in pillar_data.items():
-                for best_practice in best_practice_data:
+        for pillar_data in self.formatted_questions.values():
+            for question_data in pillar_data.get("questions").values():
+                for best_practice_data in question_data.get("best_practices").values():
                     best_practices[best_practice_id] = BestPracticeInfo(
                         id=best_practice_id,
-                        pillar=pillar,
-                        question=question,
-                        best_practice=best_practice,
+                        pillar=pillar_data.get("label"),
+                        question=question_data.get("label"),
+                        best_practice=best_practice_data.get("label"),
                     )
                     best_practice_id += 1
 
         for ai_association in ai_associations:
-            best_practice = best_practices.get(ai_association["id"])
-            if best_practice is None:
+            best_practice_data = best_practices.get(ai_association["id"])
+            if best_practice_data is None:
                 logger.error("Best practice not found for id %d", ai_association["id"])
                 continue
 
@@ -132,9 +143,9 @@ class StoreResults(Task[StoreResultsInput, None]):
             finding_end = ai_association["end"]
             finding_ids: list[str] = [str(i) for i in range(finding_start, finding_end + 1)]
             answer_data = AnswerData(
-                pillar=best_practice.pillar,
-                question=best_practice.question,
-                best_practice=best_practice.best_practice,
+                pillar=best_practice_data.pillar,
+                question=best_practice_data.question,
+                best_practice=best_practice_data.best_practice,
             )
             self.associate_finding_ids(assessment_id, scanning_tool, answer_data, finding_ids)
             self.store_findings_in_db(assessment_id, scanning_tool, finding_ids, findings_data)

@@ -23,7 +23,9 @@ class UpdateBestPracticeStatus(Task[UpdateBestPracticeStatusInput, APIResponse[N
                     status_code=NOT_FOUND,
                     body=None,
                 )
-            if not self.assessment_service.update_best_practice(assessment, event.best_practice_name, event.status):
+            if not self.assessment_service.update_best_practice(
+                assessment, event.pillar_id, event.question_id, event.best_practice_id, event.status
+            ):
                 return APIResponse(
                     status_code=NOT_FOUND,
                     body=None,

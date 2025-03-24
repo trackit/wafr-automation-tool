@@ -22,7 +22,23 @@ def test_assessment_service_retrieve():
             "question_version": "test-question-version",
             "findings": {
                 "pillar-1": {
-                    "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                    "id": "pillar-1",
+                    "label": "Pillar 1",
+                    "questions": {
+                        "question-1": {
+                            "id": "question-1",
+                            "label": "Question 1",
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "id": "best-practice-1",
+                                    "label": "Best Practice 1",
+                                    "risk": "Low",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                }
+                            },
+                        }
+                    },
                 }
             },
         }
@@ -39,7 +55,23 @@ def test_assessment_service_retrieve():
         question_version="test-question-version",
         findings={
             "pillar-1": {
-                "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                            }
+                        },
+                    }
+                },
             }
         },
     )
@@ -65,9 +97,23 @@ def test_assessment_service_retrieve_all():
                     "question_version": "test-question-version",
                     "findings": {
                         "pillar-1": {
-                            "question-1": {
-                                "best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}
-                            }
+                            "id": "pillar-1",
+                            "label": "Pillar 1",
+                            "questions": {
+                                "question-1": {
+                                    "id": "question-1",
+                                    "label": "Question 1",
+                                    "best_practices": {
+                                        "best-practice-1": {
+                                            "id": "best-practice-1",
+                                            "label": "Best Practice 1",
+                                            "risk": "Low",
+                                            "status": False,
+                                            "results": ["1", "2", "3"],
+                                        }
+                                    },
+                                }
+                            },
                         }
                     },
                 }
@@ -92,7 +138,23 @@ def test_assessment_service_retrieve_all():
                 question_version="test-question-version",
                 findings={
                     "pillar-1": {
-                        "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                        "id": "pillar-1",
+                        "label": "Pillar 1",
+                        "questions": {
+                            "question-1": {
+                                "id": "question-1",
+                                "label": "Question 1",
+                                "best_practices": {
+                                    "best-practice-1": {
+                                        "id": "best-practice-1",
+                                        "label": "Best Practice 1",
+                                        "risk": "Low",
+                                        "status": False,
+                                        "results": ["1", "2", "3"],
+                                    }
+                                },
+                            }
+                        },
                     }
                 },
             )
@@ -121,7 +183,20 @@ def test_assessment_service_retrieve_best_practice():
                 "question_version": "test-question-version",
                 "findings": {
                     "pillar-1": {
-                        "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                        "label": "Pillar 1",
+                        "questions": {
+                            "question-1": {
+                                "label": "Question 1",
+                                "best_practices": {
+                                    "best-practice-1": {
+                                        "label": "Best Practice 1",
+                                        "risk": "Low",
+                                        "status": False,
+                                        "results": ["1", "2", "3"],
+                                    }
+                                },
+                            }
+                        },
                     }
                 },
             }
@@ -139,14 +214,32 @@ def test_assessment_service_retrieve_best_practice():
         question_version="test-question-version",
         findings={
             "pillar-1": {
-                "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                            }
+                        },
+                    }
+                },
             }
         },
     )
 
-    best_practice = assessment_service.retrieve_best_practice(assessment, "best-practice-1")
+    best_practice = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
 
     assert best_practice == BestPracticeExtra(
+        id="best-practice-1",
+        label="Best Practice 1",
         results=[
             FindingExtra(
                 id="prowler:1",
@@ -181,7 +274,23 @@ def test_assessment_service_retrieve_finding():
             "question_version": "test-question-version",
             "findings": {
                 "pillar-1": {
-                    "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                    "id": "pillar-1",
+                    "label": "Pillar 1",
+                    "questions": {
+                        "question-1": {
+                            "id": "question-1",
+                            "label": "Question 1",
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "id": "best-practice-1",
+                                    "label": "Best Practice 1",
+                                    "risk": "Low",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                }
+                            },
+                        }
+                    },
                 }
             },
         }
@@ -216,7 +325,20 @@ def test_assessment_service_retrieve_findings():
                 "question_version": "test-question-version",
                 "findings": {
                     "pillar-1": {
-                        "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                        "label": "Pillar 1",
+                        "questions": {
+                            "question-1": {
+                                "label": "Question 1",
+                                "best_practices": {
+                                    "best-practice-1": {
+                                        "label": "Best Practice 1",
+                                        "risk": "Low",
+                                        "status": False,
+                                        "results": ["1", "2", "3"],
+                                    }
+                                },
+                            }
+                        },
                     }
                 },
             }
@@ -276,17 +398,33 @@ def test_assessment_service_update_best_practice():
         question_version="test-question-version",
         findings={
             "pillar-1": {
-                "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                            }
+                        },
+                    }
+                },
             }
         },
     )
 
-    assessment_service.update_best_practice(assessment, "best-practice-1", status=True)
+    assessment_service.update_best_practice(assessment, "pillar-1", "question-1", "best-practice-1", status=True)
 
     fake_database_service.update.assert_called_once_with(
         table_name="test-table",
         Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
-        UpdateExpression="SET findings.#pillar.#question.#best_practice.#status = :status",
+        UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
         ExpressionAttributeNames={
             "#pillar": "pillar-1",
             "#question": "question-1",

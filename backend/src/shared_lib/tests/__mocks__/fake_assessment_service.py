@@ -13,7 +13,9 @@ class FakeAssessmentService(IAssessmentService):
     def retrieve_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
     ) -> BestPracticeExtra | None:
         raise NotImplementedError
 

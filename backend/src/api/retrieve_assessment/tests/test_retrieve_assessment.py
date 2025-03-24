@@ -1,7 +1,7 @@
 from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
-from common.entities import Assessment
+from common.entities import APIAssessment
 from common.enums import Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
@@ -11,7 +11,7 @@ from ..app.tasks.retrieve_assessment import RetrieveAssessment
 
 
 def test_retrieve_assessment():
-    assessment = Assessment(
+    assessment = APIAssessment(
         id="AID",
         name="AN",
         role_arn="AR",
