@@ -66,7 +66,7 @@ function FindingItem({
 
 function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['findings', bestPractice],
     queryFn: () => getFindings(assessmentId, bestPractice),
   });
@@ -107,23 +107,30 @@ function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
     return false;
   });
 
-  console.log('data', data);
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-full py-8">
+        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+      </div>
+    );
   return (
     <div className="overflow-y-auto max-h-[90vh] flex flex-col">
       <div className="flex flex-col gap-2  px-8 py-4 border-b border-base-content/30">
         <div className="flex flex-row gap-2 items-center">
           <h3 className="text-lg font-bold">{bestPractice}</h3>
-          <div
-            className={`text-bold badge ${
-              data?.risk === 'High'
-                ? 'badge-error'
-                : data?.risk === 'Medium'
-                ? 'badge-warning'
-                : 'badge-info'
-            } ml-auto`}
-          >
-            {data?.risk}
-          </div>
+          {data?.risk && (
+            <div
+              className={`text-bold badge ${
+                data?.risk === 'High'
+                  ? 'badge-error'
+                  : data?.risk === 'Medium'
+                  ? 'badge-warning'
+                  : 'badge-info'
+              } ml-auto`}
+            >
+              {data?.risk}
+            </div>
+          )}
         </div>
         <label className="input w-full flex flex-row gap-2 items-center">
           <Search className="h-[1em] opacity-50" />

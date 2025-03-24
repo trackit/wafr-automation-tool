@@ -11,7 +11,7 @@ type Question = Record<string, { [key: string]: BestPractice }>;
 type Pillar = Record<string, Question>;
 type TableRow = BestPractice & { name: string };
 
-const assessmentId = '1742328326706';
+const assessmentId = '1742824750051';
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
@@ -225,7 +225,7 @@ export function AssessmentDetails() {
     return completedCount;
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['assessment', assessmentId],
     queryFn: () => getAssessment(assessmentId),
   });
@@ -298,6 +298,13 @@ export function AssessmentDetails() {
       name: key,
     }));
   }, [activeQuestion]);
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+      </div>
+    );
 
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
