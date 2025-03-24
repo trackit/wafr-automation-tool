@@ -1,8 +1,7 @@
-from http.client import INTERNAL_SERVER_ERROR, NOT_FOUND, OK
+from http.client import NOT_FOUND, OK
 from typing import override
 
 from common.task import Task
-from exceptions.database import DynamoDBError
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
@@ -16,25 +15,15 @@ class UpdateBestPracticeStatus(Task[UpdateBestPracticeStatusInput, APIResponse[N
 
     @override
     def execute(self, event: UpdateBestPracticeStatusInput) -> APIResponse[None]:
-        try:
-            assessment = self.assessment_service.retrieve(event.assessment_id)
-            if not assessment:
-                return APIResponse(
-                    status_code=NOT_FOUND,
-                    body=None,
-                )
-            if not self.assessment_service.update_best_practice(
-                assessment, event.pillar_id, event.question_id, event.best_practice_id, event.status
-            ):
-                return APIResponse(
-                    status_code=NOT_FOUND,
-                    body=None,
-                )
-        except DynamoDBError:
+        assessment = self.assessment_service.retrieve(event.assessment_id)
+        if not assessment:
             return APIResponse(
-                status_code=INTERNAL_SERVER_ERROR,
+                status_code=NOT_FOUND,
                 body=None,
             )
+        self.assessment_service.update_best_practice(
+            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.status
+        )
         return APIResponse(
             status_code=OK,
             body=None,

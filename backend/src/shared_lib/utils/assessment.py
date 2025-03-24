@@ -22,4 +22,4 @@ def convert_assessment_to_api_assessment(assessment: Assessment) -> APIAssessmen
             pillar_copy: Any = pillar.copy()
             pillar_copy["questions"] = questions
             findings.append(pillar_copy)
-    return APIAssessment(**assessment_dict, findings=findings if findings else None)
+    return APIAssessment(**assessment_dict, findings=findings)

@@ -1,6 +1,6 @@
 import base64
 import json
-from http.client import INTERNAL_SERVER_ERROR, OK
+from http.client import OK
 from typing import Any, override
 
 from common.entities import APIAssessment, Pagination
@@ -54,11 +54,6 @@ class RetrieveAllAssessments(
             attribute_value=attribute_value,
         )
         paginated = self.assessment_service.retrieve_all(pagination)
-        if not paginated:
-            return APIResponse(
-                status_code=INTERNAL_SERVER_ERROR,
-                body=None,
-            )
         next_token = (
             base64.b64encode(json.dumps(paginated.next_token).encode()).decode() if paginated.next_token else None
         )

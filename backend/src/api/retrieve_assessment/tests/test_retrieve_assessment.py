@@ -18,7 +18,7 @@ def test_retrieve_assessment():
         step=Steps.SCANNING_STARTED,
         created_at="",
         question_version="QV",
-        findings=None,
+        findings=[],
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)

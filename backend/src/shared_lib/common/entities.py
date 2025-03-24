@@ -163,6 +163,7 @@ ChunkId = str
 
 
 class ScanningTool(StrEnum):
+    _TEST = "test"
     PROWLER = "prowler"
     CLOUD_CUSTODIAN = "cloud-custodian"
     CLOUDSPLOIT = "cloudsploit"

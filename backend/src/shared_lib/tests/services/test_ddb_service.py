@@ -127,7 +127,7 @@ def test_ddb_service_delete(ddb_resource: DynamoDBServiceResource, ddb_service: 
         ddb_service.delete(table_name="test-table-inexistent", key={DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"})
 
 
-def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
+def test_ddb_service_query_all(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
     ddb_table = ddb_resource.Table("test-table")
     ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"})
     ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"})
@@ -152,6 +152,33 @@ def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: D
 
     with pytest.raises(DynamoDBError):
         ddb_service.query_all(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
+
+
+def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
+    ddb_table = ddb_resource.Table("test-table")
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk-1", DDB_SORT_KEY: "test#4"})
+
+    items = ddb_service.query(
+        table_name="test-table",
+        KeyConditionExpression=(Key(DDB_KEY).eq("test-pk") & Key(DDB_SORT_KEY).begins_with("test#")),
+    )
+    assert items["Items"] == [
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"},
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"},
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"},
+    ]
+
+    items = ddb_service.query(
+        table_name="test-table",
+        KeyConditionExpression=Key(DDB_KEY).eq("test-pk-inexistent"),
+    )
+    assert not items["Items"]
+
+    with pytest.raises(DynamoDBError):
+        ddb_service.query(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
 
 
 def test_ddb_service_bulk_get(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):

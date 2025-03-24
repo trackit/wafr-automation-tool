@@ -49,3 +49,31 @@ def test_retrieve_all_assessments_not_found():
     assessment_service.retrieve_all.assert_called_once()
     assert response.status_code == OK
     assert response.body == RetrieveAllAssessmentsResponseBody(assessments=[], next_token=None)
+
+
+def test_retrieve_all_assessments_with_search():
+    assessments = [
+        Assessment(
+            id="AID",
+            name="AN",
+            role_arn="AR",
+            step=Steps.SCANNING_STARTED,
+            created_at="",
+            question_version="QV",
+            findings=None,
+        )
+    ]
+    assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
+    assessments_dicts[0]["error"] = None
+    assessment_service = FakeAssessmentService()
+    assessment_service.retrieve_all = MagicMock(
+        return_value=PaginationOutput[Assessment](items=assessments, next_token=None)
+    )
+
+    task = RetrieveAllAssessments(assessment_service)
+    task_input = RetrieveAllAssessmentsInput(limit=10, search="AN", next_token=None, api_id="")
+    response = task.execute(task_input)
+
+    assessment_service.retrieve_all.assert_called_once()
+    assert response.status_code == OK
+    assert response.body == RetrieveAllAssessmentsResponseBody(assessments=assessments_dicts, next_token=None)

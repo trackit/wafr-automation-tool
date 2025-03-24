@@ -1,8 +1,7 @@
-from http.client import INTERNAL_SERVER_ERROR, OK
+from http.client import OK
 from typing import override
 
 from common.task import Task
-from exceptions.database import DynamoDBError
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
@@ -16,13 +15,7 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateAssessmentInput) -> APIResponse[None]:
-        try:
-            self.assessment_service.update(event.assessment_id, event.assessment_dto)
-        except DynamoDBError:
-            return APIResponse(
-                status_code=INTERNAL_SERVER_ERROR,
-                body=None,
-            )
+        self.assessment_service.update(event.assessment_id, event.assessment_dto)
         return APIResponse(
             status_code=OK,
             body=None,

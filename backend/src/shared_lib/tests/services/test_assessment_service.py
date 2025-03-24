@@ -82,6 +82,14 @@ def test_assessment_service_retrieve():
     )
 
 
+def test_assessment_service_retrieve_not_found():
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.get = MagicMock(return_value=None)
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    assessment = assessment_service.retrieve("test-assessment-id")
+    assert assessment is None
+
+
 def test_assessment_service_retrieve_all():
     fake_database_service = FakeDatabaseService()
     fake_database_service.query = MagicMock(
@@ -166,6 +174,100 @@ def test_assessment_service_retrieve_all():
         table_name="test-table",
         KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
         Limit=10,
+    )
+
+
+def test_assessment_service_retrieve_all_pagination():
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.query = MagicMock(
+        return_value={
+            "Items": [
+                {
+                    DDB_KEY: ASSESSMENT_PK,
+                    DDB_SORT_KEY: "test-assessment-id",
+                    "name": "test-assessment-name",
+                    "role_arn": "test-assessment-role",
+                    "step": Steps.FINISHED,
+                    "created_at": "",
+                    "question_version": "test-question-version",
+                    "findings": {
+                        "pillar-1": {
+                            "id": "pillar-1",
+                            "label": "Pillar 1",
+                            "questions": {
+                                "question-1": {
+                                    "id": "question-1",
+                                    "label": "Question 1",
+                                    "best_practices": {
+                                        "best-practice-1": {
+                                            "id": "best-practice-1",
+                                            "label": "Best Practice 1",
+                                            "risk": "Low",
+                                            "status": False,
+                                            "results": ["1", "2", "3"],
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    },
+                }
+            ],
+            "next_token": None,
+        }
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    pagination = Pagination(
+        limit=10,
+        filter="begins_with(#id, :id)",
+        attribute_name={"#id": "id"},
+        attribute_value={":id": "test"},
+        next_token="eyJ0ZXN0IjoidGVzdCJ9",  # noqa: S106
+    )
+    assessments = assessment_service.retrieve_all(pagination)
+
+    fake_database_service.query.assert_called_once_with(
+        table_name="test-table",
+        KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+        Limit=10,
+        FilterExpression="begins_with(#id, :id)",
+        ExclusiveStartKey={"test": "test"},
+        ExpressionAttributeNames={"#id": "id"},
+        ExpressionAttributeValues={":id": "test"},
+    )
+    assert assessments == PaginationOutput[Assessment](
+        items=[
+            Assessment(
+                id="test-assessment-id",
+                name="test-assessment-name",
+                role_arn="test-assessment-role",
+                step=Steps.FINISHED,
+                created_at="",
+                question_version="test-question-version",
+                findings={
+                    "pillar-1": {
+                        "id": "pillar-1",
+                        "label": "Pillar 1",
+                        "questions": {
+                            "question-1": {
+                                "id": "question-1",
+                                "label": "Question 1",
+                                "best_practices": {
+                                    "best-practice-1": {
+                                        "id": "best-practice-1",
+                                        "label": "Best Practice 1",
+                                        "risk": "Low",
+                                        "status": False,
+                                        "results": ["1", "2", "3"],
+                                    }
+                                },
+                            }
+                        },
+                    }
+                },
+            )
+        ],
+        next_token=None,
     )
 
 
@@ -261,6 +363,144 @@ def test_assessment_service_retrieve_best_practice():
     )
 
 
+def test_assessment_service_retrieve_best_practice_with_no_findings():
+    fake_database_service = FakeDatabaseService()
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={},
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    assert finding is None
+
+
+def test_assessment_service_retrieve_best_practice_not_found_pillar():
+    fake_database_service = FakeDatabaseService()
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "questions": {}}},
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
+    assert finding is None
+
+
+def test_assessment_service_retrieve_best_practice_not_found_question():
+    fake_database_service = FakeDatabaseService()
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={
+            "pillar-1": {
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {},
+                    }
+                },
+            }
+        },
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-2", "best-practice-1")
+    assert finding is None
+
+
+def test_assessment_service_retrieve_best_practice_not_found_best_practice():
+    fake_database_service = FakeDatabaseService()
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={
+            "pillar-1": {
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                            }
+                        },
+                    }
+                },
+            }
+        },
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-2")
+    assert finding is None
+
+
+def test_assessment_service_retrieve_best_practice_with_no_results():
+    fake_database_service = FakeDatabaseService()
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={
+            "pillar-1": {
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": [],
+                            }
+                        },
+                    }
+                },
+            }
+        },
+    )
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    assert finding == BestPracticeExtra(
+        id="best-practice-1",
+        label="Best Practice 1",
+        results=[],
+        risk="Low",
+        status=False,
+    )
+
+
 def test_assessment_service_retrieve_finding():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(
@@ -309,6 +549,14 @@ def test_assessment_service_retrieve_finding():
         table_name="test-table",
         Key={DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "prowler:1"},
     )
+
+
+def test_assessment_service_retrieve_finding_not_found():
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.get = MagicMock(return_value=None)
+    assessment_service = AssessmentService(database_service=fake_database_service)
+    finding = assessment_service.retrieve_finding("test-assessment-id", "prowler:1")
+    assert finding is None
 
 
 def test_assessment_service_retrieve_findings():
@@ -461,7 +709,7 @@ def test_assessment_service_delete_findings():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
 
-    assessment_service.delete_findings("test-assessment-id")
+    assert not assessment_service.delete_findings("test-assessment-id")
 
     fake_database_service.query_all.assert_called_once_with(
         table_name="test-table",
