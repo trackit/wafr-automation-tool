@@ -6,6 +6,7 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import { SnackbarProvider } from 'notistack';
+import { BrowserRouter } from 'react-router';
 
 import { amplifyConfig } from './amplify.config';
 
@@ -20,9 +21,11 @@ root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <SnackbarProvider>
-        <Authenticator hideSignUp loginMechanism={'email'}>
-          <App />
-        </Authenticator>
+        <BrowserRouter>
+          <Authenticator hideSignUp loginMechanism={'email'}>
+            <App />
+          </Authenticator>
+        </BrowserRouter>
       </SnackbarProvider>
     </QueryClientProvider>
   </StrictMode>

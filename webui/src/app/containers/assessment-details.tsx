@@ -5,13 +5,12 @@ import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
+import { useParams } from 'react-router';
 import FindingsDetails from './findings-details';
 type BestPractice = components['schemas']['BestPractice'];
 type Question = Record<string, { [key: string]: BestPractice }>;
 type Pillar = Record<string, Question>;
 type TableRow = BestPractice & { name: string };
-
-const assessmentId = '1742824750051';
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
@@ -20,6 +19,7 @@ export function AssessmentDetails() {
   const [activeQuestionKey, setActiveQuestionKey] = useState<string>('');
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<string | null>(null);
+  const { id } = useParams();
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -34,14 +34,13 @@ export function AssessmentDetails() {
     onMutate: async ({ assessmentId, bestPractice, status }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ['assessment', assessmentId],
+        queryKey: ['assessment', id],
       });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData([
-        'assessment',
-        assessmentId,
-      ]) as components['schemas']['AssessmentContent'] | undefined;
+      const previousData = queryClient.getQueryData(['assessment', id]) as
+        | components['schemas']['AssessmentContent']
+        | undefined;
 
       if (!previousData?.findings) {
         console.log('No previous data found');
@@ -77,7 +76,7 @@ export function AssessmentDetails() {
       }
 
       // Update the cache with our optimistic value
-      queryClient.setQueryData(['assessment', assessmentId], newData);
+      queryClient.setQueryData(['assessment', id], newData);
 
       // Return a context object with the snapshotted value
       return { previousData };
@@ -86,22 +85,20 @@ export function AssessmentDetails() {
       console.log('Error occurred, rolling back to:', context?.previousData);
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(
-          ['assessment', assessmentId],
-          context.previousData
-        );
+        queryClient.setQueryData(['assessment', id], context.previousData);
       }
     },
     onSettled: () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', assessmentId] });
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
   const handleUpdateStatus = (bestPractice: string, status: boolean) => {
+    if (!id) return;
     updateStatusMutation.mutate({
-      assessmentId,
+      assessmentId: id,
       bestPractice,
       status,
     });
@@ -226,8 +223,8 @@ export function AssessmentDetails() {
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ['assessment', assessmentId],
-    queryFn: () => getAssessment(assessmentId),
+    queryKey: ['assessment', id],
+    queryFn: () => (id ? getAssessment(id) : null),
   });
 
   // Set the first pillar key as the selected pillar key ONLY on initial load
@@ -306,6 +303,7 @@ export function AssessmentDetails() {
       </div>
     );
 
+  if (!id) return <div>No assessment ID found</div>;
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
       <div className="prose mb-2 w-full">
@@ -380,10 +378,7 @@ export function AssessmentDetails() {
           className="w-full max-w-5xl"
           notCentered
         >
-          <FindingsDetails
-            assessmentId={assessmentId}
-            bestPractice={bestPractice}
-          />
+          <FindingsDetails assessmentId={id} bestPractice={bestPractice} />
         </Modal>
       )}
     </div>
