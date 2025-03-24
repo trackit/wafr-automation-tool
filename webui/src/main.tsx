@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
+import { SnackbarProvider } from 'notistack';
 
 import { amplifyConfig } from './amplify.config';
 
@@ -18,9 +19,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Authenticator hideSignUp loginMechanism={'email'}>
-        <App />
-      </Authenticator>
+      <SnackbarProvider>
+        <Authenticator hideSignUp loginMechanism={'email'}>
+          <App />
+        </Authenticator>
+      </SnackbarProvider>
     </QueryClientProvider>
   </StrictMode>
 );
