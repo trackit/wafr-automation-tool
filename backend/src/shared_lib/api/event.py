@@ -1,6 +1,6 @@
 from typing import Any
 
-from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra
+from common.entities import APIAssessment, AssessmentDto, BestPracticeExtra, FindingExtra
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -29,13 +29,15 @@ class RetrieveAssessmentInput(BaseModel):
     assessment_id: str
 
 
-class RetrieveAssessmentResponseBody(APIResponseBody, Assessment):
+class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
     pass
 
 
 class RetrieveBestPracticeFindingsInput(BaseModel):
     assessment_id: str
-    best_practice: str
+    pillar_id: str
+    question_id: str
+    best_practice_id: str
 
 
 RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
@@ -69,5 +71,7 @@ class UpdateAssessmentInput(BaseModel):
 
 class UpdateBestPracticeStatusInput(BaseModel):
     assessment_id: str
-    best_practice_name: str
+    pillar_id: str
+    question_id: str
+    best_practice_id: str
     status: bool

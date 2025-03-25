@@ -253,13 +253,14 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:GetItem
+                - dynamodb:BatchGetItem
               Resource: !Ref DynamoDBArn
       Events:
         RetrieveBestPracticeFindings:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/best-practices/{bestPracticeName}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
   UpdateBestPracticeStatusFunction:
     Type: AWS::Serverless::Function
@@ -280,7 +281,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/best-practices/{bestPracticeName}/{status}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}
             Method: PUT
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
@@ -302,3 +303,17 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
+
+Outputs:
+  ApiEndpoint:
+    Description: API Endpoint
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Api.Stage}"
+  UserPoolId:
+    Description: User Pool ID
+    Value: !Ref UserPool
+  IdentityPoolId:
+    Description: Identity Pool ID
+    Value: !Ref IdentityPool
+  UserPoolClientId:
+    Description: User Pool Client ID
+    Value: !Ref UserPoolClient

@@ -4,6 +4,7 @@ from typing import override
 from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
+from utils.assessment import convert_assessment_to_api_assessment
 
 from api.event import RetrieveAssessmentInput, RetrieveAssessmentResponseBody
 
@@ -23,9 +24,10 @@ class RetrieveAssessment(
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
+        api_assessment = convert_assessment_to_api_assessment(assessment)
         return APIResponse(
             status_code=OK,
             body=RetrieveAssessmentResponseBody(
-                **assessment.model_dump(),
+                **api_assessment.model_dump(),
             ),
         )

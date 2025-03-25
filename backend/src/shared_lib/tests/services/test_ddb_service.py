@@ -1,4 +1,5 @@
 import os
+from typing import TYPE_CHECKING
 
 import boto3
 import pytest
@@ -8,6 +9,9 @@ from exceptions.database import DynamoDBError
 from moto import mock_aws
 from services.database import DDBService
 from types_boto3_dynamodb import DynamoDBServiceResource
+
+if TYPE_CHECKING:
+    from types_boto3_dynamodb.type_defs import TableAttributeValueTypeDef
 
 
 @pytest.fixture(autouse=True)
@@ -123,7 +127,7 @@ def test_ddb_service_delete(ddb_resource: DynamoDBServiceResource, ddb_service: 
         ddb_service.delete(table_name="test-table-inexistent", key={DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"})
 
 
-def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
+def test_ddb_service_query_all(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
     ddb_table = ddb_resource.Table("test-table")
     ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"})
     ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"})
@@ -148,6 +152,62 @@ def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: D
 
     with pytest.raises(DynamoDBError):
         ddb_service.query_all(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
+
+
+def test_ddb_service_query(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
+    ddb_table = ddb_resource.Table("test-table")
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"})
+    ddb_table.put_item(Item={DDB_KEY: "test-pk-1", DDB_SORT_KEY: "test#4"})
+
+    items = ddb_service.query(
+        table_name="test-table",
+        KeyConditionExpression=(Key(DDB_KEY).eq("test-pk") & Key(DDB_SORT_KEY).begins_with("test#")),
+    )
+    assert items["Items"] == [
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"},
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"},
+        {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"},
+    ]
+
+    items = ddb_service.query(
+        table_name="test-table",
+        KeyConditionExpression=Key(DDB_KEY).eq("test-pk-inexistent"),
+    )
+    assert not items["Items"]
+
+    with pytest.raises(DynamoDBError):
+        ddb_service.query(table_name="test-table-inexistent", KeyConditionExpression=Key(DDB_KEY).eq("test-pk"))
+
+
+def test_ddb_service_bulk_get(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):
+    ddb_table = ddb_resource.Table("test-table")
+    item_1: dict[str, TableAttributeValueTypeDef] = {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#1"}
+    item_2: dict[str, TableAttributeValueTypeDef] = {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#2"}
+    item_3: dict[str, TableAttributeValueTypeDef] = {DDB_KEY: "test-pk", DDB_SORT_KEY: "test#3"}
+    with ddb_table.batch_writer() as batch:
+        batch.put_item(Item=item_1)
+        batch.put_item(Item=item_2)
+        batch.put_item(Item=item_3)
+
+    items = ddb_service.bulk_get(
+        table_name="test-table",
+        keys=[
+            item_1,
+            item_2,
+            item_3,
+        ],
+    )
+
+    assert items == [
+        item_1,
+        item_2,
+        item_3,
+    ]
+
+    with pytest.raises(DynamoDBError):
+        ddb_service.bulk_get(table_name="test-table-inexistent", keys=[item_1, item_2, item_3])
 
 
 def test_ddb_service_bulk_put(ddb_resource: DynamoDBServiceResource, ddb_service: DDBService):

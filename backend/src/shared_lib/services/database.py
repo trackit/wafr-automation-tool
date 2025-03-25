@@ -72,6 +72,14 @@ class IDatabaseService(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def bulk_get(
+        self,
+        table_name: str,
+        keys: list[dict[str, TableAttributeValueTypeDef]],
+    ) -> list[dict[str, TableAttributeValueTypeDef]]:
+        raise NotImplementedError
+
+    @abstractmethod
     def bulk_put(self, table_name: str, items: list[dict[str, Any]]) -> None:
         raise NotImplementedError
 
@@ -192,6 +200,21 @@ class DDBService(IDatabaseService):
             raise DynamoDBError from e
         else:
             return response
+
+    @override
+    def bulk_get(
+        self,
+        table_name: str,
+        keys: list[dict[str, TableAttributeValueTypeDef]],
+    ) -> list[dict[str, TableAttributeValueTypeDef]]:
+        try:
+            response = self.resource.batch_get_item(RequestItems={table_name: {"Keys": keys}})
+            items = response["Responses"].get(table_name, [])
+        except ClientError as e:
+            logger.exception("Error while bulk getting items from DynamoDB")
+            raise DynamoDBError from e
+        else:
+            return items
 
     @override
     def bulk_put(self, table_name: str, items: list[dict[str, Any]]) -> None:

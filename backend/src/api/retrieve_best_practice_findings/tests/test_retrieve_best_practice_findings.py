@@ -37,13 +37,15 @@ def test_retrieve_best_practice_findings():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        best_practice="BP",
+        pillar_id="PI",
+        question_id="QI",
+        best_practice_id="BP",
     )
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
 
     assessment_service.retrieve.assert_called_once_with("AID")
-    assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "BP")
+    assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP")
     assert response.status_code == OK
     assert response.body == assessment_service.retrieve_best_practice.return_value
 
@@ -55,7 +57,9 @@ def test_retrieve_best_practice_findings_not_found_assessment():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        best_practice="BP",
+        pillar_id="PI",
+        question_id="QI",
+        best_practice_id="BP",
     )
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
@@ -82,12 +86,14 @@ def test_retrieve_best_practice_findings_not_found_findings():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        best_practice="BP",
+        pillar_id="PI",
+        question_id="QI",
+        best_practice_id="BP",
     )
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
 
     assessment_service.retrieve.assert_called_once_with("AID")
-    assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "BP")
+    assessment_service.retrieve_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP")
     assert response.status_code == NOT_FOUND
     assert not response.body

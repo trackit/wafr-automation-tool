@@ -52,19 +52,47 @@ class AnswerData(BaseModel):
 
 
 class BestPractice(TypedDict):
+    id: str
+    label: str
     risk: str
     status: bool
     results: list[str]
 
 
 class BestPracticeExtra(APIResponseBody):
+    id: str
+    label: str
     risk: str
     status: bool
     results: list[FindingExtra]
 
 
-QuestionDict = dict[str, BestPractice]
-PillarDict = dict[str, QuestionDict]
+Question = dict[str, BestPractice]
+Pillar = dict[str, Question]
+
+
+class FormattedQuestion(TypedDict):
+    id: str
+    label: str
+    best_practices: dict[str, BestPractice]
+
+
+class FormattedPillar(TypedDict):
+    id: str
+    label: str
+    questions: dict[str, FormattedQuestion]
+
+
+class APIFormattedQuestion(TypedDict):
+    id: str
+    label: str
+    best_practices: list[BestPractice]
+
+
+class APIFormattedPillar(TypedDict):
+    id: str
+    label: str
+    questions: list[APIFormattedQuestion]
 
 
 class BestPracticeInfo(BaseModel):
@@ -87,7 +115,7 @@ class AssessmentDto(BaseModel):
     step: str | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
-    findings: dict[str, PillarDict] | None = None
+    findings: dict[str, FormattedPillar] | None = None
 
 
 class Assessment(BaseModel):
@@ -98,7 +126,18 @@ class Assessment(BaseModel):
     step: str
     error: dict[str, Any] | None = None
     question_version: str | None = None
-    findings: dict[str, PillarDict] | None = None
+    findings: dict[str, FormattedPillar] | None = None
+
+
+class APIAssessment(BaseModel):
+    id: str
+    name: str
+    role_arn: str
+    created_at: str
+    step: str
+    error: dict[str, Any] | None = None
+    question_version: str | None = None
+    findings: list[APIFormattedPillar] | None = None
 
 
 class Pagination(BaseModel):
@@ -124,6 +163,7 @@ ChunkId = str
 
 
 class ScanningTool(StrEnum):
+    _TEST = "test"
     PROWLER = "prowler"
     CLOUD_CUSTODIAN = "cloud-custodian"
     CLOUDSPLOIT = "cloudsploit"

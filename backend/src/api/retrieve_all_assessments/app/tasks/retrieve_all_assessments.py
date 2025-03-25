@@ -1,12 +1,13 @@
 import base64
 import json
-from http.client import INTERNAL_SERVER_ERROR, OK
+from http.client import OK
 from typing import Any, override
 
-from common.entities import Assessment, Pagination
+from common.entities import APIAssessment, Pagination
 from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
+from utils.assessment import convert_all_assessments_to_api_assessments
 
 from api.event import RetrieveAllAssessmentsInput, RetrieveAllAssessmentsResponseBody
 
@@ -18,7 +19,7 @@ class RetrieveAllAssessments(
         super().__init__()
         self.assessment_service = assessment_service
 
-    def remove_findings(self, assessments: list[Assessment]) -> list[dict[str, Any]]:
+    def remove_findings(self, assessments: list[APIAssessment]) -> list[dict[str, Any]]:
         result: list[dict[str, Any]] = []
         for assessment in assessments:
             assessment_dict = assessment.model_dump()
@@ -53,17 +54,13 @@ class RetrieveAllAssessments(
             attribute_value=attribute_value,
         )
         paginated = self.assessment_service.retrieve_all(pagination)
-        if not paginated:
-            return APIResponse(
-                status_code=INTERNAL_SERVER_ERROR,
-                body=None,
-            )
         next_token = (
             base64.b64encode(json.dumps(paginated.next_token).encode()).decode() if paginated.next_token else None
         )
+        api_assessments = convert_all_assessments_to_api_assessments(paginated.items)
         return APIResponse(
             status_code=OK,
             body=RetrieveAllAssessmentsResponseBody(
-                assessments=self.remove_findings(paginated.items), next_token=next_token
+                assessments=self.remove_findings(api_assessments), next_token=next_token
             ),
         )

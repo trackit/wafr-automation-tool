@@ -43,15 +43,5 @@ capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
 parameter_overrides = [
   "Debug=true",
-]
-
-[staging.deploy.parameters]
-stack_name = "wafr-automation-tool-staging"
-resolve_s3 = true
-s3_prefix = "wafr-automation-tool-staging"
-region = "us-west-2"
-confirm_changeset = true
-capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
-image_repositories = []
-parameter_overrides = [
+  "Repository=https://github.com/trackit/wafr-automation-tool"
 ]

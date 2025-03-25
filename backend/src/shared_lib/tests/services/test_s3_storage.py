@@ -90,3 +90,8 @@ def test_s3_service_bulk_delete(s3_client: S3Client, s3_service: S3Service):
     for key in keys:
         with pytest.raises(ClientError):
             s3_client.get_object(Bucket="test-bucket", Key=key)
+
+
+def test_s3_service_delete_bucket_empty(s3_service: S3Service):
+    keys = []
+    assert s3_service.bulk_delete(bucket_name="test-bucket", keys=keys) is None

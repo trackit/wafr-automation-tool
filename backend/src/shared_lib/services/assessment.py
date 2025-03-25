@@ -8,13 +8,11 @@ from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from common.entities import (
     Assessment,
     AssessmentDto,
-    BestPractice,
     BestPracticeExtra,
     FindingExtra,
     Pagination,
     PaginationOutput,
 )
-from exceptions.assessment import FindingNotFoundError
 from types_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
@@ -29,14 +27,16 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
+    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment]:
         raise NotImplementedError
 
     @abstractmethod
     def retrieve_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
     ) -> BestPracticeExtra | None:
         raise NotImplementedError
 
@@ -49,6 +49,14 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def retrieve_findings(
+        self,
+        assessment_id: str,
+        finding_ids: list[str],
+    ) -> list[FindingExtra] | None:
+        raise NotImplementedError
+
+    @abstractmethod
     def update(self, assessment_id: str, assessment_dto: AssessmentDto) -> None:
         raise NotImplementedError
 
@@ -56,13 +64,15 @@ class IAssessmentService:
     def update_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
-        status: bool | None,
-    ) -> bool:
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
+        status: bool,  # noqa: FBT001
+    ) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def delete_findings(self, assessment_id: str) -> bool:
+    def delete_findings(self, assessment_id: str) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -86,11 +96,9 @@ class AssessmentService(IAssessmentService):
         return self._create_assessment(assessment_data)
 
     @override
-    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment] | None:
+    def retrieve_all(self, pagination: Pagination) -> PaginationOutput[Assessment]:
         query_input = self._create_retrieve_all_query_input(pagination)
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
-        if not query_output:
-            return None
         next_token = query_output.get("LastEvaluatedKey")
         assessments: list[Assessment] = []
         for item in query_output.get("Items", []):
@@ -118,26 +126,28 @@ class AssessmentService(IAssessmentService):
     def retrieve_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
     ) -> BestPracticeExtra | None:
         if not assessment.findings:
             return None
-        bp_findings: BestPractice | None = None
-        for pillar in assessment.findings.values():
-            for question in pillar.values():
-                if best_practice_name in question:
-                    bp_findings = question[best_practice_name]
-                    break
-        if not bp_findings:
+        pillar = assessment.findings.get(pillar_id)
+        if not pillar:
             return None
-        findings: list[FindingExtra] = []
-        for finding_id in bp_findings.get("results", []):
-            finding = self.retrieve_finding(assessment.id, finding_id)
-            if not finding:
-                raise FindingNotFoundError(assessment.id, finding_id)
-            findings.append(finding)
+        question = pillar.get("questions").get(question_id)
+        if not question:
+            return None
+        best_practice = question.get("best_practices").get(best_practice_id)
+        if not best_practice:
+            return None
+        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.get("results", []))
         return BestPracticeExtra(
-            results=findings, risk=bp_findings.get("risk", ""), status=bp_findings.get("status", False)
+            id=best_practice_id,
+            label=best_practice.get("label", ""),
+            results=findings if findings else [],
+            risk=best_practice.get("risk", ""),
+            status=best_practice.get("status", False),
         )
 
     @override
@@ -155,6 +165,24 @@ class AssessmentService(IAssessmentService):
         return self._create_finding(item)
 
     @override
+    def retrieve_findings(
+        self,
+        assessment_id: str,
+        finding_ids: list[str],
+    ) -> list[FindingExtra] | None:
+        if not finding_ids:
+            return None
+        items = self.database_service.bulk_get(
+            table_name=DDB_TABLE,
+            keys=[{DDB_KEY: assessment_id, DDB_SORT_KEY: finding_id} for finding_id in finding_ids],
+        )
+        findings: list[FindingExtra] = []
+        for item in items:
+            finding = self._create_finding(item)
+            findings.append(finding)
+        return findings
+
+    @override
     def update(self, assessment_id: str, assessment_dto: AssessmentDto) -> None:
         attrs = assessment_dto.model_dump(exclude_none=True)
         self.database_service.update_attrs(
@@ -165,47 +193,34 @@ class AssessmentService(IAssessmentService):
     def update_best_practice(
         self,
         assessment: Assessment,
-        best_practice_name: str,
-        status: bool | None,
-    ) -> bool:
-        if not assessment.findings or status is None:
-            return False
-        bp_findings: BestPractice | None = None
-        for pillar_name, pillar in assessment.findings.items():
-            for question_name, question in pillar.items():
-                if best_practice_name in question:
-                    bp_findings = question[best_practice_name]
-                    self._pillar_name = pillar_name
-                    self._question_name = question_name
-                    break
-        if not bp_findings:
-            return False
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
+        status: bool,
+    ) -> None:
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
-            UpdateExpression="SET findings.#pillar.#question.#best_practice.#status = :status",
+            UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
             ExpressionAttributeNames={
-                "#pillar": self._pillar_name,
-                "#question": self._question_name,
-                "#best_practice": best_practice_name,
+                "#pillar": pillar_id,
+                "#question": question_id,
+                "#best_practice": best_practice_id,
                 "#status": "status",
             },
             ExpressionAttributeValues={
                 ":status": status,
             },
         )
-        return True
 
     @override
-    def delete_findings(self, assessment_id: str) -> bool:
+    def delete_findings(self, assessment_id: str) -> None:
         items = self.database_service.query_all(
             table_name=DDB_TABLE,
             KeyConditionExpression=Key(DDB_KEY).eq(assessment_id),
         )
-        if not items:
-            return False
         keys = [{DDB_KEY: item[DDB_KEY], DDB_SORT_KEY: item[DDB_SORT_KEY]} for item in items]
-        return not self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
+        self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override
     def delete(self, assessment_id: str) -> bool:
