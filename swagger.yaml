@@ -3,16 +3,17 @@ info:
   title: Assessment API
   version: 1.0.0
   description: |
-    This documentation describes the endpoints for managing assessments,
-    including creation, retrieval, deletion, and the management of
-    associated Findings.
+    This API provides endpoints for managing assessments in a structured and efficient manner. 
+    You can create, retrieve, and delete assessments, as well as manage associated findings, best practices, and questions.
 paths:
   /assessments:
     get:
       tags:
         - Assessments
-      summary: Retrieve all assessments
-      operationId: getAllAssessments
+      summary: Retrieve a list of all assessments
+      description: |
+        Retrieves all assessments that have been created in the system. 
+        Useful for monitoring and managing multiple assessments in one place.
       responses:
         "200":
           description: List of all assessments
@@ -27,32 +28,36 @@ paths:
                       $ref: "#/components/schemas/Assessment"
                   next_token:
                     type: string
+                    description: |
+                      Token for pagination. If there are more assessments than can be returned in a single response, 
+                      this token will allow you to retrieve the next set of results.
         "500":
-          description: Internal server error
+          description: Internal server error.
 
     post:
       tags:
         - Assessments
-      summary: Start a new assessment
-      description: Initiates a new assessment process for the specified role.
-      operationId: startAssessment
+      summary: Start a new assessment process
+      description: |
+        Initiates a new assessment for a given role. 
+        You can specify a role ARN for the assessment, or a default role will be used.
       parameters:
         - name: name
           in: query
-          description: Name of the assessment
+          description: Name of the assessment to be created
           required: true
           schema:
             type: string
         - name: roleArn
           in: query
           description: |
-            Role for which to start the assessment \
-            If not set a default role will be used
+            The role ARN to associate with the assessment.
+            If not provided, a default role will be used.
           schema:
             type: string
       responses:
         "201":
-          description: Assessment successfully created
+          description: The assessment has been successfully created
           content:
             application/json:
               schema:
@@ -60,63 +65,69 @@ paths:
                 properties:
                   assessmentId:
                     type: integer
-                    description: The created assessment ID
+                    description: The unique ID of the newly created assessment
         "400":
-          description: Missing or invalid parameters
+          description: Bad Request. Missing or invalid parameters were provided.
         "500":
-          description: Internal server error
+          description: Internal server error.
 
   /assessments/{assessmentId}:
     get:
       tags:
         - Assessments
       summary: Retrieve details of a specific assessment
-      operationId: getAssessment
+      description: |
+        Retrieves detailed information about a specific assessment, 
+        including associated findings, questions, and any current errors.
       parameters:
         - name: assessmentId
           in: path
-          description: The ID of the assessment to retrieve
+          description: The unique ID of the assessment to retrieve
           required: true
           schema:
             type: integer
       responses:
         "200":
-          description: Assessment details
+          description: Detailed information about the specified assessment
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AssessmentContent"
         "404":
-          description: Assessment not found
+          description: The specified assessment could not be found
         "500":
-          description: Internal server error
+          description: Internal server error.
 
     delete:
       tags:
         - Assessments
-      summary: Delete an assessment
+      summary: Delete a specific assessment
+      description: |
+        Deletes an assessment from the system. 
+        Once deleted, the assessment cannot be recovered.
       operationId: deleteAssessment
       parameters:
         - name: assessmentId
           in: path
-          description: The ID of the assessment to delete
+          description: The unique ID of the assessment to delete
           required: true
           schema:
             type: integer
       responses:
         "204":
-          description: Assessment successfully deleted
+          description: The assessment has been successfully deleted
         "404":
-          description: Assessment not found
+          description: The specified assessment could not be found
         "500":
-          description: Internal server error
+          description: Internal server error.
 
-  /assessments/{assessmentId}/best-practices/{bestPracticeName}:
-    get:
+  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
+  : get:
       tags:
         - Best Practices
-      summary: Retrieve all findings for a specific best pratice
-      operationId: getAllFindingsByBestPractice
+      summary: Retrieve all findings for a specific best practice
+      description: |
+        Fetches all the findings associated with a specific best practice within a question in a given pillar for a specific assessment.
       parameters:
         - name: assessmentId
           in: path
@@ -124,28 +135,41 @@ paths:
           description: The ID of the assessment
           schema:
             type: integer
-        - name: bestPracticeName
+        - name: pillarId
           in: path
           required: true
-          description: The name of the best practice
+          description: The ID of the pillar under which the question falls
+          schema:
+            type: integer
+        - name: questionId
+          in: path
+          required: true
+          description: The ID of the question to retrieve the best practices to
+          schema:
+            type: integer
+        - name: bestPracticeId
+          in: path
+          required: true
+          description: The ID of the best practice to retrieve findings to
           schema:
             type: string
       responses:
         "200":
-          description: List of finding for the specific best practice
+          description: A list of findings related to the specified best practice
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/BestPracticeExtra"
         "404":
-          description: Best practice not found
+          description: The specified best practice could not be found
 
-  /assessments/{assessmentId}/best-practices/{bestPracticeName}/{status}:
-    put:
+  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}
+  : put:
       tags:
         - Best Practices
-      summary: Retrieve all findings for a specific best pratice
-      operationId: getAllFindingsByBestPractice2
+      summary: Update the status of a specific best practice
+      description: |
+        Updates the status of a best practice for a given question in the assessment
       parameters:
         - name: assessmentId
           in: path
@@ -153,57 +177,70 @@ paths:
           description: The ID of the assessment
           schema:
             type: integer
-        - name: bestPracticeName
+        - name: pillarId
           in: path
           required: true
-          description: The name of the best practice
+          description: The ID of the pillar under which the question falls
+          schema:
+            type: integer
+        - name: questionId
+          in: path
+          required: true
+          description: The ID of the question to update the best practice to
+          schema:
+            type: integer
+        - name: bestPracticeId
+          in: path
+          required: true
+          description: The ID of the best practice to update the status to
           schema:
             type: string
         - name: status
           in: path
           required: true
+          description: The status to set for the best practice
           schema:
             type: boolean
       responses:
         "200":
-          description: List of finding for the specific best practice
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BestPracticeExtra"
+          description: The status of the best practice was successfully updated
         "404":
-          description: Best practice not found
+          description: The specified assessment, pillar, question, or best practice could not be found
+        "500":
+          description: Internal server error.
 
   /assessments/{assessmentId}/findings/{findingId}:
     get:
       tags:
         - Findings
       summary: Retrieve the details of a specific finding
-      operationId: getFindingById
+      description: |
+        Fetches detailed information about a specific finding related to an assessment, 
+        including severity, status, and recommended remediation steps.
       parameters:
         - name: assessmentId
           in: path
           required: true
-          description: The ID of the assessment
+          description: The ID of the assessment to which the finding belongs
           schema:
             type: integer
         - name: findingId
           in: path
           required: true
-          description: The ID of the finding
+          description: The unique ID of the finding to retrieve
           schema:
             type: integer
       responses:
         "200":
-          description: Details of the finding
+          description: Detailed information about the specified finding
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Finding"
         "404":
-          description: Assessment or finding not found
+          description: The specified assessment or finding could not be found
         "500":
-          description: Internal server error
+          description: Internal server error.
 
 components:
   schemas:
@@ -212,67 +249,44 @@ components:
       properties:
         id:
           type: string
-          description: Unique ID of the assessment
+          description: Unique identifier of the assessment
         name:
           type: string
-          description: Name of the assessment
-        role:
-          type: string
-          description: Role associated with the assessment
-        step:
-          type: string
-          description: Current step of the assessment
-        error:
-          $ref: "#/components/schemas/AssessmentError"
-        question_version:
-          type: string
-          description: The version of questions used
-    AssessmentContent:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique ID of the assessment
-        name:
-          type: string
-          description: Name of the assessment
+          description: Name or title of the assessment
         role_arn:
           type: string
-          description: Role associated with the assessment
+          description: Role ARN associated with the assessment
+        created_at:
+          type: string
+          description: ISO-formatted date when the assessment was created
         step:
           type: string
-          description: Current step of the assessment
+          description: Current step in the assessment process
           enum:
             - "SCANNING_STARTED"
             - "PREPARING_PROMPTS"
             - "INVOKING_LLM"
             - "FINISHED"
             - "ERRORED"
+        error:
+          $ref: "#/components/schemas/AssessmentError"
         question_version:
           type: string
-          nullable: true
-          description: The version of questions used
-        findings:
-          type: object
-          description: JSONObject containing each pillar
-          additionalProperties: false
-          properties:
-            pillars:
-              type: object
-              description: JSONObject containing questions for each pillar
-              additionalProperties: false
-              properties:
-                questions:
-                  type: object
-                  description: JSONObject containing best practices for each question
-                  additionalProperties: false
-                  properties:
-                    best_practices:
-                      $ref: "#/components/schemas/BestPractice"
+          description: The version of questions that were used for the assessment
+    AssessmentContent:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Assessment"
+        - properties:
+            findings:
+              type: array
+              description: A list of findings associated with the assessment
+              items:
+                $ref: "#/components/schemas/Pillar"
     AssessmentError:
       type: object
       nullable: true
-      description: Present if an error has occurred during the process.
+      description: Error details if an issue occurred during the assessment process.
       properties:
         Error:
           type: string
@@ -280,61 +294,89 @@ components:
           type: string
     Finding:
       type: object
-      description: Finding definition
+      description: A finding within an assessment, providing details on the issue found
       additionalProperties: false
       properties:
         id:
           type: integer
-          description: Finding id
+          description: Unique identifier of the finding
         severity:
           type: string
-          description: Textual severity (e.g., Low, Medium, High)
+          description: Severity level of the finding (e.g., Low, Medium, High)
         status_code:
           type: string
-          description: Short status code (e.g., PASS, FAIL)
+          description: The status of the finding (e.g., MANUAL, FAIL)
         status_detail:
           type: string
-          description: Explanation for the status
+          description: Explanation or additional details about the finding's status
         resources:
           type: array
-          description: List of resources associated with the finding
+          description: List of resources related to the finding
           items:
             type: object
             additionalProperties: false
             properties:
               uid:
                 type: string
-                description: ARN or unique ID of the resource
+                description: ARN or unique identifier of the resource
               name:
                 type: string
-                description: Resource name
+                description: Name of the resource
               type:
                 type: string
-                description: Simple resource type (e.g., Other, S3Bucket)
+                description: Type of resource (e.g., S3Bucket)
               region:
                 type: string
-                description: AWS region or other location
+                description: The region or location of the resource
         remediation:
           type: object
-          description: Recommended steps for remediation
+          description: Remediation advice for resolving the issue found
           additionalProperties: false
           properties:
             desc:
               type: string
-              description: Textual remediation guidance
+              description: Textual guidance on how to resolve the finding
             references:
               type: array
-              description: List of URLs or CLI commands
+              description: List of resources (URLs, CLI commands) for remediation
               items:
                 type: string
         risk_details:
           type: string
-          description: Explanation of the security risk or reason for the finding
-    BestPractice:
+          description: Explanation of the risk associated with the finding
+    Pillar:
       type: object
-      description: Best practice object
       additionalProperties: false
       properties:
+        id:
+          type: string
+        label:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+    Question:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        best_practices:
+          type: array
+          items:
+            $ref: "#/components/schemas/BestPractice"
+    BestPractice:
+      type: object
+      description: A best practice related to a question and pillar in the assessment
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        label:
+          type: string
         risk:
           type: string
           enum:
@@ -349,18 +391,11 @@ components:
             type: string
     BestPracticeExtra:
       type: object
-      description: Best practice object with finding content
-      additionalProperties: false
-      properties:
-        risk:
-          type: string
-          enum:
-            - "High"
-            - "Medium"
-            - "Low"
-        status:
-          type: boolean
-        results:
-          type: array
-          items:
-            $ref: "#/components/schemas/Finding"
+      description: Enhanced best practice information, including associated findings
+      allOf:
+        - $ref: "#/components/schemas/BestPractice"
+        - properties:
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/Finding"
