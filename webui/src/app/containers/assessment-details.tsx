@@ -1,37 +1,43 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tabs, VerticalMenu, DataTable, Modal } from '@webui/ui';
+import { Tabs, VerticalMenu, DataTable, Modal, StatusBadge } from '@webui/ui';
 import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useParams } from 'react-router';
 import FindingsDetails from './findings-details';
+
 type BestPractice = components['schemas']['BestPractice'];
-type Question = Record<string, { [key: string]: BestPractice }>;
-type Pillar = Record<string, Question>;
+type Question = components['schemas']['Question'];
+type Pillar = components['schemas']['Pillar'];
 type TableRow = BestPractice & { name: string };
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
-  const [selectedPillarKey, setSelectedPillarKey] = useState<string>('');
+  const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
-  const [activeQuestionKey, setActiveQuestionKey] = useState<string>('');
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
-  const [bestPractice, setBestPractice] = useState<string | null>(null);
+  const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
   const { id } = useParams();
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
       assessmentId,
-      bestPractice,
+      pillarId,
+      questionId,
+      bestPracticeId,
       status,
     }: {
       assessmentId: string;
-      bestPractice: string;
+      pillarId: string;
+      questionId: string;
+      bestPracticeId: string;
       status: boolean;
-    }) => updateStatus(assessmentId, bestPractice, status),
-    onMutate: async ({ assessmentId, bestPractice, status }) => {
+    }) =>
+      updateStatus(assessmentId, pillarId, questionId, bestPracticeId, status),
+    onMutate: async ({ pillarId, questionId, bestPracticeId, status }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
@@ -51,25 +57,22 @@ export function AssessmentDetails() {
       const newData = JSON.parse(
         JSON.stringify(previousData)
       ) as components['schemas']['AssessmentContent'];
-      const findings = newData.findings as Record<string, Pillar>;
 
-      // Find and update the specific best practice
+      // Find and update the specific best practice using all IDs
       let updated = false;
-      for (const pillarKey of Object.keys(findings)) {
-        const pillar = findings[pillarKey] as Record<string, Question>;
-        for (const questionKey of Object.keys(pillar)) {
-          const question = pillar[questionKey] as Record<string, BestPractice>;
-          if (bestPractice in question) {
-            console.log('Found best practice to update in:', {
-              pillarKey,
-              questionKey,
-            });
-            question[bestPractice] = {
-              ...question[bestPractice],
-              status,
-            };
-            updated = true;
-            break;
+      for (const pillar of newData.findings || []) {
+        if (pillar.id === pillarId) {
+          for (const question of pillar.questions || []) {
+            if (question.id === questionId) {
+              for (const practice of question.best_practices || []) {
+                if (practice.id === bestPracticeId) {
+                  practice.status = status;
+                  updated = true;
+                  break;
+                }
+              }
+            }
+            if (updated) break;
           }
         }
         if (updated) break;
@@ -77,6 +80,21 @@ export function AssessmentDetails() {
 
       // Update the cache with our optimistic value
       queryClient.setQueryData(['assessment', id], newData);
+
+      // Update local state optimistically
+      if (
+        selectedPillar?.id === pillarId &&
+        activeQuestion?.id === questionId
+      ) {
+        const updatedBestPractices = activeQuestion.best_practices?.map(
+          (practice) =>
+            practice.id === bestPracticeId ? { ...practice, status } : practice
+        );
+        setActiveQuestion({
+          ...activeQuestion,
+          best_practices: updatedBestPractices,
+        });
+      }
 
       // Return a context object with the snapshotted value
       return { previousData };
@@ -86,6 +104,16 @@ export function AssessmentDetails() {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
         queryClient.setQueryData(['assessment', id], context.previousData);
+        // Also roll back local state
+        if (data?.findings) {
+          const pillar = data.findings[selectedPillarIndex];
+          if (pillar) {
+            setSelectedPillar(pillar);
+            if (pillar.questions && pillar.questions[activeQuestionIndex]) {
+              setActiveQuestion(pillar.questions[activeQuestionIndex]);
+            }
+          }
+        }
       }
     },
     onSettled: () => {
@@ -95,14 +123,20 @@ export function AssessmentDetails() {
     },
   });
 
-  const handleUpdateStatus = (bestPractice: string, status: boolean) => {
-    if (!id) return;
-    updateStatusMutation.mutate({
-      assessmentId: id,
-      bestPractice,
-      status,
-    });
-  };
+  const handleUpdateStatus = useCallback(
+    (bestPracticeId: string, status: boolean) => {
+      if (!id || !selectedPillar?.id || !activeQuestion?.id) return;
+
+      updateStatusMutation.mutate({
+        assessmentId: id,
+        pillarId: selectedPillar.id,
+        questionId: activeQuestion.id,
+        bestPracticeId,
+        status,
+      });
+    },
+    [id, selectedPillar?.id, activeQuestion?.id, updateStatusMutation]
+  );
 
   const columnHelper = createColumnHelper<TableRow>();
 
@@ -123,13 +157,13 @@ export function AssessmentDetails() {
               checked={info.row.original.status || false}
               readOnly
               onChange={(e) =>
-                handleUpdateStatus(info.row.original.name, e.target.checked)
+                handleUpdateStatus(info.row.original.id || '', e.target.checked)
               }
             />
           </div>
         ),
       }),
-      columnHelper.accessor('name', {
+      columnHelper.accessor('label', {
         header: ({ column }) => (
           <button
             className="flex items-center gap-1 cursor-pointer"
@@ -181,7 +215,7 @@ export function AssessmentDetails() {
                 <button
                   className="btn btn-link text-error"
                   onClick={() => {
-                    setBestPractice(info.row.original.name);
+                    setBestPractice(info.row.original);
                   }}
                 >
                   {info.row.original.results?.length || 0}
@@ -194,7 +228,7 @@ export function AssessmentDetails() {
         },
       }),
     ],
-    [handleUpdateStatus]
+    [columnHelper, handleUpdateStatus]
   );
 
   // Helper function to extract AWS account ID from role ARN
@@ -205,15 +239,17 @@ export function AssessmentDetails() {
   };
 
   // Helper function to calculate completed questions count
-  const calculateCompletedQuestions = (pillarData: Question) => {
+  const calculateCompletedQuestions = (questions: Question[]) => {
     let completedCount = 0;
 
     // Iterate through each question in the pillar
-    for (const question of Object.values(pillarData)) {
+    for (const question of questions) {
       // Check if all best practices in this question have status true
-      const allBestPracticesComplete = Object.values(question).every(
-        (bestPractice) => bestPractice.status === true
-      );
+      const allBestPracticesComplete =
+        question.best_practices?.every(
+          (bestPractice) => bestPractice.status === true
+        ) ?? false;
+
       if (allBestPracticesComplete) {
         completedCount++;
       }
@@ -227,74 +263,63 @@ export function AssessmentDetails() {
     queryFn: () => (id ? getAssessment(id) : null),
   });
 
-  // Set the first pillar key as the selected pillar key ONLY on initial load
+  // Set the first pillar as selected ONLY on initial load
   useEffect(() => {
-    if (data?.findings && !selectedPillarKey) {
-      const pillars = data.findings as Record<string, Pillar>;
-      if (pillars && Object.keys(pillars).length > 0) {
-        const firstPillarKey = Object.keys(pillars)[0];
-        setSelectedPillarKey(firstPillarKey);
-      }
+    if (
+      data?.findings &&
+      data.findings.length > 0 &&
+      selectedPillarIndex === 0
+    ) {
+      setSelectedPillar(data.findings[0]);
     }
-  }, [data?.findings, selectedPillarKey]);
+  }, [data?.findings, selectedPillarIndex]);
 
-  // Set pillar and question from the selected keys
+  // Set question from the selected indices
   useEffect(() => {
-    if (data?.findings && selectedPillarKey) {
-      const pillars = data.findings as Record<string, Pillar>;
-      setSelectedPillar(pillars[selectedPillarKey]);
-
-      // Set initial question key if not already set or if it doesn't exist in current pillar
-      const currentQuestions = pillars[selectedPillarKey];
-      if (!activeQuestionKey || !(activeQuestionKey in currentQuestions)) {
-        const questionKeys = Object.keys(currentQuestions);
-        setActiveQuestionKey(questionKeys[0]);
+    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
+      // Set initial question index if not already set or if it's out of bounds
+      if (activeQuestionIndex >= selectedPillar.questions.length) {
+        setActiveQuestionIndex(0);
       }
 
-      // Always update active question based on current keys
-      if (pillars[selectedPillarKey]) {
-        setActiveQuestion(pillars[selectedPillarKey][activeQuestionKey]);
-      }
+      // Update active question based on current index
+      setActiveQuestion(selectedPillar.questions[activeQuestionIndex]);
     }
-  }, [data?.findings, selectedPillarKey, activeQuestionKey]);
-
-  // Create dynamic tabs from findings data
-  const tabs = data?.findings
-    ? Object.entries(data.findings as Record<string, Pillar>).map(
-        ([pillar, questions]) => ({
-          label: `${pillar} ${
-            questions
-              ? `${calculateCompletedQuestions(questions)}/${
-                  Object.keys(questions).length
-                }`
-              : ''
-          }`,
-          id: pillar,
-        })
-      )
-    : [];
+  }, [selectedPillar, activeQuestionIndex]);
 
   const handleNextQuestion = () => {
-    if (!selectedPillar) return;
-    const questions = Object.keys(selectedPillar);
-    const currentIndex = questions.indexOf(activeQuestionKey);
-    if (currentIndex < questions.length - 1) {
-      setActiveQuestionKey(questions[currentIndex + 1]);
+    if (!selectedPillar?.questions) return;
+    const questions = selectedPillar.questions;
+    if (activeQuestionIndex < questions.length - 1) {
+      setActiveQuestionIndex(activeQuestionIndex + 1);
     }
   };
 
-  const isLastQuestion = selectedPillar
-    ? Object.keys(selectedPillar).indexOf(activeQuestionKey) ===
-      Object.keys(selectedPillar).length - 1
+  const isLastQuestion = selectedPillar?.questions
+    ? activeQuestionIndex === selectedPillar.questions.length - 1
     : false;
 
   const tableData = useMemo(() => {
-    if (!activeQuestion) return [];
-    return Object.entries(activeQuestion).map(([key, practice]) => ({
+    if (!activeQuestion?.best_practices) return [];
+    return activeQuestion.best_practices.map((practice) => ({
       ...practice,
-      name: key,
+      name: practice.id || '',
     }));
   }, [activeQuestion]);
+
+  const tabs = useMemo(() => {
+    if (!data?.findings) return [];
+    return data.findings.map((pillar, index) => ({
+      label: `${pillar.label} ${
+        pillar.questions
+          ? `${calculateCompletedQuestions(pillar.questions)}/${
+              pillar.questions.length
+            }`
+          : ''
+      }`,
+      id: pillar.id || `pillar-${index}`,
+    }));
+  }, [data?.findings]);
 
   if (isLoading)
     return (
@@ -306,53 +331,56 @@ export function AssessmentDetails() {
   if (!id) return <div>No assessment ID found</div>;
   return (
     <div className="container py-8 overflow-auto flex-1 flex flex-col">
-      <div className="prose mb-2 w-full">
-        <h2 className="mt-0">
-          Assessment - {data?.name}{' '}
-          <span className="text-sm text-base-content/50">
-            ({extractAccountId(data?.role_arn)})
-          </span>
-        </h2>
+      <div className="flex flex-row gap-2 justify-between">
+        <div className="prose mb-2 w-full flex flex-col gap-2">
+          <h2 className="mt-0 mb-0">Assessment - {data?.name} </h2>
+          <div className="text-sm text-base-content/50 font-bold">
+            Account:
+            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
+          </div>
+        </div>
+        <StatusBadge status={data?.step || undefined} />
       </div>
       <Tabs
         tabs={tabs}
-        activeTab={selectedPillarKey}
-        onChange={(tab) => {
-          setSelectedPillarKey(tab);
+        activeTab={selectedPillar?.id || ''}
+        onChange={(tabId) => {
+          const index = data?.findings?.findIndex((p) => p.id === tabId) ?? 0;
+          setSelectedPillarIndex(index);
+          setSelectedPillar(data?.findings?.[index] || null);
         }}
       />
-      <div className="flex-1 flex flex-row overflow-auto  my-4 rounded-lg border border-neutral-content shadow-md ">
+      <div className="flex-1 flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         <VerticalMenu
-          items={Object.keys(selectedPillar || {}).map((question) => ({
-            text: question,
-            id: question,
-            active: activeQuestionKey === question,
-            onClick: () => setActiveQuestionKey(question),
-            completed: selectedPillar
-              ? Object.values(selectedPillar[question]).every(
-                  (bestPractice) => bestPractice.status ?? false
-                )
-              : false,
+          items={(selectedPillar?.questions || []).map((question, index) => ({
+            text: question.label || '',
+            id: question.id || `question-${index}`,
+            active: activeQuestionIndex === index,
+            onClick: () => setActiveQuestionIndex(index),
+            completed:
+              question.best_practices?.every(
+                (bestPractice) => bestPractice.status ?? false
+              ) ?? false,
           }))}
         />
         <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
           <div className="bg-base-100 p-4 rounded-lg">
             <h3 className="text-center font-medium text-xl text-primary">
               <span className="font-medium">
-                {selectedPillar
-                  ? `${
-                      Object.keys(selectedPillar).indexOf(activeQuestionKey) + 1
-                    } / ${Object.keys(selectedPillar).length}`
+                {selectedPillar?.questions
+                  ? `${activeQuestionIndex + 1} / ${
+                      selectedPillar.questions.length
+                    }`
                   : ''}
               </span>
               {'. '}
-              <span className="font-light">{activeQuestionKey}</span>
+              <span className="font-light">{activeQuestion?.label}</span>
             </h3>
           </div>
           <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
             {activeQuestion && (
               <DataTable
-                key={`${selectedPillarKey}-${activeQuestionKey}`}
+                key={`${selectedPillar?.id}-${activeQuestion.id}`}
                 data={tableData}
                 columns={columns}
               />
@@ -373,12 +401,17 @@ export function AssessmentDetails() {
       </div>
       {bestPractice && (
         <Modal
-          open={bestPractice !== null}
+          open={true}
           onClose={() => setBestPractice(null)}
           className="w-full max-w-5xl"
           notCentered
         >
-          <FindingsDetails assessmentId={id} bestPractice={bestPractice} />
+          <FindingsDetails
+            assessmentId={id}
+            pillarId={selectedPillar?.id || ''}
+            questionId={activeQuestion?.id || ''}
+            bestPractice={bestPractice}
+          />
         </Modal>
       )}
     </div>

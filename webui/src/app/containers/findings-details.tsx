@@ -6,7 +6,9 @@ import { useState } from 'react';
 
 interface FindingsDetailsProps {
   assessmentId: string;
-  bestPractice: string;
+  bestPractice: components['schemas']['BestPractice'];
+  pillarId: string;
+  questionId: string;
 }
 
 function FindingItem({
@@ -64,21 +66,30 @@ function FindingItem({
   );
 }
 
-function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
+function FindingsDetails({
+  assessmentId,
+  bestPractice,
+  pillarId,
+  questionId,
+}: FindingsDetailsProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data, isLoading } = useQuery({
-    queryKey: ['findings', bestPractice],
-    queryFn: () => getFindings(assessmentId, bestPractice),
+  const { data, isLoading } = useQuery<
+    components['schemas']['BestPracticeExtra']
+  >({
+    queryKey: ['findings', assessmentId, pillarId, questionId, bestPractice.id],
+    queryFn: () =>
+      getFindings(assessmentId, pillarId, questionId, bestPractice.id || ''),
   });
 
-  const sortedFindings = data?.results?.sort((a, b) => {
+  const findings: components['schemas']['Finding'][] = data?.results || [];
+  const sortedFindings = findings.sort((a, b) => {
     // Sort findings with remediation to the top
     if (a.remediation && !b.remediation) return -1;
     if (!a.remediation && b.remediation) return 1;
     return 0;
   });
 
-  const filteredFindings = sortedFindings?.filter((finding) => {
+  const filteredFindings = sortedFindings.filter((finding) => {
     if (!searchQuery) return true;
 
     const searchLower = searchQuery.toLowerCase();
@@ -101,10 +112,7 @@ function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
       return true;
 
     // Search through remediation
-    if (finding.remediation?.desc?.toLowerCase().includes(searchLower))
-      return true;
-
-    return false;
+    return !!finding.remediation?.desc?.toLowerCase().includes(searchLower);
   });
 
   if (isLoading)
@@ -117,7 +125,7 @@ function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
     <div className="overflow-y-auto max-h-[90vh] flex flex-col">
       <div className="flex flex-col gap-2  px-8 py-4 border-b border-base-content/30">
         <div className="flex flex-row gap-2 items-center">
-          <h3 className="text-lg font-bold">{bestPractice}</h3>
+          <h3 className="text-lg font-bold">{bestPractice.label}</h3>
           {data?.risk && (
             <div
               className={`text-bold badge ${
@@ -144,10 +152,10 @@ function FindingsDetails({ assessmentId, bestPractice }: FindingsDetailsProps) {
         </label>
       </div>
       <div className="flex flex-col divide-y divide-base-content/30 overflow-y-auto">
-        {filteredFindings?.map((finding) => (
+        {filteredFindings.map((finding) => (
           <FindingItem key={finding.id} finding={finding} />
         ))}
-        {filteredFindings?.length === 0 && (
+        {filteredFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
             <p className="text-sm text-base-content/80">
               No findings found for "{searchQuery}"

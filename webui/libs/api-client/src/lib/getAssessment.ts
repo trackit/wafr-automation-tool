@@ -1,8 +1,8 @@
 import { apiClient } from './client';
-import { operations } from '@webui/types';
+import { paths } from '@webui/types';
 
 export const getAssessment = async (assessmentId: string) => {
   return apiClient.get<
-    operations['getAssessment']['responses']['200']['content']['application/json']
+    paths['/assessments/{assessmentId}']['get']['responses']['200']['content']['application/json']
   >(`/assessments/${assessmentId}`);
 };
