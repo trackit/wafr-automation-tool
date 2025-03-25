@@ -19,7 +19,14 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Maximum number of assessments to return */
+                    limit?: number;
+                    /** @description Search term to filter assessments by name, role ARN, or id */
+                    search?: string;
+                    /** @description Token for pagination. */
+                    next_token?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;

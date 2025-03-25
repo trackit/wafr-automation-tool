@@ -1,23 +1,27 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getAssessments } from '@webui/api-client';
 import { StatusBadge } from '@webui/ui';
 import { Server, Calendar, Search } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { useDebounceValue } from 'usehooks-ts';
 
 function AssessmentsList() {
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
-    queryKey: ['assessments'],
-    queryFn: getAssessments,
-  });
+  const [search, setSearch] = useDebounceValue('', 500);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['assessments', search],
+      queryFn: ({ pageParam }) =>
+        getAssessments({ limit: 24, search, next_token: pageParam }),
+      getNextPageParam: (lastPage) => lastPage.next_token,
+      initialPageParam: '',
+    });
 
   const extractAccountId = (roleArn: string | undefined) => {
     if (!roleArn) return '';
     const match = roleArn.match(/arn:aws:iam::(\d+):/);
     return match ? match[1] : '';
   };
-
-  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
@@ -34,13 +38,27 @@ function AssessmentsList() {
             type="search"
             className="grow"
             placeholder="Search an assessment"
+            defaultValue={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </label>
       </div>
       <div className="flex gap-4 overflow-auto rounded-lg border border-neutral-content shadow-md p-4 flex-wrap ">
-        {data?.assessments?.map((assessment) => (
-          <div
-            className={`
+        {isLoading ? (
+          <div className="flex flex-row gap-2 justify-center items-center w-full h-full">
+            <div className="loading loading-ring text-primary w-8 h-8"></div>
+          </div>
+        ) : null}
+        {data?.pages.length === 0 ||
+        data?.pages?.[0]?.assessments?.length === 0 ? (
+          <div className="text-center text-base-content/80">
+            No assessments found
+          </div>
+        ) : null}
+        {data?.pages.map((page) =>
+          page.assessments?.map((assessment) => (
+            <div
+              className={`
                 border border-neutral-content rounded-lg p-4
                 w-full
                 sm:w-[calc(50%-0.5rem)]
@@ -50,30 +68,44 @@ function AssessmentsList() {
                 transition-all duration-300
                 cursor-pointer
               `}
-            key={`${assessment.id}-${Math.random()}`}
-            onClick={() => navigate(`/assessments/${assessment.id}`)}
-          >
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-row gap-2 justify-between">
-                <div className="text-lg font-semibold text-primary">
-                  {assessment.name}
+              key={`${assessment.id}-${Math.random()}`}
+              onClick={() => navigate(`/assessments/${assessment.id}`)}
+            >
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row gap-2 justify-between items-center mb-2">
+                  <div className="text-lg font-semibold text-primary">
+                    {assessment.name}
+                  </div>
+                  <StatusBadge status={assessment.step} className="badge-sm" />
                 </div>
-                <StatusBadge status={assessment.step} />
-              </div>
-              <div className="text-sm text-base-content/80 flex flex-row gap-2">
-                <Server className="w-4 h-4" />
-                Account: {extractAccountId(assessment.role_arn)}
-              </div>
-              <div className="text-sm text-base-content/80 flex flex-row gap-2">
-                <Calendar className="w-4 h-4" />
-                Created:{' '}
-                {assessment.created_at
-                  ? new Date(assessment.created_at).toLocaleDateString()
-                  : 'N/A'}
+                <div className="text-sm text-base-content/80 flex flex-row gap-2">
+                  <Server className="w-4 h-4" />
+                  Account: {extractAccountId(assessment.role_arn)}
+                </div>
+                <div className="text-sm text-base-content/80 flex flex-row gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Created:{' '}
+                  {assessment.created_at
+                    ? new Date(assessment.created_at).toLocaleDateString()
+                    : 'N/A'}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
+      </div>
+      <div className="flex flex-row gap-4 justify-center">
+        <button
+          className="btn btn-accent btn-soft text-sm"
+          onClick={() => fetchNextPage()}
+          disabled={!hasNextPage || isFetchingNextPage}
+        >
+          {isFetchingNextPage
+            ? 'Loading more...'
+            : hasNextPage
+            ? 'Load More'
+            : 'Nothing more to load'}
+        </button>
       </div>
     </div>
   );
