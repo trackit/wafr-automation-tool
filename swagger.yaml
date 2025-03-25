@@ -12,8 +12,25 @@ paths:
         - Assessments
       summary: Retrieve a list of all assessments
       description: |
-        Retrieves all assessments that have been created in the system. 
+        Retrieves all assessments that have been created in the system.
         Useful for monitoring and managing multiple assessments in one place.
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of assessments to return
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          description: Search term to filter assessments by name, role ARN, or id
+          schema:
+            type: string
+        - name: next_token
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
       responses:
         "200":
           description: List of all assessments
@@ -33,7 +50,6 @@ paths:
                       this token will allow you to retrieve the next set of results.
         "500":
           description: Internal server error.
-
     post:
       tags:
         - Assessments

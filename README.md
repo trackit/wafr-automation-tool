@@ -1,5 +1,35 @@
 # Well-Architected Framework Review Automation Tool
 
+<p align="center">
+  <b>Well-Architected Framework Review Automation Tool</b> is a serverless application that automates the process of assessing the architecture of a given AWS account against the Well-Architected Framework.
+</p>
+<p align="center">
+  <b>Learn more in this <a href="https://trackit.io/aws-wafr-automation/">blog post</a></b>
+</p>
+<hr>
+
+<p align="center">
+  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml">
+    <img src="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml/badge.svg">
+  </a>
+  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml">
+    <img src="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml/badge.svg">
+  </a>
+  <a href="https://github.com/trackit/wafr-automation-tool/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/trackit/wafr-automation-tool">
+  </a>
+  <a href="https://github.com/trackit/wafr-automation-tool/releases">
+    <img src="https://img.shields.io/github/v/release/trackit/wafr-automation-tool">
+  </a>
+  <a href="https://trackit.io/aws-wafr-automation/">
+    <img src="https://img.shields.io/badge/blog-trackit.io-blue">
+  </a>
+</p>
+
+<hr>
+
+## Table of contents
+
 - [Overview](#overview)
   - [Architecture](#architecture)
 - [Getting started](#getting-started)
@@ -13,13 +43,9 @@
 
 ## Overview
 
-The Well-Architected Framework Review Automation Tool is a serverless application that automates the process of assessing the architecture of a given AWS account against the Well-Architected Framework.
-
 This tool is designed to be used by AWS Well-Architected Reviewer to assess the architecture of an AWS account against the Well-Architected Framework.
 
 ### Architecture
-
-![WAFR Automation Tool Architecture](./resources/WAFR%20Automation%20Architecture.png)
 
 The WAFR Automation Tool uses a serverless architecture built on AWS services:
 
@@ -28,6 +54,8 @@ The WAFR Automation Tool uses a serverless architecture built on AWS services:
 - Performs automated checks against Well-Architected Framework principles
 - Scales automatically based on demand
 - Operates with a pay-per-use cost model
+
+![WAFR Automation Tool Architecture](./resources/WAFR%20Automation%20Architecture.png)
 
 ## Getting started
 
@@ -60,6 +88,44 @@ To run tests locally, run:
 
 ```shell
 uv run pytest
+```
+
+### Frontend
+
+Change directory to `frontend/` using:
+
+```shell
+cd webui/
+```
+
+With [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed, run:
+
+```shell
+npm install
+```
+
+#### Development
+
+To run the frontend locally, run:
+
+```shell
+npm run dev
+```
+
+#### Build
+
+To build the frontend, run:
+
+```shell
+npm run build
+```
+
+#### Tests
+
+To run tests locally, run:
+
+```shell
+npm run test
 ```
 
 ## Deployment
