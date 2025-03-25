@@ -11,14 +11,96 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve all assessments */
-        get: operations["getAllAssessments"];
+        /**
+         * Retrieve a list of all assessments
+         * @description Retrieves all assessments that have been created in the system.
+         *     Useful for monitoring and managing multiple assessments in one place.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description List of all assessments */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            assessments?: components["schemas"]["Assessment"][];
+                            /** @description Token for pagination. If there are more assessments than can be returned in a single response,
+                             *     this token will allow you to retrieve the next set of results.
+                             *      */
+                            next_token?: string;
+                        };
+                    };
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         /**
-         * Start a new assessment
-         * @description Initiates a new assessment process for the specified role.
+         * Start a new assessment process
+         * @description Initiates a new assessment for a given role.
+         *     You can specify a role ARN for the assessment, or a default role will be used.
+         *
          */
-        post: operations["startAssessment"];
+        post: {
+            parameters: {
+                query: {
+                    /** @description Name of the assessment to be created */
+                    name: string;
+                    /** @description The role ARN to associate with the assessment.
+                     *     If not provided, a default role will be used.
+                     *      */
+                    roleArn?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The assessment has been successfully created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description The unique ID of the newly created assessment */
+                            assessmentId?: number;
+                        };
+                    };
+                };
+                /** @description Bad Request. Missing or invalid parameters were provided. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -32,26 +114,111 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve details of a specific assessment */
-        get: operations["getAssessment"];
+        /**
+         * Retrieve details of a specific assessment
+         * @description Retrieves detailed information about a specific assessment,
+         *     including associated findings, questions, and any current errors.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique ID of the assessment to retrieve */
+                    assessmentId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Detailed information about the specified assessment */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AssessmentContent"];
+                    };
+                };
+                /** @description The specified assessment could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
-        /** Delete an assessment */
+        /**
+         * Delete a specific assessment
+         * @description Deletes an assessment from the system.
+         *     Once deleted, the assessment cannot be recovered.
+         *
+         */
         delete: operations["deleteAssessment"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/best-practices/{bestPracticeName}": {
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Retrieve all findings for a specific best pratice */
-        get: operations["getAllFindingsByBestPractice"];
+        /**
+         * Retrieve all findings for a specific best practice
+         * @description Fetches all the findings associated with a specific best practice within a question in a given pillar for a specific assessment.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment */
+                    assessmentId: number;
+                    /** @description The ID of the pillar under which the question falls */
+                    pillarId: number;
+                    /** @description The ID of the question to retrieve the best practices to */
+                    questionId: number;
+                    /** @description The ID of the best practice to retrieve findings to */
+                    bestPracticeId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A list of findings related to the specified best practice */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BestPracticeExtra"];
+                    };
+                };
+                /** @description The specified best practice could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -60,7 +227,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/best-practices/{bestPracticeName}/{status}": {
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}": {
         parameters: {
             query?: never;
             header?: never;
@@ -68,8 +235,54 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Retrieve all findings for a specific best pratice */
-        put: operations["getAllFindingsByBestPractice2"];
+        /**
+         * Update the status of a specific best practice
+         * @description Updates the status of a best practice for a given question in the assessment
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment */
+                    assessmentId: number;
+                    /** @description The ID of the pillar under which the question falls */
+                    pillarId: number;
+                    /** @description The ID of the question to update the best practice to */
+                    questionId: number;
+                    /** @description The ID of the best practice to update the status to */
+                    bestPracticeId: string;
+                    /** @description The status to set for the best practice */
+                    status: boolean;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The status of the best practice was successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment, pillar, question, or best practice could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         post?: never;
         delete?: never;
         options?: never;
@@ -84,8 +297,51 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve the details of a specific finding */
-        get: operations["getFindingById"];
+        /**
+         * Retrieve the details of a specific finding
+         * @description Fetches detailed information about a specific finding related to an assessment,
+         *     including severity, status, and recommended remediation steps.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment to which the finding belongs */
+                    assessmentId: number;
+                    /** @description The unique ID of the finding to retrieve */
+                    findingId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Detailed information about the specified finding */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Finding"];
+                    };
+                };
+                /** @description The specified assessment or finding could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -99,91 +355,84 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         Assessment: {
-            /** @description Unique ID of the assessment */
+            /** @description Unique identifier of the assessment */
             id?: string;
-            /** @description Name of the assessment */
+            /** @description Name or title of the assessment */
             name?: string;
-            /** @description Role associated with the assessment */
-            role?: string;
-            /** @description Current step of the assessment */
-            step?: string;
-            error?: components["schemas"]["AssessmentError"];
-            /** @description The version of questions used */
-            question_version?: string;
-        };
-        AssessmentContent: {
-            /** @description Unique ID of the assessment */
-            id?: string;
-            /** @description Name of the assessment */
-            name?: string;
-            /** @description Role associated with the assessment */
+            /** @description Role ARN associated with the assessment */
             role_arn?: string;
+            /** @description ISO-formatted date when the assessment was created */
+            created_at?: string;
             /**
-             * @description Current step of the assessment
+             * @description Current step in the assessment process
              * @enum {string}
              */
             step?: "SCANNING_STARTED" | "PREPARING_PROMPTS" | "INVOKING_LLM" | "FINISHED" | "ERRORED";
-            /** @description The version of questions used */
-            question_version?: string | null;
-            /** @description JSONObject containing each pillar */
-            findings?: {
-                /** @description JSONObject containing questions for each pillar */
-                pillars?: {
-                    /** @description JSONObject containing best practices for each question */
-                    questions?: {
-                        best_practices?: components["schemas"]["BestPractice"];
-                    };
-                };
-            };
+            error?: components["schemas"]["AssessmentError"];
+            /** @description The version of questions that were used for the assessment */
+            question_version?: string;
         };
-        /** @description Present if an error has occurred during the process. */
+        AssessmentContent: components["schemas"]["Assessment"] & {
+            /** @description A list of findings associated with the assessment */
+            findings?: components["schemas"]["Pillar"][];
+        };
+        /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
             Error?: string;
             Cause?: string;
         } | null;
-        /** @description Finding definition */
+        /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
-            /** @description Finding id */
+            /** @description Unique identifier of the finding */
             id?: number;
-            /** @description Textual severity (e.g., Low, Medium, High) */
+            /** @description Severity level of the finding (e.g., Low, Medium, High) */
             severity?: string;
-            /** @description Short status code (e.g., PASS, FAIL) */
+            /** @description The status of the finding (e.g., MANUAL, FAIL) */
             status_code?: string;
-            /** @description Explanation for the status */
+            /** @description Explanation or additional details about the finding's status */
             status_detail?: string;
-            /** @description List of resources associated with the finding */
+            /** @description List of resources related to the finding */
             resources?: {
-                /** @description ARN or unique ID of the resource */
+                /** @description ARN or unique identifier of the resource */
                 uid?: string;
-                /** @description Resource name */
+                /** @description Name of the resource */
                 name?: string;
-                /** @description Simple resource type (e.g., Other, S3Bucket) */
+                /** @description Type of resource (e.g., S3Bucket) */
                 type?: string;
-                /** @description AWS region or other location */
+                /** @description The region or location of the resource */
                 region?: string;
             }[];
-            /** @description Recommended steps for remediation */
+            /** @description Remediation advice for resolving the issue found */
             remediation?: {
-                /** @description Textual remediation guidance */
+                /** @description Textual guidance on how to resolve the finding */
                 desc?: string;
-                /** @description List of URLs or CLI commands */
+                /** @description List of resources (URLs, CLI commands) for remediation */
                 references?: string[];
             };
-            /** @description Explanation of the security risk or reason for the finding */
+            /** @description Explanation of the risk associated with the finding */
             risk_details?: string;
         };
-        /** @description Best practice object */
+        Pillar: {
+            id?: string;
+            label?: string;
+            questions?: components["schemas"]["Question"][];
+        };
+        Question: {
+            id?: string;
+            label?: string;
+            best_practices?: components["schemas"]["BestPractice"][];
+        };
+        /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
+            id?: string;
+            label?: string;
             /** @enum {string} */
             risk?: "High" | "Medium" | "Low";
             status?: boolean;
             results?: string[];
         };
-        /** @description Best practice object with finding content */
-        BestPracticeExtra: {
-            /** @enum {string} */
-            risk?: "High" | "Medium" | "Low";
-            status?: boolean;
+        /** @description Enhanced best practice information, including associated findings */
+        BestPracticeExtra: components["schemas"]["BestPractice"] & {
             results?: components["schemas"]["Finding"][];
         };
     };
@@ -195,248 +444,33 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getAllAssessments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of all assessments */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        assessments?: components["schemas"]["Assessment"][];
-                        next_token?: string;
-                    };
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    startAssessment: {
-        parameters: {
-            query: {
-                /** @description Name of the assessment */
-                name: string;
-                /** @description Role for which to start the assessment \
-                 *     If not set a default role will be used
-                 *      */
-                roleArn?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Assessment successfully created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description The created assessment ID */
-                        assessmentId?: number;
-                    };
-                };
-            };
-            /** @description Missing or invalid parameters */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getAssessment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the assessment to retrieve */
-                assessmentId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Assessment details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssessmentContent"];
-                };
-            };
-            /** @description Assessment not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     deleteAssessment: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description The ID of the assessment to delete */
+                /** @description The unique ID of the assessment to delete */
                 assessmentId: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Assessment successfully deleted */
+            /** @description The assessment has been successfully deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Assessment not found */
+            /** @description The specified assessment could not be found */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getAllFindingsByBestPractice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the assessment */
-                assessmentId: number;
-                /** @description The name of the best practice */
-                bestPracticeName: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of finding for the specific best practice */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BestPracticeExtra"];
-                };
-            };
-            /** @description Best practice not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getAllFindingsByBestPractice2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the assessment */
-                assessmentId: number;
-                /** @description The name of the best practice */
-                bestPracticeName: string;
-                status: boolean;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of finding for the specific best practice */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BestPracticeExtra"];
-                };
-            };
-            /** @description Best practice not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getFindingById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the assessment */
-                assessmentId: number;
-                /** @description The ID of the finding */
-                findingId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Details of the finding */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Finding"];
-                };
-            };
-            /** @description Assessment or finding not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
+            /** @description Internal server error. */
             500: {
                 headers: {
                     [name: string]: unknown;
