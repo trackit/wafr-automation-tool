@@ -2,11 +2,10 @@ import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import { SnackbarProvider } from 'notistack';
 import { BrowserRouter } from 'react-router';
+import { Auth } from './app/auth';
 
 import { amplifyConfig } from './amplify.config';
 
@@ -22,9 +21,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <SnackbarProvider>
         <BrowserRouter>
-          <Authenticator hideSignUp loginMechanism={'email'}>
+          <Auth>
             <App />
-          </Authenticator>
+          </Auth>
         </BrowserRouter>
       </SnackbarProvider>
     </QueryClientProvider>

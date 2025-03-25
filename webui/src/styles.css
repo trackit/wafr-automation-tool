@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @plugin "daisyui" {
-  themes: light --default
+  themes: light --default;
 }
 @plugin "@tailwindcss/typography";
 
@@ -22,4 +22,10 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+}
+
+/* Reset font inheritance for buttons outside Amplify auth */
+:not([data-amplify-authenticator]) .btn {
+  font-size: revert;
+  line-height: revert;
 }

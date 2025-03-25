@@ -185,7 +185,7 @@ export function AssessmentDetails() {
         cell: (info) => {
           return (
             <div
-              className={`badge badge-soft badge-sm ${
+              className={`badge badge-soft badge-sm font-bold ${
                 info.row.original.risk === 'High'
                   ? 'badge-error'
                   : info.row.original.risk === 'Medium'
@@ -334,12 +334,15 @@ export function AssessmentDetails() {
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
           <h2 className="mt-0 mb-0">Assessment - {data?.name} </h2>
-          <div className="text-sm text-base-content/50 font-bold">
+          <div className="text-sm text-base-content/50 font-bold"></div>
+        </div>
+        <div className="flex flex-row gap-2">
+          <div className={'badge badge-info font-bold '}>
             Account:
             {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
           </div>
+          <StatusBadge status={data?.step || undefined} />
         </div>
-        <StatusBadge status={data?.step || undefined} />
       </div>
       <Tabs
         tabs={tabs}

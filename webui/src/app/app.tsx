@@ -10,7 +10,7 @@ export function App() {
       <div className="flex-1 flex flex-col overflow-hidden items-center">
         <Routes>
           <Route path="/" element={<AssessmentsList />} />
-          <Route path="/assessment/:id" element={<AssessmentDetails />} />
+          <Route path="/assessments/:id" element={<AssessmentDetails />} />
         </Routes>
       </div>
     </div>

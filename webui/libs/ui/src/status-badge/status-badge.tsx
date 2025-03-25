@@ -2,8 +2,10 @@ import { components } from '@webui/types';
 
 export function StatusBadge({
   status,
+  className,
 }: {
   status: components['schemas']['Assessment']['step'];
+  className?: string;
 }) {
   const statusMap = {
     SCANNING_STARTED: 'Scanning Started',
@@ -23,7 +25,9 @@ export function StatusBadge({
 
   if (!status) return null;
   return (
-    <div className={`badge font-bold badge-${statusColor[status]}`}>
+    <div
+      className={`badge font-bold badge-${statusColor[status]} ${className}`}
+    >
       {statusMap[status]}
     </div>
   );

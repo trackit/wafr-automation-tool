@@ -1,9 +1,13 @@
 // import { ThemeSwitcher } from '@webui/ui';
-
+import { useNavigate } from 'react-router';
 const Topbar = () => {
+  const navigate = useNavigate();
   return (
     <div className="w-full h-16 flex items-center justify-between py-2 border-b border-neutral-content">
-      <div className="flex items-center gap-2 ml-8 prose">
+      <div
+        className="flex items-center gap-2 ml-8 prose cursor-pointer"
+        onClick={() => navigate('/')}
+      >
         <svg
           className="fill-primary w-8 h-8 md:w-10 md:h-10"
           viewBox="0 0 53 38"

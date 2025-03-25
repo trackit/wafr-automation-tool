@@ -122,13 +122,13 @@ function FindingsDetails({
       </div>
     );
   return (
-    <div className="overflow-y-auto max-h-[90vh] flex flex-col">
+    <div className="overflow-y-auto max-h-[95vh] flex flex-col">
       <div className="flex flex-col gap-2  px-8 py-4 border-b border-base-content/30">
         <div className="flex flex-row gap-2 items-center">
           <h3 className="text-lg font-bold">{bestPractice.label}</h3>
           {data?.risk && (
             <div
-              className={`text-bold badge ${
+              className={`font-bold badge ${
                 data?.risk === 'High'
                   ? 'badge-error'
                   : data?.risk === 'Medium'
