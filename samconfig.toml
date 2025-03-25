@@ -43,5 +43,6 @@ capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
 parameter_overrides = [
   "Debug=true",
-  "Repository=https://github.com/trackit/wafr-automation-tool"
+  "Repository=https://github.com/trackit/wafr-automation-tool",
+  "InitialUserEmail=team@trackit.io",
 ]

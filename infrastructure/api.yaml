@@ -20,6 +20,8 @@ Parameters:
     Type: String
   DefaultAssessmentRole:
     Type: String
+  InitialUserEmail:
+    Type: String
 
 Globals:
   Function:
@@ -61,6 +63,18 @@ Resources:
           StringAttributeConstraints:
             MaxLength: 320
             MinLength: 3
+  UserPoolUser:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      DesiredDeliveryMediums:
+        - EMAIL
+      UserAttributes:
+        - Name: email
+          Value: !Ref InitialUserEmail
+        - Name: email_verified
+          Value: true
+      Username: !Ref InitialUserEmail
+      UserPoolId: !Ref UserPool
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:

@@ -20,6 +20,8 @@ Parameters:
       - "false"
   Repository:
     Type: String
+  InitialUserEmail:
+    Type: String
 
 Resources:
   SharedLibs:
@@ -46,6 +48,7 @@ Resources:
         DynamoDBArn: !GetAtt DynamoDB.Arn
         SharedLibsLayer: !Ref SharedLibs
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
+        InitialUserEmail: !Ref InitialUserEmail
   Network:
     Type: AWS::Serverless::Application
     Properties:
