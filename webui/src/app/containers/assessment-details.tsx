@@ -5,7 +5,7 @@ import { getAssessment, updateStatus } from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -331,6 +331,19 @@ export function AssessmentDetails() {
 
   const details = (
     <>
+      <div className="flex flex-row gap-2 justify-between">
+        <div className="prose mb-2 w-full flex flex-col gap-2">
+          <h2 className="mt-0 mb-0">Assessment {data?.name} </h2>
+          <div className="text-sm text-base-content/50 font-bold"></div>
+        </div>
+        <div className="flex flex-row gap-2">
+          <div className={'badge badge-info font-bold '}>
+            Account:
+            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
+          </div>
+          <StatusBadge status={data?.step || undefined} />
+        </div>
+      </div>
       <Tabs
         tabs={tabs}
         activeTab={selectedPillar?.id || ''}
@@ -392,41 +405,36 @@ export function AssessmentDetails() {
     </>
   );
 
-  if (
-    data?.step === 'SCANNING_STARTED' ||
-    data?.step === 'PREPARING_PROMPTS' ||
-    data?.step === 'INVOKING_LLM'
-  ) {
-    return (
-      <div className="flex items-center justify-center h-full flex-col prose">
-        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
-        <h2 className="text-center text-primary font-light mt-4">
-          {data?.step === 'SCANNING_STARTED'
-            ? 'Scanning your account...'
-            : data?.step === 'PREPARING_PROMPTS'
-            ? 'Preparing prompts...'
-            : 'Invoking LLMs...'}
-        </h2>
-      </div>
-    );
-  }
+  const loading = (
+    <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
+      <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+      <h2 className="text-center text-primary font-light mt-4">
+        {data?.step === 'SCANNING_STARTED'
+          ? 'Scanning your account...'
+          : data?.step === 'PREPARING_PROMPTS'
+          ? 'Preparing prompts...'
+          : 'Invoking LLMs...'}
+      </h2>
+    </div>
+  );
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="container py-8 overflow-auto flex-1 flex flex-col relative">
-      <div className="flex flex-row gap-2 justify-between">
-        <div className="prose mb-2 w-full flex flex-col gap-2">
-          <h2 className="mt-0 mb-0">Assessment - {data?.name} </h2>
-          <div className="text-sm text-base-content/50 font-bold"></div>
-        </div>
-        <div className="flex flex-row gap-2">
-          <div className={'badge badge-info font-bold '}>
-            Account:
-            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
-          </div>
-          <StatusBadge status={data?.step || undefined} />
-        </div>
+    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
+      <div className="breadcrumbs text-sm">
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>Assessment {data?.name}</li>
+        </ul>
       </div>
+
+      {data?.step === 'SCANNING_STARTED' ||
+      data?.step === 'PREPARING_PROMPTS' ||
+      data?.step === 'INVOKING_LLM'
+        ? loading
+        : null}
       {data?.step === 'FINISHED' ? details : null}
       {data?.step === 'ERRORED' ? (
         <div className="flex items-center justify-center h-full">
