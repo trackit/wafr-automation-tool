@@ -76,7 +76,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, assessment_id: str) -> bool:
+    def delete(self, assessment_id: str) -> None:
         raise NotImplementedError
 
 
@@ -225,8 +225,8 @@ class AssessmentService(IAssessmentService):
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override
-    def delete(self, assessment_id: str) -> bool:
-        return not self.database_service.delete(
+    def delete(self, assessment_id: str) -> None:
+        self.database_service.delete(
             table_name=DDB_TABLE,
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
         )

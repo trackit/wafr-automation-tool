@@ -130,10 +130,8 @@ paths:
           schema:
             type: integer
       responses:
-        "204":
+        "200":
           description: The assessment has been successfully deleted
-        "404":
-          description: The specified assessment could not be found
         "500":
           description: Internal server error.
 
