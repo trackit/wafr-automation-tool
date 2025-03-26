@@ -2,6 +2,12 @@
 @plugin "daisyui" {
   themes: light --default;
 }
+@plugin "daisyui/theme" {
+  name: 'light';
+  default: true;
+  --color-primary: #047aff;
+  --color-primary-content: #ffffff;
+}
 @plugin "@tailwindcss/typography";
 
 /* You can add global styles to this file, and also import other style files */
