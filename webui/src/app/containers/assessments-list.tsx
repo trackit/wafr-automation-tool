@@ -95,7 +95,7 @@ function AssessmentsList() {
                 sm:w-[calc(50%-0.5rem)]
                 md:w-[calc(33.333%-0.667rem)]
                 lg:w-[calc(25%-0.75rem)]
-                hover:shadow-md hover:shadow-primary/20 hover:bg-primary/2
+                hover:shadow-md hover:shadow-primary/20 hover:bg-primary/4
                 transition-all duration-300
                 cursor-pointer
               `}
