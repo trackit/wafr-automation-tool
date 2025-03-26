@@ -217,8 +217,11 @@ class DDBService(IDatabaseService):
         keys: list[dict[str, TableAttributeValueTypeDef]],
     ) -> list[dict[str, TableAttributeValueTypeDef]]:
         try:
-            response = self.resource.batch_get_item(RequestItems={table_name: {"Keys": keys}})
-            items = response["Responses"].get(table_name, [])
+            split_keys = [keys[i : i + 100] for i in range(0, len(keys), 100)]
+            items = []
+            for split_key in split_keys:
+                response = self.resource.batch_get_item(RequestItems={table_name: {"Keys": split_key}})
+                items.extend(response["Responses"].get(table_name, []))
         except ClientError as e:
             logger.exception("Error while bulk getting items from DynamoDB")
             raise DynamoDBError from e
