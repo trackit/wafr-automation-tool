@@ -4,6 +4,7 @@ import { StatusBadge } from '@webui/ui';
 import { Server, Calendar, Search } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
+import NewAssessmentDialog from './new-assessment-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -27,9 +28,7 @@ function AssessmentsList() {
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
       <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
         <h2 className="mt-0 mb-0">Assessments</h2>
-        <button className="btn btn-primary btn-sm text-sm h-8 min-h-8">
-          New Assessment
-        </button>
+        <NewAssessmentDialog />
       </div>
       <div className="flex flex-row gap-4">
         <label className="input w-full">
@@ -94,19 +93,21 @@ function AssessmentsList() {
           ))
         )}
       </div>
-      <div className="flex flex-row gap-4 justify-center">
-        <button
-          className="btn btn-accent btn-soft text-sm"
-          onClick={() => fetchNextPage()}
-          disabled={!hasNextPage || isFetchingNextPage}
-        >
-          {isFetchingNextPage
-            ? 'Loading more...'
-            : hasNextPage
-            ? 'Load More'
-            : 'Nothing more to load'}
-        </button>
-      </div>
+      {!isLoading && hasNextPage && (
+        <div className="flex flex-row gap-4 justify-center">
+          <button
+            className="btn btn-accent btn-soft text-sm"
+            onClick={() => fetchNextPage()}
+            disabled={!hasNextPage || isFetchingNextPage}
+          >
+            {isFetchingNextPage
+              ? 'Loading more...'
+              : hasNextPage
+              ? 'Load More'
+              : 'Nothing more to load'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

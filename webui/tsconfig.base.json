@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@webui/api-client": ["libs/api-client/src/index.ts"],
+      "@webui/forms": ["libs/forms/src/index.ts"],
       "@webui/types": ["libs/types/src/index.ts"],
       "@webui/ui": ["libs/ui/src/index.ts"]
     },

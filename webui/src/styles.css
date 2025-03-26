@@ -25,7 +25,8 @@
 }
 
 /* Reset font inheritance for buttons outside Amplify auth */
-:not([data-amplify-authenticator]) .btn {
+:not([data-amplify-authenticator]) .btn,
+:not([data-amplify-authenticator]) .input {
   font-size: revert;
   line-height: revert;
 }
