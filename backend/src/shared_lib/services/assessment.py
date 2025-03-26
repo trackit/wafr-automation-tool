@@ -104,12 +104,14 @@ class AssessmentService(IAssessmentService):
         for item in query_output.get("Items", []):
             assessment = self._create_assessment(item)
             assessments.append(assessment)
-        assessments.sort(key=lambda x: x.created_at, reverse=True)
         return PaginationOutput[Assessment](items=assessments, next_token=next_token)
 
     def _create_retrieve_all_query_input(self, pagination: Pagination) -> QueryInputTableQueryTypeDef:
         next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
-        query_input = QueryInputTableQueryTypeDef(KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK))
+        query_input = QueryInputTableQueryTypeDef(
+            KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+            ScanIndexForward=False,
+        )
         if pagination.limit:
             query_input["Limit"] = pagination.limit
         if pagination.filter:
