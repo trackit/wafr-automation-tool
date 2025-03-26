@@ -261,6 +261,7 @@ export function AssessmentDetails() {
   const { data, isLoading } = useQuery({
     queryKey: ['assessment', id],
     queryFn: () => (id ? getAssessment(id) : null),
+    refetchInterval: 30000,
   });
 
   // Set the first pillar as selected ONLY on initial load
@@ -328,22 +329,8 @@ export function AssessmentDetails() {
       </div>
     );
 
-  if (!id) return <div>No assessment ID found</div>;
-  return (
-    <div className="container py-8 overflow-auto flex-1 flex flex-col">
-      <div className="flex flex-row gap-2 justify-between">
-        <div className="prose mb-2 w-full flex flex-col gap-2">
-          <h2 className="mt-0 mb-0">Assessment - {data?.name} </h2>
-          <div className="text-sm text-base-content/50 font-bold"></div>
-        </div>
-        <div className="flex flex-row gap-2">
-          <div className={'badge badge-info font-bold '}>
-            Account:
-            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
-          </div>
-          <StatusBadge status={data?.step || undefined} />
-        </div>
-      </div>
+  const details = (
+    <>
       <Tabs
         tabs={tabs}
         activeTab={selectedPillar?.id || ''}
@@ -402,6 +389,58 @@ export function AssessmentDetails() {
           )}
         </div>
       </div>
+    </>
+  );
+
+  if (
+    data?.step === 'SCANNING_STARTED' ||
+    data?.step === 'PREPARING_PROMPTS' ||
+    data?.step === 'INVOKING_LLM'
+  ) {
+    return (
+      <div className="flex items-center justify-center h-full flex-col prose">
+        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+        <h2 className="text-center text-primary font-light mt-4">
+          {data?.step === 'SCANNING_STARTED'
+            ? 'Scanning your account...'
+            : data?.step === 'PREPARING_PROMPTS'
+            ? 'Preparing prompts...'
+            : 'Invoking LLMs...'}
+        </h2>
+      </div>
+    );
+  }
+
+  if (!id) return <div>No assessment ID found</div>;
+  return (
+    <div className="container py-8 overflow-auto flex-1 flex flex-col relative">
+      <div className="flex flex-row gap-2 justify-between">
+        <div className="prose mb-2 w-full flex flex-col gap-2">
+          <h2 className="mt-0 mb-0">Assessment - {data?.name} </h2>
+          <div className="text-sm text-base-content/50 font-bold"></div>
+        </div>
+        <div className="flex flex-row gap-2">
+          <div className={'badge badge-info font-bold '}>
+            Account:
+            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
+          </div>
+          <StatusBadge status={data?.step || undefined} />
+        </div>
+      </div>
+      {data?.step === 'FINISHED' ? details : null}
+      {data?.step === 'ERRORED' ? (
+        <div className="flex items-center justify-center h-full">
+          <h2 className="text-center text-error font-bold">
+            An error occurred while running the assessment. Please try again.
+          </h2>
+        </div>
+      ) : null}
+
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+        </div>
+      )}
       {bestPractice && (
         <Modal
           open={true}

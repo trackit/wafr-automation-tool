@@ -8,7 +8,7 @@ export function StatusBadge({
   className?: string;
 }) {
   const statusMap = {
-    SCANNING_STARTED: 'Scanning Started',
+    SCANNING_STARTED: 'Scan Started',
     PREPARING_PROMPTS: 'Preparing Prompts',
     INVOKING_LLM: 'Invoking LLM',
     FINISHED: 'Ready',

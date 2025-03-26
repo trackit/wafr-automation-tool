@@ -71,11 +71,14 @@ function AssessmentsList() {
               onClick={() => navigate(`/assessments/${assessment.id}`)}
             >
               <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-2 justify-between items-center mb-2">
+                <div className="flex flex-row justify-between items-start mb-2">
                   <div className="text-lg font-semibold text-primary">
                     {assessment.name}
                   </div>
-                  <StatusBadge status={assessment.step} className="badge-sm" />
+                  <StatusBadge
+                    status={assessment.step}
+                    className="badge-sm flex-shrink-0"
+                  />
                 </div>
                 <div className="text-sm text-base-content/80 flex flex-row gap-2">
                   <Server className="w-4 h-4" />
