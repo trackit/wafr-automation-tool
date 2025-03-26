@@ -193,12 +193,21 @@ class DDBService(IDatabaseService):
         **kwargs: Unpack[QueryInputTableQueryTypeDef],
     ) -> QueryOutputTableTypeDef:
         table = self.resource.Table(table_name)
+        items = []
+        limit = kwargs.get("Limit", 100)
         try:
             response = table.query(**kwargs)
+            items.extend(response["Items"])
+            while "LastEvaluatedKey" in response and len(items) < limit:
+                kwargs["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+                kwargs["Limit"] = limit - len(items)
+                response = table.query(**kwargs)
+                items.extend(response["Items"])
         except ClientError as e:
             logger.exception("Error while querying DynamoDB")
             raise DynamoDBError from e
         else:
+            response["Items"] = items
             return response
 
     @override
