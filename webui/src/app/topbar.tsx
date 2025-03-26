@@ -1,7 +1,28 @@
-// import { ThemeSwitcher } from '@webui/ui';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { signOut, getCurrentUser } from 'aws-amplify/auth';
+import { User, LogOut } from 'lucide-react';
+
 const Topbar = () => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState<string>('');
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((user) => {
+        setUsername(user.signInDetails?.loginId || '');
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  }, []);
+
   return (
     <div className="w-full h-16 flex items-center justify-between py-2 border-b border-neutral-content">
       <div
@@ -21,22 +42,23 @@ const Topbar = () => {
       <div className="flex items-center gap-4 mr-8">
         {/* <ThemeSwitcher /> */}
 
-        {/*<div className="dropdown dropdown-end">*/}
-        {/*  <button className="btn btn-link btn-sm text-black dark:text-white">*/}
-        {/*    <User className="w-4 h-4" />*/}
-        {/*    <span className="hidden md:block">{username}</span>*/}
-        {/*  </button>*/}
-        {/*  <ul*/}
-        {/*    tabIndex={0}*/}
-        {/*    className="dropdown-content z-[1] menu shadow bg-base-100 rounded-box shadow w-[130px]"*/}
-        {/*  >*/}
-        {/*    <li className="w-full">*/}
-        {/*      <button className="btn btn-link w-full" onClick={handleSignOut}>*/}
-        {/*        Sign out*/}
-        {/*      </button>*/}
-        {/*    </li>*/}
-        {/*  </ul>*/}
-        {/*</div>*/}
+        <div className="dropdown dropdown-end">
+          <button className="btn btn-link no-underline">
+            <User className="w-4 h-4" />
+            <span className="hidden md:block font-bold">{username}</span>
+          </button>
+          <ul
+            tabIndex={0}
+            className="dropdown-content z-[1] menu shadow bg-base-100 rounded-box shadow w-[130px]"
+          >
+            <li className="w-full">
+              <button className="btn btn-link w-full" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4" />
+                Sign out
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
