@@ -1,3 +1,4 @@
+export * from './confirmation-modal/confirmation-modal';
 export * from './status-badge/status-badge';
 export * from './modal/modal';
 export * from './best-practices-table/best-practice-table';

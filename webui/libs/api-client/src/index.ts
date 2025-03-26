@@ -3,3 +3,4 @@ export * from './lib/updateStatus';
 export * from './lib/getFindings';
 export * from './lib/getAssessments';
 export * from './lib/postAssessment';
+export * from './lib/deleteAssessment';
