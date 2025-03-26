@@ -102,7 +102,7 @@ function AssessmentsList() {
               key={`${assessment.id}-${Math.random()}`}
               onClick={() => navigate(`/assessments/${assessment.id}`)}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 justify-between h-full">
                 <div className="flex flex-row justify-between items-start mb-2 gap-1">
                   <div className="text-lg font-semibold text-primary">
                     {assessment.name}
@@ -146,16 +146,18 @@ function AssessmentsList() {
                     </div>
                   </div>
                 </div>
-                <div className="text-sm text-base-content/80 flex flex-row gap-2">
-                  <Server className="w-4 h-4" />
-                  Account: {extractAccountId(assessment.role_arn)}
-                </div>
-                <div className="text-sm text-base-content/80 flex flex-row gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Created:{' '}
-                  {assessment.created_at
-                    ? new Date(assessment.created_at).toLocaleDateString()
-                    : 'N/A'}
+                <div className="flex flex-col gap-1">
+                  <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+                    <Server className="w-4 h-4" />
+                    Account: {extractAccountId(assessment.role_arn)}
+                  </div>
+                  <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+                    <Calendar className="w-4 h-4" />
+                    Created:{' '}
+                    {assessment.created_at
+                      ? new Date(assessment.created_at).toLocaleDateString()
+                      : 'N/A'}
+                  </div>
                 </div>
               </div>
             </div>
