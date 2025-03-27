@@ -11,18 +11,38 @@ interface FindingsDetailsProps {
   questionId: string;
 }
 
+const highlightText = (text: string | undefined, searchQuery: string) => {
+  if (!text || !searchQuery) return text;
+  const regex = new RegExp(`(${searchQuery})`, 'gi');
+  const parts = text.split(regex);
+  return parts.map((part, i) => {
+    if (part.toLowerCase() === searchQuery.toLowerCase()) {
+      return (
+        <mark key={i} className="bg-yellow-200">
+          {part}
+        </mark>
+      );
+    }
+    return part;
+  });
+};
+
 function FindingItem({
   finding,
+  searchQuery,
 }: {
   finding: components['schemas']['Finding'];
+  searchQuery: string;
 }) {
   return (
     <div className="w-full  px-8 py-8">
-      <div className="text-md font-bold flex flex-row gap-2 items-center text-primary mb-2">
-        {finding.status_detail}
+      <div className="text-md font-bold text-primary mb-2">
+        {highlightText(finding.status_detail, searchQuery)}
       </div>
       {finding.risk_details && (
-        <p className="text-sm text-base-content/80">{finding.risk_details}</p>
+        <p className="text-sm text-base-content/80">
+          {highlightText(finding.risk_details, searchQuery)}
+        </p>
       )}
       {finding.resources?.map((resource) => (
         <div
@@ -31,11 +51,13 @@ function FindingItem({
         >
           <div className="text-sm text-base-content flex flex-row gap-2 items-center badge badge-soft badge-primary">
             <Server className="w-4 h-4" />
-            {resource.name || resource.uid}
+            <div>
+              {highlightText(resource.name || resource.uid, searchQuery)}
+            </div>
           </div>
           <div className="text-sm text-base-content flex flex-row gap-2 items-center badge badge-soft badge-primary">
             <Earth className="w-4 h-4" />
-            {resource.region}
+            <div>{highlightText(resource.region, searchQuery)}</div>
           </div>
         </div>
       ))}
@@ -44,7 +66,7 @@ function FindingItem({
           <Info className="w-6 h-6 text-info" />
           <div className="flex flex-col gap-2">
             <p className="text-sm text-base-content">
-              {finding.remediation.desc}
+              {highlightText(finding.remediation.desc, searchQuery)}
             </p>
             <div className="flex flex-row gap-2 items-center">
               {finding.remediation.references?.map((reference, index) => (
@@ -153,7 +175,11 @@ function FindingsDetails({
       </div>
       <div className="flex flex-col divide-y divide-base-content/30 overflow-y-auto">
         {filteredFindings.map((finding) => (
-          <FindingItem key={finding.id} finding={finding} />
+          <FindingItem
+            key={finding.id}
+            finding={finding}
+            searchQuery={searchQuery}
+          />
         ))}
         {filteredFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
