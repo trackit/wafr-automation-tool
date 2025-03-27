@@ -11,6 +11,28 @@ interface FindingsDetailsProps {
   questionId: string;
 }
 
+const SeverityBadge = ({
+  severity,
+  className,
+}: {
+  severity: 'High' | 'Medium' | 'Low';
+  className?: string;
+}) => {
+  return (
+    <div
+      className={`font-bold badge ${
+        severity === 'High'
+          ? 'badge-error'
+          : severity === 'Medium'
+          ? 'badge-warning'
+          : 'badge-info'
+      } ml-auto ${className}`}
+    >
+      {severity}
+    </div>
+  );
+};
+
 const highlightText = (text: string | undefined, searchQuery: string) => {
   if (!text || !searchQuery) return text;
   const regex = new RegExp(`(${searchQuery})`, 'gi');
@@ -37,6 +59,12 @@ function FindingItem({
   return (
     <div className="w-full  px-8 py-8">
       <div className="text-md font-bold text-primary mb-2">
+        {finding.severity && (
+          <SeverityBadge
+            className="badge-sm mr-2"
+            severity={finding.severity as 'High' | 'Medium' | 'Low'}
+          />
+        )}
         {highlightText(finding.status_detail, searchQuery)}
       </div>
       {finding.risk_details && (
@@ -148,19 +176,7 @@ function FindingsDetails({
       <div className="flex flex-col gap-2  px-8 py-4 border-b border-base-content/30">
         <div className="flex flex-row gap-2 items-center">
           <h3 className="text-lg font-bold">{bestPractice.label}</h3>
-          {data?.risk && (
-            <div
-              className={`font-bold badge ${
-                data?.risk === 'High'
-                  ? 'badge-error'
-                  : data?.risk === 'Medium'
-                  ? 'badge-warning'
-                  : 'badge-info'
-              } ml-auto`}
-            >
-              {data?.risk}
-            </div>
-          )}
+          {data?.risk && <SeverityBadge severity={data?.risk} />}
         </div>
         <label className="input w-full flex flex-row gap-2 items-center">
           <Search className="h-[1em] opacity-50" />
