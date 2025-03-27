@@ -260,10 +260,10 @@ paths:
     get:
       tags:
         - Findings
-      summary: Retrieve the details of a specific finding
+      summary: Update the visibility of a specific finding
       description: |
-        Fetches detailed information about a specific finding related to an assessment, 
-        including severity, status, and recommended remediation steps.
+        Updates the visibility of a finding.
+        The visibility can be set to `true` or `false`.
       parameters:
         - name: assessmentId
           in: path
