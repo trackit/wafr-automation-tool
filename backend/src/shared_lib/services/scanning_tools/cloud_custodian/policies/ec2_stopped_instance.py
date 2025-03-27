@@ -27,4 +27,5 @@ class EC2StoppedInstance(Policy):
                 "terminate the instance or ensure proper management of resources to prevent any potential security or "
                 "cost-related issues."
             ),
+            hidden=False,
         )

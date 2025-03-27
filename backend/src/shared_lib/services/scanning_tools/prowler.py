@@ -19,5 +19,5 @@ class ProwlerService(IScanningToolService):
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
         raw_findings = [DetectionFinding(**item) for item in loaded_content]
-        failed_findings = [item for item in raw_findings if item.status_code == "FAIL"]
+        failed_findings = [item.copy(update={"hidden": False}) for item in raw_findings if item.status_code == "FAIL"]
         return [FindingExtra(**item.dict(), id=str(i + 1)) for i, item in enumerate(failed_findings)]

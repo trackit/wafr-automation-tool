@@ -28,7 +28,7 @@ class RetrieveAllAssessments(
         return result
 
     def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
-        filter_expression = "begins_with(#name, :name) OR begins_with(#id, :id) OR begins_with(#role_arn, :role_arn)"
+        filter_expression = "contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)"
         attribute_name = {
             "#name": "name",
             "#id": "id",

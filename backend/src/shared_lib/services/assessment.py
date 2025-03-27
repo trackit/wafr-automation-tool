@@ -72,11 +72,20 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def update_finding(
+        self,
+        assessment: Assessment,
+        finding_id: str,
+        hide: bool,  # noqa: FBT001
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_findings(self, assessment_id: str) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, assessment_id: str) -> bool:
+    def delete(self, assessment_id: str) -> None:
         raise NotImplementedError
 
 
@@ -104,12 +113,14 @@ class AssessmentService(IAssessmentService):
         for item in query_output.get("Items", []):
             assessment = self._create_assessment(item)
             assessments.append(assessment)
-        assessments.sort(key=lambda x: x.created_at, reverse=True)
         return PaginationOutput[Assessment](items=assessments, next_token=next_token)
 
     def _create_retrieve_all_query_input(self, pagination: Pagination) -> QueryInputTableQueryTypeDef:
         next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
-        query_input = QueryInputTableQueryTypeDef(KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK))
+        query_input = QueryInputTableQueryTypeDef(
+            KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+            ScanIndexForward=False,
+        )
         if pagination.limit:
             query_input["Limit"] = pagination.limit
         if pagination.filter:
@@ -214,6 +225,25 @@ class AssessmentService(IAssessmentService):
         )
 
     @override
+    def update_finding(
+        self,
+        assessment: Assessment,
+        finding_id: str,
+        hide: bool,
+    ) -> None:
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
+            UpdateExpression="SET #hidden = :hidden",
+            ExpressionAttributeNames={
+                "#hidden": "hidden",
+            },
+            ExpressionAttributeValues={
+                ":hidden": hide,
+            },
+        )
+
+    @override
     def delete_findings(self, assessment_id: str) -> None:
         items = self.database_service.query_all(
             table_name=DDB_TABLE,
@@ -223,8 +253,8 @@ class AssessmentService(IAssessmentService):
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override
-    def delete(self, assessment_id: str) -> bool:
-        return not self.database_service.delete(
+    def delete(self, assessment_id: str) -> None:
+        self.database_service.delete(
             table_name=DDB_TABLE,
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
         )

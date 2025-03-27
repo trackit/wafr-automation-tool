@@ -173,6 +173,7 @@ def test_assessment_service_retrieve_all():
     fake_database_service.query.assert_called_once_with(
         table_name="test-table",
         KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+        ScanIndexForward=False,
         Limit=10,
     )
 
@@ -229,6 +230,7 @@ def test_assessment_service_retrieve_all_pagination():
     fake_database_service.query.assert_called_once_with(
         table_name="test-table",
         KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+        ScanIndexForward=False,
         Limit=10,
         FilterExpression="begins_with(#id, :id)",
         ExclusiveStartKey={"test": "test"},
@@ -276,31 +278,14 @@ def test_assessment_service_retrieve_best_practice():
     fake_database_service.bulk_get = MagicMock(
         return_value=[
             {
-                DDB_KEY: "ASSESSMENT",
+                DDB_KEY: "test-assessment-id",
                 DDB_SORT_KEY: "prowler:1",
-                "name": "test-assessment-name",
-                "role_arn": "test-assessment-role",
-                "step": Steps.FINISHED,
-                "created_at": "",
-                "question_version": "test-question-version",
-                "findings": {
-                    "pillar-1": {
-                        "label": "Pillar 1",
-                        "questions": {
-                            "question-1": {
-                                "label": "Question 1",
-                                "best_practices": {
-                                    "best-practice-1": {
-                                        "label": "Best Practice 1",
-                                        "risk": "Low",
-                                        "status": False,
-                                        "results": ["1", "2", "3"],
-                                    }
-                                },
-                            }
-                        },
-                    }
-                },
+                "status_code": "FAIL",
+                "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+                "severity": "Low",
+                "resources": [],
+                "remediation": None,
+                "hidden": False,
             }
         ]
     )
@@ -345,8 +330,12 @@ def test_assessment_service_retrieve_best_practice():
         results=[
             FindingExtra(
                 id="prowler:1",
-                status_code=None,
-                status_detail=None,
+                status_code="FAIL",
+                status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+                severity="Low",
+                resources=[],
+                remediation=None,
+                hidden=False,
             )
         ],
         risk="Low",
@@ -505,34 +494,14 @@ def test_assessment_service_retrieve_finding():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(
         return_value={
-            DDB_KEY: ASSESSMENT_PK,
+            DDB_KEY: "test-assessment-id",
             DDB_SORT_KEY: "prowler:1",
-            "name": "test-assessment-name",
-            "role_arn": "test-assessment-role",
-            "step": Steps.FINISHED,
-            "created_at": "",
-            "question_version": "test-question-version",
-            "findings": {
-                "pillar-1": {
-                    "id": "pillar-1",
-                    "label": "Pillar 1",
-                    "questions": {
-                        "question-1": {
-                            "id": "question-1",
-                            "label": "Question 1",
-                            "best_practices": {
-                                "best-practice-1": {
-                                    "id": "best-practice-1",
-                                    "label": "Best Practice 1",
-                                    "risk": "Low",
-                                    "status": False,
-                                    "results": ["1", "2", "3"],
-                                }
-                            },
-                        }
-                    },
-                }
-            },
+            "status_code": "FAIL",
+            "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+            "severity": "Low",
+            "resources": [],
+            "remediation": None,
+            "hidden": False,
         }
     )
 
@@ -541,8 +510,12 @@ def test_assessment_service_retrieve_finding():
 
     assert finding == FindingExtra(
         id="prowler:1",
-        status_code=None,
-        status_detail=None,
+        status_code="FAIL",
+        status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+        severity="Low",
+        resources=[],
+        remediation=None,
+        hidden=False,
     )
 
     fake_database_service.get.assert_called_once_with(
@@ -564,31 +537,14 @@ def test_assessment_service_retrieve_findings():
     fake_database_service.bulk_get = MagicMock(
         return_value=[
             {
-                DDB_KEY: ASSESSMENT_PK,
+                DDB_KEY: "test-assessment-id",
                 DDB_SORT_KEY: "prowler:1",
-                "name": "test-assessment-name",
-                "role_arn": "test-assessment-role",
-                "step": Steps.FINISHED,
-                "created_at": "",
-                "question_version": "test-question-version",
-                "findings": {
-                    "pillar-1": {
-                        "label": "Pillar 1",
-                        "questions": {
-                            "question-1": {
-                                "label": "Question 1",
-                                "best_practices": {
-                                    "best-practice-1": {
-                                        "label": "Best Practice 1",
-                                        "risk": "Low",
-                                        "status": False,
-                                        "results": ["1", "2", "3"],
-                                    }
-                                },
-                            }
-                        },
-                    }
-                },
+                "status_code": "FAIL",
+                "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+                "severity": "Low",
+                "resources": [],
+                "remediation": None,
+                "hidden": False,
             }
         ]
     )
@@ -599,8 +555,12 @@ def test_assessment_service_retrieve_findings():
     assert findings == [
         FindingExtra(
             id="prowler:1",
-            status_code=None,
-            status_detail=None,
+            status_code="FAIL",
+            status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+            severity="Low",
+            resources=[],
+            remediation=None,
+            hidden=False,
         )
     ]
 

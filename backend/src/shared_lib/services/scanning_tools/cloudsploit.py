@@ -22,6 +22,7 @@ class CloudSploitService(IScanningToolService):
             status_detail=finding.message,
             resources=resources,
             risk_details=finding.description,
+            hidden=False,
         )
 
     @override

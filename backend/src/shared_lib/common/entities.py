@@ -43,6 +43,7 @@ class FindingExtra(Finding):
     resources: list[FindingResource] | None = None
     remediation: FindingRemediation | None = None
     risk_details: str | None = None
+    hidden: bool = False
 
 
 class AnswerData(BaseModel):

@@ -23,6 +23,7 @@ def test_store_results():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
@@ -96,6 +97,7 @@ def test_store_results_with_no_finding():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
     database_service = FakeDatabaseService()
     database_service.update = MagicMock(return_value=None)
@@ -144,6 +146,7 @@ def test_store_results_with_invalid_questions():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
 
     storage_service = FakeStorageService()
@@ -174,6 +177,7 @@ def test_store_results_with_no_finding_data():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
@@ -237,6 +241,7 @@ def test_store_results_with_invalid_llm_response():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
 
     storage_service = FakeStorageService()

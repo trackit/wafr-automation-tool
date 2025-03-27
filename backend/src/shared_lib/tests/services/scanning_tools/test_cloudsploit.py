@@ -30,5 +30,6 @@ def test_cloudsploit_retrieve_findings():
             resources=[],
             remediation=None,
             risk_details="Ensure that IAM Access analyzer is enabled for all regions.",
+            hidden=False,
         ),
     ]

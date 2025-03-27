@@ -18,6 +18,7 @@ def test_retrieve_finding():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_finding = MagicMock(return_value=finding)
