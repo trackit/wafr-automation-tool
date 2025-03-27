@@ -256,6 +256,41 @@ paths:
         "500":
           description: Internal server error.
 
+  /assessments/{assessmentId}/findings/{findingId}/{hide}:
+    get:
+      tags:
+        - Findings
+      summary: Retrieve the details of a specific finding
+      description: |
+        Fetches detailed information about a specific finding related to an assessment, 
+        including severity, status, and recommended remediation steps.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: integer
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: integer
+        - name: hide
+          in: path
+          required: true
+          description: Whether to hide the finding or not
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: The finding's visibility status has been successfully updated
+        "404":
+          description: The specified assessment could not be found
+        "500":
+          description: Internal server error.
+
 components:
   schemas:
     Assessment:
@@ -323,6 +358,9 @@ components:
         status_detail:
           type: string
           description: Explanation or additional details about the finding's status
+        hidden:
+          type: boolean
+          description: Whether the finding is hidden or not
         resources:
           type: array
           description: List of resources related to the finding

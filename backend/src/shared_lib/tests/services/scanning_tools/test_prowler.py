@@ -44,5 +44,6 @@ def test_prowler_retrieve_findings():
                 ],
             ),
             risk_details="AWS IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, that are shared with an external entity. This lets you identify unintended access to your resources and data, which is a security risk. IAM Access Analyzer uses a form of mathematical analysis called automated reasoning, which applies logic and mathematical inference to determine all possible access paths allowed by a resource policy.",
+            hidden=False,
         )
     ]

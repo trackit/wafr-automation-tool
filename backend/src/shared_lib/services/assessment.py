@@ -72,6 +72,15 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def update_finding(
+        self,
+        assessment: Assessment,
+        finding_id: str,
+        hide: bool,  # noqa: FBT001
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_findings(self, assessment_id: str) -> None:
         raise NotImplementedError
 
@@ -212,6 +221,25 @@ class AssessmentService(IAssessmentService):
             },
             ExpressionAttributeValues={
                 ":status": status,
+            },
+        )
+
+    @override
+    def update_finding(
+        self,
+        assessment: Assessment,
+        finding_id: str,
+        hide: bool,
+    ) -> None:
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
+            UpdateExpression="SET #hidden = :hidden",
+            ExpressionAttributeNames={
+                "#hidden": "hidden",
+            },
+            ExpressionAttributeValues={
+                ":hidden": hide,
             },
         )
 

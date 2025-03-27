@@ -75,3 +75,9 @@ class UpdateBestPracticeStatusInput(BaseModel):
     question_id: str
     best_practice_id: str
     status: bool
+
+
+class UpdateFindingHideInput(BaseModel):
+    assessment_id: str
+    finding_id: str
+    hide: bool

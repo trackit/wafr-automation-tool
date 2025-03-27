@@ -317,6 +317,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
+  UpdateFindingHideFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/update_finding_hide/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdateBestPracticeStatus:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/findings/{findingId}/{hide}
+            Method: PUT
 
 Outputs:
   ApiEndpoint:

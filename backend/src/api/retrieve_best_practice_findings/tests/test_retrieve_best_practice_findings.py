@@ -30,6 +30,7 @@ def test_retrieve_best_practice_findings():
         resources=None,
         remediation=None,
         risk_details="Risk details",
+        hidden=False,
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
