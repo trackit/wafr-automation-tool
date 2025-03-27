@@ -244,14 +244,22 @@ export function AssessmentDetails() {
 
     // Iterate through each question in the pillar
     for (const question of questions) {
-      // Check if all best practices in this question have status true
-      const allBestPracticesComplete =
-        question.best_practices?.every(
-          (bestPractice) => bestPractice.status === true
-        ) ?? false;
+      // Check if the question has any high severity best practices
+      const hasHighSeverityPractices = question.best_practices?.some(
+        (bestPractice) => bestPractice.risk === 'High'
+      );
 
-      if (allBestPracticesComplete) {
-        completedCount++;
+      if (hasHighSeverityPractices) {
+        // Check if all high severity best practices in this question have status true
+        const allHighSeverityPracticesComplete =
+          question.best_practices?.every(
+            (bestPractice) =>
+              bestPractice.risk !== 'High' || bestPractice.status === true
+          ) ?? false;
+
+        if (allHighSeverityPracticesComplete) {
+          completedCount++;
+        }
       }
     }
 
@@ -362,7 +370,12 @@ export function AssessmentDetails() {
             onClick: () => setActiveQuestionIndex(index),
             completed:
               question.best_practices?.every(
-                (bestPractice) => bestPractice.status ?? false
+                (bestPractice) =>
+                  bestPractice.risk !== 'High' || bestPractice.status === true
+              ) ?? false,
+            started:
+              question.best_practices?.some(
+                (bestPractice) => bestPractice.status
               ) ?? false,
           }))}
         />
