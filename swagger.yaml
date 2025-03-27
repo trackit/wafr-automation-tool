@@ -257,7 +257,7 @@ paths:
           description: Internal server error.
 
   /assessments/{assessmentId}/findings/{findingId}/{hide}:
-    get:
+    put:
       tags:
         - Findings
       summary: Update the visibility of a specific finding
