@@ -35,6 +35,7 @@ def test_assessment_service_retrieve():
                                     "risk": "Low",
                                     "status": False,
                                     "results": ["1", "2", "3"],
+                                    "hidden_results": [],
                                 }
                             },
                         }
@@ -68,6 +69,7 @@ def test_assessment_service_retrieve():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         },
                     }
@@ -118,6 +120,7 @@ def test_assessment_service_retrieve_all():
                                             "risk": "Low",
                                             "status": False,
                                             "results": ["1", "2", "3"],
+                                            "hidden_results": [],
                                         }
                                     },
                                 }
@@ -159,6 +162,7 @@ def test_assessment_service_retrieve_all():
                                         "risk": "Low",
                                         "status": False,
                                         "results": ["1", "2", "3"],
+                                        "hidden_results": [],
                                     }
                                 },
                             }
@@ -206,6 +210,7 @@ def test_assessment_service_retrieve_all_pagination():
                                             "risk": "Low",
                                             "status": False,
                                             "results": ["1", "2", "3"],
+                                            "hidden_results": [],
                                         }
                                     },
                                 }
@@ -261,6 +266,7 @@ def test_assessment_service_retrieve_all_pagination():
                                         "risk": "Low",
                                         "status": False,
                                         "results": ["1", "2", "3"],
+                                        "hidden_results": [],
                                     }
                                 },
                             }
@@ -314,6 +320,7 @@ def test_assessment_service_retrieve_best_practice():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         },
                     }
@@ -436,6 +443,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         },
                     }
@@ -472,6 +480,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
                                 "risk": "Low",
                                 "status": False,
                                 "results": [],
+                                "hidden_results": [],
                             }
                         },
                     }
@@ -619,6 +628,7 @@ def test_assessment_service_update_best_practice():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         },
                     }

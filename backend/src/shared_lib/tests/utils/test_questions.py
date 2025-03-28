@@ -39,6 +39,7 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                     "risk": "Low",
                     "status": False,
                     "results": [],
+                    "hidden_results": [],
                 },
                 "best-practice-2": {
                     "id": "best-practice-2",
@@ -46,6 +47,7 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                     "risk": "Medium",
                     "status": False,
                     "results": [],
+                    "hidden_results": [],
                 },
             }
         },
@@ -57,6 +59,7 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                     "risk": "High",
                     "status": False,
                     "results": [],
+                    "hidden_results": [],
                 },
             }
         },
@@ -106,6 +109,7 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                             "risk": "Low",
                             "status": False,
                             "results": [],
+                            "hidden_results": [],
                         },
                         "1": {
                             "id": "1",
@@ -113,6 +117,7 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                             "risk": "Medium",
                             "status": False,
                             "results": [],
+                            "hidden_results": [],
                         },
                     },
                 }
@@ -132,6 +137,7 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                             "risk": "High",
                             "status": False,
                             "results": [],
+                            "hidden_results": [],
                         },
                     },
                 }
