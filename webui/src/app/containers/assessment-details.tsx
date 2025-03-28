@@ -345,10 +345,6 @@ export function AssessmentDetails() {
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2">
-          <div className={'badge badge-info badge-soft font-bold '}>
-            Account:
-            {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
-          </div>
           <StatusBadge status={data?.step || undefined} />
         </div>
       </div>
