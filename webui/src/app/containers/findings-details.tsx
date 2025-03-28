@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Server, Earth, Search, Info, FileCheck } from 'lucide-react';
 import { getFindings, hideFinding } from '@webui/api-client';
 import { components } from '@webui/types';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -144,6 +144,14 @@ function FindingsDetails({
   const [showHidden, setShowHidden] = useState(false);
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const findingsListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (findingsListRef.current) {
+      findingsListRef.current.scrollTop = 0;
+    }
+  }, [searchQuery]);
+
   const { data, isLoading } = useQuery<
     components['schemas']['BestPracticeExtra']
   >({
@@ -314,7 +322,10 @@ function FindingsDetails({
           />
         </label>
       </div>
-      <div className="flex flex-col divide-y divide-base-content/30 overflow-y-auto">
+      <div
+        ref={findingsListRef}
+        className="flex flex-col divide-y divide-base-content/30 overflow-y-auto"
+      >
         {filteredFindings.map((finding) => (
           <FindingItem
             key={finding.id}
