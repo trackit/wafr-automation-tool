@@ -81,7 +81,7 @@ export function AssessmentDetails() {
       // Update the cache with our optimistic value
       queryClient.setQueryData(['assessment', id], newData);
 
-      // Update local state optimistically
+      // Update local state optimistically if we're viewing the updated pillar/question
       if (
         selectedPillar?.id === pillarId &&
         activeQuestion?.id === questionId
@@ -104,13 +104,18 @@ export function AssessmentDetails() {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
         queryClient.setQueryData(['assessment', id], context.previousData);
-        // Also roll back local state
-        if (data?.findings) {
-          const pillar = data.findings[selectedPillarIndex];
+
+        // Find the current pillar and question in the previous data
+        if (context.previousData.findings) {
+          const pillar = context.previousData.findings.find(
+            (p) => p.id === selectedPillar?.id
+          );
           if (pillar) {
-            setSelectedPillar(pillar);
-            if (pillar.questions && pillar.questions[activeQuestionIndex]) {
-              setActiveQuestion(pillar.questions[activeQuestionIndex]);
+            const question = pillar.questions?.find(
+              (q) => q.id === activeQuestion?.id
+            );
+            if (question) {
+              setActiveQuestion(question);
             }
           }
         }
@@ -122,6 +127,63 @@ export function AssessmentDetails() {
       queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
+
+  // Add effect to update active question when pillar changes
+  useEffect(() => {
+    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
+      // If current question is not in the new pillar, reset to first question
+      if (!selectedPillar.questions.find((q) => q.id === activeQuestion?.id)) {
+        setActiveQuestionIndex(0);
+        setActiveQuestion(selectedPillar.questions[0]);
+      }
+    }
+  }, [selectedPillar, activeQuestion?.id]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['assessment', id],
+    queryFn: () => (id ? getAssessment(id) : null),
+    refetchInterval: 30000,
+  });
+
+  // Add effect to sync active question with cache
+  useEffect(() => {
+    console.log('effect');
+    if (data?.findings && selectedPillar?.id && activeQuestion?.id) {
+      const pillar = data.findings.find((p) => p.id === selectedPillar.id);
+      if (pillar) {
+        const question = pillar.questions?.find(
+          (q) => q.id === activeQuestion.id
+        );
+        if (question) {
+          setActiveQuestion(question);
+        }
+      }
+    }
+  }, [data, selectedPillar?.id, activeQuestion?.id]);
+
+  // Set the first pillar as selected ONLY on initial load
+  useEffect(() => {
+    if (
+      data?.findings &&
+      data.findings.length > 0 &&
+      selectedPillarIndex === 0
+    ) {
+      setSelectedPillar(data.findings[0]);
+    }
+  }, [data?.findings, selectedPillarIndex]);
+
+  // Set question from the selected indices
+  useEffect(() => {
+    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
+      // Set initial question index if not already set or if it's out of bounds
+      if (activeQuestionIndex >= selectedPillar.questions.length) {
+        setActiveQuestionIndex(0);
+      }
+
+      // Update active question based on current index
+      setActiveQuestion(selectedPillar.questions[activeQuestionIndex]);
+    }
+  }, [selectedPillar, activeQuestionIndex]);
 
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, status: boolean) => {
@@ -266,36 +328,6 @@ export function AssessmentDetails() {
     return completedCount;
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['assessment', id],
-    queryFn: () => (id ? getAssessment(id) : null),
-    refetchInterval: 30000,
-  });
-
-  // Set the first pillar as selected ONLY on initial load
-  useEffect(() => {
-    if (
-      data?.findings &&
-      data.findings.length > 0 &&
-      selectedPillarIndex === 0
-    ) {
-      setSelectedPillar(data.findings[0]);
-    }
-  }, [data?.findings, selectedPillarIndex]);
-
-  // Set question from the selected indices
-  useEffect(() => {
-    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
-      // Set initial question index if not already set or if it's out of bounds
-      if (activeQuestionIndex >= selectedPillar.questions.length) {
-        setActiveQuestionIndex(0);
-      }
-
-      // Update active question based on current index
-      setActiveQuestion(selectedPillar.questions[activeQuestionIndex]);
-    }
-  }, [selectedPillar, activeQuestionIndex]);
-
   const handleNextQuestion = () => {
     if (!selectedPillar?.questions) return;
     const questions = selectedPillar.questions;
@@ -360,21 +392,29 @@ export function AssessmentDetails() {
       />
       <div className="flex-1 flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         <VerticalMenu
-          items={(selectedPillar?.questions || []).map((question, index) => ({
-            text: question.label || '',
-            id: question.id || `question-${index}`,
-            active: activeQuestionIndex === index,
-            onClick: () => setActiveQuestionIndex(index),
-            completed:
-              question.best_practices?.every(
-                (bestPractice) =>
-                  bestPractice.risk !== 'High' || bestPractice.status === true
-              ) ?? false,
-            started:
-              question.best_practices?.some(
-                (bestPractice) => bestPractice.status
-              ) ?? false,
-          }))}
+          items={(selectedPillar?.questions || []).map((question, index) => {
+            // Find the latest question data from the cache
+            const latestQuestion =
+              data?.findings
+                ?.find((p) => p.id === selectedPillar?.id)
+                ?.questions?.find((q) => q.id === question.id) || question;
+
+            return {
+              text: question.label || '',
+              id: question.id || `question-${index}`,
+              active: activeQuestionIndex === index,
+              onClick: () => setActiveQuestionIndex(index),
+              completed:
+                latestQuestion.best_practices?.every(
+                  (bestPractice) =>
+                    bestPractice.risk !== 'High' || bestPractice.status === true
+                ) ?? false,
+              started:
+                latestQuestion.best_practices?.some(
+                  (bestPractice) => bestPractice.status
+                ) ?? false,
+            };
+          })}
         />
         <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
           <div className="bg-base-100 p-4 rounded-lg">
