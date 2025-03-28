@@ -355,6 +355,7 @@ export function AssessmentDetails() {
           const index = data?.findings?.findIndex((p) => p.id === tabId) ?? 0;
           setSelectedPillarIndex(index);
           setSelectedPillar(data?.findings?.[index] || null);
+          setActiveQuestionIndex(0);
         }}
       />
       <div className="flex-1 flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
