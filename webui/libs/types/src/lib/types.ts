@@ -357,6 +357,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/findings/{findingId}/{hide}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the visibility of a specific finding
+         * @description Updates the visibility of a finding.
+         *     The visibility can be set to `true` or `false`.
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment to which the finding belongs */
+                    assessmentId: number;
+                    /** @description The unique ID of the finding to retrieve */
+                    findingId: number;
+                    /** @description Whether to hide the finding or not */
+                    hide: boolean;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The finding's visibility status has been successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -398,6 +458,8 @@ export interface components {
             status_code?: string;
             /** @description Explanation or additional details about the finding's status */
             status_detail?: string;
+            /** @description Whether the finding is hidden or not */
+            hidden?: boolean;
             /** @description List of resources related to the finding */
             resources?: {
                 /** @description ARN or unique identifier of the resource */
@@ -434,7 +496,7 @@ export interface components {
             id?: string;
             label?: string;
             /** @enum {string} */
-            risk?: "High" | "Medium" | "Low";
+            risk?: "Critical" | "High" | "Medium" | "Low";
             status?: boolean;
             results?: string[];
         };
@@ -464,14 +526,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description The assessment has been successfully deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The specified assessment could not be found */
-            404: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

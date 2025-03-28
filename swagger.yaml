@@ -135,8 +135,8 @@ paths:
         "500":
           description: Internal server error.
 
-  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
-  : get:
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}:
+    get:
       tags:
         - Best Practices
       summary: Retrieve all findings for a specific best practice
@@ -177,8 +177,8 @@ paths:
         "404":
           description: The specified best practice could not be found
 
-  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}
-  : put:
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}:
+    put:
       tags:
         - Best Practices
       summary: Update the status of a specific best practice
@@ -432,6 +432,7 @@ components:
         risk:
           type: string
           enum:
+            - "Critical"
             - "High"
             - "Medium"
             - "Low"

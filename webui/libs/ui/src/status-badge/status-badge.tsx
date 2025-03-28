@@ -26,7 +26,7 @@ export function StatusBadge({
   if (!status) return null;
   return (
     <div
-      className={`badge font-bold badge-${statusColor[status]} ${className}`}
+      className={`badge font-bold badge-soft badge-${statusColor[status]} ${className}`}
     >
       {statusMap[status]}
     </div>

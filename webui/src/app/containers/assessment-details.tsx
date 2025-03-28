@@ -345,7 +345,7 @@ export function AssessmentDetails() {
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2">
-          <div className={'badge badge-info font-bold '}>
+          <div className={'badge badge-info badge-soft font-bold '}>
             Account:
             {data?.role_arn && <>{extractAccountId(data?.role_arn)}</>}
           </div>
@@ -466,7 +466,7 @@ export function AssessmentDetails() {
         <Modal
           open={true}
           onClose={() => setBestPractice(null)}
-          className="w-full max-w-5xl"
+          className="w-full max-w-6xl"
           notCentered
         >
           <FindingsDetails

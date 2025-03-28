@@ -4,3 +4,4 @@ export * from './lib/getFindings';
 export * from './lib/getAssessments';
 export * from './lib/postAssessment';
 export * from './lib/deleteAssessment';
+export * from './lib/hideFinding';
