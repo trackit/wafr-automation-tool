@@ -76,6 +76,7 @@ Pillar = dict[str, Question]
 class FormattedQuestion(TypedDict):
     id: str
     label: str
+    resolve: bool
     best_practices: dict[str, BestPractice]
 
 
@@ -88,6 +89,7 @@ class FormattedPillar(TypedDict):
 class APIFormattedQuestion(TypedDict):
     id: str
     label: str
+    resolve: bool
     best_practices: list[BestPractice]
 
 

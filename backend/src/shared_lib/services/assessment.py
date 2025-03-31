@@ -61,6 +61,16 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def update_question(
+        self,
+        assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        resolve: bool,  # noqa: FBT001
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def update_best_practice(
         self,
         assessment: Assessment,
@@ -201,6 +211,27 @@ class AssessmentService(IAssessmentService):
         attrs = assessment_dto.model_dump(exclude_none=True)
         self.database_service.update_attrs(
             table_name=DDB_TABLE, key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id}, attrs=attrs
+        )
+
+    @override
+    def update_question(
+        self,
+        assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        resolve: bool,
+    ) -> None:
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            UpdateExpression="SET findings.#pillar.questions.#question.resolve = :resolve",
+            ExpressionAttributeNames={
+                "#pillar": pillar_id,
+                "#question": question_id,
+            },
+            ExpressionAttributeValues={
+                ":resolve": resolve,
+            },
         )
 
     @override

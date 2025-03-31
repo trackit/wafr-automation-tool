@@ -282,6 +282,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
+  UpdateQuestionResolveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/update_question_resolve/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdateQuestionResolve:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}
+            Method: PUT
   RetrieveBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:

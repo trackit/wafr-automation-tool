@@ -28,6 +28,7 @@ def test_assessment_service_retrieve():
                         "question-1": {
                             "id": "question-1",
                             "label": "Question 1",
+                            "resolve": False,
                             "best_practices": {
                                 "best-practice-1": {
                                     "id": "best-practice-1",
@@ -62,6 +63,7 @@ def test_assessment_service_retrieve():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -113,6 +115,7 @@ def test_assessment_service_retrieve_all():
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
+                                    "resolve": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -155,6 +158,7 @@ def test_assessment_service_retrieve_all():
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
+                                "resolve": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -203,6 +207,7 @@ def test_assessment_service_retrieve_all_pagination():
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
+                                    "resolve": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -259,6 +264,7 @@ def test_assessment_service_retrieve_all_pagination():
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
+                                "resolve": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -313,6 +319,7 @@ def test_assessment_service_retrieve_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -408,6 +415,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {},
                     }
                 },
@@ -436,6 +444,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -473,6 +482,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -621,6 +631,7 @@ def test_assessment_service_update_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -672,6 +683,7 @@ def test_assessment_service_delete_findings():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",

@@ -26,6 +26,7 @@ def test_delete_assessment():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",

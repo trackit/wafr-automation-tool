@@ -34,7 +34,9 @@ def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
                     results=[],
                     hidden_results=[],
                 )
-            question = FormattedQuestion(id=str(question_index), label=question_name, best_practices=best_practices)
+            question = FormattedQuestion(
+                id=str(question_index), label=question_name, best_practices=best_practices, resolve=False
+            )
             questions[str(question_index)] = question
         pillar = FormattedPillar(id=str(pillar_index), label=pillar_name, questions=questions)
         pillars[str(pillar_index)] = pillar

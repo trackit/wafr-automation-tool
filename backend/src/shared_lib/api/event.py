@@ -81,6 +81,13 @@ class UpdateBestPracticeStatusInput(BaseModel):
     status: bool
 
 
+class UpdateQuestionResolveInput(BaseModel):
+    assessment_id: str
+    pillar_id: str
+    question_id: str
+    resolve: bool
+
+
 class UpdateFindingHideInput(BaseModel):
     assessment_id: str
     pillar_id: str
