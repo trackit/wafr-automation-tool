@@ -5,7 +5,7 @@ import AssessmentsList from './containers/assessments-list';
 
 export function App() {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen w-full flex flex-col">
       <Topbar />
       <div className="flex-1 flex flex-col overflow-hidden items-center">
         <Routes>
