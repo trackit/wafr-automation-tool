@@ -9,7 +9,7 @@ export function StatusBadge({
 }) {
   const statusMap = {
     SCANNING_STARTED: 'Scan Started',
-    PREPARING_PROMPTS: 'Preparing Prompts',
+    PREPARING_PROMPTS: 'Preparing',
     INVOKING_LLM: 'Invoking LLM',
     FINISHED: 'Ready',
     ERRORED: 'Errored',

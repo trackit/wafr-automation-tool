@@ -94,7 +94,8 @@ function AssessmentsList() {
                 w-full
                 sm:w-[calc(50%-0.5rem)]
                 md:w-[calc(33.333%-0.667rem)]
-                lg:w-[calc(25%-0.75rem)]
+                lg:w-[calc(33.333%-0.667rem)]
+                xl:w-[calc(25%-0.75rem)]
                 hover:shadow-md hover:shadow-primary/20 hover:bg-primary/4
                 transition-all duration-300
                 cursor-pointer
@@ -104,10 +105,10 @@ function AssessmentsList() {
             >
               <div className="flex flex-col gap-2 justify-between h-full">
                 <div className="flex flex-row justify-between items-start mb-2 gap-1">
-                  <div className="text-lg font-semibold text-primary">
+                  <div className="lg:text-lg md:text-base text-sm font-semibold text-primary">
                     {assessment.name}
                   </div>
-                  <div className="flex flex-row items-center gap-1">
+                  <div className="flex flex-row items-center gap-1 flex-1 flex-grow">
                     <StatusBadge
                       status={assessment.step}
                       className="badge-sm flex-shrink-0"
