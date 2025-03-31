@@ -32,6 +32,7 @@ def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
                     risk=best_practice_data["risk"],
                     status=False,
                     results=[],
+                    hidden_results=[],
                 )
             question = FormattedQuestion(id=str(question_index), label=question_name, best_practices=best_practices)
             questions[str(question_index)] = question
@@ -62,5 +63,6 @@ def retrieve_questions() -> QuestionSet:
                         "risk": question[best_practice_name]["risk"],
                         "status": False,
                         "results": [],
+                        "hidden_results": [],
                     }
     return QuestionSet(data=questions, version=question_version)

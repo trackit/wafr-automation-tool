@@ -72,12 +72,15 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def update_finding(
+    def update_finding(  # noqa: PLR0913
         self,
         assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
         finding_id: str,
         hide: bool,  # noqa: FBT001
-    ) -> None:
+    ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -228,9 +231,12 @@ class AssessmentService(IAssessmentService):
     def update_finding(
         self,
         assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        best_practice_id: str,
         finding_id: str,
         hide: bool,
-    ) -> None:
+    ) -> bool:
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
@@ -242,6 +248,26 @@ class AssessmentService(IAssessmentService):
                 ":hidden": hide,
             },
         )
+        if not assessment.findings:
+            return False
+        pillar = assessment.findings.get(pillar_id)
+        if not pillar:
+            return False
+        question = pillar.get("questions").get(question_id)
+        if not question:
+            return False
+        best_practice = question.get("best_practices").get(best_practice_id)
+        if not best_practice:
+            return False
+        if hide:
+            if finding_id in best_practice["hidden_results"]:
+                return True
+            best_practice["hidden_results"].append(finding_id)
+        else:
+            best_practice["hidden_results"].remove(finding_id)
+        assessment_dto = AssessmentDto(findings=assessment.findings)
+        self.update(assessment.id, assessment_dto)
+        return True
 
     @override
     def delete_findings(self, assessment_id: str) -> None:

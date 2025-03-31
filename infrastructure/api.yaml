@@ -336,7 +336,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}/{hide}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}
             Method: PUT
 
 Outputs:

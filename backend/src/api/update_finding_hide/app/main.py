@@ -1,4 +1,3 @@
-import urllib.parse
 from typing import Any
 
 import boto3
@@ -18,7 +17,10 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
     response = task.execute(
         UpdateFindingHideInput(
             assessment_id=event["pathParameters"]["assessmentId"],
-            finding_id=urllib.parse.unquote(event["pathParameters"]["findingId"]),
+            pillar_id=event["pathParameters"]["pillarId"],
+            question_id=event["pathParameters"]["questionId"],
+            best_practice_id=event["pathParameters"]["bestPracticeId"],
+            finding_id=event["pathParameters"]["findingId"],
             hide=event["pathParameters"]["hide"],
         ),
     )

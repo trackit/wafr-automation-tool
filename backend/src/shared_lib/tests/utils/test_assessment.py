@@ -26,6 +26,7 @@ def test_convert_assessment_to_api_assessment():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         },
                     }
@@ -57,6 +58,7 @@ def test_convert_assessment_to_api_assessment():
                                 "risk": "Low",
                                 "status": False,
                                 "results": ["1", "2", "3"],
+                                "hidden_results": [],
                             }
                         ],
                     }

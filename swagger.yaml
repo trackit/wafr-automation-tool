@@ -208,7 +208,7 @@ paths:
           required: true
           description: The ID of the best practice to update the status to
           schema:
-            type: string
+            type: integer
         - name: status
           in: path
           required: true
@@ -220,6 +220,59 @@ paths:
           description: The status of the best practice was successfully updated
         "404":
           description: The specified assessment, pillar, question, or best practice could not be found
+        "500":
+          description: Internal server error.
+
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}:
+    put:
+      tags:
+        - Best Practices
+      summary: Update the visibility of a specific finding
+      description: |
+        Updates the visibility of a finding.
+        The visibility can be set to `true` or `false`.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: integer
+        - name: pillarId
+          in: path
+          required: true
+          description: The ID of the pillar under which the question falls
+          schema:
+            type: integer
+        - name: questionId
+          in: path
+          required: true
+          description: The ID of the question to update the best practice to
+          schema:
+            type: integer
+        - name: bestPracticeId
+          in: path
+          required: true
+          description: The ID of the best practice to update the status to
+          schema:
+            type: integer
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+        - name: hide
+          in: path
+          required: true
+          description: Whether to hide the finding or not
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: The finding's visibility status has been successfully updated
+        "404":
+          description: The specified assessment could not be found
         "500":
           description: Internal server error.
 
@@ -243,7 +296,7 @@ paths:
           required: true
           description: The unique ID of the finding to retrieve
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Detailed information about the specified finding
@@ -253,41 +306,6 @@ paths:
                 $ref: "#/components/schemas/Finding"
         "404":
           description: The specified assessment or finding could not be found
-        "500":
-          description: Internal server error.
-
-  /assessments/{assessmentId}/findings/{findingId}/{hide}:
-    put:
-      tags:
-        - Findings
-      summary: Update the visibility of a specific finding
-      description: |
-        Updates the visibility of a finding.
-        The visibility can be set to `true` or `false`.
-      parameters:
-        - name: assessmentId
-          in: path
-          required: true
-          description: The ID of the assessment to which the finding belongs
-          schema:
-            type: integer
-        - name: findingId
-          in: path
-          required: true
-          description: The unique ID of the finding to retrieve
-          schema:
-            type: integer
-        - name: hide
-          in: path
-          required: true
-          description: Whether to hide the finding or not
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: The finding's visibility status has been successfully updated
-        "404":
-          description: The specified assessment could not be found
         "500":
           description: Internal server error.
 
@@ -439,6 +457,10 @@ components:
         status:
           type: boolean
         results:
+          type: array
+          items:
+            type: string
+        hidden_results:
           type: array
           items:
             type: string

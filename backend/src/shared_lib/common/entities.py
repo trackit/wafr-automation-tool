@@ -58,6 +58,7 @@ class BestPractice(TypedDict):
     risk: str
     status: bool
     results: list[str]
+    hidden_results: list[str]
 
 
 class BestPracticeExtra(APIResponseBody):
