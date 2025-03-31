@@ -1,4 +1,4 @@
-from http.client import OK
+from http.client import NOT_FOUND, OK
 from typing import override
 
 from common.task import Task
@@ -15,8 +15,11 @@ class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
+        assessment = self.assessment_service.retrieve(event.assessment_id)
+        if not assessment:
+            return APIResponse(status_code=NOT_FOUND, body=None)
+        self.assessment_service.delete_findings(assessment)
         self.assessment_service.delete(event.assessment_id)
-        self.assessment_service.delete_findings(event.assessment_id)
         return APIResponse(
             status_code=OK,
             body=None,

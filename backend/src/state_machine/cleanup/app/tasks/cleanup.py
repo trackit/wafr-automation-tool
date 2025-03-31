@@ -58,7 +58,10 @@ class Cleanup(Task[CleanupInput, None]):
         if not DEBUG:
             self.clean_prowler_scan(event)
             self.clean_assessment_storage(event)
+        assessment = self.assessment_service.retrieve(event.assessment_id)
+        if not assessment:
+            return
         if event.error:
             if not DEBUG:
-                self.assessment_service.delete_findings(event.assessment_id)
+                self.assessment_service.delete_findings(assessment)
             self.update_assessment_item(event)

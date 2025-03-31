@@ -143,6 +143,7 @@ Resources:
                 - dynamodb:DeleteItem
                 - dynamodb:Query
                 - dynamodb:BatchWriteItem
+                - dynamodb:GetItem
               Resource:
                 - !Ref DynamoDBArn
             - Effect: Allow

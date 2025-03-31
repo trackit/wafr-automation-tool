@@ -84,7 +84,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def delete_findings(self, assessment_id: str) -> None:
+    def delete_findings(self, assessment: Assessment) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -270,12 +270,15 @@ class AssessmentService(IAssessmentService):
         return True
 
     @override
-    def delete_findings(self, assessment_id: str) -> None:
-        items = self.database_service.query_all(
-            table_name=DDB_TABLE,
-            KeyConditionExpression=Key(DDB_KEY).eq(assessment_id),
-        )
-        keys = [{DDB_KEY: item[DDB_KEY], DDB_SORT_KEY: item[DDB_SORT_KEY]} for item in items]
+    def delete_findings(self, assessment: Assessment) -> None:
+        items: list[str] = []
+        if not assessment.findings:
+            return
+        for pillar in assessment.findings.values():
+            for question in pillar.get("questions", {}).values():
+                for best_practice in question.get("best_practices", {}).values():
+                    items.extend(best_practice.get("results", []))
+        keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override

@@ -33,6 +33,10 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
     pass
 
 
+class RescanAssessmentInput(BaseModel):
+    assessment_id: str
+
+
 class RetrieveBestPracticeFindingsInput(BaseModel):
     assessment_id: str
     pillar_id: str
