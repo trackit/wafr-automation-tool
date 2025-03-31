@@ -3,6 +3,7 @@ import { Server, Earth, Search, Info, FileCheck } from 'lucide-react';
 import { getFindings, hideFinding } from '@webui/api-client';
 import { components } from '@webui/types';
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -59,7 +60,7 @@ function FindingItem({
   onHide: (findingId: string, hidden: boolean) => void;
 }) {
   return (
-    <div className="w-full  px-8 py-8">
+    <div className="w-full px-8 py-8 border-b border-base-content/30">
       <div className="flex flex-row gap-2 items-start">
         <div className="text-md font-bold mb-2">
           {finding.severity && (
@@ -287,6 +288,14 @@ function FindingsDetails({
     },
   });
 
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filteredFindings.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 150,
+    overscan: 5,
+  });
+
   console.log(showHidden);
 
   if (isLoading)
@@ -296,8 +305,8 @@ function FindingsDetails({
       </div>
     );
   return (
-    <div className="overflow-y-auto max-h-[95vh] flex flex-col">
-      <div className="flex flex-col gap-2  px-8 py-4 border-b border-base-content/30">
+    <div className="flex flex-col h-[95vh]">
+      <div className="flex flex-col gap-2 px-8 py-4 border-b border-base-content/30">
         <div className="flex flex-row gap-2 items-center">
           <h3 className="text-lg font-bold">{bestPractice.label}</h3>
           <label className="fieldset-label text-sm ml-auto text-base-content">
@@ -322,18 +331,35 @@ function FindingsDetails({
           />
         </label>
       </div>
-      <div
-        ref={findingsListRef}
-        className="flex flex-col divide-y divide-base-content/30 overflow-y-auto"
-      >
-        {filteredFindings.map((finding) => (
-          <FindingItem
-            key={finding.id}
-            finding={finding}
-            searchQuery={searchQuery}
-            onHide={(findingId, hidden) => mutate({ findingId, hidden })}
-          />
-        ))}
+      <div ref={parentRef} className="flex-1 overflow-auto">
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={rowVirtualizer.measureElement}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              <FindingItem
+                finding={filteredFindings[virtualRow.index]}
+                searchQuery={searchQuery}
+                onHide={(findingId, hidden) => mutate({ findingId, hidden })}
+              />
+            </div>
+          ))}
+        </div>
         {filteredFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
             <p className="text-sm text-base-content/80">

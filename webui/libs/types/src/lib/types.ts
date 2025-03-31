@@ -259,7 +259,7 @@ export interface paths {
                     /** @description The ID of the question to update the best practice to */
                     questionId: number;
                     /** @description The ID of the best practice to update the status to */
-                    bestPracticeId: string;
+                    bestPracticeId: number;
                     /** @description The status to set for the best practice */
                     status: boolean;
                 };
@@ -275,6 +275,72 @@ export interface paths {
                     content?: never;
                 };
                 /** @description The specified assessment, pillar, question, or best practice could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the visibility of a specific finding
+         * @description Updates the visibility of a finding.
+         *     The visibility can be set to `true` or `false`.
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment to which the finding belongs */
+                    assessmentId: number;
+                    /** @description The ID of the pillar under which the question falls */
+                    pillarId: number;
+                    /** @description The ID of the question to update the best practice to */
+                    questionId: number;
+                    /** @description The ID of the best practice to update the status to */
+                    bestPracticeId: number;
+                    /** @description The unique ID of the finding to retrieve */
+                    findingId: string;
+                    /** @description Whether to hide the finding or not */
+                    hide: boolean;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The finding's visibility status has been successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment could not be found */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -318,7 +384,7 @@ export interface paths {
                     /** @description The ID of the assessment to which the finding belongs */
                     assessmentId: number;
                     /** @description The unique ID of the finding to retrieve */
-                    findingId: number;
+                    findingId: string;
                 };
                 cookie?: never;
             };
@@ -350,66 +416,6 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/assessments/{assessmentId}/findings/{findingId}/{hide}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update the visibility of a specific finding
-         * @description Updates the visibility of a finding.
-         *     The visibility can be set to `true` or `false`.
-         *
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment to which the finding belongs */
-                    assessmentId: number;
-                    /** @description The unique ID of the finding to retrieve */
-                    findingId: number;
-                    /** @description Whether to hide the finding or not */
-                    hide: boolean;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The finding's visibility status has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
         post?: never;
         delete?: never;
         options?: never;
@@ -499,6 +505,7 @@ export interface components {
             risk?: "Critical" | "High" | "Medium" | "Low";
             status?: boolean;
             results?: string[];
+            hidden_results?: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
