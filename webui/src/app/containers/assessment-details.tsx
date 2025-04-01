@@ -1,7 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Tabs, VerticalMenu, DataTable, Modal, StatusBadge } from '@webui/ui';
-import { getAssessment, updateStatus } from '@webui/api-client';
+import {
+  getAssessment,
+  updateStatus,
+  resolveQuestion,
+} from '@webui/api-client';
 import { components } from '@webui/types';
 import { ArrowRight } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -128,6 +132,37 @@ export function AssessmentDetails() {
     },
   });
 
+  const resolveQuestionMutation = useMutation({
+    mutationFn: ({
+      assessmentId,
+      pillarId,
+      questionId,
+      resolve,
+    }: {
+      assessmentId: string;
+      pillarId: string;
+      questionId: string;
+      resolve: boolean;
+    }) => resolveQuestion({ assessmentId, pillarId, questionId, resolve }),
+    onMutate: async ({ pillarId, questionId, resolve }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['assessment', id],
+      });
+    },
+  });
+
+  const handleResolveQuestion = useCallback(
+    (questionId: string, resolve: boolean) => {
+      resolveQuestionMutation.mutate({
+        assessmentId: id || '',
+        pillarId: selectedPillar?.id || '',
+        questionId,
+        resolve,
+      });
+    },
+    [id, selectedPillar?.id, resolveQuestionMutation]
+  );
+
   // Add effect to update active question when pillar changes
   useEffect(() => {
     if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
@@ -210,16 +245,27 @@ export function AssessmentDetails() {
           <div className="flex items-center justify-center">
             <input
               type="checkbox"
-              className={`checkbox checkbox-sm ${
-                info.row.original.status
-                  ? 'checkbox-success'
-                  : 'checkbox-primary'
-              }`}
-              checked={info.row.original.status || false}
-              readOnly
-              onChange={(e) =>
-                handleUpdateStatus(info.row.original.id || '', e.target.checked)
+              className={`checkbox checkbox-sm checkbox-primary`}
+              checked={
+                activeQuestion?.resolve || info.row.original.status || false
               }
+              disabled={
+                activeQuestion?.resolve && info.row.original.id !== 'resolve'
+              }
+              readOnly
+              onChange={(e) => {
+                if (info.row.original.id === 'resolve') {
+                  handleResolveQuestion(
+                    activeQuestion?.id || '',
+                    e.target.checked
+                  );
+                } else {
+                  handleUpdateStatus(
+                    info.row.original.id || '',
+                    e.target.checked
+                  );
+                }
+              }}
             />
           </div>
         ),
@@ -233,6 +279,19 @@ export function AssessmentDetails() {
             Best Practice
           </button>
         ),
+        cell: (info) => {
+          return (
+            <div
+              className={`${
+                activeQuestion?.resolve && info.row.original.id !== 'resolve'
+                  ? 'line-through text-base-content/50'
+                  : ''
+              }`}
+            >
+              {info.row.original.label}
+            </div>
+          );
+        },
       }),
       columnHelper.accessor('risk', {
         header: ({ column }) => (
@@ -279,25 +338,18 @@ export function AssessmentDetails() {
                     setBestPractice(info.row.original);
                   }}
                 >
-                  {info.row.original.results?.length || 0}
+                  {info.row.original.results?.length || '0'}
                 </button>
               ) : (
-                <div className="text-base-content/50 text-center">0</div>
+                <div className="text-base-content/50 text-center">-</div>
               )}
             </div>
           );
         },
       }),
     ],
-    [columnHelper, handleUpdateStatus]
+    [columnHelper, handleUpdateStatus, activeQuestion?.resolve]
   );
-
-  // Helper function to extract AWS account ID from role ARN
-  const extractAccountId = (roleArn: string | undefined) => {
-    if (!roleArn) return '';
-    const match = roleArn.match(/arn:aws:iam::(\d+):/);
-    return match ? match[1] : '';
-  };
 
   // Helper function to calculate completed questions count
   const calculateCompletedQuestions = (questions: Question[]) => {
@@ -341,10 +393,19 @@ export function AssessmentDetails() {
 
   const tableData = useMemo(() => {
     if (!activeQuestion?.best_practices) return [];
-    return activeQuestion.best_practices.map((practice) => ({
+    const res = activeQuestion.best_practices.map((practice) => ({
       ...practice,
       name: practice.id || '',
     }));
+    res.push({
+      id: 'resolve',
+      label: 'None of the above',
+      risk: undefined,
+      status: activeQuestion?.resolve || false,
+      results: undefined,
+      name: 'resolve',
+    });
+    return res;
   }, [activeQuestion]);
 
   const tabs = useMemo(() => {
@@ -407,10 +468,13 @@ export function AssessmentDetails() {
               active: activeQuestionIndex === index,
               onClick: () => setActiveQuestionIndex(index),
               completed:
-                latestQuestion.best_practices?.every(
-                  (bestPractice) =>
-                    bestPractice.risk !== 'High' || bestPractice.status === true
-                ) ?? false,
+                (latestQuestion.resolve ||
+                  latestQuestion.best_practices?.every(
+                    (bestPractice) =>
+                      bestPractice.risk !== 'High' ||
+                      bestPractice.status === true
+                  )) ??
+                false,
               started:
                 latestQuestion.best_practices?.some(
                   (bestPractice) => bestPractice.status

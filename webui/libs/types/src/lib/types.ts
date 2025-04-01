@@ -627,6 +627,7 @@ export interface components {
         Question: {
             id?: string;
             label?: string;
+            resolve?: boolean;
             best_practices?: components["schemas"]["BestPractice"][];
         };
         /** @description A best practice related to a question and pillar in the assessment */

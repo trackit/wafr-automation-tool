@@ -513,6 +513,8 @@ components:
           type: string
         label:
           type: string
+        resolve:
+          type: boolean
         best_practices:
           type: array
           items:
