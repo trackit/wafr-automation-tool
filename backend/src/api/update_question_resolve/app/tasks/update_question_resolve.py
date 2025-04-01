@@ -5,21 +5,23 @@ from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.event import DeleteAssessmentInput
+from api.event import UpdateQuestionResolveInput
 
 
-class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
+class UpdateQuestionResolve(Task[UpdateQuestionResolveInput, APIResponse[None]]):
     def __init__(self, assessment_service: IAssessmentService) -> None:
         super().__init__()
         self.assessment_service = assessment_service
 
     @override
-    def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
+    def execute(self, event: UpdateQuestionResolveInput) -> APIResponse[None]:
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
-            return APIResponse(status_code=NOT_FOUND, body=None)
-        self.assessment_service.delete_findings(assessment)
-        self.assessment_service.delete(event.assessment_id)
+            return APIResponse(
+                status_code=NOT_FOUND,
+                body=None,
+            )
+        self.assessment_service.update_question(assessment, event.pillar_id, event.question_id, event.resolve)
         return APIResponse(
             status_code=OK,
             body=None,

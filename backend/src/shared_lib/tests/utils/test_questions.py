@@ -102,6 +102,7 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                 "0": {
                     "id": "0",
                     "label": "question-1",
+                    "resolve": False,
                     "best_practices": {
                         "0": {
                             "id": "0",
@@ -130,6 +131,7 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                 "0": {
                     "id": "0",
                     "label": "question-2",
+                    "resolve": False,
                     "best_practices": {
                         "0": {
                             "id": "0",

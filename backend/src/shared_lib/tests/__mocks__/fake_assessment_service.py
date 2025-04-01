@@ -32,7 +32,7 @@ class FakeAssessmentService(IAssessmentService):
         raise NotImplementedError
 
     @override
-    def delete_findings(self, assessment_id: str) -> None:
+    def delete_findings(self, assessment: Assessment) -> None:
         raise NotImplementedError
 
     @override

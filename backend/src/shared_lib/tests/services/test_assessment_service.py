@@ -28,6 +28,7 @@ def test_assessment_service_retrieve():
                         "question-1": {
                             "id": "question-1",
                             "label": "Question 1",
+                            "resolve": False,
                             "best_practices": {
                                 "best-practice-1": {
                                     "id": "best-practice-1",
@@ -62,6 +63,7 @@ def test_assessment_service_retrieve():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -113,6 +115,7 @@ def test_assessment_service_retrieve_all():
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
+                                    "resolve": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -155,6 +158,7 @@ def test_assessment_service_retrieve_all():
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
+                                "resolve": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -203,6 +207,7 @@ def test_assessment_service_retrieve_all_pagination():
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
+                                    "resolve": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -259,6 +264,7 @@ def test_assessment_service_retrieve_all_pagination():
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
+                                "resolve": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -313,6 +319,7 @@ def test_assessment_service_retrieve_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -408,6 +415,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {},
                     }
                 },
@@ -436,6 +444,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -473,6 +482,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -621,6 +631,7 @@ def test_assessment_service_update_best_practice():
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
+                        "resolve": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -657,37 +668,45 @@ def test_assessment_service_update_best_practice():
 
 def test_assessment_service_delete_findings():
     fake_database_service = FakeDatabaseService()
-    fake_database_service.query_all = MagicMock(
-        return_value=[
-            {
-                DDB_KEY: ASSESSMENT_PK,
-                DDB_SORT_KEY: "prowler:1",
-                "name": "test-assessment-name",
-                "role_arn": "test-assessment-role",
-                "step": Steps.FINISHED,
-                "created_at": "",
-                "question_version": "test-question-version",
-                "findings": {
-                    "pillar-1": {
-                        "question-1": {"best-practice-1": {"risk": "Low", "status": False, "results": ["1", "2", "3"]}}
+    assessment = Assessment(
+        id="test-assessment-id",
+        name="test-assessment-name",
+        role_arn="test-assessment-role",
+        step=Steps.FINISHED,
+        created_at="",
+        question_version="test-question-version",
+        findings={
+            "pillar-1": {
+                "id": "pillar-1",
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "id": "question-1",
+                        "label": "Question 1",
+                        "resolve": False,
+                        "best_practices": {
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["prowler:1"],
+                                "hidden_results": [],
+                            }
+                        },
                     }
                 },
             }
-        ],
+        },
     )
     fake_database_service.bulk_delete = MagicMock()
 
     assessment_service = AssessmentService(database_service=fake_database_service)
 
-    assert not assessment_service.delete_findings("test-assessment-id")
-
-    fake_database_service.query_all.assert_called_once_with(
-        table_name="test-table",
-        KeyConditionExpression=Key(DDB_KEY).eq("test-assessment-id"),
-    )
+    assert not assessment_service.delete_findings(assessment)
 
     fake_database_service.bulk_delete.assert_called_once_with(
-        table_name="test-table", keys=[{"PK": "ASSESSMENT", "SK": "prowler:1"}]
+        table_name="test-table", keys=[{"PK": "test-assessment-id", "SK": "prowler:1"}]
     )
 
 

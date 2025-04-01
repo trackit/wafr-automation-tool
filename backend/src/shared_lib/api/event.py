@@ -33,6 +33,10 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
     pass
 
 
+class RescanAssessmentInput(BaseModel):
+    assessment_id: str
+
+
 class RetrieveBestPracticeFindingsInput(BaseModel):
     assessment_id: str
     pillar_id: str
@@ -75,6 +79,13 @@ class UpdateBestPracticeStatusInput(BaseModel):
     question_id: str
     best_practice_id: str
     status: bool
+
+
+class UpdateQuestionResolveInput(BaseModel):
+    assessment_id: str
+    pillar_id: str
+    question_id: str
+    resolve: bool
 
 
 class UpdateFindingHideInput(BaseModel):

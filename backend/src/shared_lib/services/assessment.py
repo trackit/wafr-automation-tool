@@ -61,6 +61,16 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
+    def update_question(
+        self,
+        assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        resolve: bool,  # noqa: FBT001
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def update_best_practice(
         self,
         assessment: Assessment,
@@ -84,7 +94,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def delete_findings(self, assessment_id: str) -> None:
+    def delete_findings(self, assessment: Assessment) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -204,6 +214,27 @@ class AssessmentService(IAssessmentService):
         )
 
     @override
+    def update_question(
+        self,
+        assessment: Assessment,
+        pillar_id: str,
+        question_id: str,
+        resolve: bool,
+    ) -> None:
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            UpdateExpression="SET findings.#pillar.questions.#question.resolve = :resolve",
+            ExpressionAttributeNames={
+                "#pillar": pillar_id,
+                "#question": question_id,
+            },
+            ExpressionAttributeValues={
+                ":resolve": resolve,
+            },
+        )
+
+    @override
     def update_best_practice(
         self,
         assessment: Assessment,
@@ -270,12 +301,15 @@ class AssessmentService(IAssessmentService):
         return True
 
     @override
-    def delete_findings(self, assessment_id: str) -> None:
-        items = self.database_service.query_all(
-            table_name=DDB_TABLE,
-            KeyConditionExpression=Key(DDB_KEY).eq(assessment_id),
-        )
-        keys = [{DDB_KEY: item[DDB_KEY], DDB_SORT_KEY: item[DDB_SORT_KEY]} for item in items]
+    def delete_findings(self, assessment: Assessment) -> None:
+        items: list[str] = []
+        if not assessment.findings:
+            return
+        for pillar in assessment.findings.values():
+            for question in pillar.get("questions", {}).values():
+                for best_practice in question.get("best_practices", {}).values():
+                    items.extend(best_practice.get("results", []))
+        keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override

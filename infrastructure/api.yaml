@@ -146,6 +146,7 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: !Ref Name
+
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -249,11 +250,58 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        UpdateAssessment:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
+            Method: PUT
+  RescanAssessmentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/rescan_assessment/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+                - dynamodb:GetItem
+                - dynamodb:BatchWriteItem
+                - dynamodb:Query
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource: !Ref StateMachineArn
+      Events:
+        RescanAssessment:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}
+            Method: POST
+  UpdateQuestionResolveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/update_question_resolve/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdateQuestionResolve:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}
             Method: PUT
   RetrieveBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
@@ -332,7 +380,7 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateBestPracticeStatus:
+        UpdateFindingHide:
           Type: Api
           Properties:
             RestApiId: !Ref Api

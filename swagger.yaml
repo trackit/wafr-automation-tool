@@ -113,13 +113,50 @@ paths:
           description: The specified assessment could not be found
         "500":
           description: Internal server error.
-
+    put:
+      tags:
+        - Assessments
+      summary: Update the details of a specific assessment
+      description: |
+        Updates the details of a specific assessment, such as the name or role ARN.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to update
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: The assessment has been successfully updated
+        "500":
+          description: Invalid request body
+    post:
+      tags:
+        - Assessments
+      summary: Rescan an assessment
+      description: |
+        Rescans an assessment, updating the findings and best practices.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to rescan
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: The assessment has been successfully rescanned
+        "404":
+          description: The specified assessment could not be found
+        "500":
+          description: Internal server error.
     delete:
       tags:
         - Assessments
       summary: Delete a specific assessment
       description: |
-        Deletes an assessment from the system. 
+        Deletes an assessment from the system.
         Once deleted, the assessment cannot be recovered.
       operationId: deleteAssessment
       parameters:
@@ -132,6 +169,48 @@ paths:
       responses:
         "200":
           description: The assessment has been successfully deleted
+        "404":
+          description: The specified assessment could not be found
+        "500":
+          description: Internal server error.
+
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}:
+    put:
+      tags:
+        - Questions
+      summary: Update the resolve status of a specific question
+      description: |
+        Updates the resolve status of a specific question in a given pillar for a specific assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment
+          schema:
+            type: integer
+        - name: pillarId
+          in: path
+          required: true
+          description: The ID of the pillar under which the question falls
+          schema:
+            type: integer
+        - name: questionId
+          in: path
+          required: true
+          description: The ID of the question to update the resolve status for
+          schema:
+            type: integer
+        - name: resolve
+          in: path
+          required: true
+          description: The status to set for the question
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: The resolve status of the question has been successfully updated
+        "404":
+          description: The specified assessment, pillar, or question could not be found
         "500":
           description: Internal server error.
 
