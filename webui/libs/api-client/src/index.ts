@@ -6,3 +6,4 @@ export * from './lib/postAssessment';
 export * from './lib/deleteAssessment';
 export * from './lib/hideFinding';
 export * from './lib/resolveQuestion';
+export * from './lib/rescanAssessment';

@@ -22,11 +22,11 @@ export function ConfirmationModal({
       <div className="flex flex-col gap-2 prose max-w-none p-6">
         <h3>{title}</h3>
         <p>{message}</p>
-        <div className="flex flex-row gap-2 justify-end">
-          <button className="btn btn-outline flex-1" onClick={onCancel}>
+        <div className="flex flex-row gap-8 justify-end">
+          <button className="btn btn-outline flex-1 btn-sm" onClick={onCancel}>
             Cancel
           </button>
-          <button className="btn btn-primary flex-1" onClick={onConfirm}>
+          <button className="btn btn-primary flex-1 btn-sm" onClick={onConfirm}>
             Confirm
           </button>
         </div>

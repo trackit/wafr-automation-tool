@@ -1,15 +1,23 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tabs, VerticalMenu, DataTable, Modal, StatusBadge } from '@webui/ui';
+import {
+  Tabs,
+  VerticalMenu,
+  DataTable,
+  Modal,
+  StatusBadge,
+  ConfirmationModal,
+} from '@webui/ui';
 import {
   getAssessment,
   updateStatus,
   resolveQuestion,
+  rescanAssessment,
 } from '@webui/api-client';
 import { components } from '@webui/types';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, RefreshCw, EllipsisVertical } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -19,12 +27,20 @@ type TableRow = BestPractice & { name: string };
 
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
   const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
   const { id } = useParams();
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['assessment', id],
+    queryFn: () => (id ? getAssessment(id) : null),
+    refetchInterval: 30000,
+  });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -223,6 +239,19 @@ export function AssessmentDetails() {
     },
   });
 
+  const rescanAssessmentMutation = useMutation({
+    mutationFn: () => rescanAssessment({ assessmentId: parseInt(id || '') }),
+    onMutate: async () => {
+      setShowRescanModal(false);
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      refetch();
+      navigate(`/`);
+    },
+  });
+
   const handleResolveQuestion = useCallback(
     (questionId: string, resolve: boolean) => {
       resolveQuestionMutation.mutate({
@@ -245,12 +274,6 @@ export function AssessmentDetails() {
       }
     }
   }, [selectedPillar, activeQuestion?.id]);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['assessment', id],
-    queryFn: () => (id ? getAssessment(id) : null),
-    refetchInterval: 30000,
-  });
 
   // Add effect to sync active question with cache
   useEffect(() => {
@@ -517,8 +540,40 @@ export function AssessmentDetails() {
           <h2 className="mt-0 mb-0">Assessment {data?.name} </h2>
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 items-center">
           <StatusBadge status={data?.step || undefined} />
+          <div
+            className="dropdown dropdown-end"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost btn-xs p-1"
+            >
+              <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+            >
+              <li>
+                <button
+                  className="flex flex-row gap-2 w-full text-left"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowRescanModal(true);
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4" /> Rescan
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       <Tabs
@@ -663,6 +718,16 @@ export function AssessmentDetails() {
             bestPractice={bestPractice}
           />
         </Modal>
+      )}
+      {showRescanModal && (
+        <ConfirmationModal
+          open={showRescanModal}
+          onClose={() => setShowRescanModal(false)}
+          onCancel={() => setShowRescanModal(false)}
+          onConfirm={() => rescanAssessmentMutation.mutate()}
+          title="Rescan Assessment"
+          message="Are you sure you want to rescan the assessment? This might take a while."
+        />
       )}
     </div>
   );
