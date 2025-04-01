@@ -37,7 +37,7 @@ export function NewAssessment({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)} role="form">
       <div className="flex flex-col gap-1">
         <label className="form-control w-full">
           <label

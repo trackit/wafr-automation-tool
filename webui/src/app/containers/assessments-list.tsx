@@ -77,7 +77,10 @@ function AssessmentsList() {
       <div className="flex gap-4 overflow-auto rounded-lg border border-neutral-content shadow-md p-4 flex-wrap ">
         {isLoading ? (
           <div className="flex flex-row gap-2 justify-center items-center w-full h-full">
-            <div className="loading loading-ring text-primary w-8 h-8"></div>
+            <div
+              className="loading loading-ring text-primary w-8 h-8"
+              role="status"
+            ></div>
           </div>
         ) : null}
         {data?.pages.length === 0 ||

@@ -15,10 +15,12 @@ type VerticalMenuProps = {
 function MenuItemComponent({ item, index }: { item: MenuItem; index: number }) {
   return (
     <div
+      role="menuitem"
       className={`cursor-pointer py-4 px-3 text-sm border-r border-b border-neutral-content relative flex-1 flex items-center ${
         item.active ? 'bg-primary/5 text-primary font-medium border-r-0' : ''
       }`}
       onClick={item.onClick}
+      aria-current={item.active ? 'true' : undefined}
     >
       {item.active && (
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
@@ -40,6 +42,7 @@ function MenuItemComponent({ item, index }: { item: MenuItem; index: number }) {
 export function VerticalMenu({ items, className }: VerticalMenuProps) {
   return (
     <div
+      role="menu"
       className={`h-full w-full max-w-[270px] overflow-auto flex flex-col divide-y divide-neutral-content rounded-l-lg ${
         className || ''
       }`}

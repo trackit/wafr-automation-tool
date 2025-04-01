@@ -147,7 +147,6 @@ export function AssessmentDetails() {
 
   // Add effect to sync active question with cache
   useEffect(() => {
-    console.log('effect');
     if (data?.findings && selectedPillar?.id && activeQuestion?.id) {
       const pillar = data.findings.find((p) => p.id === selectedPillar.id);
       if (pillar) {
@@ -365,7 +364,10 @@ export function AssessmentDetails() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+        <div
+          className="w-16 h-16 loading loading-ring loading-lg text-primary"
+          role="status"
+        ></div>
       </div>
     );
 
@@ -457,7 +459,10 @@ export function AssessmentDetails() {
 
   const loading = (
     <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
-      <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+      <div
+        className="w-16 h-16 loading loading-ring loading-lg text-primary"
+        role="status"
+      ></div>
       <h2 className="text-center text-primary font-light mt-4">
         {data?.step === 'SCANNING_STARTED'
           ? 'Scanning your account...'
@@ -496,7 +501,10 @@ export function AssessmentDetails() {
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+          <div
+            className="w-16 h-16 loading loading-ring loading-lg text-primary"
+            role="status"
+          ></div>
         </div>
       )}
       {bestPractice && (

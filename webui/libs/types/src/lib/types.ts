@@ -164,8 +164,79 @@ export interface paths {
                 };
             };
         };
-        put?: never;
-        post?: never;
+        /**
+         * Update the details of a specific assessment
+         * @description Updates the details of a specific assessment, such as the name or role ARN.
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique ID of the assessment to update */
+                    assessmentId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The assessment has been successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /**
+         * Rescan an assessment
+         * @description Rescans an assessment, updating the findings and best practices.
+         *
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique ID of the assessment to rescan */
+                    assessmentId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The assessment has been successfully rescanned */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         /**
          * Delete a specific assessment
          * @description Deletes an assessment from the system.
@@ -173,6 +244,67 @@ export interface paths {
          *
          */
         delete: operations["deleteAssessment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the resolve status of a specific question
+         * @description Updates the resolve status of a specific question in a given pillar for a specific assessment.
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment */
+                    assessmentId: number;
+                    /** @description The ID of the pillar under which the question falls */
+                    pillarId: number;
+                    /** @description The ID of the question to update the resolve status for */
+                    questionId: number;
+                    /** @description The status to set for the question */
+                    resolve: boolean;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The resolve status of the question has been successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment, pillar, or question could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -534,6 +666,13 @@ export interface operations {
         responses: {
             /** @description The assessment has been successfully deleted */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
