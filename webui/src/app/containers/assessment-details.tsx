@@ -145,9 +145,81 @@ export function AssessmentDetails() {
       resolve: boolean;
     }) => resolveQuestion({ assessmentId, pillarId, questionId, resolve }),
     onMutate: async ({ pillarId, questionId, resolve }) => {
+      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
       });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['assessment', id]) as
+        | components['schemas']['AssessmentContent']
+        | undefined;
+
+      if (!previousData?.findings) {
+        console.log('No previous data found');
+        return { previousData };
+      }
+
+      // Create a deep copy of the data
+      const newData = JSON.parse(
+        JSON.stringify(previousData)
+      ) as components['schemas']['AssessmentContent'];
+
+      // Find and update the specific question
+      let updated = false;
+      for (const pillar of newData.findings || []) {
+        if (pillar.id === pillarId) {
+          for (const question of pillar.questions || []) {
+            if (question.id === questionId) {
+              question.resolve = resolve;
+              updated = true;
+              break;
+            }
+          }
+        }
+        if (updated) break;
+      }
+
+      // Update the cache with our optimistic value
+      queryClient.setQueryData(['assessment', id], newData);
+
+      // Update local state optimistically if we're viewing the updated question
+      if (activeQuestion?.id === questionId) {
+        setActiveQuestion({
+          ...activeQuestion,
+          resolve,
+        });
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      console.log('Error occurred, rolling back to:', context?.previousData);
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(['assessment', id], context.previousData);
+
+        // Find the current question in the previous data
+        if (context.previousData.findings) {
+          const pillar = context.previousData.findings.find(
+            (p) => p.id === selectedPillar?.id
+          );
+          if (pillar) {
+            const question = pillar.questions?.find(
+              (q) => q.id === activeQuestion?.id
+            );
+            if (question) {
+              setActiveQuestion(question);
+            }
+          }
+        }
+      }
+    },
+    onSettled: () => {
+      console.log('Mutation settled, refetching data');
+      // Always refetch after error or success to ensure data is in sync with server
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
@@ -348,7 +420,13 @@ export function AssessmentDetails() {
         },
       }),
     ],
-    [columnHelper, handleUpdateStatus, activeQuestion?.resolve]
+    [
+      columnHelper,
+      handleUpdateStatus,
+      activeQuestion?.resolve,
+      handleResolveQuestion,
+      activeQuestion?.id,
+    ]
   );
 
   // Helper function to calculate completed questions count
@@ -406,7 +484,7 @@ export function AssessmentDetails() {
       name: 'resolve',
     });
     return res;
-  }, [activeQuestion]);
+  }, [activeQuestion?.best_practices, activeQuestion?.resolve]);
 
   const tabs = useMemo(() => {
     if (!data?.findings) return [];
