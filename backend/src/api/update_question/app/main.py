@@ -6,9 +6,9 @@ from entities.question import QuestionDto
 from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
+from tasks.update_question import UpdateQuestion
 
 from api.event import UpdateQuestionInput
-from src.api.update_question.app.tasks.update_question import UpdateQuestion
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)

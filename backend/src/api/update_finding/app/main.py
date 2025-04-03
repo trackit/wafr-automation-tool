@@ -6,9 +6,9 @@ from entities.finding import FindingDto
 from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
+from tasks.update_finding import UpdateFinding
 
 from api.event import UpdateFindingInput
-from src.api.update_finding.app.tasks.update_finding import UpdateFinding
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)

@@ -6,9 +6,9 @@ from entities.best_practice import BestPracticeDto
 from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
+from tasks.update_best_practice import UpdateBestPractice
 
 from api.event import UpdateBestPracticeInput
-from src.api.update_best_practice.app.tasks.update_best_practice import UpdateBestPractice
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
