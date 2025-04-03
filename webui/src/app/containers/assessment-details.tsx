@@ -398,19 +398,23 @@ export function AssessmentDetails() {
           </button>
         ),
         cell: (info) => {
-          return (
-            <div
-              className={`badge badge-soft badge-sm font-bold ${
-                info.row.original.risk === 'High'
-                  ? 'badge-error'
-                  : info.row.original.risk === 'Medium'
-                  ? 'badge-warning'
-                  : 'badge-success'
-              }`}
-            >
-              {info.row.original.risk}
-            </div>
-          );
+          if (info.row.original.id !== 'resolve') {
+            return (
+              <div
+                className={`badge badge-soft badge-sm font-bold ${
+                  info.row.original.risk === 'High'
+                    ? 'badge-error'
+                    : info.row.original.risk === 'Medium'
+                    ? 'badge-warning'
+                    : 'badge-success'
+                }`}
+              >
+                {info.row.original.risk}
+              </div>
+            );
+          } else {
+            return <div className="text-base-content/50 text-center">-</div>;
+          }
         },
       }),
       columnHelper.accessor((row) => row.results?.length || 0, {

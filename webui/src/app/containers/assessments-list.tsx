@@ -74,7 +74,7 @@ function AssessmentsList() {
           />
         </label>
       </div>
-      <div className="flex gap-4 overflow-auto rounded-lg border border-neutral-content shadow-md p-4 flex-wrap ">
+      <div className="flex gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 flex-wrap ">
         {isLoading ? (
           <div className="flex flex-row gap-2 justify-center items-center w-full h-full">
             <div
