@@ -1,7 +1,7 @@
 from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
-from common.entities import FindingExtra
+from entities.finding import FindingExtra
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import RetrieveFindingInput, RetrieveFindingResponseBody

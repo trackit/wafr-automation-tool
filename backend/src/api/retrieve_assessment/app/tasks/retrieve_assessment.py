@@ -1,8 +1,8 @@
 from http.client import NOT_FOUND, OK
 from typing import override
 
-from common.entities import Assessment
 from common.task import Task
+from entities.assessment import Assessment
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 from utils.assessment import convert_assessment_to_api_assessment

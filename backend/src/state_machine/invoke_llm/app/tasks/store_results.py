@@ -9,15 +9,12 @@ from common.config import (
     DDB_TABLE,
     STORE_CHUNK_PATH,
 )
-from common.entities import (
-    AIFindingAssociation,
-    AnswerData,
-    BestPracticeInfo,
-    ChunkId,
-    FindingExtra,
-    ScanningTool,
-)
 from common.task import Task
+from entities.ai import AIFindingAssociation, AnswerData, ChunkId, PromptS3Uri
+from entities.assessment import AssessmentID
+from entities.best_practice import BestPracticeInfo
+from entities.finding import FindingExtra
+from entities.scanning_tools import ScanningTool
 from exceptions.ai import InvalidPromptResponseError
 from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
@@ -45,7 +42,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def retrieve_findings_data(
         self,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         s3_bucket: str,
         chunk_path: str,
     ) -> list[FindingExtra]:
@@ -55,7 +52,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def associate_finding_ids(
         self,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
         answer_data: AnswerData,
         bp_finding_ids: list[str],
@@ -90,7 +87,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def store_findings_in_db(
         self,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
         finding_ids: list[str],
         findings_data: list[FindingExtra],
@@ -115,7 +112,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def store_results(
         self,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
         ai_associations: list[AIFindingAssociation],
         findings_data: list[FindingExtra],
@@ -157,7 +154,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             raise InvalidPromptResponseError(llm_response) from e
         return findings
 
-    def get_uri_infos(self, prompt_uri: str) -> tuple[ScanningTool, ChunkId]:
+    def get_uri_infos(self, prompt_uri: PromptS3Uri) -> tuple[ScanningTool, ChunkId]:
         split = prompt_uri.split("/")
         if len(split) < 1:
             raise InvalidPromptUriError(prompt_uri)

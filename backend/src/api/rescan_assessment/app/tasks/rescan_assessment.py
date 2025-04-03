@@ -3,8 +3,8 @@ from http.client import INTERNAL_SERVER_ERROR, NOT_FOUND, OK
 from typing import override
 
 from common.config import STATE_MACHINE_ARN
-from common.entities import Assessment
 from common.task import Task
+from entities.assessment import Assessment
 from services.assessment import IAssessmentService
 from types_boto3_stepfunctions import SFNClient
 from utils.api import APIResponse

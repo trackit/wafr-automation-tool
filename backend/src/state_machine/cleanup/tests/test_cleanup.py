@@ -1,8 +1,7 @@
 from unittest.mock import MagicMock, call
 
 from common.config import PROWLER_COMPLIANCE_PATH, PROWLER_OCSF_PATH, S3_BUCKET
-from common.entities import Assessment, AssessmentDto
-from common.enums import Steps
+from entities.assessment import Assessment, AssessmentDto, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService

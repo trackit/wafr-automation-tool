@@ -1,6 +1,10 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from common.entities import APIAssessment, APIFormattedPillar, APIFormattedQuestion, Assessment, BestPractice
+from entities.api import APIAssessment, APIFormattedPillar, APIFormattedQuestion
+from entities.assessment import Assessment
+
+if TYPE_CHECKING:
+    from entities.best_practice import BestPractice
 
 
 def convert_all_assessments_to_api_assessments(assessments: list[Assessment]) -> list[APIAssessment]:

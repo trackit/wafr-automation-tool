@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
+from entities.ai import PromptS3Uri
 from services.storage import IStorageService
 from utils.questions import QuestionSet
 
-from common.entities import PromptS3Uri
 from state_machine.event import CreatePromptsInput
 
 

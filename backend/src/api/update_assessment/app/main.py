@@ -2,7 +2,7 @@ import json
 from typing import Any
 
 import boto3
-from common.entities import AssessmentDto
+from entities.assessment import AssessmentDto
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.update_assessment import UpdateAssessment

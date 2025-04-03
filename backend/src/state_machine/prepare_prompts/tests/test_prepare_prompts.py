@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
-from common.entities import ScanningTool
+from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService

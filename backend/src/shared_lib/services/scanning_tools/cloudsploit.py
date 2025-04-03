@@ -2,7 +2,9 @@ import json
 from typing import override
 
 from common.config import CLOUDSPLOIT_OUTPUT_PATH, S3_BUCKET
-from common.entities import CloudSploitFinding, FindingExtra, FindingResource, ScanningTool
+from entities.assessment import AssessmentID
+from entities.finding import FindingExtra, FindingResource
+from entities.scanning_tools import CloudSploitFinding, ScanningTool
 
 from services.scanning_tools import IScanningToolService
 from services.storage import IStorageService
@@ -26,7 +28,7 @@ class CloudSploitService(IScanningToolService):
         )
 
     @override
-    def retrieve_findings(self, assessment_id: str) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
         key = CLOUDSPLOIT_OUTPUT_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)

@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 
 from common.config import QUESTIONS_PATH
-from common.entities import BestPractice, FormattedPillar, FormattedQuestion, Pillar
+from entities.best_practice import BestPractice
+from entities.question import FormattedPillar, FormattedQuestion, Pillar
 from pydantic import BaseModel
 
 

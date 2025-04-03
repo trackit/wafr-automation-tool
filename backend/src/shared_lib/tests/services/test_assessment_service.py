@@ -2,8 +2,10 @@ from unittest.mock import MagicMock
 
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
-from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra, Pagination, PaginationOutput
-from common.enums import Steps
+from entities.api import APIPagination, APIPaginationOutput
+from entities.assessment import Assessment, AssessmentDto, Steps
+from entities.best_practice import BestPracticeExtra
+from entities.finding import FindingExtra
 from services.assessment import AssessmentService
 
 from tests.__mocks__.fake_database_service import FakeDatabaseService
@@ -138,10 +140,10 @@ def test_assessment_service_retrieve_all():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
 
-    pagination = Pagination(limit=10)
+    pagination = APIPagination(limit=10)
     assessments = assessment_service.retrieve_all(pagination)
 
-    assert assessments == PaginationOutput[Assessment](
+    assert assessments == APIPaginationOutput[Assessment](
         items=[
             Assessment(
                 id="test-assessment-id",
@@ -228,9 +230,9 @@ def test_assessment_service_retrieve_all_pagination():
         }
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    pagination = Pagination(
+    pagination = APIPagination(
         limit=10,
-        filter="begins_with(#id, :id)",
+        filter_expression="begins_with(#id, :id)",
         attribute_name={"#id": "id"},
         attribute_value={":id": "test"},
         next_token="eyJ0ZXN0IjoidGVzdCJ9",  # noqa: S106
@@ -247,7 +249,7 @@ def test_assessment_service_retrieve_all_pagination():
         ExpressionAttributeNames={"#id": "id"},
         ExpressionAttributeValues={":id": "test"},
     )
-    assert assessments == PaginationOutput[Assessment](
+    assert assessments == APIPaginationOutput[Assessment](
         items=[
             Assessment(
                 id="test-assessment-id",
@@ -341,6 +343,8 @@ def test_assessment_service_retrieve_best_practice():
     assert best_practice == BestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
+        risk="Low",
+        status=False,
         results=[
             FindingExtra(
                 id="prowler:1",
@@ -352,8 +356,7 @@ def test_assessment_service_retrieve_best_practice():
                 hidden=False,
             )
         ],
-        risk="Low",
-        status=False,
+        hidden_results=[],
     )
 
     fake_database_service.bulk_get.assert_called_once_with(
@@ -503,9 +506,10 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
     assert finding == BestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
-        results=[],
         risk="Low",
         status=False,
+        results=[],
+        hidden_results=[],
     )
 
 

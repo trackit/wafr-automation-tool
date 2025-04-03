@@ -2,6 +2,7 @@ from typing import override
 
 from common.config import AI_MODEL, AI_MODELS
 from common.task import Task
+from entities.ai import PromptS3Uri
 from exceptions.ai import InvalidAIModelError
 from services.ai import IAIService
 from services.storage import IStorageService
@@ -20,7 +21,7 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
         self.storage_service = storage_service
         self.ai_service = ai_service
 
-    def retrieve_prompt(self, prompt_uri: str) -> str:
+    def retrieve_prompt(self, prompt_uri: PromptS3Uri) -> str:
         s3_bucket, s3_key = parse_s3_uri(prompt_uri)
         return self.storage_service.get(Bucket=s3_bucket, Key=s3_key)
 

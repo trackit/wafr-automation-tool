@@ -5,6 +5,7 @@ from typing import override
 
 from common.config import STATE_MACHINE_ARN
 from common.task import Task
+from entities.assessment import AssessmentID
 from types_boto3_stepfunctions import SFNClient
 from utils.api import APIResponse
 
@@ -28,7 +29,7 @@ class StartAssessment(
 
     def start_step_functions(
         self,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         event: StartAssessmentInput,
     ) -> bool:
         role_arn = event.roleArn if event.roleArn else DEFAULT_ASSESSMENT_ROLE

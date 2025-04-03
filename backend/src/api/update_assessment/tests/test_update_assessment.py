@@ -1,7 +1,7 @@
 from http.client import OK
 from unittest.mock import MagicMock
 
-from common.entities import AssessmentDto
+from entities.assessment import AssessmentDto
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import UpdateAssessmentInput

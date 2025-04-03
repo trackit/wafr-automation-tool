@@ -13,11 +13,11 @@ from api.event import RetrieveBestPracticeFindingsInput
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
 assessment_service = AssessmentService(database_service)
-retrieve_best_practice_findings_task = RetrieveBestPracticeFindings(assessment_service)
+task = RetrieveBestPracticeFindings(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
-    response = retrieve_best_practice_findings_task.execute(
+    response = task.execute(
         RetrieveBestPracticeFindingsInput(
             assessment_id=event["pathParameters"]["assessmentId"],
             pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),

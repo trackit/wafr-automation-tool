@@ -1,8 +1,7 @@
 from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
-from common.entities import Assessment
-from common.enums import Steps
+from entities.assessment import Assessment, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import UpdateFindingHideInput

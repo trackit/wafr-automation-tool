@@ -2,7 +2,9 @@ import json
 from typing import override
 
 from common.config import CLOUD_CUSTODIAN_PATH, S3_BUCKET
-from common.entities import CloudCustodianPolicy, FindingExtra, ScanningTool
+from entities.assessment import AssessmentID
+from entities.finding import FindingExtra
+from entities.scanning_tools import CloudCustodianPolicy, ScanningTool
 from exceptions.scanning_tool import InvalidPolicyError
 from types_boto3_s3.service_resource import ObjectSummary
 
@@ -20,11 +22,11 @@ class CloudCustodianService(IScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
         super().__init__(storage_service=storage_service, name=ScanningTool.CLOUD_CUSTODIAN, title="Cloud Custodian")
 
-    def retrieve_policies(self, assessment_id: str) -> list[ObjectSummary]:
+    def retrieve_policies(self, assessment_id: AssessmentID) -> list[ObjectSummary]:
         return self.storage_service.filter(bucket_name=S3_BUCKET, prefix=CLOUD_CUSTODIAN_PATH.format(assessment_id))
 
     @override
-    def retrieve_findings(self, assessment_id: str) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
         policies = self.retrieve_policies(assessment_id)
         policies_filtered = filter(lambda policy: policy.key.endswith("resources.json"), policies)
         policies_resources: list[FindingExtra] = []

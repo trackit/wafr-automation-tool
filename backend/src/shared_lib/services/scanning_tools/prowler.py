@@ -2,8 +2,10 @@ import json
 from typing import override
 
 from common.config import PROWLER_OCSF_PATH, S3_BUCKET
-from common.entities import FindingExtra, ScanningTool
+from entities.assessment import AssessmentID
+from entities.finding import FindingExtra
 from entities.prowler.events.findings.detection_finding import DetectionFinding
+from entities.scanning_tools import ScanningTool
 
 from services.scanning_tools import IScanningToolService
 from services.storage import IStorageService
@@ -14,7 +16,7 @@ class ProwlerService(IScanningToolService):
         super().__init__(storage_service=storage_service, name=ScanningTool.PROWLER, title="Prowler")
 
     @override
-    def retrieve_findings(self, assessment_id: str) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
         key = PROWLER_OCSF_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)

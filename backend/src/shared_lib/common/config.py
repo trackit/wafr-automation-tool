@@ -1,7 +1,7 @@
 import os
 
-from common.entities import AIModel
-from common.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, DeepSeekR1, IModel, NovaPro
+from entities.ai import AIModel
+from entities.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, DeepSeekR1, IModel, NovaPro
 
 DEBUG = os.getenv("DEBUG", "false") == "true"
 REGION = os.getenv("REGION", "us-west-2")

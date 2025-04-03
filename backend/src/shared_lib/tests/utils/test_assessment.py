@@ -1,5 +1,5 @@
-from common.entities import APIAssessment, Assessment
-from common.enums import Steps
+from entities.api import APIAssessment
+from entities.assessment import Assessment, Steps
 from utils.assessment import convert_assessment_to_api_assessment
 
 

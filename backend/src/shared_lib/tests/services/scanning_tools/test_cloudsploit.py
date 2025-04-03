@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from common.config import CLOUDSPLOIT_OUTPUT_PATH, S3_BUCKET
-from common.entities import FindingExtra
+from entities.finding import FindingExtra
 from services.scanning_tools.cloudsploit import CloudSploitService
 from utils.tests import load_file
 
