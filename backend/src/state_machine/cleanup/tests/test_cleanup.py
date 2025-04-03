@@ -80,7 +80,7 @@ def test_cleanup_on_error():
     storage_service.filter = MagicMock(return_value=[MagicMock(key="TEST")])
     storage_service.bulk_delete = MagicMock()
     assessment_service.delete_findings = MagicMock()
-    assessment_service.update = MagicMock()
+    assessment_service.update_assessment = MagicMock()
     assessment_service.retrieve = MagicMock(return_value=assessment)
 
     cleanup_input = CleanupInput(assessment_id="ID", error=StateMachineError(Error="ERROR", Cause="CAUSE"))
@@ -89,7 +89,7 @@ def test_cleanup_on_error():
 
     assessment_service.delete_findings.assert_called_once_with(assessment)
     assessment_service.retrieve.assert_called_once_with("ID")
-    assessment_service.update.assert_called_once_with(
+    assessment_service.update_assessment.assert_called_once_with(
         "ID",
         AssessmentDto(
             name=None,

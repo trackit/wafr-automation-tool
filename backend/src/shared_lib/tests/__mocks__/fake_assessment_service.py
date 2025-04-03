@@ -31,7 +31,7 @@ class FakeAssessmentService(IAssessmentService):
         raise NotImplementedError
 
     @override
-    def update(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
         raise NotImplementedError
 
     @override

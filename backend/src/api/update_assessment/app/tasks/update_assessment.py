@@ -15,7 +15,7 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateAssessmentInput) -> APIResponse[None]:
-        self.assessment_service.update(event.assessment_id, event.assessment_dto)
+        self.assessment_service.update_assessment(event.assessment_id, event.assessment_dto)
         return APIResponse(
             status_code=OK,
             body=None,

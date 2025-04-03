@@ -4,7 +4,7 @@ from entities.api import APIAssessment
 from entities.assessment import AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID
-from entities.question import PillarID, QuestionDto, QuestionID
+from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -83,6 +83,12 @@ class UpdateBestPracticeInput(BaseModel):
     question_id: QuestionID
     best_practice_id: BestPracticeID
     best_practice_dto: BestPracticeDto
+
+
+class UpdatePillarInput(BaseModel):
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    pillar_dto: PillarDto
 
 
 class UpdateQuestionInput(BaseModel):

@@ -282,7 +282,28 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
-  UpdateQuestionResolveFunction:
+  UpdatePillarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/update_pillar/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdatePillar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/pillars/{pillarId}
+            Method: PUT
+  UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
@@ -297,7 +318,7 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateQuestionResolve:
+        UpdateQuestion:
           Type: Api
           Properties:
             RestApiId: !Ref Api
@@ -324,7 +345,7 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
-  UpdateBestPracticeStatusFunction:
+  UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
@@ -339,7 +360,7 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateBestPracticeStatus:
+        UpdateBestPractice:
           Type: Api
           Properties:
             RestApiId: !Ref Api
@@ -359,13 +380,13 @@ Resources:
                 - dynamodb:GetItem
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        RetrieveFinding:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
-  UpdateFindingHideFunction:
+  UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
@@ -380,7 +401,7 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateFindingHide:
+        UpdateFinding:
           Type: Api
           Properties:
             RestApiId: !Ref Api

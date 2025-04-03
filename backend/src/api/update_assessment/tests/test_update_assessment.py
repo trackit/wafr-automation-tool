@@ -11,7 +11,7 @@ from ..app.tasks.update_assessment import UpdateAssessment
 
 def test_update_assessment():
     assessment_service = FakeAssessmentService()
-    assessment_service.update = MagicMock(return_value=True)
+    assessment_service.update_assessment = MagicMock(return_value=True)
     assessment_dto = AssessmentDto(
         name="AN",
     )
@@ -20,6 +20,6 @@ def test_update_assessment():
     task = UpdateAssessment(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.update.assert_called_once_with("AID", assessment_dto)
+    assessment_service.update_assessment.assert_called_once_with("AID", assessment_dto)
     assert response.status_code == OK
     assert not response.body

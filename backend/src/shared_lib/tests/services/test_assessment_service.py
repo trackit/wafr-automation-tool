@@ -624,7 +624,7 @@ def test_assessment_service_update():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment_dto = AssessmentDto(name="test-assessment-name", role_arn="test-assessment-role")
-    assessment_service.update("test-assessment-id", assessment_dto)
+    assessment_service.update_assessment("test-assessment-id", assessment_dto)
 
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",

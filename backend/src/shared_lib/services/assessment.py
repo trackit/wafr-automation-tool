@@ -10,7 +10,7 @@ from entities.assessment import Assessment, AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingDto, FindingExtra, FindingID
-from entities.question import PillarID, QuestionDto, QuestionID
+from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
 from types_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
@@ -55,7 +55,16 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_pillar(
+        self,
+        assessment: Assessment,
+        pillar_id: PillarID,
+        pillar_dto: PillarDto,
+    ) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -206,10 +215,28 @@ class AssessmentService(IAssessmentService):
         return findings
 
     @override
-    def update(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
         attrs = assessment_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            attrs=attrs,
+        )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
+
+    @override
+    def update_pillar(
+        self,
+        assessment: Assessment,
+        pillar_id: PillarID,
+        pillar_dto: PillarDto,
+    ) -> None:
+        attrs = pillar_dto.model_dump(exclude_none=True)
+        event = UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            update_expression_path="findings.#pillar.",
+            expression_attribute_names={
+                "#pillar": pillar_id,
+            },
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
@@ -290,7 +317,7 @@ class AssessmentService(IAssessmentService):
         else:
             best_practice["hidden_results"].remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings)
-        self.update(assessment.id, assessment_dto)
+        self.update_assessment(assessment.id, assessment_dto)
         return True
 
     @override
