@@ -31,3 +31,7 @@ class BestPracticeInfo(BaseModel):
     pillar: str
     question: str
     best_practice: str
+
+
+class BestPracticeDto(BaseModel):
+    status: bool | None = None

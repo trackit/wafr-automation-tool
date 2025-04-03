@@ -5,6 +5,7 @@ import boto3
 import pytest
 from boto3.dynamodb.conditions import Key
 from common.config import DDB_KEY, DDB_SORT_KEY
+from entities.database import UpdateAttrsInput
 from exceptions.database import DynamoDBError
 from moto import mock_aws
 from services.database import DDBService
@@ -93,9 +94,8 @@ def test_ddb_service_update_attrs(ddb_resource: DynamoDBServiceResource, ddb_ser
     assert "Item" in item
     assert item["Item"] == {DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"}
 
-    ddb_service.update_attrs(
-        table_name="test-table", key={DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"}, attrs={"attr": "test-attr"}
-    )
+    event = UpdateAttrsInput(key={DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"}, attrs={"attr": "test-attr"})
+    ddb_service.update_attrs(table_name="test-table", event=event)
     item = ddb_table.get_item(Key={DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk"})
     assert "Item" in item
     assert item["Item"] == {DDB_KEY: "test-pk", DDB_SORT_KEY: "test-sk", "attr": "test-attr"}

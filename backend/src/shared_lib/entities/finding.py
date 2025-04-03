@@ -27,3 +27,7 @@ class FindingExtra(Finding):
     remediation: FindingRemediation | None = None
     risk_details: str | None = None
     hidden: bool = False
+
+
+class FindingDto(BaseModel):
+    hidden: bool | None = None

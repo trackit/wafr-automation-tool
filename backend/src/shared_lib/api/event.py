@@ -2,9 +2,9 @@ from typing import Any
 
 from entities.api import APIAssessment
 from entities.assessment import AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeExtra, BestPracticeID
-from entities.finding import FindingExtra, FindingID
-from entities.question import PillarID, QuestionID
+from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.finding import FindingDto, FindingExtra, FindingID
+from entities.question import PillarID, QuestionDto, QuestionID
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -82,14 +82,14 @@ class UpdateBestPracticeStatusInput(BaseModel):
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
-    status: bool
+    best_practice_dto: BestPracticeDto
 
 
 class UpdateQuestionResolveInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
     question_id: QuestionID
-    resolve: bool
+    question_dto: QuestionDto
 
 
 class UpdateFindingHideInput(BaseModel):
@@ -98,4 +98,4 @@ class UpdateFindingHideInput(BaseModel):
     question_id: QuestionID
     best_practice_id: BestPracticeID
     finding_id: FindingID
-    hide: bool
+    finding_dto: FindingDto

@@ -1,5 +1,7 @@
 from typing import TypedDict
 
+from pydantic import BaseModel
+
 from entities.best_practice import BestPractice, BestPracticeID
 
 QuestionID = str
@@ -20,3 +22,7 @@ class FormattedPillar(TypedDict):
     id: PillarID
     label: str
     questions: dict[QuestionID, FormattedQuestion]
+
+
+class QuestionDto(BaseModel):
+    resolve: bool | None = None

@@ -1,7 +1,9 @@
-import urllib.parse
+import json
 from typing import Any
 
 import boto3
+from entities.best_practice import BestPracticeDto
+from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.update_best_practice_status import UpdateBestPracticeStatus
@@ -15,13 +17,21 @@ task = UpdateBestPracticeStatus(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
-    response = task.execute(
-        UpdateBestPracticeStatusInput(
-            assessment_id=event["pathParameters"]["assessmentId"],
-            pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
-            question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
-            best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),
-            status=event["pathParameters"]["status"],
-        ),
-    )
-    return response.build()
+    try:
+        body = json.loads(event["body"])
+        best_practice_dto = BestPracticeDto(**body)
+        response = task.execute(
+            UpdateBestPracticeStatusInput(
+                assessment_id=event["pathParameters"]["assessmentId"],
+                pillar_id=event["pathParameters"]["pillarId"],
+                question_id=event["pathParameters"]["questionId"],
+                best_practice_id=event["pathParameters"]["bestPracticeId"],
+                best_practice_dto=best_practice_dto,
+            ),
+        )
+        return response.build()
+    except ValidationError as e:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": e.errors()}),
+        }

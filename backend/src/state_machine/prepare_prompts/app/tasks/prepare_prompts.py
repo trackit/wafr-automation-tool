@@ -16,6 +16,7 @@ from common.config import (
 from common.task import Task
 from entities.ai import Prompt, PromptS3Uri
 from entities.assessment import AssessmentID
+from entities.database import UpdateAttrsInput
 from entities.finding import Finding, FindingExtra
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
@@ -48,11 +49,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             "findings": self.formatted_question_set.data,
             "question_version": self.formatted_question_set.version,
         }
-        self.database_service.update_attrs(
-            table_name=DDB_TABLE,
+        event = UpdateAttrsInput(
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
             attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
     def save_chunk_for_retrieve(
         self,

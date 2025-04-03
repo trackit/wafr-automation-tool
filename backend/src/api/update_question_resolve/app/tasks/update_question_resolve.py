@@ -21,7 +21,7 @@ class UpdateQuestionResolve(Task[UpdateQuestionResolveInput, APIResponse[None]])
                 status_code=NOT_FOUND,
                 body=None,
             )
-        self.assessment_service.update_question(assessment, event.pillar_id, event.question_id, event.resolve)
+        self.assessment_service.update_question(assessment, event.pillar_id, event.question_id, event.question_dto)
         return APIResponse(
             status_code=OK,
             body=None,

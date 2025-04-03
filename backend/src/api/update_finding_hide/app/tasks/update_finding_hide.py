@@ -22,7 +22,7 @@ class UpdateFindingHide(Task[UpdateFindingHideInput, APIResponse[None]]):
                 body=None,
             )
         self.assessment_service.update_finding(
-            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.finding_id, event.hide
+            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.finding_id, event.finding_dto
         )
         return APIResponse(
             status_code=OK,

@@ -4,7 +4,8 @@ from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
 from entities.api import APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentDto, Steps
-from entities.best_practice import BestPracticeExtra
+from entities.best_practice import BestPracticeDto, BestPracticeExtra
+from entities.database import UpdateAttrsInput
 from entities.finding import FindingExtra
 from services.assessment import AssessmentService
 
@@ -607,17 +608,19 @@ def test_assessment_service_update():
 
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
-        key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
-        attrs={
-            "name": "test-assessment-name",
-            "role_arn": "test-assessment-role",
-        },
+        event=UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            attrs={
+                "name": "test-assessment-name",
+                "role_arn": "test-assessment-role",
+            },
+        ),
     )
 
 
 def test_assessment_service_update_best_practice():
     fake_database_service = FakeDatabaseService()
-    fake_database_service.update = MagicMock()
+    fake_database_service.update_attrs = MagicMock()
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment = Assessment(
@@ -651,22 +654,24 @@ def test_assessment_service_update_best_practice():
             }
         },
     )
+    best_practice_dto = BestPracticeDto(status=True)
 
-    assessment_service.update_best_practice(assessment, "pillar-1", "question-1", "best-practice-1", status=True)
+    assessment_service.update_best_practice(
+        assessment, "pillar-1", "question-1", "best-practice-1", best_practice_dto=best_practice_dto
+    )
 
-    fake_database_service.update.assert_called_once_with(
+    fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
-        Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
-        UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
-        ExpressionAttributeNames={
-            "#pillar": "pillar-1",
-            "#question": "question-1",
-            "#best_practice": "best-practice-1",
-            "#status": "status",
-        },
-        ExpressionAttributeValues={
-            ":status": True,
-        },
+        event=UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
+            expression_attribute_names={
+                "#pillar": "pillar-1",
+                "#question": "question-1",
+                "#best_practice": "best-practice-1",
+            },
+            attrs={"status": True},
+        ),
     )
 
 

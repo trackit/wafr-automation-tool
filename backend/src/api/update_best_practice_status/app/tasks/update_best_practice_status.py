@@ -22,7 +22,7 @@ class UpdateBestPracticeStatus(Task[UpdateBestPracticeStatusInput, APIResponse[N
                 body=None,
             )
         self.assessment_service.update_best_practice(
-            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.status
+            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.best_practice_dto
         )
         return APIResponse(
             status_code=OK,

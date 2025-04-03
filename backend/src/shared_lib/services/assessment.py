@@ -7,9 +7,10 @@ from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from entities.api import APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeExtra, BestPracticeID
-from entities.finding import FindingExtra, FindingID
-from entities.question import PillarID, QuestionID
+from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.database import UpdateAttrsInput
+from entities.finding import FindingDto, FindingExtra, FindingID
+from entities.question import PillarID, QuestionDto, QuestionID
 from types_boto3_dynamodb.type_defs import (
     QueryInputTableQueryTypeDef,
 )
@@ -63,7 +64,7 @@ class IAssessmentService:
         assessment: Assessment,
         pillar_id: PillarID,
         question_id: QuestionID,
-        resolve: bool,  # noqa: FBT001
+        question_dto: QuestionDto,
     ) -> None:
         raise NotImplementedError
 
@@ -74,7 +75,7 @@ class IAssessmentService:
         pillar_id: PillarID,
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
-        status: bool,  # noqa: FBT001
+        best_practice_dto: BestPracticeDto,
     ) -> None:
         raise NotImplementedError
 
@@ -86,7 +87,7 @@ class IAssessmentService:
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
         finding_id: FindingID,
-        hide: bool,  # noqa: FBT001
+        finding_dto: FindingDto,
     ) -> bool:
         raise NotImplementedError
 
@@ -207,9 +208,11 @@ class AssessmentService(IAssessmentService):
     @override
     def update(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
         attrs = assessment_dto.model_dump(exclude_none=True)
-        self.database_service.update_attrs(
-            table_name=DDB_TABLE, key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id}, attrs=attrs
+        event = UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
     @override
     def update_question(
@@ -217,20 +220,19 @@ class AssessmentService(IAssessmentService):
         assessment: Assessment,
         pillar_id: PillarID,
         question_id: QuestionID,
-        resolve: bool,
+        question_dto: QuestionDto,
     ) -> None:
-        self.database_service.update(
-            table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
-            UpdateExpression="SET findings.#pillar.questions.#question.resolve = :resolve",
-            ExpressionAttributeNames={
+        attrs = question_dto.model_dump(exclude_none=True)
+        event = UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            update_expression_path="findings.#pillar.questions.#question.",
+            expression_attribute_names={
                 "#pillar": pillar_id,
                 "#question": question_id,
             },
-            ExpressionAttributeValues={
-                ":resolve": resolve,
-            },
+            attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
     @override
     def update_best_practice(
@@ -239,22 +241,20 @@ class AssessmentService(IAssessmentService):
         pillar_id: PillarID,
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
-        status: bool,
+        best_practice_dto: BestPracticeDto,
     ) -> None:
-        self.database_service.update(
-            table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
-            UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
-            ExpressionAttributeNames={
+        attrs = best_practice_dto.model_dump(exclude_none=True)
+        event = UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
+            expression_attribute_names={
                 "#pillar": pillar_id,
                 "#question": question_id,
                 "#best_practice": best_practice_id,
-                "#status": "status",
             },
-            ExpressionAttributeValues={
-                ":status": status,
-            },
+            attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
     @override
     def update_finding(
@@ -264,19 +264,14 @@ class AssessmentService(IAssessmentService):
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
         finding_id: FindingID,
-        hide: bool,
+        finding_dto: FindingDto,
     ) -> bool:
-        self.database_service.update(
-            table_name=DDB_TABLE,
-            Key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
-            UpdateExpression="SET #hidden = :hidden",
-            ExpressionAttributeNames={
-                "#hidden": "hidden",
-            },
-            ExpressionAttributeValues={
-                ":hidden": hide,
-            },
+        attrs = finding_dto.model_dump(exclude_none=True)
+        event = UpdateAttrsInput(
+            key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
+            attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
         if not assessment.findings:
             return False
         pillar = assessment.findings.get(pillar_id)
@@ -288,7 +283,7 @@ class AssessmentService(IAssessmentService):
         best_practice = question.get("best_practices").get(best_practice_id)
         if not best_practice:
             return False
-        if hide:
+        if finding_dto.hidden:
             if finding_id in best_practice["hidden_results"]:
                 return True
             best_practice["hidden_results"].append(finding_id)

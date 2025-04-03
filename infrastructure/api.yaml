@@ -301,7 +301,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
   RetrieveBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
@@ -343,7 +343,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: PUT
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
@@ -384,7 +384,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
             Method: PUT
 
 Outputs:
