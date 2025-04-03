@@ -77,7 +77,7 @@ class UpdateAssessmentInput(BaseModel):
     assessment_dto: AssessmentDto
 
 
-class UpdateBestPracticeStatusInput(BaseModel):
+class UpdateBestPracticeInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
     question_id: QuestionID
@@ -85,14 +85,14 @@ class UpdateBestPracticeStatusInput(BaseModel):
     best_practice_dto: BestPracticeDto
 
 
-class UpdateQuestionResolveInput(BaseModel):
+class UpdateQuestionInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
     question_id: QuestionID
     question_dto: QuestionDto
 
 
-class UpdateFindingHideInput(BaseModel):
+class UpdateFindingInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
     question_id: QuestionID

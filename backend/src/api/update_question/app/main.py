@@ -6,14 +6,14 @@ from entities.question import QuestionDto
 from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
-from tasks.update_question_resolve import UpdateQuestionResolve
 
-from api.event import UpdateQuestionResolveInput
+from api.event import UpdateQuestionInput
+from src.api.update_question.app.tasks.update_question import UpdateQuestion
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
 assessment_service = AssessmentService(database_service)
-task = UpdateQuestionResolve(assessment_service)
+task = UpdateQuestion(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
@@ -21,7 +21,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         body = json.loads(event["body"])
         question_dto = QuestionDto(**body)
         response = task.execute(
-            UpdateQuestionResolveInput(
+            UpdateQuestionInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],

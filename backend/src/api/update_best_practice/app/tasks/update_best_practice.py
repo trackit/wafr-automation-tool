@@ -5,16 +5,16 @@ from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.event import UpdateBestPracticeStatusInput
+from api.event import UpdateBestPracticeInput
 
 
-class UpdateBestPracticeStatus(Task[UpdateBestPracticeStatusInput, APIResponse[None]]):
+class UpdateBestPractice(Task[UpdateBestPracticeInput, APIResponse[None]]):
     def __init__(self, assessment_service: IAssessmentService) -> None:
         super().__init__()
         self.assessment_service = assessment_service
 
     @override
-    def execute(self, event: UpdateBestPracticeStatusInput) -> APIResponse[None]:
+    def execute(self, event: UpdateBestPracticeInput) -> APIResponse[None]:
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(

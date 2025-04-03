@@ -5,23 +5,25 @@ from common.task import Task
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 
-from api.event import UpdateQuestionResolveInput
+from api.event import UpdateFindingInput
 
 
-class UpdateQuestionResolve(Task[UpdateQuestionResolveInput, APIResponse[None]]):
+class UpdateFinding(Task[UpdateFindingInput, APIResponse[None]]):
     def __init__(self, assessment_service: IAssessmentService) -> None:
         super().__init__()
         self.assessment_service = assessment_service
 
     @override
-    def execute(self, event: UpdateQuestionResolveInput) -> APIResponse[None]:
+    def execute(self, event: UpdateFindingInput) -> APIResponse[None]:
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,
                 body=None,
             )
-        self.assessment_service.update_question(assessment, event.pillar_id, event.question_id, event.question_dto)
+        self.assessment_service.update_finding(
+            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.finding_id, event.finding_dto
+        )
         return APIResponse(
             status_code=OK,
             body=None,

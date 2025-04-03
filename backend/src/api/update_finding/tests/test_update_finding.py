@@ -2,15 +2,15 @@ from http.client import NOT_FOUND, OK
 from unittest.mock import MagicMock
 
 from entities.assessment import Assessment, Steps
-from entities.best_practice import BestPracticeDto
+from entities.finding import FindingDto
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
-from api.event import UpdateBestPracticeStatusInput
+from api.event import UpdateFindingInput
 
-from ..app.tasks.update_best_practice_status import UpdateBestPracticeStatus
+from ..app.tasks.update_finding import UpdateFinding
 
 
-def test_update_best_practice_status():
+def test_update_finding():
     assessment = Assessment(
         id="AID",
         name="AN",
@@ -22,40 +22,41 @@ def test_update_best_practice_status():
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
-    assessment_service.update_best_practice = MagicMock(return_value=True)
-    best_practice_dto = BestPracticeDto(status=True)
+    assessment_service.update_finding = MagicMock(return_value=True)
+    finding_dto = FindingDto(hidden=True)
 
-    task_input = UpdateBestPracticeStatusInput(
+    task_input = UpdateFindingInput(
         assessment_id="AID",
         pillar_id="PI",
         question_id="QI",
-        best_practice_id="BP",
-        best_practice_dto=best_practice_dto,
+        best_practice_id="BPI",
+        finding_id="FID",
+        finding_dto=finding_dto,
     )
-    task = UpdateBestPracticeStatus(assessment_service)
+    task = UpdateFinding(assessment_service)
     response = task.execute(task_input)
 
     assessment_service.retrieve.assert_called_once_with("AID")
-    assessment_service.update_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP", best_practice_dto)
+    assessment_service.update_finding.assert_called_once_with(assessment, "PI", "QI", "BPI", "FID", finding_dto)
     assert response.status_code == OK
     assert not response.body
 
 
-def test_update_best_practice_status_not_found():
+def test_update_finding_not_found():
     assessment = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
-    assessment_service.update_best_practice = MagicMock(return_value=True)
-    best_practice_dto = BestPracticeDto(status=True)
+    finding_dto = FindingDto(hidden=True)
 
-    task_input = UpdateBestPracticeStatusInput(
+    task_input = UpdateFindingInput(
         assessment_id="AID",
         pillar_id="PI",
         question_id="QI",
-        best_practice_id="BP",
-        best_practice_dto=best_practice_dto,
+        best_practice_id="BPI",
+        finding_id="FID",
+        finding_dto=finding_dto,
     )
-    task = UpdateBestPracticeStatus(assessment_service)
+    task = UpdateFinding(assessment_service)
     response = task.execute(task_input)
 
     assessment_service.retrieve.assert_called_once_with("AID")
