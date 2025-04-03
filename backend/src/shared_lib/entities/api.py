@@ -14,13 +14,15 @@ from entities.question import PillarID, QuestionID
 class APIFormattedQuestion(TypedDict):
     id: QuestionID
     label: str
-    resolve: bool
+    none: bool
+    disabled: bool
     best_practices: list[BestPractice]
 
 
 class APIFormattedPillar(TypedDict):
     id: PillarID
     label: str
+    disabled: bool
     questions: list[APIFormattedQuestion]
 
 

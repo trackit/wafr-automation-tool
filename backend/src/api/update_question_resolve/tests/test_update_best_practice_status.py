@@ -23,7 +23,7 @@ def test_update_best_practice_status():
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
     assessment_service.update_question = MagicMock(return_value=True)
-    question_dto = QuestionDto(resolve=True)
+    question_dto = QuestionDto(none=True)
 
     task_input = UpdateQuestionResolveInput(
         assessment_id="AID", pillar_id="PI", question_id="QI", question_dto=question_dto
@@ -42,7 +42,7 @@ def test_update_best_practice_status_not_found():
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
     assessment_service.update_best_practice = MagicMock(return_value=True)
-    question_dto = QuestionDto(resolve=True)
+    question_dto = QuestionDto(none=True)
 
     task_input = UpdateQuestionResolveInput(
         assessment_id="AID", pillar_id="PI", question_id="QI", question_dto=question_dto

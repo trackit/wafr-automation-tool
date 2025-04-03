@@ -14,15 +14,22 @@ Pillar = dict[QuestionID, Question]
 class FormattedQuestion(TypedDict):
     id: QuestionID
     label: str
-    resolve: bool
+    none: bool
+    disabled: bool
     best_practices: dict[BestPracticeID, BestPractice]
 
 
 class FormattedPillar(TypedDict):
     id: PillarID
     label: str
+    disabled: bool
     questions: dict[QuestionID, FormattedQuestion]
 
 
 class QuestionDto(BaseModel):
-    resolve: bool | None = None
+    none: bool | None = None
+    disabled: bool | None = None
+
+
+class PillarDto(BaseModel):
+    disabled: bool | None = None

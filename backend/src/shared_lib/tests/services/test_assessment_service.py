@@ -27,11 +27,13 @@ def test_assessment_service_retrieve():
                 "pillar-1": {
                     "id": "pillar-1",
                     "label": "Pillar 1",
+                    "disabled": False,
                     "questions": {
                         "question-1": {
                             "id": "question-1",
                             "label": "Question 1",
-                            "resolve": False,
+                            "none": False,
+                            "disabled": False,
                             "best_practices": {
                                 "best-practice-1": {
                                     "id": "best-practice-1",
@@ -62,11 +64,13 @@ def test_assessment_service_retrieve():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -114,11 +118,13 @@ def test_assessment_service_retrieve_all():
                         "pillar-1": {
                             "id": "pillar-1",
                             "label": "Pillar 1",
+                            "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
-                                    "resolve": False,
+                                    "none": False,
+                                    "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -157,11 +163,13 @@ def test_assessment_service_retrieve_all():
                     "pillar-1": {
                         "id": "pillar-1",
                         "label": "Pillar 1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
-                                "resolve": False,
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -206,11 +214,13 @@ def test_assessment_service_retrieve_all_pagination():
                         "pillar-1": {
                             "id": "pillar-1",
                             "label": "Pillar 1",
+                            "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
-                                    "resolve": False,
+                                    "none": False,
+                                    "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -263,11 +273,13 @@ def test_assessment_service_retrieve_all_pagination():
                     "pillar-1": {
                         "id": "pillar-1",
                         "label": "Pillar 1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
-                                "resolve": False,
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -318,11 +330,13 @@ def test_assessment_service_retrieve_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -395,7 +409,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",
-        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "questions": {}}},
+        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "disabled": False, "questions": {}}},
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
     finding = assessment_service.retrieve_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
@@ -415,11 +429,13 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {},
                     }
                 },
@@ -444,11 +460,13 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -482,11 +500,13 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -634,11 +654,13 @@ def test_assessment_service_update_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -688,11 +710,13 @@ def test_assessment_service_delete_findings():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",

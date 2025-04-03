@@ -50,11 +50,13 @@ def test_cleanup_on_error():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
