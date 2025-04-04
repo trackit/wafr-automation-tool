@@ -507,6 +507,8 @@ export function AssessmentDetails() {
         if (allHighSeverityPracticesComplete) {
           completedCount++;
         }
+      } else {
+        completedCount++;
       }
     }
 
