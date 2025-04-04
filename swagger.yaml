@@ -524,6 +524,8 @@ components:
           type: string
         label:
           type: string
+        disabled:
+          type: boolean
         questions:
           type: array
           items:
@@ -542,6 +544,10 @@ components:
           type: string
         label:
           type: string
+        none:
+          type: boolean
+        disabled:
+          type: boolean
         best_practices:
           type: array
           items:
