@@ -530,7 +530,7 @@ export function AssessmentDetails() {
               </div>
             );
           } else {
-            return <div className="text-base-content/50 text-center">-</div>;
+            return null;
           }
         },
       }),
