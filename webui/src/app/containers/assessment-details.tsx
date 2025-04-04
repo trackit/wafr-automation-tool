@@ -547,7 +547,7 @@ export function AssessmentDetails() {
       label: `${pillar.label} ${
         pillar.questions
           ? `${calculateCompletedQuestions(pillar.questions)}/${
-              pillar.questions.length
+              pillar.questions.filter((q) => !q.disabled).length
             }`
           : ''
       }`,
