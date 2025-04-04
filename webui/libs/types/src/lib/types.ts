@@ -66,19 +66,23 @@ export interface paths {
          */
         post: {
             parameters: {
-                query: {
-                    /** @description Name of the assessment to be created */
-                    name: string;
-                    /** @description The role ARN to associate with the assessment.
-                     *     If not provided, a default role will be used.
-                     *      */
-                    roleArn?: string;
-                };
+                query?: never;
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description Name of the assessment to be created */
+                        name: string;
+                        /** @description The role ARN to associate with the assessment.
+                         *     If not provided, a default role will be used.
+                         *      */
+                        roleArn?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description The assessment has been successfully created */
                 201: {
@@ -254,7 +258,41 @@ export interface paths {
          *     Once deleted, the assessment cannot be recovered.
          *
          */
-        delete: operations["deleteAssessment"];
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique ID of the assessment to delete */
+                    assessmentId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The assessment has been successfully deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -760,40 +798,4 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export interface operations {
-    deleteAssessment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The unique ID of the assessment to delete */
-                assessmentId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The assessment has been successfully deleted */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The specified assessment could not be found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-}
+export type operations = Record<string, never>;
