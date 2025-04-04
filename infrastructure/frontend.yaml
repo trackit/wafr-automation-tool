@@ -83,7 +83,7 @@ Resources:
     Type: AWS::Amplify::Branch
     Properties:
       AppId: !GetAtt AmplifyApp.AppId
-      BranchName: "feat/front-end-base"
+      BranchName: "main"
       Stage: PRODUCTION
       BuildSpec: |
         version: 1
