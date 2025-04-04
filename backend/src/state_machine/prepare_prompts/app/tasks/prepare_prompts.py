@@ -23,7 +23,7 @@ from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
-from utils.prompt import get_prompt
+from utils.files import get_prompt
 from utils.questions import FormattedQuestionSet
 from utils.s3 import get_s3_uri
 

@@ -13,7 +13,7 @@ from utils.tests import load_file
 from state_machine.event import PreparePromptsInput
 
 
-@patch("utils.prompt.get_prompt", return_value="prompt")
+@patch("utils.files.get_prompt", return_value="prompt")
 def test_prepare_prompts(get_prompt_mock: MagicMock):
     from ..app.tasks.prepare_prompts import PreparePrompts
 

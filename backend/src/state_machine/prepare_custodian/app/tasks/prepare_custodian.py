@@ -1,9 +1,9 @@
-from pathlib import Path
 from typing import override
 
-from common.config import S3_BUCKET
+from common.config import CUSTODIAN_FILE_NAME, S3_BUCKET
 from common.task import Task
 from services.storage import IStorageService
+from utils.files import get_custodian_policies
 from utils.s3 import get_s3_uri
 
 
@@ -13,10 +13,9 @@ class PrepareCustodian(Task[None, str]):
         super().__init__()
 
     def prepare_custodian(self) -> str:
-        with Path("./policies/policies.yml").open() as f:
-            policies = f.read()
-        self.storage_service.put(Bucket=S3_BUCKET, Key="custodian.yml", Body=policies)
-        return get_s3_uri(S3_BUCKET, "custodian.yml")
+        policies = get_custodian_policies()
+        self.storage_service.put(Bucket=S3_BUCKET, Key=CUSTODIAN_FILE_NAME, Body=policies)
+        return get_s3_uri(S3_BUCKET, CUSTODIAN_FILE_NAME)
 
     @override
     def execute(self, event: None) -> str:
