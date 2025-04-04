@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 
 from common.config import QUESTIONS_PATH
-from common.entities import BestPractice, FormattedPillar, FormattedQuestion, Pillar
+from entities.best_practice import BestPractice
+from entities.question import FormattedPillar, FormattedQuestion, Pillar
 from pydantic import BaseModel
 
 
@@ -35,10 +36,10 @@ def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
                     hidden_results=[],
                 )
             question = FormattedQuestion(
-                id=str(question_index), label=question_name, best_practices=best_practices, resolve=False
+                id=str(question_index), label=question_name, best_practices=best_practices, none=False, disabled=False
             )
             questions[str(question_index)] = question
-        pillar = FormattedPillar(id=str(pillar_index), label=pillar_name, questions=questions)
+        pillar = FormattedPillar(id=str(pillar_index), label=pillar_name, questions=questions, disabled=False)
         pillars[str(pillar_index)] = pillar
     return FormattedQuestionSet(data=pillars, version=question_set.version)
 

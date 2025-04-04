@@ -1,6 +1,10 @@
 from typing import Any
 
-from common.entities import APIAssessment, AssessmentDto, BestPracticeExtra, FindingExtra
+from entities.api import APIAssessment
+from entities.assessment import AssessmentDto, AssessmentID
+from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.finding import FindingDto, FindingExtra, FindingID
+from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -11,22 +15,22 @@ class StartAssessmentInput(BaseModel):
 
 
 class StartAssessmentResponseBody(APIResponseBody):
-    assessmentId: str  # noqa: N815
+    assessmentId: AssessmentID  # noqa: N815
 
 
 class StateMachineInput(BaseModel):
-    assessment_id: str
+    assessment_id: AssessmentID
     name: str
     role_arn: str
     created_at: str
 
 
 class DeleteAssessmentInput(BaseModel):
-    assessment_id: str
+    assessment_id: AssessmentID
 
 
 class RetrieveAssessmentInput(BaseModel):
-    assessment_id: str
+    assessment_id: AssessmentID
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
@@ -34,22 +38,22 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
 
 
 class RescanAssessmentInput(BaseModel):
-    assessment_id: str
+    assessment_id: AssessmentID
 
 
 class RetrieveBestPracticeFindingsInput(BaseModel):
-    assessment_id: str
-    pillar_id: str
-    question_id: str
-    best_practice_id: str
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    question_id: QuestionID
+    best_practice_id: BestPracticeID
 
 
 RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
 
 
 class RetrieveFindingInput(BaseModel):
-    assessment_id: str
-    finding_id: str
+    assessment_id: AssessmentID
+    finding_id: FindingID
 
 
 class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
@@ -69,29 +73,35 @@ class RetrieveAllAssessmentsResponseBody(APIResponseBody):
 
 
 class UpdateAssessmentInput(BaseModel):
-    assessment_id: str
+    assessment_id: AssessmentID
     assessment_dto: AssessmentDto
 
 
-class UpdateBestPracticeStatusInput(BaseModel):
-    assessment_id: str
-    pillar_id: str
-    question_id: str
-    best_practice_id: str
-    status: bool
+class UpdateBestPracticeInput(BaseModel):
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    question_id: QuestionID
+    best_practice_id: BestPracticeID
+    best_practice_dto: BestPracticeDto
 
 
-class UpdateQuestionResolveInput(BaseModel):
-    assessment_id: str
-    pillar_id: str
-    question_id: str
-    resolve: bool
+class UpdatePillarInput(BaseModel):
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    pillar_dto: PillarDto
 
 
-class UpdateFindingHideInput(BaseModel):
-    assessment_id: str
-    pillar_id: str
-    question_id: str
-    best_practice_id: str
-    finding_id: str
-    hide: bool
+class UpdateQuestionInput(BaseModel):
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    question_id: QuestionID
+    question_dto: QuestionDto
+
+
+class UpdateFindingInput(BaseModel):
+    assessment_id: AssessmentID
+    pillar_id: PillarID
+    question_id: QuestionID
+    best_practice_id: BestPracticeID
+    finding_id: FindingID
+    finding_dto: FindingDto

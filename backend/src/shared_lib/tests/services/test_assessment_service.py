@@ -2,8 +2,11 @@ from unittest.mock import MagicMock
 
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
-from common.entities import Assessment, AssessmentDto, BestPracticeExtra, FindingExtra, Pagination, PaginationOutput
-from common.enums import Steps
+from entities.api import APIPagination, APIPaginationOutput
+from entities.assessment import Assessment, AssessmentDto, Steps
+from entities.best_practice import BestPracticeDto, BestPracticeExtra
+from entities.database import UpdateAttrsInput
+from entities.finding import FindingExtra
 from services.assessment import AssessmentService
 
 from tests.__mocks__.fake_database_service import FakeDatabaseService
@@ -24,11 +27,13 @@ def test_assessment_service_retrieve():
                 "pillar-1": {
                     "id": "pillar-1",
                     "label": "Pillar 1",
+                    "disabled": False,
                     "questions": {
                         "question-1": {
                             "id": "question-1",
                             "label": "Question 1",
-                            "resolve": False,
+                            "none": False,
+                            "disabled": False,
                             "best_practices": {
                                 "best-practice-1": {
                                     "id": "best-practice-1",
@@ -59,11 +64,13 @@ def test_assessment_service_retrieve():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -111,11 +118,13 @@ def test_assessment_service_retrieve_all():
                         "pillar-1": {
                             "id": "pillar-1",
                             "label": "Pillar 1",
+                            "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
-                                    "resolve": False,
+                                    "none": False,
+                                    "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -138,10 +147,10 @@ def test_assessment_service_retrieve_all():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
 
-    pagination = Pagination(limit=10)
+    pagination = APIPagination(limit=10)
     assessments = assessment_service.retrieve_all(pagination)
 
-    assert assessments == PaginationOutput[Assessment](
+    assert assessments == APIPaginationOutput[Assessment](
         items=[
             Assessment(
                 id="test-assessment-id",
@@ -154,11 +163,13 @@ def test_assessment_service_retrieve_all():
                     "pillar-1": {
                         "id": "pillar-1",
                         "label": "Pillar 1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
-                                "resolve": False,
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -203,11 +214,13 @@ def test_assessment_service_retrieve_all_pagination():
                         "pillar-1": {
                             "id": "pillar-1",
                             "label": "Pillar 1",
+                            "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
                                     "label": "Question 1",
-                                    "resolve": False,
+                                    "none": False,
+                                    "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
@@ -228,9 +241,9 @@ def test_assessment_service_retrieve_all_pagination():
         }
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    pagination = Pagination(
+    pagination = APIPagination(
         limit=10,
-        filter="begins_with(#id, :id)",
+        filter_expression="begins_with(#id, :id)",
         attribute_name={"#id": "id"},
         attribute_value={":id": "test"},
         next_token="eyJ0ZXN0IjoidGVzdCJ9",  # noqa: S106
@@ -247,7 +260,7 @@ def test_assessment_service_retrieve_all_pagination():
         ExpressionAttributeNames={"#id": "id"},
         ExpressionAttributeValues={":id": "test"},
     )
-    assert assessments == PaginationOutput[Assessment](
+    assert assessments == APIPaginationOutput[Assessment](
         items=[
             Assessment(
                 id="test-assessment-id",
@@ -260,11 +273,13 @@ def test_assessment_service_retrieve_all_pagination():
                     "pillar-1": {
                         "id": "pillar-1",
                         "label": "Pillar 1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
                                 "label": "Question 1",
-                                "resolve": False,
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
@@ -315,11 +330,13 @@ def test_assessment_service_retrieve_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -341,6 +358,8 @@ def test_assessment_service_retrieve_best_practice():
     assert best_practice == BestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
+        risk="Low",
+        status=False,
         results=[
             FindingExtra(
                 id="prowler:1",
@@ -352,8 +371,7 @@ def test_assessment_service_retrieve_best_practice():
                 hidden=False,
             )
         ],
-        risk="Low",
-        status=False,
+        hidden_results=[],
     )
 
     fake_database_service.bulk_get.assert_called_once_with(
@@ -391,7 +409,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",
-        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "questions": {}}},
+        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "disabled": False, "questions": {}}},
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
     finding = assessment_service.retrieve_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
@@ -411,11 +429,13 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {},
                     }
                 },
@@ -440,11 +460,13 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -478,11 +500,13 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -503,9 +527,10 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
     assert finding == BestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
-        results=[],
         risk="Low",
         status=False,
+        results=[],
+        hidden_results=[],
     )
 
 
@@ -599,21 +624,23 @@ def test_assessment_service_update():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment_dto = AssessmentDto(name="test-assessment-name", role_arn="test-assessment-role")
-    assessment_service.update("test-assessment-id", assessment_dto)
+    assessment_service.update_assessment("test-assessment-id", assessment_dto)
 
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
-        key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
-        attrs={
-            "name": "test-assessment-name",
-            "role_arn": "test-assessment-role",
-        },
+        event=UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            attrs={
+                "name": "test-assessment-name",
+                "role_arn": "test-assessment-role",
+            },
+        ),
     )
 
 
 def test_assessment_service_update_best_practice():
     fake_database_service = FakeDatabaseService()
-    fake_database_service.update = MagicMock()
+    fake_database_service.update_attrs = MagicMock()
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment = Assessment(
@@ -627,11 +654,13 @@ def test_assessment_service_update_best_practice():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -647,22 +676,24 @@ def test_assessment_service_update_best_practice():
             }
         },
     )
+    best_practice_dto = BestPracticeDto(status=True)
 
-    assessment_service.update_best_practice(assessment, "pillar-1", "question-1", "best-practice-1", status=True)
+    assessment_service.update_best_practice(
+        assessment, "pillar-1", "question-1", "best-practice-1", best_practice_dto=best_practice_dto
+    )
 
-    fake_database_service.update.assert_called_once_with(
+    fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
-        Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
-        UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.#status = :status",
-        ExpressionAttributeNames={
-            "#pillar": "pillar-1",
-            "#question": "question-1",
-            "#best_practice": "best-practice-1",
-            "#status": "status",
-        },
-        ExpressionAttributeValues={
-            ":status": True,
-        },
+        event=UpdateAttrsInput(
+            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
+            expression_attribute_names={
+                "#pillar": "pillar-1",
+                "#question": "question-1",
+                "#best_practice": "best-practice-1",
+            },
+            attrs={"status": True},
+        ),
     )
 
 
@@ -679,11 +710,13 @@ def test_assessment_service_delete_findings():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",

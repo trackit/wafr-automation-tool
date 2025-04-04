@@ -18,7 +18,7 @@ storage_service = S3Service(s3_client, s3_resource)
 
 question_set = retrieve_questions()
 
-prepare_prompts_task = PreparePrompts(
+task = PreparePrompts(
     database_service=database_service,
     storage_service=storage_service,
     formatted_question_set=format_questions(question_set),
@@ -26,4 +26,4 @@ prepare_prompts_task = PreparePrompts(
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:  # noqa: ANN401
-    return prepare_prompts_task.execute(PreparePromptsInput(**event))
+    return task.execute(PreparePromptsInput(**event))

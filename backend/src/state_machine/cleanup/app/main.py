@@ -17,8 +17,8 @@ dynamodb_client = boto3.resource("dynamodb", region_name=REGION)
 storage_service = S3Service(s3_client, s3_resource)
 database_service = DDBService(dynamodb_client)
 assessment_service = AssessmentService(database_service)
-cleanup_task = Cleanup(storage_service, database_service, assessment_service)
+task = Cleanup(storage_service, database_service, assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:  # noqa: ANN401
-    cleanup_task.execute(CleanupInput(**event))
+    task.execute(CleanupInput(**event))

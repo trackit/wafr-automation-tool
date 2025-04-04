@@ -98,11 +98,13 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
         "0": {
             "id": "0",
             "label": "pillar-1",
+            "disabled": False,
             "questions": {
                 "0": {
                     "id": "0",
                     "label": "question-1",
-                    "resolve": False,
+                    "none": False,
+                    "disabled": False,
                     "best_practices": {
                         "0": {
                             "id": "0",
@@ -127,11 +129,13 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
         "1": {
             "id": "1",
             "label": "pillar-2",
+            "disabled": False,
             "questions": {
                 "0": {
                     "id": "0",
                     "label": "question-2",
-                    "resolve": False,
+                    "none": False,
+                    "disabled": False,
                     "best_practices": {
                         "0": {
                             "id": "0",

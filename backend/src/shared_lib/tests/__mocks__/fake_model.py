@@ -1,4 +1,4 @@
-from common.models import IModel
+from entities.models import IModel
 
 
 class FakeModel(IModel):

@@ -1,13 +1,13 @@
 from typing import override
 
-from common.entities import FindingExtra, FindingResource
+from entities.finding import FindingExtra, FindingID, FindingResource
 
 from services.scanning_tools.cloud_custodian.policy import Policy
 
 
 class EC2StoppedInstance(Policy):
     @override
-    def parse_finding(self, finding_id: str, finding: dict) -> FindingExtra:
+    def parse_finding(self, finding_id: FindingID, finding: dict) -> FindingExtra:
         region = finding.get("Placement", {})
         region = region.get("AvailabilityZone", {})
         return FindingExtra(

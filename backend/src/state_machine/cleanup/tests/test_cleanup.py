@@ -1,8 +1,7 @@
 from unittest.mock import MagicMock, call
 
 from common.config import PROWLER_COMPLIANCE_PATH, PROWLER_OCSF_PATH, S3_BUCKET
-from common.entities import Assessment, AssessmentDto
-from common.enums import Steps
+from entities.assessment import Assessment, AssessmentDto, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
@@ -51,11 +50,13 @@ def test_cleanup_on_error():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -79,7 +80,7 @@ def test_cleanup_on_error():
     storage_service.filter = MagicMock(return_value=[MagicMock(key="TEST")])
     storage_service.bulk_delete = MagicMock()
     assessment_service.delete_findings = MagicMock()
-    assessment_service.update = MagicMock()
+    assessment_service.update_assessment = MagicMock()
     assessment_service.retrieve = MagicMock(return_value=assessment)
 
     cleanup_input = CleanupInput(assessment_id="ID", error=StateMachineError(Error="ERROR", Cause="CAUSE"))
@@ -88,7 +89,7 @@ def test_cleanup_on_error():
 
     assessment_service.delete_findings.assert_called_once_with(assessment)
     assessment_service.retrieve.assert_called_once_with("ID")
-    assessment_service.update.assert_called_once_with(
+    assessment_service.update_assessment.assert_called_once_with(
         "ID",
         AssessmentDto(
             name=None,

@@ -1,4 +1,4 @@
-from common.entities import ScanningTool
+from entities.scanning_tools import ScanningTool
 
 from services.scanning_tools.cloud_custodian import CloudCustodianService
 from services.scanning_tools.cloudsploit import CloudSploitService

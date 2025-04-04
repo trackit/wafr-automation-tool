@@ -1,8 +1,7 @@
 from http.client import OK
 from unittest.mock import MagicMock
 
-from common.entities import Assessment
-from common.enums import Steps
+from entities.assessment import Assessment, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import DeleteAssessmentInput
@@ -22,11 +21,13 @@ def test_delete_assessment():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
-from common.entities import FindingExtra
+from entities.finding import FindingExtra
 from exceptions.ai import InvalidPromptResponseError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService

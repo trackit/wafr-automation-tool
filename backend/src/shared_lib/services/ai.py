@@ -2,7 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import override
 
-from common.models import IModel
+from entities.ai import Prompt
+from entities.models import IModel
 from types_boto3_bedrock_runtime import BedrockRuntimeClient
 
 logger = logging.getLogger("AIService")
@@ -11,7 +12,7 @@ logger.setLevel(logging.DEBUG)
 
 class IAIService(ABC):
     @abstractmethod
-    def converse(self, model: IModel, prompt: str) -> str:
+    def converse(self, model: IModel, prompt: Prompt) -> str:
         raise NotImplementedError
 
 
@@ -21,7 +22,7 @@ class BedrockService(IAIService):
         self.bedrock_client = bedrock_client
 
     @override
-    def converse(self, model: IModel, prompt: str) -> str:
+    def converse(self, model: IModel, prompt: Prompt) -> str:
         response = self.bedrock_client.converse_stream(
             modelId=model.id,
             inferenceConfig={

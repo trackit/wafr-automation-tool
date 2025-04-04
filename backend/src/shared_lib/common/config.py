@@ -1,7 +1,7 @@
 import os
 
-from common.entities import AIModel
-from common.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, DeepSeekR1, IModel, NovaPro
+from entities.ai import AIModel
+from entities.models import Claude3Dot5Sonnet, Claude3Dot7Sonnet, DeepSeekR1, IModel, NovaPro
 
 DEBUG = os.getenv("DEBUG", "false") == "true"
 REGION = os.getenv("REGION", "us-west-2")
@@ -18,6 +18,8 @@ SCANNING_TOOL_TITLE_PLACEHOLDER = "[SCANNING_TOOL_TITLE]"
 SCANNING_TOOL_DATA_PLACEHOLDER = "[SCANNING_TOOL_DATA]"
 QUESTION_SET_DATA_PLACEHOLDER = "[QUESTION_SET_DATA]"
 PROMPT_PATH = "./data/prompt.txt"
+CUSTODIAN_POLICIES_PATH = "./policies/policies.yml"
+CUSTODIAN_FILE_NAME = "custodian.yml"
 
 PROWLER_OCSF_PATH = "assessments/{}/scans/prowler/json-ocsf/output.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "assessments/{}/scans/prowler/compliance/output"

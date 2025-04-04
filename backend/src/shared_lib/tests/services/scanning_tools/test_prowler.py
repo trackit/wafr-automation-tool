@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from common.config import PROWLER_OCSF_PATH, S3_BUCKET
-from common.entities import FindingExtra, FindingRemediation, FindingResource
+from entities.finding import FindingExtra, FindingRemediation, FindingResource
 from services.scanning_tools.prowler import ProwlerService
 from utils.tests import load_file
 

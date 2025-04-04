@@ -1,8 +1,8 @@
 from http.client import OK
 from unittest.mock import MagicMock
 
-from common.entities import Assessment, PaginationOutput
-from common.enums import Steps
+from entities.api import APIPaginationOutput
+from entities.assessment import Assessment, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import RetrieveAllAssessmentsInput, RetrieveAllAssessmentsResponseBody
@@ -26,7 +26,7 @@ def test_retrieve_all_assessments():
     assessments_dicts[0]["error"] = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(
-        return_value=PaginationOutput[Assessment](items=assessments, next_token=None)
+        return_value=APIPaginationOutput[Assessment](items=assessments, next_token=None)
     )
 
     task = RetrieveAllAssessments(assessment_service)
@@ -40,7 +40,7 @@ def test_retrieve_all_assessments():
 
 def test_retrieve_all_assessments_not_found():
     assessment_service = FakeAssessmentService()
-    assessment_service.retrieve_all = MagicMock(return_value=PaginationOutput[Assessment](items=[], next_token=None))
+    assessment_service.retrieve_all = MagicMock(return_value=APIPaginationOutput[Assessment](items=[], next_token=None))
 
     task = RetrieveAllAssessments(assessment_service)
     task_input = RetrieveAllAssessmentsInput(limit=10, search=None, next_token=None, api_id="")
@@ -67,7 +67,7 @@ def test_retrieve_all_assessments_with_search():
     assessments_dicts[0]["error"] = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(
-        return_value=PaginationOutput[Assessment](items=assessments, next_token=None)
+        return_value=APIPaginationOutput[Assessment](items=assessments, next_token=None)
     )
 
     task = RetrieveAllAssessments(assessment_service)

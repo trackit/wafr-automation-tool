@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from typing import Any, Unpack, override
 
+from entities.database import UpdateAttrsInput
 from services.database import IDatabaseService
 from types_boto3_dynamodb.type_defs import (
     GetItemInputTableGetItemTypeDef,
@@ -29,12 +30,7 @@ class FakeDatabaseService(IDatabaseService):
         raise NotImplementedError
 
     @override
-    def update_attrs(
-        self,
-        table_name: str,
-        key: Mapping[str, TableAttributeValueTypeDef],
-        attrs: dict[str, Any],
-    ) -> None:
+    def update_attrs(self, table_name: str, event: UpdateAttrsInput) -> None:
         raise NotImplementedError
 
     @override

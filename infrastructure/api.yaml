@@ -282,12 +282,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
-  UpdateQuestionResolveFunction:
+  UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/update_question_resolve/app
+      CodeUri: ../backend/src/api/update_pillar/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -297,11 +297,32 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateQuestionResolve:
+        UpdatePillar:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}
+            Method: PUT
+  UpdateQuestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/api/update_question/app
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdateQuestion:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
   RetrieveBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
@@ -324,12 +345,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
-  UpdateBestPracticeStatusFunction:
+  UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/update_best_practice_status/app
+      CodeUri: ../backend/src/api/update_best_practice/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -339,11 +360,11 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateBestPracticeStatus:
+        UpdateBestPractice:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: PUT
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
@@ -359,18 +380,18 @@ Resources:
                 - dynamodb:GetItem
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        RetrieveFinding:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
-  UpdateFindingHideFunction:
+  UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/update_finding_hide/app
+      CodeUri: ../backend/src/api/update_finding/app
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -380,11 +401,11 @@ Resources:
                 - dynamodb:UpdateItem
               Resource: !Ref DynamoDBArn
       Events:
-        UpdateFindingHide:
+        UpdateFinding:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}
+            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
             Method: PUT
 
 Outputs:

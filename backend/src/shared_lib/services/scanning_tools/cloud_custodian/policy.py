@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
-from common.entities import FindingExtra
+from entities.finding import FindingExtra, FindingID
 
 
 class Policy(ABC):
     @abstractmethod
-    def parse_finding(self, finding_id: str, finding: dict) -> FindingExtra:
+    def parse_finding(self, finding_id: FindingID, finding: dict) -> FindingExtra:
         raise NotImplementedError
 
     def parse(self, index_offset: int, finding: dict) -> list[FindingExtra]:

@@ -35,8 +35,7 @@
 - [Getting started](#getting-started)
   - [Requirements](#requirements)
   - [Backend](#backend)
-    - [Installing dependencies](#installing-dependencies)
-    - [Tests](#tests)
+  - [Frontend](#frontend)
 - [Deployment](#deployment)
   - [Build](#build)
   - [Deploy](#deploy)
@@ -59,74 +58,14 @@ The WAFR Automation Tool uses a serverless architecture built on AWS services:
 
 ## Getting started
 
-The tool leverages Python 3.12 runtime and can be deployed to different environments (dev/prod) using SAM templates.
-
-- [uv](https://docs.astral.sh/uv/#installation)
-- [Docker >= 19.03](https://docs.docker.com/get-docker/)
-  - the Docker daemon must also be running
-- [AWS SAM CLI >= 1.116.0](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions)
 
 ### Backend
 
-#### Installing dependencies
-
-Change directory to `backend/` using:
-
-```bash
-cd backend/
-```
-
-With [uv](https://docs.astral.sh/uv/#installation) installed, run:
-
-```bash
-uv sync
-```
-
-#### Tests
-
-To run tests locally, run:
-
-```shell
-uv run pytest
-```
+More information about the backend can be found in the Backend [README](./backend/README.md).
 
 ### Frontend
 
-Change directory to `frontend/` using:
-
-```shell
-cd webui/
-```
-
-With [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed, run:
-
-```shell
-npm install
-```
-
-#### Development
-
-To run the frontend locally, run:
-
-```shell
-npm run dev
-```
-
-#### Build
-
-To build the frontend, run:
-
-```shell
-npm run build
-```
-
-#### Tests
-
-To run tests locally, run:
-
-```shell
-npm run test
-```
+More information about the frontend can be found in the Frontend [README](./frontend/README.md).
 
 ## Deployment
 

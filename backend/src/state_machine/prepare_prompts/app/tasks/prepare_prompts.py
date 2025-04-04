@@ -13,14 +13,17 @@ from common.config import (
     STORE_CHUNK_PATH,
     STORE_PROMPT_PATH,
 )
-from common.entities import Finding, FindingExtra, Prompt, PromptS3Uri
 from common.task import Task
+from entities.ai import Prompt, PromptS3Uri
+from entities.assessment import AssessmentID
+from entities.database import UpdateAttrsInput
+from entities.finding import Finding, FindingExtra
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
-from utils.prompt import get_prompt
+from utils.files import get_prompt
 from utils.questions import FormattedQuestionSet
 from utils.s3 import get_s3_uri
 
@@ -41,21 +44,21 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.storage_service = storage_service
         self.formatted_question_set = formatted_question_set
 
-    def populate_dynamodb(self, assessment_id: str) -> None:
+    def populate_dynamodb(self, assessment_id: AssessmentID) -> None:
         attrs: dict[str, Any] = {
             "findings": self.formatted_question_set.data,
             "question_version": self.formatted_question_set.version,
         }
-        self.database_service.update_attrs(
-            table_name=DDB_TABLE,
+        event = UpdateAttrsInput(
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
             attrs=attrs,
         )
+        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
     def save_chunk_for_retrieve(
         self,
         scanning_tool_service: IScanningToolService,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         chunk_index: int,
         chunk: list[FindingExtra],
     ) -> None:
@@ -69,7 +72,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def create_chunks(
         self,
         scanning_tool_service: IScanningToolService,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         findings: list[FindingExtra],
     ) -> list[list[Finding]]:
         initial_chunks = [findings[i : i + CHUNK_SIZE] for i in range(0, len(findings), CHUNK_SIZE)]
@@ -82,7 +85,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def create_prompts_from_chunks(
         self,
         scanning_tool_service: IScanningToolService,
-        prompt: str,
+        prompt: Prompt,
         chunks: list[list[Finding]],
     ) -> list[Prompt]:
         prompt = prompt.replace(SCANNING_TOOL_TITLE_PLACEHOLDER, scanning_tool_service.title)
@@ -120,7 +123,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def store_prompts(
         self,
         scanning_tool_service: IScanningToolService,
-        assessment_id: str,
+        assessment_id: AssessmentID,
         prompts: list[Prompt],
     ) -> list[PromptS3Uri]:
         prompt_uris: list[PromptS3Uri] = []
@@ -135,7 +138,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             )
         return prompt_uris
 
-    def create_prompts(self, scanning_tool_service: IScanningToolService, assessment_id: str) -> list[Prompt]:
+    def create_prompts(self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID) -> list[Prompt]:
         findings = scanning_tool_service.retrieve_findings(assessment_id)
         chunks = self.create_chunks(scanning_tool_service, assessment_id, findings)
         prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)

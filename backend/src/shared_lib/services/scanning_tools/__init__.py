@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from common.entities import FindingExtra
+from entities.assessment import AssessmentID
+from entities.finding import FindingExtra
 
 from services.storage import IStorageService
 
@@ -13,5 +14,5 @@ class IScanningToolService(ABC):
         self.storage_service = storage_service
 
     @abstractmethod
-    def retrieve_findings(self, assessment_id: str) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
         raise NotImplementedError

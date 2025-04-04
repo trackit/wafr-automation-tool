@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any, Unpack, override
 
 from botocore.exceptions import ClientError
+from entities.database import UpdateAttrsInput
 from exceptions.database import DynamoDBError
 from types_boto3_dynamodb import DynamoDBServiceResource
 from types_boto3_dynamodb.type_defs import (
@@ -38,8 +39,7 @@ class IDatabaseService(ABC):
     def update_attrs(
         self,
         table_name: str,
-        key: Mapping[str, TableAttributeValueTypeDef],
-        attrs: dict[str, Any],
+        event: UpdateAttrsInput,
     ) -> None:
         raise NotImplementedError
 
@@ -126,18 +126,17 @@ class DDBService(IDatabaseService):
     def update_attrs(
         self,
         table_name: str,
-        key: Mapping[str, TableAttributeValueTypeDef],
-        attrs: dict[str, Any],
+        event: UpdateAttrsInput,
     ) -> None:
         update_expression = "SET "
-        expression_attribute_names = {}
+        expression_attribute_names = event.expression_attribute_names or {}
         expression_attribute_values = {}
-        for attr_name, attr_value in attrs.items():
-            update_expression += f"#{attr_name} = :{attr_name}, "
+        for attr_name, attr_value in event.attrs.items():
+            update_expression += f"{event.update_expression_path or ''}#{attr_name} = :{attr_name}, "
             expression_attribute_names[f"#{attr_name}"] = attr_name
             expression_attribute_values[f":{attr_name}"] = attr_value
         update_params: UpdateItemInputTableUpdateItemTypeDef = {
-            "Key": key,
+            "Key": event.key,
             "UpdateExpression": update_expression[:-2],
             "ExpressionAttributeNames": expression_attribute_names,
             "ExpressionAttributeValues": expression_attribute_values,

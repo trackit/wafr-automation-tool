@@ -1,5 +1,5 @@
-from common.entities import APIAssessment, Assessment
-from common.enums import Steps
+from entities.api import APIAssessment
+from entities.assessment import Assessment, Steps
 from utils.assessment import convert_assessment_to_api_assessment
 
 
@@ -15,11 +15,13 @@ def test_convert_assessment_to_api_assessment():
             "pillar-1": {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
@@ -48,11 +50,13 @@ def test_convert_assessment_to_api_assessment():
             {
                 "id": "pillar-1",
                 "label": "Pillar 1",
+                "disabled": False,
                 "questions": [
                     {
                         "id": "question-1",
                         "label": "Question 1",
-                        "resolve": False,
+                        "none": False,
+                        "disabled": False,
                         "best_practices": [
                             {
                                 "id": "best-practice-1",

@@ -3,8 +3,8 @@ import json
 from http.client import OK
 from typing import Any, override
 
-from common.entities import APIAssessment, Pagination
 from common.task import Task
+from entities.api import APIAssessment, APIPagination
 from services.assessment import IAssessmentService
 from utils.api import APIResponse
 from utils.assessment import convert_all_assessments_to_api_assessments
@@ -27,7 +27,11 @@ class RetrieveAllAssessments(
             result.append(assessment_dict)
         return result
 
-    def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    def create_filter(
+        self, event: RetrieveAllAssessmentsInput
+    ) -> tuple[str, dict[str, Any], dict[str, Any]] | tuple[None, None, None]:
+        if event.search is None:
+            return (None, None, None)
         filter_expression = "contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)"
         attribute_name = {
             "#name": "name",
@@ -43,13 +47,11 @@ class RetrieveAllAssessments(
 
     @override
     def execute(self, event: RetrieveAllAssessmentsInput) -> APIResponse[RetrieveAllAssessmentsResponseBody]:
-        filter_expression, attribute_name, attribute_value = (
-            self.create_filter(event) if event.search else (None, None, None)
-        )
-        pagination = Pagination(
+        filter_expression, attribute_name, attribute_value = self.create_filter(event)
+        pagination = APIPagination(
             limit=event.limit,
             next_token=event.next_token,
-            filter=filter_expression,
+            filter_expression=filter_expression,
             attribute_name=attribute_name,
             attribute_value=attribute_value,
         )

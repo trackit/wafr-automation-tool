@@ -6,9 +6,8 @@ from common.config import (
     PROWLER_OCSF_PATH,
     S3_BUCKET,
 )
-from common.entities import AssessmentDto
-from common.enums import Steps
 from common.task import Task
+from entities.assessment import AssessmentDto, Steps
 from services.assessment import IAssessmentService
 from services.database import IDatabaseService
 from services.storage import IStorageService
@@ -51,7 +50,7 @@ class Cleanup(Task[CleanupInput, None]):
             step=Steps.ERRORED,
             error=error,
         )
-        self.assessment_service.update(event.assessment_id, assessment_dto)
+        self.assessment_service.update_assessment(event.assessment_id, assessment_dto)
 
     @override
     def execute(self, event: CleanupInput) -> None:

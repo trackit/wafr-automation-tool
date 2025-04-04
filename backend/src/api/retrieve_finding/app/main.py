@@ -10,11 +10,11 @@ from api.event import RetrieveFindingInput
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
 assessment_service = AssessmentService(database_service)
-retrieve_finding_task = RetrieveFinding(assessment_service)
+task = RetrieveFinding(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
-    response = retrieve_finding_task.execute(
+    response = task.execute(
         RetrieveFindingInput(
             assessment_id=event["pathParameters"]["assessmentId"],
             finding_id=event["pathParameters"]["findingId"],
