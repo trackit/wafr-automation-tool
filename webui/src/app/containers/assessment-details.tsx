@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, act } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Tabs,
@@ -11,7 +11,7 @@ import {
 import {
   getAssessment,
   updateStatus,
-  resolveQuestion,
+  updateQuestion,
   rescanAssessment,
 } from '@webui/api-client';
 import { components } from '@webui/types';
@@ -20,6 +20,7 @@ import {
   RefreshCw,
   EllipsisVertical,
   CircleMinus,
+  CircleCheck,
 } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link, useParams, useNavigate } from 'react-router';
@@ -153,19 +154,22 @@ export function AssessmentDetails() {
     },
   });
 
-  const resolveQuestionMutation = useMutation({
+  const updateQuestionMutation = useMutation({
     mutationFn: ({
       assessmentId,
       pillarId,
       questionId,
-      resolve,
+      none,
+      disabled,
     }: {
       assessmentId: string;
       pillarId: string;
       questionId: string;
-      resolve: boolean;
-    }) => resolveQuestion({ assessmentId, pillarId, questionId, resolve }),
-    onMutate: async ({ pillarId, questionId, resolve }) => {
+      none?: boolean;
+      disabled?: boolean;
+    }) =>
+      updateQuestion({ assessmentId, pillarId, questionId, none, disabled }),
+    onMutate: async ({ pillarId, questionId, none, disabled }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
@@ -192,7 +196,12 @@ export function AssessmentDetails() {
         if (pillar.id === pillarId) {
           for (const question of pillar.questions || []) {
             if (question.id === questionId) {
-              question.resolve = resolve;
+              if (none !== undefined) {
+                question.none = none;
+              }
+              if (disabled !== undefined) {
+                question.disabled = disabled;
+              }
               updated = true;
               break;
             }
@@ -208,7 +217,8 @@ export function AssessmentDetails() {
       if (activeQuestion?.id === questionId) {
         setActiveQuestion({
           ...activeQuestion,
-          resolve,
+          none: none || activeQuestion.none,
+          disabled: disabled || activeQuestion.disabled,
         });
       }
 
@@ -257,16 +267,28 @@ export function AssessmentDetails() {
     },
   });
 
-  const handleResolveQuestion = useCallback(
-    (questionId: string, resolve: boolean) => {
-      resolveQuestionMutation.mutate({
+  const handleNoneQuestion = useCallback(
+    (questionId: string, none: boolean) => {
+      updateQuestionMutation.mutate({
         assessmentId: id || '',
         pillarId: selectedPillar?.id || '',
         questionId,
-        resolve,
+        none,
       });
     },
-    [id, selectedPillar?.id, resolveQuestionMutation]
+    [id, selectedPillar?.id, updateQuestionMutation]
+  );
+
+  const handleDisabledQuestion = useCallback(
+    (questionId: string, disabled: boolean) => {
+      updateQuestionMutation.mutate({
+        assessmentId: id || '',
+        pillarId: selectedPillar?.id || '',
+        questionId,
+        disabled,
+      });
+    },
+    [id, selectedPillar?.id, updateQuestionMutation]
   );
 
   // Add effect to update active question when pillar changes
@@ -356,7 +378,7 @@ export function AssessmentDetails() {
               }
               onChange={(e) => {
                 if (info.row.original.id === 'resolve') {
-                  handleResolveQuestion(
+                  handleNoneQuestion(
                     activeQuestion?.id || '',
                     e.target.checked
                   );
@@ -457,7 +479,7 @@ export function AssessmentDetails() {
       columnHelper,
       handleUpdateStatus,
       activeQuestion?.none,
-      handleResolveQuestion,
+      handleNoneQuestion,
       activeQuestion?.id,
     ]
   );
@@ -653,6 +675,7 @@ export function AssessmentDetails() {
                   (bestPractice) => bestPractice.status
                 ) ?? false,
               error: latestQuestion.none,
+              disabled: latestQuestion.disabled,
             };
           })}
         />
@@ -689,27 +712,51 @@ export function AssessmentDetails() {
               >
                 <li>
                   <button
-                    className="flex flex-row gap-2 w-full text-left text-error"
+                    className={`flex flex-row gap-2 w-full text-left ${
+                      activeQuestion?.disabled
+                        ? 'text-base-content'
+                        : 'text-error'
+                    }`}
                     onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                      handleDisabledQuestion(
+                        activeQuestion?.id || '',
+                        !activeQuestion?.disabled
+                      );
                     }}
                   >
-                    <CircleMinus className="w-4 h-4" /> Disable this question
+                    {activeQuestion?.disabled ? (
+                      <>
+                        <CircleCheck className="w-4 h-4" /> Enable this question
+                      </>
+                    ) : (
+                      <>
+                        <CircleMinus className="w-4 h-4" /> Disable this
+                        question
+                      </>
+                    )}
                   </button>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-            {activeQuestion && (
-              <DataTable
-                key={`${selectedPillar?.id}-${activeQuestion.id}`}
-                data={tableData}
-                columns={columns}
-              />
-            )}
-          </div>
+          {activeQuestion?.disabled && (
+            <div className="flex flex-row gap-2 items-center justify-between p-8">
+              <h3 className="text-center font-medium text-xl  flex-1">
+                This question is disabled
+              </h3>
+            </div>
+          )}
+          {!activeQuestion?.disabled && (
+            <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+              {activeQuestion && (
+                <DataTable
+                  key={`${selectedPillar?.id}-${activeQuestion.id}`}
+                  data={tableData}
+                  columns={columns}
+                />
+              )}
+            </div>
+          )}
           {!isLastQuestion && (
             <div className="flex flex-row gap-2 justify-end mt-auto">
               <button

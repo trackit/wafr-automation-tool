@@ -5,6 +5,7 @@ export type MenuItem = {
   completed?: boolean;
   started?: boolean;
   error?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 };
 
@@ -22,22 +23,33 @@ function MenuItemComponent({ item, index }: { item: MenuItem; index: number }) {
       }`}
       onClick={item.onClick}
       aria-current={item.active ? 'true' : undefined}
+      aria-disabled={item.disabled}
     >
       {item.active && (
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
       )}
-      {item.completed && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
-      )}
-      {item.started && !item.completed && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning"></div>
-      )}
-      {item.error && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+      {!item.disabled && (
+        <>
+          {item.completed && (
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
+          )}
+          {item.started && !item.completed && (
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-warning"></div>
+          )}
+          {item.error && (
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+          )}
+        </>
       )}
       <div className="flex">
         <div className="w-6 flex-shrink-0">{index}.</div>
-        <div>{item.text}</div>
+        <div
+          className={`${
+            item.disabled ? 'text-base-content/50 line-through' : ''
+          }`}
+        >
+          {item.text}
+        </div>
       </div>
     </div>
   );
