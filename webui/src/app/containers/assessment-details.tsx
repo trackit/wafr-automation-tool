@@ -490,6 +490,7 @@ export function AssessmentDetails() {
 
     // Iterate through each question in the pillar
     for (const question of questions) {
+      if (question.disabled) continue;
       // Check if the question has any high severity best practices
       const hasHighSeverityPractices = question.best_practices?.some(
         (bestPractice) => bestPractice.risk === 'High'
