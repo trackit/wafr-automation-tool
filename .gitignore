@@ -59,6 +59,8 @@ Temporary Items
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/**/*theme*.xml
+.idea/**/vcs.xml
 
 # AWS User-specific
 .idea/**/aws.xml
