@@ -13,6 +13,7 @@ import {
   updateStatus,
   updateQuestion,
   rescanAssessment,
+  updatePillar,
 } from '@webui/api-client';
 import { components } from '@webui/types';
 import {
@@ -143,6 +144,83 @@ export function AssessmentDetails() {
             if (question) {
               setActiveQuestion(question);
             }
+          }
+        }
+      }
+    },
+    onSettled: () => {
+      console.log('Mutation settled, refetching data');
+      // Always refetch after error or success to ensure data is in sync with server
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+    },
+  });
+
+  const updatePillarMutation = useMutation({
+    mutationFn: ({
+      assessmentId,
+      pillarId,
+      disabled,
+    }: {
+      assessmentId: string;
+      pillarId: string;
+      disabled: boolean;
+    }) => updatePillar({ assessmentId, pillarId, disabled }),
+    onMutate: async ({ pillarId, disabled }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ['assessment', id],
+      });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['assessment', id]) as
+        | components['schemas']['AssessmentContent']
+        | undefined;
+
+      if (!previousData?.findings) {
+        console.log('No previous data found');
+        return { previousData };
+      }
+
+      // Create a deep copy of the data
+      const newData = JSON.parse(
+        JSON.stringify(previousData)
+      ) as components['schemas']['AssessmentContent'];
+
+      // Find and update the specific pillar
+      for (const pillar of newData.findings || []) {
+        if (pillar.id === pillarId) {
+          pillar.disabled = disabled;
+          break;
+        }
+      }
+
+      // Update the cache with our optimistic value
+      queryClient.setQueryData(['assessment', id], newData);
+
+      // Update local state optimistically if we're viewing the updated pillar
+      if (selectedPillar?.id === pillarId) {
+        setSelectedPillar({
+          ...selectedPillar,
+          disabled,
+        });
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      console.log('Error occurred, rolling back to:', context?.previousData);
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(['assessment', id], context.previousData);
+
+        // Find the current pillar in the previous data
+        if (context.previousData.findings) {
+          const pillar = context.previousData.findings.find(
+            (p) => p.id === selectedPillar?.id
+          );
+          if (pillar) {
+            setSelectedPillar(pillar);
           }
         }
       }
@@ -289,6 +367,17 @@ export function AssessmentDetails() {
       });
     },
     [id, selectedPillar?.id, updateQuestionMutation]
+  );
+
+  const handleDisabledPillar = useCallback(
+    (pillarId: string, disabled: boolean) => {
+      updatePillarMutation.mutate({
+        assessmentId: id || '',
+        pillarId,
+        disabled,
+      });
+    },
+    [id, updatePillarMutation]
   );
 
   // Add effect to update active question when pillar changes
@@ -555,6 +644,7 @@ export function AssessmentDetails() {
           : ''
       }`,
       id: pillar.id || `pillar-${index}`,
+      disabled: pillar.disabled,
       action: (
         <div
           className="dropdown dropdown-end"
@@ -576,20 +666,31 @@ export function AssessmentDetails() {
           >
             <li>
               <button
-                className="flex flex-row gap-2 w-full text-left text-error"
+                className={`flex flex-row gap-2 w-full text-left ${
+                  pillar.disabled ? 'text-base-content' : 'text-error'
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  handleDisabledPillar(pillar.id || '', !pillar.disabled);
                 }}
               >
-                <CircleMinus className="w-4 h-4" /> Disable this pillar
+                {pillar.disabled ? (
+                  <>
+                    <CircleCheck className="w-4 h-4" /> Enable this pillar
+                  </>
+                ) : (
+                  <>
+                    <CircleMinus className="w-4 h-4" /> Disable this pillar
+                  </>
+                )}
               </button>
             </li>
           </ul>
         </div>
       ),
     }));
-  }, [data?.findings]);
+  }, [data?.findings, handleDisabledPillar]);
 
   if (isLoading)
     return (
@@ -655,123 +756,140 @@ export function AssessmentDetails() {
         }}
       />
       <div className="flex-1 flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
-        <VerticalMenu
-          items={(selectedPillar?.questions || []).map((question, index) => {
-            // Find the latest question data from the cache
-            const latestQuestion =
-              data?.findings
-                ?.find((p) => p.id === selectedPillar?.id)
-                ?.questions?.find((q) => q.id === question.id) || question;
-
-            return {
-              text: question.label || '',
-              id: question.id || `question-${index}`,
-              active: activeQuestionIndex === index,
-              onClick: () => setActiveQuestionIndex(index),
-              completed:
-                latestQuestion.best_practices?.every(
-                  (bestPractice) =>
-                    bestPractice.risk !== 'High' || bestPractice.status === true
-                ) ?? false,
-              started:
-                latestQuestion.best_practices?.some(
-                  (bestPractice) => bestPractice.status
-                ) ?? false,
-              error: latestQuestion.none,
-              disabled: latestQuestion.disabled,
-            };
-          })}
-        />
-        <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
-          <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
-            <h3 className="text-center font-medium text-xl text-primary flex-1">
-              <span className="font-medium">
-                {selectedPillar?.questions
-                  ? `${activeQuestionIndex + 1} / ${
-                      selectedPillar.questions.length
-                    }`
-                  : ''}
-              </span>
-              {'. '}
-              <span className="font-light">{activeQuestion?.label}</span>
+        {selectedPillar?.disabled && (
+          <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
+            <h3 className="text-center font-medium text-xl  flex-1">
+              This pillar is disabled
             </h3>
-            <div
-              className="dropdown dropdown-end"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-xs p-1"
-              >
-                <EllipsisVertical className="w-4 h-4 text-base-content/80" />
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-              >
-                <li>
-                  <button
-                    className={`flex flex-row gap-2 w-full text-left ${
-                      activeQuestion?.disabled
-                        ? 'text-base-content'
-                        : 'text-error'
-                    }`}
-                    onClick={(e) => {
-                      handleDisabledQuestion(
-                        activeQuestion?.id || '',
-                        !activeQuestion?.disabled
-                      );
-                    }}
-                  >
-                    {activeQuestion?.disabled ? (
-                      <>
-                        <CircleCheck className="w-4 h-4" /> Enable this question
-                      </>
-                    ) : (
-                      <>
-                        <CircleMinus className="w-4 h-4" /> Disable this
-                        question
-                      </>
-                    )}
-                  </button>
-                </li>
-              </ul>
-            </div>
           </div>
-          {activeQuestion?.disabled && (
-            <div className="flex flex-row gap-2 items-center justify-between p-8">
-              <h3 className="text-center font-medium text-xl  flex-1">
-                This question is disabled
-              </h3>
-            </div>
-          )}
-          {!activeQuestion?.disabled && (
-            <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-              {activeQuestion && (
-                <DataTable
-                  key={`${selectedPillar?.id}-${activeQuestion.id}`}
-                  data={tableData}
-                  columns={columns}
-                />
+        )}
+        {!selectedPillar?.disabled && (
+          <>
+            <VerticalMenu
+              items={(selectedPillar?.questions || []).map(
+                (question, index) => {
+                  // Find the latest question data from the cache
+                  const latestQuestion =
+                    data?.findings
+                      ?.find((p) => p.id === selectedPillar?.id)
+                      ?.questions?.find((q) => q.id === question.id) ||
+                    question;
+
+                  return {
+                    text: question.label || '',
+                    id: question.id || `question-${index}`,
+                    active: activeQuestionIndex === index,
+                    onClick: () => setActiveQuestionIndex(index),
+                    completed:
+                      latestQuestion.best_practices?.every(
+                        (bestPractice) =>
+                          bestPractice.risk !== 'High' ||
+                          bestPractice.status === true
+                      ) ?? false,
+                    started:
+                      latestQuestion.best_practices?.some(
+                        (bestPractice) => bestPractice.status
+                      ) ?? false,
+                    error: latestQuestion.none,
+                    disabled: latestQuestion.disabled,
+                  };
+                }
+              )}
+            />
+
+            <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
+              <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
+                <h3 className="text-center font-medium text-xl text-primary flex-1">
+                  <span className="font-medium">
+                    {selectedPillar?.questions
+                      ? `${activeQuestionIndex + 1} / ${
+                          selectedPillar.questions.length
+                        }`
+                      : ''}
+                  </span>
+                  {'. '}
+                  <span className="font-light">{activeQuestion?.label}</span>
+                </h3>
+                <div
+                  className="dropdown dropdown-end"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="btn btn-ghost btn-xs p-1"
+                  >
+                    <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                  >
+                    <li>
+                      <button
+                        className={`flex flex-row gap-2 w-full text-left ${
+                          activeQuestion?.disabled
+                            ? 'text-base-content'
+                            : 'text-error'
+                        }`}
+                        onClick={(e) => {
+                          handleDisabledQuestion(
+                            activeQuestion?.id || '',
+                            !activeQuestion?.disabled
+                          );
+                        }}
+                      >
+                        {activeQuestion?.disabled ? (
+                          <>
+                            <CircleCheck className="w-4 h-4" /> Enable this
+                            question
+                          </>
+                        ) : (
+                          <>
+                            <CircleMinus className="w-4 h-4" /> Disable this
+                            question
+                          </>
+                        )}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              {activeQuestion?.disabled && (
+                <div className="flex flex-row gap-2 items-center justify-between p-8">
+                  <h3 className="text-center font-medium text-xl  flex-1">
+                    This question is disabled
+                  </h3>
+                </div>
+              )}
+              {!activeQuestion?.disabled && (
+                <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                  {activeQuestion && (
+                    <DataTable
+                      key={`${selectedPillar?.id}-${activeQuestion.id}`}
+                      data={tableData}
+                      columns={columns}
+                    />
+                  )}
+                </div>
+              )}
+              {!isLastQuestion && (
+                <div className="flex flex-row gap-2 justify-end mt-auto">
+                  <button
+                    className="btn btn-link no-underline"
+                    onClick={handleNextQuestion}
+                  >
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
-          )}
-          {!isLastQuestion && (
-            <div className="flex flex-row gap-2 justify-end mt-auto">
-              <button
-                className="btn btn-link no-underline"
-                onClick={handleNextQuestion}
-              >
-                Next
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </>
   );

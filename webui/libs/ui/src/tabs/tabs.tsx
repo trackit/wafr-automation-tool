@@ -1,10 +1,10 @@
 import './tabs.css';
-import { EllipsisVertical, CircleMinus } from 'lucide-react';
 
 export type Tab = {
   label: string;
   id: string;
   action?: React.ReactNode;
+  disabled?: boolean;
 };
 
 export type TabsProps = {
@@ -21,11 +21,18 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
           role="tab"
           className={`tab ${
             tab.id === activeTab ? 'tab-active text-primary' : ''
-          }`}
+          } ${tab.disabled ? 'cursor-not-allowed' : ''}`}
           key={tab.id}
-          onClick={() => onChange(tab.id)}
+          onClick={() => {
+            if (tab.disabled) return;
+            onChange(tab.id);
+          }}
         >
-          {tab.label}
+          <span
+            className={tab.disabled ? 'line-through text-base-content/30' : ''}
+          >
+            {tab.label}
+          </span>
           {tab.action}
         </div>
       ))}

@@ -260,6 +260,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/pillars/{pillarId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the details of a specific pillar
+         * @description Updates the details of a specific pillar.
+         *
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the assessment */
+                    assessmentId: number;
+                    /** @description The ID of the pillar */
+                    pillarId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["PillarDto"];
+                };
+            };
+            responses: {
+                /** @description The pillar has been successfully updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment, or pillar could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}": {
         parameters: {
             query?: never;
@@ -269,8 +337,8 @@ export interface paths {
         };
         get?: never;
         /**
-         * Update the resolve status of a specific question
-         * @description Updates the resolve status of a specific question in a given pillar for a specific assessment.
+         * Update the details of a specific question
+         * @description Updates the details of a specific question.
          *
          */
         put: {
@@ -282,7 +350,7 @@ export interface paths {
                     assessmentId: number;
                     /** @description The ID of the pillar under which the question falls */
                     pillarId: number;
-                    /** @description The ID of the question to update the resolve status for */
+                    /** @description The ID of the question */
                     questionId: number;
                 };
                 cookie?: never;
@@ -293,7 +361,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description The resolve status of the question has been successfully updated */
+                /** @description The question has been successfully updated */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -379,8 +447,8 @@ export interface paths {
             };
         };
         /**
-         * Update the status of a specific best practice
-         * @description Updates the status of a best practice for a given question in the assessment
+         * Update the details of a specific best practice
+         * @description Updates the details of a specific best practice.
          *
          */
         put: {
@@ -394,7 +462,7 @@ export interface paths {
                     pillarId: number;
                     /** @description The ID of the question to update the best practice to */
                     questionId: number;
-                    /** @description The ID of the best practice to update the status to */
+                    /** @description The ID of the best practice */
                     bestPracticeId: number;
                 };
                 cookie?: never;
@@ -405,7 +473,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description The status of the best practice was successfully updated */
+                /** @description The best practice has been successfully updated */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -451,9 +519,8 @@ export interface paths {
         };
         get?: never;
         /**
-         * Update the visibility of a specific finding
-         * @description Updates the visibility of a finding.
-         *     The visibility can be set to `true` or `false`.
+         * Update the details of a specific finding
+         * @description Updates the details of a specific finding.
          *
          */
         put: {
@@ -480,7 +547,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description The finding's visibility status has been successfully updated */
+                /** @description The finding has been successfully updated */
                 200: {
                     headers: {
                         [name: string]: unknown;

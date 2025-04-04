@@ -7,3 +7,4 @@ export * from './lib/deleteAssessment';
 export * from './lib/hideFinding';
 export * from './lib/updateQuestion';
 export * from './lib/rescanAssessment';
+export * from './lib/updatePillar';
