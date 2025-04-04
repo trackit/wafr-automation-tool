@@ -57,20 +57,23 @@ paths:
       description: |
         Initiates a new assessment for a given role.
         You can specify a role ARN for the assessment, or a default role will be used.
-      parameters:
-        - name: name
-          in: query
-          description: Name of the assessment to be created
-          required: true
-          schema:
-            type: string
-        - name: roleArn
-          in: query
-          description: |
-            The role ARN to associate with the assessment.
-            If not provided, a default role will be used.
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Name of the assessment to be created
+                roleArn:
+                  type: string
+                  description: |
+                    The role ARN to associate with the assessment.
+                    If not provided, a default role will be used.
       responses:
         "201":
           description: The assessment has been successfully created
@@ -165,7 +168,6 @@ paths:
       description: |
         Deletes an assessment from the system.
         Once deleted, the assessment cannot be recovered.
-      operationId: deleteAssessment
       parameters:
         - name: assessmentId
           in: path
