@@ -1,0 +1,20 @@
+{
+  "name": "webui",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "sourceRoot": "./src",
+  "projectType": "application",
+  "tags": ["scope:webui", "type:app"],
+  "// targets": "to see all targets run: nx show project webui --web",
+  "targets": {
+    "serve": {
+      "dependsOn": ["build-types"]
+    },
+    "build-types": {
+      "command": "npx openapi-typescript ../swagger.yaml -o libs/types/src/lib/types.ts",
+      "options": {
+        "cwd": "."
+      }
+    }
+  }
+}
