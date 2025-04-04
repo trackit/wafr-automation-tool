@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, act } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Tabs,
@@ -15,7 +15,12 @@ import {
   rescanAssessment,
 } from '@webui/api-client';
 import { components } from '@webui/types';
-import { ArrowRight, RefreshCw, EllipsisVertical } from 'lucide-react';
+import {
+  ArrowRight,
+  RefreshCw,
+  EllipsisVertical,
+  CircleMinus,
+} from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link, useParams, useNavigate } from 'react-router';
 import FindingsDetails from './findings-details';
@@ -39,7 +44,7 @@ export function AssessmentDetails() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['assessment', id],
     queryFn: () => (id ? getAssessment(id) : null),
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const updateStatusMutation = useMutation({
@@ -342,12 +347,13 @@ export function AssessmentDetails() {
               type="checkbox"
               className={`checkbox checkbox-sm checkbox-primary`}
               checked={
-                activeQuestion?.resolve || info.row.original.status || false
+                activeQuestion?.none && info.row.original.id !== 'resolve'
+                  ? false
+                  : info.row.original.status || false
               }
               disabled={
-                activeQuestion?.resolve && info.row.original.id !== 'resolve'
+                activeQuestion?.none && info.row.original.id !== 'resolve'
               }
-              readOnly
               onChange={(e) => {
                 if (info.row.original.id === 'resolve') {
                   handleResolveQuestion(
@@ -378,7 +384,7 @@ export function AssessmentDetails() {
           return (
             <div
               className={`${
-                activeQuestion?.resolve && info.row.original.id !== 'resolve'
+                activeQuestion?.none && info.row.original.id !== 'resolve'
                   ? 'line-through text-base-content/50'
                   : ''
               }`}
@@ -450,7 +456,7 @@ export function AssessmentDetails() {
     [
       columnHelper,
       handleUpdateStatus,
-      activeQuestion?.resolve,
+      activeQuestion?.none,
       handleResolveQuestion,
       activeQuestion?.id,
     ]
@@ -506,12 +512,12 @@ export function AssessmentDetails() {
       id: 'resolve',
       label: 'None of the above',
       risk: undefined,
-      status: activeQuestion?.resolve || false,
+      status: activeQuestion?.none || false,
       results: undefined,
       name: 'resolve',
     });
     return res;
-  }, [activeQuestion?.best_practices, activeQuestion?.resolve]);
+  }, [activeQuestion?.best_practices, activeQuestion?.none]);
 
   const tabs = useMemo(() => {
     if (!data?.findings) return [];
@@ -524,6 +530,39 @@ export function AssessmentDetails() {
           : ''
       }`,
       id: pillar.id || `pillar-${index}`,
+      action: (
+        <div
+          className="dropdown dropdown-end"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-xs p-1 pt-[7px]"
+          >
+            <EllipsisVertical className="w-3 h-3 text-base-content/50" />
+          </div>
+          <ul
+            tabIndex={0}
+            className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+          >
+            <li>
+              <button
+                className="flex flex-row gap-2 w-full text-left text-error"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                <CircleMinus className="w-4 h-4" /> Disable this pillar
+              </button>
+            </li>
+          </ul>
+        </div>
+      ),
     }));
   }, [data?.findings]);
 
@@ -605,23 +644,21 @@ export function AssessmentDetails() {
               active: activeQuestionIndex === index,
               onClick: () => setActiveQuestionIndex(index),
               completed:
-                (latestQuestion.resolve ||
-                  latestQuestion.best_practices?.every(
-                    (bestPractice) =>
-                      bestPractice.risk !== 'High' ||
-                      bestPractice.status === true
-                  )) ??
-                false,
+                latestQuestion.best_practices?.every(
+                  (bestPractice) =>
+                    bestPractice.risk !== 'High' || bestPractice.status === true
+                ) ?? false,
               started:
                 latestQuestion.best_practices?.some(
                   (bestPractice) => bestPractice.status
                 ) ?? false,
+              error: latestQuestion.none,
             };
           })}
         />
         <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
-          <div className="bg-base-100 p-4 rounded-lg">
-            <h3 className="text-center font-medium text-xl text-primary">
+          <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
+            <h3 className="text-center font-medium text-xl text-primary flex-1">
               <span className="font-medium">
                 {selectedPillar?.questions
                   ? `${activeQuestionIndex + 1} / ${
@@ -632,6 +669,37 @@ export function AssessmentDetails() {
               {'. '}
               <span className="font-light">{activeQuestion?.label}</span>
             </h3>
+            <div
+              className="dropdown dropdown-end"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-xs p-1"
+              >
+                <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+              </div>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <button
+                    className="flex flex-row gap-2 w-full text-left text-error"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <CircleMinus className="w-4 h-4" /> Disable this question
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
           <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
             {activeQuestion && (

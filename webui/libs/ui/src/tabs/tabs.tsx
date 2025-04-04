@@ -1,8 +1,10 @@
 import './tabs.css';
+import { EllipsisVertical, CircleMinus } from 'lucide-react';
 
 export type Tab = {
   label: string;
   id: string;
+  action?: React.ReactNode;
 };
 
 export type TabsProps = {
@@ -24,6 +26,7 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
           onClick={() => onChange(tab.id)}
         >
           {tab.label}
+          {tab.action}
         </div>
       ))}
     </div>

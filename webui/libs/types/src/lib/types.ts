@@ -179,7 +179,11 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["AssessmentDto"];
+                };
+            };
             responses: {
                 /** @description The assessment has been successfully updated */
                 200: {
@@ -189,6 +193,13 @@ export interface paths {
                     content?: never;
                 };
                 /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
                 500: {
                     headers: {
                         [name: string]: unknown;
@@ -249,7 +260,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/{resolve}": {
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -273,15 +284,24 @@ export interface paths {
                     pillarId: number;
                     /** @description The ID of the question to update the resolve status for */
                     questionId: number;
-                    /** @description The status to set for the question */
-                    resolve: boolean;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["QuestionDto"];
+                };
+            };
             responses: {
                 /** @description The resolve status of the question has been successfully updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -334,7 +354,7 @@ export interface paths {
                     /** @description The ID of the question to retrieve the best practices to */
                     questionId: number;
                     /** @description The ID of the best practice to retrieve findings to */
-                    bestPracticeId: string;
+                    bestPracticeId: number;
                 };
                 cookie?: never;
             };
@@ -358,22 +378,6 @@ export interface paths {
                 };
             };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
         /**
          * Update the status of a specific best practice
          * @description Updates the status of a best practice for a given question in the assessment
@@ -392,15 +396,24 @@ export interface paths {
                     questionId: number;
                     /** @description The ID of the best practice to update the status to */
                     bestPracticeId: number;
-                    /** @description The status to set for the best practice */
-                    status: boolean;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["BestPracticeDto"];
+                };
+            };
             responses: {
                 /** @description The status of the best practice was successfully updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -429,7 +442,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}/{hide}": {
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -458,15 +471,24 @@ export interface paths {
                     bestPracticeId: number;
                     /** @description The unique ID of the finding to retrieve */
                     findingId: string;
-                    /** @description Whether to hide the finding or not */
-                    hide: boolean;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["FindingDto"];
+                };
+            };
             responses: {
                 /** @description The finding's visibility status has been successfully updated */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -586,6 +608,10 @@ export interface components {
             Error?: string;
             Cause?: string;
         } | null;
+        AssessmentDto: {
+            name?: string | null;
+            role_arn?: string | null;
+        };
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
             /** @description Unique identifier of the finding */
@@ -619,23 +645,35 @@ export interface components {
             /** @description Explanation of the risk associated with the finding */
             risk_details?: string;
         };
+        FindingDto: {
+            hidden?: boolean | null;
+        };
         Pillar: {
             id?: string;
             label?: string;
+            disabled?: boolean;
             questions?: components["schemas"]["Question"][];
+        };
+        PillarDto: {
+            disabled?: boolean | null;
         };
         Question: {
             id?: string;
             label?: string;
-            resolve?: boolean;
+            none?: boolean;
+            disabled?: boolean;
             best_practices?: components["schemas"]["BestPractice"][];
+        };
+        QuestionDto: {
+            none?: boolean | null;
+            disabled?: boolean | null;
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
             id?: string;
             label?: string;
             /** @enum {string} */
-            risk?: "Critical" | "High" | "Medium" | "Low";
+            risk?: "High" | "Medium" | "Low";
             status?: boolean;
             results?: string[];
             hidden_results?: string[];
@@ -643,6 +681,9 @@ export interface components {
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
             results?: components["schemas"]["Finding"][];
+        };
+        BestPracticeDto: {
+            status?: boolean | null;
         };
     };
     responses: never;
