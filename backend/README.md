@@ -37,6 +37,7 @@ cd backend/
 With [uv](https://docs.astral.sh/uv/#installation) installed, run:
 
 ```bash
+uv venv
 uv sync
 ```
 
