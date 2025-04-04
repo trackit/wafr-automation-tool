@@ -8,9 +8,11 @@ export const updateStatus = async (
   status: boolean
 ) => {
   return apiClient.put<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/{status}']['put']['responses']['200']['content']
+    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['put']['responses']['200']['content']
   >(
-    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}/${status}`,
-    {}
+    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}`,
+    {
+      status,
+    }
   );
 };
