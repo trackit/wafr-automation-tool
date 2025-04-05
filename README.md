@@ -65,16 +65,22 @@ More information about the backend can be found in the Backend [README](./backen
 
 ### Frontend
 
-More information about the frontend can be found in the Frontend [README](./frontend/README.md).
+More information about the frontend can be found in the Frontend [README](./webui/README.md).
 
 ## Deployment
+
+### Requirements
+
+- [Docker >= 19.03](https://docs.docker.com/get-docker/)
+  - the Docker daemon must also be running
+- [AWS SAM CLI >= 1.133.0](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions)
 
 ### Build
 
 To build the serverless application, using [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-build.html) run:
 
 ```bash
-sam build --use-container
+sam build --use-container --mount-symlinks
 ```
 
 ### Deploy
