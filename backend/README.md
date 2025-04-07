@@ -8,6 +8,7 @@
   - [Installing dependencies](#installing-dependencies)
   - [Tests](#tests)
 - [Usage](#usage)
+  - [Requirements](#requirements-1)
   - [Local](#local)
   - [Remote](#remote)
 
