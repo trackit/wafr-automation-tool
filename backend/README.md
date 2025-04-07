@@ -47,6 +47,10 @@ uv run pytest
 
 In both cases, a complete analysis takes a long time, depending on the size of the account.
 
+### Requirements
+
+- Claude 3.7 enabled on your AWS account
+
 ### Local
 
 To perform a local analysis, you don't need to provide any custom roles or policies.
