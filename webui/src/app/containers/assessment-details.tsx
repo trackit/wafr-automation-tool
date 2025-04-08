@@ -43,6 +43,7 @@ export function AssessmentDetails() {
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
   const { id } = useParams();
+  const [progress, setProgress] = useState<number>(0);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['assessment', id],
@@ -605,6 +606,17 @@ export function AssessmentDetails() {
     return completedCount;
   };
 
+  useEffect(() => {
+    if (!data?.findings) return;
+    const completedQuestions = data.findings.reduce((acc, pillar) => {
+      return acc + calculateCompletedQuestions(pillar.questions || []);
+    }, 0);
+    const totalQuestions = data.findings.reduce((acc, pillar) => {
+      return acc + (pillar.questions?.filter((q) => !q.disabled).length || 0);
+    }, 0);
+    setProgress(Math.round((completedQuestions / totalQuestions) * 100));
+  }, [data?.findings]);
+
   const handleNextQuestion = () => {
     if (!selectedPillar?.questions) return;
     const questions = selectedPillar.questions;
@@ -730,6 +742,19 @@ export function AssessmentDetails() {
 
   const details = (
     <>
+      <div
+        className=" w-full absolute top-0 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
+        data-tip={`${progress}% completed`}
+      >
+        <progress
+          className={`progress w-full rounded-none h-1 ${
+            progress === 100 ? 'progress-success' : 'progress-primary'
+          }`}
+          value={progress}
+          max="100"
+        ></progress>
+      </div>
+
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
           <h2 className="mt-0 mb-0">Assessment {data?.name} </h2>
@@ -931,63 +956,65 @@ export function AssessmentDetails() {
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
-      <div className="breadcrumbs text-sm">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>Assessment {data?.name}</li>
-        </ul>
-      </div>
-
-      {data?.step === 'SCANNING_STARTED' ||
-      data?.step === 'PREPARING_PROMPTS' ||
-      data?.step === 'INVOKING_LLM'
-        ? loading
-        : null}
-      {data?.step === 'FINISHED' ? details : null}
-      {data?.step === 'ERRORED' ? (
-        <div className="flex items-center justify-center h-full">
-          <h2 className="text-center text-error font-bold">
-            An error occurred while running the assessment. Please try again.
-          </h2>
+    <div className="relative flex-1 flex flex-col w-full items-center">
+      <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col flex-grow">
+        <div className="breadcrumbs text-sm">
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>Assessment {data?.name}</li>
+          </ul>
         </div>
-      ) : null}
 
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div
-            className="w-16 h-16 loading loading-ring loading-lg text-primary"
-            role="status"
-          ></div>
-        </div>
-      )}
-      {bestPractice && (
-        <Modal
-          open={true}
-          onClose={() => setBestPractice(null)}
-          className="w-full max-w-6xl"
-          notCentered
-        >
-          <FindingsDetails
-            assessmentId={id}
-            pillarId={selectedPillar?.id || ''}
-            questionId={activeQuestion?.id || ''}
-            bestPractice={bestPractice}
+        {data?.step === 'SCANNING_STARTED' ||
+        data?.step === 'PREPARING_PROMPTS' ||
+        data?.step === 'INVOKING_LLM'
+          ? loading
+          : null}
+        {data?.step === 'FINISHED' ? details : null}
+        {data?.step === 'ERRORED' ? (
+          <div className="flex items-center justify-center h-full">
+            <h2 className="text-center text-error font-bold">
+              An error occurred while running the assessment. Please try again.
+            </h2>
+          </div>
+        ) : null}
+
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="w-16 h-16 loading loading-ring loading-lg text-primary"
+              role="status"
+            ></div>
+          </div>
+        )}
+        {bestPractice && (
+          <Modal
+            open={true}
+            onClose={() => setBestPractice(null)}
+            className="w-full max-w-6xl"
+            notCentered
+          >
+            <FindingsDetails
+              assessmentId={id}
+              pillarId={selectedPillar?.id || ''}
+              questionId={activeQuestion?.id || ''}
+              bestPractice={bestPractice}
+            />
+          </Modal>
+        )}
+        {showRescanModal && (
+          <ConfirmationModal
+            open={showRescanModal}
+            onClose={() => setShowRescanModal(false)}
+            onCancel={() => setShowRescanModal(false)}
+            onConfirm={() => rescanAssessmentMutation.mutate()}
+            title="Rescan Assessment"
+            message="Are you sure you want to rescan the assessment? This might take a while."
           />
-        </Modal>
-      )}
-      {showRescanModal && (
-        <ConfirmationModal
-          open={showRescanModal}
-          onClose={() => setShowRescanModal(false)}
-          onCancel={() => setShowRescanModal(false)}
-          onConfirm={() => rescanAssessmentMutation.mutate()}
-          title="Rescan Assessment"
-          message="Are you sure you want to rescan the assessment? This might take a while."
-        />
-      )}
+        )}
+      </div>
     </div>
   );
 }
