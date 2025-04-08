@@ -4,7 +4,11 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { deleteAssessment, getAssessments } from '@webui/api-client';
+import {
+  deleteAssessment,
+  getAssessments,
+  rescanAssessment,
+} from '@webui/api-client';
 import { StatusBadge } from '@webui/ui';
 import {
   Server,
@@ -12,6 +16,7 @@ import {
   Search,
   EllipsisVertical,
   Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
@@ -23,14 +28,21 @@ function AssessmentsList() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useDebounceValue('', 500);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ['assessments', search],
-      queryFn: ({ pageParam }) =>
-        getAssessments({ limit: 24, search, next_token: pageParam }),
-      getNextPageParam: (lastPage) => lastPage.next_token,
-      initialPageParam: '',
-    });
+  const [idToRescan, setIdToRescan] = useState<string | null>(null);
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['assessments', search],
+    queryFn: ({ pageParam }) =>
+      getAssessments({ limit: 24, search, next_token: pageParam }),
+    getNextPageParam: (lastPage) => lastPage.next_token,
+    initialPageParam: '',
+  });
 
   const extractAccountId = (roleArn: string | undefined) => {
     if (!roleArn) return '';
@@ -49,6 +61,20 @@ function AssessmentsList() {
     },
     onError: () => {
       setIdToDelete(null);
+    },
+  });
+
+  const rescanAssessmentMutation = useMutation({
+    mutationFn: (id: string) =>
+      rescanAssessment({ assessmentId: parseInt(id) }),
+    onMutate: async () => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
+      queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      setIdToRescan(null);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
+      refetch();
     },
   });
 
@@ -136,6 +162,18 @@ function AssessmentsList() {
                       >
                         <li>
                           <button
+                            className="flex flex-row gap-2 text-primary w-full text-left"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIdToRescan(assessment.id ?? null);
+                            }}
+                          >
+                            <RefreshCw className="w-4 h-4" /> Rescan
+                          </button>
+                        </li>
+                        <li>
+                          <button
                             className="flex flex-row gap-2 text-error w-full text-left"
                             onClick={(e) => {
                               e.preventDefault();
@@ -191,6 +229,16 @@ function AssessmentsList() {
           open={true}
           onClose={() => setIdToDelete(null)}
           onCancel={() => setIdToDelete(null)}
+        />
+      )}
+      {idToRescan && (
+        <ConfirmationModal
+          title="Rescan Assessment"
+          message="Are you sure you want to rescan this assessment? This might take a while."
+          onConfirm={() => rescanAssessmentMutation.mutate(idToRescan)}
+          open={true}
+          onClose={() => setIdToRescan(null)}
+          onCancel={() => setIdToRescan(null)}
         />
       )}
     </div>
