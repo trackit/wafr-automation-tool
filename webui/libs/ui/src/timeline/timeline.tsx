@@ -33,7 +33,7 @@ export function Timeline({ steps }: TimelineProps) {
                 <CircleMinus className="text-base-content/30" />
               )}
             </div>
-            <div className="timeline-end timeline-box flex items-center border-none shadow-md">
+            <div className="timeline-end timeline-box flex items-center border-none ">
               <span
                 className={`text-lg ${
                   step.completed || step.loading
