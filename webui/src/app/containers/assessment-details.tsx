@@ -743,7 +743,7 @@ export function AssessmentDetails() {
   const details = (
     <>
       <div
-        className=" w-full absolute top-0 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
+        className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
         data-tip={`${progress}% completed`}
       >
         <progress
@@ -806,7 +806,7 @@ export function AssessmentDetails() {
           setActiveQuestionIndex(0);
         }}
       />
-      <div className="flex-1 flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
+      <div className="flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         {selectedPillar?.disabled && (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
             <h3 className="text-center font-medium text-xl  flex-1">
@@ -956,65 +956,63 @@ export function AssessmentDetails() {
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="relative flex-1 flex flex-col w-full items-center">
-      <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col flex-grow">
-        <div className="breadcrumbs text-sm">
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>Assessment {data?.name}</li>
-          </ul>
-        </div>
-
-        {data?.step === 'SCANNING_STARTED' ||
-        data?.step === 'PREPARING_PROMPTS' ||
-        data?.step === 'INVOKING_LLM'
-          ? loading
-          : null}
-        {data?.step === 'FINISHED' ? details : null}
-        {data?.step === 'ERRORED' ? (
-          <div className="flex items-center justify-center h-full">
-            <h2 className="text-center text-error font-bold">
-              An error occurred while running the assessment. Please try again.
-            </h2>
-          </div>
-        ) : null}
-
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="w-16 h-16 loading loading-ring loading-lg text-primary"
-              role="status"
-            ></div>
-          </div>
-        )}
-        {bestPractice && (
-          <Modal
-            open={true}
-            onClose={() => setBestPractice(null)}
-            className="w-full max-w-6xl"
-            notCentered
-          >
-            <FindingsDetails
-              assessmentId={id}
-              pillarId={selectedPillar?.id || ''}
-              questionId={activeQuestion?.id || ''}
-              bestPractice={bestPractice}
-            />
-          </Modal>
-        )}
-        {showRescanModal && (
-          <ConfirmationModal
-            open={showRescanModal}
-            onClose={() => setShowRescanModal(false)}
-            onCancel={() => setShowRescanModal(false)}
-            onConfirm={() => rescanAssessmentMutation.mutate()}
-            title="Rescan Assessment"
-            message="Are you sure you want to rescan the assessment? This might take a while."
-          />
-        )}
+    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
+      <div className="breadcrumbs text-sm">
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>Assessment {data?.name}</li>
+        </ul>
       </div>
+
+      {data?.step === 'SCANNING_STARTED' ||
+      data?.step === 'PREPARING_PROMPTS' ||
+      data?.step === 'INVOKING_LLM'
+        ? loading
+        : null}
+      {data?.step === 'FINISHED' ? details : null}
+      {data?.step === 'ERRORED' ? (
+        <div className="flex items-center justify-center h-full">
+          <h2 className="text-center text-error font-bold">
+            An error occurred while running the assessment. Please try again.
+          </h2>
+        </div>
+      ) : null}
+
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="w-16 h-16 loading loading-ring loading-lg text-primary"
+            role="status"
+          ></div>
+        </div>
+      )}
+      {bestPractice && (
+        <Modal
+          open={true}
+          onClose={() => setBestPractice(null)}
+          className="w-full max-w-6xl"
+          notCentered
+        >
+          <FindingsDetails
+            assessmentId={id}
+            pillarId={selectedPillar?.id || ''}
+            questionId={activeQuestion?.id || ''}
+            bestPractice={bestPractice}
+          />
+        </Modal>
+      )}
+      {showRescanModal && (
+        <ConfirmationModal
+          open={showRescanModal}
+          onClose={() => setShowRescanModal(false)}
+          onCancel={() => setShowRescanModal(false)}
+          onConfirm={() => rescanAssessmentMutation.mutate()}
+          title="Rescan Assessment"
+          message="Are you sure you want to rescan the assessment? This might take a while."
+        />
+      )}
     </div>
   );
 }

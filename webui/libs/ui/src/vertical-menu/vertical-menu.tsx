@@ -59,7 +59,7 @@ export function VerticalMenu({ items, className }: VerticalMenuProps) {
   return (
     <div
       role="menu"
-      className={`h-full w-full max-w-[270px] overflow-auto flex flex-col divide-y divide-neutral-content rounded-l-lg ${
+      className={`overflow-auto w-full max-w-[270px] flex flex-col divide-y divide-neutral-content rounded-l-lg ${
         className || ''
       }`}
     >
