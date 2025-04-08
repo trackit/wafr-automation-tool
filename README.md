@@ -28,6 +28,8 @@
 
 <hr>
 
+![WAFR Automation Tool Screenshot](./assets/main.png)
+
 ## Table of contents
 
 - [Overview](#overview)
@@ -57,7 +59,6 @@ The WAFR Automation Tool uses a serverless architecture built on AWS services:
 ![WAFR Automation Tool Architecture](./resources/WAFR%20Automation%20Architecture.png)
 
 ## Getting started
-
 
 ### Backend
 
