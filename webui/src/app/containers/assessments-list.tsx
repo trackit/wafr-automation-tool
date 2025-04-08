@@ -111,10 +111,10 @@ function AssessmentsList() {
                   <div className="lg:text-lg md:text-base text-sm font-semibold text-primary">
                     {assessment.name}
                   </div>
-                  <div className="flex flex-row items-center gap-1 flex-1 flex-grow">
+                  <div className="flex flex-row items-center gap-1 flex-1 flex-grow justify-end">
                     <StatusBadge
                       status={assessment.step}
-                      className="badge-sm flex-shrink-0"
+                      className="badge-sm flex-shrink-0 "
                     />
                     <div
                       className="dropdown dropdown-end"

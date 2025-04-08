@@ -7,6 +7,7 @@ import {
   Modal,
   StatusBadge,
   ConfirmationModal,
+  Timeline,
 } from '@webui/ui';
 import {
   getAssessment,
@@ -692,6 +693,31 @@ export function AssessmentDetails() {
     }));
   }, [data?.findings, handleDisabledPillar]);
 
+  const timelineSteps = useMemo(() => {
+    return [
+      {
+        text: 'Scanning your account',
+        loading: data?.step === 'SCANNING_STARTED',
+        completed: data?.step !== 'SCANNING_STARTED',
+      },
+      {
+        text: 'Preparing prompts',
+        loading: data?.step === 'PREPARING_PROMPTS',
+        completed:
+          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'SCANNING_STARTED',
+      },
+      {
+        text: 'Invoking LLMs',
+        loading: data?.step === 'INVOKING_LLM',
+        completed:
+          data?.step !== 'INVOKING_LLM' &&
+          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'SCANNING_STARTED',
+      },
+    ];
+  }, [data?.step]);
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-full">
@@ -896,17 +922,10 @@ export function AssessmentDetails() {
 
   const loading = (
     <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
-      <div
-        className="w-16 h-16 loading loading-ring loading-lg text-primary"
-        role="status"
-      ></div>
-      <h2 className="text-center text-primary font-light mt-4">
-        {data?.step === 'SCANNING_STARTED'
-          ? 'Scanning your account...'
-          : data?.step === 'PREPARING_PROMPTS'
-          ? 'Preparing prompts...'
-          : 'Invoking LLMs...'}
+      <h2 className="text-center text-primary font-light mb-0 ">
+        Your assessment is processing
       </h2>
+      <Timeline steps={timelineSteps} />
     </div>
   );
 

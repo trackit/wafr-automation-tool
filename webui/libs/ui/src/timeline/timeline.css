@@ -1,0 +1,8 @@
+.timeline-container {
+  li {
+    grid-template-rows: var(--timeline-col-start, minmax(0, 1fr)) 50px var(
+        --timeline-col-end,
+        minmax(0, 1fr)
+      );
+  }
+}
