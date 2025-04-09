@@ -227,6 +227,7 @@ Resources:
               Action:
                 - dynamodb:DeleteItem
                 - dynamodb:Query
+                - dynamodb:GetItem
                 - dynamodb:BatchWriteItem
               Resource: !Ref DynamoDBArn
       Events:

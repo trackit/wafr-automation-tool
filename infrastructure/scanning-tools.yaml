@@ -169,7 +169,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Sub "${ParentStackName}-prowler"
-      Cpu: "1024"
+      Cpu: "2048"
       Memory: "4096"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -180,7 +180,7 @@ Resources:
         - Name: prowler-container
           Image: "toniblyx/prowler:5.1.5"
           Essential: true
-          Cpu: 1024
+          Cpu: 2048
           Memory: 4096
           LogConfiguration:
             LogDriver: awslogs
@@ -188,6 +188,8 @@ Resources:
               awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: prowler
+              mode: non-blocking
+              max-buffer-size: 25m
           Environment:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
@@ -259,6 +261,8 @@ Resources:
               awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: cloud-custodian
+              mode: non-blocking
+              max-buffer-size: 25m
           Environment:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
@@ -318,7 +322,9 @@ Resources:
             Options:
               awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
               awslogs-region: !Ref "AWS::Region"
-              awslogs-stream-prefix: prowler
+              awslogs-stream-prefix: cloudsploit
+              mode: non-blocking
+              max-buffer-size: 25m
           Environment:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName

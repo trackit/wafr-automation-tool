@@ -50,6 +50,14 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
+    def remove_self_made_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
+        filtered_findings = []
+        for finding in findings:
+            if finding.resources and finding.resources[0].uid and "wafr-automation-tool" in finding.resources[0].uid:
+                continue
+            filtered_findings.append(finding)
+        return filtered_findings
+
     def associate_finding_ids(
         self,
         assessment_id: AssessmentID,
@@ -171,5 +179,6 @@ class StoreResults(Task[StoreResultsInput, None]):
         s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
         findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
+        findings_data = self.remove_self_made_findings(findings_data)
         logger.info("Processing %s chunk %s", scanning_tool, chunk_id)
         self.store_results(event.assessment_id, scanning_tool, ai_associations, findings_data)

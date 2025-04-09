@@ -162,6 +162,8 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/prepare_custodian/app
+      Timeout: 300
+      MemorySize: 128
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -185,45 +187,45 @@ Resources:
               Resource:
                 - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
-            Effect: Allow
-            Action: ecs:RunTask
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
+            - Effect: Allow
+              Action: ecs:RunTask
+              Resource:
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
         - Statement:
-            Effect: Allow
-            Action:
-              - dynamodb:UpdateItem
-              - dynamodb:PutItem
-            Resource:
-              - !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:PutItem
+              Resource:
+                - !Ref DynamoDBArn
         - Statement:
-            Effect: Allow
-            Action: iam:PassRole
-            Resource:
-              - !Ref ECSExecutionRole
-              - !Ref ProwlerTaskRole
-              - !Ref CloudCustodianTaskRole
-              - !Ref CloudSploitTaskRole
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource:
+                - !Ref ECSExecutionRole
+                - !Ref ProwlerTaskRole
+                - !Ref CloudCustodianTaskRole
+                - !Ref CloudSploitTaskRole
         - Statement:
-            Effect: Allow
-            Action:
-              - events:PutRule
-              - events:PutTargets
-              - events:DescribeRule
-              - events:DeleteRule
-              - events:RemoveTargets
-            Resource: "*"
+            - Effect: Allow
+              Action:
+                - events:PutRule
+                - events:PutTargets
+                - events:DescribeRule
+                - events:DeleteRule
+                - events:RemoveTargets
+              Resource: "*"
         - Statement:
-            Effect: Allow
-            Action:
-              - lambda:InvokeFunction
-            Resource:
-              - !GetAtt PreparePromptsFunction.Arn
-              - !GetAtt InvokeLLMFunction.Arn
-              - !GetAtt CleanupFunction.Arn
-              - !GetAtt PrepareCustodianFunction.Arn
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt PreparePromptsFunction.Arn
+                - !GetAtt InvokeLLMFunction.Arn
+                - !GetAtt CleanupFunction.Arn
+                - !GetAtt PrepareCustodianFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
