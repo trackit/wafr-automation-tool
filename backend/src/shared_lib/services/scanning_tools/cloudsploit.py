@@ -17,7 +17,7 @@ class CloudSploitService(IScanningToolService):
     def convert_raw_findings(self, raw_findings: list[CloudSploitFinding], regions: list[str]) -> list[FindingExtra]:
         findings: list[FindingExtra] = []
         for index, raw_finding in enumerate(raw_findings):
-            if raw_finding.region not in regions:
+            if regions and raw_finding.region not in regions:
                 continue
             resources = []
             if raw_finding.resource != "N/A":
