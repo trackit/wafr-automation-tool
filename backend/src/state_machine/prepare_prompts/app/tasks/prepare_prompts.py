@@ -137,10 +137,28 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             )
         return prompt_uris
 
+    def merge_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
+        grouped_findings = {}
+        index = 1
+        for finding in findings:
+            key = (finding.status_detail, finding.risk_details)
+            if key not in grouped_findings:
+                finding.id = str(index)
+                index += 1
+                grouped_findings[key] = finding
+            else:
+                existing = grouped_findings[key]
+                if existing.resources is None:
+                    existing.resources = finding.resources
+                elif finding.resources:
+                    existing.resources.extend(finding.resources)
+        return list(grouped_findings.values())
+
     def create_prompts(
         self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, regions: list[str]
     ) -> list[Prompt]:
         findings = scanning_tool_service.retrieve_findings(assessment_id, regions)
+        findings = self.merge_findings(findings)
         chunks = self.create_chunks(scanning_tool_service, assessment_id, findings)
         prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
         return self.store_prompts(scanning_tool_service, assessment_id, prompts)
