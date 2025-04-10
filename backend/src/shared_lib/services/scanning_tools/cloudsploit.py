@@ -19,9 +19,11 @@ class CloudSploitService(IScanningToolService):
         for index, raw_finding in enumerate(raw_findings):
             if regions and raw_finding.region not in regions:
                 continue
-            resources = []
-            if raw_finding.resource != "N/A":
-                resources.append(FindingResource(uid=raw_finding.resource, region=raw_finding.region))
+            resources = [
+                FindingResource(
+                    uid=raw_finding.resource if raw_finding.resource != "N/A" else None, region=raw_finding.region
+                )
+            ]
             findings.append(
                 FindingExtra(
                     id=str(index + 1),
