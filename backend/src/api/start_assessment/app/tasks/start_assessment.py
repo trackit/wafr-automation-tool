@@ -36,6 +36,7 @@ class StartAssessment(
         input_json = StateMachineInput(
             assessment_id=assessment_id,
             name=event.name,
+            regions=event.regions if event.regions else [],
             role_arn=role_arn,
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )

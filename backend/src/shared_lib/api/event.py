@@ -11,6 +11,7 @@ from utils.api import APIResponseBody
 
 class StartAssessmentInput(BaseModel):
     name: str
+    regions: list[str] | None = None
     roleArn: str | None = None  # noqa: N815
 
 
@@ -21,6 +22,7 @@ class StartAssessmentResponseBody(APIResponseBody):
 class StateMachineInput(BaseModel):
     assessment_id: AssessmentID
     name: str
+    regions: list[str]
     role_arn: str
     created_at: str
 

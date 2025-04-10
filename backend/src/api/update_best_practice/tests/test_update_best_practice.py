@@ -14,6 +14,7 @@ def test_update_best_practice():
     assessment = Assessment(
         id="AID",
         name="AN",
+        regions=["test-region"],
         role_arn="AR",
         step=Steps.SCANNING_STARTED,
         created_at="",

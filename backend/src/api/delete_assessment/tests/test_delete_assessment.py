@@ -13,6 +13,7 @@ def test_delete_assessment():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",

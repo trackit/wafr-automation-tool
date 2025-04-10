@@ -16,7 +16,7 @@ def test_prowler_retrieve_findings():
 
     service = ProwlerService(storage_service=fake_storage_service)
 
-    findings = service.retrieve_findings(assessment_id="test-assessment-id")
+    findings = service.retrieve_findings(assessment_id="test-assessment-id", regions=[])
 
     fake_storage_service.get.assert_called_once_with(
         Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("test-assessment-id")

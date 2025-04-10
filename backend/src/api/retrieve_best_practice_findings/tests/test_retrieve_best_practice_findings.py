@@ -16,6 +16,7 @@ def test_retrieve_best_practice_findings():
     assessment = Assessment(
         id="AID",
         name="AN",
+        regions=["test-region"],
         role_arn="AR",
         step=Steps.SCANNING_STARTED,
         created_at="",
@@ -74,6 +75,7 @@ def test_retrieve_best_practice_findings_not_found_findings():
     assessment = Assessment(
         id="AID",
         name="AN",
+        regions=["test-region"],
         role_arn="AR",
         step=Steps.SCANNING_STARTED,
         created_at="",

@@ -15,6 +15,7 @@ def test_retrieve_all_assessments():
         Assessment(
             id="AID",
             name="AN",
+            regions=["test-region"],
             role_arn="AR",
             step=Steps.SCANNING_STARTED,
             created_at="",
@@ -56,6 +57,7 @@ def test_retrieve_all_assessments_with_search():
         Assessment(
             id="AID",
             name="AN",
+            regions=["test-region"],
             role_arn="AR",
             step=Steps.SCANNING_STARTED,
             created_at="",

@@ -14,5 +14,5 @@ class IScanningToolService(ABC):
         self.storage_service = storage_service
 
     @abstractmethod
-    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         raise NotImplementedError

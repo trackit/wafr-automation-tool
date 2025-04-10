@@ -3,6 +3,7 @@ from typing import Any, override
 
 from common.config import (
     ASSESSMENT_PK,
+    CHUNK_SIZE,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
@@ -28,8 +29,6 @@ from utils.questions import FormattedQuestionSet
 from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
-
-CHUNK_SIZE = 400
 
 
 class PreparePrompts(Task[PreparePromptsInput, list[str]]):
@@ -138,8 +137,10 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             )
         return prompt_uris
 
-    def create_prompts(self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID) -> list[Prompt]:
-        findings = scanning_tool_service.retrieve_findings(assessment_id)
+    def create_prompts(
+        self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, regions: list[str]
+    ) -> list[Prompt]:
+        findings = scanning_tool_service.retrieve_findings(assessment_id, regions)
         chunks = self.create_chunks(scanning_tool_service, assessment_id, findings)
         prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
         return self.store_prompts(scanning_tool_service, assessment_id, prompts)
@@ -152,4 +153,4 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
         self.populate_dynamodb(event.assessment_id)
         scanning_tool_service = scanning_tool_service_type(self.storage_service)
-        return self.create_prompts(scanning_tool_service, event.assessment_id)
+        return self.create_prompts(scanning_tool_service, event.assessment_id, event.regions)

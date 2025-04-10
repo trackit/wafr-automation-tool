@@ -26,7 +26,7 @@ class CloudCustodianService(IScanningToolService):
         return self.storage_service.filter(bucket_name=S3_BUCKET, prefix=CLOUD_CUSTODIAN_PATH.format(assessment_id))
 
     @override
-    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         policies = self.retrieve_policies(assessment_id)
         policies_filtered = filter(lambda policy: policy.key.endswith("resources.json"), policies)
         policies_resources: list[FindingExtra] = []

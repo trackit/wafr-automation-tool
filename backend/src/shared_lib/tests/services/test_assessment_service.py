@@ -56,6 +56,7 @@ def test_assessment_service_retrieve():
     assert assessment == Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -155,6 +156,7 @@ def test_assessment_service_retrieve_all():
             Assessment(
                 id="test-assessment-id",
                 name="test-assessment-name",
+                regions=["test-region"],
                 role_arn="test-assessment-role",
                 step=Steps.FINISHED,
                 created_at="",
@@ -265,6 +267,7 @@ def test_assessment_service_retrieve_all_pagination():
             Assessment(
                 id="test-assessment-id",
                 name="test-assessment-name",
+                regions=["test-region"],
                 role_arn="test-assessment-role",
                 step=Steps.FINISHED,
                 created_at="",
@@ -322,6 +325,7 @@ def test_assessment_service_retrieve_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -389,6 +393,7 @@ def test_assessment_service_retrieve_best_practice_with_no_findings():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -405,6 +410,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -421,6 +427,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -452,6 +459,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -492,6 +500,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -646,6 +655,7 @@ def test_assessment_service_update_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",
@@ -702,6 +712,7 @@ def test_assessment_service_delete_findings():
     assessment = Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
+        regions=["test-region"],
         role_arn="test-assessment-role",
         step=Steps.FINISHED,
         created_at="",

@@ -14,23 +14,33 @@ class CloudSploitService(IScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
         super().__init__(storage_service=storage_service, name=ScanningTool.CLOUDSPLOIT, title="CloudSploit")
 
-    def convert_raw_finding(self, index: int, finding: CloudSploitFinding) -> FindingExtra:
-        resources = []
-        if finding.resource != "N/A":
-            resources.append(FindingResource(uid=finding.resource, region=finding.region))
+    def convert_raw_findings(self, raw_findings: list[CloudSploitFinding], regions: list[str]) -> list[FindingExtra]:
+        findings: list[FindingExtra] = []
+        for index, raw_finding in enumerate(raw_findings):
+            if raw_finding.region not in regions:
+                continue
+            resources = []
+            if raw_finding.resource != "N/A":
+                resources.append(FindingResource(uid=raw_finding.resource, region=raw_finding.region))
+            findings.append(
+                FindingExtra(
+                    id=str(index + 1),
+                    status_detail=raw_finding.message,
+                    resources=resources,
+                    risk_details=raw_finding.description,
+                    hidden=False,
+                )
+            )
+        return findings
 
-        return FindingExtra(
-            id=str(index + 1),
-            status_detail=finding.message,
-            resources=resources,
-            risk_details=finding.description,
-            hidden=False,
-        )
+    def remove_duplicates(self, findings: list[CloudSploitFinding]) -> list[CloudSploitFinding]:
+        return [finding for i, finding in enumerate(findings) if finding not in findings[i + 1 :]]
 
     @override
-    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         key = CLOUDSPLOIT_OUTPUT_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
         raw_findings = [CloudSploitFinding(**item) for item in loaded_content]
-        return [self.convert_raw_finding(i, raw_finding) for i, raw_finding in enumerate(raw_findings)]
+        filtered_findings = self.remove_duplicates(raw_findings)
+        return self.convert_raw_findings(filtered_findings, regions)

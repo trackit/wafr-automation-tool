@@ -16,7 +16,7 @@ class ProwlerService(IScanningToolService):
         super().__init__(storage_service=storage_service, name=ScanningTool.PROWLER, title="Prowler")
 
     @override
-    def retrieve_findings(self, assessment_id: AssessmentID) -> list[FindingExtra]:
+    def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         key = PROWLER_OCSF_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)

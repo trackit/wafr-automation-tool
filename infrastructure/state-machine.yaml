@@ -245,6 +245,8 @@ Resources:
                   S: "{% $states.input.assessment_id %}"
                 name:
                   S: "{% $states.input.name %}"
+                regions:
+                  L: "{% $states.input.regions %}"
                 role_arn:
                   S: "{% $states.input.role_arn %}"
                 step:
@@ -253,6 +255,7 @@ Resources:
                   S: "{% $states.input.created_at %}"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
+              regions: "{% $states.input.regions %}"
               role_arn: "{% $states.input.role_arn %}"
             Next: ScanningTools
             Catch:
@@ -287,6 +290,8 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
+                              - Name: REGIONS
+                                Value: "{% $count($regions) > 0 ? '--filter-region ' & $join($regions, ' ') : '' %}"
                               - Name: ROLE_ARN
                                 Value: "{% $role_arn %}"
                     End: true
@@ -316,6 +321,8 @@ Resources:
                             Environment:
                               - Name: ASSESSMENT_ID
                                 Value: "{% $assessment_id %}"
+                              - Name: REGIONS
+                                Value: "{% $join([$map($regions, function($r) { '--region ' & $r })], ' ') %}"
                               - Name: POLICIES_URI
                                 Value: "{% $states.input %}"
                               - Name: ROLE_ARN
@@ -387,6 +394,7 @@ Resources:
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "prowler"
+                      regions: "{% $regions %}"
                     End: true
               - StartAt: Prepare Cloud Custodian Prompts
                 States:
@@ -396,6 +404,7 @@ Resources:
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloud-custodian"
+                      regions: "{% $regions %}"
                     End: true
               - StartAt: Prepare CloudSploit Prompts
                 States:
@@ -405,6 +414,7 @@ Resources:
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloudsploit"
+                      regions: "{% $regions %}"
                     End: true
             Next: InvokeLLMUpdateStep
             Output: "{% $spread($states.result) %}"

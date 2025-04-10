@@ -38,3 +38,4 @@ AI_MODELS: dict[str, IModel] = {
     AIModel.NovaPro: NovaPro(),
 }
 AI_MODEL = os.getenv("AI_MODEL", "claude-3-5-sonnet")
+CHUNK_SIZE = 400

@@ -19,6 +19,7 @@ class Steps(StrEnum):
 class Assessment(BaseModel):
     id: AssessmentID
     name: str
+    regions: list[str]
     role_arn: str
     created_at: str
     step: Steps
