@@ -69,6 +69,13 @@ paths:
                 name:
                   type: string
                   description: Name of the assessment to be created
+                regions:
+                  type: array
+                  items:
+                    type: string
+                  description: |
+                    List of regions to scan
+                    If empty, all regions will be scanned
                 roleArn:
                   type: string
                   description: |
@@ -443,6 +450,13 @@ components:
         name:
           type: string
           description: Name or title of the assessment
+        regions:
+          type: array
+          items:
+            type: string
+          description: |
+            List of regions to scan
+            If empty, all regions will be scanned
         role_arn:
           type: string
           description: Role ARN associated with the assessment
