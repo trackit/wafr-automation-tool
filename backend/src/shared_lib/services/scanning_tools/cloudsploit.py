@@ -35,14 +35,10 @@ class CloudSploitService(IScanningToolService):
             )
         return findings
 
-    def remove_duplicates(self, findings: list[CloudSploitFinding]) -> list[CloudSploitFinding]:
-        return [finding for i, finding in enumerate(findings) if finding not in findings[i + 1 :]]
-
     @override
     def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         key = CLOUDSPLOIT_OUTPUT_PATH.format(assessment_id)
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
         raw_findings = [CloudSploitFinding(**item) for item in loaded_content]
-        filtered_findings = self.remove_duplicates(raw_findings)
-        return self.convert_raw_findings(filtered_findings, regions)
+        return self.convert_raw_findings(raw_findings, regions)
