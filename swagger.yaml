@@ -535,15 +535,19 @@ components:
               uid:
                 type: string
                 description: ARN or unique identifier of the resource
+                nullable: true
               name:
                 type: string
                 description: Name of the resource
+                nullable: true
               type:
                 type: string
                 description: Type of resource (e.g., S3Bucket)
+                nullable: true
               region:
                 type: string
                 description: The region or location of the resource
+                nullable: true
         remediation:
           type: object
           description: Remediation advice for resolving the issue found
