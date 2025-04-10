@@ -29,7 +29,7 @@ class APIFormattedPillar(TypedDict):
 class APIAssessment(BaseModel):
     id: AssessmentID
     name: str
-    region: list[str]
+    regions: list[str]
     role_arn: str
     created_at: str
     step: Steps
