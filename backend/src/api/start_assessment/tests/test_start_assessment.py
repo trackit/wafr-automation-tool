@@ -37,7 +37,7 @@ def test_start_assessment_with_default_role():
     task.generate_assessment_id.assert_called_once()
     sfn_client.start_execution.assert_called_once_with(
         stateMachineArn=STATE_MACHINE_ARN,
-        input='{"assessment_id":"ID","name":"NAME","role_arn":"test-role","created_at":"2000-01-01T00:00:00+00:00"}',
+        input='{"assessment_id":"ID","name":"NAME","regions":[],"role_arn":"test-role","created_at":"2000-01-01T00:00:00+00:00"}',
     )
     assert response.status_code == OK
     assert response.body == StartAssessmentResponseBody(assessmentId="ID")

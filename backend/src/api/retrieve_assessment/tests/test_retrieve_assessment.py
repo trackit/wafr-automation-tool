@@ -14,7 +14,7 @@ def test_retrieve_assessment():
     assessment = APIAssessment(
         id="AID",
         name="AN",
-        region=["test-region"],
+        regions=["test-region"],
         role_arn="AR",
         step=Steps.SCANNING_STARTED,
         created_at="",

@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from common.config import CLOUDSPLOIT_OUTPUT_PATH, S3_BUCKET
-from entities.finding import FindingExtra
+from entities.finding import FindingExtra, FindingResource
 from services.scanning_tools.cloudsploit import CloudSploitService
 from utils.tests import load_file
 
@@ -27,7 +27,7 @@ def test_cloudsploit_retrieve_findings():
             status_code=None,
             status_detail="Access Analyzer is not configured",
             severity=None,
-            resources=[],
+            resources=[FindingResource(uid=None, name=None, type=None, region="us-east-1")],
             remediation=None,
             risk_details="Ensure that IAM Access analyzer is enabled for all regions.",
             hidden=False,
