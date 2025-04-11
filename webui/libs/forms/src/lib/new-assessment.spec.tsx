@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
 import '@testing-library/jest-dom';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import NewAssessment from './new-assessment';
 
@@ -34,6 +34,8 @@ describe('NewAssessment', () => {
         {
           name: 'Test Assessment',
           roleArn: '',
+          regions: [],
+          workflox: '',
         },
         expect.any(Object)
       );

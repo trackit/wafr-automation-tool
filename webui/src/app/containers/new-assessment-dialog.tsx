@@ -1,16 +1,16 @@
-import { NewAssessment } from '@webui/forms';
-import { Modal } from '@webui/ui';
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { postAssessment } from '@webui/api-client';
-import { useNavigate } from 'react-router';
+import { NewAssessment } from '@webui/forms';
 import { paths } from '@webui/types';
+import { Modal } from '@webui/ui';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 function NewAssessmentDialog() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: { name: string; roleArn?: string }) => {
+    mutationFn: async (data: { name: string; roleArn?: string, regions: string[], workflow?: string }) => {
       const response = (await postAssessment(
         data
       )) as paths['/assessments']['post']['responses']['201']['content']['application/json'];
@@ -22,7 +22,7 @@ function NewAssessmentDialog() {
     },
   });
 
-  const onSubmit = (data: { name: string; roleArn?: string }) => {
+  const onSubmit = (data: { name: string; roleArn?: string, regions: string[], workflow?: string }) => {
     mutate(data);
   };
 

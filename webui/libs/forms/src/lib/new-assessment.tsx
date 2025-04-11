@@ -207,7 +207,7 @@ export function NewAssessment({
         </label>
         <div role="alert" className="alert alert-info alert-soft mb-4">
           <Info className="w-6" />
-          <span>All the accounts will be process if no workflow is provided.</span>
+          <span>All the account will be processed if no workflow is provided.</span>
         </div>
       </div>
 
