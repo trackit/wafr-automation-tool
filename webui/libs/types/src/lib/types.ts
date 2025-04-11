@@ -76,10 +76,18 @@ export interface paths {
                     "application/json": {
                         /** @description Name of the assessment to be created */
                         name: string;
+                        /** @description List of regions to scan
+                         *     If empty, all regions will be scanned
+                         *      */
+                        regions?: string[];
                         /** @description The role ARN to associate with the assessment.
                          *     If not provided, a default role will be used.
                          *      */
                         roleArn?: string;
+                        /** @description The workflow to associate with the assessment.
+                         *     If not provided, no workflow will be associated.
+                         *      */
+                        workflow?: string;
                     };
                 };
             };
@@ -691,8 +699,14 @@ export interface components {
             id?: string;
             /** @description Name or title of the assessment */
             name?: string;
+            /** @description List of regions to scan
+             *     If empty, all regions will be scanned
+             *      */
+            regions?: string[];
             /** @description Role ARN associated with the assessment */
             role_arn?: string;
+            /** @description Workflow associated with the assessment */
+            workflow?: string;
             /** @description ISO-formatted date when the assessment was created */
             created_at?: string;
             /**
@@ -732,13 +746,13 @@ export interface components {
             /** @description List of resources related to the finding */
             resources?: {
                 /** @description ARN or unique identifier of the resource */
-                uid?: string;
+                uid?: string | null;
                 /** @description Name of the resource */
-                name?: string;
+                name?: string | null;
                 /** @description Type of resource (e.g., S3Bucket) */
-                type?: string;
+                type?: string | null;
                 /** @description The region or location of the resource */
-                region?: string;
+                region?: string | null;
             }[];
             /** @description Remediation advice for resolving the issue found */
             remediation?: {
