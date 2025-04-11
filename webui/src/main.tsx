@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router';
 import App from './app/app';
 
 import { amplifyConfig } from './amplify.config';
+import { Auth } from './app/auth';
 
 Amplify.configure(amplifyConfig);
 const queryClient = new QueryClient();
@@ -20,9 +21,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <SnackbarProvider>
         <BrowserRouter>
-          {/* <Auth> */}
+          <Auth>
             <App />
-          {/* </Auth> */}
+          </Auth>
         </BrowserRouter>
       </SnackbarProvider>
     </QueryClientProvider>
