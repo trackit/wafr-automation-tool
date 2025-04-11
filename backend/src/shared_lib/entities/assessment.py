@@ -19,9 +19,9 @@ class Steps(StrEnum):
 class Assessment(BaseModel):
     id: AssessmentID
     name: str
-    regions: list[str]
+    regions: list[str] = []
     role_arn: str
-    workflow: str
+    workflow: str = ""
     created_at: str
     step: Steps
     error: dict[str, Any] | None = None
