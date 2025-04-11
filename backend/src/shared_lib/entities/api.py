@@ -31,6 +31,7 @@ class APIAssessment(BaseModel):
     name: str
     regions: list[str]
     role_arn: str
+    workflow: str
     created_at: str
     step: Steps
     error: dict[str, Any] | None = None

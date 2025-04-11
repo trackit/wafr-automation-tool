@@ -81,6 +81,11 @@ paths:
                   description: |
                     The role ARN to associate with the assessment.
                     If not provided, a default role will be used.
+                workflow:
+                  type: string
+                  description: |
+                    The workflow to associate with the assessment.
+                    If not provided, no workflow will be associated.
       responses:
         "201":
           description: The assessment has been successfully created
@@ -460,6 +465,9 @@ components:
         role_arn:
           type: string
           description: Role ARN associated with the assessment
+        workflow:
+          type: string
+          description: Workflow associated with the assessment
         created_at:
           type: string
           description: ISO-formatted date when the assessment was created

@@ -44,6 +44,7 @@ def test_cleanup_on_error():
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
+        workflow="test-workflow",
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",

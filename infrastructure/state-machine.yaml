@@ -249,6 +249,8 @@ Resources:
                   L: "{% $states.input.regions %}"
                 role_arn:
                   S: "{% $states.input.role_arn %}"
+                workflow:
+                  S: "{% $states.input.workflow %}"
                 step:
                   S: "SCANNING_STARTED"
                 created_at:
@@ -257,6 +259,7 @@ Resources:
               assessment_id: "{% $states.input.assessment_id %}"
               regions: "{% $states.input.regions %}"
               role_arn: "{% $states.input.role_arn %}"
+              workflow: "{% $states.input.workflow %}"
             Next: ScanningTools
             Catch:
               - ErrorEquals:
@@ -395,6 +398,7 @@ Resources:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "prowler"
                       regions: "{% $regions %}"
+                      workflow: "{% $workflow %}"
                     End: true
               - StartAt: Prepare Cloud Custodian Prompts
                 States:
@@ -405,6 +409,7 @@ Resources:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloud-custodian"
                       regions: "{% $regions %}"
+                      workflow: "{% $workflow %}"
                     End: true
               - StartAt: Prepare CloudSploit Prompts
                 States:
@@ -415,6 +420,7 @@ Resources:
                       assessment_id: "{% $assessment_id %}"
                       scanning_tool: "cloudsploit"
                       regions: "{% $regions %}"
+                      workflow: "{% $workflow %}"
                     End: true
             Next: InvokeLLMUpdateStep
             Output: "{% $spread($states.result) %}"

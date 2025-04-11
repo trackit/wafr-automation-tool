@@ -38,6 +38,7 @@ class StartAssessment(
             name=event.name,
             regions=event.regions if event.regions else [],
             role_arn=role_arn,
+            workflow=event.workflow if event.workflow else "",
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )
         response = self.sfn_client.start_execution(

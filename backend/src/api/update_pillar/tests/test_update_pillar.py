@@ -16,6 +16,7 @@ def test_update_pillar():
         name="AN",
         regions=["test-region"],
         role_arn="AR",
+        workflow="test-workflow",
         step=Steps.SCANNING_STARTED,
         created_at="",
         question_version="QV",

@@ -150,18 +150,35 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                 existing = grouped_findings[key]
                 if existing.resources is None:
                     existing.resources = finding.resources
-                elif finding.resources:
+                elif finding.resources and finding.resources not in existing.resources:
                     existing.resources.extend(finding.resources)
         return list(grouped_findings.values())
 
-    def create_prompts(
-        self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, regions: list[str]
-    ) -> list[Prompt]:
-        findings = scanning_tool_service.retrieve_findings(assessment_id, regions)
+    def is_finding_in_workflow(self, finding: FindingExtra, workflow: str) -> bool:
+        filtered_resources = [
+            resource
+            for resource in finding.resources or []
+            if (resource.name and workflow in resource.name) or (resource.uid and workflow in resource.uid)
+        ]
+        if filtered_resources:
+            finding.resources = filtered_resources
+            return True
+        if finding.risk_details and workflow in finding.risk_details:
+            return True
+        return bool(finding.status_detail and workflow in finding.status_detail)
+
+    def filter_findings(self, findings: list[FindingExtra], workflow: str) -> list[FindingExtra]:
+        if not workflow:
+            return findings
+        return [finding for finding in findings if self.is_finding_in_workflow(finding, workflow)]
+
+    def create_prompts(self, scanning_tool_service: IScanningToolService, event: PreparePromptsInput) -> list[Prompt]:
+        findings = scanning_tool_service.retrieve_findings(event.assessment_id, event.regions)
         findings = self.merge_findings(findings)
-        chunks = self.create_chunks(scanning_tool_service, assessment_id, findings)
+        findings = self.filter_findings(findings, event.workflow)
+        chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
         prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
-        return self.store_prompts(scanning_tool_service, assessment_id, prompts)
+        return self.store_prompts(scanning_tool_service, event.assessment_id, prompts)
 
     @override
     def execute(self, event: PreparePromptsInput) -> list[str]:
@@ -171,4 +188,4 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
         self.populate_dynamodb(event.assessment_id)
         scanning_tool_service = scanning_tool_service_type(self.storage_service)
-        return self.create_prompts(scanning_tool_service, event.assessment_id, event.regions)
+        return self.create_prompts(scanning_tool_service, event)
