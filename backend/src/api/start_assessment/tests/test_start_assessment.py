@@ -15,10 +15,8 @@ def test_start_assessment():
 
     task_input = StartAssessmentInput(name="NAME", roleArn="ROLE")
     task = StartAssessment(sfn_client)
-    task.generate_assessment_id = MagicMock(return_value="ID")
     response = task.execute(task_input)
 
-    task.generate_assessment_id.assert_called_once()
     sfn_client.start_execution.assert_called_once()
     assert response.status_code == OK
     assert response.body == StartAssessmentResponseBody(assessmentId="ID")
@@ -31,10 +29,8 @@ def test_start_assessment_with_default_role():
 
     task_input = StartAssessmentInput(name="NAME")
     task = StartAssessment(sfn_client)
-    task.generate_assessment_id = MagicMock(return_value="ID")
     response = task.execute(task_input)
 
-    task.generate_assessment_id.assert_called_once()
     sfn_client.start_execution.assert_called_once_with(
         stateMachineArn=STATE_MACHINE_ARN,
         input='{"assessment_id":"ID","name":"NAME","regions":[],"role_arn":"test-role","created_at":"2000-01-01T00:00:00+00:00"}',

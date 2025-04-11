@@ -49,11 +49,14 @@ def test_delete_assessment():
     assessment_service.retrieve = MagicMock(return_value=assessment)
     assessment_service.delete = MagicMock(return_value=True)
     assessment_service.delete_findings = MagicMock(return_value=True)
+    sfn_client = MagicMock()
+    sfn_client.delete_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": OK}})
 
     task_input = DeleteAssessmentInput(assessment_id="AID")
-    task = DeleteAssessment(assessment_service)
+    task = DeleteAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 
+    sfn_client.delete_execution.assert_called_once()
     assessment_service.delete.assert_called_once_with("AID")
     assessment_service.delete_findings.assert_called_once_with(assessment)
     assert response.status_code == OK

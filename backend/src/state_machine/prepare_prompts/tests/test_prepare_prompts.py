@@ -17,7 +17,9 @@ from state_machine.event import PreparePromptsInput
 def test_prepare_prompts(get_prompt_mock: MagicMock):
     from ..app.tasks.prepare_prompts import PreparePrompts
 
-    event = PreparePromptsInput(assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[])
+    event = PreparePromptsInput(
+        assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[], workflow=""
+    )
 
     fake_database_service = FakeDatabaseService()
     fake_database_service.update_attrs = MagicMock()
@@ -98,7 +100,12 @@ def test_prepare_prompts(get_prompt_mock: MagicMock):
 def test_prepare_prompts_invalid_scanning_tool():
     from ..app.tasks.prepare_prompts import PreparePrompts
 
-    event = PreparePromptsInput(assessment_id="test_assessment_id", scanning_tool=ScanningTool._TEST, regions=[])  # noqa: SLF001
+    event = PreparePromptsInput(
+        assessment_id="test_assessment_id",
+        scanning_tool=ScanningTool._TEST,  # noqa: SLF001
+        regions=[],
+        workflow="",
+    )
 
     task = PreparePrompts(database_service=MagicMock(), storage_service=MagicMock(), formatted_question_set=MagicMock())
 

@@ -22,8 +22,9 @@ class Assessment(BaseModel):
     regions: list[str] = []
     role_arn: str
     workflow: str = ""
-    created_at: str
     step: Steps
+    execution_arn: str | None = None
+    created_at: str
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, FormattedPillar] | None = None

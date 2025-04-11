@@ -10,7 +10,8 @@ from api.event import DeleteAssessmentInput
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
 assessment_service = AssessmentService(database_service)
-task = DeleteAssessment(assessment_service)
+sfn_client = boto3.client("stepfunctions")
+task = DeleteAssessment(assessment_service, sfn_client)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401

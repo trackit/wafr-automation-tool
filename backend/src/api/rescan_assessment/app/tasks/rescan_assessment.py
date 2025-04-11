@@ -26,6 +26,7 @@ class RescanAssessment(
             name=assessment.name,
             regions=assessment.regions,
             role_arn=assessment.role_arn,
+            workflow=assessment.workflow,
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )
         response = self.sfn_client.start_execution(

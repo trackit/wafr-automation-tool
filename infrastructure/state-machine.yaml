@@ -253,6 +253,8 @@ Resources:
                   S: "{% $states.input.workflow %}"
                 step:
                   S: "SCANNING_STARTED"
+                execution_arn:
+                  S: "{% $states.context.Execution.Id %}"
                 created_at:
                   S: "{% $states.input.created_at %}"
             Assign:
