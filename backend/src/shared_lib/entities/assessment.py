@@ -21,7 +21,7 @@ class Assessment(BaseModel):
     name: str
     regions: list[str] = []
     role_arn: str
-    workflow: str = ""
+    workflows: list[str] = []
     step: Steps
     execution_arn: str | None = None
     created_at: str

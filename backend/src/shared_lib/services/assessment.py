@@ -342,6 +342,8 @@ class AssessmentService(IAssessmentService):
     def _create_assessment(self, item: dict[str, Any]) -> Assessment:
         formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
         formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
+        if "workflow" in formatted_item:
+            formatted_item["workflows"] = [formatted_item.pop("workflow")]
         return Assessment.model_validate(
             formatted_item,
         )

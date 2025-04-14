@@ -154,28 +154,29 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                     existing.resources.extend(finding.resources)
         return list(grouped_findings.values())
 
-    def is_finding_in_workflow(self, finding: FindingExtra, workflow: str) -> bool:
+    def is_finding_in_workflow(self, finding: FindingExtra, workflows: list[str]) -> bool:
         filtered_resources = [
             resource
             for resource in finding.resources or []
-            if (resource.name and workflow in resource.name) or (resource.uid and workflow in resource.uid)
+            if (resource.name and any(w in resource.name for w in workflows))
+            or (resource.uid and any(w in resource.uid for w in workflows))
         ]
         if filtered_resources:
             finding.resources = filtered_resources
             return True
-        if finding.risk_details and workflow in finding.risk_details:
+        if finding.risk_details and any(w in finding.risk_details for w in workflows):
             return True
-        return bool(finding.status_detail and workflow in finding.status_detail)
+        return bool(finding.status_detail and any(w in finding.status_detail for w in workflows))
 
-    def filter_findings(self, findings: list[FindingExtra], workflow: str) -> list[FindingExtra]:
-        if not workflow:
+    def filter_findings(self, findings: list[FindingExtra], workflows: list[str]) -> list[FindingExtra]:
+        if not workflows:
             return findings
-        return [finding for finding in findings if self.is_finding_in_workflow(finding, workflow)]
+        return [finding for finding in findings if self.is_finding_in_workflow(finding, workflows)]
 
     def create_prompts(self, scanning_tool_service: IScanningToolService, event: PreparePromptsInput) -> list[Prompt]:
         findings = scanning_tool_service.retrieve_findings(event.assessment_id, event.regions)
         findings = self.merge_findings(findings)
-        findings = self.filter_findings(findings, event.workflow)
+        findings = self.filter_findings(findings, event.workflows)
         chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
         prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
         return self.store_prompts(scanning_tool_service, event.assessment_id, prompts)

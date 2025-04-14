@@ -16,7 +16,7 @@ def test_update_best_practice():
         name="AN",
         regions=["test-region"],
         role_arn="AR",
-        workflow="test-workflow",
+        workflows=["test-workflow"],
         step=Steps.SCANNING_STARTED,
         created_at="",
         question_version="QV",

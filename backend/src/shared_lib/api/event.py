@@ -5,19 +5,19 @@ from entities.assessment import AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID
 from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from utils.api import APIResponseBody
 
 
 class StartAssessmentInput(BaseModel):
     name: str
     regions: list[str] = []
-    roleArn: str | None = None  # noqa: N815
-    workflow: str | None = None
+    role_arn: str | None = Field(default=None, alias="roleArn")
+    workflows: list[str] = []
 
 
 class StartAssessmentResponseBody(APIResponseBody):
-    assessmentId: AssessmentID  # noqa: N815
+    assessment_id: AssessmentID = Field(alias="assessmentId")
 
 
 class StateMachineInput(BaseModel):
@@ -25,7 +25,7 @@ class StateMachineInput(BaseModel):
     name: str
     regions: list[str]
     role_arn: str
-    workflow: str
+    workflows: list[str]
     created_at: str
 
 

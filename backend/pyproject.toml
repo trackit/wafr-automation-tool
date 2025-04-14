@@ -88,6 +88,8 @@ convention = "google"
     "S101",
     "S105",
     "TID252",
+    "SLF001",
+    "S106",
 ]
 
 [tool.ruff.format]

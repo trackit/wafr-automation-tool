@@ -10,7 +10,7 @@ class PreparePromptsInput(BaseModel):
     assessment_id: AssessmentID
     scanning_tool: ScanningTool
     regions: list[str]
-    workflow: str
+    workflows: list[str]
 
 
 class FormatProwlerInput(BaseModel):
