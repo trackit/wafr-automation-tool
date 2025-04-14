@@ -425,7 +425,7 @@ Resources:
                       workflows: "{% $workflows %}"
                     End: true
             Next: InvokeLLMUpdateStep
-            Output: "{% $spread($states.result) %}"
+            Output: "{% [$spread($states.result)] %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
