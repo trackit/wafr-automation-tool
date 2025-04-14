@@ -119,8 +119,12 @@ describe('AssessmentDetails', () => {
 
     render(<AssessmentDetails />, { wrapper });
 
+    // First check for the loading ring
+    expect(screen.getByRole('status')).toBeInTheDocument();
+
+    // Then check for the scanning text in the timeline
     await waitFor(() => {
-      expect(screen.getByText('Scanning your account...')).toBeInTheDocument();
+      expect(screen.getByText('Scanning your account')).toBeInTheDocument();
     });
   });
 

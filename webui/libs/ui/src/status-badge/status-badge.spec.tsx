@@ -10,9 +10,9 @@ describe('StatusBadge', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders "Scan Started" status with info color', () => {
+  it('renders "Scanning" status with info color', () => {
     render(<StatusBadge status="SCANNING_STARTED" />);
-    const badge = screen.getByText('Scan Started');
+    const badge = screen.getByText('Scanning');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('badge-info');
   });
