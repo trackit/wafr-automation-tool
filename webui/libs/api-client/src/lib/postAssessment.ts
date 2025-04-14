@@ -6,7 +6,7 @@ export function postAssessment({
   roleArn,
   regions,
   workflow,
-}: paths['/assessments']['post']['parameters']['query']) {
+}: paths['/assessments']['post']['requestBody']['content']['application/json']) {
   return apiClient.post('/assessments', {
     name,
     roleArn,

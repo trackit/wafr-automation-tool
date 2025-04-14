@@ -79,13 +79,13 @@ export interface paths {
                         /** @description List of regions to scan
                          *     If empty, all regions will be scanned
                          *      */
-                        roleArn?: string;
-                        /** @description The workflow to associate with the assessment.
-                         *     If not provided, no workflow will be associated.
-                         *      */
                         regions?: string[];
                         /** @description The role ARN to associate with the assessment.
                          *     If not provided, a default role will be used.
+                         *      */
+                        roleArn?: string;
+                        /** @description The workflow to associate with the assessment.
+                         *     If not provided, no workflow will be associated.
                          *      */
                         workflow?: string;
                     };

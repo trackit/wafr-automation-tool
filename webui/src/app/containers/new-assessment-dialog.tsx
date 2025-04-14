@@ -10,7 +10,12 @@ function NewAssessmentDialog() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: { name: string; roleArn?: string, regions: string[], workflow?: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      roleArn?: string;
+      regions?: string[];
+      workflow?: string;
+    }) => {
       const response = (await postAssessment(
         data
       )) as paths['/assessments']['post']['responses']['201']['content']['application/json'];
@@ -22,8 +27,18 @@ function NewAssessmentDialog() {
     },
   });
 
-  const onSubmit = (data: { name: string; roleArn?: string, regions: string[], workflow?: string }) => {
-    mutate(data);
+  const onSubmit = (data: {
+    name: string;
+    roleArn?: string;
+    regions?: string[];
+    workflow?: string;
+  }) => {
+    mutate({
+      name: data.name,
+      roleArn: data.roleArn || undefined,
+      regions: data.regions?.length ? data.regions : undefined,
+      workflow: data.workflow || undefined,
+    });
   };
 
   return (

@@ -1,40 +1,42 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Info, KeyRound, Pen } from 'lucide-react';
+import { Computer, Earth, KeyRound, Pen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-
-
 const awsRegions = [
-  "us-east-1",
-  "us-east-2",
-  "us-west-1",
-  "us-west-2",
-  "af-south-1",
-  "ap-east-1",
-  "ap-south-1",
-  "ap-northeast-1",
-  "ap-northeast-2",
-  "ap-northeast-3",
-  "ap-southeast-1",
-  "ap-southeast-2",
-  "ca-central-1",
-  "eu-central-1",
-  "eu-west-1",
-  "eu-west-2",
-  "eu-west-3",
-  "eu-north-1",
-  "eu-south-1",
-  "me-south-1",
-  "sa-east-1"
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2',
+  'af-south-1',
+  'ap-east-1',
+  'ap-south-1',
+  'ap-northeast-1',
+  'ap-northeast-2',
+  'ap-northeast-3',
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'ca-central-1',
+  'eu-central-1',
+  'eu-west-1',
+  'eu-west-2',
+  'eu-west-3',
+  'eu-north-1',
+  'eu-south-1',
+  'me-south-1',
+  'sa-east-1',
 ] as const;
 type Region = (typeof awsRegions)[number];
 type NewAssessmentProps = {
-  onSubmit: (data: { name: string; roleArn?: string, regions: Region[]; workflow?: string }) => void;
+  onSubmit: (data: {
+    name: string;
+    roleArn?: string;
+    regions?: Region[];
+    workflow?: string;
+  }) => void;
   disabled?: boolean;
 };
-
 
 export function NewAssessment({
   onSubmit,
@@ -75,7 +77,7 @@ export function NewAssessment({
     setValue('regions', selectedRegions);
   }, [selectedRegions, setValue]);
 
-  const toggleRegion = (region: typeof awsRegions[number]) => {
+  const toggleRegion = (region: (typeof awsRegions)[number]) => {
     setSelectedRegions((prev) =>
       prev.includes(region)
         ? prev.filter((r) => r !== region)
@@ -84,70 +86,68 @@ export function NewAssessment({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} role="form">
-      <div className="flex flex-col gap-1">
-        <label className="form-control w-full">
-          <label
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-col gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Name</legend>
+          <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.name ? 'input-error' : ''
             }`}
           >
-            <Pen className="w-6" />
-            <span className="text-base-content/70">Assessment Name</span>
+            <Pen className="w-4 opacity-80" />
             <input
               type="text"
-              className="grow "
-              placeholder=""
+              className="grow"
+              placeholder="Enter assessment name"
               {...register('name')}
             />
-          </label>
+          </div>
           {errors.name && (
-            <div className="label">
-              <span className="label-text-alt text-error text-sm">
-                {errors.name?.message}
-              </span>
-            </div>
+            <p className="fieldset-label text-error">{errors.name?.message}</p>
           )}
-        </label>
-        <div role="alert" className="mb-4"/>
+        </fieldset>
 
-        <label className="form-control w-full">
-          <label
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Role ARN</legend>
+          <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.roleArn ? 'input-error' : ''
             }`}
           >
-            <KeyRound className="w-6" />
-            <span className="text-base-content/70">Role ARN</span>
+            <KeyRound className="w-4 opacity-80" />
             <input
               type="text"
-              className="grow "
-              placeholder=""
+              className="grow"
+              placeholder="Enter AWS role ARN"
               {...register('roleArn')}
             />
-          </label>
+          </div>
           {errors.roleArn && (
-            <div className="label">
-              <span className="label-text-alt text-error text-sm">
-                {errors.roleArn?.message}
-              </span>
-            </div>
+            <p className="fieldset-label text-error">
+              {errors.roleArn?.message}
+            </p>
           )}
-        </label>
-        <div role="alert" className="alert alert-info alert-soft mb-4">
-          <Info className="w-6" />
-          <span>Default role will be used if no role is provided.</span>
-        </div>
+          {!errors.roleArn && (
+            <p className="fieldset-label">
+              If no role is provided, the default role will be used.
+            </p>
+          )}
+        </fieldset>
 
-        <div className="form-control w-full">
-          <input type="hidden" {...register("regions")} />
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Regions</legend>
+          <input type="hidden" {...register('regions')} />
           <div className="dropdown">
-            <label tabIndex={0} className="input input-bordered flex items-center gap-2 w-full">
-              <KeyRound className="w-6" />
+            <label
+              tabIndex={0}
+              className="input input-bordered flex items-center gap-2 w-full cursor-pointer"
+            >
+              <Earth className="w-4 opacity-80" />
               <span className="text-base-content/70">
                 {selectedRegions.length > 0
-                  ? `Regions (${selectedRegions.length})`
-                  : "Regions (Global)"}
+                  ? `Selected Regions (${selectedRegions.length})`
+                  : 'Select Regions'}
               </span>
             </label>
             <ul
@@ -170,48 +170,41 @@ export function NewAssessment({
             </ul>
           </div>
           {errors.regions && (
-            <div className="label">
-              <span className="label-text-alt text-error text-sm">
-                {errors.regions.message}
-              </span>
-            </div>
+            <p className="fieldset-label text-error">
+              {errors.regions.message}
+            </p>
           )}
-        </div>
-        <div role="alert" className="alert alert-info alert-soft mb-4">
-          <Info className="w-6" />
-          <span>All regions will be used if no region is provided.</span>
-        </div>
+          {!errors.regions && (
+            <p className="fieldset-label">
+              If no regions are provided, all regions will be scanned.
+            </p>
+          )}
+        </fieldset>
 
-        <label className="form-control w-full">
-          <label
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Workflow</legend>
+          <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.workflow ? 'input-error' : ''
             }`}
           >
-            <KeyRound className="w-6" />
-            <span className="text-base-content/70">Workflow</span>
+            <Computer className="w-4 opacity-80" />
             <input
               type="text"
-              className="grow "
-              placeholder=""
+              className="grow"
+              placeholder="Enter workflow"
               {...register('workflow')}
             />
-          </label>
+          </div>
           {errors.workflow && (
-            <div className="label">
-              <span className="label-text-alt text-error text-sm">
-                {errors.workflow?.message}
-              </span>
-            </div>
+            <p className="fieldset-label text-error">
+              {errors.workflow?.message}
+            </p>
           )}
-        </label>
-        <div role="alert" className="alert alert-info alert-soft mb-4">
-          <Info className="w-6" />
-          <span>All the account will be processed if no workflow is provided.</span>
-        </div>
+        </fieldset>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-4">
         <button type="submit" className="btn btn-primary" disabled={disabled}>
           Submit
         </button>

@@ -8,8 +8,10 @@ describe('NewAssessment', () => {
   it('renders the form with all fields', () => {
     render(<NewAssessment onSubmit={vi.fn()} />);
 
-    expect(screen.getByText('Assessment Name')).toBeInTheDocument();
+    expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Role ARN')).toBeInTheDocument();
+    expect(screen.getByText('Regions')).toBeInTheDocument();
+    expect(screen.getByText('Workflow')).toBeInTheDocument();
     expect(screen.getByText('Submit')).toBeInTheDocument();
   });
 
@@ -17,7 +19,7 @@ describe('NewAssessment', () => {
     const onSubmitMock = vi.fn();
     render(<NewAssessment onSubmit={onSubmitMock} />);
 
-    const nameInput = screen.getByRole('textbox', { name: /assessment name/i });
+    const nameInput = screen.getByPlaceholderText('Enter assessment name');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
@@ -28,14 +30,13 @@ describe('NewAssessment', () => {
       fireEvent.click(submitButton);
     });
 
-    // Wait for the form submission to complete
     await vi.waitFor(() => {
       expect(onSubmitMock).toHaveBeenCalledWith(
         {
           name: 'Test Assessment',
           roleArn: '',
           regions: [],
-          workflox: '',
+          workflow: '',
         },
         expect.any(Object)
       );
@@ -57,7 +58,7 @@ describe('NewAssessment', () => {
   it('shows error for invalid role ARN format', async () => {
     render(<NewAssessment onSubmit={vi.fn()} />);
 
-    const roleInput = screen.getByRole('textbox', { name: /role arn/i });
+    const roleInput = screen.getByPlaceholderText('Enter AWS role ARN');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
@@ -75,8 +76,8 @@ describe('NewAssessment', () => {
     const onSubmitMock = vi.fn();
     render(<NewAssessment onSubmit={onSubmitMock} />);
 
-    const nameInput = screen.getByRole('textbox', { name: /assessment name/i });
-    const roleInput = screen.getByRole('textbox', { name: /role arn/i });
+    const nameInput = screen.getByPlaceholderText('Enter assessment name');
+    const roleInput = screen.getByPlaceholderText('Enter AWS role ARN');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
@@ -93,15 +94,22 @@ describe('NewAssessment', () => {
       fireEvent.click(submitButton);
     });
 
-    // Wait for the form submission to complete
     await vi.waitFor(() => {
       expect(onSubmitMock).toHaveBeenCalledWith(
         {
           name: 'Test Assessment',
           roleArn: 'arn:aws:iam::123456789012:role/test-role',
+          regions: [],
+          workflow: '',
         },
         expect.any(Object)
       );
     });
+  });
+
+  it('handles disabled state', () => {
+    render(<NewAssessment onSubmit={vi.fn()} disabled />);
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    expect(submitButton).toBeDisabled();
   });
 });
