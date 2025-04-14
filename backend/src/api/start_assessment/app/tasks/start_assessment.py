@@ -37,7 +37,7 @@ class StartAssessment(
             name=event.name,
             regions=event.regions,
             role_arn=event.role_arn if event.role_arn else DEFAULT_ASSESSMENT_ROLE,
-            workflows=event.workflows,
+            workflows=[w.lower() for w in event.workflows],
             created_at=datetime.datetime.fromtimestamp(int(assessment_id) / 1000, tz=datetime.UTC).isoformat(),
         )
         response = self.sfn_client.start_execution(
