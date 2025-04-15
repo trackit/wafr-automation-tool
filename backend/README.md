@@ -65,3 +65,20 @@ To perform a remote analysis, you must provide a custom role with these managed 
 - job-function/ViewOnlyAccess
 
 And the following inline policy: [Inline Policy](../resources/inline-policy.json)
+
+Additionally, add the following trust policy to your role:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "ACCOUNT_ID"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
