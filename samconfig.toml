@@ -44,5 +44,18 @@ image_repositories = []
 parameter_overrides = [
   "Debug=true",
   "Repository=https://github.com/trackit/wafr-automation-tool",
-  "InitialUserEmail=team@trackit.io",
+  "InitialUserEmail=contact@example.com",
+]
+
+[prod.deploy.parameters]
+stack_name = "wafr-automation-tool-prod"
+resolve_s3 = true
+s3_prefix = "wafr-automation-tool-prod"
+region = "us-west-2"
+confirm_changeset = true
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
+image_repositories = []
+parameter_overrides = [
+  "Repository=https://github.com/trackit/wafr-automation-tool",
+  "InitialUserEmail=contact@example.com",
 ]
