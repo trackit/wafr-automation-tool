@@ -14,7 +14,7 @@ function NewAssessmentDialog() {
       name: string;
       roleArn?: string;
       regions?: string[];
-      workflow?: string;
+      workflows?: string[];
     }) => {
       const response = (await postAssessment(
         data
@@ -31,13 +31,13 @@ function NewAssessmentDialog() {
     name: string;
     roleArn?: string;
     regions?: string[];
-    workflow?: string;
+    workflows?: string[];
   }) => {
     mutate({
       name: data.name,
       roleArn: data.roleArn || undefined,
       regions: data.regions?.length ? data.regions : undefined,
-      workflow: data.workflow || undefined,
+      workflows: data.workflows?.length ? data.workflows : undefined,
     });
   };
 

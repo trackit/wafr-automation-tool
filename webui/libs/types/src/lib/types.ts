@@ -84,10 +84,10 @@ export interface paths {
                          *     If not provided, a default role will be used.
                          *      */
                         roleArn?: string;
-                        /** @description The workflow to associate with the assessment.
-                         *     If not provided, no workflow will be associated.
+                        /** @description The workflows to associate with the assessment.
+                         *     If not provided, no workflows will be associated.
                          *      */
-                        workflow?: string;
+                        workflows?: string[];
                     };
                 };
             };
@@ -705,8 +705,8 @@ export interface components {
             regions?: string[];
             /** @description Role ARN associated with the assessment */
             role_arn?: string;
-            /** @description Workflow associated with the assessment */
-            workflow?: string;
+            /** @description Workflows associated with the assessment */
+            workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
             created_at?: string;
             /**
