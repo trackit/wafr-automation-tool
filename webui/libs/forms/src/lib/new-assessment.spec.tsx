@@ -31,15 +31,12 @@ describe('NewAssessment', () => {
     });
 
     await vi.waitFor(() => {
-      expect(onSubmitMock).toHaveBeenCalledWith(
-        {
-          name: 'Test Assessment',
-          roleArn: '',
-          regions: [],
-          workflow: '',
-        },
-        expect.any(Object)
-      );
+      expect(onSubmitMock).toHaveBeenCalledWith({
+        name: 'Test Assessment',
+        roleArn: undefined,
+        regions: [],
+        workflows: undefined,
+      });
     });
   });
 
@@ -95,15 +92,44 @@ describe('NewAssessment', () => {
     });
 
     await vi.waitFor(() => {
-      expect(onSubmitMock).toHaveBeenCalledWith(
-        {
-          name: 'Test Assessment',
-          roleArn: 'arn:aws:iam::123456789012:role/test-role',
-          regions: [],
-          workflow: '',
-        },
-        expect.any(Object)
-      );
+      expect(onSubmitMock).toHaveBeenCalledWith({
+        name: 'Test Assessment',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        regions: [],
+        workflows: undefined,
+      });
+    });
+  });
+
+  it('submits form with multiple workflows', async () => {
+    const onSubmitMock = vi.fn();
+    render(<NewAssessment onSubmit={onSubmitMock} />);
+
+    const nameInput = screen.getByPlaceholderText('Enter assessment name');
+    const workflowInput = screen.getByPlaceholderText('Enter workflow');
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Test Assessment' } });
+    });
+
+    await act(async () => {
+      fireEvent.change(workflowInput, {
+        target: { value: 'workflow1, workflow2, workflow3' },
+      });
+    });
+
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
+
+    await vi.waitFor(() => {
+      expect(onSubmitMock).toHaveBeenCalledWith({
+        name: 'Test Assessment',
+        roleArn: undefined,
+        regions: [],
+        workflows: ['workflow1', 'workflow2', 'workflow3'],
+      });
     });
   });
 

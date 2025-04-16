@@ -17,6 +17,8 @@ import {
   EllipsisVertical,
   Trash2,
   RefreshCw,
+  Earth,
+  Computer,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
@@ -199,6 +201,17 @@ function AssessmentsList() {
                     {assessment.created_at
                       ? new Date(assessment.created_at).toLocaleDateString()
                       : 'N/A'}
+                  </div>
+                  <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+                    <Earth className="w-4 h-4" />
+                    {assessment.regions?.join(', ') || 'Global'}
+                  </div>
+                  <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+                    <Computer className="w-4 h-4" />
+                    Workflow:
+                    {Array.isArray(assessment.workflows)
+                      ? assessment.workflows.join(', ')
+                      : assessment.workflows || ' -'}
                   </div>
                 </div>
               </div>

@@ -33,7 +33,7 @@ type NewAssessmentProps = {
     name: string;
     roleArn?: string;
     regions?: Region[];
-    workflow?: string;
+    workflows?: string[];
   }) => void;
   disabled?: boolean;
 };
@@ -53,7 +53,7 @@ export function NewAssessment({
       .optional()
       .or(z.literal('')),
     regions: z.array(z.enum(awsRegions)).optional(),
-    workflow: z.string().optional().or(z.literal('')),
+    workflows: z.string().optional().or(z.literal('')),
   });
 
   const {
@@ -67,7 +67,7 @@ export function NewAssessment({
       name: '',
       roleArn: '',
       regions: [],
-      workflow: '',
+      workflows: '',
     },
   });
 
@@ -85,8 +85,24 @@ export function NewAssessment({
     );
   };
 
+  const handleFormSubmit = (data: z.infer<typeof formSchema>) => {
+    const workflows = data.workflows
+      ? data.workflows
+          .split(',')
+          .map((w) => w.trim())
+          .filter(Boolean)
+      : undefined;
+
+    onSubmit({
+      name: data.name,
+      roleArn: data.roleArn || undefined,
+      regions: data.regions,
+      workflows,
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="flex flex-col gap-2">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Name</legend>
@@ -185,7 +201,7 @@ export function NewAssessment({
           <legend className="fieldset-legend">Workflow</legend>
           <div
             className={`input input-bordered flex items-center gap-2 w-full ${
-              errors.workflow ? 'input-error' : ''
+              errors.workflows ? 'input-error' : ''
             }`}
           >
             <Computer className="w-4 opacity-80" />
@@ -193,12 +209,17 @@ export function NewAssessment({
               type="text"
               className="grow"
               placeholder="Enter workflow"
-              {...register('workflow')}
+              {...register('workflows')}
             />
           </div>
-          {errors.workflow && (
+          {errors.workflows && (
             <p className="fieldset-label text-error">
-              {errors.workflow?.message}
+              {errors.workflows?.message}
+            </p>
+          )}
+          {!errors.workflows && (
+            <p className="fieldset-label">
+              You can enter multiple workflows separated by commas.
             </p>
           )}
         </fieldset>

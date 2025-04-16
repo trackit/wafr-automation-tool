@@ -5,13 +5,13 @@ export function postAssessment({
   name,
   roleArn,
   regions,
-  workflow,
+  workflows,
 }: paths['/assessments']['post']['requestBody']['content']['application/json']) {
   return apiClient.post('/assessments', {
     name,
     roleArn,
     regions,
-    workflow,
+    workflows,
   });
 }
 
