@@ -67,7 +67,7 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: PreparePromptsFunction
-      Timeout: 300
+      Timeout: 600
       MemorySize: 1024
       Policies:
         - Version: "2012-10-17"
@@ -182,7 +182,7 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: PrepareCustodianFunction
-      Timeout: 300
+      Timeout: 600
       MemorySize: 128
       Policies:
         - Version: "2012-10-17"
@@ -192,6 +192,29 @@ Resources:
                 - s3:PutObject
               Resource:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+  GenerateDataFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.12
+      CodeUri: ../backend/src/state_machine/generate_data/app
+      Timeout: 600
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: GenerateDataFunction
+      MemorySize: 128
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+              Resource:
+                - !Ref DynamoDBArn
   BedrockPrompt:
     Type: "AWS::Bedrock::Prompt"
     Properties:
@@ -292,6 +315,7 @@ Resources:
                 - !GetAtt InvokeLLMFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
+                - !GetAtt GenerateDataFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
@@ -319,6 +343,10 @@ Resources:
                   L: "{% $states.input.workflows %}"
                 step:
                   S: "SCANNING_STARTED"
+                raw_graph_datas:
+                  M: {}
+                graph_datas:
+                  M: {}
                 execution_arn:
                   S: "{% $states.context.Execution.Id %}"
                 created_at:
@@ -544,7 +572,7 @@ Resources:
                       BackoffRate: 2
                       IntervalSeconds: 1
                       MaxAttempts: 3
-            Next: FinishUpdateStep
+            Next: GenerateData
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -552,6 +580,19 @@ Resources:
                 Output:
                   assessment_id: "{% $assessment_id %}"
                   error: "{% $states.errorOutput %}"
+          GenerateData:
+            Type: Task
+            Resource: !GetAtt GenerateDataFunction.Arn
+            Arguments:
+              assessment_id: "{% $assessment_id %}"
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+            Next: "FinishUpdateStep"
           FinishUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
@@ -579,6 +620,13 @@ Resources:
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
             End: true
           CleanupOnError:
             Type: Task
