@@ -1,31 +1,31 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Tabs,
-  VerticalMenu,
-  DataTable,
-  Modal,
-  StatusBadge,
-  ConfirmationModal,
-  Timeline,
-} from '@webui/ui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createColumnHelper } from '@tanstack/react-table';
 import {
   getAssessment,
-  updateStatus,
-  updateQuestion,
   rescanAssessment,
   updatePillar,
+  updateQuestion,
+  updateStatus,
 } from '@webui/api-client';
 import { components } from '@webui/types';
 import {
-  ArrowRight,
-  RefreshCw,
-  EllipsisVertical,
-  CircleMinus,
+  ConfirmationModal,
+  DataTable,
+  Modal,
+  StatusBadge,
+  Tabs,
+  Timeline,
+  VerticalMenu,
+} from '@webui/ui';
+import {
+  ChevronRight,
   CircleCheck,
+  CircleMinus,
+  EllipsisVertical,
+  RefreshCw,
 } from 'lucide-react';
-import { createColumnHelper } from '@tanstack/react-table';
-import { Link, useParams, useNavigate } from 'react-router';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -454,8 +454,9 @@ export function AssessmentDetails() {
       columnHelper.display({
         id: 'status',
         header: '',
+        size: 60,
         cell: (info) => (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center w-4">
             <input
               type="checkbox"
               className={`checkbox checkbox-sm checkbox-primary`}
@@ -516,6 +517,7 @@ export function AssessmentDetails() {
             Severity
           </button>
         ),
+        size: 80,
         cell: (info) => {
           if (info.row.original.id !== 'resolve') {
             return (
@@ -543,9 +545,10 @@ export function AssessmentDetails() {
             className="flex items-center gap-1 justify-center w-full cursor-pointer"
             onClick={() => column.toggleSorting()}
           >
-            Failed Findings
+            Findings
           </button>
         ),
+        size: 80,
         cell: (info) => {
           return (
             <div className="font-bold text-center">
@@ -806,7 +809,7 @@ export function AssessmentDetails() {
           setActiveQuestionIndex(0);
         }}
       />
-      <div className="flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
+      <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         {selectedPillar?.disabled && (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
             <h3 className="text-center font-medium text-xl  flex-1">
@@ -848,9 +851,9 @@ export function AssessmentDetails() {
               )}
             />
 
-            <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
-              <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
-                <h3 className="text-center font-medium text-xl text-primary flex-1">
+            <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
+              <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
+                <h3 className="text-center font-medium text-lg text-primary flex-1">
                   <span className="font-medium">
                     {selectedPillar?.questions
                       ? `${activeQuestionIndex + 1} / ${
@@ -861,52 +864,68 @@ export function AssessmentDetails() {
                   {'. '}
                   <span className="font-light">{activeQuestion?.label}</span>
                 </h3>
-                <div
-                  className="dropdown dropdown-end"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
+                <div>
+                  {!isLastQuestion && (
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="btn btn-ghost btn-xs p-1"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleNextQuestion();
+                      }}
+                    >
+                      <ChevronRight className="w-4 h-4 text-base-content/80" />
+                    </div>
+                  )}
                   <div
-                    tabIndex={0}
-                    role="button"
-                    className="btn btn-ghost btn-xs p-1"
+                    className="dropdown dropdown-end"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                   >
-                    <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="btn btn-ghost btn-xs p-1"
+                    >
+                      <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                    >
+                      <li>
+                        <button
+                          className={`flex flex-row gap-2 w-full text-left ${
+                            activeQuestion?.disabled
+                              ? 'text-base-content'
+                              : 'text-error'
+                          }`}
+                          onClick={() => {
+                            handleDisabledQuestion(
+                              activeQuestion?.id || '',
+                              !activeQuestion?.disabled
+                            );
+                          }}
+                        >
+                          {activeQuestion?.disabled ? (
+                            <>
+                              <CircleCheck className="w-4 h-4" /> Enable this
+                              question
+                            </>
+                          ) : (
+                            <>
+                              <CircleMinus className="w-4 h-4" /> Disable this
+                              question
+                            </>
+                          )}
+                        </button>
+                      </li>
+                    </ul>
                   </div>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-                  >
-                    <li>
-                      <button
-                        className={`flex flex-row gap-2 w-full text-left ${
-                          activeQuestion?.disabled
-                            ? 'text-base-content'
-                            : 'text-error'
-                        }`}
-                        onClick={(e) => {
-                          handleDisabledQuestion(
-                            activeQuestion?.id || '',
-                            !activeQuestion?.disabled
-                          );
-                        }}
-                      >
-                        {activeQuestion?.disabled ? (
-                          <>
-                            <CircleCheck className="w-4 h-4" /> Enable this
-                            question
-                          </>
-                        ) : (
-                          <>
-                            <CircleMinus className="w-4 h-4" /> Disable this
-                            question
-                          </>
-                        )}
-                      </button>
-                    </li>
-                  </ul>
                 </div>
               </div>
               {activeQuestion?.disabled && (
@@ -925,17 +944,6 @@ export function AssessmentDetails() {
                       columns={columns}
                     />
                   )}
-                </div>
-              )}
-              {!isLastQuestion && (
-                <div className="flex flex-row gap-2 justify-end mt-auto">
-                  <button
-                    className="btn btn-link no-underline"
-                    onClick={handleNextQuestion}
-                  >
-                    Next
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
                 </div>
               )}
             </div>
@@ -957,7 +965,7 @@ export function AssessmentDetails() {
   if (!id) return <div>No assessment ID found</div>;
   return (
     <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
-      <div className="breadcrumbs text-sm">
+      <div className="breadcrumbs text-sm shrink-0">
         <ul>
           <li>
             <Link to="/">Home</Link>
