@@ -34,8 +34,11 @@ const SeverityBadge = ({
   );
 };
 
-const highlightText = (text: string | undefined, searchQuery: string) => {
-  if (!text || !searchQuery) return text;
+const highlightText = (
+  text: string | null | undefined,
+  searchQuery: string
+) => {
+  if (!text || !searchQuery) return text || undefined;
   const regex = new RegExp(`(${searchQuery})`, 'gi');
   const parts = text.split(regex);
   return parts.map((part, i) => {
@@ -94,18 +97,20 @@ function FindingItem({
       )}
       {finding.resources?.map((resource) => (
         <div
-          className="flex flex-row gap-2 items-center mt-2"
+          className="flex flex-row flex-wrap gap-2 items-start mt-2"
           key={resource.uid}
         >
-          <div className="text-sm text-base-content flex flex-row gap-2 items-center badge badge-soft">
-            <Server className="w-4 h-4" />
-            <div>
+          <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">
+            <Server className="w-4 h-4 flex-shrink-0 mr-2 mt-0.5" />
+            <div className="break-all">
               {highlightText(resource.name || resource.uid, searchQuery)}
             </div>
           </div>
-          <div className="text-sm text-base-content flex flex-row gap-2 items-center badge badge-soft">
-            <Earth className="w-4 h-4" />
-            <div>{highlightText(resource.region, searchQuery)}</div>
+          <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">
+            <Earth className="w-4 h-4 flex-shrink-0 mr-2 mt-0.5" />
+            <div className="break-all">
+              {highlightText(resource.region, searchQuery)}
+            </div>
           </div>
         </div>
       ))}
