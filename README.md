@@ -1,4 +1,4 @@
-# Well-Architected Framework Review Automation Tool
+<h1 align="center">Well-Architected Framework Review Automation Tool</h1>
 
 <p align="center">
   <b>Well-Architected Framework Review Automation Tool</b> is a serverless application that automates the process of assessing the architecture of a given AWS account against the Well-Architected Framework.
@@ -6,29 +6,20 @@
 <p align="center">
   <b>Learn more in this <a href="https://trackit.io/aws-wafr-automation/">blog post</a></b>
 </p>
+
 <hr>
 
 <p align="center">
-  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml">
-    <img src="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml/badge.svg">
-  </a>
-  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml">
-    <img src="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml/badge.svg">
-  </a>
-  <a href="https://github.com/trackit/wafr-automation-tool/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/trackit/wafr-automation-tool">
-  </a>
-  <a href="https://github.com/trackit/wafr-automation-tool/releases">
-    <img src="https://img.shields.io/github/v/release/trackit/wafr-automation-tool">
-  </a>
-  <a href="https://trackit.io/aws-wafr-automation/">
-    <img src="https://img.shields.io/badge/blog-trackit.io-blue">
-  </a>
+  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml"><img alt="Tests check" src="https://github.com/trackit/wafr-automation-tool/actions/workflows/tests.yml/badge.svg"></a>
+  <a href="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml"><img alt="Linting and Code Formatting check" src="https://github.com/trackit/wafr-automation-tool/actions/workflows/linting-code-formatting.yml/badge.svg"></a>
+  <a href="https://github.com/trackit/wafr-automation-tool/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/trackit/wafr-automation-tool"></a>
+  <a href="https://github.com/trackit/wafr-automation-tool/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/trackit/wafr-automation-tool"></a>
+  <a href="https://trackit.io/aws-wafr-automation/"><img alt="Blog" src="https://img.shields.io/badge/blog-trackit.io-blue"></a>
 </p>
 
 <hr>
 
-![WAFR Automation Tool Screenshot](./assets/main.png)
+![Frontend](./resources/frontend.png)
 
 ## Table of contents
 
@@ -41,6 +32,8 @@
 - [Deployment](#deployment)
   - [Build](#build)
   - [Deploy](#deploy)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
@@ -56,7 +49,7 @@ The WAFR Automation Tool uses a serverless architecture built on AWS services:
 - Scales automatically based on demand
 - Operates with a pay-per-use cost model
 
-![WAFR Automation Tool Architecture](./resources/WAFR%20Automation%20Architecture.png)
+![AWS Architecture](./resources/architecture.png)
 
 ## Getting started
 
@@ -91,6 +84,12 @@ With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/devel
 ```bash
 sam deploy --config-env <dev|prod>
 ```
+
+# Contributing
+
+We welcome contributions to the project.
+
+Please read our [contributing guidelines](./CONTRIBUTING.md) for more information on how to get started.
 
 # License
 
