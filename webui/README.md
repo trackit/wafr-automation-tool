@@ -1,6 +1,6 @@
 # Front-end
 
-![WAFR](../assets/main.png)
+![WAFR](../resources/frontend.png)
 
 ## Quick tour
 
