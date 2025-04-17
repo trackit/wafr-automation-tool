@@ -1,31 +1,31 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Tabs,
-  VerticalMenu,
-  DataTable,
-  Modal,
-  StatusBadge,
-  ConfirmationModal,
-  Timeline,
-} from '@webui/ui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createColumnHelper } from '@tanstack/react-table';
 import {
   getAssessment,
-  updateStatus,
-  updateQuestion,
   rescanAssessment,
   updatePillar,
+  updateQuestion,
+  updateStatus,
 } from '@webui/api-client';
 import { components } from '@webui/types';
 import {
-  RefreshCw,
-  EllipsisVertical,
-  CircleMinus,
-  CircleCheck,
+  ConfirmationModal,
+  DataTable,
+  Modal,
+  StatusBadge,
+  Tabs,
+  Timeline,
+  VerticalMenu,
+} from '@webui/ui';
+import {
   ChevronRight,
+  CircleCheck,
+  CircleMinus,
+  EllipsisVertical,
+  RefreshCw,
 } from 'lucide-react';
-import { createColumnHelper } from '@tanstack/react-table';
-import { Link, useParams, useNavigate } from 'react-router';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -809,7 +809,7 @@ export function AssessmentDetails() {
           setActiveQuestionIndex(0);
         }}
       />
-      <div className="flex flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
+      <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         {selectedPillar?.disabled && (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
             <h3 className="text-center font-medium text-xl  flex-1">
