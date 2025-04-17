@@ -517,7 +517,7 @@ export function AssessmentDetails() {
             Severity
           </button>
         ),
-        size: 80,
+        size: 95,
         cell: (info) => {
           if (info.row.original.id !== 'resolve') {
             return (
@@ -554,7 +554,7 @@ export function AssessmentDetails() {
             <div className="font-bold text-center">
               {info.row.original.results?.length ? (
                 <button
-                  className="btn btn-link text-error"
+                  className="btn btn-link text-error h-[20px]"
                   onClick={() => {
                     setBestPractice(info.row.original);
                   }}

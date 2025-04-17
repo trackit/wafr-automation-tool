@@ -69,7 +69,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className="hover:bg-primary/3">
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="p-4 py-3 overflow-hidden">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
