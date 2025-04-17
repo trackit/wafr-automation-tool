@@ -18,9 +18,9 @@ function MenuItemComponent({ item, index }: { item: MenuItem; index: number }) {
   return (
     <div
       role="menuitem"
-      className={`cursor-pointer py-4 px-3 text-sm border-r border-b border-neutral-content relative flex items-center ${
+      className={`cursor-pointer py-4 px-3 font-medium text-sm border-r border-b border-neutral-content relative flex items-center ${
         item.active
-          ? 'bg-primary/5 text-primary font-medium border-r-0'
+          ? 'bg-primary/5 text-primary border-r-transparent'
           : ' bg-base-100'
       }`}
       onClick={item.onClick}
