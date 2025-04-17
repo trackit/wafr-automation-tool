@@ -852,8 +852,8 @@ export function AssessmentDetails() {
             />
 
             <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
-              <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
-                <h3 className="text-center font-medium text-xl text-primary flex-1">
+              <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
+                <h3 className="text-center font-medium text-lg text-primary flex-1">
                   <span className="font-medium">
                     {selectedPillar?.questions
                       ? `${activeQuestionIndex + 1} / ${
