@@ -18,7 +18,6 @@ import {
 } from '@webui/api-client';
 import { components } from '@webui/types';
 import {
-  ArrowRight,
   RefreshCw,
   EllipsisVertical,
   CircleMinus,
@@ -455,8 +454,9 @@ export function AssessmentDetails() {
       columnHelper.display({
         id: 'status',
         header: '',
+        size: 60,
         cell: (info) => (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center w-4">
             <input
               type="checkbox"
               className={`checkbox checkbox-sm checkbox-primary`}
@@ -517,6 +517,7 @@ export function AssessmentDetails() {
             Severity
           </button>
         ),
+        size: 80,
         cell: (info) => {
           if (info.row.original.id !== 'resolve') {
             return (
@@ -544,9 +545,10 @@ export function AssessmentDetails() {
             className="flex items-center gap-1 justify-center w-full cursor-pointer"
             onClick={() => column.toggleSorting()}
           >
-            Failed Findings
+            Findings
           </button>
         ),
+        size: 80,
         cell: (info) => {
           return (
             <div className="font-bold text-center">
@@ -902,7 +904,7 @@ export function AssessmentDetails() {
                               ? 'text-base-content'
                               : 'text-error'
                           }`}
-                          onClick={(e) => {
+                          onClick={() => {
                             handleDisabledQuestion(
                               activeQuestion?.id || '',
                               !activeQuestion?.disabled
