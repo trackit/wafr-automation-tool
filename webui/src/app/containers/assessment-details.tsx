@@ -23,6 +23,7 @@ import {
   EllipsisVertical,
   CircleMinus,
   CircleCheck,
+  ChevronRight,
 } from 'lucide-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link, useParams, useNavigate } from 'react-router';
@@ -848,7 +849,7 @@ export function AssessmentDetails() {
               )}
             />
 
-            <div className="flex-1 bg-primary/5 p-8 flex flex-col gap-4">
+            <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
               <div className="bg-base-100 p-4 rounded-lg flex flex-row gap-2 items-center justify-between">
                 <h3 className="text-center font-medium text-xl text-primary flex-1">
                   <span className="font-medium">
@@ -861,52 +862,68 @@ export function AssessmentDetails() {
                   {'. '}
                   <span className="font-light">{activeQuestion?.label}</span>
                 </h3>
-                <div
-                  className="dropdown dropdown-end"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
+                <div>
+                  {!isLastQuestion && (
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="btn btn-ghost btn-xs p-1"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleNextQuestion();
+                      }}
+                    >
+                      <ChevronRight className="w-4 h-4 text-base-content/80" />
+                    </div>
+                  )}
                   <div
-                    tabIndex={0}
-                    role="button"
-                    className="btn btn-ghost btn-xs p-1"
+                    className="dropdown dropdown-end"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                   >
-                    <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="btn btn-ghost btn-xs p-1"
+                    >
+                      <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                    >
+                      <li>
+                        <button
+                          className={`flex flex-row gap-2 w-full text-left ${
+                            activeQuestion?.disabled
+                              ? 'text-base-content'
+                              : 'text-error'
+                          }`}
+                          onClick={(e) => {
+                            handleDisabledQuestion(
+                              activeQuestion?.id || '',
+                              !activeQuestion?.disabled
+                            );
+                          }}
+                        >
+                          {activeQuestion?.disabled ? (
+                            <>
+                              <CircleCheck className="w-4 h-4" /> Enable this
+                              question
+                            </>
+                          ) : (
+                            <>
+                              <CircleMinus className="w-4 h-4" /> Disable this
+                              question
+                            </>
+                          )}
+                        </button>
+                      </li>
+                    </ul>
                   </div>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-                  >
-                    <li>
-                      <button
-                        className={`flex flex-row gap-2 w-full text-left ${
-                          activeQuestion?.disabled
-                            ? 'text-base-content'
-                            : 'text-error'
-                        }`}
-                        onClick={(e) => {
-                          handleDisabledQuestion(
-                            activeQuestion?.id || '',
-                            !activeQuestion?.disabled
-                          );
-                        }}
-                      >
-                        {activeQuestion?.disabled ? (
-                          <>
-                            <CircleCheck className="w-4 h-4" /> Enable this
-                            question
-                          </>
-                        ) : (
-                          <>
-                            <CircleMinus className="w-4 h-4" /> Disable this
-                            question
-                          </>
-                        )}
-                      </button>
-                    </li>
-                  </ul>
                 </div>
               </div>
               {activeQuestion?.disabled && (
@@ -925,17 +942,6 @@ export function AssessmentDetails() {
                       columns={columns}
                     />
                   )}
-                </div>
-              )}
-              {!isLastQuestion && (
-                <div className="flex flex-row gap-2 justify-end mt-auto">
-                  <button
-                    className="btn btn-link no-underline"
-                    onClick={handleNextQuestion}
-                  >
-                    Next
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
                 </div>
               )}
             </div>

@@ -58,7 +58,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
         {table.getRowModel().rows.map((row) => (
           <tr key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="p-4 py-6">
+              <td key={cell.id} className="p-4 py-3">
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}
