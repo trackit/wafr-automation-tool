@@ -214,7 +214,15 @@ function FindingsDetails({
     }: {
       findingId: string;
       hidden: boolean;
-    }) => hideFinding(assessmentId, findingId, hidden),
+    }) =>
+      hideFinding({
+        assessmentId,
+        pillarId,
+        questionId,
+        bestPracticeId: bestPractice.id || '',
+        findingId,
+        hide: hidden,
+      }),
     onMutate: async ({ findingId, hidden }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
