@@ -42,6 +42,7 @@ confirm_changeset = true
 capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
 parameter_overrides = [
+  "Owner=TrackIt",
   "Debug=true",
   "Repository=https://github.com/trackit/wafr-automation-tool",
   "InitialUserEmail=contact@example.com",
@@ -56,6 +57,7 @@ confirm_changeset = true
 capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
 parameter_overrides = [
+  "Owner=TrackIt",
   "Repository=https://github.com/trackit/wafr-automation-tool",
   "InitialUserEmail=contact@example.com",
 ]

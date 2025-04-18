@@ -5,16 +5,11 @@ Description: Scanning Tools
 Parameters:
   Owner:
     Type: String
-    Default: Antoine Berger
   Project:
     Type: String
-    Default: WAFR Automation Tool
-  Name:
-    Type: String
-    Default: scanning-tools
-  S3BucketName:
-    Type: String
   ParentStackName:
+    Type: String
+  S3BucketName:
     Type: String
 
 Resources:
@@ -111,7 +106,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: ECSCluster
   ECSExecutionRole:
     Type: AWS::IAM::Role
     Properties:

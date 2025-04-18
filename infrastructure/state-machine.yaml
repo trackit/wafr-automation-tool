@@ -5,13 +5,8 @@ Description: State Machine
 Parameters:
   Owner:
     Type: String
-    Default: Antoine Berger
   Project:
     Type: String
-    Default: WAFR Automation Tool
-  Name:
-    Type: String
-    Default: state-machine
   ParentStackName:
     Type: String
   Debug:
@@ -54,10 +49,6 @@ Globals:
     Runtime: python3.12
     Layers:
       - !Ref SharedLibsLayer
-    Tags:
-      Project: !Ref Project
-      Owner: !Ref Owner
-      Name: !Ref Name
     Environment:
       Variables:
         DEBUG: !Ref Debug
@@ -72,6 +63,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/prepare_prompts/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: PreparePromptsFunction
       Timeout: 300
       MemorySize: 512
       Policies:
@@ -99,6 +94,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/invoke_llm/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: InvokeLLMFunction
       Timeout: 900
       MemorySize: 128
       Policies:
@@ -134,6 +133,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/cleanup/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: CleanupFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -162,6 +165,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/state_machine/prepare_custodian/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: PrepareCustodianFunction
       Timeout: 300
       MemorySize: 128
       Policies:
@@ -177,9 +184,9 @@ Resources:
     Properties:
       Name: !Sub "${ParentStackName}-StateMachine"
       Tags:
-        Project: !Ref Project
         Owner: !Ref Owner
-        Name: !Ref Name
+        Project: !Ref Project
+        Name: StateMachine
       Policies:
         - Statement:
             - Effect: Allow

@@ -5,13 +5,8 @@ Description: Frontend Resources
 Parameters:
   Owner:
     Type: String
-    Default: Alexian Kauffmann
   Project:
     Type: String
-    Default: WAFR Automation Tool
-  Name:
-    Type: String
-    Default: Backend
   ParentStackName:
     Type: String
   Repository:
@@ -78,7 +73,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: AmplifyApp
   AmplifyBranch:
     Type: AWS::Amplify::Branch
     Properties:
@@ -93,7 +88,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: AmplifyBranch
 Outputs:
   Endpoint:
     Description: Web UI endpoint
