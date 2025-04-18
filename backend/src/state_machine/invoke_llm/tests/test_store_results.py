@@ -106,12 +106,15 @@ def test_store_results_with_no_finding():
     questions = MagicMock(
         data={
             "pillar-1": {
+                "id": "pillar-1",
                 "label": "Operational excellence",
                 "questions": {
                     "question-1": {
+                        "id": "question-1",
                         "label": "How do you determine what your priorities are?",
                         "best_practices": {
                             "best-practice-1": {
+                                "id": "best-practice-1",
                                 "label": "Evaluate external customer needs",
                                 "risk": "Low",
                                 "status": False,
