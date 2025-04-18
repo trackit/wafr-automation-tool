@@ -10,10 +10,10 @@ from common.config import (
     STORE_CHUNK_PATH,
 )
 from common.task import Task
-from entities.ai import AIFindingAssociation, AnswerData, ChunkId, PromptS3Uri
+from entities.ai import AIFindingAssociation, ChunkId, PromptS3Uri
 from entities.assessment import AssessmentID
 from entities.best_practice import BestPracticeInfo
-from entities.finding import FindingExtra
+from entities.finding import FindingExtra, FindingID
 from entities.scanning_tools import ScanningTool
 from exceptions.ai import InvalidPromptResponseError
 from exceptions.assessment import InvalidPromptUriError
@@ -50,54 +50,35 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def remove_self_made_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
-        filtered_findings = []
-        for finding in findings:
-            if finding.resources and finding.resources[0].uid and "wafr-automation-tool" in finding.resources[0].uid:
-                continue
-            filtered_findings.append(finding)
-        return filtered_findings
-
-    def associate_finding_ids(
+    def store_finding_ids(
         self,
         assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
-        answer_data: AnswerData,
-        bp_finding_ids: list[str],
+        best_practice_info: BestPracticeInfo,
+        best_practice_finding_ids: list[FindingID],
     ) -> None:
-        if not bp_finding_ids:
+        if not best_practice_finding_ids:
             return
-        pillar = next(
-            pillar for pillar in self.formatted_questions.values() if pillar.get("label") == answer_data.pillar
-        )
-        question = next(
-            question for question in pillar.get("questions").values() if question.get("label") == answer_data.question
-        )
-        best_practice = next(
-            best_practice
-            for best_practice in question.get("best_practices").values()
-            if best_practice.get("label") == answer_data.best_practice
-        )
         self.database_service.update(
             table_name=DDB_TABLE,
             Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
             UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
-                "#pillar": pillar.get("id"),
-                "#question": question.get("id"),
-                "#best_practice": best_practice.get("id"),
+                "#pillar": best_practice_info.pillar,
+                "#question": best_practice_info.question,
+                "#best_practice": best_practice_info.best_practice,
             },
             ExpressionAttributeValues={
-                ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in bp_finding_ids],
+                ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in best_practice_finding_ids],
                 ":empty_list": [],
             },
         )
 
-    def store_findings_in_db(
+    def store_findings(
         self,
         assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
-        finding_ids: list[str],
+        finding_ids: list[FindingID],
         findings_data: list[FindingExtra],
     ) -> None:
         for finding_id in finding_ids:
@@ -118,13 +99,7 @@ class StoreResults(Task[StoreResultsInput, None]):
                 },
             )
 
-    def store_results(
-        self,
-        assessment_id: AssessmentID,
-        scanning_tool: ScanningTool,
-        ai_associations: list[AIFindingAssociation],
-        findings_data: list[FindingExtra],
-    ) -> None:
+    def create_best_practices_info(self) -> dict[int, BestPracticeInfo]:
         best_practices: dict[int, BestPracticeInfo] = {}
         best_practice_id = 1
         for pillar_data in self.formatted_questions.values():
@@ -132,28 +107,31 @@ class StoreResults(Task[StoreResultsInput, None]):
                 for best_practice_data in question_data.get("best_practices").values():
                     best_practices[best_practice_id] = BestPracticeInfo(
                         id=best_practice_id,
-                        pillar=pillar_data.get("label"),
-                        question=question_data.get("label"),
-                        best_practice=best_practice_data.get("label"),
+                        pillar=pillar_data.get("id"),
+                        question=question_data.get("id"),
+                        best_practice=best_practice_data.get("id"),
                     )
                     best_practice_id += 1
+        return best_practices
 
+    def store_results(
+        self,
+        assessment_id: AssessmentID,
+        scanning_tool: ScanningTool,
+        ai_associations: list[AIFindingAssociation],
+        findings_data: list[FindingExtra],
+    ) -> None:
+        best_practices_info = self.create_best_practices_info()
         for ai_association in ai_associations:
-            best_practice_data = best_practices.get(ai_association["id"])
-            if best_practice_data is None:
+            best_practice_info = best_practices_info.get(ai_association["id"])
+            if best_practice_info is None:
                 logger.error("Best practice not found for id %d", ai_association["id"])
                 continue
-
             finding_start = ai_association["start"]
             finding_end = ai_association["end"]
-            finding_ids: list[str] = [str(i) for i in range(finding_start, finding_end + 1)]
-            answer_data = AnswerData(
-                pillar=best_practice_data.pillar,
-                question=best_practice_data.question,
-                best_practice=best_practice_data.best_practice,
-            )
-            self.associate_finding_ids(assessment_id, scanning_tool, answer_data, finding_ids)
-            self.store_findings_in_db(assessment_id, scanning_tool, finding_ids, findings_data)
+            finding_ids: list[FindingID] = [str(i) for i in range(finding_start, finding_end + 1)]
+            self.store_finding_ids(assessment_id, scanning_tool, best_practice_info, finding_ids)
+            self.store_findings(assessment_id, scanning_tool, finding_ids, findings_data)
 
     def load_response(self, llm_response: str) -> list[AIFindingAssociation]:
         try:
@@ -179,6 +157,5 @@ class StoreResults(Task[StoreResultsInput, None]):
         s3_bucket, s3_key = s3.parse_s3_uri(event.prompt_uri)
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
         findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
-        findings_data = self.remove_self_made_findings(findings_data)
         logger.info("Processing %s chunk %s", scanning_tool, chunk_id)
         self.store_results(event.assessment_id, scanning_tool, ai_associations, findings_data)

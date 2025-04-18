@@ -1,10 +1,12 @@
-from enum import StrEnum
 from typing import TypedDict
 
 from pydantic import BaseModel
 
+from entities.finding import Finding
+
 Prompt = str
 PromptS3Uri = str
+Chunk = list[Finding]
 ChunkId = str
 
 
@@ -14,16 +16,13 @@ class AIFindingAssociation(TypedDict):
     end: int
 
 
-class AIModel(StrEnum):
-    Claude3Dot5Sonnet = "claude-3-5-sonnet"
-    Claude3Dot7Sonnet = "claude-3-7-sonnet"
-    DeepseekR1 = "deepseek-r1"
-    NovaPro = "nova-pro"
-    NovaLite = "nova-lite"
-    NovaMicro = "nova-micro"
-
-
 class AnswerData(BaseModel):
     pillar: str
     question: str
     best_practice: str
+
+
+class PromptVariables(BaseModel):
+    scanning_tool_title: str
+    question_set_data: str
+    scanning_tool_data: Chunk

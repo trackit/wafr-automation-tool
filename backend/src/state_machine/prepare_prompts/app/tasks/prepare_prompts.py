@@ -7,15 +7,12 @@ from common.config import (
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
-    QUESTION_SET_DATA_PLACEHOLDER,
     S3_BUCKET,
-    SCANNING_TOOL_DATA_PLACEHOLDER,
-    SCANNING_TOOL_TITLE_PLACEHOLDER,
     STORE_CHUNK_PATH,
     STORE_PROMPT_PATH,
 )
 from common.task import Task
-from entities.ai import Prompt, PromptS3Uri
+from entities.ai import Chunk, PromptS3Uri, PromptVariables
 from entities.assessment import AssessmentID
 from entities.database import UpdateAttrsInput
 from entities.finding import Finding, FindingExtra
@@ -24,7 +21,6 @@ from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
-from utils.files import get_prompt
 from utils.questions import FormattedQuestionSet
 from utils.s3 import get_s3_uri
 
@@ -54,7 +50,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
 
-    def save_chunk_for_retrieve(
+    def store_chunk(
         self,
         scanning_tool_service: IScanningToolService,
         assessment_id: AssessmentID,
@@ -73,35 +69,17 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         scanning_tool_service: IScanningToolService,
         assessment_id: AssessmentID,
         findings: list[FindingExtra],
-    ) -> list[list[Finding]]:
+    ) -> list[Chunk]:
         initial_chunks = [findings[i : i + CHUNK_SIZE] for i in range(0, len(findings), CHUNK_SIZE)]
-        chunks: list[list[Finding]] = []
+        chunks: list[Chunk] = []
         for i, chunk in enumerate(initial_chunks):
-            self.save_chunk_for_retrieve(scanning_tool_service, assessment_id, i, chunk)
+            self.store_chunk(scanning_tool_service, assessment_id, i, chunk)
             chunks.append([Finding(**finding.model_dump(exclude_none=True)) for finding in chunk])
         return chunks
 
-    def create_prompts_from_chunks(
-        self,
-        scanning_tool_service: IScanningToolService,
-        prompt: Prompt,
-        chunks: list[list[Finding]],
-    ) -> list[Prompt]:
-        prompt = prompt.replace(SCANNING_TOOL_TITLE_PLACEHOLDER, scanning_tool_service.title)
-        prompts: list[Prompt] = []
-        for chunk in chunks:
-            chunk_prompt = prompt
-            chunk_prompt = chunk_prompt.replace(
-                SCANNING_TOOL_DATA_PLACEHOLDER,
-                json.dumps([finding.model_dump(exclude_none=True) for finding in chunk], separators=(",", ":")),
-            )
-            prompts.append(chunk_prompt)
-        return prompts
-
-    def insert_questions_in_prompt(self, prompt: Prompt) -> str:
+    def retrieve_questions(self) -> str:
         best_practices = []
         best_practice_id = 1
-
         for pillar_name, pillar_data in self.formatted_question_set.data.items():
             for question_name, question_data in pillar_data.get("questions").items():
                 for best_practice_data in question_data.get("best_practices").values():
@@ -114,28 +92,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                         }
                     )
                     best_practice_id += 1
-        return prompt.replace(
-            QUESTION_SET_DATA_PLACEHOLDER,
-            json.dumps(best_practices, separators=(",", ":")).replace(":{}", ""),
-        )
-
-    def store_prompts(
-        self,
-        scanning_tool_service: IScanningToolService,
-        assessment_id: AssessmentID,
-        prompts: list[Prompt],
-    ) -> list[PromptS3Uri]:
-        prompt_uris: list[PromptS3Uri] = []
-        for i, prompt in enumerate(prompts):
-            key = STORE_PROMPT_PATH.format(assessment_id, f"{scanning_tool_service.name}_{i}")
-            prompt_uris.append(get_s3_uri(S3_BUCKET, key))
-            prompt_with_questions = self.insert_questions_in_prompt(prompt)
-            self.storage_service.put(
-                Bucket=S3_BUCKET,
-                Key=key,
-                Body=prompt_with_questions,
-            )
-        return prompt_uris
+        return json.dumps(best_practices, separators=(",", ":")).replace(":{}", "")
 
     def merge_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
         grouped_findings = {}
@@ -155,6 +112,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         return list(grouped_findings.values())
 
     def is_finding_in_workflow(self, finding: FindingExtra, workflows: list[str]) -> bool:
+        if not workflows:
+            return True
         filtered_resources = [
             resource
             for resource in finding.resources or []
@@ -168,25 +127,58 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             return True
         return bool(finding.status_detail and any(w in finding.status_detail.lower() for w in workflows))
 
-    def filter_findings(self, findings: list[FindingExtra], workflows: list[str]) -> list[FindingExtra]:
-        if not workflows:
-            return findings
-        return [finding for finding in findings if self.is_finding_in_workflow(finding, workflows)]
+    def is_self_made_finding(self, finding: FindingExtra) -> bool:
+        return bool(
+            finding.resources and finding.resources[0].uid and "wafr-automation-tool" in finding.resources[0].uid
+        )
 
-    def create_prompts(self, scanning_tool_service: IScanningToolService, event: PreparePromptsInput) -> list[Prompt]:
-        findings = scanning_tool_service.retrieve_findings(event.assessment_id, event.regions)
-        findings = self.filter_findings(findings, event.workflows)
-        findings = self.merge_findings(findings)
-        chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
-        prompts = self.create_prompts_from_chunks(scanning_tool_service, get_prompt(), chunks)
-        return self.store_prompts(scanning_tool_service, event.assessment_id, prompts)
+    def filter_findings(self, findings: list[FindingExtra], workflows: list[str]) -> list[FindingExtra]:
+        return [
+            finding
+            for finding in findings
+            if self.is_finding_in_workflow(finding, workflows) and not self.is_self_made_finding(finding)
+        ]
+
+    def store_prompt_variables_list(
+        self,
+        scanning_tool_service: IScanningToolService,
+        assessment_id: AssessmentID,
+        prompt_variables_list: list[PromptVariables],
+    ) -> list[PromptS3Uri]:
+        prompt_variables_uris: list[PromptS3Uri] = []
+        for i, prompt_variables in enumerate(prompt_variables_list):
+            key = STORE_PROMPT_PATH.format(assessment_id, f"{scanning_tool_service.name}_{i}")
+            prompt_variables_uris.append(get_s3_uri(S3_BUCKET, key))
+            self.storage_service.put(
+                Bucket=S3_BUCKET,
+                Key=key,
+                Body=json.dumps(prompt_variables.model_dump(), separators=(",", ":")),
+            )
+        return prompt_variables_uris
+
+    def create_prompt_variables_list(
+        self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, chunks: list[Chunk]
+    ) -> list[str]:
+        prompt_variables_list: list[PromptVariables] = []
+        questions = self.retrieve_questions()
+        for chunk in chunks:
+            prompt_variables = PromptVariables(
+                scanning_tool_title=scanning_tool_service.title,
+                question_set_data=questions,
+                scanning_tool_data=chunk,
+            )
+            prompt_variables_list.append(prompt_variables)
+        return self.store_prompt_variables_list(scanning_tool_service, assessment_id, prompt_variables_list)
 
     @override
     def execute(self, event: PreparePromptsInput) -> list[str]:
         scanning_tool_service_type = SCANNING_TOOL_SERVICES.get(event.scanning_tool)
         if scanning_tool_service_type is None:
             raise InvalidScanningToolError(event.scanning_tool)
-
         self.populate_dynamodb(event.assessment_id)
-        scanning_tool_service = scanning_tool_service_type(self.storage_service)
-        return self.create_prompts(scanning_tool_service, event)
+        scanning_tool_service: IScanningToolService = scanning_tool_service_type(self.storage_service)
+        findings = scanning_tool_service.retrieve_findings(event.assessment_id, event.regions)
+        findings = self.filter_findings(findings, event.workflows)
+        findings = self.merge_findings(findings)
+        chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
+        return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)

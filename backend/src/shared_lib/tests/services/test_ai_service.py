@@ -1,10 +1,10 @@
 from unittest.mock import MagicMock
 
 import pytest
+from entities.ai import PromptVariables
+from entities.finding import Finding
 from services.ai import BedrockService
 from types_boto3_bedrock_runtime import BedrockRuntimeClient
-
-from tests.__mocks__.fake_model import FakeModel
 
 
 @pytest.fixture
@@ -26,11 +26,19 @@ def bedrock_service(bedrock_runtime_client: BedrockRuntimeClient):
     return BedrockService(bedrock_runtime_client)
 
 
-@pytest.fixture
-def fake_model():
-    return FakeModel()
-
-
-def test_bedrock_service_invoke(bedrock_service: BedrockService, fake_model: FakeModel):
-    response = bedrock_service.converse(model=fake_model, prompt="test-prompt")
+def test_bedrock_service_converse(bedrock_service: BedrockService):
+    response = bedrock_service.converse(
+        prompt_arn="ARN",
+        prompt_variables=PromptVariables(
+            question_set_data="QUESTIONS",
+            scanning_tool_data=[
+                Finding(
+                    id="AID",
+                    status_code="FAIL",
+                    status_detail="error",
+                )
+            ],
+            scanning_tool_title="test",
+        ),
+    )
     assert response == "Hello world!"
