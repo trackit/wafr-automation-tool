@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Computer, Earth, KeyRound, Pen } from 'lucide-react';
+import { TagsInput } from '@webui/ui';
+import { Computer, Earth, KeyRound, Pen, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -53,7 +54,7 @@ export function NewAssessment({
       .optional()
       .or(z.literal('')),
     regions: z.array(z.enum(awsRegions)).optional(),
-    workflows: z.string().optional().or(z.literal('')),
+    workflows: z.array(z.string()).optional(),
   });
 
   const {
@@ -67,15 +68,24 @@ export function NewAssessment({
       name: '',
       roleArn: '',
       regions: [],
-      workflows: '',
+      workflows: [],
     },
   });
 
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
+  const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
 
   useEffect(() => {
     setValue('regions', selectedRegions);
   }, [selectedRegions, setValue]);
+
+  useEffect(() => {
+    setValue('workflows', selectedWorkflows);
+  }, [selectedWorkflows, setValue]);
+
+  const removeWorkflow = (workflow: string) => {
+    setSelectedWorkflows(selectedWorkflows.filter(w => w !== workflow));
+  };
 
   const toggleRegion = (region: (typeof awsRegions)[number]) => {
     setSelectedRegions((prev) =>
@@ -86,18 +96,11 @@ export function NewAssessment({
   };
 
   const handleFormSubmit = (data: z.infer<typeof formSchema>) => {
-    const workflows = data.workflows
-      ? data.workflows
-          .split(',')
-          .map((w) => w.trim())
-          .filter(Boolean)
-      : undefined;
-
     onSubmit({
       name: data.name,
       roleArn: data.roleArn || undefined,
       regions: data.regions,
-      workflows,
+      workflows: data.workflows,
     });
   };
 
@@ -198,19 +201,33 @@ export function NewAssessment({
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Workflow</legend>
+          <legend className="fieldset-legend">Workflows</legend>
           <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.workflows ? 'input-error' : ''
             }`}
           >
-            <Computer className="w-4 opacity-80" />
-            <input
-              type="text"
-              className="grow"
-              placeholder="Enter workflow"
-              {...register('workflows')}
-            />
+            <Computer className="w-4 min-w-4 opacity-80" />
+            <TagsInput tags={selectedWorkflows} setTags={setSelectedWorkflows} inputProps={{ placeholder: 'Enter a workflow name' }} />
+          </div>
+          <div
+            className="flex flex-wrap gap-1 items-center"
+          >
+            {selectedWorkflows.map((workflow) => (
+              <span
+                key={workflow}
+                className="badge badge-sm badge-primary flex items-center"
+              >
+                {workflow}
+                <button
+                  type="button"
+                  onClick={() => removeWorkflow(workflow)}
+                  className="ml-1 text-base-content hover:text-error cursor-pointer"
+                >
+                  <X className='w-4 h-4' />
+                </button>
+              </span>
+            ))}
           </div>
           {errors.workflows && (
             <p className="fieldset-label text-error">
