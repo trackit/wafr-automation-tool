@@ -1,28 +1,34 @@
 import { ChangeEvent, FocusEvent, KeyboardEvent, useState } from 'react';
 
 export function TagsInput({
-  tags = [],
+  tags,
   setTags,
   inputProps
 }: {
-  tags: string[];
-  setTags: (tags: string[]) => void;
+  tags: Set<string>;
+  setTags: (tags: Set<string>) => void;
   inputProps: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown' | 'onBlur'>;
 }) {
   const [inputValue, setInputValue] = useState('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value.replace(/,+$/, ''));
+      const values = e.target.value.split(',').filter(Boolean);
+      if (values.length > 1) {
+          addTags(values.map(v => v.trim()));
+      } else {
+          setInputValue(e.target.value.replace(/,+$/, ''));
+      }
   };
 
-  const addTag = (tag: string) => {
+  const addTags = (add: string[]) => {
+    setTags(new Set([...tags, ...add]));
     setInputValue('');
-    if (tags.includes(tag)) return;
-    setTags([...tags, tag]);
   };
 
   const removeTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+    const newTags = new Set(tags);
+    newTags.delete(tag);
+    setTags(newTags);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -31,17 +37,18 @@ export function TagsInput({
       inputValue.trim() !== ''
     ) {
       e.preventDefault();
-      addTag(inputValue.trim());
+      addTags([inputValue.trim()]);
     }
-    if (e.key === 'Backspace' && inputValue === '' && tags.length) {
+    if (e.key === 'Backspace' && inputValue === '' && tags.size) {
       e.preventDefault();
-      removeTag(tags[tags.length - 1]);
+      const lastTag = Array.from(tags).pop();
+      if (lastTag) removeTag(lastTag);
     }
   };
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     if (inputValue.trim() !== '') {
-      addTag(inputValue.trim());
+      addTags([inputValue.trim()]);
     }
   };
 

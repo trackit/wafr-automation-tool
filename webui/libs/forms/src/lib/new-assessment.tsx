@@ -73,18 +73,22 @@ export function NewAssessment({
   });
 
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
-  const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
+  const [selectedWorkflows, setSelectedWorkflows] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setValue('regions', selectedRegions);
   }, [selectedRegions, setValue]);
 
   useEffect(() => {
-    setValue('workflows', selectedWorkflows);
+    setValue('workflows', Array.from(selectedWorkflows));
   }, [selectedWorkflows, setValue]);
 
   const removeWorkflow = (workflow: string) => {
-    setSelectedWorkflows(selectedWorkflows.filter(w => w !== workflow));
+    setSelectedWorkflows(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(workflow);
+      return newSet;
+    });
   };
 
   const toggleRegion = (region: (typeof awsRegions)[number]) => {
@@ -213,7 +217,7 @@ export function NewAssessment({
           <div
             className="flex flex-wrap gap-1 items-center"
           >
-            {selectedWorkflows.map((workflow) => (
+            {Array.from(selectedWorkflows).map((workflow) => (
               <span
                 key={workflow}
                 className="badge badge-sm badge-primary flex items-center"
