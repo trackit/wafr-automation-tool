@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
+  deleteAssessment,
   getAssessment,
   rescanAssessment,
   updatePillar,
@@ -26,6 +25,8 @@ import {
   EllipsisVertical,
   RefreshCw,
 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -953,12 +954,21 @@ export function AssessmentDetails() {
     </>
   );
 
+  const handleCancelAssessment = () => {
+    if (!id) return;
+    deleteAssessment({ assessmentId: parseInt(id) });
+    navigate('/');
+  }
+
   const loading = (
     <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
       <h2 className="text-center text-primary font-light mb-0 ">
         Your assessment is processing
       </h2>
       <Timeline steps={timelineSteps} />
+      <button className="btn btn-error btn-sm text-sm h-8 min-h-8 mt-5 text-white" onClick={handleCancelAssessment}>
+        Cancel Assessment
+      </button>
     </div>
   );
 
