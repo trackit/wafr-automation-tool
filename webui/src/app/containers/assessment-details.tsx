@@ -349,6 +349,17 @@ export function AssessmentDetails() {
     },
   });
 
+  const cancelAssessmentMutation = useMutation({
+    mutationFn: () => deleteAssessment({ assessmentId: parseInt(id || '') }),
+    onMutate: async () => {
+      setShowCancelModal(false);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', id] }, { cancelRefetch: true });
+      navigate(`/`);
+    },
+  });
+
   const handleNoneQuestion = useCallback(
     (questionId: string, none: boolean) => {
       updateQuestionMutation.mutate({
@@ -955,12 +966,6 @@ export function AssessmentDetails() {
     </>
   );
 
-  const handleCancelAssessment = () => {
-    if (!id) return;
-    deleteAssessment({ assessmentId: parseInt(id) });
-    navigate('/');
-  }
-
   const loading = (
     <>
       <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
@@ -978,7 +983,7 @@ export function AssessmentDetails() {
           open={showCancelModal}
           onClose={() => setShowCancelModal(false)}
           onCancel={() => setShowCancelModal(false)}
-          onConfirm={() => handleCancelAssessment()}
+          onConfirm={() => cancelAssessmentMutation.mutate()}
           title="Cancel Assessment"
           message="Are you sure you want to cancel this assessment? This action cannot be undone."
         />
