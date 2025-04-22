@@ -1,8 +1,10 @@
-export * from './confirmation-modal/confirmation-modal';
-export * from './status-badge/status-badge';
-export * from './modal/modal';
 export * from './best-practices-table/best-practice-table';
-export * from './vertical-menu/vertical-menu';
+export * from './confirmation-modal/confirmation-modal';
+export * from './modal/modal';
+export * from './status-badge/status-badge';
 export * from './tabs/tabs';
+export * from './tag-input/tag-input';
 export * from './theme-switcher/theme-switcher';
 export * from './timeline/timeline';
+export * from './vertical-menu/vertical-menu';
+
