@@ -96,7 +96,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  assessmentId:
+                  assessment_id:
                     type: integer
                     description: The unique ID of the newly created assessment
         "400":

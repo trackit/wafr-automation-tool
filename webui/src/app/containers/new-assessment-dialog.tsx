@@ -19,11 +19,14 @@ function NewAssessmentDialog() {
       const response = (await postAssessment(
         data
       )) as paths['/assessments']['post']['responses']['201']['content']['application/json'];
-      return { id: response.assessmentId?.toString() || '' };
+      if (!response.assessment_id) {
+        console.error('Assessment ID is missing from response');
+      }
+      return { assessment_id: response.assessment_id?.toString() || '' };
     },
-    onSuccess: (data: { id: string }) => {
+    onSuccess: (data: { assessment_id: string }) => {
       setOpen(false);
-      navigate(`/assessments/${data.id}`);
+      navigate(`/assessments/${data.assessment_id}`);
     },
   });
 
