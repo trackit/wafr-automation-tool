@@ -11,7 +11,7 @@ describe('NewAssessment', () => {
     expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Role ARN')).toBeInTheDocument();
     expect(screen.getByText('Regions')).toBeInTheDocument();
-    expect(screen.getByText('Workflow')).toBeInTheDocument();
+    expect(screen.getByText('Workflows')).toBeInTheDocument();
     expect(screen.getByText('Submit')).toBeInTheDocument();
   });
 
@@ -35,7 +35,7 @@ describe('NewAssessment', () => {
         name: 'Test Assessment',
         roleArn: undefined,
         regions: [],
-        workflows: undefined,
+        workflows: [],
       });
     });
   });
@@ -96,7 +96,7 @@ describe('NewAssessment', () => {
         name: 'Test Assessment',
         roleArn: 'arn:aws:iam::123456789012:role/test-role',
         regions: [],
-        workflows: undefined,
+        workflows: [],
       });
     });
   });
@@ -106,7 +106,7 @@ describe('NewAssessment', () => {
     render(<NewAssessment onSubmit={onSubmitMock} />);
 
     const nameInput = screen.getByPlaceholderText('Enter assessment name');
-    const workflowInput = screen.getByPlaceholderText('Enter workflow');
+    const workflowInput = screen.getByPlaceholderText('Enter a workflow name');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
@@ -115,7 +115,7 @@ describe('NewAssessment', () => {
 
     await act(async () => {
       fireEvent.change(workflowInput, {
-        target: { value: 'workflow1, workflow2, workflow3' },
+        target: { value: 'workflow1,workflow2,workflow3' },
       });
     });
 

@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Server, Earth, Search, Info, FileCheck } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { getFindings, hideFinding } from '@webui/api-client';
 import { components } from '@webui/types';
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { Earth, FileCheck, Info, Search, Server } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -103,7 +103,7 @@ function FindingItem({
           <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">
             <Server className="w-4 h-4 flex-shrink-0 mr-2 mt-0.5" />
             <div className="break-all">
-              {highlightText(resource.name || resource.uid, searchQuery)}
+              {highlightText(resource.name || resource.uid || "N/A", searchQuery)}
             </div>
           </div>
           <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">

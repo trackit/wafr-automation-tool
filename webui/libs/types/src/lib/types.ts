@@ -100,7 +100,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             /** @description The unique ID of the newly created assessment */
-                            assessmentId?: number;
+                            assessment_id?: number;
                         };
                     };
                 };
