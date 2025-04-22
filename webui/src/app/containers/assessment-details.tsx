@@ -38,6 +38,7 @@ export function AssessmentDetails() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
+  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
@@ -961,15 +962,28 @@ export function AssessmentDetails() {
   }
 
   const loading = (
-    <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
-      <h2 className="text-center text-primary font-light mb-0 ">
-        Your assessment is processing
-      </h2>
-      <Timeline steps={timelineSteps} />
-      <button className="btn btn-error btn-sm text-sm h-8 min-h-8 mt-5 text-white" onClick={handleCancelAssessment}>
-        Cancel Assessment
-      </button>
-    </div>
+    <>
+      <div className="flex items-center justify-center h-full w-full flex-col prose max-w-none">
+        <h2 className="text-center text-primary font-light mb-0 ">
+          Your assessment is processing
+        </h2>
+        <Timeline steps={timelineSteps} />
+        <button className="btn btn-error btn-sm text-sm h-8 min-h-8 mt-5 text-white" onClick={() => setShowCancelModal(true)}>
+          Cancel Assessment
+        </button>
+      </div>
+      {
+        showCancelModal &&
+        <ConfirmationModal
+          open={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          onCancel={() => setShowCancelModal(false)}
+          onConfirm={() => handleCancelAssessment()}
+          title="Cancel Assessment"
+          message="Are you sure you want to cancel this assessment? This action cannot be undone."
+        />
+      }
+    </>
   );
 
   if (!id) return <div>No assessment ID found</div>;
