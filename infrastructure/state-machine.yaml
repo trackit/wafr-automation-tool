@@ -193,15 +193,15 @@ Resources:
               Resource:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
   BedrockPrompt:
-    Type: 'AWS::Bedrock::Prompt'
+    Type: "AWS::Bedrock::Prompt"
     Properties:
       Name: !Sub ${ParentStackName}-prompt
-      Description: 'The prompt used to generate responses.'
-      DefaultVariant: 'prompt'
+      Description: "The prompt used to generate responses."
+      DefaultVariant: "prompt"
       Variants:
-        - Name: 'prompt'
-          TemplateType: 'TEXT'
-          ModelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
+        - Name: "prompt"
+          TemplateType: "TEXT"
+          ModelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
           TemplateConfiguration:
             Text:
               InputVariables:
@@ -237,7 +237,7 @@ Resources:
       Tags:
         Project: !Ref Project
         Owner: !Ref Owner
-        Name: !Ref Name
+        Name: BedrockPrompt
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -248,50 +248,50 @@ Resources:
         Name: StateMachine
       Policies:
         - Statement:
-          - Effect: Allow
-            Action: states:StartExecution
-            Resource:
-              - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource:
+                - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
-          - Effect: Allow
-            Action: ecs:RunTask
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
-              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
+            - Effect: Allow
+              Action: ecs:RunTask
+              Resource:
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
         - Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:UpdateItem
-              - dynamodb:PutItem
-            Resource:
-              - !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:PutItem
+              Resource:
+                - !Ref DynamoDBArn
         - Statement:
-          - Effect: Allow
-            Action: iam:PassRole
-            Resource:
-              - !Ref ECSExecutionRole
-              - !Ref ProwlerTaskRole
-              - !Ref CloudCustodianTaskRole
-              - !Ref CloudSploitTaskRole
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource:
+                - !Ref ECSExecutionRole
+                - !Ref ProwlerTaskRole
+                - !Ref CloudCustodianTaskRole
+                - !Ref CloudSploitTaskRole
         - Statement:
-          - Effect: Allow
-            Action:
-              - events:PutRule
-              - events:PutTargets
-              - events:DescribeRule
-              - events:DeleteRule
-              - events:RemoveTargets
-            Resource: "*"
+            - Effect: Allow
+              Action:
+                - events:PutRule
+                - events:PutTargets
+                - events:DescribeRule
+                - events:DeleteRule
+                - events:RemoveTargets
+              Resource: "*"
         - Statement:
-          - Effect: Allow
-            Action:
-              - lambda:InvokeFunction
-            Resource:
-              - !GetAtt PreparePromptsFunction.Arn
-              - !GetAtt InvokeLLMFunction.Arn
-              - !GetAtt CleanupFunction.Arn
-              - !GetAtt PrepareCustodianFunction.Arn
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt PreparePromptsFunction.Arn
+                - !GetAtt InvokeLLMFunction.Arn
+                - !GetAtt CleanupFunction.Arn
+                - !GetAtt PrepareCustodianFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
