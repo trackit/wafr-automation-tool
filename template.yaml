@@ -69,7 +69,7 @@ Resources:
       Parameters:
         Owner: !Ref Owner
         Project: !Ref Project
-        jParentStackName: !Ref "AWS::StackName"
+        ParentStackName: !Ref "AWS::StackName"
         S3BucketName: !Ref S3Bucket
   StateMachine:
     Type: AWS::Serverless::Application
