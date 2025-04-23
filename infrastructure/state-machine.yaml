@@ -68,7 +68,7 @@ Resources:
         Project: !Ref Project
         Name: PreparePromptsFunction
       Timeout: 300
-      MemorySize: 512
+      MemorySize: 1024
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -88,6 +88,12 @@ Resources:
                 - dynamodb:UpdateItem
               Resource:
                 - !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - bedrock:GetPrompt
+                - bedrock:ListPrompts
+              Resource:
+                - !GetAtt BedrockPrompt.Arn
   InvokeLLMFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -117,7 +123,14 @@ Resources:
             - Effect: Allow
               Action:
                 - bedrock:InvokeModelWithResponseStream
-              Resource: "*"
+              Resource:
+                - "arn:aws:bedrock:*:*:inference-profile/*"
+                - "arn:aws:bedrock:*::foundation-model/*"
+            - Effect: Allow
+              Action:
+                - bedrock:RenderPrompt
+              Resource:
+                - !GetAtt BedrockPrompt.Arn
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
@@ -179,6 +192,52 @@ Resources:
                 - s3:PutObject
               Resource:
                 - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+  BedrockPrompt:
+    Type: 'AWS::Bedrock::Prompt'
+    Properties:
+      Name: !Sub ${ParentStackName}-prompt
+      Description: 'The prompt used to generate responses.'
+      DefaultVariant: 'prompt'
+      Variants:
+        - Name: 'prompt'
+          TemplateType: 'TEXT'
+          ModelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
+          TemplateConfiguration:
+            Text:
+              InputVariables:
+                - Name: scanning_tool_title
+                - Name: question_set_data
+                - Name: scanning_tool_data
+              Text: |
+                Context:
+                - We have a set of {{scanning_tool_title}} findings from our AWS environment.
+                - Each finding must be assessed and mapped to a specific WAFR best practice based on our predefined pillars and questions.
+                Objective:
+                - Transform the scanning tool findings into a JSON mapping where each mapping associates a contiguous range of findings with a unique WAFR best practice ID.
+                Output Format:
+                - The final output must be a minified JSON array containing objects with the following structure:
+                  [{"id": integer, "start": integer, "end": integer}]
+                - Example:
+                  [{"id":101,"start":201,"end":203}]
+                Instructions:
+                1. For each best practice (defined as a unique combination of pillar, question, and best practice), determine the contiguous range of findings it applies to from the {{scanning_tool_title}} Findings.
+                2. Use the predefined unique ID from the WAFR question set for the "id" field.
+                3. Define "start" as the starting index and "end" as the ending index (inclusive) of the range of findings for that best practice.
+                4. Return ONLY the FINAL MINIFIED JSON object. No additional text, comments, or formatting is allowed.
+                5. Do not prefix or suffix the output with any extra characters or messages. Any deviation from the exact specified structure will result in a failure of the state machine.
+                Inputs:
+                - WAFR Pillars, Questions, and Best Practices:
+                  {{question_set_data}}
+                - {{scanning_tool_title}} Findings:
+                  {{scanning_tool_data}}
+          InferenceConfiguration:
+            Text:
+              Temperature: 0
+              MaxTokens: 2048
+      Tags:
+        Project: !Ref Project
+        Owner: !Ref Owner
+        Name: !Ref Name
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -189,50 +248,50 @@ Resources:
         Name: StateMachine
       Policies:
         - Statement:
-            - Effect: Allow
-              Action: states:StartExecution
-              Resource:
-                - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
+          - Effect: Allow
+            Action: states:StartExecution
+            Resource:
+              - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
-            - Effect: Allow
-              Action: ecs:RunTask
-              Resource:
-                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
-                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
-                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
+          - Effect: Allow
+            Action: ecs:RunTask
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
         - Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:PutItem
-              Resource:
-                - !Ref DynamoDBArn
+          - Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:PutItem
+            Resource:
+              - !Ref DynamoDBArn
         - Statement:
-            - Effect: Allow
-              Action: iam:PassRole
-              Resource:
-                - !Ref ECSExecutionRole
-                - !Ref ProwlerTaskRole
-                - !Ref CloudCustodianTaskRole
-                - !Ref CloudSploitTaskRole
+          - Effect: Allow
+            Action: iam:PassRole
+            Resource:
+              - !Ref ECSExecutionRole
+              - !Ref ProwlerTaskRole
+              - !Ref CloudCustodianTaskRole
+              - !Ref CloudSploitTaskRole
         - Statement:
-            - Effect: Allow
-              Action:
-                - events:PutRule
-                - events:PutTargets
-                - events:DescribeRule
-                - events:DeleteRule
-                - events:RemoveTargets
-              Resource: "*"
+          - Effect: Allow
+            Action:
+              - events:PutRule
+              - events:PutTargets
+              - events:DescribeRule
+              - events:DeleteRule
+              - events:RemoveTargets
+            Resource: "*"
         - Statement:
-            - Effect: Allow
-              Action:
-                - lambda:InvokeFunction
-              Resource:
-                - !GetAtt PreparePromptsFunction.Arn
-                - !GetAtt InvokeLLMFunction.Arn
-                - !GetAtt CleanupFunction.Arn
-                - !GetAtt PrepareCustodianFunction.Arn
+          - Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource:
+              - !GetAtt PreparePromptsFunction.Arn
+              - !GetAtt InvokeLLMFunction.Arn
+              - !GetAtt CleanupFunction.Arn
+              - !GetAtt PrepareCustodianFunction.Arn
       Definition:
         Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
@@ -477,6 +536,7 @@ Resources:
                   Arguments:
                     assessment_id: "{% $assessment_id %}"
                     prompt_uri: "{% $states.input %}"
+                    prompt_arn: !GetAtt BedrockPrompt.Arn
                   End: true
                   Retry:
                     - ErrorEquals:

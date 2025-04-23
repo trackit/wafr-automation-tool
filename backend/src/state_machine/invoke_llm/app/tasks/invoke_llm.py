@@ -1,9 +1,8 @@
+import json
 from typing import override
 
-from common.config import AI_MODEL, AI_MODELS
 from common.task import Task
-from entities.ai import PromptS3Uri
-from exceptions.ai import InvalidAIModelError
+from entities.ai import PromptS3Uri, PromptVariables
 from services.ai import IAIService
 from services.storage import IStorageService
 from utils.s3 import parse_s3_uri
@@ -21,18 +20,14 @@ class InvokeLLM(Task[InvokeLLMInput, str]):
         self.storage_service = storage_service
         self.ai_service = ai_service
 
-    def retrieve_prompt(self, prompt_uri: PromptS3Uri) -> str:
+    def retrieve_prompt_variables(self, prompt_uri: PromptS3Uri) -> PromptVariables:
         s3_bucket, s3_key = parse_s3_uri(prompt_uri)
-        return self.storage_service.get(Bucket=s3_bucket, Key=s3_key)
+        return PromptVariables(**json.loads(self.storage_service.get(Bucket=s3_bucket, Key=s3_key)))
 
     @override
     def execute(self, event: InvokeLLMInput) -> str:
-        model_type = AI_MODELS.get(AI_MODEL)
-        if model_type is None:
-            raise InvalidAIModelError(AI_MODEL)
-
-        prompt = self.retrieve_prompt(event.prompt_uri)
+        prompt_variables = self.retrieve_prompt_variables(event.prompt_uri)
         return self.ai_service.converse(
-            model_type,
-            prompt,
+            event.prompt_arn,
+            prompt_variables,
         )

@@ -20,6 +20,7 @@ class FormatProwlerInput(BaseModel):
 
 class InvokeLLMInput(BaseModel):
     assessment_id: AssessmentID
+    prompt_arn: str
     prompt_uri: PromptS3Uri
 
 
