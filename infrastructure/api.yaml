@@ -5,13 +5,8 @@ Description: API Lambda Functions
 Parameters:
   Owner:
     Type: String
-    Default: Antoine Berger
   Project:
     Type: String
-    Default: WAFR Automation Tool
-  Name:
-    Type: String
-    Default: api
   StateMachineArn:
     Type: String
   DynamoDBArn:
@@ -30,10 +25,6 @@ Globals:
     Runtime: python3.12
     Layers:
       - !Ref SharedLibsLayer
-    Tags:
-      Project: !Ref Project
-      Owner: !Ref Owner
-      Name: !Ref Name
     Environment:
       Variables:
         REGION: !Ref AWS::Region
@@ -145,14 +136,17 @@ Resources:
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: !Ref Name
-
+        Name: APIGateway
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/start_assessment/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: StartAssessmentFunction
       Environment:
         Variables:
           DEFAULT_ASSESSMENT_ROLE: !Ref DefaultAssessmentRole
@@ -175,6 +169,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_all_assessments/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: RetrieveAllAssessmentsFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -196,6 +194,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_assessment/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: RetrieveAssessmentFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -216,6 +218,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/delete_assessment/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: DeleteAssessmentFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -251,6 +257,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/update_assessment/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: UpdateAssessmentFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -271,6 +281,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/rescan_assessment/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: RescanAssessmentFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -297,6 +311,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/update_pillar/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: UpdatePillarFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -318,6 +336,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/update_question/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: UpdateQuestionFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -339,6 +361,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_best_practice_findings/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: RetrieveBestPracticeFindingsFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -360,6 +386,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/update_best_practice/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: UpdateBestPracticeFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -381,6 +411,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/retrieve_finding/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: RetrieveFindingFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -401,6 +435,10 @@ Resources:
       Handler: main.lambda_handler
       Runtime: python3.12
       CodeUri: ../backend/src/api/update_finding/app
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: UpdateFindingFunction
       Policies:
         - Version: "2012-10-17"
           Statement:

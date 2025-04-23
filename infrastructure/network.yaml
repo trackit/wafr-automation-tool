@@ -5,13 +5,8 @@ Description: Network
 Parameters:
   Owner:
     Type: String
-    Default: Antoine Berger
   Project:
     Type: String
-    Default: WAFR Automation Tool
-  Name:
-    Type: String
-    Default: network
 
 Resources:
   VPC:
@@ -26,7 +21,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: VPC
   Subnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -40,7 +35,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: Subnet
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -50,7 +45,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: InternetGateway
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -66,7 +61,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: RouteTable
   Route:
     Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
@@ -95,7 +90,7 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: !Ref Name
+          Value: SecurityGroup
 
 Outputs:
   Subnet:
