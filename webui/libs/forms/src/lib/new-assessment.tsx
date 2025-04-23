@@ -209,7 +209,7 @@ export function NewAssessment({
 
         <fieldset className="fieldset">
           <legend className="fieldset-legend">
-            Workflow
+            Workflows
             <WorkflowHintDialog />
           </legend>
           <div
