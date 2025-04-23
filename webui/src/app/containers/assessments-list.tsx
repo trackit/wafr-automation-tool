@@ -210,7 +210,9 @@ function AssessmentsList() {
                     <Computer className="w-4 h-4" />
                     Workflow:
                     {Array.isArray(assessment.workflows)
-                      ? assessment.workflows.join(', ')
+                      ? assessment.workflows.length
+                        ? assessment.workflows.join(', ')
+                        : ' -'
                       : assessment.workflows || ' -'}
                   </div>
                 </div>
