@@ -355,7 +355,7 @@ export function AssessmentDetails() {
       setShowCancelModal(false);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] }, { cancelRefetch: true });
+      queryClient.invalidateQueries({ queryKey: ['assessments'] });
       navigate(`/`);
     },
   });
@@ -973,12 +973,14 @@ export function AssessmentDetails() {
           Your assessment is processing
         </h2>
         <Timeline steps={timelineSteps} />
-        <button className="btn btn-error btn-sm text-sm h-8 min-h-8 mt-5 text-white" onClick={() => setShowCancelModal(true)}>
+        <button
+          className="btn btn-error btn-sm text-sm h-8 min-h-8 mt-5 text-white"
+          onClick={() => setShowCancelModal(true)}
+        >
           Cancel Assessment
         </button>
       </div>
-      {
-        showCancelModal &&
+      {showCancelModal && (
         <ConfirmationModal
           open={showCancelModal}
           onClose={() => setShowCancelModal(false)}
@@ -987,7 +989,7 @@ export function AssessmentDetails() {
           title="Cancel Assessment"
           message="Are you sure you want to cancel this assessment? This action cannot be undone."
         />
-      }
+      )}
     </>
   );
 
