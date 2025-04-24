@@ -40,7 +40,7 @@ Resources:
         AllowAdminCreateUserOnly: true
       Policies:
         PasswordPolicy:
-          MinimumLength: 12
+          MinimumLength: 14
           RequireLowercase: true
           RequireNumbers: true
           RequireSymbols: true
@@ -54,6 +54,7 @@ Resources:
           StringAttributeConstraints:
             MaxLength: 320
             MinLength: 3
+      DeletionProtection: ACTIVE
   UserPoolUser:
     Type: AWS::Cognito::UserPoolUser
     Properties:
@@ -87,6 +88,7 @@ Resources:
         - profile
       AllowedOAuthFlows:
         - code
+      PreventUserExistenceErrors: ENABLED
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
