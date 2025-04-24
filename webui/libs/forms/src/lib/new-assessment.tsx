@@ -4,6 +4,7 @@ import { Computer, Earth, KeyRound, Pen, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import WorkflowHintDialog from './workflow-hint-dialog';
 
 const awsRegions = [
   'us-east-1',
@@ -73,7 +74,9 @@ export function NewAssessment({
   });
 
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
-  const [selectedWorkflows, setSelectedWorkflows] = useState<Set<string>>(new Set());
+  const [selectedWorkflows, setSelectedWorkflows] = useState<Set<string>>(
+    new Set()
+  );
 
   useEffect(() => {
     setValue('regions', selectedRegions);
@@ -84,7 +87,7 @@ export function NewAssessment({
   }, [selectedWorkflows, setValue]);
 
   const removeWorkflow = (workflow: string) => {
-    setSelectedWorkflows(prev => {
+    setSelectedWorkflows((prev) => {
       const newSet = new Set(prev);
       newSet.delete(workflow);
       return newSet;
@@ -205,18 +208,23 @@ export function NewAssessment({
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Workflows</legend>
+          <legend className="fieldset-legend">
+            Workflows
+            <WorkflowHintDialog />
+          </legend>
           <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.workflows ? 'input-error' : ''
             }`}
           >
             <Computer className="w-4 min-w-4 opacity-80" />
-            <TagsInput tags={selectedWorkflows} setTags={setSelectedWorkflows} inputProps={{ placeholder: 'Enter a workflow name' }} />
+            <TagsInput
+              tags={selectedWorkflows}
+              setTags={setSelectedWorkflows}
+              inputProps={{ placeholder: 'Enter a workflow name' }}
+            />
           </div>
-          <div
-            className="flex flex-wrap gap-1 items-center"
-          >
+          <div className="flex flex-wrap gap-1 items-center">
             {Array.from(selectedWorkflows).map((workflow) => (
               <span
                 key={workflow}
@@ -228,7 +236,7 @@ export function NewAssessment({
                   onClick={() => removeWorkflow(workflow)}
                   className="ml-1 text-base-content hover:text-error cursor-pointer"
                 >
-                  <X className='w-4 h-4' />
+                  <X className="w-4 h-4" />
                 </button>
               </span>
             ))}
@@ -236,11 +244,6 @@ export function NewAssessment({
           {errors.workflows && (
             <p className="fieldset-label text-error">
               {errors.workflows?.message}
-            </p>
-          )}
-          {!errors.workflows && (
-            <p className="fieldset-label">
-              You can enter multiple workflows separated by commas.
             </p>
           )}
         </fieldset>
