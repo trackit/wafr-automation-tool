@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import ErrorPage from './error-page';
 import FindingsDetails from './findings-details';
 
 type BestPractice = components['schemas']['BestPractice'];
@@ -1011,13 +1012,7 @@ export function AssessmentDetails() {
         ? loading
         : null}
       {data?.step === 'FINISHED' ? details : null}
-      {data?.step === 'ERRORED' ? (
-        <div className="flex items-center justify-center h-full">
-          <h2 className="text-center text-error font-bold">
-            An error occurred while running the assessment. Please try again.
-          </h2>
-        </div>
-      ) : null}
+      {data?.step === 'ERRORED' ? <ErrorPage {...data} /> : null}
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
