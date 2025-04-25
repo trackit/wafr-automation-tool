@@ -117,3 +117,54 @@ def test_prepare_prompts_invalid_scanning_tool():
 
     with pytest.raises(InvalidScanningToolError):
         task.execute(event)
+
+
+def test_prepare_prompts_self_made_finding():
+    from ..app.tasks.prepare_prompts import PreparePrompts
+
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.update_attrs = MagicMock()
+
+    fake_storage_service = FakeStorageService()
+    fake_storage_service.get = MagicMock(
+        return_value=load_file(Path(__file__).parent / "self_made_prowler_output.json")
+    )
+    fake_storage_service.put = MagicMock()
+
+    fake_question_set = MagicMock(
+        data={
+            "pillar-1": {
+                "label": "Pillar 1",
+                "questions": {
+                    "question-1": {
+                        "label": "Question 1",
+                        "best_practices": {
+                            "best-practice-1": {
+                                "label": "Best Practice 1",
+                                "risk": "Low",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
+                        },
+                    }
+                },
+            }
+        }
+    )
+
+    event = PreparePromptsInput(
+        assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[], workflows=[]
+    )
+    task = PreparePrompts(
+        database_service=fake_database_service,
+        storage_service=fake_storage_service,
+        formatted_question_set=fake_question_set,
+    )
+    prompt_list = task.execute(event)
+
+    fake_storage_service.get.assert_called_once_with(
+        Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format(event.assessment_id)
+    )
+    fake_storage_service.put.assert_not_called()
+    assert prompt_list == []
