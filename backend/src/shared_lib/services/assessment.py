@@ -172,14 +172,10 @@ class AssessmentService(IAssessmentService):
         best_practice = question.get("best_practices").get(best_practice_id)
         if not best_practice:
             return None
-        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.get("results", []))
+        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.results)
         return BestPracticeExtra(
-            id=best_practice.get("id", ""),
-            label=best_practice.get("label", ""),
-            risk=best_practice.get("risk", ""),
-            status=best_practice.get("status", False),
+            **best_practice.model_dump(exclude={"results"}),
             results=findings if findings else [],
-            hidden_results=best_practice.get("hidden_results", []),
         )
 
     @override
@@ -311,11 +307,11 @@ class AssessmentService(IAssessmentService):
         if not best_practice:
             return False
         if finding_dto.hidden:
-            if finding_id in best_practice["hidden_results"]:
+            if finding_id in best_practice.hidden_results:
                 return True
-            best_practice["hidden_results"].append(finding_id)
+            best_practice.hidden_results.append(finding_id)
         else:
-            best_practice["hidden_results"].remove(finding_id)
+            best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings)
         self.update_assessment(assessment.id, assessment_dto)
         return True
@@ -328,7 +324,7 @@ class AssessmentService(IAssessmentService):
         for pillar in assessment.findings.values():
             for question in pillar.get("questions", {}).values():
                 for best_practice in question.get("best_practices", {}).values():
-                    items.extend(best_practice.get("results", []))
+                    items.extend(best_practice.results)
         keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 

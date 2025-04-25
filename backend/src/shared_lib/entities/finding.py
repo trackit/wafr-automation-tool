@@ -5,8 +5,8 @@ FindingID = str
 
 class Finding(BaseModel):
     id: FindingID
-    status_code: str | None = None
     status_detail: str | None = None
+    risk_details: str | None = None
 
 
 class FindingResource(BaseModel):
@@ -22,6 +22,7 @@ class FindingRemediation(BaseModel):
 
 
 class FindingExtra(Finding):
+    status_code: str | None = None
     severity: str | None = None
     resources: list[FindingResource] | None = None
     remediation: FindingRemediation | None = None

@@ -80,15 +80,18 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def retrieve_questions(self) -> str:
         best_practices = []
         best_practice_id = 1
-        for pillar_name, pillar_data in self.formatted_question_set.data.items():
-            for question_name, question_data in pillar_data.get("questions").items():
+        for pillar_data in self.formatted_question_set.data.values():
+            for question_data in pillar_data.get("questions").values():
                 for best_practice_data in question_data.get("best_practices").values():
                     best_practices.append(
                         {
                             "id": best_practice_id,
-                            "pillar": pillar_name,
-                            "question": question_name,
-                            "best_practice": best_practice_data,
+                            "pillar": pillar_data.get("label"),
+                            "question": question_data.get("label"),
+                            "best_practice": {
+                                "label": best_practice_data.label,
+                                "description": best_practice_data.description,
+                            },
                         }
                     )
                     best_practice_id += 1

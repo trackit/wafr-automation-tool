@@ -24,16 +24,12 @@ def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
         questions: dict[str, FormattedQuestion] = {}
         for question_index, (question_name, question_data) in enumerate(pillar_data.items()):
             best_practices: dict[str, BestPractice] = {}
-            for best_practice_index, (best_practice_name, best_practice_data) in enumerate(
+            for best_practice_index, (_, best_practice_data) in enumerate(
                 question_data.items(),
             ):
                 best_practices[str(best_practice_index)] = BestPractice(
+                    **best_practice_data.model_dump(exclude={"id"}),
                     id=str(best_practice_index),
-                    label=best_practice_name,
-                    risk=best_practice_data["risk"],
-                    status=False,
-                    results=[],
-                    hidden_results=[],
                 )
             question = FormattedQuestion(
                 id=str(question_index), label=question_name, best_practices=best_practices, none=False, disabled=False
@@ -61,9 +57,9 @@ def retrieve_questions() -> QuestionSet:
             for question_name, question in pillar.items():
                 for best_practice_name in question:
                     questions[pillar_name][question_name][best_practice_name] = {
+                        **question[best_practice_name],
                         "id": best_practice_name,
                         "label": best_practice_name,
-                        "risk": question[best_practice_name]["risk"],
                         "status": False,
                         "results": [],
                         "hidden_results": [],
