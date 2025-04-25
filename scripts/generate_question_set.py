@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import datetime
+from typing import TypedDict
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -20,6 +21,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 driver.get(
     "https://docs.aws.amazon.com/wellarchitected/latest/framework/general-design-principles.html"
 )
+driver.maximize_window()
 
 
 def get_text_from_li(li: WebElement):
@@ -36,7 +38,13 @@ def get_formatted_text_statement(statement: WebElement):
     return re.sub(r"^[A-Z]+\d+-[A-Z]+\d+:?\s*", "", text)
 
 
-def get_best_practice_risk(best_practice: WebElement) -> str | None:
+class BestPracticeData(TypedDict):
+    risk: str
+    description: str
+
+
+def get_best_practice_data(best_practice: WebElement) -> BestPracticeData:
+    best_practice_data: BestPracticeData = {"risk": "", "description": ""}
     link_element = best_practice.find_element(By.XPATH, ".//a")  # type: ignore
     url = link_element.get_attribute("href")  # type: ignore
     driver.execute_script(f"window.open('{url}', '_blank');")  # type: ignore
@@ -45,15 +53,17 @@ def get_best_practice_risk(best_practice: WebElement) -> str | None:
         EC.presence_of_element_located((By.XPATH, "//*[@id='main-col-body']"))
     )
     paragraphs = page_content.find_elements(By.TAG_NAME, "p")  # type: ignore
+    if len(paragraphs) != 0:
+        best_practice_data["description"] = paragraphs[0].text
     for text in paragraphs:
         content = text.text
         if "Level of risk" in content:
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            return re.findall(r"(High|Medium|Low)", content)[0]
-    driver.close()
+            best_practice_data["risk"] = re.findall(r"(High|Medium|Low)", content)[0]
+            break
     driver.switch_to.window(driver.window_handles[0])
-    return None
+    return best_practice_data
 
 
 try:
@@ -61,7 +71,7 @@ try:
         EC.presence_of_element_located(
             (
                 By.XPATH,
-                "/html/body/div[2]/div/div/div[2]/main/div[1]/nav[2]/div/div[2]/div[2]/div/ul/li[8]/div/div[2]/ul",
+                "/html/body/div[2]/div/div/div[3]/main/div[2]/nav[2]/div/div[2]/div[2]/div/ul/li[8]/div/div[2]/ul",
             )
         )
     )
@@ -79,9 +89,9 @@ try:
                 best_practices = question.find_elements(By.XPATH, "./div/div[2]/ul/li")  # type: ignore
                 for best_practice in best_practices:
                     best_practice_text = get_formatted_text_statement(best_practice)
-                    json_output[pillar_text][question_text][best_practice_text] = {
-                        "risk": get_best_practice_risk(best_practice)
-                    }
+                    json_output[pillar_text][question_text][best_practice_text] = (
+                        get_best_practice_data(best_practice)
+                    )
     current_date = datetime.now().strftime("%m%d%Y")
     with open(f"questions/questions_{current_date}.json", "w") as f:
         f.write(json.dumps(json_output, indent=4))
