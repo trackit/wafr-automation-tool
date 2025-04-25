@@ -17,6 +17,8 @@ const WhatIsWAFRAutomationToolAnswer = () => (
         Learn more in this{' '}
         <a
           href="https://trackit.io/aws-wafr-automation/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
         >
           blog post

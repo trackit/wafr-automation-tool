@@ -22,7 +22,7 @@ const ContributeProjectAnswer = () => (
       <p>
         To get started, please read our{' '}
         <a
-          href="https://github.com/TrackIt/wafr-automation"
+          href="https://github.com/trackit/wafr-automation-tool"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
@@ -38,7 +38,7 @@ const ContributeProjectAnswer = () => (
       <p>
         If you have any questions, please ask them in the form of{' '}
         <a
-          href="https://github.com/TrackIt/wafr-automation/issues"
+          href="https://github.com/trackit/wafr-automation-tool/issues"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
