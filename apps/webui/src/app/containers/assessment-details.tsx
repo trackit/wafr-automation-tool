@@ -470,7 +470,7 @@ export function AssessmentDetails() {
         header: '',
         size: 60,
         cell: (info) => (
-          <div className="flex items-center justify-center w-4">
+          <div className="ml-5 flex justify-center w-4">
             <input
               type="checkbox"
               className={`checkbox checkbox-sm checkbox-primary`}
@@ -511,13 +511,21 @@ export function AssessmentDetails() {
         cell: (info) => {
           return (
             <div
+              tabIndex={0}
               className={`${
                 activeQuestion?.none && info.row.original.id !== 'resolve'
                   ? 'line-through text-base-content/50'
                   : ''
-              }`}
+              } collapse
+              ${!info.row.original.description ? ' collapse-close' : ''}
+              `}
             >
-              {info.row.original.label}
+              <div className="collapse-title p-4 py-3 min-h-full flex gap-2 items-center">
+                {info.row.original.label}
+              </div>
+              <div className="collapse-content">
+                {info.row.original.description}
+              </div>
             </div>
           );
         },
@@ -536,7 +544,7 @@ export function AssessmentDetails() {
           if (info.row.original.id !== 'resolve') {
             return (
               <div
-                className={`badge badge-soft badge-sm font-bold ${
+                className={`m-4 mt-3 badge badge-soft badge-sm font-bold ${
                   info.row.original.risk === 'High'
                     ? 'badge-error'
                     : info.row.original.risk === 'Medium'
@@ -565,7 +573,7 @@ export function AssessmentDetails() {
         size: 80,
         cell: (info) => {
           return (
-            <div className="font-bold text-center">
+            <div className="m-4 mt-3 font-bold text-center">
               {info.row.original.results?.length ? (
                 <button
                   className="btn btn-link text-error h-[20px]"
