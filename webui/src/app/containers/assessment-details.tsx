@@ -833,8 +833,9 @@ export function AssessmentDetails() {
         {!selectedPillar?.disabled && (
           <>
             <VerticalMenu
-              items={(selectedPillar?.questions || []).map(
-                (question, index) => {
+              items={(selectedPillar?.questions || [])
+                .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
+                .map((question, index) => {
                   // Find the latest question data from the cache
                   const latestQuestion =
                     data?.findings
@@ -860,8 +861,7 @@ export function AssessmentDetails() {
                     error: latestQuestion.none,
                     disabled: latestQuestion.disabled,
                   };
-                }
-              )}
+                })}
             />
 
             <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
