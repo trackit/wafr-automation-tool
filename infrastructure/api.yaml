@@ -305,16 +305,16 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
-  ExportAssessmentWAFunction:
+  ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main.lambda_handler
       Runtime: python3.12
-      CodeUri: ../backend/src/api/export_wa/app
+      CodeUri: ../backend/src/api/export_well_architected_tool/app
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: ExportAssessmentWAFunction
+        Name: ExportAssessmentWellArchitectedToolFunction
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -340,11 +340,11 @@ Resources:
               Resource:
                 - !Sub "arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:*"
       Events:
-        ExportAssessmentWA:
+        ExportAssessmentWellArchitectedTool:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/export/wa
+            Path: /assessments/{assessmentId}/exports/well-architected-tool
             Method: POST
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
