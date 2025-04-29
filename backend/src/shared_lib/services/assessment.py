@@ -344,7 +344,7 @@ class AssessmentService(IAssessmentService):
         formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
         if "workflow" in formatted_item:
             formatted_item["workflows"] = [formatted_item.pop("workflow")]
-        if not formatted_item["graph_datas"]:
+        if "graph_datas" not in formatted_item:
             formatted_item["graph_datas"] = AssessmentData(regions={}, resource_types={}, severities={}, findings=0)
         return Assessment.model_validate(
             formatted_item,
