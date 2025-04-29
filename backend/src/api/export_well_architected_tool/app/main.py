@@ -5,9 +5,9 @@ import boto3
 from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
+from tasks.export_well_architected_tool import ExportWellArchitectedTool
 
 from api.event import ExportWellArchitectedToolInput
-from src.api.export_well_architected_tool.app.tasks.export_well_architected_tool import ExportWellArchitectedTool
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
