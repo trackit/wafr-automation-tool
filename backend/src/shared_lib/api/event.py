@@ -95,8 +95,9 @@ class UpdatePillarInput(BaseModel):
     pillar_dto: PillarDto
 
 
-class ExportWAInput(BaseModel):
+class ExportWellArchitectedToolInput(BaseModel):
     assessment_id: AssessmentID
+    owner: str | None = None
 
 
 class UpdateQuestionInput(BaseModel):

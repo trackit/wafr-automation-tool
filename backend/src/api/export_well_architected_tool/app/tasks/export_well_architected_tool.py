@@ -17,7 +17,7 @@ from types_boto3_wellarchitected.type_defs import (
 )
 from utils.api import APIResponse
 
-from api.event import ExportWAInput
+from api.event import ExportWellArchitectedToolInput
 
 WorkloadId = str
 
@@ -27,7 +27,7 @@ logger = logging.getLogger("AIService")
 logger.setLevel(logging.ERROR)
 
 
-class ExportWA(Task[ExportWAInput, APIResponse[None]]):
+class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse[None]]):
     def __init__(self, assessment_service: IAssessmentService, well_architect_client: WellArchitectedClient) -> None:
         super().__init__()
         self.assessment_service = assessment_service
@@ -35,16 +35,11 @@ class ExportWA(Task[ExportWAInput, APIResponse[None]]):
 
     def does_workload_exist(self, workload_name: str) -> WorkloadSummaryTypeDef | None:
         workloads = self.well_architect_client.list_workloads()["WorkloadSummaries"]
-        for workload in workloads:
-            if workload.get("WorkloadName") == workload_name:
-                return workload
-        return None
+        return next((workload for workload in workloads if workload.get("WorkloadName") == workload_name), None)
 
-    def create_workload(self, assessment: Assessment) -> WorkloadId:
+    def create_workload(self, assessment: Assessment, event: ExportWellArchitectedToolInput) -> WorkloadId:
         workload_name = f"wafr-{assessment.name.lower().replace(' ', '-')}-{assessment.id.lower()}"
-
         workload = self.does_workload_exist(workload_name)
-
         if workload is not None:
             workload_id = workload.get("WorkloadId")
             if workload_id is not None:
@@ -56,9 +51,9 @@ class ExportWA(Task[ExportWAInput, APIResponse[None]]):
             Lenses=[WAFRLens],
             AwsRegions=assessment.regions or ["us-west-2"],
             ClientRequestToken=workload_name + str(time.time()),
-            ReviewOwner="Antoine Berger",
+            ReviewOwner=event.owner or "WAFR Automation Tool",
             Tags={
-                "Owner": "Antoine Berger",
+                "Owner": event.owner or "WAFR Automation Tool",
                 "Project": "WAFR Automation Tool",
                 "Name": assessment.name,
             },
@@ -163,11 +158,11 @@ class ExportWA(Task[ExportWAInput, APIResponse[None]]):
             ).get("AnswerSummaries", [])
             self.export_questions(workload_id, formatted_questions, pillar_answers)
 
-    def export_wa(self, assessment: Assessment) -> bool:
+    def export_well_architected_tool(self, assessment: Assessment, event: ExportWellArchitectedToolInput) -> bool:
         if not assessment.findings:
             return False
         formatted_pillars = list(assessment.findings.values())
-        workload_id = self.create_workload(assessment)
+        workload_id = self.create_workload(assessment, event)
         lens_review = self.well_architect_client.get_lens_review(WorkloadId=workload_id, LensAlias=WAFRLens)[
             "LensReview"
         ]
@@ -176,14 +171,14 @@ class ExportWA(Task[ExportWAInput, APIResponse[None]]):
         return True
 
     @override
-    def execute(self, event: ExportWAInput) -> APIResponse[None]:
+    def execute(self, event: ExportWellArchitectedToolInput) -> APIResponse[None]:
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,
                 body=None,
             )
-        if not self.export_wa(assessment):
+        if not self.export_well_architected_tool(assessment, event):
             return APIResponse(
                 status_code=INTERNAL_SERVER_ERROR,
                 body=None,
