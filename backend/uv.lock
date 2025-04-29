@@ -514,6 +514,9 @@ s3 = [
 stepfunctions = [
     { name = "types-boto3-stepfunctions" },
 ]
+wellarchitected = [
+    { name = "types-boto3-wellarchitected" },
+]
 
 [[package]]
 name = "types-boto3-bedrock-runtime"
@@ -552,6 +555,15 @@ wheels = [
 ]
 
 [[package]]
+name = "types-boto3-wellarchitected"
+version = "1.37.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/f8/4017a612d2f6afe8755499eb2156263014dbd857f8dfa779c423b97ad693/types_boto3_wellarchitected-1.37.0.tar.gz", hash = "sha256:8b36a69cce47d236ea382e30db7d0905eba5be04ea70a4081d8f95ae719e09c3", size = 32991 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/e8/e158478d242dee01e29152e09e071480987dc635fb8c8828bc0d37a835c2/types_boto3_wellarchitected-1.37.0-py3-none-any.whl", hash = "sha256:5512b7f48971d7f7e7c108d6df295efe149e3ae5e6a5f376a012bffd5494edd9", size = 35475 },
+]
+
+[[package]]
 name = "types-s3transfer"
 version = "0.11.3"
 source = { registry = "https://pypi.org/simple" }
@@ -586,7 +598,7 @@ dependencies = [
     { name = "boto3" },
     { name = "pydantic", extra = ["email"] },
     { name = "regex" },
-    { name = "types-boto3", extra = ["bedrock-runtime", "dynamodb", "s3", "stepfunctions"] },
+    { name = "types-boto3", extra = ["bedrock-runtime", "dynamodb", "s3", "stepfunctions", "wellarchitected"] },
 ]
 
 [package.dev-dependencies]
@@ -602,7 +614,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.37.5" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.10.6" },
     { name = "regex", specifier = ">=2024.11.6" },
-    { name = "types-boto3", extras = ["bedrock-runtime", "dynamodb", "s3", "stepfunctions"], specifier = ">=1.37.5" },
+    { name = "types-boto3", extras = ["wellarchitected", "bedrock-runtime", "dynamodb", "s3", "stepfunctions"], specifier = ">=1.37.5" },
 ]
 
 [package.metadata.requires-dev]
