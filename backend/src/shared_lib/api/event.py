@@ -95,6 +95,10 @@ class UpdatePillarInput(BaseModel):
     pillar_dto: PillarDto
 
 
+class ExportWAInput(BaseModel):
+    assessment_id: AssessmentID
+
+
 class UpdateQuestionInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
