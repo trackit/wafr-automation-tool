@@ -15,10 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@webui/api-client": ["libs/api-client/src/index.ts"],
-      "@webui/forms": ["libs/forms/src/index.ts"],
-      "@webui/types": ["libs/types/src/index.ts"],
-      "@webui/ui": ["libs/ui/src/index.ts"]
+      "@webui/api-client": ["../../libs/webui/api-client/src/index.ts"],
+      "@webui/forms": ["../../libs/webui/forms/src/index.ts"],
+      "@webui/types": ["../../libs/webui/types/src/index.ts"],
+      "@webui/ui": ["../../libs/webui/ui/src/index.ts"]
     },
     "jsx": "react-jsx",
     "allowJs": true,
