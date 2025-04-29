@@ -4,6 +4,7 @@ from http.client import INTERNAL_SERVER_ERROR, NOT_FOUND, OK
 from typing import override
 
 from common.task import Task
+from entities.api import WorkloadId
 from entities.assessment import Assessment
 from entities.best_practice import BestPractice
 from entities.question import FormattedPillar, FormattedQuestion
@@ -17,13 +18,10 @@ from types_boto3_wellarchitected.type_defs import (
 )
 from utils.api import APIResponse
 
+from api.config import WAFRLens
 from api.event import ExportWellArchitectedToolInput
 
-WorkloadId = str
-
-WAFRLens = "wellarchitected"
-
-logger = logging.getLogger("AIService")
+logger = logging.getLogger("ExportWellArchitectedTool")
 logger.setLevel(logging.ERROR)
 
 
