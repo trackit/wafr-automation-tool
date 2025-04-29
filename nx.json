@@ -12,6 +12,7 @@
     ],
     "sharedGlobals": []
   },
+  "nxCloudId": "6810f81a3864437f590544fe",
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",
@@ -45,7 +46,6 @@
       "dependsOn": ["^build"]
     }
   },
-  "defaultProject": "webui",
   "generators": {
     "@nx/react": {
       "application": {

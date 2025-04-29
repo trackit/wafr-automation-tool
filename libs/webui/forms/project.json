@@ -1,0 +1,9 @@
+{
+  "name": "webui/forms",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web-ui/forms/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project webui/forms --web",
+  "targets": {}
+}
