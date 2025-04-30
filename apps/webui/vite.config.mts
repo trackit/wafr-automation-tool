@@ -27,7 +27,7 @@ export default defineConfig(() => ({
   //  plugins: [ nxViteTsPaths() ],
   // },
   build: {
-    outDir: './dist/webui',
+    outDir: '../../dist/webui',
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
@@ -41,7 +41,7 @@ export default defineConfig(() => ({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
-      reportsDirectory: './coverage/webui',
+      reportsDirectory: '../../coverage/webui',
       provider: 'v8' as const,
     },
   },

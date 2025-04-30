@@ -11,7 +11,7 @@
       "dependsOn": ["build-types"]
     },
     "build-types": {
-      "command": "npx openapi-typescript ../../swagger.yaml -o libs/webui/types/src/lib/types.ts",
+      "command": "npx openapi-typescript ./swagger.yaml -o libs/webui/types/src/lib/types.ts",
       "options": {
         "cwd": "."
       }
