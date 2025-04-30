@@ -1,0 +1,47 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "sourceRoot": "apps/backend/src",
+  "projectType": "application",
+  "tags": ["scope:backend", "type:app"],
+  "targets": {
+    "prettier": {
+      "command": "prettier src --check",
+      "options": {
+        "cwd": "apps/backend"
+      }
+    },
+    "build": {
+      "command": "sam build --cached",
+      "options": {
+        "cwd": "."
+      }
+    },
+    "validate": {
+      "command": "sam validate",
+      "options": {
+        "cwd": "."
+      },
+      "dependsOn": ["build"]
+    },
+    "typecheck": {
+      "command": "tsc --noEmit -p tsconfig.app.json",
+      "options": {
+        "cwd": "apps/backend"
+      }
+    },
+    "deploy": {
+      "command": "sam deploy --stack-name=\"wafr-automation-tool-$STAGE\" --tags Project=wafr-automation-tool Owner=\"$STAGE\" Name=\"wafr-automation-tool-$STAGE\" --parameter-overrides Debug=\"$DEBUG\" Repository=\"$REPOSITORY\" InitialUserEmail=\"$INITIAL_USER_EMAIL\" --no-fail-on-empty-changeset",
+      "options": {
+        "cwd": "."
+      },
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  }
+}
