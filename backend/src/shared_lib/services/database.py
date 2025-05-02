@@ -44,6 +44,14 @@ class IDatabaseService(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_list_attrs(
+        self,
+        table_name: str,
+        event: UpdateAttrsInput,
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def put(self, table_name: str, item: dict[str, Any]) -> None:
         raise NotImplementedError
 
@@ -131,8 +139,32 @@ class DDBService(IDatabaseService):
         update_expression = "SET "
         expression_attribute_names = event.expression_attribute_names or {}
         expression_attribute_values = {}
-        for attr_name, attr_value in event.attrs.items():
+        for original_attr_name, attr_value in event.attrs.items():
+            attr_name = original_attr_name.replace("-", "_")
             update_expression += f"{event.update_expression_path or ''}#{attr_name} = :{attr_name}, "
+            expression_attribute_names[f"#{attr_name}"] = attr_name
+            expression_attribute_values[f":{attr_name}"] = attr_value
+        update_params: UpdateItemInputTableUpdateItemTypeDef = {
+            "Key": event.key,
+            "UpdateExpression": update_expression[:-2],
+            "ExpressionAttributeNames": expression_attribute_names,
+            "ExpressionAttributeValues": expression_attribute_values,
+        }
+        self.update(table_name, **update_params)
+
+    @override
+    def update_list_attrs(
+        self,
+        table_name: str,
+        event: UpdateAttrsInput,
+    ) -> None:
+        update_expression = "SET "
+        expression_attribute_names = event.expression_attribute_names or {}
+        expression_attribute_values = {
+            ":empty_list": [],
+        }
+        for attr_name, attr_value in event.attrs.items():
+            update_expression += f"{event.update_expression_path or ''}#{attr_name} = list_append(if_not_exists({event.update_expression_path or ''}#{attr_name}, :empty_list), :{attr_name}), "  # noqa: E501
             expression_attribute_names[f"#{attr_name}"] = attr_name
             expression_attribute_values[f":{attr_name}"] = attr_value
         update_params: UpdateItemInputTableUpdateItemTypeDef = {

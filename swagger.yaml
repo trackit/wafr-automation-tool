@@ -197,6 +197,36 @@ paths:
         "500":
           description: Internal server error.
 
+  /assessments/{assessmentId}/exports/well-architected-tool:
+    post:
+      tags:
+        - Exports
+      summary: Export the assessment to Well Architected Tool
+      description: |
+        Exports the assessment to Well Architected Tool.
+        You can specify an owner for the workload and a name for the assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to export
+          required: true
+          schema:
+            type: integer
+        - name: owner
+          in: query
+          description: The owner of the workload
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The assessment has been successfully exported
+        "400":
+          description: Invalid request body
+        "404":
+          description: The specified assessment could not be found
+        "500":
+          description: Internal server error.
+
   /assessments/{assessmentId}/pillars/{pillarId}:
     put:
       tags:
@@ -273,8 +303,8 @@ paths:
         "500":
           description: Internal server error.
 
-  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
-  : get:
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}:
+    get:
       tags:
         - Best Practices
       summary: Retrieve all findings for a specific best practice
@@ -475,6 +505,23 @@ components:
         created_at:
           type: string
           description: ISO-formatted date when the assessment was created
+        graph_datas:
+          type: object
+          description: Processed data from the scanning tools
+          additionalProperties: false
+          properties:
+            regions:
+              type: object
+              description: Regions where findings were found
+            resource_types:
+              type: object
+              description: Resource types where findings were found
+            severities:
+              type: object
+              description: Severity levels where findings were found
+            findings:
+              type: integer
+              description: Total number of findings
         step:
           type: string
           description: Current step in the assessment process

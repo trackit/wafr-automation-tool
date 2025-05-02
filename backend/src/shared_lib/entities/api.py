@@ -6,9 +6,11 @@ from types_boto3_dynamodb.type_defs import (
     TableAttributeValueTypeDef,
 )
 
-from entities.assessment import AssessmentID, Steps
+from entities.assessment import AssessmentData, AssessmentID, Steps
 from entities.best_practice import BestPractice
 from entities.question import PillarID, QuestionID
+
+WorkloadId = str
 
 
 class APIFormattedQuestion(TypedDict):
@@ -34,6 +36,7 @@ class APIAssessment(BaseModel):
     workflows: list[str]
     created_at: str
     step: Steps
+    graph_datas: AssessmentData | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: list[APIFormattedPillar] | None = None

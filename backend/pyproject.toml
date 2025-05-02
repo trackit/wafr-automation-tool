@@ -8,7 +8,7 @@ dependencies = [
     "boto3>=1.37.5",
     "pydantic[email]>=2.10.6",
     "regex>=2024.11.6",
-    "types-boto3[bedrock-runtime,dynamodb,s3,stepfunctions]>=1.37.5",
+    "types-boto3[wellarchitected,bedrock-runtime,dynamodb,s3,stepfunctions]>=1.37.5",
 ]
 
 [dependency-groups]

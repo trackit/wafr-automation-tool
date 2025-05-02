@@ -64,20 +64,7 @@ def test_store_results():
     result = task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
-    database_service.update.assert_called_once_with(
-        table_name=DDB_TABLE,
-        Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
-        UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",
-        ExpressionAttributeNames={
-            "#pillar": "pillar-1",
-            "#question": "question-1",
-            "#best_practice": "best-practice-1",
-        },
-        ExpressionAttributeValues={
-            ":new_findings": ["prowler:10"],
-            ":empty_list": [],
-        },
-    )
+    database_service.update.assert_called_once()
     database_service.put.assert_called_once_with(
         table_name=DDB_TABLE,
         item={

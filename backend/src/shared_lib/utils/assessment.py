@@ -12,7 +12,7 @@ def convert_all_assessments_to_api_assessments(assessments: list[Assessment]) ->
 
 
 def convert_assessment_to_api_assessment(assessment: Assessment) -> APIAssessment:
-    assessment_dict = assessment.model_dump(exclude={"findings"})
+    assessment_dict = assessment.model_dump(exclude={"findings", "raw_graph_datas"})
     findings: list[APIFormattedPillar] = []
 
     if assessment.findings:

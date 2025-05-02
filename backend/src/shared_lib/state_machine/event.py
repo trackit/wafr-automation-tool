@@ -43,3 +43,7 @@ class CleanupInput(BaseModel):
 class CreatePromptsInput(BaseModel):
     assessment_id: AssessmentID
     scanning_tool: ScanningTool
+
+
+class GenerateDataInput(BaseModel):
+    assessment_id: AssessmentID

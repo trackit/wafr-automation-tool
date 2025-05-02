@@ -138,9 +138,7 @@ describe('AssessmentDetails', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          'An error occurred while running the assessment. Please try again.'
-        )
+        screen.getByText('An error occurred while running the assessment.')
       ).toBeInTheDocument();
     });
   });

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
 from entities.api import APIPagination, APIPaginationOutput
-from entities.assessment import Assessment, AssessmentDto, Steps
+from entities.assessment import Assessment, AssessmentData, AssessmentDto, Steps
 from entities.best_practice import BestPractice, BestPracticeDto, BestPracticeExtra
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingExtra
@@ -64,6 +64,12 @@ def test_assessment_service_retrieve():
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",
+        graph_datas=AssessmentData(
+            regions={},
+            resource_types={},
+            severities={},
+            findings=0,
+        ),
         findings={
             "pillar-1": {
                 "id": "pillar-1",
@@ -167,6 +173,12 @@ def test_assessment_service_retrieve_all():
                 step=Steps.FINISHED,
                 created_at="",
                 question_version="test-question-version",
+                graph_datas=AssessmentData(
+                    regions={},
+                    resource_types={},
+                    severities={},
+                    findings=0,
+                ),
                 findings={
                     "pillar-1": {
                         "id": "pillar-1",
@@ -281,6 +293,12 @@ def test_assessment_service_retrieve_all_pagination():
                 step=Steps.FINISHED,
                 created_at="",
                 question_version="test-question-version",
+                graph_datas=AssessmentData(
+                    regions={},
+                    resource_types={},
+                    severities={},
+                    findings=0,
+                ),
                 findings={
                     "pillar-1": {
                         "id": "pillar-1",

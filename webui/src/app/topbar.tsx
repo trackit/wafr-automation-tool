@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+import { getCurrentUser, signOut } from 'aws-amplify/auth';
+import { CircleHelp, LogOut, User } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { signOut, getCurrentUser } from 'aws-amplify/auth';
-import { User, LogOut } from 'lucide-react';
 
 const Topbar = () => {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ const Topbar = () => {
         </svg>
         <h2 className="mt-0">WAFR Automation</h2>
       </div>
-      <div className="flex items-center gap-4 mr-8">
+      <div className="flex items-center mr-8">
         {/* <ThemeSwitcher /> */}
 
         <div className="dropdown dropdown-end">
@@ -59,6 +59,14 @@ const Topbar = () => {
             </li>
           </ul>
         </div>
+        <button
+          className="btn btn-ghost btn-xs p-1"
+          onClick={(e) => {
+            navigate('/faq');
+          }}
+        >
+          <CircleHelp className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

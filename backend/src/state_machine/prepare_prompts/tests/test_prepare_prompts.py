@@ -23,6 +23,7 @@ def test_prepare_prompts():
 
     fake_database_service = FakeDatabaseService()
     fake_database_service.update_attrs = MagicMock()
+    fake_database_service.update = MagicMock()
 
     fake_storage_service = FakeStorageService()
     fake_storage_service.get = MagicMock(return_value=load_file(Path(__file__).parent / "prowler_output.json"))
@@ -89,6 +90,8 @@ def test_prepare_prompts():
         ),
     )
 
+    fake_database_service.update.assert_called_once()
+    fake_database_service.update_attrs.assert_called_once()
     fake_storage_service.get.assert_called_once_with(
         Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format(event.assessment_id)
     )
