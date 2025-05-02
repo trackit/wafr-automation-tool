@@ -23,10 +23,8 @@ class RetrieveAssessment(
         for pillar in assessment.findings.values():
             for question in pillar.get("questions", {}).values():
                 for best_practice in question.get("best_practices", {}).values():
-                    hidden_results: list[str] = best_practice.get("hidden_results", [])
-                    best_practice["results"] = [
-                        result for result in best_practice["results"] if result not in hidden_results
-                    ]
+                    hidden_results: list[str] = best_practice.hidden_results
+                    best_practice.results = [result for result in best_practice.results if result not in hidden_results]
         return assessment
 
     @override

@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from entities.best_practice import BestPractice
 from utils.questions import format_questions, retrieve_questions
 
 
@@ -33,34 +34,34 @@ def test_retrieve_questions(mock_open: MagicMock, mock_listdir: MagicMock):
     assert output.data == {
         "pillar-1": {
             "question-1": {
-                "best-practice-1": {
-                    "id": "best-practice-1",
-                    "label": "best-practice-1",
-                    "risk": "Low",
-                    "status": False,
-                    "results": [],
-                    "hidden_results": [],
-                },
-                "best-practice-2": {
-                    "id": "best-practice-2",
-                    "label": "best-practice-2",
-                    "risk": "Medium",
-                    "status": False,
-                    "results": [],
-                    "hidden_results": [],
-                },
+                "best-practice-1": BestPractice(
+                    id="best-practice-1",
+                    label="best-practice-1",
+                    risk="Low",
+                    status=False,
+                    results=[],
+                    hidden_results=[],
+                ),
+                "best-practice-2": BestPractice(
+                    id="best-practice-2",
+                    label="best-practice-2",
+                    risk="Medium",
+                    status=False,
+                    results=[],
+                    hidden_results=[],
+                ),
             }
         },
         "pillar-2": {
             "question-2": {
-                "best-practice-1": {
-                    "id": "best-practice-1",
-                    "label": "best-practice-1",
-                    "risk": "High",
-                    "status": False,
-                    "results": [],
-                    "hidden_results": [],
-                },
+                "best-practice-1": BestPractice(
+                    id="best-practice-1",
+                    label="best-practice-1",
+                    risk="High",
+                    status=False,
+                    results=[],
+                    hidden_results=[],
+                ),
             }
         },
     }
@@ -106,22 +107,22 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                     "none": False,
                     "disabled": False,
                     "best_practices": {
-                        "0": {
-                            "id": "0",
-                            "label": "best-practice-1",
-                            "risk": "Low",
-                            "status": False,
-                            "results": [],
-                            "hidden_results": [],
-                        },
-                        "1": {
-                            "id": "1",
-                            "label": "best-practice-2",
-                            "risk": "Medium",
-                            "status": False,
-                            "results": [],
-                            "hidden_results": [],
-                        },
+                        "0": BestPractice(
+                            id="0",
+                            label="best-practice-1",
+                            risk="Low",
+                            status=False,
+                            results=[],
+                            hidden_results=[],
+                        ),
+                        "1": BestPractice(
+                            id="1",
+                            label="best-practice-2",
+                            risk="Medium",
+                            status=False,
+                            results=[],
+                            hidden_results=[],
+                        ),
                     },
                 }
             },
@@ -137,14 +138,14 @@ def test_format_questions(mock_open: MagicMock, mock_listdir: MagicMock):
                     "none": False,
                     "disabled": False,
                     "best_practices": {
-                        "0": {
-                            "id": "0",
-                            "label": "best-practice-1",
-                            "risk": "High",
-                            "status": False,
-                            "results": [],
-                            "hidden_results": [],
-                        },
+                        "0": BestPractice(
+                            id="0",
+                            label="best-practice-1",
+                            risk="High",
+                            status=False,
+                            results=[],
+                            hidden_results=[],
+                        ),
                     },
                 }
             },

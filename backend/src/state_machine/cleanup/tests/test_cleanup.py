@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, call
 
 from common.config import PROWLER_COMPLIANCE_PATH, PROWLER_OCSF_PATH, S3_BUCKET
 from entities.assessment import Assessment, AssessmentDto, Steps
+from entities.best_practice import BestPractice
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
@@ -60,14 +61,14 @@ def test_cleanup_on_error():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },

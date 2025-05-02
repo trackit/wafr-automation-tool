@@ -66,7 +66,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             ExpressionAttributeNames={
                 "#pillar": best_practice_info.pillar,
                 "#question": best_practice_info.question,
-                "#best_practice": best_practice_info.best_practice,
+                "#best_practice": best_practice_info.best_practice.get("id") or "",
             },
             ExpressionAttributeValues={
                 ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in best_practice_finding_ids],
@@ -109,7 +109,9 @@ class StoreResults(Task[StoreResultsInput, None]):
                         id=best_practice_id,
                         pillar=pillar_data.get("id"),
                         question=question_data.get("id"),
-                        best_practice=best_practice_data.get("id"),
+                        best_practice={
+                            "id": best_practice_data.id,
+                        },
                     )
                     best_practice_id += 1
         return best_practices

@@ -4,7 +4,7 @@ from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
 from entities.api import APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, Steps
-from entities.best_practice import BestPracticeDto, BestPracticeExtra
+from entities.best_practice import BestPractice, BestPracticeDto, BestPracticeExtra
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingExtra
 from services.assessment import AssessmentService
@@ -82,14 +82,14 @@ def test_assessment_service_retrieve():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -191,14 +191,14 @@ def test_assessment_service_retrieve_all():
                                 "none": False,
                                 "disabled": False,
                                 "best_practices": {
-                                    "best-practice-1": {
-                                        "id": "best-practice-1",
-                                        "label": "Best Practice 1",
-                                        "risk": "Low",
-                                        "status": False,
-                                        "results": ["1", "2", "3"],
-                                        "hidden_results": [],
-                                    }
+                                    "best-practice-1": BestPractice(
+                                        id="best-practice-1",
+                                        label="Best Practice 1",
+                                        risk="Low",
+                                        status=False,
+                                        results=["1", "2", "3"],
+                                        hidden_results=[],
+                                    )
                                 },
                             }
                         },
@@ -311,14 +311,14 @@ def test_assessment_service_retrieve_all_pagination():
                                 "none": False,
                                 "disabled": False,
                                 "best_practices": {
-                                    "best-practice-1": {
-                                        "id": "best-practice-1",
-                                        "label": "Best Practice 1",
-                                        "risk": "Low",
-                                        "status": False,
-                                        "results": ["1", "2", "3"],
-                                        "hidden_results": [],
-                                    }
+                                    "best-practice-1": BestPractice(
+                                        id="best-practice-1",
+                                        label="Best Practice 1",
+                                        risk="Low",
+                                        status=False,
+                                        results=["1", "2", "3"],
+                                        hidden_results=[],
+                                    )
                                 },
                             }
                         },
@@ -370,14 +370,14 @@ def test_assessment_service_retrieve_best_practice():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -508,14 +508,14 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -550,14 +550,14 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": [],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=[],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -706,14 +706,14 @@ def test_assessment_service_update_best_practice():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -764,14 +764,14 @@ def test_assessment_service_delete_findings():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["prowler:1"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["prowler:1"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },

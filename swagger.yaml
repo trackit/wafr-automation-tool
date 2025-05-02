@@ -390,8 +390,8 @@ paths:
         "500":
           description: Internal server error.
 
-  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}:
-    put:
+  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
+  : put:
       tags:
         - Best Practices
       summary: Update the details of a specific finding
@@ -689,6 +689,8 @@ components:
             - "High"
             - "Medium"
             - "Low"
+        description:
+          type: string
         status:
           type: boolean
         results:
