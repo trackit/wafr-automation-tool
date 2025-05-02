@@ -9,6 +9,7 @@ from services.database import DDBService
 from tasks.update_question import UpdateQuestion
 
 from api.event import UpdateQuestionInput
+from utils.api import UnauthorizedError, get_bearer_token
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
@@ -16,8 +17,10 @@ assessment_service = AssessmentService(database_service)
 task = UpdateQuestion(assessment_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
+def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     try:
+        auth_header = get_bearer_token(event)
+
         body = json.loads(event["body"])
         question_dto = QuestionDto(**body)
         response = task.execute(
@@ -26,9 +29,15 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],
                 question_dto=question_dto,
+                owner_id=auth_header,
             ),
         )
         return response.build()
+    except UnauthorizedError as e:
+        return {
+            "statusCode": 401,
+            "body": json.dumps({"error": str(e)}),
+        }
     except ValidationError as e:
         return {
             "statusCode": 400,

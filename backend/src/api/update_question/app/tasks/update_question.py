@@ -15,7 +15,7 @@ class UpdateQuestion(Task[UpdateQuestionInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateQuestionInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, "123")  # temporaire
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.owner_id)  # temporaire
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,
