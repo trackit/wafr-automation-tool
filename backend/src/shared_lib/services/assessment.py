@@ -43,6 +43,7 @@ class IAssessmentService:
         self,
         assessment_id: AssessmentID,
         finding_id: FindingID,
+        owner_id: str
     ) -> FindingExtra | None:
         raise NotImplementedError
 
@@ -191,6 +192,7 @@ class AssessmentService(IAssessmentService):
         self,
         assessment_id: AssessmentID,
         finding_id: FindingID,
+        owner_id: str
     ) -> FindingExtra | None:
         item = self.database_service.get(
             table_name=DDB_TABLE,
@@ -198,7 +200,11 @@ class AssessmentService(IAssessmentService):
         )
         if not item:
             return None
+        
+        if item.get("owner_id") != owner_id:
+            return None
         return self._create_finding(item)
+    
 
     @override
     def retrieve_findings(

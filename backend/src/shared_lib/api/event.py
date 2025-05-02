@@ -1,3 +1,4 @@
+from os import O_WRONLY
 from typing import Any
 
 from entities.api import APIAssessment, APIBestPracticeExtra
@@ -55,6 +56,7 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
+    owner_id: str
 
 
 RetrieveBestPracticeFindingsResponseBody = APIBestPracticeExtra
@@ -63,6 +65,7 @@ RetrieveBestPracticeFindingsResponseBody = APIBestPracticeExtra
 class RetrieveFindingInput(BaseModel):
     assessment_id: AssessmentID
     finding_id: FindingID
+    owner_id: str
 
 
 class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
@@ -94,12 +97,14 @@ class UpdateBestPracticeInput(BaseModel):
     question_id: QuestionID
     best_practice_id: BestPracticeID
     best_practice_dto: BestPracticeDto
+    owner_id: str
 
 
 class UpdatePillarInput(BaseModel):
     assessment_id: AssessmentID
     pillar_id: PillarID
     pillar_dto: PillarDto
+    owner_id: str
 
 
 class ExportWellArchitectedToolInput(BaseModel):
@@ -112,6 +117,7 @@ class UpdateQuestionInput(BaseModel):
     pillar_id: PillarID
     question_id: QuestionID
     question_dto: QuestionDto
+    owner_id: str
 
 
 class UpdateFindingInput(BaseModel):
@@ -121,3 +127,4 @@ class UpdateFindingInput(BaseModel):
     best_practice_id: BestPracticeID
     finding_id: FindingID
     finding_dto: FindingDto
+    owner_id: str
