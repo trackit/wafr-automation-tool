@@ -45,7 +45,7 @@ class RescanAssessment(
         self,
         event: RescanAssessmentInput,
     ) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, "123")  # temporaire
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.owner_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         self.clean_assessment(assessment)
