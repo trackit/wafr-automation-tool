@@ -306,6 +306,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/exports/well-architected-tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export the assessment to Well Architected Tool
+         * @description Exports the assessment to Well Architected Tool.
+         *     You can specify an owner for the workload and a name for the assessment.
+         *
+         */
+        post: {
+            parameters: {
+                query?: {
+                    /** @description The owner of the workload */
+                    owner?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The unique ID of the assessment to export */
+                    assessmentId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The assessment has been successfully exported */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The specified assessment could not be found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/pillars/{pillarId}": {
         parameters: {
             query?: never;
@@ -709,6 +775,17 @@ export interface components {
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
             created_at?: string;
+            /** @description Processed data from the scanning tools */
+            graph_datas?: {
+                /** @description Regions where findings were found */
+                regions?: Record<string, never>;
+                /** @description Resource types where findings were found */
+                resource_types?: Record<string, never>;
+                /** @description Severity levels where findings were found */
+                severities?: Record<string, never>;
+                /** @description Total number of findings */
+                findings?: number;
+            };
             /**
              * @description Current step in the assessment process
              * @enum {string}
@@ -793,6 +870,7 @@ export interface components {
             label?: string;
             /** @enum {string} */
             risk?: "High" | "Medium" | "Low";
+            description?: string;
             status?: boolean;
             results?: string[];
             hidden_results?: string[];
