@@ -21,7 +21,7 @@ from services.database import IDatabaseService
 
 class IAssessmentService:
     @abstractmethod
-    def retrieve(self, assessment_id: AssessmentID) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, owner_id: str) -> Assessment | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -55,7 +55,9 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str
+    ) -> int | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -115,13 +117,20 @@ class AssessmentService(IAssessmentService):
         self.database_service = database_service
 
     @override
-    def retrieve(self, assessment_id: AssessmentID) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, owner_id: str) -> Assessment | None:
         assessment_data = self.database_service.get(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            Key={
+                DDB_KEY: ASSESSMENT_PK,
+                DDB_SORT_KEY: assessment_id,
+            },
         )
         if not assessment_data:
             return None
+
+        if assessment_data.get("owner_id") != owner_id:
+            return None
+
         return self._create_assessment(assessment_data)
 
     @override
@@ -210,13 +219,21 @@ class AssessmentService(IAssessmentService):
         return findings
 
     @override
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str) -> int:
+        existing = self.retrieve(
+            assessment_id=assessment_id,
+            owner_id=owner_id,
+        )
+        if not existing:
+            return 84
+
         attrs = assessment_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
             key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
+        return 0
 
     @override
     def update_pillar(
@@ -312,7 +329,7 @@ class AssessmentService(IAssessmentService):
         else:
             best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings.root)
-        self.update_assessment(assessment.id, assessment_dto)
+        self.update_assessment(assessment.id, assessment_dto, "122")  # temporaire
         return True
 
     @override

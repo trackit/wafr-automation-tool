@@ -38,6 +38,7 @@ class Assessment(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: QuestionSetData | None = None
+    owner_id: str
 
 
 class AssessmentDto(BaseModel):
@@ -50,3 +51,4 @@ class AssessmentDto(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, Pillar] | None = None
+    owner_id: str | None = None

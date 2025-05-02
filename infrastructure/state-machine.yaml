@@ -350,6 +350,9 @@ Resources:
                   S: "{% $states.context.Execution.Id %}"
                 created_at:
                   S: "{% $states.input.created_at %}"
+                owner_id:
+                  S: "{% $states.input.owner_id %}"
+                  
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
               regions: "{% $states.input.regions %}"

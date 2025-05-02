@@ -14,6 +14,7 @@ class StartAssessmentInput(BaseModel):
     regions: list[str] = []
     role_arn: str | None = Field(default=None, alias="roleArn")
     workflows: list[str] = []
+    owner_id: str
 
 
 class StartAssessmentResponseBody(APIResponseBody):
@@ -27,14 +28,17 @@ class StateMachineInput(BaseModel):
     role_arn: str
     workflows: list[str]
     created_at: str
+    owner_id: str
 
 
 class DeleteAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    owner_id: str
 
 
 class RetrieveAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    owner_id: str
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
@@ -69,6 +73,7 @@ class RetrieveAllAssessmentsInput(BaseModel):
     limit: int
     search: str | None = None
     next_token: str | None = None
+    owner_id: str
 
 
 class RetrieveAllAssessmentsResponseBody(APIResponseBody):
@@ -79,6 +84,7 @@ class RetrieveAllAssessmentsResponseBody(APIResponseBody):
 class UpdateAssessmentInput(BaseModel):
     assessment_id: AssessmentID
     assessment_dto: AssessmentDto
+    owner_id: str
 
 
 class UpdateBestPracticeInput(BaseModel):

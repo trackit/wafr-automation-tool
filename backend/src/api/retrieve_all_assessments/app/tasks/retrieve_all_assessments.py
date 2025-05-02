@@ -27,22 +27,32 @@ class RetrieveAllAssessments(
             result.append(assessment_dict)
         return result
 
-    def create_filter(
-        self, event: RetrieveAllAssessmentsInput
-    ) -> tuple[str, dict[str, Any], dict[str, Any]] | tuple[None, None, None]:
-        if event.search is None:
-            return (None, None, None)
-        filter_expression = "contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)"
-        attribute_name = {
-            "#name": "name",
-            "#id": "id",
-            "#role_arn": "role_arn",
-        }
-        attribute_value = {
-            ":name": event.search,
-            ":id": event.search,
-            ":role_arn": event.search,
-        }
+    def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
+        attribute_name = {"#owner_id": "owner_id"}
+        attribute_value = {":owner_id": event.owner_id}
+
+        if event.search:
+            filter_expression = (
+                "(contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)) "
+                "AND #owner_id = :owner_id"
+            )
+            attribute_name.update(
+                {
+                    "#name": "name",
+                    "#id": "id",
+                    "#role_arn": "role_arn",
+                }
+            )
+            attribute_value.update(
+                {
+                    ":name": event.search,
+                    ":id": event.search,
+                    ":role_arn": event.search,
+                }
+            )
+        else:
+            filter_expression = "#owner_id = :owner_id"
+
         return (filter_expression, attribute_name, attribute_value)
 
     @override

@@ -269,6 +269,7 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
+                - dynamodb:GetItem
               Resource: !Ref DynamoDBArn
       Events:
         UpdateAssessment:
