@@ -1,8 +1,9 @@
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
+from entities.best_practice import BestPractice
 from entities.database import UpdateAttrsInput
 from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
@@ -13,8 +14,7 @@ from utils.tests import load_file
 from state_machine.event import PreparePromptsInput
 
 
-@patch("utils.files.get_prompt", return_value="prompt")
-def test_prepare_prompts(get_prompt_mock: MagicMock):
+def test_prepare_prompts():
     from ..app.tasks.prepare_prompts import PreparePrompts
 
     event = PreparePromptsInput(
@@ -36,13 +36,14 @@ def test_prepare_prompts(get_prompt_mock: MagicMock):
                     "question-1": {
                         "label": "Question 1",
                         "best_practices": {
-                            "best-practice-1": {
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
+                            "best-practice-1": BestPractice(
+                                id="best-practice-1",
+                                label="Best Practice 1",
+                                risk="Low",
+                                status=False,
+                                results=["1", "2", "3"],
+                                hidden_results=[],
+                            )
                         },
                     }
                 },
@@ -70,13 +71,14 @@ def test_prepare_prompts(get_prompt_mock: MagicMock):
                             "question-1": {
                                 "label": "Question 1",
                                 "best_practices": {
-                                    "best-practice-1": {
-                                        "label": "Best Practice 1",
-                                        "risk": "Low",
-                                        "status": False,
-                                        "results": ["1", "2", "3"],
-                                        "hidden_results": [],
-                                    }
+                                    "best-practice-1": BestPractice(
+                                        id="best-practice-1",
+                                        label="Best Practice 1",
+                                        risk="Low",
+                                        status=False,
+                                        results=["1", "2", "3"],
+                                        hidden_results=[],
+                                    )
                                 },
                             }
                         },
