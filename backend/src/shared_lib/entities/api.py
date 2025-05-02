@@ -52,6 +52,7 @@ class APIAssessment(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: list[APIFormattedPillar] | None = None
+    owner_id: str
 
 
 class APIPagination(BaseModel):

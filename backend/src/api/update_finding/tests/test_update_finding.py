@@ -21,6 +21,7 @@ def test_update_finding():
         created_at="",
         question_version="QV",
         findings=None,
+        owner_id="test-owner-id",
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)

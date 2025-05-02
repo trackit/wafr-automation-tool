@@ -15,7 +15,7 @@ class UpdatePillar(Task[UpdatePillarInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdatePillarInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, "123")  # temporaire
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,

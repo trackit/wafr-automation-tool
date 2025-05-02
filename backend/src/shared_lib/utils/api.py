@@ -48,3 +48,19 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
                 "access-control-allow-credentials": "true",
             },
         }
+
+
+class UnauthorizedError(Exception):
+    def __init__(self, message: str = "Unauthorized: missing or invalid token") -> None:
+        self.message = message
+        super().__init__(self.message)
+
+
+def get_bearer_token(event: dict[str, Any]) -> str:
+    headers = event.get("headers") or {}
+    auth_header = headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer ") or auth_header == "Bearer ":
+        raise UnauthorizedError
+
+    return auth_header.removeprefix("Bearer ")

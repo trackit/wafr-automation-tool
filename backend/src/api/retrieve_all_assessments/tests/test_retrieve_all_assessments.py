@@ -22,6 +22,7 @@ def test_retrieve_all_assessments():
             created_at="",
             question_version="QV",
             findings=None,
+            owner_id="test-owner-id",
         )
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
@@ -72,6 +73,7 @@ def test_retrieve_all_assessments_with_search():
                 severities={},
                 findings=0,
             ),
+            owner_id="test-owner-id",
         )
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]

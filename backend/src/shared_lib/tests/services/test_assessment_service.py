@@ -59,7 +59,7 @@ def test_assessment_service_retrieve():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id")
+    assessment = assessment_service.retrieve("test-assessment-id", "123")  # temporaire
     assert assessment == Assessment(
         id="test-assessment-id",
         name="test-assessment-name",
@@ -106,6 +106,7 @@ def test_assessment_service_retrieve():
                 }
             }
         ),
+        owner_id="123",  # temporaire
     )
 
     fake_database_service.get.assert_called_once_with(
@@ -118,7 +119,7 @@ def test_assessment_service_retrieve_not_found():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(return_value=None)
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id")
+    assessment = assessment_service.retrieve("test-assessment-id", "123")  # temporaire
     assert assessment is None
 
 

@@ -23,6 +23,7 @@ def test_retrieve_best_practice_findings():
         created_at="",
         question_version="QV",
         findings=None,
+        owner_id="test-owner-id",
     )
     finding: FindingExtra = FindingExtra(
         id="FID",
@@ -83,6 +84,7 @@ def test_retrieve_best_practice_findings_not_found_findings():
         created_at="",
         question_version="QV",
         findings=None,
+        owner_id="test-owner-id",
     )
     finding = None
     assessment_service = FakeAssessmentService()

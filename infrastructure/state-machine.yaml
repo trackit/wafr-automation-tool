@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: State Machine
 
@@ -70,19 +70,19 @@ Resources:
       Timeout: 600
       MemorySize: 1024
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
                 - s3:GetObject
                 - s3:PutObject
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
             - Effect: Allow
               Action:
                 - s3:ListBucket
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
@@ -108,25 +108,25 @@ Resources:
       Timeout: 900
       MemorySize: 128
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
                 - s3:GetObject
                 - s3:PutObject
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
             - Effect: Allow
               Action:
                 - s3:ListBucket
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
             - Effect: Allow
               Action:
                 - bedrock:InvokeModelWithResponseStream
               Resource:
-                - 'arn:aws:bedrock:*:*:inference-profile/*'
-                - 'arn:aws:bedrock:*::foundation-model/*'
+                - "arn:aws:bedrock:*:*:inference-profile/*"
+                - "arn:aws:bedrock:*::foundation-model/*"
             - Effect: Allow
               Action:
                 - bedrock:RenderPrompt
@@ -152,7 +152,7 @@ Resources:
         Project: !Ref Project
         Name: CleanupFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -167,12 +167,12 @@ Resources:
               Action:
                 - s3:DeleteObject
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
             - Effect: Allow
               Action:
                 - s3:ListBucket
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
   PrepareCustodianFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -186,13 +186,13 @@ Resources:
       Timeout: 600
       MemorySize: 128
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
                 - s3:PutObject
               Resource:
-                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+                - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
   GenerateDataFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -206,7 +206,7 @@ Resources:
         Name: GenerateDataFunction
       MemorySize: 128
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -217,15 +217,15 @@ Resources:
               Resource:
                 - !Ref DynamoDBArn
   BedrockPrompt:
-    Type: 'AWS::Bedrock::Prompt'
+    Type: "AWS::Bedrock::Prompt"
     Properties:
       Name: !Sub ${ParentStackName}-prompt
-      Description: 'The prompt used to generate responses.'
-      DefaultVariant: 'prompt'
+      Description: "The prompt used to generate responses."
+      DefaultVariant: "prompt"
       Variants:
-        - Name: 'prompt'
-          TemplateType: 'TEXT'
-          ModelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
+        - Name: "prompt"
+          TemplateType: "TEXT"
+          ModelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
           TemplateConfiguration:
             Text:
               InputVariables:
@@ -265,7 +265,7 @@ Resources:
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
-      Name: !Sub '${ParentStackName}-StateMachine'
+      Name: !Sub "${ParentStackName}-StateMachine"
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -275,14 +275,14 @@ Resources:
             - Effect: Allow
               Action: states:StartExecution
               Resource:
-                - !Sub 'arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine'
+                - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine"
         - Statement:
             - Effect: Allow
               Action: ecs:RunTask
               Resource:
-                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*'
-                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*'
-                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*'
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*"
+                - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*"
         - Statement:
             - Effect: Allow
               Action:
@@ -306,7 +306,7 @@ Resources:
                 - events:DescribeRule
                 - events:DeleteRule
                 - events:RemoveTargets
-              Resource: '*'
+              Resource: "*"
         - Statement:
             - Effect: Allow
               Action:
@@ -318,7 +318,7 @@ Resources:
                 - !GetAtt PrepareCustodianFunction.Arn
                 - !GetAtt GenerateDataFunction.Arn
       Definition:
-        Comment: 'State Machine for WAFR Automation Tool'
+        Comment: "State Machine for WAFR Automation Tool"
         QueryLanguage: JSONata
         StartAt: CreateAssessment
         States:
@@ -329,40 +329,42 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: 'ASSESSMENT'
+                  S: "ASSESSMENT"
                 SK:
-                  S: '{% $states.input.assessment_id %}'
+                  S: "{% $states.input.assessment_id %}"
                 id:
-                  S: '{% $states.input.assessment_id %}'
+                  S: "{% $states.input.assessment_id %}"
                 name:
-                  S: '{% $states.input.name %}'
+                  S: "{% $states.input.name %}"
                 regions:
-                  L: '{% $states.input.regions %}'
+                  L: "{% $states.input.regions %}"
                 role_arn:
-                  S: '{% $states.input.role_arn %}'
+                  S: "{% $states.input.role_arn %}"
                 workflows:
-                  L: '{% $states.input.workflows %}'
+                  L: "{% $states.input.workflows %}"
                 step:
-                  S: 'SCANNING_STARTED'
+                  S: "SCANNING_STARTED"
                 raw_graph_datas:
                   M: {}
                 execution_arn:
-                  S: '{% $states.context.Execution.Id %}'
+                  S: "{% $states.context.Execution.Id %}"
                 created_at:
-                  S: '{% $states.input.created_at %}'
+                  S: "{% $states.input.created_at %}"
+                owner_id:
+                  S: "{% $states.input.owner_id %}"
             Assign:
-              assessment_id: '{% $states.input.assessment_id %}'
-              regions: '{% $states.input.regions %}'
-              role_arn: '{% $states.input.role_arn %}'
-              workflows: '{% $states.input.workflows %}'
+              assessment_id: "{% $states.input.assessment_id %}"
+              regions: "{% $states.input.regions %}"
+              role_arn: "{% $states.input.role_arn %}"
+              workflows: "{% $states.input.workflows %}"
             Next: ScanningTools
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $states.input.assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $states.input.assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
             Branches:
@@ -387,11 +389,11 @@ Resources:
                           - Name: prowler-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: "{% $assessment_id %}"
                               - Name: REGIONS
                                 Value: "{% $count($regions) > 0 ? '--filter-region ' & $join($regions, ' ') : '' %}"
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: PrepareCustodian
                 States:
@@ -418,13 +420,13 @@ Resources:
                           - Name: cloud-custodian-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: "{% $assessment_id %}"
                               - Name: REGIONS
                                 Value: "{% $join([$map($regions, function($r) { '--region ' & $r })], ' ') %}"
                               - Name: POLICIES_URI
-                                Value: '{% $states.input %}'
+                                Value: "{% $states.input %}"
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: "{% $role_arn %}"
                     End: true
               - StartAt: CloudSploitScan
                 States:
@@ -447,9 +449,9 @@ Resources:
                           - Name: cloudsploit-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: "{% $assessment_id %}"
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: "{% $role_arn %}"
                     End: true
             Next: PreparePromptsUpdateStep
             Catch:
@@ -457,8 +459,8 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           PreparePromptsUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
@@ -466,21 +468,21 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: 'ASSESSMENT'
+                  S: "ASSESSMENT"
                 SK:
-                  S: '{% $assessment_id %}'
+                  S: "{% $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
-                ':newStep':
-                  S: 'PREPARING_PROMPTS'
+                ":newStep":
+                  S: "PREPARING_PROMPTS"
             Next: Prepare Prompts
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           Prepare Prompts:
             Type: Parallel
             Branches:
@@ -490,10 +492,10 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
-                      scanning_tool: 'prowler'
-                      regions: '{% $regions %}'
-                      workflows: '{% $workflows %}'
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "prowler"
+                      regions: "{% $regions %}"
+                      workflows: "{% $workflows %}"
                     End: true
               - StartAt: Prepare Cloud Custodian Prompts
                 States:
@@ -501,10 +503,10 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
-                      scanning_tool: 'cloud-custodian'
-                      regions: '{% $regions %}'
-                      workflows: '{% $workflows %}'
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "cloud-custodian"
+                      regions: "{% $regions %}"
+                      workflows: "{% $workflows %}"
                     End: true
               - StartAt: Prepare CloudSploit Prompts
                 States:
@@ -512,20 +514,20 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
-                      scanning_tool: 'cloudsploit'
-                      regions: '{% $regions %}'
-                      workflows: '{% $workflows %}'
+                      assessment_id: "{% $assessment_id %}"
+                      scanning_tool: "cloudsploit"
+                      regions: "{% $regions %}"
+                      workflows: "{% $workflows %}"
                     End: true
             Next: InvokeLLMUpdateStep
-            Output: '{% [$spread($states.result)] %}'
+            Output: "{% [$spread($states.result)] %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           InvokeLLMUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
@@ -533,22 +535,22 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: 'ASSESSMENT'
+                  S: "ASSESSMENT"
                 SK:
-                  S: '{% $assessment_id %}'
+                  S: "{% $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
-                ':newStep':
-                  S: 'INVOKING_LLM'
+                ":newStep":
+                  S: "INVOKING_LLM"
             Next: PromptMap
-            Output: '{% $states.input %}'
+            Output: "{% $states.input %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
             MaxConcurrency: 5
@@ -561,8 +563,8 @@ Resources:
                   Type: Task
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
-                    assessment_id: '{% $assessment_id %}'
-                    prompt_uri: '{% $states.input %}'
+                    assessment_id: "{% $assessment_id %}"
+                    prompt_uri: "{% $states.input %}"
                     prompt_arn: !GetAtt BedrockPrompt.Arn
                   End: true
                   Retry:
@@ -577,21 +579,21 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           GenerateData:
             Type: Task
             Resource: !GetAtt GenerateDataFunction.Arn
             Arguments:
-              assessment_id: '{% $assessment_id %}'
+              assessment_id: "{% $assessment_id %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
-            Next: 'FinishUpdateStep'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
+            Next: "FinishUpdateStep"
           FinishUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
@@ -599,33 +601,33 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: 'ASSESSMENT'
+                  S: "ASSESSMENT"
                 SK:
-                  S: '{% $assessment_id %}'
+                  S: "{% $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
-                ':newStep':
-                  S: 'FINISHED'
+                ":newStep":
+                  S: "FINISHED"
             Next: Cleanup
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
-              assessment_id: '{% $assessment_id %}'
+              assessment_id: "{% $assessment_id %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
-                  error: '{% $states.errorOutput %}'
+                  assessment_id: "{% $assessment_id %}"
+                  error: "{% $states.errorOutput %}"
             End: true
           CleanupOnError:
             Type: Task

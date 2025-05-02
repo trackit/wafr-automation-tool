@@ -52,6 +52,7 @@ def test_delete_assessment():
                 }
             }
         ),
+        owner_id="test-owner-id",
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
