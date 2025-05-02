@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 from pydantic import BaseModel
 from utils.api import APIResponseBody
 
@@ -6,10 +8,10 @@ from entities.finding import FindingExtra
 BestPracticeID = str
 
 
-class BestPractice(BaseModel):
+class BestPractice(TypedDict):
     id: BestPracticeID
     label: str
-    description: str = ""
+    description: str
     risk: str
     status: bool
     results: list[str]

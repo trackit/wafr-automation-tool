@@ -2,7 +2,6 @@ from http.client import OK
 from unittest.mock import MagicMock
 
 from entities.assessment import Assessment, Steps
-from entities.best_practice import BestPractice
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import ExportWellArchitectedToolInput
@@ -32,14 +31,15 @@ def test_export_well_architected_tool():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },

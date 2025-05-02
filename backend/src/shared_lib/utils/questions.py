@@ -27,8 +27,10 @@ def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
             for best_practice_index, (_, best_practice_data) in enumerate(
                 question_data.items(),
             ):
+                best_practice_dump = {**best_practice_data}
+                del best_practice_dump["id"]
                 best_practices[str(best_practice_index)] = BestPractice(
-                    **best_practice_data.model_dump(exclude={"id"}),
+                    **best_practice_dump,
                     id=str(best_practice_index),
                 )
             question = FormattedQuestion(

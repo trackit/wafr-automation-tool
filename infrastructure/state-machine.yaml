@@ -345,8 +345,6 @@ Resources:
                   S: "SCANNING_STARTED"
                 raw_graph_datas:
                   M: {}
-                graph_datas:
-                  M: {}
                 execution_arn:
                   S: "{% $states.context.Execution.Id %}"
                 created_at:

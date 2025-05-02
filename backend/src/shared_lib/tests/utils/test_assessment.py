@@ -1,6 +1,5 @@
 from entities.api import APIAssessment
 from entities.assessment import Assessment, Steps
-from entities.best_practice import BestPractice
 from utils.assessment import convert_assessment_to_api_assessment
 
 
@@ -26,14 +25,15 @@ def test_convert_assessment_to_api_assessment():
                         "none": False,
                         "disabled": False,
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },
@@ -63,14 +63,15 @@ def test_convert_assessment_to_api_assessment():
                         "none": False,
                         "disabled": False,
                         "best_practices": [
-                            BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         ],
                     }
                 ],

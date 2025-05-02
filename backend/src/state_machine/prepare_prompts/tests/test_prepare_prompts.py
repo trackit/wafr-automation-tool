@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
-from entities.best_practice import BestPractice
 from entities.database import UpdateAttrsInput
 from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
@@ -37,14 +36,15 @@ def test_prepare_prompts():
                     "question-1": {
                         "label": "Question 1",
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },
@@ -72,14 +72,15 @@ def test_prepare_prompts():
                             "question-1": {
                                 "label": "Question 1",
                                 "best_practices": {
-                                    "best-practice-1": BestPractice(
-                                        id="best-practice-1",
-                                        label="Best Practice 1",
-                                        risk="Low",
-                                        status=False,
-                                        results=["1", "2", "3"],
-                                        hidden_results=[],
-                                    )
+                                    "best-practice-1": {
+                                        "id": "best-practice-1",
+                                        "label": "Best Practice 1",
+                                        "description": "Best Practice 1 Description",
+                                        "risk": "High",
+                                        "status": False,
+                                        "results": ["1", "2", "3"],
+                                        "hidden_results": [],
+                                    }
                                 },
                             }
                         },

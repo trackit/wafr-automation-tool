@@ -110,7 +110,7 @@ class StoreResults(Task[StoreResultsInput, None]):
                         pillar=pillar_data.get("id"),
                         question=question_data.get("id"),
                         best_practice={
-                            "id": best_practice_data.id,
+                            "id": best_practice_data.get("id"),
                         },
                     )
                     best_practice_id += 1

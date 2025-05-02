@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
-from entities.best_practice import BestPractice
 from entities.finding import FindingExtra
 from exceptions.ai import InvalidPromptResponseError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
@@ -38,14 +37,15 @@ def test_store_results():
                         "id": "question-1",
                         "label": "How do you determine what your priorities are?",
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },
@@ -102,14 +102,15 @@ def test_store_results_with_no_finding():
                         "id": "question-1",
                         "label": "How do you determine what your priorities are?",
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },
@@ -184,14 +185,15 @@ def test_store_results_with_no_finding_data():
                         "id": "question-1",
                         "label": "How do you determine what your priorities are?",
                         "best_practices": {
-                            "best-practice-1": BestPractice(
-                                id="best-practice-1",
-                                label="Best Practice 1",
-                                risk="Low",
-                                status=False,
-                                results=["1", "2", "3"],
-                                hidden_results=[],
-                            )
+                            "best-practice-1": {
+                                "id": "best-practice-1",
+                                "label": "Best Practice 1",
+                                "description": "Best Practice 1 Description",
+                                "risk": "High",
+                                "status": False,
+                                "results": ["1", "2", "3"],
+                                "hidden_results": [],
+                            }
                         },
                     }
                 },

@@ -74,14 +74,14 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 (
                     best_practice
                     for best_practice in formatted_best_practices
-                    if best_practice.label.lower() == best_practice_title.lower()
+                    if best_practice.get("label").lower() == best_practice_title.lower()
                 ),
                 None,
             )
             if best_practice_data is None:
                 logger.error("Best practice not found: %s", best_practice_title)
                 continue
-            if best_practice_data.status:
+            if best_practice_data.get("status"):
                 best_practices_selected.append(best_practice_id)
         return best_practices_selected
 

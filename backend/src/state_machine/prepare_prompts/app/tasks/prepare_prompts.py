@@ -129,8 +129,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                             "pillar": pillar_data.get("label"),
                             "question": question_data.get("label"),
                             "best_practice": {
-                                "label": best_practice_data.label,
-                                "description": best_practice_data.description,
+                                "label": best_practice_data.get("label"),
+                                "description": best_practice_data.get("description"),
                             },
                         }
                     )
