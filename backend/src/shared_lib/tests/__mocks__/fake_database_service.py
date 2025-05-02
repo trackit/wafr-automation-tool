@@ -34,6 +34,10 @@ class FakeDatabaseService(IDatabaseService):
         raise NotImplementedError
 
     @override
+    def update_list_attrs(self, table_name: str, event: UpdateAttrsInput) -> None:
+        raise NotImplementedError
+
+    @override
     def put(self, table_name: str, item: dict[str, Any]) -> None:
         raise NotImplementedError
 

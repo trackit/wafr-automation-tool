@@ -6,7 +6,7 @@ from typing import Any, override
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
 from entities.api import APIPagination, APIPaginationOutput
-from entities.assessment import Assessment, AssessmentDto, AssessmentID
+from entities.assessment import Assessment, AssessmentData, AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingDto, FindingExtra, FindingID
@@ -344,6 +344,8 @@ class AssessmentService(IAssessmentService):
         formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
         if "workflow" in formatted_item:
             formatted_item["workflows"] = [formatted_item.pop("workflow")]
+        if "graph_datas" not in formatted_item:
+            formatted_item["graph_datas"] = AssessmentData(regions={}, resource_types={}, severities={}, findings=0)
         return Assessment.model_validate(
             formatted_item,
         )

@@ -1,5 +1,6 @@
 import json
-from typing import Any, override
+from collections import Counter
+from typing import override
 
 from common.config import (
     ASSESSMENT_PK,
@@ -13,9 +14,10 @@ from common.config import (
 )
 from common.task import Task
 from entities.ai import Chunk, PromptS3Uri, PromptVariables
-from entities.assessment import AssessmentID
+from entities.assessment import AssessmentData, AssessmentID
 from entities.database import UpdateAttrsInput
 from entities.finding import Finding, FindingExtra
+from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
@@ -39,16 +41,54 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.storage_service = storage_service
         self.formatted_question_set = formatted_question_set
 
-    def populate_dynamodb(self, assessment_id: AssessmentID) -> None:
-        attrs: dict[str, Any] = {
-            "findings": self.formatted_question_set.data,
-            "question_version": self.formatted_question_set.version,
-        }
-        event = UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
-            attrs=attrs,
+    def populate_dynamodb(
+        self, findings: list[FindingExtra], assessment_id: AssessmentID, scanning_tool: ScanningTool
+    ) -> None:
+        assessment_data = AssessmentData(
+            regions=dict(
+                Counter(
+                    [
+                        resource.region
+                        for finding in findings
+                        for resource in (finding.resources or [])
+                        if resource.region is not None
+                    ]
+                )
+            ),
+            resource_types=dict(
+                Counter(
+                    [
+                        resource.type
+                        for finding in findings
+                        for resource in (finding.resources or [])
+                        if resource.type is not None
+                    ]
+                )
+            ),
+            severities=dict(Counter([finding.severity for finding in findings if finding.severity is not None])),
+            findings=sum(len(finding.resources or []) for finding in findings),
         )
-        self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
+        self.database_service.update_attrs(
+            table_name=DDB_TABLE,
+            event=UpdateAttrsInput(
+                key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+                attrs={
+                    "findings": self.formatted_question_set.data,
+                    "question_version": self.formatted_question_set.version,
+                },
+            ),
+        )
+        self.database_service.update(
+            table_name=DDB_TABLE,
+            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            UpdateExpression="SET raw_graph_datas.#scanning_tool = :data",
+            ExpressionAttributeNames={
+                "#scanning_tool": scanning_tool,
+            },
+            ExpressionAttributeValues={
+                ":data": assessment_data,
+            },
+        )
 
     def store_chunk(
         self,
@@ -94,51 +134,6 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                     best_practice_id += 1
         return json.dumps(best_practices, separators=(",", ":")).replace(":{}", "")
 
-    def merge_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
-        grouped_findings = {}
-        index = 1
-        for finding in findings:
-            key = (finding.status_detail, finding.risk_details)
-            if key not in grouped_findings:
-                finding.id = str(index)
-                index += 1
-                grouped_findings[key] = finding
-            else:
-                existing = grouped_findings[key]
-                if existing.resources is None:
-                    existing.resources = finding.resources
-                elif finding.resources and finding.resources not in existing.resources:
-                    existing.resources.extend(finding.resources)
-        return list(grouped_findings.values())
-
-    def is_finding_in_workflow(self, finding: FindingExtra, workflows: list[str]) -> bool:
-        if not workflows:
-            return True
-        filtered_resources = [
-            resource
-            for resource in finding.resources or []
-            if (resource.name and any(w in resource.name.lower() for w in workflows))
-            or (resource.uid and any(w in resource.uid.lower() for w in workflows))
-        ]
-        if filtered_resources:
-            finding.resources = filtered_resources
-            return True
-        if finding.risk_details and any(w in finding.risk_details.lower() for w in workflows):
-            return True
-        return bool(finding.status_detail and any(w in finding.status_detail.lower() for w in workflows))
-
-    def is_self_made_finding(self, finding: FindingExtra) -> bool:
-        return bool(
-            finding.resources and finding.resources[0].uid and "wafr-automation-tool" in finding.resources[0].uid
-        )
-
-    def filter_findings(self, findings: list[FindingExtra], workflows: list[str]) -> list[FindingExtra]:
-        return [
-            finding
-            for finding in findings
-            if self.is_finding_in_workflow(finding, workflows) and not self.is_self_made_finding(finding)
-        ]
-
     def store_prompt_variables_list(
         self,
         scanning_tool_service: IScanningToolService,
@@ -170,15 +165,16 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             prompt_variables_list.append(prompt_variables)
         return self.store_prompt_variables_list(scanning_tool_service, assessment_id, prompt_variables_list)
 
+    def create_prompts(self, scanning_tool_service: IScanningToolService, event: PreparePromptsInput) -> list[str]:
+        findings = scanning_tool_service.retrieve_filtered_findings(event.assessment_id, event.regions, event.workflows)
+        self.populate_dynamodb(findings, event.assessment_id, event.scanning_tool)
+        chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
+        return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)
+
     @override
     def execute(self, event: PreparePromptsInput) -> list[str]:
         scanning_tool_service_type = SCANNING_TOOL_SERVICES.get(event.scanning_tool)
         if scanning_tool_service_type is None:
             raise InvalidScanningToolError(event.scanning_tool)
-        self.populate_dynamodb(event.assessment_id)
         scanning_tool_service: IScanningToolService = scanning_tool_service_type(self.storage_service)
-        findings = scanning_tool_service.retrieve_findings(event.assessment_id, event.regions)
-        findings = self.filter_findings(findings, event.workflows)
-        findings = self.merge_findings(findings)
-        chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
-        return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)
+        return self.create_prompts(scanning_tool_service, event)

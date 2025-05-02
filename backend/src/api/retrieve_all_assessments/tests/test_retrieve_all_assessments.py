@@ -2,7 +2,7 @@ from http.client import OK
 from unittest.mock import MagicMock
 
 from entities.api import APIPaginationOutput
-from entities.assessment import Assessment, Steps
+from entities.assessment import Assessment, AssessmentData, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
 from api.event import RetrieveAllAssessmentsInput, RetrieveAllAssessmentsResponseBody
@@ -26,6 +26,7 @@ def test_retrieve_all_assessments():
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
     assessments_dicts[0]["error"] = None
+    assessments_dicts[0]["graph_datas"] = None
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_all = MagicMock(
         return_value=APIPaginationOutput[Assessment](items=assessments, next_token=None)
@@ -65,6 +66,12 @@ def test_retrieve_all_assessments_with_search():
             created_at="",
             question_version="QV",
             findings=None,
+            graph_datas=AssessmentData(
+                regions={},
+                resource_types={},
+                severities={},
+                findings=0,
+            ),
         )
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]

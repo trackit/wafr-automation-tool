@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any
+from typing import Any, TypedDict
 
 from pydantic import BaseModel
 
@@ -16,6 +16,13 @@ class Steps(StrEnum):
     ERRORED = "ERRORED"
 
 
+class AssessmentData(TypedDict):
+    regions: dict[str, int]
+    resource_types: dict[str, int]
+    severities: dict[str, int]
+    findings: int
+
+
 class Assessment(BaseModel):
     id: AssessmentID
     name: str
@@ -25,6 +32,8 @@ class Assessment(BaseModel):
     step: Steps
     execution_arn: str | None = None
     created_at: str
+    raw_graph_datas: dict[str, AssessmentData] | None = None
+    graph_datas: AssessmentData | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, FormattedPillar] | None = None
@@ -35,6 +44,8 @@ class AssessmentDto(BaseModel):
     role_arn: str | None = None
     created_at: str | None = None
     step: Steps | None = None
+    raw_graph_datas: dict[str, AssessmentData] | None = None
+    graph_datas: AssessmentData | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, FormattedPillar] | None = None
