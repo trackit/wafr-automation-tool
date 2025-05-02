@@ -47,6 +47,7 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
 
 class RescanAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    owner_id: str
 
 
 class RetrieveBestPracticeFindingsInput(BaseModel):
