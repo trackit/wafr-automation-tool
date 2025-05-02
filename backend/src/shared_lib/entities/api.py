@@ -10,6 +10,8 @@ from entities.assessment import AssessmentData, AssessmentID, Steps
 from entities.best_practice import BestPractice
 from entities.question import PillarID, QuestionID
 
+WorkloadId = str
+
 
 class APIFormattedQuestion(TypedDict):
     id: QuestionID
