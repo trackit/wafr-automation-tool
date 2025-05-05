@@ -6,7 +6,6 @@ from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.retrieve_assessment import RetrieveAssessment
-from utils.api import UnauthorizedError, get_bearer_token
 
 from api.event import RetrieveAssessmentInput
 
@@ -18,16 +17,11 @@ task = RetrieveAssessment(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        auth_header = get_bearer_token(event)
+        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
         response = task.execute(
-            RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], owner_id=auth_header),
+            RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], owner_id=user_id),
         )
         return response.build()
-    except UnauthorizedError as e:
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"error": str(e)}),
-        }
     except ValidationError as e:
         return {
             "statusCode": 400,

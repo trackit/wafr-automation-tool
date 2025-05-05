@@ -14,9 +14,12 @@ task = RetrieveFinding(assessment_service)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
+    user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+
     response = task.execute(
         RetrieveFindingInput(
             assessment_id=event["pathParameters"]["assessmentId"],
+            owner_id=user_id,
             finding_id=event["pathParameters"]["findingId"],
         )
     )

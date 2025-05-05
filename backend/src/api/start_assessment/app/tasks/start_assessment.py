@@ -34,12 +34,12 @@ class StartAssessment(
     ) -> bool:
         input_json = StateMachineInput(
             assessment_id=assessment_id,
+            owner_id=event.owner_id,
             name=event.name,
             regions=event.regions,
             role_arn=event.role_arn if event.role_arn else DEFAULT_ASSESSMENT_ROLE,
             workflows=[w.lower() for w in event.workflows],
             created_at=datetime.datetime.fromtimestamp(int(assessment_id) / 1000, tz=datetime.UTC).isoformat(),
-            owner_id=event.owner_id,
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
