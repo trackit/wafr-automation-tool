@@ -14,6 +14,7 @@ def test_retrieve_all_assessments():
     assessments = [
         Assessment(
             id="AID",
+            owner_id="test-owner-id",
             name="AN",
             regions=["test-region"],
             role_arn="AR",
@@ -22,7 +23,6 @@ def test_retrieve_all_assessments():
             created_at="",
             question_version="QV",
             findings=None,
-            owner_id="test-owner-id",
         )
     ]
     assessments_dicts = [assessment.model_dump(exclude_none=True) for assessment in assessments]
@@ -34,7 +34,7 @@ def test_retrieve_all_assessments():
     )
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, next_token=None, api_id="")
+    task_input = RetrieveAllAssessmentsInput(owner_id="test-owner-id", limit=10, search=None, next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
@@ -47,7 +47,7 @@ def test_retrieve_all_assessments_not_found():
     assessment_service.retrieve_all = MagicMock(return_value=APIPaginationOutput[Assessment](items=[], next_token=None))
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(limit=10, search=None, next_token=None, api_id="")
+    task_input = RetrieveAllAssessmentsInput(owner_id="test-owner-id", limit=10, search=None, next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
@@ -84,7 +84,7 @@ def test_retrieve_all_assessments_with_search():
     )
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(limit=10, search="AN", next_token=None, api_id="")
+    task_input = RetrieveAllAssessmentsInput(owner_id="test-owner-id", limit=10, search="AN", next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
