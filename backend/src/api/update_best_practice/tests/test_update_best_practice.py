@@ -13,6 +13,7 @@ from ..app.tasks.update_best_practice import UpdateBestPractice
 def test_update_best_practice():
     assessment = Assessment(
         id="AID",
+        owner_id="test-owner-id",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -21,7 +22,6 @@ def test_update_best_practice():
         created_at="",
         question_version="QV",
         findings=None,
-        owner_id="test-owner-id",
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
@@ -30,6 +30,7 @@ def test_update_best_practice():
 
     task_input = UpdateBestPracticeInput(
         assessment_id="AID",
+        owner_id="test-owner-id",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BP",
@@ -38,7 +39,7 @@ def test_update_best_practice():
     task = UpdateBestPractice(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
     assessment_service.update_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP", best_practice_dto)
     assert response.status_code == OK
     assert not response.body
@@ -53,6 +54,7 @@ def test_update_best_practice_not_found():
 
     task_input = UpdateBestPracticeInput(
         assessment_id="AID",
+        owner_id="test-owner-id",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BP",
@@ -61,6 +63,6 @@ def test_update_best_practice_not_found():
     task = UpdateBestPractice(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
     assert response.status_code == NOT_FOUND
     assert not response.body

@@ -8,6 +8,7 @@ from utils.questions import QuestionSetData
 def test_convert_assessment_to_api_assessment():
     assessment = Assessment(
         id="test-assessment-id",
+        owner_id="test-owner-id",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -51,6 +52,7 @@ def test_convert_assessment_to_api_assessment():
 
     assert api_assessment == APIAssessment(
         id="test-assessment-id",
+        owner_id="test-owner-id",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -91,6 +93,7 @@ def test_convert_assessment_to_api_assessment():
 def test_convert_assessment_to_api_assessment_no_findings():
     assessment = Assessment(
         id="test-assessment-id",
+        owner_id="test-owner-id",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -104,6 +107,7 @@ def test_convert_assessment_to_api_assessment_no_findings():
 
     assert api_assessment == APIAssessment(
         id="test-assessment-id",
+        owner_id="test-owner-id",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",

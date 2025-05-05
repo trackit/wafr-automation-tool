@@ -42,6 +42,7 @@ def test_cleanup():
 def test_cleanup_on_error():
     assessment = Assessment(
         id="test-assessment-id",
+        owner_id="test-owner-id",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",

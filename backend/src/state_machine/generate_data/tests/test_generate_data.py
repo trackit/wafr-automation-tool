@@ -11,6 +11,7 @@ def test_generate_data():
 
     assessment: Assessment = Assessment(
         id="AID",
+        owner_id="test-owner-id",
         name="Assessment",
         regions=["region1", "region2"],
         role_arn="role_arn",
