@@ -11,8 +11,3 @@ class FindingNotFoundError(Exception):
 class InvalidPromptUriError(Exception):
     def __init__(self, prompt_uri: PromptS3Uri) -> None:
         super().__init__(f"Invalid prompt uri: {prompt_uri}")
-
-
-class InvalidBestPracticeDataError(Exception):
-    def __init__(self, data: list) -> None:
-        super().__init__(f"Invalid best practice data: {data}")

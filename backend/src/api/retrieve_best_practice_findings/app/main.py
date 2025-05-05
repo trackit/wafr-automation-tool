@@ -11,7 +11,6 @@ from tasks.retrieve_best_practice_findings import (
 )
 
 from api.event import RetrieveBestPracticeFindingsInput
-from utils.api import UnauthorizedError, get_bearer_token
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
@@ -19,26 +18,20 @@ assessment_service = AssessmentService(database_service)
 task = RetrieveBestPracticeFindings(assessment_service)
 
 
-def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
+def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        auth_header = get_bearer_token(event)
+        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
 
         response = task.execute(
             RetrieveBestPracticeFindingsInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
+                owner_id=user_id,
                 pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
                 question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
                 best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),
-                owner_id=auth_header
             )
         )
         return response.build()
-
-    except UnauthorizedError as e:
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"error": str(e)}),
-        }
     except ValidationError as e:
         return {
             "statusCode": 400,

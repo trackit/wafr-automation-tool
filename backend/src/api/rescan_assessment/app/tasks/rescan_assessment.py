@@ -23,12 +23,12 @@ class RescanAssessment(
     def start_step_functions(self, assessment: Assessment) -> bool:
         input_json = StateMachineInput(
             assessment_id=assessment.id,
+            owner_id=assessment.owner_id,
             name=assessment.name,
             regions=assessment.regions,
             role_arn=assessment.role_arn,
             workflows=assessment.workflows,
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
-            owner_id=assessment.owner_id,
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,

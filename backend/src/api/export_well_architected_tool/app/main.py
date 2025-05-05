@@ -18,11 +18,14 @@ task = ExportWellArchitectedTool(assessment_service, well_architect_client)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
+        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+
         body = json.loads(event["body"])
         response = task.execute(
             ExportWellArchitectedToolInput(
                 **body,
                 assessment_id=event["pathParameters"]["assessmentId"],
+                owner_id=user_id,
             ),
         )
         return response.build()

@@ -50,14 +50,14 @@ class Cleanup(Task[CleanupInput, None]):
             step=Steps.ERRORED,
             error=error,
         )
-        self.assessment_service.update_assessment(event.assessment_id, assessment_dto, "123")  # temporaire
+        self.assessment_service.update_assessment(event.assessment_id, assessment_dto)
 
     @override
     def execute(self, event: CleanupInput) -> None:
         if not DEBUG:
             self.clean_prowler_scan(event)
             self.clean_assessment_storage(event)
-        assessment = self.assessment_service.retrieve(event.assessment_id, "123")  # temporaire
+        assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return
         if event.error:

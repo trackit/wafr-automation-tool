@@ -15,13 +15,12 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateAssessmentInput) -> APIResponse[None]:
-        assessment = self.assessment_service.update_assessment(
+        success = self.assessment_service.update_assessment(
             assessment_id=event.assessment_id,
-            assessment_dto=event.assessment_dto,
             owner_id=event.owner_id,
+            assessment_dto=event.assessment_dto,
         )
-
-        if assessment == 84:
+        if not success:
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
             status_code=200,

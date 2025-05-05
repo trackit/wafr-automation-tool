@@ -26,6 +26,7 @@ class AssessmentData(TypedDict):
 
 class Assessment(BaseModel):
     id: AssessmentID
+    owner_id: str
     name: str
     regions: list[str] = []
     role_arn: str

@@ -21,7 +21,7 @@ from services.database import IDatabaseService
 
 class IAssessmentService:
     @abstractmethod
-    def retrieve(self, assessment_id: AssessmentID, owner_id: str) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, owner_id: str | None = None) -> Assessment | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -42,8 +42,8 @@ class IAssessmentService:
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
+        owner_id: str,
         finding_id: FindingID,
-        owner_id: str
     ) -> FindingExtra | None:
         raise NotImplementedError
 
@@ -57,8 +57,8 @@ class IAssessmentService:
 
     @abstractmethod
     def update_assessment(
-        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str
-    ) -> int | None:
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str | None = None
+    ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -118,7 +118,7 @@ class AssessmentService(IAssessmentService):
         self.database_service = database_service
 
     @override
-    def retrieve(self, assessment_id: AssessmentID, owner_id: str) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, owner_id: str | None = None) -> Assessment | None:
         assessment_data = self.database_service.get(
             table_name=DDB_TABLE,
             Key={
@@ -129,7 +129,7 @@ class AssessmentService(IAssessmentService):
         if not assessment_data:
             return None
 
-        if assessment_data.get("owner_id") != owner_id:
+        if owner_id is not None and assessment_data.get("owner_id") != owner_id:
             return None
 
         return self._create_assessment(assessment_data)
@@ -191,8 +191,8 @@ class AssessmentService(IAssessmentService):
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
+        owner_id: str,
         finding_id: FindingID,
-        owner_id: str
     ) -> FindingExtra | None:
         item = self.database_service.get(
             table_name=DDB_TABLE,
@@ -200,11 +200,9 @@ class AssessmentService(IAssessmentService):
         )
         if not item:
             return None
-        
         if item.get("owner_id") != owner_id:
             return None
         return self._create_finding(item)
-    
 
     @override
     def retrieve_findings(
@@ -225,13 +223,15 @@ class AssessmentService(IAssessmentService):
         return findings
 
     @override
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str) -> int:
+    def update_assessment(
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str | None = None
+    ) -> bool:
         existing = self.retrieve(
             assessment_id=assessment_id,
             owner_id=owner_id,
         )
         if not existing:
-            return 84
+            return False
 
         attrs = assessment_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
@@ -239,7 +239,7 @@ class AssessmentService(IAssessmentService):
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
-        return 0
+        return True
 
     @override
     def update_pillar(

@@ -33,5 +33,5 @@ class RetrieveBestPracticeFindings(
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
             status_code=OK,
-            body=findings,
+            body=RetrieveBestPracticeFindingsResponseBody(**findings.model_dump(exclude_none=True)),
         )
