@@ -99,7 +99,6 @@ Resources:
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
   DynamoDB:
     Type: AWS::DynamoDB::Table
-    DeletionPolicy: Retain
     Properties:
       TableName: !Ref AWS::StackName
       Tags:
