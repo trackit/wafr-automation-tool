@@ -32,7 +32,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: List of all assessments
           content:
             application/json:
@@ -42,13 +42,13 @@ paths:
                   assessments:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Assessment'
+                      $ref: "#/components/schemas/Assessment"
                   next_token:
                     type: string
                     description: |
                       Token for pagination. If there are more assessments than can be returned in a single response,
                       this token will allow you to retrieve the next set of results.
-        '500':
+        "500":
           description: Internal server error.
     post:
       tags:
@@ -89,7 +89,7 @@ paths:
                     The workflows to associate with the assessment.
                     If not provided, no workflows will be associated.
       responses:
-        '201':
+        "201":
           description: The assessment has been successfully created
           content:
             application/json:
@@ -99,9 +99,9 @@ paths:
                   assessment_id:
                     type: integer
                     description: The unique ID of the newly created assessment
-        '400':
+        "400":
           description: Bad Request. Missing or invalid parameters were provided.
-        '500':
+        "500":
           description: Internal server error.
 
   /assessments/{assessmentId}:
@@ -120,15 +120,15 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: Detailed information about the specified assessment
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssessmentContent'
-        '404':
+                $ref: "#/components/schemas/AssessmentContent"
+        "404":
           description: The specified assessment could not be found
-        '500':
+        "500":
           description: Internal server error.
     put:
       tags:
@@ -147,13 +147,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssessmentDto'
+              $ref: "#/components/schemas/AssessmentDto"
       responses:
-        '200':
+        "200":
           description: The assessment has been successfully updated
-        '400':
+        "400":
           description: Invalid request body
-        '500':
+        "500":
           description: Internal server error.
     post:
       tags:
@@ -169,11 +169,11 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: The assessment has been successfully rescanned
-        '404':
+        "404":
           description: The specified assessment could not be found
-        '500':
+        "500":
           description: Internal server error.
     delete:
       tags:
@@ -190,11 +190,11 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: The assessment has been successfully deleted
-        '404':
+        "404":
           description: The specified assessment could not be found
-        '500':
+        "500":
           description: Internal server error.
 
   /assessments/{assessmentId}/exports/well-architected-tool:
@@ -251,15 +251,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PillarDto'
+              $ref: "#/components/schemas/PillarDto"
       responses:
-        '200':
+        "200":
           description: The pillar has been successfully updated
-        '400':
+        "400":
           description: Invalid request body
-        '404':
+        "404":
           description: The specified assessment, or pillar could not be found
-        '500':
+        "500":
           description: Internal server error.
 
   /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}:
@@ -292,15 +292,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuestionDto'
+              $ref: "#/components/schemas/QuestionDto"
       responses:
-        '200':
+        "200":
           description: The question has been successfully updated
-        '400':
+        "400":
           description: Invalid request body
-        '404':
+        "404":
           description: The specified assessment, pillar, or question could not be found
-        '500':
+        "500":
           description: Internal server error.
 
   /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}:
@@ -336,13 +336,13 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: A list of findings related to the specified best practice
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BestPracticeExtra'
-        '404':
+                $ref: "#/components/schemas/BestPracticeExtra"
+        "404":
           description: The specified best practice could not be found
     put:
       tags:
@@ -379,16 +379,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BestPracticeDto'
+              $ref: "#/components/schemas/BestPracticeDto"
       responses:
-        '200':
+        "200":
           description: The best practice has been successfully updated
-        '400':
+        "400":
           description: Invalid request body
-        '404':
+        "404":
           description: The specified assessment, pillar, question, or best practice could
             not be found
-        '500':
+        "500":
           description: Internal server error.
 
   ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
@@ -433,15 +433,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FindingDto'
+              $ref: "#/components/schemas/FindingDto"
       responses:
-        '200':
+        "200":
           description: The finding has been successfully updated
-        '400':
+        "400":
           description: Invalid request body
-        '404':
+        "404":
           description: The specified assessment could not be found
-        '500':
+        "500":
           description: Internal server error.
 
   /assessments/{assessmentId}/findings/{findingId}:
@@ -466,15 +466,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Detailed information about the specified finding
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Finding'
-        '404':
+                $ref: "#/components/schemas/Finding"
+        "404":
           description: The specified assessment or finding could not be found
-        '500':
+        "500":
           description: Internal server error.
 
 components:
@@ -533,20 +533,20 @@ components:
             - FINISHED
             - ERRORED
         error:
-          $ref: '#/components/schemas/AssessmentError'
+          $ref: "#/components/schemas/AssessmentError"
         question_version:
           type: string
           description: The version of questions that were used for the assessment
     AssessmentContent:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Assessment'
+        - $ref: "#/components/schemas/Assessment"
         - properties:
             findings:
               type: array
               description: A list of findings associated with the assessment
               items:
-                $ref: '#/components/schemas/Pillar'
+                $ref: "#/components/schemas/Pillar"
     AssessmentError:
       type: object
       nullable: true
@@ -581,7 +581,7 @@ components:
           description: The status of the finding (e.g., MANUAL, FAIL)
         status_detail:
           type: string
-          description: Explanation or additional details about the finding's status
+          description: Explanation or additional details about the finding"s status
         hidden:
           type: boolean
           description: Whether the finding is hidden or not
@@ -643,7 +643,7 @@ components:
         questions:
           type: array
           items:
-            $ref: '#/components/schemas/Question'
+            $ref: "#/components/schemas/Question"
     PillarDto:
       type: object
       properties:
@@ -665,7 +665,7 @@ components:
         best_practices:
           type: array
           items:
-            $ref: '#/components/schemas/BestPractice'
+            $ref: "#/components/schemas/BestPractice"
     QuestionDto:
       type: object
       properties:
@@ -706,16 +706,15 @@ components:
       type: object
       description: Enhanced best practice information, including associated findings
       allOf:
-        - $ref: '#/components/schemas/BestPractice'
+        - $ref: "#/components/schemas/BestPractice"
         - properties:
             results:
               type: array
               items:
-                $ref: '#/components/schemas/Finding'
+                $ref: "#/components/schemas/Finding"
     BestPracticeDto:
       type: object
       properties:
         status:
           type: boolean
           nullable: true
-Transform: AWS::Serverless-2016-10-31
