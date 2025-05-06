@@ -335,7 +335,7 @@ class AssessmentService(IAssessmentService):
         else:
             best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings.root)
-        self.update_assessment(assessment.id, assessment_dto, "122")  # temporaire
+        self.update_assessment(assessment.id, assessment_dto)
         return True
 
     @override
