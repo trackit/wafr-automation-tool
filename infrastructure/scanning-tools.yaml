@@ -208,6 +208,8 @@ Resources:
               --role
               "$ROLE_ARN"
               $REGIONS
+              --status
+              FAIL MANUAL
   CloudCustodianTaskRole:
     Type: AWS::IAM::Role
     Properties:
