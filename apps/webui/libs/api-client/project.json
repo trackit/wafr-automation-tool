@@ -1,6 +1,6 @@
 {
   "name": "webui/api-client",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/webui/api-client/src",
   "projectType": "library",
   "tags": ["type:infra", "scope:webui"],
