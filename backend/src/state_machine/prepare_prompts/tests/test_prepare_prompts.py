@@ -124,6 +124,7 @@ def test_prepare_prompts_self_made_finding():
 
     fake_database_service = FakeDatabaseService()
     fake_database_service.update_attrs = MagicMock()
+    fake_database_service.update = MagicMock()
 
     fake_storage_service = FakeStorageService()
     fake_storage_service.get = MagicMock(
@@ -167,4 +168,6 @@ def test_prepare_prompts_self_made_finding():
         Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format(event.assessment_id)
     )
     fake_storage_service.put.assert_not_called()
+    fake_database_service.update.assert_called_once()
+    fake_database_service.update_attrs.assert_called_once()
     assert prompt_list == []
