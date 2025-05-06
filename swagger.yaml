@@ -386,8 +386,7 @@ paths:
         "400":
           description: Invalid request body
         "404":
-          description: The specified assessment, pillar, question, or best practice could
-            not be found
+          description: The specified assessment, pillar, question, or best practice could not be found
         "500":
           description: Internal server error.
 
@@ -581,7 +580,7 @@ components:
           description: The status of the finding (e.g., MANUAL, FAIL)
         status_detail:
           type: string
-          description: Explanation or additional details about the finding"s status
+          description: Explanation or additional details about the finding's status
         hidden:
           type: boolean
           description: Whether the finding is hidden or not
