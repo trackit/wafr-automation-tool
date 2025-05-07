@@ -1,1 +1,1799 @@
-{}
+{
+  "organizations_account_part_of_organizations": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_multi_accounts"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_define_guardrails"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_access_control"
+    }
+  ],
+  "iam_root_hardware_mfa_enabled": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_aws_account"
+    }
+  ],
+  "iam_root_mfa_enabled": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_aws_account"
+    }
+  ],
+  "iam_no_root_access_key": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_aws_account"
+    }
+  ],
+  "ec2_instance_managed_by_ssm": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_test_validate_pipeline"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_auto_protection"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_actions_distance"
+    }
+  ],
+  "ecr_repositories_scan_images_on_push_enabled": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_test_validate_pipeline"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_reduce_surface"
+    },
+    {
+      "pillar": "security",
+      "question": "application-security",
+      "best_practice": "sec_appsec_automate_testing_throughout_lifecycle"
+    }
+  ],
+  "ecr_repositories_scan_vulnerabilities_in_latest_image": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_test_validate_pipeline"
+    },
+    {
+      "pillar": "security",
+      "question": "application-security",
+      "best_practice": "sec_appsec_automate_testing_throughout_lifecycle"
+    }
+  ],
+  "wellarchitected_workload_no_high_or_medium_risks": [
+    {
+      "pillar": "security",
+      "question": "securely-operate",
+      "best_practice": "sec_securely_operate_threat_model"
+    }
+  ],
+  "iam_password_policy_lowercase": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_password_policy_minimum_length_14": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_password_policy_number": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_password_policy_reuse_24": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_password_policy_symbol": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_password_policy_uppercase": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "directoryservice_radius_server_security_protocol": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "directoryservice_supported_mfa_radius_enabled": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_user_hardware_mfa_enabled": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_user_mfa_enabled_console_access": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_user_two_active_access_key": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_user_no_setup_initial_access_key": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "opensearch_service_domains_use_cognito_authentication_for_kibana": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "sagemaker_notebook_instance_root_access_disabled": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_avoid_root_usage": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_enforce_mechanisms"
+    }
+  ],
+  "iam_rotate_access_key_90_days": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_unique"
+    },
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_audit"
+    }
+  ],
+  "autoscaling_find_secrets_ec2_launch_configuration": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "awslambda_function_no_secrets_in_code": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "awslambda_function_no_secrets_in_variables": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "cloudformation_stack_outputs_find_secrets": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "ec2_instance_secrets_user_data": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "ec2_launch_template_no_secrets": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "ecs_task_definitions_no_environment_secrets": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    }
+  ],
+  "ssm_document_secrets": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_secrets"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_share_securely"
+    }
+  ],
+  "iam_role_cross_service_confused_deputy_prevention": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_identity_provider"
+    }
+  ],
+  "kms_cmk_rotation_enabled": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_audit"
+    }
+  ],
+  "secretsmanager_automatic_rotation_enabled": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_audit"
+    }
+  ],
+  "iam_policy_allows_privilege_escalation": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_groups_attributes"
+    }
+  ],
+  "iam_policy_attached_only_to_group_or_roles": [
+    {
+      "pillar": "security",
+      "question": "identities",
+      "best_practice": "sec_identities_groups_attributes"
+    }
+  ],
+  "ec2_instance_imdsv2_enabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_define"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "ec2_instance_profile_attached": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_define"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_auto_protection"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_actions_distance"
+    }
+  ],
+  "cloudwatch_cross_account_sharing_disabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_define"
+    }
+  ],
+  "iam_aws_attached_policy_no_administrative_privileges": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    }
+  ],
+  "iam_customer_attached_policy_no_administrative_privileges": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_continuous_reduction"
+    }
+  ],
+  "iam_customer_unattached_policy_no_administrative_privileges": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_continuous_reduction"
+    }
+  ],
+  "iam_inline_policy_no_administrative_privileges": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    }
+  ],
+  "opensearch_service_domains_internal_user_database_enabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_least_privileges"
+    }
+  ],
+  "account_maintain_current_contact_details": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_emergency_process"
+    },
+    {
+      "pillar": "security",
+      "question": "incident-response",
+      "best_practice": "sec_incident_response_identify_personnel"
+    }
+  ],
+  "account_security_contact_information_is_registered": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_emergency_process"
+    },
+    {
+      "pillar": "security",
+      "question": "incident-response",
+      "best_practice": "sec_incident_response_identify_personnel"
+    }
+  ],
+  "account_security_questions_are_registered_in_the_aws_account": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_emergency_process"
+    },
+    {
+      "pillar": "security",
+      "question": "incident-response",
+      "best_practice": "sec_incident_response_identify_personnel"
+    }
+  ],
+  "appstream_fleet_maximum_session_duration": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "appstream_fleet_session_disconnect_timeout": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "appstream_fleet_session_idle_disconnect_timeout": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "cloudwatch_log_group_retention_policy_specific_days_enabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "codebuild_project_older_90_days": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "ec2_elastic_ip_unassigned": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "ecr_repositories_lifecycle_policy_enabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "elbv2_listeners_underneath": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "iam_password_policy_expires_passwords_within_90_days_or_less": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_lifecycle"
+    }
+  ],
+  "ec2_ebs_public_snapshot": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    }
+  ],
+  "ec2_instance_public_ip": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "opensearch_service_domains_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_share_securely"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "emr_cluster_master_nodes_no_public_ip": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "emr_cluster_account_public_block_enabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "emr_cluster_publicly_accesible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "glacier_vaults_policy_public_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "awslambda_function_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_share_securely"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_reduce_surface"
+    }
+  ],
+  "rds_instance_no_public_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "rds_snapshots_public_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "kms_key_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "redshift_cluster_public_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "s3_account_level_public_access_blocks": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "s3_bucket_public_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "s3_bucket_policy_public_write_access": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "sagemaker_notebook_instance_without_direct_internet_access_configured": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_share_securely"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    }
+  ],
+  "appstream_fleet_default_internet_access_disabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "apigateway_restapi_public": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "awslambda_function_url_cors_policy": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "awslambda_function_url_public": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "cloudtrail_logs_s3_bucket_is_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "codeartifact_packages_external_public_publishing_disabled": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "ecr_repositories_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "efs_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "eks_cluster_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "elb_internet_facing": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "elbv2_internet_facing": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "sns_topics_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "sqs_queues_not_publicly_accessible": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "ssm_documents_set_as_public": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "ec2_securitygroup_allow_wide_open_public_ipv4": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "ec2_ami_public": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_analyze_cross_account"
+    }
+  ],
+  "codebuild_project_user_controlled_buildspec": [
+    {
+      "pillar": "security",
+      "question": "permissions",
+      "best_practice": "sec_permissions_share_securely"
+    }
+  ],
+  "apigateway_restapi_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "opensearch_service_domains_audit_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "cloudtrail_cloudwatch_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    },
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "cloudtrail_s3_dataevents_read_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "cloudtrail_s3_dataevents_write_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "acm_certificates_transparency_logs_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "apigatewayv2_api_access_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "awslambda_function_invoke_api_operations_cloudtrail_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "cloudfront_distributions_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "cloudtrail_logs_s3_bucket_access_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "directoryservice_directory_log_forwarding_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "eks_control_plane_logging_all_types_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "elb_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    },
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_auto_response"
+    }
+  ],
+  "elbv2_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "opensearch_service_domains_cloudwatch_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "rds_instance_integration_cloudwatch_logs": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "redshift_cluster_audit_logging": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "route53_public_hosted_zones_cloudwatch_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "s3_bucket_server_access_logging_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    }
+  ],
+  "vpc_flow_logs_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_app_service_logging"
+    },
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_analyze_all"
+    },
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_auto_response"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_inspection"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_authentication"
+    }
+  ],
+  "cloudtrail_multi_region_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_analyze_all"
+    },
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_auto_response"
+    }
+  ],
+  "config_recorder_all_regions_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_analyze_all"
+    }
+  ],
+  "securityhub_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_changes_to_network_acls_alarm_configured": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_changes_to_network_gateways_alarm_configured": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_changes_to_network_route_tables_alarm_configured": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_changes_to_vpcs_alarm_configured": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_and_alarm_for_aws_config_configuration_changes_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_and_alarm_for_cloudtrail_configuration_changes_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_authentication_failures": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_aws_organizations_changes": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_disable_or_scheduled_deletion_of_kms_cmk": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_for_s3_bucket_policy_changes": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_policy_changes": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_root_usage": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_security_group_changes": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_sign_in_without_mfa": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "cloudwatch_log_metric_filter_unauthorized_api_calls": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "directoryservice_directory_monitor_notifications": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "guardduty_no_high_severity_findings": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "macie_is_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    }
+  ],
+  "guardduty_is_enabled": [
+    {
+      "pillar": "security",
+      "question": "detect-investigate-events",
+      "best_practice": "sec_detect_investigate_events_actionable_events"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_inspection"
+    }
+  ],
+  "apigateway_restapi_waf_acl_attached": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "cloudfront_distributions_using_waf": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "sagemaker_models_network_isolation_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "sagemaker_models_vpc_settings_configured": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "sagemaker_notebook_instance_vpc_settings_configured": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "sagemaker_training_jobs_network_isolation_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "sagemaker_training_jobs_vpc_settings_configured": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "vpc_endpoint_connections_trust_boundaries": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "vpc_endpoint_services_allowed_principals_trust_boundaries": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_create_layers"
+    }
+  ],
+  "ec2_networkacl_allow_ingress_tcp_port_22": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "apigateway_restapi_authorizers_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_inspection"
+    }
+  ],
+  "apigatewayv2_api_authorizers_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    }
+  ],
+  "s3_bucket_acl_prohibited": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    }
+  ],
+  "s3_bucket_no_mfa_delete": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_layered"
+    }
+  ],
+  "ec2_networkacl_allow_ingress_any_port": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_networkacl_allow_ingress_tcp_port_3389": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_all_ports": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_port_mongodb_27017_27018": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_ftp_port_20_21": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_3389": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_cassandra_7199_9160_8888": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_elasticsearch_kibana_9200_9300_5601": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_kafka_9092": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_memcached_11211": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_mysql_3306": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_oracle_1521_2483": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_postgres_5432": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_redis_6379": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_sql_server_1433_1434": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_telnet_23": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "elbv2_waf_acl_attached": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_default_restrict_traffic": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_from_launch_wizard": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_not_used": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "ec2_securitygroup_with_many_ingress_egress_rules": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "elbv2_desync_mitigation_mode": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    },
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "route53_domains_privacy_protection_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "route53_domains_transferlock_enabled": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_associated_elastic_ips": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_classic_load_balancers": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_cloudfront_distributions": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_global_accelerators": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_internet_facing_load_balancers": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "shield_advanced_protection_in_route53_hosted_zones": [
+    {
+      "pillar": "security",
+      "question": "network-protection",
+      "best_practice": "sec_network_protection_auto_protect"
+    }
+  ],
+  "rds_instance_minor_version_upgrade_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "cloudtrail_log_file_validation_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_validate_software_integrity"
+    }
+  ],
+  "ec2_instance_internet_facing_with_instance_profile": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "opensearch_service_domains_updated_to_the_latest_service_software_version": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "redshift_cluster_automatic_upgrades": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "ssm_managed_compliant_patching": [
+    {
+      "pillar": "security",
+      "question": "protect-compute",
+      "best_practice": "sec_protect_compute_vulnerability_management"
+    }
+  ],
+  "kms_cmk_are_used": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_key_mgmt"
+    }
+  ],
+  "efs_encryption_at_rest_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "opensearch_service_domains_encryption_at_rest_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "ec2_ebs_volume_encryption": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "rds_instance_storage_encrypted": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "cloudtrail_kms_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "cloudwatch_log_group_kms_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "dynamodb_accelerator_cluster_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "dynamodb_tables_kms_cmk_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "ec2_ebs_default_encryption": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "ec2_ebs_snapshots_encrypted": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "eks_cluster_kms_cmk_encryption_in_secrets_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_data_catalogs_connection_passwords_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_data_catalogs_metadata_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_database_connections_ssl_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_development_endpoints_cloudwatch_logs_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_development_endpoints_job_bookmark_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_development_endpoints_s3_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_etl_jobs_amazon_s3_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_etl_jobs_cloudwatch_logs_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "glue_etl_jobs_job_bookmark_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "sagemaker_notebook_instance_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    },
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_automate_protection"
+    }
+  ],
+  "sagemaker_training_jobs_intercontainer_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "sagemaker_training_jobs_volume_and_output_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "sqs_queues_server_side_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "workspaces_volume_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_encrypt"
+    }
+  ],
+  "s3_bucket_default_encryption": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_automate_protection"
+    }
+  ],
+  "sns_topics_kms_encryption_at_rest_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_access_control"
+    }
+  ],
+  "s3_bucket_object_versioning": [
+    {
+      "pillar": "security",
+      "question": "protect-data-rest",
+      "best_practice": "sec_protect_data_rest_access_control"
+    }
+  ],
+  "acm_certificates_expiration_check": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_key_cert_mgmt"
+    }
+  ],
+  "directoryservice_ldap_certificate_expiration": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_key_cert_mgmt"
+    }
+  ],
+  "opensearch_service_domains_node_to_node_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "opensearch_service_domains_https_communications_enforced": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "apigateway_restapi_client_certificate_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "cloudfront_distributions_field_level_encryption_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "cloudfront_distributions_https_enabled": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "cloudfront_distributions_using_deprecated_ssl_protocols": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "elb_insecure_ssl_ciphers": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "elb_ssl_listeners": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "elbv2_insecure_ssl_ciphers": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "elbv2_ssl_listeners": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "s3_bucket_secure_transport_policy": [
+    {
+      "pillar": "security",
+      "question": "protect-data-transit",
+      "best_practice": "sec_protect_data_transit_encrypt"
+    }
+  ],
+  "iam_support_role_created": [
+    {
+      "pillar": "security",
+      "question": "incident-response",
+      "best_practice": "sec_incident_response_identify_personnel"
+    }
+  ]
+}
