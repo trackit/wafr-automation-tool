@@ -12,7 +12,8 @@
     "start:webui": "npm run start --workspace=apps/webui",
     "build:webui": "npm run build --workspace=apps/webui",
     "test:webui": "npm run test --workspace=apps/webui",
-    "test": "nx run-many -t test"
+    "test": "nx run-many -t test",
+    "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts"
   },
   "nx": {
     "includedScripts": []
