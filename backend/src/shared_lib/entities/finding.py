@@ -46,4 +46,4 @@ class FindingRule(TypedDict):
     best_practice: str
 
 
-FilteringRules = dict[str, FindingRule]
+FilteringRules = dict[str, list[FindingRule]]

@@ -1,3 +1,4 @@
+import builtins
 from abc import ABC, abstractmethod
 
 from entities.assessment import AssessmentID
@@ -50,8 +51,26 @@ class BaseScanningToolService(IScanningToolService):
             if self.is_finding_in_workflow(finding, workflows) and not self.is_self_made_finding(finding)
         ]
 
+    def merge_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
+        grouped_findings = {}
+        index = 1
+        for finding in findings:
+            key = (finding.status_detail, finding.risk_details)
+            if key not in grouped_findings:
+                finding.id = str(index)
+                index += 1
+                grouped_findings[key] = finding
+            else:
+                existing = grouped_findings[key]
+                if existing.resources is None:
+                    existing.resources = finding.resources
+                elif finding.resources and finding.resources not in existing.resources:
+                    existing.resources.extend(finding.resources)
+        return builtins.list(grouped_findings.values())
+
     def retrieve_filtered_findings(
         self, assessment_id: AssessmentID, regions: list[str], workflows: list[str]
     ) -> list[FindingExtra]:
         findings = self.retrieve_findings(assessment_id, regions)
-        return self.filter_findings(findings, workflows)
+        findings = self.filter_findings(findings, workflows)
+        return self.merge_findings(findings)
