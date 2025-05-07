@@ -51,17 +51,20 @@ def test_cleanup_on_error():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "High",

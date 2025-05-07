@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
@@ -13,7 +13,8 @@ from utils.tests import load_file
 from state_machine.event import PreparePromptsInput
 
 
-def test_prepare_prompts():
+@patch("utils.files.get_filtering_rules", return_value="{}")
+def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
     from ..app.tasks.prepare_prompts import PreparePrompts
 
     event = PreparePromptsInput(

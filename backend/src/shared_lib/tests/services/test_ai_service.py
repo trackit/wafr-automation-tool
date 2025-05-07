@@ -34,8 +34,8 @@ def test_bedrock_service_converse(bedrock_service: BedrockService):
             scanning_tool_data=[
                 Finding(
                     id="AID",
-                    status_code="FAIL",
                     status_detail="error",
+                    risk_details="risk",
                 )
             ],
             scanning_tool_title="test",

@@ -2,9 +2,9 @@ from unittest.mock import MagicMock
 
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
-from entities.api import APIPagination, APIPaginationOutput
+from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, Steps
-from entities.best_practice import BestPracticeDto, BestPracticeExtra
+from entities.best_practice import BestPracticeDto
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingExtra
 from services.assessment import AssessmentService
@@ -28,17 +28,20 @@ def test_assessment_service_retrieve():
             "findings": {
                 "pillar-1": {
                     "id": "pillar-1",
+                    "primary_id": "pillar-1",
                     "label": "Pillar 1",
                     "disabled": False,
                     "questions": {
                         "question-1": {
                             "id": "question-1",
+                            "primary_id": "question-1",
                             "label": "Question 1",
                             "none": False,
                             "disabled": False,
                             "best_practices": {
                                 "best-practice-1": {
                                     "id": "best-practice-1",
+                                    "primary_id": "best-practice-1",
                                     "label": "Best Practice 1",
                                     "description": "Best Practice 1 Description",
                                     "risk": "Low",
@@ -74,17 +77,20 @@ def test_assessment_service_retrieve():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "Low",
@@ -131,17 +137,20 @@ def test_assessment_service_retrieve_all():
                     "findings": {
                         "pillar-1": {
                             "id": "pillar-1",
+                            "primary_id": "pillar-1",
                             "label": "Pillar 1",
                             "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
+                                    "primary_id": "question-1",
                                     "label": "Question 1",
                                     "none": False,
                                     "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
+                                            "primary_id": "best-practice-1",
                                             "label": "Best Practice 1",
                                             "description": "Best Practice 1 Description",
                                             "risk": "Low",
@@ -185,17 +194,20 @@ def test_assessment_service_retrieve_all():
                 findings={
                     "pillar-1": {
                         "id": "pillar-1",
+                        "primary_id": "pillar-1",
                         "label": "Pillar 1",
                         "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
+                                "primary_id": "question-1",
                                 "label": "Question 1",
                                 "none": False,
                                 "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
+                                        "primary_id": "best-practice-1",
                                         "label": "Best Practice 1",
                                         "description": "Best Practice 1 Description",
                                         "risk": "Low",
@@ -239,17 +251,20 @@ def test_assessment_service_retrieve_all_pagination():
                     "findings": {
                         "pillar-1": {
                             "id": "pillar-1",
+                            "primary_id": "pillar-1",
                             "label": "Pillar 1",
                             "disabled": False,
                             "questions": {
                                 "question-1": {
                                     "id": "question-1",
+                                    "primary_id": "question-1",
                                     "label": "Question 1",
                                     "none": False,
                                     "disabled": False,
                                     "best_practices": {
                                         "best-practice-1": {
                                             "id": "best-practice-1",
+                                            "primary_id": "best-practice-1",
                                             "label": "Best Practice 1",
                                             "description": "Best Practice 1 Description",
                                             "risk": "High",
@@ -307,17 +322,20 @@ def test_assessment_service_retrieve_all_pagination():
                 findings={
                     "pillar-1": {
                         "id": "pillar-1",
+                        "primary_id": "pillar-1",
                         "label": "Pillar 1",
                         "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
+                                "primary_id": "question-1",
                                 "label": "Question 1",
                                 "none": False,
                                 "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
+                                        "primary_id": "best-practice-1",
                                         "label": "Best Practice 1",
                                         "description": "Best Practice 1 Description",
                                         "risk": "High",
@@ -367,17 +385,20 @@ def test_assessment_service_retrieve_best_practice():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "Low",
@@ -392,9 +413,11 @@ def test_assessment_service_retrieve_best_practice():
         },
     )
 
-    best_practice = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    best_practice = assessment_service.retrieve_api_best_practice(
+        assessment, "pillar-1", "question-1", "best-practice-1"
+    )
 
-    assert best_practice == BestPracticeExtra(
+    assert best_practice == APIBestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
         description="Best Practice 1 Description",
@@ -438,7 +461,7 @@ def test_assessment_service_retrieve_best_practice_with_no_findings():
         findings={},
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
     assert finding is None
 
 
@@ -453,10 +476,18 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",
-        findings={"pillar-1": {"id": "pillar-1", "label": "Pillar 1", "disabled": False, "questions": {}}},
+        findings={
+            "pillar-1": {
+                "id": "pillar-1",
+                "primary_id": "pillar-1",
+                "label": "Pillar 1",
+                "disabled": False,
+                "questions": {},
+            }
+        },
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
+    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
     assert finding is None
 
 
@@ -474,11 +505,13 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
@@ -489,7 +522,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
         },
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-2", "best-practice-1")
+    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-2", "best-practice-1")
     assert finding is None
 
 
@@ -507,17 +540,20 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "High",
@@ -532,7 +568,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
         },
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-2")
+    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-2")
     assert finding is None
 
 
@@ -550,17 +586,20 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "Low",
@@ -575,8 +614,8 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
         },
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
-    assert finding == BestPracticeExtra(
+    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    assert finding == APIBestPracticeExtra(
         id="best-practice-1",
         label="Best Practice 1",
         description="Best Practice 1 Description",
@@ -708,17 +747,20 @@ def test_assessment_service_update_best_practice():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "High",
@@ -767,17 +809,20 @@ def test_assessment_service_delete_findings():
         findings={
             "pillar-1": {
                 "id": "pillar-1",
+                "primary_id": "pillar-1",
                 "label": "Pillar 1",
                 "disabled": False,
                 "questions": {
                     "question-1": {
                         "id": "question-1",
+                        "primary_id": "question-1",
                         "label": "Question 1",
                         "none": False,
                         "disabled": False,
                         "best_practices": {
                             "best-practice-1": {
                                 "id": "best-practice-1",
+                                "primary_id": "best-practice-1",
                                 "label": "Best Practice 1",
                                 "description": "Best Practice 1 Description",
                                 "risk": "High",
