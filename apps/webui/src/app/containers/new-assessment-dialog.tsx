@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { postAssessment } from '@webui/api-client';
 import { NewAssessment } from '@webui/forms';
-import { paths } from '@webui/types';
+import { paths } from '@shared/api-schema';
 import { Modal } from '@webui/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';

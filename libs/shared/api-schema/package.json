@@ -1,5 +1,5 @@
 {
-  "name": "@shared/api-schema",
+  "name": "@wafr-automation-tool/api-schema",
   "version": "0.0.1",
   "private": true,
   "type": "module",

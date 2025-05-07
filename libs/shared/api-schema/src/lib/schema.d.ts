@@ -17,46 +17,7 @@ export interface paths {
          *     Useful for monitoring and managing multiple assessments in one place.
          *
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Maximum number of assessments to return */
-                    limit?: number;
-                    /** @description Search term to filter assessments by name, role ARN, or id */
-                    search?: string;
-                    /** @description Token for pagination. */
-                    next_token?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of all assessments */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            assessments?: components["schemas"]["Assessment"][];
-                            /** @description Token for pagination. If there are more assessments than can be returned in a single response,
-                             *     this token will allow you to retrieve the next set of results.
-                             *      */
-                            next_token?: string;
-                        };
-                    };
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getAssessments"];
         put?: never;
         /**
          * Start a new assessment process
@@ -64,62 +25,7 @@ export interface paths {
          *     You can specify a role ARN for the assessment, or a default role will be used.
          *
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the assessment to be created */
-                        name: string;
-                        /** @description List of regions to scan
-                         *     If empty, all regions will be scanned
-                         *      */
-                        regions?: string[];
-                        /** @description The role ARN to associate with the assessment.
-                         *     If not provided, a default role will be used.
-                         *      */
-                        roleArn?: string;
-                        /** @description The workflows to associate with the assessment.
-                         *     If not provided, no workflows will be associated.
-                         *      */
-                        workflows?: string[];
-                    };
-                };
-            };
-            responses: {
-                /** @description The assessment has been successfully created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description The unique ID of the newly created assessment */
-                            assessment_id?: number;
-                        };
-                    };
-                };
-                /** @description Bad Request. Missing or invalid parameters were provided. */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["startAssessment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -139,168 +45,26 @@ export interface paths {
          *     including associated findings, questions, and any current errors.
          *
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique ID of the assessment to retrieve */
-                    assessmentId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Detailed information about the specified assessment */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["AssessmentContent"];
-                    };
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getAssessment"];
         /**
          * Update the details of a specific assessment
          * @description Updates the details of a specific assessment, such as the name or role ARN.
          *
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique ID of the assessment to update */
-                    assessmentId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["AssessmentDto"];
-                };
-            };
-            responses: {
-                /** @description The assessment has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        put: operations["updateAssessment"];
         /**
          * Rescan an assessment
          * @description Rescans an assessment, updating the findings and best practices.
          *
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique ID of the assessment to rescan */
-                    assessmentId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The assessment has been successfully rescanned */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["rescanAssessment"];
         /**
          * Delete a specific assessment
          * @description Deletes an assessment from the system.
          *     Once deleted, the assessment cannot be recovered.
          *
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique ID of the assessment to delete */
-                    assessmentId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The assessment has been successfully deleted */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        delete: operations["deleteAssessment"];
         options?: never;
         head?: never;
         patch?: never;
@@ -321,51 +85,7 @@ export interface paths {
          *     You can specify an owner for the workload and a name for the assessment.
          *
          */
-        post: {
-            parameters: {
-                query?: {
-                    /** @description The owner of the workload */
-                    owner?: string;
-                };
-                header?: never;
-                path: {
-                    /** @description The unique ID of the assessment to export */
-                    assessmentId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The assessment has been successfully exported */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["exportWellArchitectedTool"];
         delete?: never;
         options?: never;
         head?: never;
@@ -385,54 +105,7 @@ export interface paths {
          * @description Updates the details of a specific pillar.
          *
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment */
-                    assessmentId: number;
-                    /** @description The ID of the pillar */
-                    pillarId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["PillarDto"];
-                };
-            };
-            responses: {
-                /** @description The pillar has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment, or pillar could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        put: operations["updatePillar"];
         post?: never;
         delete?: never;
         options?: never;
@@ -453,56 +126,7 @@ export interface paths {
          * @description Updates the details of a specific question.
          *
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment */
-                    assessmentId: number;
-                    /** @description The ID of the pillar under which the question falls */
-                    pillarId: number;
-                    /** @description The ID of the question */
-                    questionId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["QuestionDto"];
-                };
-            };
-            responses: {
-                /** @description The question has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment, pillar, or question could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        put: operations["updateQuestion"];
         post?: never;
         delete?: never;
         options?: never;
@@ -522,99 +146,13 @@ export interface paths {
          * @description Fetches all the findings associated with a specific best practice within a question in a given pillar for a specific assessment.
          *
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment */
-                    assessmentId: number;
-                    /** @description The ID of the pillar under which the question falls */
-                    pillarId: number;
-                    /** @description The ID of the question to retrieve the best practices to */
-                    questionId: number;
-                    /** @description The ID of the best practice to retrieve findings to */
-                    bestPracticeId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description A list of findings related to the specified best practice */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BestPracticeExtra"];
-                    };
-                };
-                /** @description The specified best practice could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getBestPracticeFindings"];
         /**
          * Update the details of a specific best practice
          * @description Updates the details of a specific best practice.
          *
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment */
-                    assessmentId: number;
-                    /** @description The ID of the pillar under which the question falls */
-                    pillarId: number;
-                    /** @description The ID of the question to update the best practice to */
-                    questionId: number;
-                    /** @description The ID of the best practice */
-                    bestPracticeId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["BestPracticeDto"];
-                };
-            };
-            responses: {
-                /** @description The best practice has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment, pillar, question, or best practice could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        put: operations["updateBestPractice"];
         post?: never;
         delete?: never;
         options?: never;
@@ -635,60 +173,7 @@ export interface paths {
          * @description Updates the details of a specific finding.
          *
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment to which the finding belongs */
-                    assessmentId: number;
-                    /** @description The ID of the pillar under which the question falls */
-                    pillarId: number;
-                    /** @description The ID of the question to update the best practice to */
-                    questionId: number;
-                    /** @description The ID of the best practice to update the status to */
-                    bestPracticeId: number;
-                    /** @description The unique ID of the finding to retrieve */
-                    findingId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["FindingDto"];
-                };
-            };
-            responses: {
-                /** @description The finding has been successfully updated */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The specified assessment could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        put: operations["updateFinding"];
         post?: never;
         delete?: never;
         options?: never;
@@ -709,45 +194,7 @@ export interface paths {
          *     including severity, status, and recommended remediation steps.
          *
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the assessment to which the finding belongs */
-                    assessmentId: number;
-                    /** @description The unique ID of the finding to retrieve */
-                    findingId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Detailed information about the specified finding */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Finding"];
-                    };
-                };
-                /** @description The specified assessment or finding could not be found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Internal server error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getFinding"];
         put?: never;
         post?: never;
         delete?: never;
@@ -840,6 +287,8 @@ export interface components {
             };
             /** @description Explanation of the risk associated with the finding */
             risk_details?: string;
+            /** @description Tells whether the finding is associated with an AI or manually */
+            is_ai_associated?: boolean;
         };
         FindingDto: {
             hidden?: boolean | null;
@@ -890,4 +339,571 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getAssessments: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of assessments to return */
+                limit?: number;
+                /** @description Search term to filter assessments by name, role ARN, or id */
+                search?: string;
+                /** @description Token for pagination. */
+                next_token?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all assessments */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        assessments?: components["schemas"]["Assessment"][];
+                        /** @description Token for pagination. If there are more assessments than can be returned in a single response,
+                         *     this token will allow you to retrieve the next set of results.
+                         *      */
+                        next_token?: string;
+                    };
+                };
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    startAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Name of the assessment to be created */
+                    name: string;
+                    /** @description List of regions to scan
+                     *     If empty, all regions will be scanned
+                     *      */
+                    regions?: string[];
+                    /** @description The role ARN to associate with the assessment.
+                     *     If not provided, a default role will be used.
+                     *      */
+                    roleArn?: string;
+                    /** @description The workflows to associate with the assessment.
+                     *     If not provided, no workflows will be associated.
+                     *      */
+                    workflows?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The assessment has been successfully created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The unique ID of the newly created assessment */
+                        assessment_id?: number;
+                    };
+                };
+            };
+            /** @description Bad Request. Missing or invalid parameters were provided. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve */
+                assessmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Detailed information about the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentContent"];
+                };
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to update */
+                assessmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssessmentDto"];
+            };
+        };
+        responses: {
+            /** @description The assessment has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    rescanAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to rescan */
+                assessmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The assessment has been successfully rescanned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to delete */
+                assessmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The assessment has been successfully deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    exportWellArchitectedTool: {
+        parameters: {
+            query?: {
+                /** @description The owner of the workload */
+                owner?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to export */
+                assessmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The assessment has been successfully exported */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updatePillar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment */
+                assessmentId: number;
+                /** @description The ID of the pillar */
+                pillarId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PillarDto"];
+            };
+        };
+        responses: {
+            /** @description The pillar has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment, or pillar could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateQuestion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment */
+                assessmentId: number;
+                /** @description The ID of the pillar under which the question falls */
+                pillarId: number;
+                /** @description The ID of the question */
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuestionDto"];
+            };
+        };
+        responses: {
+            /** @description The question has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment, pillar, or question could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getBestPracticeFindings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment */
+                assessmentId: number;
+                /** @description The ID of the pillar under which the question falls */
+                pillarId: number;
+                /** @description The ID of the question to retrieve the best practices to */
+                questionId: number;
+                /** @description The ID of the best practice to retrieve findings to */
+                bestPracticeId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of findings related to the specified best practice */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BestPracticeExtra"];
+                };
+            };
+            /** @description The specified best practice could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateBestPractice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment */
+                assessmentId: number;
+                /** @description The ID of the pillar under which the question falls */
+                pillarId: number;
+                /** @description The ID of the question to update the best practice to */
+                questionId: number;
+                /** @description The ID of the best practice */
+                bestPracticeId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["BestPracticeDto"];
+            };
+        };
+        responses: {
+            /** @description The best practice has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment, pillar, question, or best practice could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: number;
+                /** @description The ID of the pillar under which the question falls */
+                pillarId: number;
+                /** @description The ID of the question to update the best practice to */
+                questionId: number;
+                /** @description The ID of the best practice to update the status to */
+                bestPracticeId: number;
+                /** @description The unique ID of the finding to retrieve */
+                findingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FindingDto"];
+            };
+        };
+        responses: {
+            /** @description The finding has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: number;
+                /** @description The unique ID of the finding to retrieve */
+                findingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Detailed information about the specified finding */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Finding"];
+                };
+            };
+            /** @description The specified assessment or finding could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+}
