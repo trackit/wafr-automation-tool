@@ -54,6 +54,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             if not finding_rules:
                 continue
             finding_formatted_id = f"{scanning_tool}:{finding.id}"
+            is_filtered = False
             for finding_rule in finding_rules:
                 best_practice_data = get_best_practice_by_primary_id(
                     self.formatted_question_set.data,
@@ -62,9 +63,11 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                     finding_rule.get("best_practice"),
                 )
                 if not best_practice_data:
-                    msg = f"Best practice not found: {finding_rule}"
-                    raise Exception(msg)  # noqa: TRY002
+                    continue
+                is_filtered = True
                 best_practice_data["results"].append(finding_formatted_id)
+            if not is_filtered:
+                continue
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
