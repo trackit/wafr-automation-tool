@@ -1,8 +1,8 @@
 from typing import Any
 
-from entities.api import APIAssessment
+from entities.api import APIAssessment, APIBestPracticeExtra
 from entities.assessment import AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.best_practice import BestPracticeDto, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID
 from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
 from pydantic import BaseModel, Field
@@ -52,7 +52,7 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     best_practice_id: BestPracticeID
 
 
-RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
+RetrieveBestPracticeFindingsResponseBody = APIBestPracticeExtra
 
 
 class RetrieveFindingInput(BaseModel):

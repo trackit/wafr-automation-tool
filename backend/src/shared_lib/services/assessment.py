@@ -5,9 +5,9 @@ from typing import Any, override
 
 from boto3.dynamodb.conditions import Key
 from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
-from entities.api import APIPagination, APIPaginationOutput
+from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.best_practice import BestPracticeDto, BestPracticeID
 from entities.database import UpdateAttrsInput
 from entities.finding import FindingDto, FindingExtra, FindingID
 from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
@@ -29,13 +29,13 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_best_practice(
+    def retrieve_api_best_practice(
         self,
         assessment: Assessment,
         pillar_id: PillarID,
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
-    ) -> BestPracticeExtra | None:
+    ) -> APIBestPracticeExtra | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -154,13 +154,13 @@ class AssessmentService(IAssessmentService):
         return query_input
 
     @override
-    def retrieve_best_practice(
+    def retrieve_api_best_practice(
         self,
         assessment: Assessment,
         pillar_id: PillarID,
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
-    ) -> BestPracticeExtra | None:
+    ) -> APIBestPracticeExtra | None:
         if not assessment.findings:
             return None
         pillar = assessment.findings.get(pillar_id)
@@ -175,7 +175,7 @@ class AssessmentService(IAssessmentService):
         findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.get("results", []))
         best_practice_data = {**best_practice}
         best_practice_data["results"] = findings if findings else []
-        return BestPracticeExtra(**best_practice_data)
+        return APIBestPracticeExtra(**best_practice_data)
 
     @override
     def retrieve_finding(
