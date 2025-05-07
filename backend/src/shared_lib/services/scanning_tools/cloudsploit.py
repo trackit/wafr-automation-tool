@@ -6,11 +6,11 @@ from entities.assessment import AssessmentID
 from entities.finding import FindingExtra, FindingResource
 from entities.scanning_tools import CloudSploitFinding, ScanningTool
 
-from services.scanning_tools import IScanningToolService
+from services.scanning_tools import BaseScanningToolService
 from services.storage import IStorageService
 
 
-class CloudSploitService(IScanningToolService):
+class CloudSploitService(BaseScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
         super().__init__(storage_service=storage_service, name=ScanningTool.CLOUDSPLOIT, title="CloudSploit")
 

@@ -16,11 +16,11 @@ from common.task import Task
 from entities.ai import Chunk, PromptS3Uri, PromptVariables
 from entities.assessment import AssessmentData, AssessmentID
 from entities.database import UpdateAttrsInput
-from entities.finding import FilteringRules, Finding, FindingExtra
+from entities.finding import Finding, FindingExtra
 from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
 from services.database import IDatabaseService
-from services.scanning_tools import IScanningToolService
+from services.scanning_tools import BaseScanningToolService, IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
 from utils.files import get_filtering_rules
@@ -41,6 +41,79 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.database_service = database_service
         self.storage_service = storage_service
         self.formatted_question_set = formatted_question_set
+
+    def manual_filtering(
+        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra]
+    ) -> list[FindingExtra]:
+        filtering_rules = get_filtering_rules()
+        to_remove = []
+        for finding in findings:
+            if not finding.metadata or not finding.metadata.event_code:
+                continue
+            finding_rule = filtering_rules.get(finding.metadata.event_code)
+            if not finding_rule:
+                continue
+            pillar_data = next(
+                (
+                    pillar
+                    for pillar in self.formatted_question_set.data.values()
+                    if pillar.get("primary_id").lower() == finding_rule.get("pillar").lower()
+                ),
+                None,
+            )
+            if not pillar_data:
+                continue
+            question_data = next(
+                (
+                    question
+                    for question in pillar_data.get("questions", {}).values()
+                    if question.get("primary_id").lower() == finding_rule.get("question").lower()
+                ),
+                None,
+            )
+            if not question_data:
+                continue
+            best_practice_data = next(
+                (
+                    best_practice
+                    for best_practice in question_data.get("best_practices", {}).values()
+                    if best_practice.get("primary_id").lower() == finding_rule.get("best_practice").lower()
+                ),
+                None,
+            )
+            if not best_practice_data:
+                continue
+            formatted_finding_id = f"{scanning_tool}:{finding.id}"
+            best_practice_data["results"].append(formatted_finding_id)
+            self.database_service.put(
+                table_name=DDB_TABLE,
+                item={
+                    **finding.model_dump(exclude={"id"}).copy(),
+                    DDB_KEY: assessment_id,
+                    DDB_SORT_KEY: formatted_finding_id,
+                },
+            )
+            to_remove.append(finding)
+        for finding in to_remove:
+            findings.remove(finding)
+        return findings
+
+    def merge_findings(self, findings: list[FindingExtra]) -> list[FindingExtra]:
+        grouped_findings = {}
+        index = 1
+        for finding in findings:
+            key = (finding.status_detail, finding.risk_details)
+            if key not in grouped_findings:
+                finding.id = str(index)
+                index += 1
+                grouped_findings[key] = finding
+            else:
+                existing = grouped_findings[key]
+                if existing.resources is None:
+                    existing.resources = finding.resources
+                elif finding.resources and finding.resources not in existing.resources:
+                    existing.resources.extend(finding.resources)
+        return list(grouped_findings.values())
 
     def populate_dynamodb(
         self, findings: list[FindingExtra], assessment_id: AssessmentID, scanning_tool: ScanningTool
@@ -156,7 +229,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         return prompt_variables_uris
 
     def create_prompt_variables_list(
-        self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, chunks: list[Chunk]
+        self, scanning_tool_service: BaseScanningToolService, assessment_id: AssessmentID, chunks: list[Chunk]
     ) -> list[str]:
         prompt_variables_list: list[PromptVariables] = []
         questions = self.format_llm_questions()
@@ -169,62 +242,10 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             prompt_variables_list.append(prompt_variables)
         return self.store_prompt_variables_list(scanning_tool_service, assessment_id, prompt_variables_list)
 
-    def manual_filtering(
-        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra]
-    ) -> list[FindingExtra]:
-        filtering_rules = FilteringRules(**json.loads(get_filtering_rules()))
-        for finding in findings:
-            if not finding.metadata or not finding.metadata.event_code:
-                continue
-            finding_rule = filtering_rules.get(finding.metadata.event_code)
-            if not finding_rule:
-                continue
-            pillar_data = next(
-                (
-                    pillar
-                    for pillar in self.formatted_question_set.data.values()
-                    if pillar.get("primary_id").lower() == finding_rule.get("pillar").lower()
-                ),
-                None,
-            )
-            if not pillar_data:
-                continue
-            question_data = next(
-                (
-                    question
-                    for question in pillar_data.get("questions", {}).values()
-                    if question.get("primary_id").lower() == finding_rule.get("question").lower()
-                ),
-                None,
-            )
-            if not question_data:
-                continue
-            best_practice_data = next(
-                (
-                    best_practice
-                    for best_practice in question_data.get("best_practices", {}).values()
-                    if best_practice.get("primary_id").lower() == finding_rule.get("best_practice").lower()
-                ),
-                None,
-            )
-            if not best_practice_data:
-                continue
-            formatted_finding_id = f"{scanning_tool}:{finding.id}"
-            best_practice_data["results"].append(formatted_finding_id)
-            self.database_service.put(
-                table_name=DDB_TABLE,
-                item={
-                    **finding.model_dump(exclude={"id"}).copy(),
-                    DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: formatted_finding_id,
-                },
-            )
-            findings.remove(finding)
-        return findings
-
-    def create_prompts(self, scanning_tool_service: IScanningToolService, event: PreparePromptsInput) -> list[str]:
+    def create_prompts(self, scanning_tool_service: BaseScanningToolService, event: PreparePromptsInput) -> list[str]:
         findings = scanning_tool_service.retrieve_filtered_findings(event.assessment_id, event.regions, event.workflows)
         findings = self.manual_filtering(event.assessment_id, event.scanning_tool, findings)
+        findings = self.merge_findings(findings)
         self.populate_dynamodb(findings, event.assessment_id, event.scanning_tool)
         chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
         return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)
@@ -234,5 +255,5 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         scanning_tool_service_type = SCANNING_TOOL_SERVICES.get(event.scanning_tool)
         if scanning_tool_service_type is None:
             raise InvalidScanningToolError(event.scanning_tool)
-        scanning_tool_service: IScanningToolService = scanning_tool_service_type(self.storage_service)
+        scanning_tool_service: BaseScanningToolService = scanning_tool_service_type(self.storage_service)
         return self.create_prompts(scanning_tool_service, event)
