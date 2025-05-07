@@ -20,7 +20,7 @@ from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
-from utils.questions import FormattedQuestionSet
+from utils.questions import QuestionSet
 
 from state_machine.event import StoreResultsInput
 
@@ -33,7 +33,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-        formatted_question_set: FormattedQuestionSet,
+        formatted_question_set: QuestionSet,
     ) -> None:
         super().__init__()
         self.database_service = database_service

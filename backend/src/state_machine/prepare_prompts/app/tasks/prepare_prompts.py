@@ -23,7 +23,7 @@ from services.database import IDatabaseService
 from services.scanning_tools import IScanningToolService
 from services.scanning_tools.list import SCANNING_TOOL_SERVICES
 from services.storage import IStorageService
-from utils.questions import FormattedQuestionSet
+from utils.questions import QuestionSet
 from utils.s3 import get_s3_uri
 
 from state_machine.event import PreparePromptsInput
@@ -34,7 +34,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-        formatted_question_set: FormattedQuestionSet,
+        formatted_question_set: QuestionSet,
     ) -> None:
         super().__init__()
         self.database_service = database_service
@@ -117,7 +117,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             chunks.append([Finding(**finding.model_dump(exclude_none=True)) for finding in chunk])
         return chunks
 
-    def retrieve_questions(self) -> str:
+    def format_llm_questions(self) -> str:
         best_practices = []
         best_practice_id = 1
         for pillar_data in self.formatted_question_set.data.values():
@@ -158,7 +158,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self, scanning_tool_service: IScanningToolService, assessment_id: AssessmentID, chunks: list[Chunk]
     ) -> list[str]:
         prompt_variables_list: list[PromptVariables] = []
-        questions = self.retrieve_questions()
+        questions = self.format_llm_questions()
         for chunk in chunks:
             prompt_variables = PromptVariables(
                 scanning_tool_title=scanning_tool_service.title,

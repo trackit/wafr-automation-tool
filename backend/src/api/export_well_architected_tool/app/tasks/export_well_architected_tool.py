@@ -7,7 +7,7 @@ from common.task import Task
 from entities.api import WorkloadId
 from entities.assessment import Assessment
 from entities.best_practice import BestPractice
-from entities.question import FormattedPillar, FormattedQuestion
+from entities.question import Pillar, Question
 from services.assessment import IAssessmentService
 from types_boto3_wellarchitected import WellArchitectedClient
 from types_boto3_wellarchitected.type_defs import (
@@ -88,7 +88,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
     def export_questions(
         self,
         workload_id: WorkloadId,
-        formatted_questions: list[FormattedQuestion],
+        formatted_questions: list[Question],
         pillar_answers: list[AnswerSummaryTypeDef],
     ) -> None:
         for question in pillar_answers:
@@ -129,7 +129,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
     def export_pillars(
         self,
         workload_id: WorkloadId,
-        formatted_pillars: list[FormattedPillar],
+        formatted_pillars: list[Pillar],
         pillar_reviews: list[PillarReviewSummaryTypeDef],
     ) -> None:
         for pillar in pillar_reviews:

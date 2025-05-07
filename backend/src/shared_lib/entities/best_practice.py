@@ -10,6 +10,7 @@ BestPracticeID = str
 
 class BestPractice(TypedDict):
     id: BestPracticeID
+    primary_id: str
     label: str
     description: str
     risk: str
@@ -37,3 +38,10 @@ class BestPracticeInfo(BaseModel):
 
 class BestPracticeDto(BaseModel):
     status: bool | None = None
+
+
+class RawBestPractice(TypedDict):
+    primary_id: str
+    label: str
+    description: str
+    risk: str
