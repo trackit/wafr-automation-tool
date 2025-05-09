@@ -18,7 +18,8 @@
       "@webui/api-client": ["apps/webui/libs/api-client/src/index.ts"],
       "@webui/forms": ["apps/webui/libs/forms/src/index.ts"],
       "@webui/types": ["apps/webui/libs/types/src/index.ts"],
-      "@webui/ui": ["apps/webui/libs/ui/src/index.ts"]
+      "@webui/ui": ["apps/webui/libs/ui/src/index.ts"],
+      "@di-container": ["libs/shared/di-container/index"],
     }
   },
   "exclude": ["node_modules", "tmp"]
