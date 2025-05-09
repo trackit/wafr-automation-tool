@@ -23,6 +23,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.6",
     "aws-amplify": "^6.14.4",
+    "aws-lambda": "^1.0.7",
     "axios": "^1.9.0",
     "lucide-react": "^0.479.0",
     "notistack": "^3.0.2",
