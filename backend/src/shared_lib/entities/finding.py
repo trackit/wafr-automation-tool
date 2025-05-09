@@ -34,6 +34,7 @@ class FindingExtra(Finding):
     resources: list[FindingResource] | None = None
     remediation: FindingRemediation | None = None
     hidden: bool = False
+    is_ai_associated: bool = True
 
 
 class FindingDto(BaseModel):

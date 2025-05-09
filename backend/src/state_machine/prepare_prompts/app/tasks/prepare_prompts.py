@@ -68,6 +68,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                 best_practice_data.results.append(finding_formatted_id)
             if not is_filtered:
                 continue
+            finding.is_ai_associated = False
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
