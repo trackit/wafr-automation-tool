@@ -155,7 +155,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
     def export_well_architected_tool(self, assessment: Assessment, event: ExportWellArchitectedToolInput) -> bool:
         if not assessment.findings:
             return False
-        formatted_pillars = list(assessment.findings.values())
+        formatted_pillars = list(assessment.findings.root.values())
         workload_id = self.create_workload(assessment, event)
         lens_review = self.well_architect_client.get_lens_review(WorkloadId=workload_id, LensAlias=WAFRLens)[
             "LensReview"

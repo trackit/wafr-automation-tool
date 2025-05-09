@@ -14,7 +14,7 @@ def convert_all_assessments_to_api_assessments(assessments: list[Assessment]) ->
 def convert_assessment_to_api_assessment(assessment: Assessment) -> APIAssessment:
     findings: list[APIFormattedPillar] = []
     if assessment.findings:
-        for pillar in assessment.findings.values():
+        for pillar in assessment.findings.root.values():
             questions: list[APIFormattedQuestion] = []
             for question in pillar.questions.values():
                 best_practices: list[BestPractice] = list(question.best_practices.values())

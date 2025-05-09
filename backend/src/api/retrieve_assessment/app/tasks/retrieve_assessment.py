@@ -20,7 +20,7 @@ class RetrieveAssessment(
     def remove_hidden_findings(self, assessment: Assessment) -> Assessment:
         if not assessment.findings:
             return assessment
-        for pillar in assessment.findings.values():
+        for pillar in assessment.findings.root.values():
             for question in pillar.questions.values():
                 for best_practice in question.best_practices.values():
                     hidden_results: list[str] = best_practice.hidden_results

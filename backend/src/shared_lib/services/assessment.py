@@ -163,7 +163,7 @@ class AssessmentService(IAssessmentService):
     ) -> APIBestPracticeExtra | None:
         if not assessment.findings:
             return None
-        pillar = assessment.findings.get(pillar_id)
+        pillar = assessment.findings.root.get(pillar_id)
         if not pillar:
             return None
         question = pillar.questions.get(question_id)
@@ -296,7 +296,7 @@ class AssessmentService(IAssessmentService):
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
         if not assessment.findings:
             return False
-        pillar = assessment.findings.get(pillar_id)
+        pillar = assessment.findings.root.get(pillar_id)
         if not pillar:
             return False
         question = pillar.questions.get(question_id)
@@ -311,7 +311,7 @@ class AssessmentService(IAssessmentService):
             best_practice.hidden_results.append(finding_id)
         else:
             best_practice.hidden_results.remove(finding_id)
-        assessment_dto = AssessmentDto(findings=assessment.findings)
+        assessment_dto = AssessmentDto(findings=assessment.findings.root)
         self.update_assessment(assessment.id, assessment_dto)
         return True
 
@@ -320,7 +320,7 @@ class AssessmentService(IAssessmentService):
         items: list[str] = []
         if not assessment.findings:
             return
-        for pillar in assessment.findings.values():
+        for pillar in assessment.findings.root.values():
             for question in pillar.questions.values():
                 for best_practice in question.best_practices.values():
                     items.extend(best_practice.results)
