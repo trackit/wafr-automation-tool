@@ -1,13 +1,11 @@
-from typing import TypedDict
-
 from pydantic import BaseModel
 
 BestPracticeID = str
 
 
-class BestPractice(TypedDict):
+class BestPractice(BaseModel):
     id: BestPracticeID
-    primary_id: str
+    primary_id: str = ""
     label: str
     description: str
     risk: str
@@ -27,7 +25,7 @@ class BestPracticeDto(BaseModel):
     status: bool | None = None
 
 
-class RawBestPractice(TypedDict):
+class RawBestPractice(BaseModel):
     primary_id: str
     label: str
     description: str

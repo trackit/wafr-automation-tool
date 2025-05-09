@@ -1,5 +1,3 @@
-from typing import TypedDict
-
 from pydantic import BaseModel
 
 from entities.best_practice import BestPractice, BestPracticeID, RawBestPractice
@@ -8,30 +6,30 @@ QuestionID = str
 PillarID = str
 
 
-class Question(TypedDict):
+class Question(BaseModel):
     id: QuestionID
-    primary_id: str
+    primary_id: str = ""
     label: str
     none: bool
     disabled: bool
     best_practices: dict[BestPracticeID, BestPractice]
 
 
-class Pillar(TypedDict):
+class Pillar(BaseModel):
     id: PillarID
-    primary_id: str
+    primary_id: str = ""
     label: str
     disabled: bool
     questions: dict[QuestionID, Question]
 
 
-class RawQuestion(TypedDict):
+class RawQuestion(BaseModel):
     primary_id: str
     label: str
     best_practices: dict[str, RawBestPractice]
 
 
-class RawPillar(TypedDict):
+class RawPillar(BaseModel):
     primary_id: str
     label: str
     questions: dict[str, RawQuestion]

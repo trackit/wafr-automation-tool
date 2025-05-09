@@ -65,7 +65,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                 if not best_practice_data:
                     continue
                 is_filtered = True
-                best_practice_data["results"].append(finding_formatted_id)
+                best_practice_data.results.append(finding_formatted_id)
             if not is_filtered:
                 continue
             self.database_service.put(
@@ -111,7 +111,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             event=UpdateAttrsInput(
                 key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
                 attrs={
-                    "findings": self.formatted_question_set.data,
+                    "findings": self.formatted_question_set.data.model_dump(),
                     "question_version": self.formatted_question_set.version,
                 },
             ),
@@ -158,17 +158,17 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
     def format_llm_questions(self) -> str:
         best_practices = []
         best_practice_id = 1
-        for pillar_data in self.formatted_question_set.data.values():
-            for question_data in pillar_data.get("questions").values():
-                for best_practice_data in question_data.get("best_practices").values():
+        for pillar_data in self.formatted_question_set.data.root.values():
+            for question_data in pillar_data.questions.values():
+                for best_practice_data in question_data.best_practices.values():
                     best_practices.append(
                         {
                             "id": best_practice_id,
-                            "pillar": pillar_data.get("label"),
-                            "question": question_data.get("label"),
+                            "pillar": pillar_data.label,
+                            "question": question_data.label,
                             "best_practice": {
-                                "label": best_practice_data.get("label"),
-                                "description": best_practice_data.get("description"),
+                                "label": best_practice_data.label,
+                                "description": best_practice_data.description,
                             },
                         }
                     )

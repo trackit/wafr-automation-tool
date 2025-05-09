@@ -74,14 +74,14 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 (
                     best_practice
                     for best_practice in formatted_best_practices
-                    if best_practice.get("label").lower() == best_practice_title.lower()
+                    if best_practice.label.lower() == best_practice_title.lower()
                 ),
                 None,
             )
             if best_practice_data is None:
                 logger.error("Best practice not found: %s", best_practice_title)
                 continue
-            if best_practice_data.get("status"):
+            if best_practice_data.status:
                 best_practices_selected.append(best_practice_id)
         return best_practices_selected
 
@@ -99,18 +99,14 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 logger.error("Missing fields for question %s", question_title)
                 continue
             question_data = next(
-                (
-                    question
-                    for question in formatted_questions
-                    if question.get("label").lower() == question_title.lower()
-                ),
+                (question for question in formatted_questions if question.label.lower() == question_title.lower()),
                 None,
             )
             if question_data is None:
                 logger.error("Question not found: %s", question_title)
                 continue
-            formatted_best_practices = list(question_data.get("best_practices", {}).values())
-            if question_data.get("none"):
+            formatted_best_practices = list(question_data.best_practices.values())
+            if question_data.none:
                 best_practices_selected = [
                     choice.get("ChoiceId", "")
                     for choice in question_choices
@@ -123,7 +119,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 LensAlias=WAFRLens,
                 QuestionId=question_id,
                 SelectedChoices=best_practices_selected,
-                IsApplicable=not question_data.get("disabled"),
+                IsApplicable=not question_data.disabled,
             )
 
     def export_pillars(
@@ -139,15 +135,15 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 logger.error("Missing fields for pillar %s", pillar_name)
                 continue
             pillar_data = next(
-                (pillar for pillar in formatted_pillars if pillar.get("label").lower() == pillar_name.lower()),
+                (pillar for pillar in formatted_pillars if pillar.label.lower() == pillar_name.lower()),
                 None,
             )
             if pillar_data is None:
                 logger.error("Pillar not found: %s", pillar_name)
                 continue
-            if pillar_data.get("disabled"):
+            if pillar_data.disabled:
                 continue
-            formatted_questions = list(pillar_data.get("questions", {}).values())
+            formatted_questions = list(pillar_data.questions.values())
             if not formatted_questions:
                 logger.error("No questions for pillar %s", pillar_name)
                 continue

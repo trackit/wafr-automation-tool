@@ -166,14 +166,14 @@ class AssessmentService(IAssessmentService):
         pillar = assessment.findings.get(pillar_id)
         if not pillar:
             return None
-        question = pillar.get("questions").get(question_id)
+        question = pillar.questions.get(question_id)
         if not question:
             return None
-        best_practice = question.get("best_practices").get(best_practice_id)
+        best_practice = question.best_practices.get(best_practice_id)
         if not best_practice:
             return None
-        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.get("results", []))
-        best_practice_data = {**best_practice}
+        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.results)
+        best_practice_data = {**best_practice.model_dump()}
         best_practice_data["results"] = findings if findings else []
         return APIBestPracticeExtra(**best_practice_data)
 
@@ -299,18 +299,18 @@ class AssessmentService(IAssessmentService):
         pillar = assessment.findings.get(pillar_id)
         if not pillar:
             return False
-        question = pillar.get("questions").get(question_id)
+        question = pillar.questions.get(question_id)
         if not question:
             return False
-        best_practice = question.get("best_practices").get(best_practice_id)
+        best_practice = question.best_practices.get(best_practice_id)
         if not best_practice:
             return False
         if finding_dto.hidden:
-            if finding_id in best_practice.get("hidden_results", []):
+            if finding_id in best_practice.hidden_results:
                 return True
-            best_practice.get("hidden_results", []).append(finding_id)
+            best_practice.hidden_results.append(finding_id)
         else:
-            best_practice.get("hidden_results", []).remove(finding_id)
+            best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings)
         self.update_assessment(assessment.id, assessment_dto)
         return True
@@ -321,9 +321,9 @@ class AssessmentService(IAssessmentService):
         if not assessment.findings:
             return
         for pillar in assessment.findings.values():
-            for question in pillar.get("questions", {}).values():
-                for best_practice in question.get("best_practices", {}).values():
-                    items.extend(best_practice.get("results", []))
+            for question in pillar.questions.values():
+                for best_practice in question.best_practices.values():
+                    items.extend(best_practice.results)
         keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
