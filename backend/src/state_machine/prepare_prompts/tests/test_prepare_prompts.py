@@ -9,6 +9,7 @@ from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
+from utils.questions import QuestionSetData
 from utils.tests import load_file
 
 from state_machine.event import PreparePromptsInput
@@ -30,33 +31,39 @@ def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
     fake_storage_service.get = MagicMock(return_value=load_file(Path(__file__).parent / "prowler_output.json"))
     fake_storage_service.put = MagicMock()
 
-    fake_question_set = MagicMock(
-        data={
-            "pillar-1": {
-                "id": "pillar-1",
-                "label": "Pillar 1",
-                "primary_id": "pillar-1",
-                "questions": {
-                    "question-1": {
-                        "id": "question-1",
-                        "label": "Question 1",
-                        "primary_id": "question-1",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "primary_id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
-            }
+    fake_question_set_data = {
+        "pillar-1": {
+            "id": "pillar-1",
+            "label": "Pillar 1",
+            "primary_id": "pillar-1",
+            "disabled": False,
+            "questions": {
+                "question-1": {
+                    "id": "question-1",
+                    "label": "Question 1",
+                    "primary_id": "question-1",
+                    "none": False,
+                    "disabled": False,
+                    "best_practices": {
+                        "best-practice-1": {
+                            "id": "best-practice-1",
+                            "primary_id": "best-practice-1",
+                            "label": "Best Practice 1",
+                            "description": "Best Practice 1 Description",
+                            "risk": "High",
+                            "status": False,
+                            "results": ["1", "2", "3"],
+                            "hidden_results": [],
+                        }
+                    },
+                }
+            },
         }
+    }
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **fake_question_set_data,
+        )
     )
 
     task = PreparePrompts(
@@ -77,11 +84,14 @@ def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
                         "id": "pillar-1",
                         "label": "Pillar 1",
                         "primary_id": "pillar-1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
                                 "id": "question-1",
-                                "primary_id": "question-1",
                                 "label": "Question 1",
+                                "primary_id": "question-1",
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",

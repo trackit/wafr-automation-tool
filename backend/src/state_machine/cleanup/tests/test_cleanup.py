@@ -5,6 +5,7 @@ from entities.assessment import Assessment, AssessmentDto, Steps
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
+from utils.questions import QuestionSetData
 
 from state_machine.event import CleanupInput, StateMachineError
 
@@ -48,35 +49,37 @@ def test_cleanup_on_error():
         step=Steps.FINISHED,
         created_at="",
         question_version="test-question-version",
-        findings={
-            "pillar-1": {
-                "id": "pillar-1",
-                "primary_id": "pillar-1",
-                "label": "Pillar 1",
-                "disabled": False,
-                "questions": {
-                    "question-1": {
-                        "id": "question-1",
-                        "primary_id": "question-1",
-                        "label": "Question 1",
-                        "none": False,
-                        "disabled": False,
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "primary_id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
+        findings=QuestionSetData(
+            **{
+                "pillar-1": {
+                    "id": "pillar-1",
+                    "primary_id": "pillar-1",
+                    "label": "Pillar 1",
+                    "disabled": False,
+                    "questions": {
+                        "question-1": {
+                            "id": "question-1",
+                            "primary_id": "question-1",
+                            "label": "Question 1",
+                            "none": False,
+                            "disabled": False,
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "id": "best-practice-1",
+                                    "primary_id": "best-practice-1",
+                                    "label": "Best Practice 1",
+                                    "description": "Best Practice 1 Description",
+                                    "risk": "High",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                    "hidden_results": [],
+                                }
+                            },
+                        }
+                    },
+                }
             }
-        },
+        ),
     )
     storage_service = FakeStorageService()
     database_service = FakeDatabaseService()
