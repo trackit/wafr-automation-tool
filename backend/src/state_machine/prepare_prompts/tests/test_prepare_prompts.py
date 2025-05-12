@@ -155,25 +155,37 @@ def test_prepare_prompts_self_made_finding():
     fake_storage_service.put = MagicMock()
 
     fake_question_set = MagicMock(
-        data={
-            "pillar-1": {
-                "label": "Pillar 1",
-                "questions": {
-                    "question-1": {
-                        "label": "Question 1",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "label": "Best Practice 1",
-                                "risk": "Low",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
+        data=QuestionSetData(
+            **{
+                "pillar-1": {
+                    "id": "pillar-1",
+                    "primary_id": "pillar-1",
+                    "label": "Pillar 1",
+                    "disabled": False,
+                    "questions": {
+                        "question-1": {
+                            "id": "question-1",
+                            "primary_id": "question-1",
+                            "label": "Question 1",
+                            "none": False,
+                            "disabled": False,
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "id": "best-practice-1",
+                                    "primary_id": "best-practice-1",
+                                    "description": "Best Practice 1 Description",
+                                    "label": "Best Practice 1",
+                                    "risk": "Low",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                    "hidden_results": [],
+                                }
+                            },
+                        }
+                    },
+                }
             }
-        }
+        )
     )
 
     event = PreparePromptsInput(
