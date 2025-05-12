@@ -41,4 +41,5 @@ class CloudSploitService(IScanningToolService):
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
         raw_findings = [CloudSploitFinding(**item) for item in loaded_content]
-        return self.convert_raw_findings(raw_findings, regions)
+        failed_findings = [item for item in raw_findings if item.status == "FAIL"]
+        return self.convert_raw_findings(failed_findings, regions)
