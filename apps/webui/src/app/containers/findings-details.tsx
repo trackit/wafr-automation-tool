@@ -34,6 +34,14 @@ const SeverityBadge = ({
   );
 };
 
+const AIBadge = ({ className }: { className?: string }) => {
+  return (
+    <div className={`font-bold badge badge-soft badge-info ${className}`}>
+      AI Associated
+    </div>
+  );
+};
+
 const highlightText = (
   text: string | null | undefined,
   searchQuery: string
@@ -73,6 +81,7 @@ function FindingItem({
             />
           )}
           {highlightText(finding.status_detail, searchQuery)}
+          {finding.is_ai_associated && <AIBadge className="badge-sm ml-2" />}
         </div>
         {!finding.hidden && (
           <div
@@ -103,7 +112,10 @@ function FindingItem({
           <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">
             <Server className="w-4 h-4 flex-shrink-0 mr-2 mt-0.5" />
             <div className="break-all">
-              {highlightText(resource.name || resource.uid || "N/A", searchQuery)}
+              {highlightText(
+                resource.name || resource.uid || 'N/A',
+                searchQuery
+              )}
             </div>
           </div>
           <div className="text-sm text-base-content inline-flex items-start badge badge-soft whitespace-normal break-all py-1 min-h-fit h-auto">
