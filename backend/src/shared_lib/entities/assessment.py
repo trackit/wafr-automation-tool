@@ -2,8 +2,9 @@ from enum import StrEnum
 from typing import Any, TypedDict
 
 from pydantic import BaseModel
+from utils.questions import QuestionSetData
 
-from entities.question import FormattedPillar
+from entities.question import Pillar
 
 AssessmentID = str
 
@@ -36,7 +37,7 @@ class Assessment(BaseModel):
     graph_datas: AssessmentData | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
-    findings: dict[str, FormattedPillar] | None = None
+    findings: QuestionSetData | None = None
 
 
 class AssessmentDto(BaseModel):
@@ -48,4 +49,4 @@ class AssessmentDto(BaseModel):
     graph_datas: AssessmentData | None = None
     error: dict[str, Any] | None = None
     question_version: str | None = None
-    findings: dict[str, FormattedPillar] | None = None
+    findings: dict[str, Pillar] | None = None

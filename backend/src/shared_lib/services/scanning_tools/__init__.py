@@ -18,6 +18,11 @@ class IScanningToolService(ABC):
     def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         raise NotImplementedError
 
+
+class BaseScanningToolService(IScanningToolService):
+    def __init__(self, storage_service: IStorageService, name: str, title: str) -> None:
+        super().__init__(storage_service=storage_service, name=name, title=title)
+
     def is_finding_in_workflow(self, finding: FindingExtra, workflows: list[str]) -> bool:
         if not workflows:
             return True

@@ -5,12 +5,24 @@ from types_boto3_dynamodb.type_defs import (
     ConditionBaseImportTypeDef,
     TableAttributeValueTypeDef,
 )
+from utils.api import APIResponseBody
 
 from entities.assessment import AssessmentData, AssessmentID, Steps
-from entities.best_practice import BestPractice
+from entities.best_practice import BestPractice, BestPracticeID
+from entities.finding import FindingExtra
 from entities.question import PillarID, QuestionID
 
 WorkloadId = str
+
+
+class APIBestPracticeExtra(APIResponseBody):
+    id: BestPracticeID
+    label: str
+    description: str = ""
+    risk: str
+    status: bool
+    results: list[FindingExtra]
+    hidden_results: list[str]
 
 
 class APIFormattedQuestion(TypedDict):

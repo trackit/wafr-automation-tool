@@ -1,7 +1,8 @@
 from typing import override
 
+from entities.api import APIBestPracticeExtra
 from entities.assessment import Assessment, AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeExtra, BestPracticeID
+from entities.best_practice import BestPracticeID
 from entities.finding import FindingExtra, FindingID
 from entities.question import PillarID, QuestionID
 from services.assessment import IAssessmentService
@@ -13,13 +14,13 @@ class FakeAssessmentService(IAssessmentService):
         raise NotImplementedError
 
     @override
-    def retrieve_best_practice(
+    def retrieve_api_best_practice(
         self,
         assessment: Assessment,
         pillar_id: PillarID,
         question_id: QuestionID,
         best_practice_id: BestPracticeID,
-    ) -> BestPracticeExtra | None:
+    ) -> APIBestPracticeExtra | None:
         raise NotImplementedError
 
     @override

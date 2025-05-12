@@ -4,42 +4,49 @@ from pathlib import Path
 
 from common.config import QUESTIONS_PATH
 from entities.best_practice import BestPractice
-from entities.question import FormattedPillar, FormattedQuestion, Pillar
-from pydantic import BaseModel
+from entities.question import Pillar, Question, RawPillar
+from pydantic import BaseModel, RootModel
+
+
+class QuestionSetData(RootModel):
+    root: dict[str, Pillar]
 
 
 class QuestionSet(BaseModel):
-    data: dict[str, Pillar]
+    data: QuestionSetData
     version: str
 
 
-class FormattedQuestionSet(BaseModel):
-    data: dict[str, FormattedPillar]
-    version: str
+class RawQuestionSet(RootModel):
+    root: dict[str, RawPillar]
 
 
-def format_questions(question_set: QuestionSet) -> FormattedQuestionSet:
-    pillars: dict[str, FormattedPillar] = {}
-    for pillar_index, (pillar_name, pillar_data) in enumerate(question_set.data.items()):
-        questions: dict[str, FormattedQuestion] = {}
-        for question_index, (question_name, question_data) in enumerate(pillar_data.items()):
+def _format_questions(question_version: str, questions_set: RawQuestionSet) -> QuestionSet:
+    question_data = QuestionSet(data=QuestionSetData({}), version=question_version)
+    for pillar_id, pillar in questions_set.root.items():
+        questions: dict[str, Question] = {}
+        for question_id, question in pillar.questions.items():
             best_practices: dict[str, BestPractice] = {}
-            for best_practice_index, (_, best_practice_data) in enumerate(
-                question_data.items(),
-            ):
-                best_practice_dump = {**best_practice_data}
-                del best_practice_dump["id"]
-                best_practices[str(best_practice_index)] = BestPractice(
-                    **best_practice_dump,
-                    id=str(best_practice_index),
+            for best_practice_id, best_practice in question.best_practices.items():
+                best_practices[best_practice_id] = BestPractice(
+                    **best_practice.model_dump(), id=best_practice_id, results=[], hidden_results=[], status=False
                 )
-            question = FormattedQuestion(
-                id=str(question_index), label=question_name, best_practices=best_practices, none=False, disabled=False
+            questions[question_id] = Question(
+                id=question_id,
+                primary_id=question.primary_id,
+                label=question.label,
+                best_practices=best_practices,
+                none=False,
+                disabled=False,
             )
-            questions[str(question_index)] = question
-        pillar = FormattedPillar(id=str(pillar_index), label=pillar_name, questions=questions, disabled=False)
-        pillars[str(pillar_index)] = pillar
-    return FormattedQuestionSet(data=pillars, version=question_set.version)
+        question_data.data.root[pillar_id] = Pillar(
+            id=pillar_id,
+            primary_id=pillar.primary_id,
+            label=pillar.label,
+            questions=questions,
+            disabled=False,
+        )
+    return question_data
 
 
 def retrieve_questions() -> QuestionSet:
@@ -54,16 +61,5 @@ def retrieve_questions() -> QuestionSet:
     )
     question_version = question_set[-1].split(".")[0]
     with Path(f"{QUESTIONS_PATH}/{question_set[-1]}").open() as f:
-        questions = json.load(f)
-        for pillar_name, pillar in questions.items():
-            for question_name, question in pillar.items():
-                for best_practice_name in question:
-                    questions[pillar_name][question_name][best_practice_name] = {
-                        **question[best_practice_name],
-                        "id": best_practice_name,
-                        "label": best_practice_name,
-                        "status": False,
-                        "results": [],
-                        "hidden_results": [],
-                    }
-    return QuestionSet(data=questions, version=question_version)
+        questions_set: RawQuestionSet = RawQuestionSet(**json.load(f))
+    return _format_questions(question_version, questions_set)

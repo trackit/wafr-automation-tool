@@ -20,7 +20,7 @@ from exceptions.assessment import InvalidPromptUriError
 from services.database import IDatabaseService
 from services.storage import IStorageService
 from utils import s3
-from utils.questions import FormattedQuestionSet
+from utils.questions import QuestionSet
 
 from state_machine.event import StoreResultsInput
 
@@ -33,7 +33,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         self,
         database_service: IDatabaseService,
         storage_service: IStorageService,
-        formatted_question_set: FormattedQuestionSet,
+        formatted_question_set: QuestionSet,
     ) -> None:
         super().__init__()
         self.database_service = database_service
@@ -102,15 +102,15 @@ class StoreResults(Task[StoreResultsInput, None]):
     def create_best_practices_info(self) -> dict[int, BestPracticeInfo]:
         best_practices: dict[int, BestPracticeInfo] = {}
         best_practice_id = 1
-        for pillar_data in self.formatted_questions.values():
-            for question_data in pillar_data.get("questions").values():
-                for best_practice_data in question_data.get("best_practices").values():
+        for pillar_data in self.formatted_questions.root.values():
+            for question_data in pillar_data.questions.values():
+                for best_practice_data in question_data.best_practices.values():
                     best_practices[best_practice_id] = BestPracticeInfo(
                         id=best_practice_id,
-                        pillar=pillar_data.get("id"),
-                        question=question_data.get("id"),
+                        pillar=pillar_data.id,
+                        question=question_data.id,
                         best_practice={
-                            "id": best_practice_data.get("id"),
+                            "id": best_practice_data.id,
                         },
                     )
                     best_practice_id += 1
