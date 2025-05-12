@@ -7,7 +7,7 @@ from common.task import Task
 from entities.api import WorkloadId
 from entities.assessment import Assessment
 from entities.best_practice import BestPractice
-from entities.question import FormattedPillar, FormattedQuestion
+from entities.question import Pillar, Question
 from services.assessment import IAssessmentService
 from types_boto3_wellarchitected import WellArchitectedClient
 from types_boto3_wellarchitected.type_defs import (
@@ -74,21 +74,21 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 (
                     best_practice
                     for best_practice in formatted_best_practices
-                    if best_practice.get("label").lower() == best_practice_title.lower()
+                    if best_practice.label.lower() == best_practice_title.lower()
                 ),
                 None,
             )
             if best_practice_data is None:
                 logger.error("Best practice not found: %s", best_practice_title)
                 continue
-            if best_practice_data.get("status"):
+            if best_practice_data.status:
                 best_practices_selected.append(best_practice_id)
         return best_practices_selected
 
     def export_questions(
         self,
         workload_id: WorkloadId,
-        formatted_questions: list[FormattedQuestion],
+        formatted_questions: list[Question],
         pillar_answers: list[AnswerSummaryTypeDef],
     ) -> None:
         for question in pillar_answers:
@@ -99,18 +99,14 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 logger.error("Missing fields for question %s", question_title)
                 continue
             question_data = next(
-                (
-                    question
-                    for question in formatted_questions
-                    if question.get("label").lower() == question_title.lower()
-                ),
+                (question for question in formatted_questions if question.label.lower() == question_title.lower()),
                 None,
             )
             if question_data is None:
                 logger.error("Question not found: %s", question_title)
                 continue
-            formatted_best_practices = list(question_data.get("best_practices", {}).values())
-            if question_data.get("none"):
+            formatted_best_practices = list(question_data.best_practices.values())
+            if question_data.none:
                 best_practices_selected = [
                     choice.get("ChoiceId", "")
                     for choice in question_choices
@@ -123,13 +119,13 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 LensAlias=WAFRLens,
                 QuestionId=question_id,
                 SelectedChoices=best_practices_selected,
-                IsApplicable=not question_data.get("disabled"),
+                IsApplicable=not question_data.disabled,
             )
 
     def export_pillars(
         self,
         workload_id: WorkloadId,
-        formatted_pillars: list[FormattedPillar],
+        formatted_pillars: list[Pillar],
         pillar_reviews: list[PillarReviewSummaryTypeDef],
     ) -> None:
         for pillar in pillar_reviews:
@@ -139,15 +135,15 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
                 logger.error("Missing fields for pillar %s", pillar_name)
                 continue
             pillar_data = next(
-                (pillar for pillar in formatted_pillars if pillar.get("label").lower() == pillar_name.lower()),
+                (pillar for pillar in formatted_pillars if pillar.label.lower() == pillar_name.lower()),
                 None,
             )
             if pillar_data is None:
                 logger.error("Pillar not found: %s", pillar_name)
                 continue
-            if pillar_data.get("disabled"):
+            if pillar_data.disabled:
                 continue
-            formatted_questions = list(pillar_data.get("questions", {}).values())
+            formatted_questions = list(pillar_data.questions.values())
             if not formatted_questions:
                 logger.error("No questions for pillar %s", pillar_name)
                 continue
@@ -159,7 +155,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
     def export_well_architected_tool(self, assessment: Assessment, event: ExportWellArchitectedToolInput) -> bool:
         if not assessment.findings:
             return False
-        formatted_pillars = list(assessment.findings.values())
+        formatted_pillars = list(assessment.findings.root.values())
         workload_id = self.create_workload(assessment, event)
         lens_review = self.well_architect_client.get_lens_review(WorkloadId=workload_id, LensAlias=WAFRLens)[
             "LensReview"

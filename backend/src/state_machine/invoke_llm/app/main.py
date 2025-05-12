@@ -7,7 +7,7 @@ from services.database import DDBService
 from services.storage import S3Service
 from tasks.invoke_llm import InvokeLLM
 from tasks.store_results import StoreResults
-from utils.questions import format_questions, retrieve_questions
+from utils.questions import retrieve_questions
 
 from state_machine.event import InvokeLLMInput, StoreResultsInput
 
@@ -23,7 +23,7 @@ ai_service = BedrockService(bedrock_client)
 
 invoke_llm_task = InvokeLLM(storage_service, ai_service)
 questions = retrieve_questions()
-store_results_task = StoreResults(database_service, storage_service, format_questions(questions))
+store_results_task = StoreResults(database_service, storage_service, questions)
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> None:  # noqa: ANN401

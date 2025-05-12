@@ -29,12 +29,23 @@ WAFR_LENS = "wellarchitected"
 
 
 class BestPractice(TypedDict):
-    risk: str
+    primary_id: str
+    label: str
     description: str
+    risk: str
 
 
-Question = dict[str, BestPractice]
-Pillar = dict[str, Question]
+class Question(TypedDict):
+    primary_id: str
+    label: str
+    best_practices: dict[str, BestPractice]
+
+
+class Pillar(TypedDict):
+    primary_id: str
+    label: str
+    questions: dict[str, Question]
+
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -116,35 +127,43 @@ class RetrieveQuestionSet:
         error_message = "Best practice risk not found"
         raise AssertionError(error_message)
 
-    def retrieve_best_practice(self, question_choices: list[ChoiceTypeDef]) -> Question:
-        best_practices: Question = {}
-        for best_practice in question_choices:
+    def retrieve_best_practice(self, question_choices: list[ChoiceTypeDef]) -> dict[str, BestPractice]:
+        best_practices: dict[str, BestPractice] = {}
+        for best_practice_index, best_practice in enumerate(question_choices):
+            best_practice_id = best_practice.get("ChoiceId")
             best_practice_title = best_practice.get("Title")
             best_practice_description = best_practice.get("Description", "")
-            if not best_practice_title:
+            if not best_practice_id or not best_practice_title:
                 logger.error("Missing fields for best practice %s", best_practice_title)
                 continue
             if "None of these" in best_practice_title:
                 continue
-            best_practices[best_practice_title] = BestPractice(
-                risk=self.retrieve_best_practice_risk(best_practice),
+            best_practices[str(best_practice_index)] = BestPractice(
+                primary_id=best_practice_id,
+                label=best_practice_title,
                 description=best_practice_description,
+                risk=self.retrieve_best_practice_risk(best_practice),
             )
         return best_practices
 
-    def retrieve_questions(self, pillar_answers: list[AnswerSummaryTypeDef]) -> Pillar:
-        questions: Pillar = {}
-        for question in pillar_answers:
+    def retrieve_questions(self, pillar_answers: list[AnswerSummaryTypeDef]) -> dict[str, Question]:
+        questions: dict[str, Question] = {}
+        for question_index, question in enumerate(pillar_answers):
+            question_id = question.get("QuestionId")
             question_title = question.get("QuestionTitle")
             question_choices = question.get("Choices")
-            if not question_title or not question_choices:
+            if not question_id or not question_title or not question_choices:
                 logger.error("Missing fields for question %s", question_title)
                 continue
-            questions[question_title] = self.retrieve_best_practice(question_choices)
+            questions[str(question_index)] = Question(
+                primary_id=question_id,
+                label=question_title,
+                best_practices=self.retrieve_best_practice(question_choices),
+            )
         return questions
 
     def retrieve_pillars(self, workload_id: str, pillar_reviews: list[PillarReviewSummaryTypeDef]) -> None:
-        for pillar in pillar_reviews:
+        for pillar_index, pillar in enumerate(pillar_reviews):
             pillar_id = pillar.get("PillarId")
             pillar_name = pillar.get("PillarName")
             if not pillar_name or not pillar_id:
@@ -153,7 +172,11 @@ class RetrieveQuestionSet:
             pillar_answers = self.well_architect_client.list_answers(
                 WorkloadId=workload_id, LensAlias=WAFR_LENS, PillarId=pillar_id, MaxResults=50
             ).get("AnswerSummaries", [])
-            self.question_set[pillar_name] = self.retrieve_questions(pillar_answers)
+            self.question_set[str(pillar_index)] = Pillar(
+                primary_id=pillar_id,
+                label=pillar_name,
+                questions=self.retrieve_questions(pillar_answers),
+            )
 
     def save_question_set(self) -> None:
         current_date = datetime.datetime.now(tz=datetime.UTC).strftime("%m%d%Y")

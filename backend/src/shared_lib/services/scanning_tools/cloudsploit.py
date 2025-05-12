@@ -6,11 +6,11 @@ from entities.assessment import AssessmentID
 from entities.finding import FindingExtra, FindingResource
 from entities.scanning_tools import CloudSploitFinding, ScanningTool
 
-from services.scanning_tools import IScanningToolService
+from services.scanning_tools import BaseScanningToolService
 from services.storage import IStorageService
 
 
-class CloudSploitService(IScanningToolService):
+class CloudSploitService(BaseScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
         super().__init__(storage_service=storage_service, name=ScanningTool.CLOUDSPLOIT, title="CloudSploit")
 
@@ -41,4 +41,5 @@ class CloudSploitService(IScanningToolService):
         content = self.storage_service.get(Bucket=S3_BUCKET, Key=key)
         loaded_content = json.loads(content)
         raw_findings = [CloudSploitFinding(**item) for item in loaded_content]
-        return self.convert_raw_findings(raw_findings, regions)
+        failed_findings = [item for item in raw_findings if item.status == "FAIL"]
+        return self.convert_raw_findings(failed_findings, regions)

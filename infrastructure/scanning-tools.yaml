@@ -40,8 +40,10 @@ Resources:
                 Effect: Allow
                 Action:
                   - account:Get*
+                  - aoss:ListCollections
                   - appstream:Describe*
                   - appstream:List*
+                  - auditmanager:GetSettings
                   - backup:List*
                   - backup:Get*
                   - bedrock:List*
@@ -51,27 +53,40 @@ Resources:
                   - codebuild:BatchGet*
                   - codebuild:ListReportGroups
                   - cognito-idp:GetUserPoolMfaConfig
+                  - compute-optimizer:GetRecommendationSummaries
+                  - devops-guru:ListNotificationChannels
                   - dlm:Get*
                   - drs:Describe*
                   - ds:Get*
                   - ds:Describe*
                   - ds:List*
                   - dynamodb:GetResourcePolicy
+                  - ec2:GetEbsDefaultKmsKeyId
                   - ec2:GetEbsEncryptionByDefault
                   - ec2:GetSnapshotBlockPublicAccessState
                   - ec2:GetInstanceMetadataDefaults
                   - ecr:Describe*
                   - ecr:GetRegistryScanningConfiguration
                   - elasticfilesystem:DescribeBackupPolicy
+                  - forecast:ListForecastExportJobs
+                  - geo:ListGeofenceCollections
+                  - geo:DescribeGeofenceCollection
+                  - geo:ListTrackers
+                  - geo:DescribeTracker
                   - glue:GetConnections
                   - glue:GetSecurityConfiguration*
                   - glue:SearchTables
                   - glue:GetMLTransforms
+                  - imagebuilder:Get*
+                  - imagebuilder:List*
+                  - iotsitewise:DescribeDefaultEncryptionConfiguration
                   - lambda:GetFunction*
                   - logs:FilterLogEvents
                   - lightsail:GetRelationalDatabases
                   - macie2:GetMacieSession
                   - macie2:GetAutomatedDiscoveryConfiguration
+                  - proton:ListEnvironmentTemplates
+                  - proton:GetEnvironmentTemplate
                   - s3:GetAccountPublicAccessBlock
                   - shield:DescribeProtection
                   - shield:GetSubscriptionState
@@ -84,7 +99,11 @@ Resources:
                   - states:ListTagsForResource
                   - support:Describe*
                   - tag:GetTagKeys
+                  - timestream:DescribeEndpoints
+                  - timestream:ListDatabases
+                  - voiceid:ListDomains
                   - wellarchitected:List*
+                  - wisdom:ListAssistants
                 Resource: "*"
               - Sid: AllowAPIGatewayReadOnly
                 Effect: Allow

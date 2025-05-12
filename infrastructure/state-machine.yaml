@@ -86,6 +86,7 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
+                - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
             - Effect: Allow

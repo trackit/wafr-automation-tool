@@ -1,29 +1,38 @@
-from typing import TypedDict
-
 from pydantic import BaseModel
 
-from entities.best_practice import BestPractice, BestPracticeID
+from entities.best_practice import BestPractice, BestPracticeID, RawBestPractice
 
 QuestionID = str
 PillarID = str
 
-Question = dict[BestPracticeID, BestPractice]
-Pillar = dict[QuestionID, Question]
 
-
-class FormattedQuestion(TypedDict):
+class Question(BaseModel):
     id: QuestionID
+    primary_id: str = ""
     label: str
     none: bool
     disabled: bool
     best_practices: dict[BestPracticeID, BestPractice]
 
 
-class FormattedPillar(TypedDict):
+class Pillar(BaseModel):
     id: PillarID
+    primary_id: str = ""
     label: str
     disabled: bool
-    questions: dict[QuestionID, FormattedQuestion]
+    questions: dict[QuestionID, Question]
+
+
+class RawQuestion(BaseModel):
+    primary_id: str
+    label: str
+    best_practices: dict[str, RawBestPractice]
+
+
+class RawPillar(BaseModel):
+    primary_id: str
+    label: str
+    questions: dict[str, RawQuestion]
 
 
 class QuestionDto(BaseModel):

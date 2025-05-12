@@ -17,6 +17,7 @@ QUESTION_SET_DATA_PLACEHOLDER = "[QUESTION_SET_DATA]"
 PROMPT_PATH = "./data/prompt.txt"
 CUSTODIAN_POLICIES_PATH = "./policies/policies.yml"
 CUSTODIAN_FILE_NAME = "custodian.yml"
+FILTERING_RULES_PATH = "./filtering/filtering.json"
 
 PROWLER_OCSF_PATH = "assessments/{}/scans/prowler/json-ocsf/output.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "assessments/{}/scans/prowler/compliance/output"

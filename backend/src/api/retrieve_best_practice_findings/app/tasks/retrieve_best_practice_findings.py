@@ -23,7 +23,7 @@ class RetrieveBestPracticeFindings(
         assessment = self.assessment_service.retrieve(event.assessment_id)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
-        findings = self.assessment_service.retrieve_best_practice(
+        findings = self.assessment_service.retrieve_api_best_practice(
             assessment,
             event.pillar_id,
             event.question_id,
