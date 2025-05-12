@@ -840,6 +840,8 @@ export interface components {
             };
             /** @description Explanation of the risk associated with the finding */
             risk_details?: string;
+            /** @description Tells whether the finding is associated with an AI or manually */
+            is_ai_associated?: boolean;
         };
         FindingDto: {
             hidden?: boolean | null;
