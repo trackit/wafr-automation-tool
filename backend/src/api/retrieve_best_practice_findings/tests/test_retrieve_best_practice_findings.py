@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 
 from entities.api import APIBestPracticeExtra
 from entities.assessment import Assessment, Steps
-from entities.best_practice import BestPracticeExtra
 from entities.finding import FindingExtra
 from tests.__mocks__.fake_assessment_service import FakeAssessmentService
 
@@ -119,6 +118,6 @@ def test_retrieve_best_practice_findings_not_found_findings():
     response = task.execute(task_input)
 
     assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
-    assessment_service.retrieve_api_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP"
+    assessment_service.retrieve_api_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP")
     assert response.status_code == NOT_FOUND
     assert not response.body
