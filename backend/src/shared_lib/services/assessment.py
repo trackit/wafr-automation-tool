@@ -317,13 +317,13 @@ class AssessmentService(IAssessmentService):
 
     @override
     def delete_findings(self, assessment: Assessment) -> None:
-        items: list[str] = []
+        items: set[str] = set()
         if not assessment.findings:
             return
         for pillar in assessment.findings.root.values():
             for question in pillar.questions.values():
                 for best_practice in question.best_practices.values():
-                    items.extend(best_practice.results)
+                    items.update(best_practice.results)
         keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
