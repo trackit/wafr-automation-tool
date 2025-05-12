@@ -23,6 +23,7 @@ import {
   CircleCheck,
   CircleMinus,
   EllipsisVertical,
+  InfoIcon,
   RefreshCw,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -45,6 +46,8 @@ export function AssessmentDetails() {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
+  const [bestPracticeDescription, setBestPracticeDescription] =
+    useState<BestPractice | null>(null);
   const { id } = useParams();
   const [progress, setProgress] = useState<number>(0);
 
@@ -516,16 +519,19 @@ export function AssessmentDetails() {
                 activeQuestion?.none && info.row.original.id !== 'resolve'
                   ? 'line-through text-base-content/50'
                   : ''
-              } collapse
-              ${!info.row.original.description ? ' collapse-close' : ''}
-              `}
+              } flex items-center`}
             >
-              <div className="collapse-title p-4 py-3 min-h-full flex gap-2 items-center">
+              <div className="p-4 py-3 pr-2 min-h-full flex gap-2 items-center">
                 {info.row.original.label}
               </div>
-              <div className="collapse-content">
-                {info.row.original.description}
-              </div>
+              {info.row.original.description && (
+                <button
+                  className="cursor-pointer"
+                  onClick={() => setBestPracticeDescription(info.row.original)}
+                >
+                  <InfoIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
           );
         },
@@ -1043,6 +1049,18 @@ export function AssessmentDetails() {
             questionId={activeQuestion?.id || ''}
             bestPractice={bestPractice}
           />
+        </Modal>
+      )}
+      {bestPracticeDescription && (
+        <Modal
+          open={true}
+          onClose={() => setBestPracticeDescription(null)}
+          className="w-full max-w-6xl"
+        >
+          <div className="flex flex-col gap-2 prose max-w-none p-6">
+            <h3>{bestPracticeDescription.label}</h3>
+            {bestPracticeDescription.description}
+          </div>
         </Modal>
       )}
       {showRescanModal && (
