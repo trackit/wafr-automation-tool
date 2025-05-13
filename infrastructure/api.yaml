@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: API Lambda Functions
 
@@ -35,12 +35,12 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub '${AWS::StackName}'
+      UserPoolName: !Sub "${AWS::StackName}"
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
       Policies:
         PasswordPolicy:
-          MinimumLength: 12
+          MinimumLength: 14
           RequireLowercase: true
           RequireNumbers: true
           RequireSymbols: true
@@ -70,7 +70,7 @@ Resources:
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub '${AWS::StackName}'
+      ClientName: !Sub "${AWS::StackName}"
       UserPoolId: !Ref UserPool
       ExplicitAuthFlows:
         - ALLOW_ADMIN_USER_PASSWORD_AUTH
@@ -78,7 +78,7 @@ Resources:
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       CallbackURLs:
-        - !Sub 'http://localhost:4000/auth_callback'
+        - !Sub "http://localhost:4000/auth_callback"
       SupportedIdentityProviders:
         - COGNITO
       AllowedOAuthFlowsUserPoolClient: true
@@ -92,7 +92,7 @@ Resources:
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      IdentityPoolName: !Sub '${AWS::StackName}'
+      IdentityPoolName: !Sub "${AWS::StackName}"
       AllowUnauthenticatedIdentities: false
       CognitoIdentityProviders:
         - ClientId:
@@ -105,7 +105,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -114,7 +114,7 @@ Resources:
             Condition:
               StringEquals:
                 cognito-identity.amazonaws.com:aud: !Ref IdentityPool
-              'ForAnyValue:StringLike':
+              "ForAnyValue:StringLike":
                 cognito-identity.amazonaws.com:amr: authenticated
   IdentityPoolRoleAttachment:
     Type: AWS::Cognito::IdentityPoolRoleAttachment
@@ -153,7 +153,7 @@ Resources:
         Variables:
           DEFAULT_ASSESSMENT_ROLE: !Ref DefaultAssessmentRole
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action: states:StartExecution
@@ -176,7 +176,7 @@ Resources:
         Project: !Ref Project
         Name: RetrieveAllAssessmentsFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -201,7 +201,7 @@ Resources:
         Project: !Ref Project
         Name: RetrieveAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -225,20 +225,20 @@ Resources:
         Project: !Ref Project
         Name: DeleteAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
                 - states:StopExecution
               Resource: !Join
-                - ''
-                - - 'arn:aws:states:'
-                  - !Ref 'AWS::Region'
-                  - ':'
-                  - !Ref 'AWS::AccountId'
-                  - ':execution:'
-                  - !Select [6, !Split [':', !Ref StateMachineArn]]
-                  - ':*'
+                - ""
+                - - "arn:aws:states:"
+                  - !Ref "AWS::Region"
+                  - ":"
+                  - !Ref "AWS::AccountId"
+                  - ":execution:"
+                  - !Select [6, !Split [":", !Ref StateMachineArn]]
+                  - ":*"
             - Effect: Allow
               Action:
                 - dynamodb:DeleteItem
@@ -264,7 +264,7 @@ Resources:
         Project: !Ref Project
         Name: UpdateAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -288,7 +288,7 @@ Resources:
         Project: !Ref Project
         Name: RescanAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -318,7 +318,7 @@ Resources:
         Project: !Ref Project
         Name: ExportAssessmentWellArchitectedToolFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -335,12 +335,12 @@ Resources:
                 - wellarchitected:ListAnswers
                 - wellarchitected:UpdateAnswer
               Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:workload/*'
+                - !Sub "arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:workload/*"
             - Effect: Allow
               Action:
                 - wellarchitected:ListWorkloads
               Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:*'
+                - !Sub "arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:*"
       Events:
         ExportAssessmentWellArchitectedTool:
           Type: Api
@@ -359,7 +359,7 @@ Resources:
         Project: !Ref Project
         Name: UpdatePillarFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -384,7 +384,7 @@ Resources:
         Project: !Ref Project
         Name: UpdateQuestionFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -409,7 +409,7 @@ Resources:
         Project: !Ref Project
         Name: RetrieveBestPracticeFindingsFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -434,7 +434,7 @@ Resources:
         Project: !Ref Project
         Name: UpdateBestPracticeFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -459,7 +459,7 @@ Resources:
         Project: !Ref Project
         Name: RetrieveFindingFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -483,7 +483,7 @@ Resources:
         Project: !Ref Project
         Name: UpdateFindingFunction
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -501,7 +501,7 @@ Resources:
 Outputs:
   ApiEndpoint:
     Description: API Endpoint
-    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Api.Stage}'
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Api.Stage}"
   UserPoolId:
     Description: User Pool ID
     Value: !Ref UserPool
