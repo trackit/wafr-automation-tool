@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import AssessmentOverview from './assessment-overview';
 import ErrorPage from './error-page';
 import FindingsDetails from './findings-details';
 
@@ -40,8 +41,9 @@ export function AssessmentDetails() {
   const navigate = useNavigate();
   const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-  const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
-  const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
+  const [selectedPillar, setSelectedPillar] = useState<Pillar | null>({
+    id: 'overview',
+  });
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
@@ -422,17 +424,6 @@ export function AssessmentDetails() {
     }
   }, [data, selectedPillar?.id, activeQuestion?.id]);
 
-  // Set the first pillar as selected ONLY on initial load
-  useEffect(() => {
-    if (
-      data?.findings &&
-      data.findings.length > 0 &&
-      selectedPillarIndex === 0
-    ) {
-      setSelectedPillar(data.findings[0]);
-    }
-  }, [data?.findings, selectedPillarIndex]);
-
   // Set question from the selected indices
   useEffect(() => {
     if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
@@ -665,7 +656,7 @@ export function AssessmentDetails() {
 
   const tabs = useMemo(() => {
     if (!data?.findings) return [];
-    return data.findings.map((pillar, index) => ({
+    const pillars = data.findings.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
           ? `${calculateCompletedQuestions(pillar.questions)}/${
@@ -720,6 +711,14 @@ export function AssessmentDetails() {
         </div>
       ),
     }));
+    const overview: {
+      label: string;
+      id: string;
+    } = {
+      label: 'Overview',
+      id: 'overview',
+    };
+    return [overview, ...pillars];
   }, [data?.findings, handleDisabledPillar]);
 
   const timelineSteps = useMemo(() => {
@@ -818,20 +817,26 @@ export function AssessmentDetails() {
         activeTab={selectedPillar?.id || ''}
         onChange={(tabId) => {
           const index = data?.findings?.findIndex((p) => p.id === tabId) ?? 0;
-          setSelectedPillarIndex(index);
-          setSelectedPillar(data?.findings?.[index] || null);
-          setActiveQuestionIndex(0);
+          if (index === -1) {
+            setSelectedPillar({
+              id: tabId,
+            });
+          } else {
+            setSelectedPillar(data?.findings?.[index] || null);
+            setActiveQuestionIndex(0);
+          }
         }}
       />
       <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
-        {selectedPillar?.disabled && (
+        {selectedPillar?.id === 'overview' ? (
+          <AssessmentOverview assessment={data ?? null} />
+        ) : selectedPillar?.disabled ? (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
             <h3 className="text-center font-medium text-xl  flex-1">
               This pillar is disabled
             </h3>
           </div>
-        )}
-        {!selectedPillar?.disabled && (
+        ) : (
           <>
             <VerticalMenu
               items={(selectedPillar?.questions || [])
