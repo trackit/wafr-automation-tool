@@ -77,8 +77,6 @@ Resources:
                   - glue:GetSecurityConfiguration*
                   - glue:SearchTables
                   - glue:GetMLTransforms
-                  - imagebuilder:Get*
-                  - imagebuilder:List*
                   - iotsitewise:DescribeDefaultEncryptionConfiguration
                   - lambda:GetFunction*
                   - logs:FilterLogEvents
