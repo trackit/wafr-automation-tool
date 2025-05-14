@@ -18,73 +18,90 @@ const CreateRoleAnswer = () => (
         <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700">
           <code>
             {`{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "account:Get*",
-        "appstream:Describe*",
-        "appstream:List*",
-        "backup:List*",
-        "backup:Get*",
-        "bedrock:List*",
-        "bedrock:Get*",
-        "cloudtrail:GetInsightSelectors",
-        "codeartifact:List*",
-        "codebuild:BatchGet*",
-        "codebuild:ListReportGroups",
-        "cognito-idp:GetUserPoolMfaConfig",
-        "dlm:Get*",
-        "drs:Describe*",
-        "ds:Get*",
-        "ds:Describe*",
-        "ds:List*",
-        "dynamodb:GetResourcePolicy",
-        "ec2:GetEbsEncryptionByDefault",
-        "ec2:GetSnapshotBlockPublicAccessState",
-        "ec2:GetInstanceMetadataDefaults",
-        "ecr:Describe*",
-        "ecr:GetRegistryScanningConfiguration",
-        "elasticfilesystem:DescribeBackupPolicy",
-        "glue:GetConnections",
-        "glue:GetSecurityConfiguration*",
-        "glue:SearchTables",
-        "glue:GetMLTransforms",
-        "lambda:GetFunction*",
-        "logs:FilterLogEvents",
-        "lightsail:GetRelationalDatabases",
-        "macie2:GetMacieSession",
-        "macie2:GetAutomatedDiscoveryConfiguration",
-        "s3:GetAccountPublicAccessBlock",
-        "shield:DescribeProtection",
-        "shield:GetSubscriptionState",
-        "securityhub:BatchImportFindings",
-        "securityhub:GetFindings",
-        "servicecatalog:Describe*",
-        "servicecatalog:List*",
-        "ssm:GetDocument",
-        "ssm-incidents:List*",
-        "states:ListTagsForResource",
-        "support:Describe*",
-        "tag:GetTagKeys",
-        "wellarchitected:List*"
-      ],
-      "Resource": "*",
-      "Sid": "AllowMoreReadOnly"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "apigateway:GET"
-      ],
-      "Resource": [
-        "arn:*:apigateway:*::/restapis/*",
-        "arn:*:apigateway:*::/apis/*"
-      ],
-      "Sid": "AllowAPIGatewayReadOnly"
-    }
-  ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Action": [
+				"account:Get*",
+				"aoss:ListCollections",
+				"appstream:Describe*",
+				"appstream:List*",
+				"auditmanager:GetSettings",
+				"backup:List*",
+				"backup:Get*",
+				"bedrock:List*",
+				"bedrock:Get*",
+				"cloudtrail:GetInsightSelectors",
+				"codeartifact:List*",
+				"codebuild:BatchGet*",
+				"codebuild:ListReportGroups",
+				"cognito-idp:GetUserPoolMfaConfig",
+				"compute-optimizer:GetRecommendationSummaries",
+				"devops-guru:ListNotificationChannels",
+				"dlm:Get*",
+				"drs:Describe*",
+				"ds:Get*",
+				"ds:Describe*",
+				"ds:List*",
+				"dynamodb:GetResourcePolicy",
+				"ec2:GetEbsDefaultKmsKeyId",
+				"ec2:GetEbsEncryptionByDefault",
+				"ec2:GetSnapshotBlockPublicAccessState",
+				"ec2:GetInstanceMetadataDefaults",
+				"ecr:Describe*",
+				"ecr:GetRegistryScanningConfiguration",
+				"elasticfilesystem:DescribeBackupPolicy",
+				"forecast:ListForecastExportJobs",
+				"geo:ListGeofenceCollections",
+				"geo:DescribeGeofenceCollection",
+				"geo:ListTrackers",
+				"geo:DescribeTracker",
+				"glue:GetConnections",
+				"glue:GetSecurityConfiguration*",
+				"glue:SearchTables",
+				"glue:GetMLTransforms",
+				"iotsitewise:DescribeDefaultEncryptionConfiguration",
+				"lambda:GetFunction*",
+				"logs:FilterLogEvents",
+				"lightsail:GetRelationalDatabases",
+				"macie2:GetMacieSession",
+				"macie2:GetAutomatedDiscoveryConfiguration",
+				"proton:ListEnvironmentTemplates",
+				"proton:GetEnvironmentTemplate",
+				"s3:GetAccountPublicAccessBlock",
+				"shield:DescribeProtection",
+				"shield:GetSubscriptionState",
+				"securityhub:BatchImportFindings",
+				"securityhub:GetFindings",
+				"servicecatalog:Describe*",
+				"servicecatalog:List*",
+				"ssm:GetDocument",
+				"ssm-incidents:List*",
+				"states:ListTagsForResource",
+				"support:Describe*",
+				"tag:GetTagKeys",
+				"timestream:DescribeEndpoints",
+				"timestream:ListDatabases",
+				"voiceid:ListDomains",
+				"wellarchitected:List*",
+				"wisdom:ListAssistants"d
+			],
+			"Resource": "*",
+			"Effect": "Allow",
+			"Sid": "AllowMoreReadOnly"
+		},
+		{
+			"Action": [
+				"apigateway:GET"
+			],
+			"Resource": [
+				"arn:aws:apigateway:*::*/restapis/*",
+				"arn:aws:apigateway:*::*/apis/*"
+			],
+			"Effect": "Allow",
+			"Sid": "AllowAPIGatewayReadOnly"
+		}
+	]
 }`}
           </code>
         </pre>
