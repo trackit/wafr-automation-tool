@@ -17,7 +17,7 @@ def test_rescan_assessment():
     sfn_client.start_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": OK}})
     assessment = APIAssessment(
         id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -34,12 +34,12 @@ def test_rescan_assessment():
 
     task_input = RescanAssessmentInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
     )
     task = RescanAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
     assessment_service.delete_findings.assert_called_once_with(assessment)
     assessment_service.delete.assert_called_once_with("AID")
     assert response.status_code == OK
@@ -55,11 +55,11 @@ def test_rescan_assessment_not_found():
 
     task_input = RescanAssessmentInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
     )
     task = RescanAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
     assert response.status_code == NOT_FOUND
     assert not response.body

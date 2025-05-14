@@ -28,7 +28,7 @@ class DeleteAssessment(Task[DeleteAssessmentInput, APIResponse[None]]):
     def execute(self, event: DeleteAssessmentInput) -> APIResponse[None]:
         assessment = self.assessment_service.retrieve(
             assessment_id=event.assessment_id,
-            owner_id=event.owner_id,
+            created_by=event.created_by,
         )
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)

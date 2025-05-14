@@ -15,7 +15,7 @@ class UpdateQuestion(Task[UpdateQuestionInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateQuestionInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, event.owner_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.created_by)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,

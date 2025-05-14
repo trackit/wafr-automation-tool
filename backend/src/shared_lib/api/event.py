@@ -14,7 +14,7 @@ class StartAssessmentInput(BaseModel):
     regions: list[str] = []
     role_arn: str | None = Field(default=None, alias="roleArn")
     workflows: list[str] = []
-    owner_id: str
+    created_by: str
 
 
 class StartAssessmentResponseBody(APIResponseBody):
@@ -23,7 +23,7 @@ class StartAssessmentResponseBody(APIResponseBody):
 
 class StateMachineInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     name: str
     regions: list[str]
     role_arn: str
@@ -33,12 +33,12 @@ class StateMachineInput(BaseModel):
 
 class DeleteAssessmentInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
 
 
 class RetrieveAssessmentInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
@@ -47,7 +47,7 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
 
 class RescanAssessmentInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
 
 
 class RetrieveBestPracticeFindingsInput(BaseModel):
@@ -55,7 +55,7 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
-    owner_id: str
+    created_by: str
 
 
 class RetrieveBestPracticeFindingsResponseBody(APIResponseBody, APIBestPracticeExtra):
@@ -64,7 +64,7 @@ class RetrieveBestPracticeFindingsResponseBody(APIResponseBody, APIBestPracticeE
 
 class RetrieveFindingInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     finding_id: FindingID
 
 
@@ -73,7 +73,7 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
 
 
 class RetrieveAllAssessmentsInput(BaseModel):
-    owner_id: str
+    created_by: str
     limit: int
     search: str | None = None
     next_token: str | None = None
@@ -87,12 +87,12 @@ class RetrieveAllAssessmentsResponseBody(APIResponseBody):
 class UpdateAssessmentInput(BaseModel):
     assessment_id: AssessmentID
     assessment_dto: AssessmentDto
-    owner_id: str
+    created_by: str
 
 
 class UpdateBestPracticeInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
@@ -101,20 +101,20 @@ class UpdateBestPracticeInput(BaseModel):
 
 class UpdatePillarInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     pillar_id: PillarID
     pillar_dto: PillarDto
 
 
 class ExportWellArchitectedToolInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     owner: str | None = None
 
 
 class UpdateQuestionInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     pillar_id: PillarID
     question_id: QuestionID
     question_dto: QuestionDto
@@ -122,7 +122,7 @@ class UpdateQuestionInput(BaseModel):
 
 class UpdateFindingInput(BaseModel):
     assessment_id: AssessmentID
-    owner_id: str
+    created_by: str
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID

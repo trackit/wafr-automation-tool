@@ -1,0 +1,17 @@
+{
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.fixAll" : ["source.unusedImports"],
+    "python.languageServer": "Pylance",
+    "python.analysis.indexing": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+        "source.addMissingImports": "always"
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/aws/serverless-application-model/main/samtranslator/schema/schema.json": [
+        "C:/MESFICHIERS/TrackIt/WAFR-automation-tool/wafr-automation-tool/template.yaml",
+        "C:/MESFICHIERS/TrackIt/WAFR-automation-tool/wafr-automation-tool/infrastructure/state-machine.yaml",
+        "C:/MESFICHIERS/TrackIt/WAFR-automation-tool/wafr-automation-tool/infrastructure/api.yaml"
+        ]
+    }
+}

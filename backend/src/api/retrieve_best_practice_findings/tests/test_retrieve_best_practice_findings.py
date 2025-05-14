@@ -16,7 +16,7 @@ from ..app.tasks.retrieve_best_practice_findings import (
 def test_retrieve_best_practice_findings():
     assessment = Assessment(
         id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -52,7 +52,7 @@ def test_retrieve_best_practice_findings():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BP",
@@ -60,7 +60,7 @@ def test_retrieve_best_practice_findings():
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
     assessment_service.retrieve_api_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP")
     assert response.status_code == OK
     assert response.body is not None
@@ -76,7 +76,7 @@ def test_retrieve_best_practice_findings_not_found_assessment():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BP",
@@ -84,7 +84,7 @@ def test_retrieve_best_practice_findings_not_found_assessment():
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
     assert response.status_code == NOT_FOUND
     assert not response.body
 
@@ -92,7 +92,7 @@ def test_retrieve_best_practice_findings_not_found_assessment():
 def test_retrieve_best_practice_findings_not_found_findings():
     assessment = Assessment(
         id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -109,7 +109,7 @@ def test_retrieve_best_practice_findings_not_found_findings():
 
     task_input = RetrieveBestPracticeFindingsInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BP",
@@ -117,7 +117,7 @@ def test_retrieve_best_practice_findings_not_found_findings():
     task = RetrieveBestPracticeFindings(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-owner-id")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
     assessment_service.retrieve_api_best_practice.assert_called_once_with(assessment, "PI", "QI", "BP")
     assert response.status_code == NOT_FOUND
     assert not response.body

@@ -334,8 +334,8 @@ Resources:
                   S: "{% $states.input.assessment_id %}"
                 id:
                   S: "{% $states.input.assessment_id %}"
-                owner_id:
-                  S: "{% $states.input.owner_id %}"
+                created_by:
+                  S: "{% $states.input.created_by %}"
                 name:
                   S: "{% $states.input.name %}"
                 regions:

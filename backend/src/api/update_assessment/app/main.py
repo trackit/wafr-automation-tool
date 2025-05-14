@@ -25,7 +25,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         response = task.execute(
             UpdateAssessmentInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
-                owner_id=user_id,
+                created_by=user_id,
                 assessment_dto=assessement_dto,
             ),
         )

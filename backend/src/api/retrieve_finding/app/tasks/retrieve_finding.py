@@ -20,7 +20,7 @@ class RetrieveFinding(
         self,
         event: RetrieveFindingInput,
     ) -> APIResponse[RetrieveFindingResponseBody]:
-        finding = self.assessment_service.retrieve_finding(event.assessment_id, event.owner_id, event.finding_id)
+        finding = self.assessment_service.retrieve_finding(event.assessment_id, event.created_by, event.finding_id)
         if not finding:
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(

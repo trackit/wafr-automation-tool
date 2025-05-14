@@ -16,7 +16,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
         body = json.loads(event["body"])
 
-        response = task.execute(StartAssessmentInput(**body, owner_id=user_id))
+        response = task.execute(StartAssessmentInput(**body, created_by=user_id))
         return response.build()
     except ValidationError as e:
         return {

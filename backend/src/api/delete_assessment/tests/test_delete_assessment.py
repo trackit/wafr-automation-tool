@@ -14,7 +14,7 @@ from ..app.tasks.delete_assessment import DeleteAssessment
 def test_delete_assessment():
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -60,7 +60,7 @@ def test_delete_assessment():
     assessment_service.delete_findings = MagicMock(return_value=True)
     sfn_client = MagicMock()
 
-    task_input = DeleteAssessmentInput(assessment_id="AID", owner_id="test-owner-id")
+    task_input = DeleteAssessmentInput(assessment_id="AID", created_by="test-created-by")
     task = DeleteAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 

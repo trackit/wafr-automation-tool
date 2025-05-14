@@ -19,7 +19,7 @@ def test_assessment_service_retrieve():
         return_value={
             DDB_KEY: "ASSESSMENT",
             DDB_SORT_KEY: "test-assessment-id",
-            "owner_id": "test-owner-id",
+            "created_by": "test-created-by",
             "name": "test-assessment-name",
             "regions": ["test-region"],
             "role_arn": "test-assessment-role",
@@ -60,10 +60,10 @@ def test_assessment_service_retrieve():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id", "test-owner-id")
+    assessment = assessment_service.retrieve("test-assessment-id", "test-created-by")
     assert assessment == Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -120,7 +120,7 @@ def test_assessment_service_retrieve_not_found():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(return_value=None)
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id", "test-owner-id")
+    assessment = assessment_service.retrieve("test-assessment-id", "test-created-by")
     assert assessment is None
 
 
@@ -132,7 +132,7 @@ def test_assessment_service_retrieve_all():
                 {
                     DDB_KEY: ASSESSMENT_PK,
                     DDB_SORT_KEY: "test-assessment-id",
-                    "owner_id": "test-owner-id",
+                    "created_by": "test-created-by",
                     "name": "test-assessment-name",
                     "regions": ["test-region"],
                     "role_arn": "test-assessment-role",
@@ -184,7 +184,7 @@ def test_assessment_service_retrieve_all():
         items=[
             Assessment(
                 id="test-assessment-id",
-                owner_id="test-owner-id",
+                created_by="test-created-by",
                 name="test-assessment-name",
                 regions=["test-region"],
                 role_arn="test-assessment-role",
@@ -250,7 +250,7 @@ def test_assessment_service_retrieve_all_pagination():
                 {
                     DDB_KEY: ASSESSMENT_PK,
                     DDB_SORT_KEY: "test-assessment-id",
-                    "owner_id": "test-owner-id",
+                    "created_by": "test-created-by",
                     "name": "test-assessment-name",
                     "regions": ["test-region"],
                     "role_arn": "test-assessment-role",
@@ -316,7 +316,7 @@ def test_assessment_service_retrieve_all_pagination():
         items=[
             Assessment(
                 id="test-assessment-id",
-                owner_id="test-owner-id",
+                created_by="test-created-by",
                 name="test-assessment-name",
                 regions=["test-region"],
                 role_arn="test-assessment-role",
@@ -388,7 +388,7 @@ def test_assessment_service_retrieve_best_practice():
 
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -467,7 +467,7 @@ def test_assessment_service_retrieve_best_practice_with_no_findings():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -486,7 +486,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -515,7 +515,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -553,7 +553,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -602,7 +602,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -661,7 +661,7 @@ def test_assessment_service_retrieve_finding():
         return_value={
             DDB_KEY: "test-assessment-id",
             DDB_SORT_KEY: "prowler:1",
-            "owner_id": "test-owner-id",
+            "created_by": "test-created-by",
             "status_code": "FAIL",
             "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
             "severity": "Low",
@@ -672,7 +672,7 @@ def test_assessment_service_retrieve_finding():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_finding("test-assessment-id", "test-owner-id", "prowler:1")
+    finding = assessment_service.retrieve_finding("test-assessment-id", "test-created-by", "prowler:1")
 
     assert finding == FindingExtra(
         id="prowler:1",
@@ -694,7 +694,7 @@ def test_assessment_service_retrieve_finding_not_found():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(return_value=None)
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_finding("test-assessment-id", "test-owner-id", "prowler:1")
+    finding = assessment_service.retrieve_finding("test-assessment-id", "test-created-by", "prowler:1")
     assert finding is None
 
 
@@ -746,7 +746,7 @@ def test_assessment_service_update():
         return_value={
             DDB_KEY: "ASSESSMENT",
             DDB_SORT_KEY: "test-assessment-id",
-            "owner_id": "test-owner-id",
+            "created_by": "test-created-by",
             "name": "test-assessment-name",
             "regions": ["test-region"],
             "role_arn": "test-assessment-role",
@@ -789,7 +789,7 @@ def test_assessment_service_update_best_practice():
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -854,7 +854,7 @@ def test_assessment_service_delete_findings():
     fake_database_service = FakeDatabaseService()
     assessment = Assessment(
         id="test-assessment-id",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",

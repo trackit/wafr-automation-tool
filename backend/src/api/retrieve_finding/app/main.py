@@ -19,7 +19,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
     response = task.execute(
         RetrieveFindingInput(
             assessment_id=event["pathParameters"]["assessmentId"],
-            owner_id=user_id,
+            created_by=user_id,
             finding_id=event["pathParameters"]["findingId"],
         )
     )

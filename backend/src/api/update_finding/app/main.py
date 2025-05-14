@@ -25,7 +25,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         response = task.execute(
             UpdateFindingInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
-                owner_id=user_id,
+                created_by=user_id,
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],
                 best_practice_id=event["pathParameters"]["bestPracticeId"],

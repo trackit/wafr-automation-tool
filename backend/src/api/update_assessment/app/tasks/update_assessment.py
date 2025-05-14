@@ -17,7 +17,7 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
     def execute(self, event: UpdateAssessmentInput) -> APIResponse[None]:
         success = self.assessment_service.update_assessment(
             assessment_id=event.assessment_id,
-            owner_id=event.owner_id,
+            created_by=event.created_by,
             assessment_dto=event.assessment_dto,
         )
         if not success:

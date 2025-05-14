@@ -21,7 +21,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
 
         response = task_delete.execute(
-            DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], owner_id=user_id),
+            DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], created_by=user_id),
         )
         return response.build()
     except ValidationError as e:

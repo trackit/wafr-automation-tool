@@ -166,7 +166,7 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
 
     @override
     def execute(self, event: ExportWellArchitectedToolInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, event.owner_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.created_by)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,

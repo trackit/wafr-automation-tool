@@ -21,7 +21,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
 
         response = task.execute(
-            RescanAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], owner_id=user_id),
+            RescanAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], created_by=user_id),
         )
         return response.build()
     except ValidationError as e:

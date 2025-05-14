@@ -34,7 +34,7 @@ class StartAssessment(
     ) -> bool:
         input_json = StateMachineInput(
             assessment_id=assessment_id,
-            owner_id=event.owner_id,
+            created_by=event.created_by,
             name=event.name,
             regions=event.regions,
             role_arn=event.role_arn if event.role_arn else DEFAULT_ASSESSMENT_ROLE,

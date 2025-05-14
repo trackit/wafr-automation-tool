@@ -26,7 +26,6 @@ class AssessmentData(TypedDict):
 
 class Assessment(BaseModel):
     id: AssessmentID
-    owner_id: str
     name: str
     regions: list[str] = []
     role_arn: str
@@ -39,7 +38,7 @@ class Assessment(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: QuestionSetData | None = None
-    owner_id: str
+    created_by: str
 
 
 class AssessmentDto(BaseModel):
@@ -52,4 +51,4 @@ class AssessmentDto(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: dict[str, Pillar] | None = None
-    owner_id: str | None = None
+    created_by: str | None = None

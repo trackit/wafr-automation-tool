@@ -23,7 +23,7 @@ class RescanAssessment(
     def start_step_functions(self, assessment: Assessment) -> bool:
         input_json = StateMachineInput(
             assessment_id=assessment.id,
-            owner_id=assessment.owner_id,
+            created_by=assessment.created_by,
             name=assessment.name,
             regions=assessment.regions,
             role_arn=assessment.role_arn,
@@ -45,7 +45,7 @@ class RescanAssessment(
         self,
         event: RescanAssessmentInput,
     ) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, event.owner_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.created_by)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         self.clean_assessment(assessment)

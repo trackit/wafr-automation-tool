@@ -21,7 +21,7 @@ from services.database import IDatabaseService
 
 class IAssessmentService:
     @abstractmethod
-    def retrieve(self, assessment_id: AssessmentID, owner_id: str | None = None) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, created_by: str | None = None) -> Assessment | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -42,7 +42,7 @@ class IAssessmentService:
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
-        owner_id: str,
+        created_by: str,
         finding_id: FindingID,
     ) -> FindingExtra | None:
         raise NotImplementedError
@@ -57,7 +57,7 @@ class IAssessmentService:
 
     @abstractmethod
     def update_assessment(
-        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str | None = None
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, created_by: str | None = None
     ) -> bool:
         raise NotImplementedError
 
@@ -118,7 +118,7 @@ class AssessmentService(IAssessmentService):
         self.database_service = database_service
 
     @override
-    def retrieve(self, assessment_id: AssessmentID, owner_id: str | None = None) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, created_by: str | None = None) -> Assessment | None:
         assessment_data = self.database_service.get(
             table_name=DDB_TABLE,
             Key={
@@ -129,7 +129,7 @@ class AssessmentService(IAssessmentService):
         if not assessment_data:
             return None
 
-        if owner_id is not None and assessment_data.get("owner_id") != owner_id:
+        if created_by is not None and assessment_data.get("created_by") != created_by:
             return None
 
         return self._create_assessment(assessment_data)
@@ -191,7 +191,7 @@ class AssessmentService(IAssessmentService):
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
-        owner_id: str,
+        created_by: str,
         finding_id: FindingID,
     ) -> FindingExtra | None:
         item = self.database_service.get(
@@ -200,7 +200,7 @@ class AssessmentService(IAssessmentService):
         )
         if not item:
             return None
-        if item.get("owner_id") != owner_id:
+        if item.get("created_by") != created_by:
             return None
         return self._create_finding(item)
 
@@ -224,11 +224,11 @@ class AssessmentService(IAssessmentService):
 
     @override
     def update_assessment(
-        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, owner_id: str | None = None
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, created_by: str | None = None
     ) -> bool:
         existing = self.retrieve(
             assessment_id=assessment_id,
-            owner_id=owner_id,
+            created_by=created_by,
         )
         if not existing:
             return False

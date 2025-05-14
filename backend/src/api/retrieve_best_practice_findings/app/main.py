@@ -25,7 +25,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         response = task.execute(
             RetrieveBestPracticeFindingsInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
-                owner_id=user_id,
+                created_by=user_id,
                 pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
                 question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
                 best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),

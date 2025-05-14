@@ -13,7 +13,7 @@ from ..app.tasks.retrieve_assessment import RetrieveAssessment
 def test_retrieve_assessment():
     assessment = APIAssessment(
         id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -28,12 +28,12 @@ def test_retrieve_assessment():
 
     task_input = RetrieveAssessmentInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
     )
     task = RetrieveAssessment(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with(assessment_id="AID", owner_id="test-owner-id")
+    assessment_service.retrieve.assert_called_once_with(assessment_id="AID", created_by="test-created-by")
     assert response.status_code == OK
     assert response.body is not None
     assert response.body.model_dump_json() == assessment.model_dump_json()
@@ -45,11 +45,11 @@ def test_retrieve_assessment_not_found():
 
     task_input = RetrieveAssessmentInput(
         assessment_id="AID",
-        owner_id="test-owner-id",
+        created_by="test-created-by",
     )
     task = RetrieveAssessment(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with(assessment_id="AID", owner_id="test-owner-id")
+    assessment_service.retrieve.assert_called_once_with(assessment_id="AID", created_by="test-created-by")
     assert response.status_code == NOT_FOUND
     assert not response.body
