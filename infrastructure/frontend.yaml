@@ -31,8 +31,6 @@ Resources:
       EnvironmentVariables:
         - Name: AMPLIFY_DIFF_DEPLOY
           Value: false
-        - Name: AMPLIFY_MONOREPO_APP_ROOT
-          Value: 'apps/webui'
         - Name: VITE_API_URL
           Value: !Ref ApiEndpoint
         - Name: VITE_USER_POOL_ID
@@ -66,7 +64,6 @@ Resources:
               cache:
                 paths:
                   - .npm/**/*
-            appRoot: apps/webui
       Tags:
         - Key: Project
           Value: !Ref Project
