@@ -390,8 +390,8 @@ paths:
         "500":
           description: Internal server error.
 
-  ? /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
-  : put:
+  /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}:
+    put:
       tags:
         - Best Practices
       summary: Update the details of a specific finding
@@ -623,6 +623,9 @@ components:
         risk_details:
           type: string
           description: Explanation of the risk associated with the finding
+        is_ai_associated:
+          type: boolean
+          description: Tells whether the finding is associated with an AI or manually
     FindingDto:
       type: object
       properties:
