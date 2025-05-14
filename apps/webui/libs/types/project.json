@@ -1,0 +1,9 @@
+{
+  "name": "webui/types",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/webui/types/src",
+  "projectType": "library",
+  "tags": ["type:types", "scope:shared"],
+  "// targets": "to see all targets run: nx show project webui/types --web",
+  "targets": {}
+}
