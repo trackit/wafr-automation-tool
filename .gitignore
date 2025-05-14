@@ -558,3 +558,6 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,visualstudiocode,pycharm,sublimetext,sam,node
 
 .nx
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*

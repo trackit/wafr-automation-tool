@@ -1,25 +1,23 @@
 {
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "outDir": "dist",
-    "rootDir": ".",
+    "module": "ESNext",
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "importHelpers": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true
   },
-  "include": [
-    "*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
   ]
 }
-
