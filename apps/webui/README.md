@@ -1,42 +1,81 @@
-# Front-end
+# Frontend <a href="../../README.md" style="float: right; font-size: medium; line-height: 1.5;">Home</a>
 
-![WAFR](../resources/frontend.png)
+![WAFR](../../resources/frontend.png)
 
-## Quick tour
+## Table of contents
 
-This project uses:
+- [Overview](#overview)
+- [Getting started](#getting-started)
+  - [Environment Variables](#environment-variables)
+  - [Run Locally](#run-locally)
+  - [Build](#build)
+  - [Tests](#tests)
+- [Deployment](#deployment)
 
-- [React](https://react.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [DaisyUI](https://daisyui.com/)
-- [TanStack Query](https://tanstack.com/query/latest)
-- [Nx](https://nx.dev/)
+## Overview
 
-## Environment Variables
+The frontend is a modern, responsive web application designed to provide a seamless user experience for interacting with the Well-Architected Framework Review Automation Tool.
 
-These enviornment variables need to be set for the webui to work properly. If you use the deploy script these will be filled automatically, if you want to run the front end locally you will need to fill those manually.
+Built with **[React](https://react.dev/)** and **[TypeScript](https://www.typescriptlang.org/)**, it ensures maintainability and type safety throughout the codebase. Styling is handled via **[Tailwind CSS](https://tailwindcss.com/)** combined with **[DaisyUI](https://daisyui.com/)** components, allowing rapid UI development with a clean and consistent design system.
 
-- `VITE_API_URL`: The base URL for the API endpoint in API Gateway (e.g., `https://your-api-gateway-url.execute-api.region.amazonaws.com/stage`)
-- `VITE_AWS_REGION`: The AWS region where your resources are deployed (e.g., `us-west-2`)
-- `VITE_USER_POOL_ID`: The ID of your Amazon Cognito User Pool
-- `VITE_IDENTITY_POOL_ID`: The ID of your Amazon Cognito Identity Pool
-- `VITE_APP_CLIENT_ID`: The client ID of your Amazon Cognito App Client
+For efficient data fetching and state management, the app leverages **[TanStack Query](https://tanstack.com/query/latest)**, enabling optimized asynchronous requests, caching, and automatic updates.
 
-## Run the development server
+Key frontend features include:
 
-With a valid environment run:
+- Intuitive dashboard displaying the results of automated AWS architecture assessments
+- Real-time status updates on ongoing analyses
+- Secure authentication and authorization managed through [AWS Cognito](https://aws.amazon.com/fr/cognito/) integration
+- Support for multiple AWS accounts and user roles
+- Ability to export assessments directly into the official [AWS Well-Architected Tool](https://aws.amazon.com/fr/well-architected-tool/) for further review and action
+- Responsive design compatible with desktop and mobile devices
+
+This frontend connects to the backend API Gateway, consuming REST endpoints that provide access to analysis data and user management functions.
+
+## Getting started
+
+### Environment Variables
+
+The following environment variables must be configured for the frontend to function correctly.
+<br/>To run the frontend locally, you need to set them manually.
+
+**Note:** The backend must be deployed first for the frontend to connect properly.
+
+| Variable                | Description                                          | Example                                                               | Where to find it                                                     |
+| ----------------------- | ---------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `VITE_API_URL`          | Base URL of the API Gateway endpoint                 | `https://your-api-gateway-url.execute-api.region.amazonaws.com/stage` | After deployment, found in the **prod stage URL** of the API Gateway |
+| `VITE_AWS_REGION`       | AWS region where your backend resources are deployed | `us-west-2`                                                           | User’s choice based on preferred deployment region                   |
+| `VITE_USER_POOL_ID`     | Amazon Cognito User Pool ID                          | `us-west-2_XXXXXXXXX`                                                 | Provided in the CloudFormation stack output of the API stack         |
+| `VITE_IDENTITY_POOL_ID` | Amazon Cognito Identity Pool ID                      | `us-west-2:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`                      | Provided in the CloudFormation stack output of the API stack         |
+| `VITE_APP_CLIENT_ID`    | Amazon Cognito App Client ID                         | `xxxxxxxxxxxxxxxxxxxxxxxxxx`                                          | Provided in the CloudFormation stack output of the API stack         |
+
+### Run Locally
+
+With the environment variables configured, start the development server by running:
 
 ```shell
-$ npm run start
+$ nx run webui:serve
 ```
 
-## Manually build the WebUI
+The application will be available locally, typically at http://localhost:4200.
 
-To manually build the WebUI without deploying:
+### Build
+
+To build the frontend without deploying, run:
 
 ```shell
-$ npm run build
+$ nx run webui:build
 ```
 
-This will generate the static assets in the `dist/webui` folder. You can then serve these files locally or deploy them to your preferred hosting service.
+This command generates static assets in the `dist/webui` folder, which can be served locally or deployed to any static hosting service.
+
+### Tests
+
+Run frontend tests locally with:
+
+```shell
+$ nx run webui:tests
+```
+
+## Deployment
+
+The frontend (WebUI) is deployed automatically alongside the backend via AWS Amplify, ensuring smooth integration and continuous delivery.
