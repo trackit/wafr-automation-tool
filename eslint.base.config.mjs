@@ -17,8 +17,36 @@ export default [
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?js$'],
           depConstraints: [
             {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
+              sourceTag: 'type:handlers',
+              onlyDependOnLibsWithTags: ['type:tokens', 'type:model', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:ports',
+              onlyDependOnLibsWithTags: ['type:model'],
+            },
+            {
+              sourceTag: 'type:tokens',
+              onlyDependOnLibsWithTags: ['type:ports', 'type:useCases', 'type:infrastructure', 'type:model', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:useCases',
+              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:useCases', 'type:model', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:infrastructure',
+              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:infrastructure', 'type:model', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:model',
+              onlyDependOnLibsWithTags: ['type:model'],
+            },
+            {
+              sourceTag: 'scope:shared',
+              onlyDependOnLibsWithTags: [],
+            },
+            {
+              sourceTag: 'scope:webui',
+              onlyDependOnLibsWithTags: ['scope:webui'],
             },
           ],
         },
