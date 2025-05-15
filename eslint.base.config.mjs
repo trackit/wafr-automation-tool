@@ -18,7 +18,7 @@ export default [
           depConstraints: [
             {
               sourceTag: 'type:handlers',
-              onlyDependOnLibsWithTags: ['type:tokens', 'type:model', 'scope:shared'],
+              onlyDependOnLibsWithTags: ['type:tokens', 'type:model', 'scope:di-container'],
             },
             {
               sourceTag: 'type:ports',
@@ -26,22 +26,22 @@ export default [
             },
             {
               sourceTag: 'type:tokens',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:useCases', 'type:infrastructure', 'type:model', 'scope:shared'],
+              onlyDependOnLibsWithTags: ['type:ports', 'type:useCases', 'type:infrastructure', 'type:model', 'scope:di-container'],
             },
             {
               sourceTag: 'type:useCases',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:useCases', 'type:model', 'scope:shared'],
+              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:useCases', 'type:model', 'scope:di-container'],
             },
             {
               sourceTag: 'type:infrastructure',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:infrastructure', 'type:model', 'scope:shared'],
+              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:infrastructure', 'type:model', 'scope:di-container'],
             },
             {
               sourceTag: 'type:model',
               onlyDependOnLibsWithTags: ['type:model'],
             },
             {
-              sourceTag: 'scope:shared',
+              sourceTag: 'scope:di-container',
               onlyDependOnLibsWithTags: [],
             },
             {
