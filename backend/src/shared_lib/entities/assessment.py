@@ -39,6 +39,7 @@ class Assessment(BaseModel):
     question_version: str | None = None
     findings: QuestionSetData | None = None
     created_by: str
+    organization: str
 
 
 class AssessmentDto(BaseModel):

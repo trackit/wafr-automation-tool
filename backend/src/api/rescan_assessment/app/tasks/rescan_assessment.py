@@ -29,6 +29,7 @@ class RescanAssessment(
             role_arn=assessment.role_arn,
             workflows=assessment.workflows,
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
+            organization=assessment.organization,
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
@@ -45,7 +46,7 @@ class RescanAssessment(
         self,
         event: RescanAssessmentInput,
     ) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, event.created_by)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         self.clean_assessment(assessment)

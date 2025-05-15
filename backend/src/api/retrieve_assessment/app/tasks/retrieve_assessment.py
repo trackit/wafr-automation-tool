@@ -34,7 +34,7 @@ class RetrieveAssessment(
     ) -> APIResponse[RetrieveAssessmentResponseBody]:
         assessment = self.assessment_service.retrieve(
             assessment_id=event.assessment_id,
-            created_by=event.created_by,
+            organization=event.organization,
         )
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)

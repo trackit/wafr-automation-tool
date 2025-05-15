@@ -14,9 +14,10 @@ task = StartAssessment(sfn_client)
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
         user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
         body = json.loads(event["body"])
 
-        response = task.execute(StartAssessmentInput(**body, created_by=user_id))
+        response = task.execute(StartAssessmentInput(**body, created_by=user_id, organization=organization))
         return response.build()
     except ValidationError as e:
         return {

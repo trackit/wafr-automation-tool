@@ -18,14 +18,14 @@ task = UpdateBestPractice(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
 
         body = json.loads(event["body"])
         best_practice_dto = BestPracticeDto(**body)
         response = task.execute(
             UpdateBestPracticeInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
-                created_by=user_id,
+                organization=organization,
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],
                 best_practice_id=event["pathParameters"]["bestPracticeId"],

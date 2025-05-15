@@ -28,13 +28,17 @@ class RetrieveAllAssessments(
         return result
 
     def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
-        attribute_name = {"#created_by": "created_by"}
-        attribute_value = {":created_by": event.created_by}
+        attribute_name = {
+            "#organization": "organization",
+        }
+        attribute_value = {
+            ":organization": event.organization,
+        }
 
         if event.search:
             filter_expression = (
                 "(contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)) "
-                "AND #created_by = :created_by"
+                "AND #organization = :organization"
             )
             attribute_name.update(
                 {
@@ -51,7 +55,7 @@ class RetrieveAllAssessments(
                 }
             )
         else:
-            filter_expression = "#created_by = :created_by"
+            filter_expression = "#organization = :organization"
 
         return (filter_expression, attribute_name, attribute_value)
 

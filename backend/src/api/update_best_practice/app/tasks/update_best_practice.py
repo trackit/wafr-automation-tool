@@ -15,7 +15,7 @@ class UpdateBestPractice(Task[UpdateBestPracticeInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateBestPracticeInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id, event.created_by)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,

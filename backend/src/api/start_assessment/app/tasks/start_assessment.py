@@ -35,6 +35,7 @@ class StartAssessment(
         input_json = StateMachineInput(
             assessment_id=assessment_id,
             created_by=event.created_by,
+            organization=event.organization,
             name=event.name,
             regions=event.regions,
             role_arn=event.role_arn if event.role_arn else DEFAULT_ASSESSMENT_ROLE,

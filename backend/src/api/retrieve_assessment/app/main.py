@@ -17,9 +17,10 @@ task = RetrieveAssessment(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
+
         response = task.execute(
-            RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], created_by=user_id),
+            RetrieveAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], organization=organization),
         )
         return response.build()
     except ValidationError as e:

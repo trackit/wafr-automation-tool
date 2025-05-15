@@ -18,10 +18,10 @@ task_delete = DeleteAssessment(assessment_service, sfn_client)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
 
         response = task_delete.execute(
-            DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], created_by=user_id),
+            DeleteAssessmentInput(assessment_id=event["pathParameters"]["assessmentId"], organization=organization),
         )
         return response.build()
     except ValidationError as e:

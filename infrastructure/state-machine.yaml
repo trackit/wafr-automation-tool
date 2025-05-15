@@ -336,6 +336,8 @@ Resources:
                   S: "{% $states.input.assessment_id %}"
                 created_by:
                   S: "{% $states.input.created_by %}"
+                organization:
+                  S: "{% $states.input.organization %}"
                 name:
                   S: "{% $states.input.name %}"
                 regions:

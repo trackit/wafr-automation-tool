@@ -20,12 +20,12 @@ task = RetrieveBestPracticeFindings(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
 
         response = task.execute(
             RetrieveBestPracticeFindingsInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
-                created_by=user_id,
+                organization=organization,
                 pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
                 question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
                 best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),
