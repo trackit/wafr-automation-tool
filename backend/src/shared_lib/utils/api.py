@@ -48,3 +48,5 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
                 "access-control-allow-credentials": "true",
             },
         }
+
+

@@ -329,9 +329,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $states.input.organization %}"
                 SK:
-                  S: "{% $states.input.assessment_id %}"
+                  S: "ASSESSMENT#{% $states.input.assessment_id %}"
                 id:
                   S: "{% $states.input.assessment_id %}"
                 created_by:

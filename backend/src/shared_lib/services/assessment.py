@@ -123,8 +123,8 @@ class AssessmentService(IAssessmentService):
         assessment_data = self.database_service.get(
             table_name=DDB_TABLE,
             Key={
-                DDB_KEY: ASSESSMENT_PK,
-                DDB_SORT_KEY: assessment_id,
+                DDB_KEY: organization,
+                DDB_SORT_KEY: "ASSESSMENT#" + assessment_id,
             },
         )
         if not assessment_data:
