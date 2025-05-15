@@ -36,12 +36,14 @@ $ nx run backend:tests
 
 ### Environment Variables
 
-These enviornment variables need to be set for the backend to be deployed.
+These environment variables need to be set for the backend to be deployed.
 
-- `STAGE`: The stage to deploy to (e.g., `dev` or `prod`)
-- `DEBUG`: Whether to enable debug mode (e.g., `true` or `false`)
-- `REPOSITORY`: The repository URL for the backend (e.g., `https://github.com/trackit/wafr-automation-tool`)
-- `INITIAL_USER_EMAIL`: The initial user email for the frontend where the first user will be created (e.g., `example@example.com`)
+| Variable             | Description                                                                                                                | Example                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `STAGE`              | Defines the target deployment environment or context                                                                       | `dev` or `prod`                                   |
+| `DEBUG`              | Enable or disable debug mode (`true` or `false`)                                                                           | `false`                                           |
+| `REPOSITORY`         | URL of the backend repository                                                                                              | `https://github.com/trackit/wafr-automation-tool` |
+| `INITIAL_USER_EMAIL` | Email of the initial user created in the frontend. An email will be sent to this address containing the frontend password. | `example@example.com`                             |
 
 ### Deployment Command
 
