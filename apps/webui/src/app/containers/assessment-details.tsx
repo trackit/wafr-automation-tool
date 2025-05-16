@@ -1,3 +1,4 @@
+import { components } from '@shared/api-schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
@@ -8,7 +9,6 @@ import {
   updateQuestion,
   updateStatus,
 } from '@webui/api-client';
-import { components } from '@shared/api-schema';
 import {
   ConfirmationModal,
   DataTable,
@@ -341,7 +341,7 @@ export function AssessmentDetails() {
   });
 
   const rescanAssessmentMutation = useMutation({
-    mutationFn: () => rescanAssessment({ assessmentId: parseInt(id || '') }),
+    mutationFn: () => rescanAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowRescanModal(false);
       queryClient.invalidateQueries({ queryKey: ['assessment', id] });
@@ -354,7 +354,7 @@ export function AssessmentDetails() {
   });
 
   const cancelAssessmentMutation = useMutation({
-    mutationFn: () => deleteAssessment({ assessmentId: parseInt(id || '') }),
+    mutationFn: () => deleteAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowCancelModal(false);
     },
