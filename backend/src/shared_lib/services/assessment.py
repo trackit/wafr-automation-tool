@@ -25,7 +25,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_all(self, pagination: APIPagination, organization) -> APIPaginationOutput[Assessment]:
+    def retrieve_all(self, pagination: APIPagination, organization : str) -> APIPaginationOutput[Assessment]:
         raise NotImplementedError
 
     @abstractmethod
@@ -136,7 +136,7 @@ class AssessmentService(IAssessmentService):
         return self._create_assessment(assessment_data)
 
     @override
-    def retrieve_all(self, pagination: APIPagination, organization) -> APIPaginationOutput[Assessment]:
+    def retrieve_all(self, pagination: APIPagination, organization : str) -> APIPaginationOutput[Assessment]:
         query_input = self._create_retrieve_all_query_input(pagination, organization)
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
         next_token = query_output.get("LastEvaluatedKey")
@@ -146,7 +146,7 @@ class AssessmentService(IAssessmentService):
             assessments.append(assessment)
         return APIPaginationOutput[Assessment](items=assessments, next_token=next_token)
 
-    def _create_retrieve_all_query_input(self, pagination: APIPagination, organization) -> QueryInputTableQueryTypeDef:
+    def _create_retrieve_all_query_input(self, pagination: APIPagination, organization : str) -> QueryInputTableQueryTypeDef:
         next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
         query_input = QueryInputTableQueryTypeDef(
             KeyConditionExpression=Key(DDB_KEY).eq(organization),
@@ -361,7 +361,6 @@ class AssessmentService(IAssessmentService):
 
     def _create_assessment(self, item: dict[str, Any]) -> Assessment:
         formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
-        formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
         if "workflow" in formatted_item:
             formatted_item["workflows"] = [formatted_item.pop("workflow")]
         if "graph_datas" not in formatted_item:
