@@ -3,7 +3,7 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/backend/infrastructure/src",
   "projectType": "library",
-  "tags": ["type:infrastructure", "scope:backend"],
+  "tags": ["type:infrastructure", "scope:backend-libs"],
   "// targets": "to see all targets run: nx show project infrastructure --web",
   "targets": {}
 }
