@@ -8,7 +8,7 @@ import {
   updateQuestion,
   updateStatus,
 } from '@webui/api-client';
-import { components } from '@webui/types';
+import { components } from '@shared/api-schema';
 import {
   ConfirmationModal,
   DataTable,
