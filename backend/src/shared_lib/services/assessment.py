@@ -25,7 +25,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_all(self, pagination: APIPagination) -> APIPaginationOutput[Assessment]:
+    def retrieve_all(self, pagination: APIPagination, organization) -> APIPaginationOutput[Assessment]:
         raise NotImplementedError
 
     @abstractmethod
@@ -136,8 +136,8 @@ class AssessmentService(IAssessmentService):
         return self._create_assessment(assessment_data)
 
     @override
-    def retrieve_all(self, pagination: APIPagination) -> APIPaginationOutput[Assessment]:
-        query_input = self._create_retrieve_all_query_input(pagination)
+    def retrieve_all(self, pagination: APIPagination, organization) -> APIPaginationOutput[Assessment]:
+        query_input = self._create_retrieve_all_query_input(pagination, organization)
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
         next_token = query_output.get("LastEvaluatedKey")
         assessments: list[Assessment] = []
@@ -146,10 +146,10 @@ class AssessmentService(IAssessmentService):
             assessments.append(assessment)
         return APIPaginationOutput[Assessment](items=assessments, next_token=next_token)
 
-    def _create_retrieve_all_query_input(self, pagination: APIPagination) -> QueryInputTableQueryTypeDef:
+    def _create_retrieve_all_query_input(self, pagination: APIPagination, organization) -> QueryInputTableQueryTypeDef:
         next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
         query_input = QueryInputTableQueryTypeDef(
-            KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+            KeyConditionExpression=Key(DDB_KEY).eq(organization),
             ScanIndexForward=False,
         )
         if pagination.limit:

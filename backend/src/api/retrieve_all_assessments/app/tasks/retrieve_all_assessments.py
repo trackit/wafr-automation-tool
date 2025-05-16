@@ -69,7 +69,7 @@ class RetrieveAllAssessments(
             attribute_name=attribute_name,
             attribute_value=attribute_value,
         )
-        paginated = self.assessment_service.retrieve_all(pagination)
+        paginated = self.assessment_service.retrieve_all(pagination, event.organization)
         next_token = (
             base64.b64encode(json.dumps(paginated.next_token).encode()).decode() if paginated.next_token else None
         )

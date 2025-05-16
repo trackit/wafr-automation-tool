@@ -75,7 +75,6 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
 
 
 class RetrieveAllAssessmentsInput(BaseModel):
-    created_by: str
     limit: int
     search: str | None = None
     next_token: str | None = None
