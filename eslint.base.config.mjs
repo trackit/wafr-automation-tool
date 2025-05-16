@@ -17,31 +17,27 @@ export default [
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?js$'],
           depConstraints: [
             {
-              sourceTag: 'type:handlers',
-              onlyDependOnLibsWithTags: ['type:tokens', 'type:model', 'scope:di-container'],
+              sourceTag: 'scope:backend',
+              onlyDependOnLibsWithTags: ['type:useCases', 'type:model', 'type:di-container'],
             },
             {
               sourceTag: 'type:ports',
               onlyDependOnLibsWithTags: ['type:model'],
             },
             {
-              sourceTag: 'type:tokens',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:useCases', 'type:infrastructure', 'type:model', 'scope:di-container'],
-            },
-            {
               sourceTag: 'type:useCases',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:useCases', 'type:model', 'scope:di-container'],
+              onlyDependOnLibsWithTags: ['type:ports', 'type:infrastructure', 'type:useCases', 'type:model', 'type:di-container'],
             },
             {
               sourceTag: 'type:infrastructure',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:tokens', 'type:infrastructure', 'type:model', 'scope:di-container'],
+              onlyDependOnLibsWithTags: ['type:ports', 'type:infrastructure', 'type:model', 'type:di-container'],
             },
             {
               sourceTag: 'type:model',
               onlyDependOnLibsWithTags: ['type:model'],
             },
             {
-              sourceTag: 'scope:di-container',
+              sourceTag: 'type:di-container',
               onlyDependOnLibsWithTags: [],
             },
             {
