@@ -53,8 +53,7 @@ function AssessmentsList() {
   };
 
   const { mutate: deleteAssessmentMutation } = useMutation({
-    mutationFn: (id: string) =>
-      deleteAssessment({ assessmentId: parseInt(id) }),
+    mutationFn: (id: string) => deleteAssessment({ assessmentId: id }),
     onMutate: () => {
       setIdToDelete(null);
     },
@@ -67,8 +66,7 @@ function AssessmentsList() {
   });
 
   const rescanAssessmentMutation = useMutation({
-    mutationFn: (id: string) =>
-      rescanAssessment({ assessmentId: parseInt(id) }),
+    mutationFn: (id: string) => rescanAssessment({ assessmentId: id }),
     onMutate: async () => {
       queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
       queryClient.invalidateQueries({ queryKey: ['assessments'] });
