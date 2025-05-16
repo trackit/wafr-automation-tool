@@ -182,7 +182,7 @@ describe('AssessmentsList', () => {
     });
 
     await waitFor(() => {
-      expect(deleteAssessment).toHaveBeenCalledWith({ assessmentId: 1 });
+      expect(deleteAssessment).toHaveBeenCalledWith({ assessmentId: '1' });
     });
   });
 

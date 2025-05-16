@@ -416,7 +416,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description The unique ID of the newly created assessment */
-                        assessment_id?: number;
+                        assessment_id?: string;
                     };
                 };
             };
@@ -442,7 +442,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to retrieve */
-                assessmentId: number;
+                assessmentId: string;
             };
             cookie?: never;
         };
@@ -479,7 +479,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to update */
-                assessmentId: number;
+                assessmentId: string;
             };
             cookie?: never;
         };
@@ -518,7 +518,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to rescan */
-                assessmentId: number;
+                assessmentId: string;
             };
             cookie?: never;
         };
@@ -553,7 +553,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to delete */
-                assessmentId: number;
+                assessmentId: string;
             };
             cookie?: never;
         };
@@ -591,7 +591,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to export */
-                assessmentId: number;
+                assessmentId: string;
             };
             cookie?: never;
         };
@@ -633,7 +633,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The ID of the pillar */
                 pillarId: number;
             };
@@ -681,7 +681,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
                 pillarId: number;
                 /** @description The ID of the question */
@@ -731,7 +731,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
                 pillarId: number;
                 /** @description The ID of the question to retrieve the best practices to */
@@ -767,7 +767,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
                 pillarId: number;
                 /** @description The ID of the question to update the best practice to */
@@ -819,7 +819,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
                 pillarId: number;
                 /** @description The ID of the question to update the best practice to */
@@ -873,7 +873,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
-                assessmentId: number;
+                assessmentId: string;
                 /** @description The unique ID of the finding to retrieve */
                 findingId: string;
             };
