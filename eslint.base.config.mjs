@@ -18,7 +18,15 @@ export default [
           depConstraints: [
             {
               sourceTag: 'scope:backend',
-              onlyDependOnLibsWithTags: ['type:useCases', 'type:model', 'type:di-container'],
+              onlyDependOnLibsWithTags: ['scope:backend', 'type:useCases', 'type:model', 'scope:shared'],
+            },
+            {
+              sourceTag: 'scope:webui',
+              onlyDependOnLibsWithTags: ['scope:webui', 'scope:shared', 'scope:webui-libs'],
+            },
+            {
+              sourceTag: 'scope:webui-libs',
+              onlyDependOnLibsWithTags: ['scope:webui-libs', 'scope:shared'],
             },
             {
               sourceTag: 'type:ports',
@@ -39,10 +47,6 @@ export default [
             {
               sourceTag: 'type:di-container',
               onlyDependOnLibsWithTags: [],
-            },
-            {
-              sourceTag: 'scope:webui',
-              onlyDependOnLibsWithTags: ['scope:webui'],
             },
           ],
         },
