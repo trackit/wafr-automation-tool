@@ -50,14 +50,14 @@ class Cleanup(Task[CleanupInput, None]):
             step=Steps.ERRORED,
             error=error,
         )
-        self.assessment_service.update_assessment(event.assessment_id, assessment_dto)
+        self.assessment_service.update_assessment(event.assessment_id, assessment_dto, event.organization)
 
     @override
     def execute(self, event: CleanupInput) -> None:
         if not DEBUG:
             self.clean_prowler_scan(event)
             self.clean_assessment_storage(event)
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return
         if event.error:

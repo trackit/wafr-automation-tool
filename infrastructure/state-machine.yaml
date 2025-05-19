@@ -367,6 +367,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $states.input.assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
@@ -463,6 +464,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           PreparePromptsUpdateStep:
             Type: Task
@@ -485,6 +487,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           Prepare Prompts:
             Type: Parallel
@@ -530,6 +533,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           InvokeLLMUpdateStep:
             Type: Task
@@ -553,6 +557,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
@@ -584,18 +589,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           GenerateData:
             Type: Task
             Resource: !GetAtt GenerateDataFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+              organization: "{% $organization %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
             Next: "FinishUpdateStep"
           FinishUpdateStep:
@@ -619,18 +627,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+              organization: "{% $organization %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
             End: true
           CleanupOnError:

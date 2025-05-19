@@ -15,7 +15,7 @@ class GenerateData(Task[GenerateDataInput, None]):
         super().__init__()
 
     def generate_data(self, event: GenerateDataInput) -> None:
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment or not assessment.raw_graph_datas:
             return
         data: AssessmentData = AssessmentData(
@@ -35,7 +35,7 @@ class GenerateData(Task[GenerateDataInput, None]):
             data["severities"] = dict(Counter(data["severities"]) + Counter(scanning_tool_data["severities"]))
             data["findings"] += scanning_tool_data["findings"]
         self.assessment_service.update_assessment(
-            event.assessment_id, AssessmentDto(graph_datas=data, raw_graph_datas={})
+            event.assessment_id, AssessmentDto(graph_datas=data, raw_graph_datas={}), event.organization
         )
 
     @override

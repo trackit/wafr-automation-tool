@@ -1,3 +1,4 @@
+from sys import orig_argv
 from typing import Any
 
 from entities.ai import PromptS3Uri
@@ -39,6 +40,7 @@ class StateMachineError(BaseModel):
 
 class CleanupInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     error: StateMachineError | None = None
 
 
@@ -49,3 +51,4 @@ class CreatePromptsInput(BaseModel):
 
 class GenerateDataInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
