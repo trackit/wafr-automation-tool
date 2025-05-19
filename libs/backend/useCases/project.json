@@ -1,0 +1,9 @@
+{
+  "name": "useCases",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/backend/useCases/src",
+  "projectType": "library",
+  "tags": ["type:useCases", "scope:backend"],
+  "// targets": "to see all targets run: nx show project useCases --web",
+  "targets": {}
+}
