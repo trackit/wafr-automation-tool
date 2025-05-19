@@ -1,4 +1,4 @@
-from http.client import NOT_FOUND
+from http.client import NOT_FOUND, OK
 from typing import override
 
 from common.task import Task
@@ -23,6 +23,6 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
         if not success:
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
-            status_code=200,
+            status_code=OK,
             body=None,
         )
