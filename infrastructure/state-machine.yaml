@@ -356,6 +356,7 @@ Resources:
                   S: "{% $states.input.created_at %}"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
+              organization: "{% $states.input.organization %}"
               regions: "{% $states.input.regions %}"
               role_arn: "{% $states.input.role_arn %}"
               workflows: "{% $states.input.workflows %}"
@@ -566,6 +567,7 @@ Resources:
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
                     assessment_id: "{% $assessment_id %}"
+                    organization: "{% $organization %}"
                     prompt_uri: "{% $states.input %}"
                     prompt_arn: !GetAtt BedrockPrompt.Arn
                   End: true

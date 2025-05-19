@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.retrieve_all_assessments import RetrieveAllAssessments
+from utils.api import get_user_organization_id
 
 from api.event import RetrieveAllAssessmentsInput
 
@@ -17,7 +18,7 @@ task = RetrieveAllAssessments(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        organization = event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
+        organization = get_user_organization_id(event)
 
         query_string_parameters = event.get("queryStringParameters")
         task_input = RetrieveAllAssessmentsInput(limit=999999, organization=organization)

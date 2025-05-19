@@ -11,6 +11,7 @@ class PreparePromptsInput(BaseModel):
     scanning_tool: ScanningTool
     regions: list[str]
     workflows: list[str]
+    organization: str
 
 
 class FormatProwlerInput(BaseModel):
@@ -28,6 +29,7 @@ class StoreResultsInput(BaseModel):
     assessment_id: AssessmentID
     prompt_uri: PromptS3Uri
     llm_response: str
+    organization: str
 
 
 class StateMachineError(BaseModel):

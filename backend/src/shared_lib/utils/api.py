@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal
+import re
 from typing import Any, override
 
 from pydantic import BaseModel
@@ -50,3 +51,5 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
         }
 
 
+def get_user_organization_id(event: dict[str, Any]) -> str:
+    return event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]

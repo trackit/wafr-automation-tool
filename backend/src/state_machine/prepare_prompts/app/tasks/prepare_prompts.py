@@ -44,7 +44,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.formatted_question_set = formatted_question_set
 
     def manual_filtering(
-        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra]
+        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra], organization: str
     ) -> list[FindingExtra]:
         filtering_rules = get_filtering_rules()
         for finding in findings.copy():
@@ -73,8 +73,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
                 table_name=DDB_TABLE,
                 item={
                     **finding.model_dump(exclude={"id"}),
-                    DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: finding_formatted_id,
+                    DDB_KEY: organization,
+                    DDB_SORT_KEY: "ASSESSMENT#" + assessment_id + "#" + scanning_tool + "#" + finding.id,
                 },
             )
             findings.remove(finding)
@@ -209,7 +209,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
     def create_prompts(self, scanning_tool_service: BaseScanningToolService, event: PreparePromptsInput) -> list[str]:
         findings = scanning_tool_service.retrieve_filtered_findings(event.assessment_id, event.regions, event.workflows)
-        findings = self.manual_filtering(event.assessment_id, event.scanning_tool, findings)
+        findings = self.manual_filtering(event.assessment_id, event.scanning_tool, findings, event.organization)
         self.populate_dynamodb(findings, event.assessment_id, event.scanning_tool)
         chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
         return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)

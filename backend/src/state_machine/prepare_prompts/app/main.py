@@ -6,6 +6,7 @@ from services.database import DDBService
 from services.storage import S3Service
 from tasks.prepare_prompts import PreparePrompts
 from utils.questions import retrieve_questions
+from utils.api import get_user_organization_id
 
 from state_machine.event import PreparePromptsInput
 
@@ -26,4 +27,5 @@ task = PreparePrompts(
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:  # noqa: ANN401
-    return task.execute(PreparePromptsInput(**event))
+    organization = get_user_organization_id(event)
+    return task.execute(PreparePromptsInput(**event, organization=organization))

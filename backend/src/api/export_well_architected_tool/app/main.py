@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.export_well_architected_tool import ExportWellArchitectedTool
+from utils.api import get_user_organization_id
 
 from api.event import ExportWellArchitectedToolInput
 

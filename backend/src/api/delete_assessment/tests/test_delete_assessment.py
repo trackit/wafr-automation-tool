@@ -53,6 +53,7 @@ def test_delete_assessment():
                 }
             }
         ),
+        organization="test-organization-id",
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
@@ -60,7 +61,7 @@ def test_delete_assessment():
     assessment_service.delete_findings = MagicMock(return_value=True)
     sfn_client = MagicMock()
 
-    task_input = DeleteAssessmentInput(assessment_id="AID", created_by="test-created-by")
+    task_input = DeleteAssessmentInput(assessment_id="AID", organization="OID")
     task = DeleteAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 

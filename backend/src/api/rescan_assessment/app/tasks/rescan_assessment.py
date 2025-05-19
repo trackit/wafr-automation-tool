@@ -39,7 +39,7 @@ class RescanAssessment(
 
     def clean_assessment(self, assessment: Assessment) -> None:
         self.assessment_service.delete_findings(assessment)
-        self.assessment_service.delete(assessment.id)
+        self.assessment_service.delete(assessment.id, assessment.organization)
 
     @override
     def execute(

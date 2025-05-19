@@ -80,6 +80,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         scanning_tool: ScanningTool,
         finding_ids: list[FindingID],
         findings_data: list[FindingExtra],
+        organization: str,
     ) -> None:
         for finding_id in finding_ids:
             finding_data = next(
@@ -94,8 +95,8 @@ class StoreResults(Task[StoreResultsInput, None]):
                 table_name=DDB_TABLE,
                 item={
                     **finding_dict,
-                    DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: f"{scanning_tool}:{finding_id}",
+                    DDB_KEY: organization,
+                    DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}#{scanning_tool}#{finding_id}"
                 },
             )
 
@@ -122,6 +123,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         scanning_tool: ScanningTool,
         ai_associations: list[AIFindingAssociation],
         findings_data: list[FindingExtra],
+        organization: str,
     ) -> None:
         best_practices_info = self.create_best_practices_info()
         for ai_association in ai_associations:
@@ -133,7 +135,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             finding_end = ai_association["end"]
             finding_ids: list[FindingID] = [str(i) for i in range(finding_start, finding_end + 1)]
             self.store_finding_ids(assessment_id, scanning_tool, best_practice_info, finding_ids)
-            self.store_findings(assessment_id, scanning_tool, finding_ids, findings_data)
+            self.store_findings(assessment_id, scanning_tool, finding_ids, findings_data, organization)
 
     def load_response(self, llm_response: str) -> list[AIFindingAssociation]:
         try:
@@ -160,4 +162,4 @@ class StoreResults(Task[StoreResultsInput, None]):
         scanning_tool, chunk_id = self.get_uri_infos(s3_key)
         findings_data = self.retrieve_findings_data(event.assessment_id, s3_bucket, f"{scanning_tool}_{chunk_id}")
         logger.info("Processing %s chunk %s", scanning_tool, chunk_id)
-        self.store_results(event.assessment_id, scanning_tool, ai_associations, findings_data)
+        self.store_results(event.assessment_id, scanning_tool, ai_associations, findings_data, event.organization)
