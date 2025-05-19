@@ -10,7 +10,8 @@
   "scripts": {
     "start:webui": "nx serve webui",
     "build:webui": "nx build webui",
-    "test:webui": "nx run-many -t test webui",
+    "test:webui": "nx run-many -t test -p tag:scope:webui tag:scope:webui-libs tag:scope:shared",
+    "test:backend": "nx run-many -t test -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "test": "nx run-many -t test",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts"
   },
