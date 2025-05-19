@@ -200,8 +200,6 @@ class AssessmentService(IAssessmentService):
         )
         if not item:
             return None
-        if item.get("organization") != organization:  # really useful ?
-            return None
         return self._create_finding(item)
 
     @override
