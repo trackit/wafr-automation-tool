@@ -3,10 +3,11 @@ import logging
 from typing import override
 
 from common.config import (
-    ASSESSMENT_PK,
+    ASSESSMENT_SK,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
+    FINDING_SK,
     STORE_CHUNK_PATH,
 )
 from common.task import Task
@@ -52,6 +53,7 @@ class StoreResults(Task[StoreResultsInput, None]):
 
     def store_finding_ids(
         self,
+        organization: str,
         assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
         best_practice_info: BestPracticeInfo,
@@ -61,7 +63,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             return
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            Key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": best_practice_info.pillar,
@@ -96,7 +98,7 @@ class StoreResults(Task[StoreResultsInput, None]):
                 item={
                     **finding_dict,
                     DDB_KEY: organization,
-                    DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}#{scanning_tool}#{finding_id}"
+                    DDB_SORT_KEY: FINDING_SK.format(assessment_id, f"{scanning_tool}#{finding_id}"),
                 },
             )
 
@@ -134,7 +136,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             finding_start = ai_association["start"]
             finding_end = ai_association["end"]
             finding_ids: list[FindingID] = [str(i) for i in range(finding_start, finding_end + 1)]
-            self.store_finding_ids(assessment_id, scanning_tool, best_practice_info, finding_ids)
+            self.store_finding_ids(organization, assessment_id, scanning_tool, best_practice_info, finding_ids)
             self.store_findings(assessment_id, scanning_tool, finding_ids, findings_data, organization)
 
     def load_response(self, llm_response: str) -> list[AIFindingAssociation]:

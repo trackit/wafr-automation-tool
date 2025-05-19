@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Any, override
 
 from boto3.dynamodb.conditions import Key
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, FINDING_SK
 from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeID
@@ -123,7 +123,7 @@ class AssessmentService(IAssessmentService):
             table_name=DDB_TABLE,
             Key={
                 DDB_KEY: organization,
-                DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}",
+                DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id),
             },
         )
         if not assessment_data:
@@ -196,7 +196,7 @@ class AssessmentService(IAssessmentService):
     ) -> FindingExtra | None:
         item = self.database_service.get(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}#{finding_id}"},
+            Key={DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_id)},
         )
         if not item:
             return None
@@ -216,7 +216,7 @@ class AssessmentService(IAssessmentService):
         items = self.database_service.bulk_get(
             table_name=DDB_TABLE,
             keys=[
-                {DDB_KEY: organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}#{finding_id}"}
+                {DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_id)}
                 for finding_id in finding_ids
             ],
         )
@@ -237,7 +237,7 @@ class AssessmentService(IAssessmentService):
 
         attrs = assessment_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}"},
+            key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
@@ -252,7 +252,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = pillar_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment.id}"},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -271,7 +271,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = question_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment.id}"},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.questions.#question.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -292,7 +292,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = best_practice_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment.id}"},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -316,7 +316,7 @@ class AssessmentService(IAssessmentService):
     ) -> bool:
         attrs = finding_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment.id}#{finding_id}"},
+            key={DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, finding_id)},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
@@ -351,7 +351,7 @@ class AssessmentService(IAssessmentService):
                 for best_practice in question.best_practices.values():
                     items.update(best_practice.results)
         keys = [
-            {DDB_KEY: assessment.organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment.id}#{item}"} for item in items
+            {DDB_KEY: assessment.organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, item)} for item in items
         ]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
@@ -359,7 +359,7 @@ class AssessmentService(IAssessmentService):
     def delete(self, assessment_id: AssessmentID, organization: str) -> None:
         self.database_service.delete(
             table_name=DDB_TABLE,
-            key={DDB_KEY: organization, DDB_SORT_KEY: f"ASSESSMENT#{assessment_id}"},
+            key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
         )
 
     def _create_assessment(self, item: dict[str, Any]) -> Assessment:
