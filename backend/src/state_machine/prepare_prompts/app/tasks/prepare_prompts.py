@@ -3,7 +3,7 @@ from collections import Counter
 from typing import override
 
 from common.config import (
-    ASSESSMENT_PK,
+    ASSESSMENT_SK,
     CHUNK_SIZE,
     DDB_KEY,
     DDB_SORT_KEY,
@@ -54,7 +54,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             finding_rules = filtering_rules.get(finding.metadata.event_code)
             if not finding_rules:
                 continue
-            finding_formatted_id = f"{scanning_tool}:{finding.id}"
+            finding_formatted_id = f"{scanning_tool}#{finding.id}"
             is_filtered = False
             for finding_rule in finding_rules:
                 best_practice_data = get_best_practice_by_primary_id(

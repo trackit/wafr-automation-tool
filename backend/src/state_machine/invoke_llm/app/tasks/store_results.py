@@ -71,7 +71,7 @@ class StoreResults(Task[StoreResultsInput, None]):
                 "#best_practice": best_practice_info.best_practice.get("id") or "",
             },
             ExpressionAttributeValues={
-                ":new_findings": [f"{scanning_tool}:{finding_id}" for finding_id in best_practice_finding_ids],
+                ":new_findings": [f"{scanning_tool}#{finding_id}" for finding_id in best_practice_finding_ids],
                 ":empty_list": [],
             },
         )
