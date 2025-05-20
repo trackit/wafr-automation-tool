@@ -73,7 +73,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
-                    **finding.model_dump(exclude={"id"}),
+                    **finding.model_dump(),
                     DDB_KEY: organization,
                     DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_formatted_id),
                 },
