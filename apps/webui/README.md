@@ -73,7 +73,7 @@ This command generates static assets in the `dist/webui` folder, which can be se
 Run frontend tests locally with:
 
 ```shell
-$ nx run webui:tests
+$ npm run test:webui
 ```
 
 ## Deployment
