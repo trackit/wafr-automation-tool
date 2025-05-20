@@ -1,0 +1,2 @@
+class OrganizationExtractionError(Exception):
+    pass

@@ -499,6 +499,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "prowler"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"
@@ -510,6 +511,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "cloud-custodian"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"
@@ -521,6 +523,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "cloudsploit"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"

@@ -6,7 +6,6 @@ from services.database import DDBService
 from services.storage import S3Service
 from tasks.prepare_prompts import PreparePrompts
 from utils.questions import retrieve_questions
-from utils.api import get_user_organization_id
 
 from state_machine.event import PreparePromptsInput
 

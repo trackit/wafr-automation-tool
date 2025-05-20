@@ -5,6 +5,8 @@ from typing import Any, override
 
 from pydantic import BaseModel
 
+from exceptions.api import OrganizationExtractionError
+
 
 class APIResponseBody(BaseModel):
     pass
@@ -50,8 +52,10 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
             },
         }
 
-class OrganizationExtractionError(Exception):
-    pass
 
 def get_user_organization_id(event: dict[str, Any]) -> str:
-    return event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
+    try:
+        return event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
+    except (KeyError, AttributeError, IndexError) as e:
+        msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("email", None)
+        raise OrganizationExtractionError(msg) from e
