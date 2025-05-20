@@ -711,14 +711,14 @@ components:
           type: string
         label:
           type: string
-        description:
-          type: string
         risk:
           type: string
           enum:
             - High
             - Medium
             - Low
+        description:
+          type: string
         status:
           type: boolean
         results:
