@@ -22,7 +22,12 @@ class UpdateFinding(Task[UpdateFindingInput, APIResponse[None]]):
                 body=None,
             )
         self.assessment_service.update_finding(
-            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.finding_id, event.finding_dto, event.organization
+            assessment,
+            event.pillar_id,
+            event.question_id,
+            event.best_practice_id,
+            event.finding_id,
+            event.finding_dto,
         )
         return APIResponse(
             status_code=OK,

@@ -99,7 +99,6 @@ class IAssessmentService:
         best_practice_id: BestPracticeID,
         finding_id: FindingID,
         finding_dto: FindingDto,
-        organization: str,
     ) -> bool:
         raise NotImplementedError
 
@@ -310,11 +309,10 @@ class AssessmentService(IAssessmentService):
         best_practice_id: BestPracticeID,
         finding_id: FindingID,
         finding_dto: FindingDto,
-        organization: str,
     ) -> bool:
         attrs = finding_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, finding_id)},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, finding_id)},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
@@ -336,7 +334,7 @@ class AssessmentService(IAssessmentService):
         else:
             best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings.root)
-        self.update_assessment(assessment.id, assessment_dto, organization)
+        self.update_assessment(assessment.id, assessment_dto, assessment.organization)
         return True
 
     @override
