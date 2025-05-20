@@ -50,7 +50,7 @@ These environment variables need to be set for the backend to be deployed.
 Deploy the backend using [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-deploying.html#serverless-sam-cli-using-package-and-deploy) through:
 
 ```shell
-$ nx run backend:deploy
+$ npm run deploy:backend
 ```
 
 ## Usage
