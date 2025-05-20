@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from boto3.dynamodb.conditions import Key
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, FINDING_SK
 from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, Steps
 from entities.best_practice import BestPractice, BestPracticeDto
@@ -17,9 +17,11 @@ def test_assessment_service_retrieve():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(
         return_value={
-            DDB_KEY: "ASSESSMENT",
-            DDB_SORT_KEY: "test-assessment-id",
+            DDB_KEY: "test-organization",
+            DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id"),
+            "id": "test-assessment-id",
             "created_by": "test-created-by",
+            "organization": "test-organization",
             "name": "test-assessment-name",
             "regions": ["test-region"],
             "role_arn": "test-assessment-role",
@@ -60,10 +62,11 @@ def test_assessment_service_retrieve():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id", "test-created-by")
+    assessment = assessment_service.retrieve("test-assessment-id", "test-organization")
     assert assessment == Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -112,7 +115,7 @@ def test_assessment_service_retrieve():
 
     fake_database_service.get.assert_called_once_with(
         table_name="test-table",
-        Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+        Key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id")},
     )
 
 
@@ -120,7 +123,7 @@ def test_assessment_service_retrieve_not_found():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(return_value=None)
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment = assessment_service.retrieve("test-assessment-id", "test-created-by")
+    assessment = assessment_service.retrieve("test-assessment-id", "test-organization")
     assert assessment is None
 
 
@@ -130,9 +133,11 @@ def test_assessment_service_retrieve_all():
         return_value={
             "Items": [
                 {
-                    DDB_KEY: ASSESSMENT_PK,
-                    DDB_SORT_KEY: "test-assessment-id",
+                    DDB_KEY: "test-organization",
+                    DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id"),
+                    "id": "test-assessment-id",
                     "created_by": "test-created-by",
+                    "organization": "test-organization",
                     "name": "test-assessment-name",
                     "regions": ["test-region"],
                     "role_arn": "test-assessment-role",
@@ -178,13 +183,14 @@ def test_assessment_service_retrieve_all():
     assessment_service = AssessmentService(database_service=fake_database_service)
 
     pagination = APIPagination(limit=10)
-    assessments = assessment_service.retrieve_all(pagination)
+    assessments = assessment_service.retrieve_all(pagination, organization="test-organization")
 
     assert assessments == APIPaginationOutput[Assessment](
         items=[
             Assessment(
                 id="test-assessment-id",
                 created_by="test-created-by",
+                organization="test-organization",
                 name="test-assessment-name",
                 regions=["test-region"],
                 role_arn="test-assessment-role",
@@ -236,7 +242,7 @@ def test_assessment_service_retrieve_all():
 
     fake_database_service.query.assert_called_once_with(
         table_name="test-table",
-        KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+        KeyConditionExpression=Key(DDB_KEY).eq("test-organization"),
         ScanIndexForward=False,
         Limit=10,
     )
@@ -248,9 +254,11 @@ def test_assessment_service_retrieve_all_pagination():
         return_value={
             "Items": [
                 {
-                    DDB_KEY: ASSESSMENT_PK,
-                    DDB_SORT_KEY: "test-assessment-id",
+                    DDB_KEY: "test-organization",
+                    DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id"),
+                    "id": "test-assessment-id",
                     "created_by": "test-created-by",
+                    "organization": "test-organization",
                     "name": "test-assessment-name",
                     "regions": ["test-region"],
                     "role_arn": "test-assessment-role",
@@ -300,11 +308,11 @@ def test_assessment_service_retrieve_all_pagination():
         attribute_value={":id": "test"},
         next_token="eyJ0ZXN0IjoidGVzdCJ9",
     )
-    assessments = assessment_service.retrieve_all(pagination)
+    assessments = assessment_service.retrieve_all(pagination, organization="test-organization")
 
     fake_database_service.query.assert_called_once_with(
         table_name="test-table",
-        KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+        KeyConditionExpression=Key(DDB_KEY).eq("test-organization"),
         ScanIndexForward=False,
         Limit=10,
         FilterExpression="begins_with(#id, :id)",
@@ -317,6 +325,7 @@ def test_assessment_service_retrieve_all_pagination():
             Assessment(
                 id="test-assessment-id",
                 created_by="test-created-by",
+                organization="test-organization",
                 name="test-assessment-name",
                 regions=["test-region"],
                 role_arn="test-assessment-role",
@@ -373,7 +382,7 @@ def test_assessment_service_retrieve_best_practice():
         return_value=[
             {
                 DDB_KEY: "test-assessment-id",
-                DDB_SORT_KEY: "prowler:1",
+                DDB_SORT_KEY: "prowler#1",
                 "status_code": "FAIL",
                 "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
                 "severity": "Low",
@@ -389,6 +398,7 @@ def test_assessment_service_retrieve_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -441,7 +451,7 @@ def test_assessment_service_retrieve_best_practice():
         status=False,
         results=[
             FindingExtra(
-                id="prowler:1",
+                id="prowler#1",
                 status_code="FAIL",
                 status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
                 severity="Low",
@@ -456,9 +466,9 @@ def test_assessment_service_retrieve_best_practice():
     fake_database_service.bulk_get.assert_called_once_with(
         table_name="test-table",
         keys=[
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "1"},
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "2"},
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "3"},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "1")},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "2")},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "3")},
         ],
     )
 
@@ -468,6 +478,7 @@ def test_assessment_service_retrieve_best_practice_with_no_findings():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -487,6 +498,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -516,6 +528,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -554,6 +567,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -603,6 +617,7 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -660,8 +675,7 @@ def test_assessment_service_retrieve_finding():
     fake_database_service.get = MagicMock(
         return_value={
             DDB_KEY: "test-assessment-id",
-            DDB_SORT_KEY: "prowler:1",
-            "created_by": "test-created-by",
+            DDB_SORT_KEY: "prowler#1",
             "status_code": "FAIL",
             "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
             "severity": "Low",
@@ -672,10 +686,10 @@ def test_assessment_service_retrieve_finding():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_finding("test-assessment-id", "test-created-by", "prowler:1")
+    finding = assessment_service.retrieve_finding("test-assessment-id", "test-organization", "prowler#1")
 
     assert finding == FindingExtra(
-        id="prowler:1",
+        id="prowler#1",
         status_code="FAIL",
         status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
         severity="Low",
@@ -686,7 +700,7 @@ def test_assessment_service_retrieve_finding():
 
     fake_database_service.get.assert_called_once_with(
         table_name="test-table",
-        Key={DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "prowler:1"},
+        Key={DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#1")},
     )
 
 
@@ -694,7 +708,7 @@ def test_assessment_service_retrieve_finding_not_found():
     fake_database_service = FakeDatabaseService()
     fake_database_service.get = MagicMock(return_value=None)
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_finding("test-assessment-id", "test-created-by", "prowler:1")
+    finding = assessment_service.retrieve_finding("test-assessment-id", "test-organization", "prowler#1")
     assert finding is None
 
 
@@ -704,7 +718,7 @@ def test_assessment_service_retrieve_findings():
         return_value=[
             {
                 DDB_KEY: "test-assessment-id",
-                DDB_SORT_KEY: "prowler:1",
+                DDB_SORT_KEY: "prowler#1",
                 "status_code": "FAIL",
                 "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
                 "severity": "Low",
@@ -716,11 +730,13 @@ def test_assessment_service_retrieve_findings():
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    findings = assessment_service.retrieve_findings("test-assessment-id", ["prowler:1", "prowler:2", "prowler:3"])
+    findings = assessment_service.retrieve_findings(
+        "test-assessment-id", ["prowler#1", "prowler#2", "prowler#3"], organization="test-organization"
+    )
 
     assert findings == [
         FindingExtra(
-            id="prowler:1",
+            id="prowler#1",
             status_code="FAIL",
             status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
             severity="Low",
@@ -733,9 +749,9 @@ def test_assessment_service_retrieve_findings():
     fake_database_service.bulk_get.assert_called_once_with(
         table_name="test-table",
         keys=[
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "prowler:1"},
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "prowler:2"},
-            {DDB_KEY: "test-assessment-id", DDB_SORT_KEY: "prowler:3"},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#1")},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#2")},
+            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#3")},
         ],
     )
 
@@ -746,7 +762,9 @@ def test_assessment_service_update():
         return_value={
             DDB_KEY: "ASSESSMENT",
             DDB_SORT_KEY: "test-assessment-id",
+            "id": "test-assessment-id",
             "created_by": "test-created-by",
+            "organization": "test-organization",
             "name": "test-assessment-name",
             "regions": ["test-region"],
             "role_arn": "test-assessment-role",
@@ -768,12 +786,12 @@ def test_assessment_service_update():
 
     assessment_service = AssessmentService(database_service=fake_database_service)
     assessment_dto = AssessmentDto(name="test-assessment-name", role_arn="test-assessment-role")
-    assessment_service.update_assessment("test-assessment-id", assessment_dto)
+    assessment_service.update_assessment("test-assessment-id", assessment_dto, "test-organization")
 
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
         event=UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id")},
             attrs={
                 "name": "test-assessment-name",
                 "role_arn": "test-assessment-role",
@@ -790,6 +808,7 @@ def test_assessment_service_update_best_practice():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -838,7 +857,7 @@ def test_assessment_service_update_best_practice():
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
         event=UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+            key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id")},
             update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
             expression_attribute_names={
                 "#pillar": "pillar-1",
@@ -855,6 +874,7 @@ def test_assessment_service_delete_findings():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -884,7 +904,7 @@ def test_assessment_service_delete_findings():
                                     description="Best Practice 1 Description",
                                     risk="High",
                                     status=False,
-                                    results=["prowler:1"],
+                                    results=["prowler#1"],
                                     hidden_results=[],
                                 )
                             },
@@ -901,7 +921,8 @@ def test_assessment_service_delete_findings():
     assert not assessment_service.delete_findings(assessment)
 
     fake_database_service.bulk_delete.assert_called_once_with(
-        table_name="test-table", keys=[{"PK": "test-assessment-id", "SK": "prowler:1"}]
+        table_name="test-table",
+        keys=[{"PK": "test-organization", "SK": FINDING_SK.format("test-assessment-id", "prowler#1")}],
     )
 
 
@@ -910,9 +931,9 @@ def test_assessment_service_delete():
     fake_database_service.delete = MagicMock()
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    assessment_service.delete("test-assessment-id")
+    assessment_service.delete("test-assessment-id", organization="test-organization")
 
     fake_database_service.delete.assert_called_once_with(
         table_name="test-table",
-        key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test-assessment-id"},
+        key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test-assessment-id")},
     )

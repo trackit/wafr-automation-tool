@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
 from entities.database import UpdateAttrsInput
 from entities.finding import FilteringRules
 from entities.scanning_tools import ScanningTool
@@ -20,7 +20,11 @@ def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
     from ..app.tasks.prepare_prompts import PreparePrompts
 
     event = PreparePromptsInput(
-        assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[], workflows=[]
+        assessment_id="test_assessment_id",
+        organization="test-organization",
+        scanning_tool=ScanningTool.PROWLER,
+        regions=[],
+        workflows=[],
     )
 
     fake_database_service = FakeDatabaseService()
@@ -77,7 +81,7 @@ def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
         event=UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test_assessment_id"},
+            key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test_assessment_id")},
             attrs={
                 "findings": {
                     "pillar-1": {
@@ -131,6 +135,7 @@ def test_prepare_prompts_invalid_scanning_tool():
     event = PreparePromptsInput(
         assessment_id="test_assessment_id",
         scanning_tool=ScanningTool._TEST,
+        organization="test-organization",
         regions=[],
         workflows=[],
     )
@@ -189,7 +194,11 @@ def test_prepare_prompts_self_made_finding():
     )
 
     event = PreparePromptsInput(
-        assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[], workflows=[]
+        assessment_id="test_assessment_id",
+        scanning_tool=ScanningTool.PROWLER,
+        regions=[],
+        workflows=[],
+        organization="test-organization",
     )
     task = PreparePrompts(
         database_service=fake_database_service,

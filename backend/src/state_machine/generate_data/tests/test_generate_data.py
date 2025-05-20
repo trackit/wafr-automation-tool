@@ -12,6 +12,7 @@ def test_generate_data():
     assessment: Assessment = Assessment(
         id="AID",
         created_by="test-created-by",
+        organization="test-organization",
         name="Assessment",
         regions=["region1", "region2"],
         role_arn="role_arn",
@@ -77,7 +78,7 @@ def test_generate_data():
     fake_assessment_service.update_assessment = MagicMock()
     fake_assessment_service.retrieve = MagicMock(return_value=assessment)
 
-    task_input = GenerateDataInput(assessment_id="AID")
+    task_input = GenerateDataInput(assessment_id="AID", organization="test-organization")
     task = GenerateData(fake_assessment_service)
     task.execute(task_input)
 
@@ -101,4 +102,5 @@ def test_generate_data():
                 "findings": 9,
             },
         ),
+        "test-organization",
     )
