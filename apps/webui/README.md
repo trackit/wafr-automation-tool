@@ -53,7 +53,7 @@ The following environment variables must be configured for the frontend to funct
 With the environment variables configured, start the development server by running:
 
 ```shell
-$ nx run webui:serve
+$ npm run start:webui
 ```
 
 The application will be available locally, typically at http://localhost:4200.
