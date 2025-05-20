@@ -52,6 +52,7 @@ class APIAssessment(BaseModel):
     question_version: str | None = None
     findings: list[APIFormattedPillar] | None = None
     created_by: str
+    organization: str
 
 
 class APIPagination(BaseModel):
