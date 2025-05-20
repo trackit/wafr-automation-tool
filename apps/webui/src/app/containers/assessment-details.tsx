@@ -1,14 +1,15 @@
+import { components } from '@shared/api-schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
   deleteAssessment,
+  exportToAWS,
   getAssessment,
   rescanAssessment,
   updatePillar,
   updateQuestion,
   updateStatus,
 } from '@webui/api-client';
-import { components } from '@shared/api-schema';
 import {
   ConfirmationModal,
   DataTable,
@@ -26,6 +27,7 @@ import {
   InfoIcon,
   RefreshCw,
 } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import ErrorPage from './error-page';
@@ -361,6 +363,22 @@ export function AssessmentDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments'] });
       navigate(`/`);
+    },
+  });
+
+  const exportToAWSMutation = useMutation({
+    mutationFn: () => exportToAWS({ assessmentId: parseInt(id || '') }),
+    onMutate: () => {
+      enqueueSnackbar({
+        message: 'Exporting to AWS...',
+        variant: 'info',
+      });
+    },
+    onSuccess: () => {
+      enqueueSnackbar({
+        message: 'Successfully exported to AWS',
+        variant: 'success',
+      });
     },
   });
 
@@ -792,6 +810,14 @@ export function AssessmentDetails() {
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
+          <button
+            className="btn btn-primary"
+            onClick={(e) => {
+              exportToAWSMutation.mutate();
+            }}
+          >
+            Export to AWS
+          </button>
           <StatusBadge status={data?.step || undefined} />
           <div
             className="dropdown dropdown-end"
