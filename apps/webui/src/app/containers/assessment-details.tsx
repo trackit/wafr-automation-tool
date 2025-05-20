@@ -376,8 +376,14 @@ export function AssessmentDetails() {
     },
     onSuccess: () => {
       enqueueSnackbar({
-        message: 'Successfully exported to AWS',
+        message: 'Assessment sent successfully to AWS Console',
         variant: 'success',
+      });
+    },
+    onError: () => {
+      enqueueSnackbar({
+        message: 'Failed to send data. Please try again later',
+        variant: 'error',
       });
     },
   });
