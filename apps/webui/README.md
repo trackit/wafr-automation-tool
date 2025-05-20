@@ -63,7 +63,7 @@ The application will be available locally, typically at http://localhost:4200.
 To build the frontend without deploying, run:
 
 ```shell
-$ nx run webui:build
+$ npm run build:webui
 ```
 
 This command generates static assets in the `dist/webui` folder, which can be served locally or deployed to any static hosting service.
