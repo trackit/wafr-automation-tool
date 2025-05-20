@@ -15,6 +15,7 @@ def test_delete_assessment():
     assessment = Assessment(
         id="test-assessment-id",
         created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -53,7 +54,6 @@ def test_delete_assessment():
                 }
             }
         ),
-        organization="test-organization-id",
     )
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve = MagicMock(return_value=assessment)
@@ -61,11 +61,11 @@ def test_delete_assessment():
     assessment_service.delete_findings = MagicMock(return_value=True)
     sfn_client = MagicMock()
 
-    task_input = DeleteAssessmentInput(assessment_id="AID", organization="OID")
+    task_input = DeleteAssessmentInput(assessment_id=assessment.id, organization=assessment.organization)
     task = DeleteAssessment(assessment_service, sfn_client)
     response = task.execute(task_input)
 
-    assessment_service.delete.assert_called_once_with("AID")
+    assessment_service.delete.assert_called_once_with(assessment.id, assessment.organization)
     assessment_service.delete_findings.assert_called_once_with(assessment)
     assert response.status_code == OK
     assert not response.body

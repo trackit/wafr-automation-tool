@@ -15,6 +15,7 @@ def test_retrieve_all_assessments():
         Assessment(
             id="AID",
             created_by="test-created-by",
+            organization="test-organization",
             name="AN",
             regions=["test-region"],
             role_arn="AR",
@@ -34,7 +35,7 @@ def test_retrieve_all_assessments():
     )
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(created_by="test-created-by", limit=10, search=None, next_token=None)
+    task_input = RetrieveAllAssessmentsInput(organization="test-organization", limit=10, search=None, next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
@@ -47,7 +48,7 @@ def test_retrieve_all_assessments_not_found():
     assessment_service.retrieve_all = MagicMock(return_value=APIPaginationOutput[Assessment](items=[], next_token=None))
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(created_by="test-created-by", limit=10, search=None, next_token=None)
+    task_input = RetrieveAllAssessmentsInput(organization="test-organization", limit=10, search=None, next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()
@@ -63,6 +64,7 @@ def test_retrieve_all_assessments_with_search():
             regions=["test-region"],
             role_arn="AR",
             workflows=["test-workflow"],
+            organization="test-organization",
             step=Steps.SCANNING_STARTED,
             created_at="",
             question_version="QV",
@@ -84,7 +86,7 @@ def test_retrieve_all_assessments_with_search():
     )
 
     task = RetrieveAllAssessments(assessment_service)
-    task_input = RetrieveAllAssessmentsInput(created_by="test-created-by", limit=10, search="AN", next_token=None)
+    task_input = RetrieveAllAssessmentsInput(organization="test-organization", limit=10, search="AN", next_token=None)
     response = task.execute(task_input)
 
     assessment_service.retrieve_all.assert_called_once()

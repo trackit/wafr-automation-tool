@@ -14,6 +14,7 @@ def test_update_question():
     assessment = Assessment(
         id="AID",
         created_by="test-created-by",
+        organization="test-organization",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -29,12 +30,16 @@ def test_update_question():
     question_dto = QuestionDto(none=True)
 
     task_input = UpdateQuestionInput(
-        assessment_id="AID", created_by="test-created-by", pillar_id="PI", question_id="QI", question_dto=question_dto
+        assessment_id="AID",
+        organization="test-organization",
+        pillar_id="PI",
+        question_id="QI",
+        question_dto=question_dto,
     )
     task = UpdateQuestion(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assessment_service.update_question.assert_called_once_with(assessment, "PI", "QI", question_dto)
     assert response.status_code == OK
     assert not response.body
@@ -47,11 +52,15 @@ def test_update_question_not_found():
     question_dto = QuestionDto(none=True)
 
     task_input = UpdateQuestionInput(
-        assessment_id="AID", created_by="test-created-by", pillar_id="PI", question_id="QI", question_dto=question_dto
+        assessment_id="AID",
+        organization="test-organization",
+        pillar_id="PI",
+        question_id="QI",
+        question_dto=question_dto,
     )
     task = UpdateQuestion(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assert response.status_code == NOT_FOUND
     assert not response.body

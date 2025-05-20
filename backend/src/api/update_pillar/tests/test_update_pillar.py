@@ -14,6 +14,7 @@ def test_update_pillar():
     assessment = Assessment(
         id="AID",
         created_by="test-created-by",
+        organization="test-organization",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -28,11 +29,13 @@ def test_update_pillar():
     assessment_service.update_pillar = MagicMock(return_value=True)
     pillar_dto = PillarDto(disabled=False)
 
-    task_input = UpdatePillarInput(assessment_id="AID", created_by="test-created-by", pillar_id="PI", pillar_dto=pillar_dto)
+    task_input = UpdatePillarInput(
+        assessment_id="AID", organization="test-organization", pillar_id="PI", pillar_dto=pillar_dto
+    )
     task = UpdatePillar(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assessment_service.update_pillar.assert_called_once_with(assessment, "PI", pillar_dto)
     assert response.status_code == OK
     assert not response.body
@@ -44,10 +47,12 @@ def test_update_pillar_not_found():
     assessment_service.retrieve = MagicMock(return_value=assessment)
     pillar_dto = PillarDto(disabled=False)
 
-    task_input = UpdatePillarInput(assessment_id="AID", created_by="test-created-by", pillar_id="PI", pillar_dto=pillar_dto)
+    task_input = UpdatePillarInput(
+        assessment_id="AID", organization="test-organization", pillar_id="PI", pillar_dto=pillar_dto
+    )
     task = UpdatePillar(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assert response.status_code == NOT_FOUND
     assert not response.body

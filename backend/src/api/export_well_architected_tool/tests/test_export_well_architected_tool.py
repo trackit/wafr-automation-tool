@@ -15,6 +15,7 @@ def test_export_well_architected_tool():
     assessment = Assessment(
         id="AID",
         created_by="test-created-by",
+        organization="test-organization",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -86,11 +87,13 @@ def test_export_well_architected_tool():
         }
     )
     well_architect_client.update_answer = MagicMock()
-    task_input = ExportWellArchitectedToolInput(assessment_id="AID", created_by="test-created-by")
+    task_input = ExportWellArchitectedToolInput(
+        assessment_id="AID", organization="test-organization", owner="test-owner"
+    )
     task = ExportWellArchitectedTool(assessment_service, well_architect_client)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     well_architect_client.get_lens_review.assert_called_once()
     well_architect_client.list_answers.assert_called_once()
     well_architect_client.update_answer.assert_called_once()

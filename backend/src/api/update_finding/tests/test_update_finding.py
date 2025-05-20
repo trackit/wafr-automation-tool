@@ -14,6 +14,7 @@ def test_update_finding():
     assessment = Assessment(
         id="AID",
         created_by="test-created-by",
+        organization="test-organization",
         name="AN",
         regions=["test-region"],
         role_arn="AR",
@@ -30,7 +31,7 @@ def test_update_finding():
 
     task_input = UpdateFindingInput(
         assessment_id="AID",
-        created_by="test-created-by",
+        organization="test-organization",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BPI",
@@ -40,7 +41,7 @@ def test_update_finding():
     task = UpdateFinding(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assessment_service.update_finding.assert_called_once_with(assessment, "PI", "QI", "BPI", "FID", finding_dto)
     assert response.status_code == OK
     assert not response.body
@@ -54,7 +55,7 @@ def test_update_finding_not_found():
 
     task_input = UpdateFindingInput(
         assessment_id="AID",
-        created_by="test-created-by",
+        organization="test-organization",
         pillar_id="PI",
         question_id="QI",
         best_practice_id="BPI",
@@ -64,6 +65,6 @@ def test_update_finding_not_found():
     task = UpdateFinding(assessment_service)
     response = task.execute(task_input)
 
-    assessment_service.retrieve.assert_called_once_with("AID", "test-created-by")
+    assessment_service.retrieve.assert_called_once_with("AID", "test-organization")
     assert response.status_code == NOT_FOUND
     assert not response.body
