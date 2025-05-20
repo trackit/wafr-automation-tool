@@ -81,7 +81,7 @@ def test_store_results():
     database_service.put.assert_called_once_with(
         table_name=DDB_TABLE,
         item={
-            **finding.model_dump(exclude={"id"}),
+            **finding.model_dump(),
             DDB_KEY: invoke_llm_input.organization,
             DDB_SORT_KEY: FINDING_SK.format(invoke_llm_input.assessment_id, "prowler#10"),
         },
