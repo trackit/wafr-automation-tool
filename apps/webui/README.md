@@ -1,4 +1,4 @@
-# Frontend <a href="../../README.md" style="float: right; font-size: medium; line-height: 1.5;">Home</a>
+# Web UI <a href="../../README.md" style="float: right; font-size: medium; line-height: 1.5;">Home</a>
 
 ![WAFR](../../resources/frontend.png)
 
