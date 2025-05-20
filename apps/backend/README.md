@@ -29,7 +29,7 @@ The results produced by these tools are stored in Amazon S3 and DynamoDB, then a
 To run backend tests locally, execute:
 
 ```shell
-$ nx run backend:tests
+$ npm run test:backend
 ```
 
 ## Deployment
