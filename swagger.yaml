@@ -132,7 +132,7 @@ paths:
         - Assessments
       summary: Retrieve details of a specific assessment
       description: |
-        Retrieves detailed information about a specific assessment, 
+        Retrieves detailed information about a specific assessment,
         including associated findings, questions, and any current errors.
       parameters:
         - name: assessmentId

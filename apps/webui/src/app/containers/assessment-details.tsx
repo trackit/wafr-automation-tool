@@ -23,6 +23,7 @@ import {
   CircleCheck,
   CircleMinus,
   EllipsisVertical,
+  InfoIcon,
   RefreshCw,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -45,6 +46,8 @@ export function AssessmentDetails() {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
+  const [bestPracticeDescription, setBestPracticeDescription] =
+    useState<BestPractice | null>(null);
   const { id } = useParams();
   const [progress, setProgress] = useState<number>(0);
 
@@ -470,7 +473,7 @@ export function AssessmentDetails() {
         header: '',
         size: 60,
         cell: (info) => (
-          <div className="flex items-center justify-center w-4">
+          <div className="ml-5 flex justify-center w-4">
             <input
               type="checkbox"
               className={`checkbox checkbox-sm checkbox-primary`}
@@ -511,13 +514,24 @@ export function AssessmentDetails() {
         cell: (info) => {
           return (
             <div
+              tabIndex={0}
               className={`${
                 activeQuestion?.none && info.row.original.id !== 'resolve'
                   ? 'line-through text-base-content/50'
                   : ''
-              }`}
+              } flex items-center`}
             >
-              {info.row.original.label}
+              <div className="p-4 py-3 pr-2 min-h-full flex gap-2 items-center">
+                {info.row.original.label}
+              </div>
+              {info.row.original.description && (
+                <button
+                  className="cursor-pointer"
+                  onClick={() => setBestPracticeDescription(info.row.original)}
+                >
+                  <InfoIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
           );
         },
@@ -536,7 +550,7 @@ export function AssessmentDetails() {
           if (info.row.original.id !== 'resolve') {
             return (
               <div
-                className={`badge badge-soft badge-sm font-bold ${
+                className={`m-4 mt-3 badge badge-soft badge-sm font-bold ${
                   info.row.original.risk === 'High'
                     ? 'badge-error'
                     : info.row.original.risk === 'Medium'
@@ -565,7 +579,7 @@ export function AssessmentDetails() {
         size: 80,
         cell: (info) => {
           return (
-            <div className="font-bold text-center">
+            <div className="m-4 mt-3 font-bold text-center">
               {info.row.original.results?.length ? (
                 <button
                   className="btn btn-link text-error h-[20px]"
@@ -1035,6 +1049,18 @@ export function AssessmentDetails() {
             questionId={activeQuestion?.id || ''}
             bestPractice={bestPractice}
           />
+        </Modal>
+      )}
+      {bestPracticeDescription && (
+        <Modal
+          open={true}
+          onClose={() => setBestPracticeDescription(null)}
+          className="w-full max-w-6xl"
+        >
+          <div className="flex flex-col gap-2 prose max-w-none p-6">
+            <h3>{bestPracticeDescription.label}</h3>
+            {bestPracticeDescription.description}
+          </div>
         </Modal>
       )}
       {showRescanModal && (
