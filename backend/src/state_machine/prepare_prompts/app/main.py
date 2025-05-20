@@ -27,5 +27,4 @@ task = PreparePrompts(
 
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> list[str]:  # noqa: ANN401
-    organization = get_user_organization_id(event)
-    return task.execute(PreparePromptsInput(**event, organization=organization))
+    return task.execute(PreparePromptsInput(**event))

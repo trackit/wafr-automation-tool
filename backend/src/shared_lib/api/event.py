@@ -109,7 +109,7 @@ class UpdatePillarInput(BaseModel):
 
 class ExportWellArchitectedToolInput(BaseModel):
     assessment_id: AssessmentID
-    created_by: str
+    organization: str
     owner: str | None = None
 
 

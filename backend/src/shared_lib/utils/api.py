@@ -50,6 +50,8 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
             },
         }
 
+class OrganizationExtractionError(Exception):
+    pass
 
 def get_user_organization_id(event: dict[str, Any]) -> str:
     return event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]

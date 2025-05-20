@@ -9,7 +9,7 @@ from services.database import DDBService
 from tasks.retrieve_best_practice_findings import (
     RetrieveBestPracticeFindings,
 )
-from utils.api import get_user_organization_id
+from utils.api import get_user_organization_id, OrganizationExtractionError
 
 from api.event import RetrieveBestPracticeFindingsInput
 
@@ -21,7 +21,10 @@ task = RetrieveBestPracticeFindings(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
-        organization = get_user_organization_id(event)
+        try:
+            organization = get_user_organization_id(event)
+        except (KeyError, AttributeError, IndexError) as e:
+            raise OrganizationExtractionError("Impossible to extract the user organization") from e
 
         response = task.execute(
             RetrieveBestPracticeFindingsInput(
@@ -33,6 +36,11 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
             )
         )
         return response.build()
+    except OrganizationExtractionError as e:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": str(e)}),
+        }
     except ValidationError as e:
         return {
             "statusCode": 400,
