@@ -1,12 +1,12 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodType } from 'zod';
 
-import { inject } from '@shared/di-container';
 import type { operations } from '@shared/api-schema';
+import { inject } from '@shared/di-container';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
+import { JSONParseError, parseJson } from '@shared/utils';
 
 import { BadRequestError, handleHttpRequest } from '../../handlers/HttpErrors';
-import { JSONParseError, parseJson } from '@shared/utils';
 
 const StartAssessmentArgsSchema = z.object({
   name: z.string(),
@@ -28,8 +28,8 @@ export class StartAssessmentAdapter {
   }
 
   public async handle(
-    event: APIGatewayProxyEventV2
-  ): Promise<APIGatewayProxyResultV2> {
+    event: APIGatewayProxyEvent
+  ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
@@ -37,8 +37,8 @@ export class StartAssessmentAdapter {
     });
   }
 
-  public async processRequest(
-    event: APIGatewayProxyEventV2
+  private async processRequest(
+    event: APIGatewayProxyEvent
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {
