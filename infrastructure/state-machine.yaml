@@ -473,9 +473,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
@@ -545,9 +545,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
@@ -616,9 +616,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
