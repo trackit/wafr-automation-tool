@@ -9,7 +9,6 @@ from entities.assessment import AssessmentID
 from types_boto3_stepfunctions import SFNClient
 from utils.api import APIResponse
 
-from api.config import DEFAULT_ASSESSMENT_ROLE
 from api.event import (
     StartAssessmentInput,
     StartAssessmentResponseBody,
@@ -38,7 +37,7 @@ class StartAssessment(
             organization=event.organization,
             name=event.name,
             regions=event.regions,
-            role_arn=event.role_arn if event.role_arn else DEFAULT_ASSESSMENT_ROLE,
+            role_arn=event.role_arn,
             workflows=[w.lower() for w in event.workflows],
             created_at=datetime.datetime.fromtimestamp(int(assessment_id) / 1000, tz=datetime.UTC).isoformat(),
         )
