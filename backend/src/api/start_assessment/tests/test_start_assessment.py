@@ -30,7 +30,9 @@ def test_start_assessment_with_default_role():
     sfn_client = MagicMock()
     sfn_client.start_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": OK}})
 
-    task_input = StartAssessmentInput(created_by="test-created-by", organization="test-organization", name="NAME")
+    task_input = StartAssessmentInput(
+        created_by="test-created-by", organization="test-organization", name="NAME", roleArn="test-role"
+    )
     task = StartAssessment(sfn_client)
     response = task.execute(task_input)
 
