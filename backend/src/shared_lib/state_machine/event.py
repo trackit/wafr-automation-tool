@@ -1,4 +1,3 @@
-from sys import orig_argv
 from typing import Any
 
 from entities.ai import PromptS3Uri

@@ -23,4 +23,3 @@ class ProwlerService(BaseScanningToolService):
         raw_findings = [DetectionFinding(**item) for item in loaded_content]
         failed_findings = [item.copy() for item in raw_findings]
         return [FindingExtra(**item.dict(), id=str(i + 1)) for i, item in enumerate(failed_findings)]
-

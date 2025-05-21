@@ -1,11 +1,9 @@
 import json
 from decimal import Decimal
-import re
 from typing import Any, override
 
-from pydantic import BaseModel
-
 from exceptions.api import OrganizationExtractionError
+from pydantic import BaseModel
 
 
 class APIResponseBody(BaseModel):

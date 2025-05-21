@@ -80,6 +80,7 @@ class RetrieveAllAssessmentsInput(BaseModel):
     next_token: str | None = None
     organization: str
 
+
 class RetrieveAllAssessmentsResponseBody(APIResponseBody):
     assessments: list[dict[str, Any]]
     next_token: str | None
