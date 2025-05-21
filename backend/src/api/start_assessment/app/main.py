@@ -19,7 +19,6 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
 
         user_id = get_user_id(event)
 
-        user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
         body = json.loads(event["body"])
 
         response = task.execute(StartAssessmentInput(**body, created_by=user_id, organization=organization))
