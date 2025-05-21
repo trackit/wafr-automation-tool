@@ -1,4 +1,4 @@
-import { components } from '@webui/types';
+import { components } from '@shared/api-schema';
 
 export function StatusBadge({
   status,

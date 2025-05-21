@@ -1,12 +1,12 @@
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable,
   SortingState,
-  ColumnDef,
+  useReactTable,
 } from '@tanstack/react-table';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface DataTableProps<T> {
@@ -71,7 +71,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="hover:bg-primary/3">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-4 py-3 overflow-hidden">
+                <td key={cell.id} className="p-0 overflow-hidden">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

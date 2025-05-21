@@ -1,4 +1,4 @@
-import { paths } from '@webui/types';
+import { paths } from '@shared/api-schema';
 
 export function ErrorPage(
   data: paths['/assessments/{assessmentId}']['get']['responses']['200']['content']['application/json']

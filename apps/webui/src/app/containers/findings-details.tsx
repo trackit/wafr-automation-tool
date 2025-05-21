@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { getFindings, hideFinding } from '@webui/api-client';
-import { components } from '@webui/types';
+import { components } from '@shared/api-schema';
 import { Earth, FileCheck, Info, Search, Server } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
