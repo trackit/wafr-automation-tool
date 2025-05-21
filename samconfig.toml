@@ -62,17 +62,3 @@ parameter_overrides = [
   "InitialUserEmail=contact@example.com",
 ]
 
-[auguste.deploy.parameters]
-stack_name = "wafr-automation-tool-auguste"
-resolve_s3 = true
-s3_prefix = "wafr-automation-tool-auguste"
-region = "us-west-2"
-confirm_changeset = true
-capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
-image_repositories = []
-parameter_overrides = [
-  "Owner=TrackIt",
-  "Debug=true",
-  "Repository=https://github.com/trackit/wafr-automation-tool",
-  "InitialUserEmail=auguste.mulley@trackit.io",
-]
