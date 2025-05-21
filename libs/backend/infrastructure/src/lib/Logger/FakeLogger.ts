@@ -2,7 +2,7 @@
 
 import { Logger } from '@backend/ports';
 
-export default class VoidLogger implements Logger {
+export class FakeLogger implements Logger {
   debug(): void {}
 
   error(): void {}
