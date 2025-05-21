@@ -254,7 +254,7 @@ paths:
         '200':
           description: The assessment has been successfully exported
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid request body or a issue occurred while trying to retrieve the organization or email of the user
         '404':
           description: The specified assessment could not be found
         '500':
