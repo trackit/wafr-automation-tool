@@ -1,14 +1,15 @@
+import { components } from '@shared/api-schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
   deleteAssessment,
+  exportToAWS,
   getAssessment,
   rescanAssessment,
   updatePillar,
   updateQuestion,
   updateStatus,
 } from '@webui/api-client';
-import { components } from '@shared/api-schema';
 import {
   ConfirmationModal,
   DataTable,
@@ -19,6 +20,7 @@ import {
   VerticalMenu,
 } from '@webui/ui';
 import {
+  ArrowRightFromLine,
   ChevronRight,
   CircleCheck,
   CircleMinus,
@@ -26,6 +28,7 @@ import {
   InfoIcon,
   RefreshCw,
 } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import ErrorPage from './error-page';
@@ -361,6 +364,28 @@ export function AssessmentDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments'] });
       navigate(`/`);
+    },
+  });
+
+  const exportToAWSMutation = useMutation({
+    mutationFn: () => exportToAWS({ assessmentId: parseInt(id || '') }),
+    onMutate: () => {
+      enqueueSnackbar({
+        message: 'Exporting to AWS...',
+        variant: 'info',
+      });
+    },
+    onSuccess: () => {
+      enqueueSnackbar({
+        message: 'Assessment sent successfully to AWS Console',
+        variant: 'success',
+      });
+    },
+    onError: () => {
+      enqueueSnackbar({
+        message: 'Failed to send data. Please try again later',
+        variant: 'error',
+      });
     },
   });
 
@@ -821,6 +846,18 @@ export function AssessmentDetails() {
                   }}
                 >
                   <RefreshCw className="w-4 h-4" /> Rescan
+                </button>
+              </li>
+              <li>
+                <button
+                  className="flex flex-row gap-2 w-full text-left"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    exportToAWSMutation.mutate();
+                  }}
+                >
+                  <ArrowRightFromLine className="w-4 h-4" /> Export to AWS
                 </button>
               </li>
             </ul>
