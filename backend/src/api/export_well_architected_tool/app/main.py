@@ -3,7 +3,6 @@ from http.client import BAD_REQUEST
 from typing import Any
 
 import boto3
-from api.event import ExportWellArchitectedToolInput
 from exceptions.api import EmailExtractionError
 from pydantic import ValidationError
 from services.assessment import AssessmentService
@@ -14,6 +13,8 @@ from utils.api import (
     get_user_email,
     get_user_organization_id,
 )
+
+from api.event import ExportWellArchitectedToolInput
 
 ddb_resource = boto3.resource("dynamodb")
 database_service = DDBService(ddb_resource)
