@@ -7,22 +7,26 @@ import type {
   AssessmentsStateMachineStartAssessmentArgs,
 } from '@backend/ports';
 
+import { tokenLogger } from '../Logger';
+
 export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly client = inject(tokenClientSfn);
   private readonly stateMachineArn = inject(tokenStateMachineArn);
+  private readonly logger = inject(tokenLogger);
 
   public async startAssessment(
     assessment: AssessmentsStateMachineStartAssessmentArgs
   ): Promise<void> {
+    const input = {
+      assessment_id: assessment.assessmentId,
+      name: assessment.name,
+      regions: assessment.regions,
+      role_arn: assessment.roleArn,
+      workflows: assessment.workflows,
+      created_at: assessment.createdAt,
+    };
     const command = new StartExecutionCommand({
-      input: JSON.stringify({
-        assessment_id: assessment.assessmentId,
-        name: assessment.name,
-        regions: assessment.regions,
-        role_arn: assessment.roleArn,
-        workflows: assessment.workflows,
-        created_at: assessment.createdAt,
-      }),
+      input: JSON.stringify(input),
       name: assessment.name,
       stateMachineArn: this.stateMachineArn,
     });
@@ -33,6 +37,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
         `Failed to start assessment: ${response.$metadata.httpStatusCode}`
       );
     }
+    this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
   }
 }
 

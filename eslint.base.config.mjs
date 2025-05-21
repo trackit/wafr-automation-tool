@@ -22,6 +22,7 @@ export default [
                 'scope:backend',
                 'type:useCases',
                 'type:models',
+                'type:infrastructure',
                 'scope:shared',
               ],
             },

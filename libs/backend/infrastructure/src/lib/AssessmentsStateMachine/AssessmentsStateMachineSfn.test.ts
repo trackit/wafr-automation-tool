@@ -10,6 +10,7 @@ import {
   tokenStateMachineArn,
 } from './AssessmentsStateMachineSfn';
 import { IdGeneratorCrypto } from '../IdGenerator/IdGeneratorCrypto';
+import { tokenLogger, FakeLogger } from '../Logger';
 
 describe('AssessmentsStateMachine Infrastructure', () => {
   const TestRoleArn = 'arn:aws:iam::123456789012:role/test-role';
@@ -105,6 +106,7 @@ const setup = () => {
     'arn:aws:states:us-west-2:123456789012:stateMachine:MyStateMachine';
   register(tokenClientSfn, { useClass: SFNClient });
   register(tokenStateMachineArn, { useValue: stateMachineArn });
+  register(tokenLogger, { useClass: FakeLogger });
   const assessmentsStateMachineSfn = new AssessmentsStateMachineSfn();
 
   return { assessmentsStateMachineSfn, stateMachineArn, sfnClientMock };

@@ -3,6 +3,9 @@ import type {
   APIGatewayProxyResultV2,
 } from 'aws-lambda';
 
+import { tokenLogger } from '@backend/infrastructure';
+import { inject } from '@shared/di-container';
+
 export class HttpError extends Error {
   public readonly code: number;
   public readonly message: string;
@@ -63,13 +66,18 @@ export const handleHttpRequest = async ({
   func: (event: APIGatewayProxyEventV2) => Promise<unknown>;
   statusCode?: number;
 }): Promise<APIGatewayProxyResultV2> => {
+  const logger = inject(tokenLogger);
   try {
+    logger.info(`[${event.requestContext.http.method}] ${event.rawPath}`, {
+      event,
+    });
     return {
       statusCode,
       body: JSON.stringify(await func(event)),
     };
   } catch (e: unknown) {
     if (e instanceof HttpError) {
+      logger.error('HttpError', e);
       return {
         statusCode: e.code,
         body: JSON.stringify({
@@ -78,7 +86,7 @@ export const handleHttpRequest = async ({
         }),
       };
     }
-    console.error(e);
+    logger.error('Internal Server Error', e);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal Server Error.' }),
