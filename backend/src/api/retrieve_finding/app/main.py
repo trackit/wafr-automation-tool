@@ -33,4 +33,3 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
             "statusCode": BAD_REQUEST,
             "body": json.dumps({"error": str(e)}),
         }
-

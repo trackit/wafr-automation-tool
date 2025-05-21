@@ -58,6 +58,7 @@ def get_user_organization_id(event: dict[str, Any]) -> str:
         msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("email", None)
         raise OrganizationExtractionError(msg) from e
 
+
 def get_user_id(event: dict[str, Any]) -> str:
     try:
         return event["requestContext"]["authorizer"]["claims"]["sub"]
