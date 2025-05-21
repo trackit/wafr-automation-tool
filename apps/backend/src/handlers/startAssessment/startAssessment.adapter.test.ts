@@ -81,13 +81,9 @@ describe('startAssessment adapter', () => {
     });
 
     it('should return the assessment id from the useCase', async () => {
-      const { adapter, useCase } = setup();
+      const { adapter } = setup();
 
       const event = StartAssessmentAdapterEventMother.basic().build();
-
-      useCase.startAssessment.mockResolvedValueOnce({
-        assessmentId: 'assessment-id',
-      });
 
       const response = (await adapter.handle(
         event
@@ -98,13 +94,9 @@ describe('startAssessment adapter', () => {
     });
 
     it('should return a 201 status code', async () => {
-      const { adapter, useCase } = setup();
+      const { adapter } = setup();
 
       const event = StartAssessmentAdapterEventMother.basic().build();
-
-      useCase.startAssessment.mockResolvedValueOnce({
-        assessmentId: 'assessment-id',
-      });
 
       const response = (await adapter.handle(
         event
@@ -118,6 +110,9 @@ describe('startAssessment adapter', () => {
 const setup = () => {
   reset();
   const useCase = { startAssessment: vitest.fn() };
+  useCase.startAssessment.mockResolvedValueOnce({
+    assessmentId: 'assessment-id',
+  });
   register(tokenStartAssessmentUseCase, { useValue: useCase });
   const adapter = new StartAssessmentAdapter();
   return { useCase, adapter };
