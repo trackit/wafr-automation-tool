@@ -1,4 +1,5 @@
 import json
+from http.client import BAD_REQUEST
 from typing import Any
 
 import boto3
@@ -32,11 +33,11 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         return response.build()
     except OrganizationExtractionError as e:
         return {
-            "statusCode": 400,
+            "statusCode": BAD_REQUEST,
             "body": json.dumps({"error": str(e)}),
         }
     except ValidationError as e:
         return {
-            "statusCode": 400,
+            "statusCode": BAD_REQUEST,
             "body": json.dumps({"error": e.errors()}),
         }

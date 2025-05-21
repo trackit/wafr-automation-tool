@@ -2,7 +2,7 @@ import json
 from decimal import Decimal
 from typing import Any, override
 
-from exceptions.api import OrganizationExtractionError
+from exceptions.api import OrganizationExtractionError, UserIdExtractionError
 from pydantic import BaseModel
 
 
@@ -57,3 +57,10 @@ def get_user_organization_id(event: dict[str, Any]) -> str:
     except (KeyError, AttributeError, IndexError) as e:
         msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("email", None)
         raise OrganizationExtractionError(msg) from e
+
+def get_user_id(event: dict[str, Any]) -> str:
+    try:
+        return event["requestContext"]["authorizer"]["claims"]["sub"]
+    except (KeyError, AttributeError, IndexError) as e:
+        msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("sub", None)
+        raise UserIdExtractionError(msg) from e
