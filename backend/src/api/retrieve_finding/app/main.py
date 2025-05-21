@@ -3,7 +3,6 @@ from http.client import BAD_REQUEST
 from typing import Any
 
 import boto3
-from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.retrieve_finding import RetrieveFinding
