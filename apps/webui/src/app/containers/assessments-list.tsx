@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   useInfiniteQuery,
   useMutation,
@@ -6,24 +5,27 @@ import {
 } from '@tanstack/react-query';
 import {
   deleteAssessment,
+  exportToAWS,
   getAssessments,
   rescanAssessment,
 } from '@webui/api-client';
-import { StatusBadge } from '@webui/ui';
+import { ConfirmationModal, StatusBadge } from '@webui/ui';
 import {
-  Server,
+  ArrowRightFromLine,
   Calendar,
-  Search,
-  EllipsisVertical,
-  Trash2,
-  RefreshCw,
-  Earth,
   Computer,
+  Earth,
+  EllipsisVertical,
+  RefreshCw,
+  Search,
+  Server,
+  Trash2,
 } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 import NewAssessmentDialog from './new-assessment-dialog';
-import { ConfirmationModal } from '@webui/ui';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -77,6 +79,28 @@ function AssessmentsList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
       refetch();
+    },
+  });
+
+  const exportToAWSMutation = useMutation({
+    mutationFn: () => exportToAWS({ assessmentId: parseInt(id || '') }),
+    onMutate: () => {
+      enqueueSnackbar({
+        message: 'Exporting to AWS...',
+        variant: 'info',
+      });
+    },
+    onSuccess: () => {
+      enqueueSnackbar({
+        message: 'Assessment sent successfully to AWS Console',
+        variant: 'success',
+      });
+    },
+    onError: () => {
+      enqueueSnackbar({
+        message: 'Failed to send data. Please try again later',
+        variant: 'error',
+      });
     },
   });
 
@@ -174,6 +198,20 @@ function AssessmentsList() {
                             <RefreshCw className="w-4 h-4" /> Rescan
                           </button>
                         </li>
+                        <li>
+                          <button
+                            className="flex flex-row gap-2 w-full text-left"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              exportToAWSMutation.mutate();
+                            }}
+                          >
+                            <ArrowRightFromLine className="w-4 h-4" /> Export to
+                            AWS
+                          </button>
+                        </li>
+                        <li className="m-1"></li>
                         <li>
                           <button
                             className="flex flex-row gap-2 text-error w-full text-left"

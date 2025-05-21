@@ -20,6 +20,7 @@ import {
   VerticalMenu,
 } from '@webui/ui';
 import {
+  ArrowRightFromLine,
   ChevronRight,
   CircleCheck,
   CircleMinus,
@@ -816,14 +817,6 @@ export function AssessmentDetails() {
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <button
-            className="btn btn-primary"
-            onClick={(e) => {
-              exportToAWSMutation.mutate();
-            }}
-          >
-            Export to AWS
-          </button>
           <StatusBadge status={data?.step || undefined} />
           <div
             className="dropdown dropdown-end"
@@ -853,6 +846,18 @@ export function AssessmentDetails() {
                   }}
                 >
                   <RefreshCw className="w-4 h-4" /> Rescan
+                </button>
+              </li>
+              <li>
+                <button
+                  className="flex flex-row gap-2 w-full text-left"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    exportToAWSMutation.mutate();
+                  }}
+                >
+                  <ArrowRightFromLine className="w-4 h-4" /> Export to AWS
                 </button>
               </li>
             </ul>
