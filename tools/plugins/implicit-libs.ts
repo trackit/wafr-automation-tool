@@ -7,7 +7,7 @@ export const createNodesV2: CreateNodesV2 = [
     return indexPathList.map((indexPath) => {
       const [libs, scope, type, _] = indexPath.split('/');
       const projectRoot = `${libs}/${scope}/${type}`;
-      const projectName = `${scope}-${type}`;
+      const projectName = `${scope}/${type}`;
 
       return [
         /* This is used by Nx to track which matching file was used by the plugin
@@ -20,7 +20,7 @@ export const createNodesV2: CreateNodesV2 = [
               name: projectName,
               sourceRoot: projectRoot,
               projectType: 'library',
-              tags: [`type:${type}`, `scope:${scope}`],
+              tags: [`type:${type}`, `scope:${scope}-libs`],
               targets: {
                 lint: {
                   command: 'eslint .',
