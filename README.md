@@ -26,70 +26,60 @@
 - [Overview](#overview)
   - [Architecture](#architecture)
 - [Getting started](#getting-started)
-  - [Requirements](#requirements)
+  - [Prerequisites](#prerequisites)
+  - [Dependencies Installation](#dependencies-installation)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Deployment](#deployment)
-  - [Build](#build)
-  - [Deploy](#deploy)
 - [Contributing](#contributing)
 - [License](#license)
+- [Contact](#contact)
 
 ## Overview
 
-This tool is designed to be used by AWS Well-Architected Reviewer to assess the architecture of an AWS account against the Well-Architected Framework.
+The **WAFR Automation Tool** is designed to automate the assessment of AWS architectures against the Well-Architected Framework.
+It targets cloud architects and DevOps teams aiming to enhance quality, security, and performance of their AWS environments.
 
 ### Architecture
 
-The WAFR Automation Tool uses a serverless architecture built on AWS services:
+This project leverages a scalable serverless architecture using AWS technologies:
 
 - Built using AWS Serverless Application Model (SAM)
 - Runs as a collection of serverless functions that automatically assess AWS accounts
 - Performs automated checks against Well-Architected Framework principles
-- Scales automatically based on demand
-- Operates with a pay-per-use cost model
+- Automatic scaling with a pay-per-use cost model
 
 ![AWS Architecture](./resources/architecture.png)
 
 ## Getting started
 
-### Backend
-
-More information about the backend can be found in the Backend [README](./backend/README.md).
-
-### Frontend
-
-More information about the frontend can be found in the Frontend [README](./webui/README.md).
-
-## Deployment
-
-### Requirements
+### Prerequisites
 
 - [Docker >= 19.03](https://docs.docker.com/get-docker/)
   - the Docker daemon must also be running
 - [AWS SAM CLI >= 1.134.0](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions)
+- [Node.js >= 22.x](https://nodejs.org/en/download/)
 
-### Build
+### Dependencies Installation
 
-To build the serverless application, using [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-build.html) run:
+From the project root directory, run:
 
-```bash
-sam build --use-container --mount-symlinks
+```shell
+$ npm install
 ```
 
-### Deploy
+### Backend
 
-With [SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-deploying.html#serverless-sam-cli-using-package-and-deploy), run:
+More information about the backend can be found in the Backend [README](./apps/backend/README.md).
 
-```bash
-sam deploy --config-env <dev|prod>
-```
+### Frontend
+
+More information about the frontend can be found in the Frontend [README](./apps/webui/README.md).
 
 # Contributing
 
-We welcome contributions to the project.
+Contributions of any kind are welcome to help improve this project.
 
-Please read our [contributing guidelines](./CONTRIBUTING.md) for more information on how to get started.
+Please read our [contributing guidelines](./CONTRIBUTING.md) guidelines before submitting a pull request or issue.
 
 # License
 
@@ -99,10 +89,14 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-  [LICENSE](./LICENSE)
+[LICENSE](./LICENSE)
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+# Contact
+
+For questions, suggestions, or support, please open an issue on GitHub or contact us via the blog.
