@@ -30,7 +30,7 @@ export class StartAssessmentAdapter {
     });
   }
 
-  public async processRequest(
+  private async processRequest(
     event: APIGatewayProxyEventV2
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
@@ -55,6 +55,6 @@ export class StartAssessmentAdapter {
     }
 
     const { assessmentId } = await this.useCase.startAssessment(parsedBody);
-    return { assessment_id: Number(assessmentId) }; // TODO: change return type to string ? (will also have to change front)
+    return { assessment_id: assessmentId };
   }
 }
