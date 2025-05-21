@@ -17,6 +17,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     const command = new StartExecutionCommand({
       input: JSON.stringify({
         assessment_id: assessment.assessmentId,
+        name: assessment.name,
         regions: assessment.regions,
         role_arn: assessment.roleArn,
         workflows: assessment.workflows,

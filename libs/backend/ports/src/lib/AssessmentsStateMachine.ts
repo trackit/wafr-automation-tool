@@ -1,6 +1,6 @@
 export type AssessmentsStateMachineStartAssessmentArgs = {
   name: string;
-  regions?: string[];
+  regions: string[];
   roleArn: string;
   workflows: string[];
   assessmentId: string;
