@@ -61,3 +61,4 @@ parameter_overrides = [
   "Repository=https://github.com/trackit/wafr-automation-tool",
   "InitialUserEmail=contact@example.com",
 ]
+

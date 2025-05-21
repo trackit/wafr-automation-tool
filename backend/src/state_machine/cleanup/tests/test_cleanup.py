@@ -23,13 +23,13 @@ def test_cleanup():
     assessment_service.delete_findings = MagicMock()
     assessment_service.retrieve = MagicMock(return_value=MagicMock(id="ID"))
 
-    cleanup_input = CleanupInput(assessment_id="ID")
+    cleanup_input = CleanupInput(assessment_id="ID", organization="test-organization")
     cleanup = Cleanup(storage_service, database_service, assessment_service)
     cleanup.update_assessment_item = MagicMock()
     cleanup.execute(cleanup_input)
 
     assessment_service.delete_findings.assert_not_called()
-    assessment_service.retrieve.assert_called_once_with("ID")
+    assessment_service.retrieve.assert_called_once_with("ID", "test-organization")
     cleanup.update_assessment_item.assert_not_called()
 
     storage_service.delete.assert_called_once_with(Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("ID"))
@@ -42,6 +42,8 @@ def test_cleanup():
 def test_cleanup_on_error():
     assessment = Assessment(
         id="test-assessment-id",
+        created_by="test-created-by",
+        organization="test-organization",
         name="test-assessment-name",
         regions=["test-region"],
         role_arn="test-assessment-role",
@@ -92,12 +94,14 @@ def test_cleanup_on_error():
     assessment_service.update_assessment = MagicMock()
     assessment_service.retrieve = MagicMock(return_value=assessment)
 
-    cleanup_input = CleanupInput(assessment_id="ID", error=StateMachineError(Error="ERROR", Cause="CAUSE"))
+    cleanup_input = CleanupInput(
+        assessment_id="ID", organization="test-organization", error=StateMachineError(Error="ERROR", Cause="CAUSE")
+    )
     cleanup = Cleanup(storage_service, database_service, assessment_service)
     cleanup.execute(cleanup_input)
 
     assessment_service.delete_findings.assert_called_once_with(assessment)
-    assessment_service.retrieve.assert_called_once_with("ID")
+    assessment_service.retrieve.assert_called_once_with("ID", "test-organization")
     assessment_service.update_assessment.assert_called_once_with(
         "ID",
         AssessmentDto(
@@ -108,6 +112,7 @@ def test_cleanup_on_error():
             findings=None,
             error={"Error": "ERROR", "Cause": "CAUSE"},
         ),
+        "test-organization",
     )
     storage_service.delete.assert_called_once_with(Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format("ID"))
     storage_service.filter.assert_has_calls(

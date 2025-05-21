@@ -10,7 +10,7 @@ from services.assessment import IAssessmentService
 
 class FakeAssessmentService(IAssessmentService):
     @override
-    def retrieve(self, assessment_id: AssessmentID) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, organization: str | None = None) -> Assessment | None:
         raise NotImplementedError
 
     @override
@@ -27,12 +27,15 @@ class FakeAssessmentService(IAssessmentService):
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
+        organization: str,
         finding_id: FindingID,
     ) -> FindingExtra | None:
         raise NotImplementedError
 
     @override
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(
+        self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, organization: str | None = None
+    ) -> bool:
         raise NotImplementedError
 
     @override
@@ -40,5 +43,5 @@ class FakeAssessmentService(IAssessmentService):
         raise NotImplementedError
 
     @override
-    def delete(self, assessment_id: AssessmentID) -> None:
+    def delete(self, assessment_id: AssessmentID, organization: str | None = None) -> None:
         raise NotImplementedError

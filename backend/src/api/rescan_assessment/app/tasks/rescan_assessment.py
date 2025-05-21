@@ -23,11 +23,13 @@ class RescanAssessment(
     def start_step_functions(self, assessment: Assessment) -> bool:
         input_json = StateMachineInput(
             assessment_id=assessment.id,
+            created_by=assessment.created_by,
             name=assessment.name,
             regions=assessment.regions,
             role_arn=assessment.role_arn,
             workflows=assessment.workflows,
             created_at=datetime.datetime.now(datetime.UTC).isoformat(),
+            organization=assessment.organization,
         )
         response = self.sfn_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
@@ -37,14 +39,14 @@ class RescanAssessment(
 
     def clean_assessment(self, assessment: Assessment) -> None:
         self.assessment_service.delete_findings(assessment)
-        self.assessment_service.delete(assessment.id)
+        self.assessment_service.delete(assessment.id, assessment.organization)
 
     @override
     def execute(
         self,
         event: RescanAssessmentInput,
     ) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
         self.clean_assessment(assessment)

@@ -5,7 +5,6 @@ from types_boto3_dynamodb.type_defs import (
     ConditionBaseImportTypeDef,
     TableAttributeValueTypeDef,
 )
-from utils.api import APIResponseBody
 
 from entities.assessment import AssessmentData, AssessmentID, Steps
 from entities.best_practice import BestPractice, BestPracticeID
@@ -15,7 +14,7 @@ from entities.question import PillarID, QuestionID
 WorkloadId = str
 
 
-class APIBestPracticeExtra(APIResponseBody):
+class APIBestPracticeExtra(BaseModel):
     id: BestPracticeID
     label: str
     description: str = ""
@@ -52,6 +51,8 @@ class APIAssessment(BaseModel):
     error: dict[str, Any] | None = None
     question_version: str | None = None
     findings: list[APIFormattedPillar] | None = None
+    created_by: str
+    organization: str
 
 
 class APIPagination(BaseModel):

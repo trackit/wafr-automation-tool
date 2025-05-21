@@ -3,7 +3,7 @@ info:
   title: Assessment API
   version: 1.0.0
   description: |
-    This API provides endpoints for managing assessments in a structured and efficient manner. 
+    This API provides endpoints for managing assessments in a structured and efficient manner.
     You can create, retrieve, and delete assessments, as well as manage associated findings, best practices, and questions.
   contact:
     email: team@trackit.io
@@ -67,8 +67,10 @@ paths:
                   next_token:
                     type: string
                     description: |
-                      Token for pagination. If there are more assessments than can be returned in a single response, 
+                      Token for pagination. If there are more assessments than can be returned in a single response,
                       this token will allow you to retrieve the next set of results.
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
         '500':
           description: Internal server error.
     post:
@@ -122,7 +124,7 @@ paths:
                     type: integer
                     description: The unique ID of the newly created assessment
         '400':
-          description: Bad Request. Missing or invalid parameters were provided.
+          description: Bad Request. Missing or invalid parameters were provided. Or a issue occurred while trying to retrieve the organization of the user or the user id
         '500':
           description: Internal server error.
   '/assessments/{assessmentId}':
@@ -175,7 +177,9 @@ paths:
         '200':
           description: The assessment has been successfully updated
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
         '500':
           description: Internal server error.
     post:
@@ -195,6 +199,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully rescanned
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -217,6 +223,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully deleted
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -246,7 +254,7 @@ paths:
         '200':
           description: The assessment has been successfully exported
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -281,9 +289,9 @@ paths:
         '200':
           description: The pillar has been successfully updated
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
-          description: 'The specified assessment, or pillar could not be found'
+          description: The specified assessment, or pillar could not be found
         '500':
           description: Internal server error.
   '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}':
@@ -322,9 +330,9 @@ paths:
         '200':
           description: The question has been successfully updated
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
-          description: 'The specified assessment, pillar, or question could not be found'
+          description: The specified assessment, pillar, or question could not be found
         '500':
           description: Internal server error.
   '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
@@ -367,6 +375,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BestPracticeExtra'
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified best practice could not be found
     put:
@@ -410,9 +420,9 @@ paths:
         '200':
           description: The best practice has been successfully updated
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
-          description: 'The specified assessment, pillar, question, or best practice could not be found'
+          description: The specified assessment, pillar, question, or best practice could not be found
         '500':
           description: Internal server error.
   '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}':
@@ -463,7 +473,7 @@ paths:
         '200':
           description: The finding has been successfully updated
         '400':
-          description: Invalid request body
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -475,7 +485,7 @@ paths:
         - Findings
       summary: Retrieve the details of a specific finding
       description: |
-        Fetches detailed information about a specific finding related to an assessment, 
+        Fetches detailed information about a specific finding related to an assessment,
         including severity, status, and recommended remediation steps.
       parameters:
         - name: assessmentId
@@ -497,6 +507,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Finding'
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment or finding could not be found
         '500':
@@ -512,6 +524,12 @@ components:
         name:
           type: string
           description: Name or title of the assessment
+        created_by:
+          type: string
+          description: User who created the assessment
+        organization:
+          type: string
+          description: Organization associated with the assessment
         regions:
           type: array
           items:

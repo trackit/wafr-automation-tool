@@ -23,7 +23,7 @@ def test_retrieve_finding():
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_finding = MagicMock(return_value=finding)
 
-    task_input = RetrieveFindingInput(assessment_id="AID", finding_id="FID")
+    task_input = RetrieveFindingInput(assessment_id="AID", organization="test-organization", finding_id="FID")
     task = RetrieveFinding(assessment_service)
     response = task.execute(task_input)
 
@@ -38,7 +38,7 @@ def test_retrieve_finding_not_found():
     assessment_service = FakeAssessmentService()
     assessment_service.retrieve_finding = MagicMock(return_value=finding)
 
-    task_input = RetrieveFindingInput(assessment_id="AID", finding_id="FID")
+    task_input = RetrieveFindingInput(assessment_id="AID", organization="test-organization", finding_id="FID")
     task = RetrieveFinding(assessment_service)
     response = task.execute(task_input)
 

@@ -3,11 +3,12 @@ from collections import Counter
 from typing import override
 
 from common.config import (
-    ASSESSMENT_PK,
+    ASSESSMENT_SK,
     CHUNK_SIZE,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
+    FINDING_SK,
     S3_BUCKET,
     STORE_CHUNK_PATH,
     STORE_PROMPT_PATH,
@@ -44,7 +45,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.formatted_question_set = formatted_question_set
 
     def manual_filtering(
-        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra]
+        self, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra], organization: str
     ) -> list[FindingExtra]:
         filtering_rules = get_filtering_rules()
         for finding in findings.copy():
@@ -53,7 +54,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             finding_rules = filtering_rules.get(finding.metadata.event_code)
             if not finding_rules:
                 continue
-            finding_formatted_id = f"{scanning_tool}:{finding.id}"
+            finding_formatted_id = f"{scanning_tool}#{finding.id}"
             is_filtered = False
             for finding_rule in finding_rules:
                 best_practice_data = get_best_practice_by_primary_id(
@@ -72,16 +73,16 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
-                    **finding.model_dump(exclude={"id"}),
-                    DDB_KEY: assessment_id,
-                    DDB_SORT_KEY: finding_formatted_id,
+                    **finding.model_dump(),
+                    DDB_KEY: organization,
+                    DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_formatted_id),
                 },
             )
             findings.remove(finding)
         return findings
 
     def populate_dynamodb(
-        self, findings: list[FindingExtra], assessment_id: AssessmentID, scanning_tool: ScanningTool
+        self, organization: str, assessment_id: AssessmentID, scanning_tool: ScanningTool, findings: list[FindingExtra]
     ) -> None:
         assessment_data = AssessmentData(
             regions=dict(
@@ -110,7 +111,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.database_service.update_attrs(
             table_name=DDB_TABLE,
             event=UpdateAttrsInput(
-                key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+                key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
                 attrs={
                     "findings": self.formatted_question_set.data.model_dump(),
                     "question_version": self.formatted_question_set.version,
@@ -119,7 +120,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         )
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            Key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             UpdateExpression="SET raw_graph_datas.#scanning_tool = :data",
             ExpressionAttributeNames={
                 "#scanning_tool": scanning_tool,
@@ -209,8 +210,8 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
 
     def create_prompts(self, scanning_tool_service: BaseScanningToolService, event: PreparePromptsInput) -> list[str]:
         findings = scanning_tool_service.retrieve_filtered_findings(event.assessment_id, event.regions, event.workflows)
-        findings = self.manual_filtering(event.assessment_id, event.scanning_tool, findings)
-        self.populate_dynamodb(findings, event.assessment_id, event.scanning_tool)
+        findings = self.manual_filtering(event.assessment_id, event.scanning_tool, findings, event.organization)
+        self.populate_dynamodb(event.organization, event.assessment_id, event.scanning_tool, findings)
         chunks = self.create_chunks(scanning_tool_service, event.assessment_id, findings)
         return self.create_prompt_variables_list(scanning_tool_service, event.assessment_id, chunks)
 

@@ -1,4 +1,4 @@
-from http.client import OK
+from http.client import NOT_FOUND, OK
 from typing import override
 
 from common.task import Task
@@ -15,7 +15,13 @@ class UpdateAssessment(Task[UpdateAssessmentInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateAssessmentInput) -> APIResponse[None]:
-        self.assessment_service.update_assessment(event.assessment_id, event.assessment_dto)
+        success = self.assessment_service.update_assessment(
+            assessment_id=event.assessment_id,
+            organization=event.organization,
+            assessment_dto=event.assessment_dto,
+        )
+        if not success:
+            return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
             status_code=OK,
             body=None,

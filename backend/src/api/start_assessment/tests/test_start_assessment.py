@@ -14,7 +14,9 @@ def test_start_assessment():
     sfn_client = MagicMock()
     sfn_client.start_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": OK}})
 
-    task_input = StartAssessmentInput(name="NAME", roleArn="ROLE")
+    task_input = StartAssessmentInput(
+        created_by="test-created-by", organization="test-organization", name="NAME", roleArn="ROLE"
+    )
     task = StartAssessment(sfn_client)
     response = task.execute(task_input)
 
@@ -28,13 +30,13 @@ def test_start_assessment_with_default_role():
     sfn_client = MagicMock()
     sfn_client.start_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": OK}})
 
-    task_input = StartAssessmentInput(name="NAME")
+    task_input = StartAssessmentInput(created_by="test-created-by", organization="test-organization", name="NAME")
     task = StartAssessment(sfn_client)
     response = task.execute(task_input)
 
     sfn_client.start_execution.assert_called_once_with(
         stateMachineArn=STATE_MACHINE_ARN,
-        input='{"assessment_id":"946684800000","name":"NAME","regions":[],"role_arn":"test-role","workflows":[],"created_at":"2000-01-01T00:00:00+00:00"}',
+        input='{"assessment_id":"946684800000","created_by":"test-created-by","name":"NAME","regions":[],"role_arn":"test-role","workflows":[],"created_at":"2000-01-01T00:00:00+00:00","organization":"test-organization"}',
     )
     assert response.status_code == OK
     assert response.body == StartAssessmentResponseBody(assessmentId="946684800000")
@@ -44,7 +46,9 @@ def test_start_assessment_internal_error():
     sfn_client = MagicMock()
     sfn_client.start_execution = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": INTERNAL_SERVER_ERROR}})
 
-    task_input = StartAssessmentInput(name="NAME", roleArn="ROLE")
+    task_input = StartAssessmentInput(
+        created_by="test-created-by", organization="test-organization", name="NAME", roleArn="ROLE"
+    )
     task = StartAssessment(sfn_client)
     response = task.execute(task_input)
 

@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Any, override
 
 from boto3.dynamodb.conditions import Key
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, FINDING_SK
 from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeID
@@ -21,11 +21,11 @@ from services.database import IDatabaseService
 
 class IAssessmentService:
     @abstractmethod
-    def retrieve(self, assessment_id: AssessmentID) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, organization: str) -> Assessment | None:
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_all(self, pagination: APIPagination) -> APIPaginationOutput[Assessment]:
+    def retrieve_all(self, pagination: APIPagination, organization: str) -> APIPaginationOutput[Assessment]:
         raise NotImplementedError
 
     @abstractmethod
@@ -42,6 +42,7 @@ class IAssessmentService:
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
+        organization: str,
         finding_id: FindingID,
     ) -> FindingExtra | None:
         raise NotImplementedError
@@ -51,11 +52,12 @@ class IAssessmentService:
         self,
         assessment_id: AssessmentID,
         finding_ids: list[str],
+        organization: str,
     ) -> list[FindingExtra] | None:
         raise NotImplementedError
 
     @abstractmethod
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, organization: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -105,7 +107,7 @@ class IAssessmentService:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, assessment_id: AssessmentID) -> None:
+    def delete(self, assessment_id: AssessmentID, organization: str) -> None:
         raise NotImplementedError
 
 
@@ -115,18 +117,21 @@ class AssessmentService(IAssessmentService):
         self.database_service = database_service
 
     @override
-    def retrieve(self, assessment_id: AssessmentID) -> Assessment | None:
+    def retrieve(self, assessment_id: AssessmentID, organization: str) -> Assessment | None:
         assessment_data = self.database_service.get(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            Key={
+                DDB_KEY: organization,
+                DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id),
+            },
         )
         if not assessment_data:
             return None
         return self._create_assessment(assessment_data)
 
     @override
-    def retrieve_all(self, pagination: APIPagination) -> APIPaginationOutput[Assessment]:
-        query_input = self._create_retrieve_all_query_input(pagination)
+    def retrieve_all(self, pagination: APIPagination, organization: str) -> APIPaginationOutput[Assessment]:
+        query_input = self._create_retrieve_all_query_input(pagination, organization)
         query_output = self.database_service.query(table_name=DDB_TABLE, **query_input)
         next_token = query_output.get("LastEvaluatedKey")
         assessments: list[Assessment] = []
@@ -135,10 +140,12 @@ class AssessmentService(IAssessmentService):
             assessments.append(assessment)
         return APIPaginationOutput[Assessment](items=assessments, next_token=next_token)
 
-    def _create_retrieve_all_query_input(self, pagination: APIPagination) -> QueryInputTableQueryTypeDef:
+    def _create_retrieve_all_query_input(
+        self, pagination: APIPagination, organization: str
+    ) -> QueryInputTableQueryTypeDef:
         next_token = json.loads(base64.b64decode(pagination.next_token).decode()) if pagination.next_token else {}
         query_input = QueryInputTableQueryTypeDef(
-            KeyConditionExpression=Key(DDB_KEY).eq(ASSESSMENT_PK),
+            KeyConditionExpression=Key(DDB_KEY).eq(organization),
             ScanIndexForward=False,
         )
         if pagination.limit:
@@ -172,7 +179,9 @@ class AssessmentService(IAssessmentService):
         best_practice = question.best_practices.get(best_practice_id)
         if not best_practice:
             return None
-        findings: list[FindingExtra] | None = self.retrieve_findings(assessment.id, best_practice.results)
+        findings: list[FindingExtra] | None = self.retrieve_findings(
+            assessment.id, best_practice.results, assessment.organization
+        )
         best_practice_data = {**best_practice.model_dump()}
         best_practice_data["results"] = findings if findings else []
         return APIBestPracticeExtra(**best_practice_data)
@@ -181,11 +190,12 @@ class AssessmentService(IAssessmentService):
     def retrieve_finding(
         self,
         assessment_id: AssessmentID,
+        organization: str,
         finding_id: FindingID,
     ) -> FindingExtra | None:
         item = self.database_service.get(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: assessment_id, DDB_SORT_KEY: finding_id},
+            Key={DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_id)},
         )
         if not item:
             return None
@@ -196,12 +206,16 @@ class AssessmentService(IAssessmentService):
         self,
         assessment_id: AssessmentID,
         finding_ids: list[str],
+        organization: str,
     ) -> list[FindingExtra] | None:
         if not finding_ids:
             return None
         items = self.database_service.bulk_get(
             table_name=DDB_TABLE,
-            keys=[{DDB_KEY: assessment_id, DDB_SORT_KEY: finding_id} for finding_id in finding_ids],
+            keys=[
+                {DDB_KEY: organization, DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_id)}
+                for finding_id in finding_ids
+            ],
         )
         findings: list[FindingExtra] = []
         for item in items:
@@ -210,13 +224,21 @@ class AssessmentService(IAssessmentService):
         return findings
 
     @override
-    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto) -> None:
+    def update_assessment(self, assessment_id: AssessmentID, assessment_dto: AssessmentDto, organization: str) -> bool:
+        existing = self.retrieve(
+            assessment_id=assessment_id,
+            organization=organization,
+        )
+        if not existing:
+            return False
+
         attrs = assessment_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
+        return True
 
     @override
     def update_pillar(
@@ -227,7 +249,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = pillar_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -246,7 +268,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = question_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.questions.#question.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -267,7 +289,7 @@ class AssessmentService(IAssessmentService):
     ) -> None:
         attrs = best_practice_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment.id},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment.id)},
             update_expression_path="findings.#pillar.questions.#question.best_practices.#best_practice.",
             expression_attribute_names={
                 "#pillar": pillar_id,
@@ -290,7 +312,7 @@ class AssessmentService(IAssessmentService):
     ) -> bool:
         attrs = finding_dto.model_dump(exclude_none=True)
         event = UpdateAttrsInput(
-            key={DDB_KEY: assessment.id, DDB_SORT_KEY: finding_id},
+            key={DDB_KEY: assessment.organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, finding_id)},
             attrs=attrs,
         )
         self.database_service.update_attrs(table_name=DDB_TABLE, event=event)
@@ -312,7 +334,7 @@ class AssessmentService(IAssessmentService):
         else:
             best_practice.hidden_results.remove(finding_id)
         assessment_dto = AssessmentDto(findings=assessment.findings.root)
-        self.update_assessment(assessment.id, assessment_dto)
+        self.update_assessment(assessment.id, assessment_dto, assessment.organization)
         return True
 
     @override
@@ -324,19 +346,20 @@ class AssessmentService(IAssessmentService):
             for question in pillar.questions.values():
                 for best_practice in question.best_practices.values():
                     items.update(best_practice.results)
-        keys = [{DDB_KEY: assessment.id, DDB_SORT_KEY: item} for item in items]
+        keys = [
+            {DDB_KEY: assessment.organization, DDB_SORT_KEY: FINDING_SK.format(assessment.id, item)} for item in items
+        ]
         self.database_service.bulk_delete(table_name=DDB_TABLE, keys=keys)
 
     @override
-    def delete(self, assessment_id: AssessmentID) -> None:
+    def delete(self, assessment_id: AssessmentID, organization: str) -> None:
         self.database_service.delete(
             table_name=DDB_TABLE,
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: assessment_id},
+            key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
         )
 
     def _create_assessment(self, item: dict[str, Any]) -> Assessment:
         formatted_item: dict[str, Any] = json.loads(json.dumps(item, cls=DecimalEncoder))
-        formatted_item["id"] = formatted_item.pop(DDB_SORT_KEY)
         if "workflow" in formatted_item:
             formatted_item["workflows"] = [formatted_item.pop("workflow")]
         if "graph_datas" not in formatted_item:
