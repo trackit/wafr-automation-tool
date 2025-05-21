@@ -49,9 +49,9 @@ class ExportWellArchitectedTool(Task[ExportWellArchitectedToolInput, APIResponse
             Lenses=[WAFRLens],
             AwsRegions=assessment.regions or ["us-west-2"],
             ClientRequestToken=workload_name + str(time.time()),
-            ReviewOwner=event.owner or "WAFR Automation Tool",
+            ReviewOwner=f"WAFR Automation Tool - {event.owner}",
             Tags={
-                "Owner": event.owner or "WAFR Automation Tool",
+                "Owner": event.owner,
                 "Project": "WAFR Automation Tool",
                 "Name": assessment.name,
             },
