@@ -18,11 +18,20 @@ export default [
           depConstraints: [
             {
               sourceTag: 'scope:backend',
-              onlyDependOnLibsWithTags: ['scope:backend', 'type:useCases', 'type:model', 'scope:shared'],
+              onlyDependOnLibsWithTags: [
+                'scope:backend',
+                'type:useCases',
+                'type:models',
+                'scope:shared',
+              ],
             },
             {
               sourceTag: 'scope:webui',
-              onlyDependOnLibsWithTags: ['scope:webui', 'scope:shared', 'scope:webui-libs'],
+              onlyDependOnLibsWithTags: [
+                'scope:webui',
+                'scope:shared',
+                'scope:webui-libs',
+              ],
             },
             {
               sourceTag: 'scope:webui-libs',
@@ -30,19 +39,32 @@ export default [
             },
             {
               sourceTag: 'type:ports',
-              onlyDependOnLibsWithTags: ['type:model'],
+              onlyDependOnLibsWithTags: ['type:models', 'scope:shared'],
             },
             {
               sourceTag: 'type:useCases',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:infrastructure', 'type:useCases', 'type:model', 'type:di-container'],
+              onlyDependOnLibsWithTags: [
+                'type:ports',
+                'type:infrastructure',
+                'type:useCases',
+                'type:models',
+                'type:di-container',
+                'scope:shared',
+              ],
             },
             {
               sourceTag: 'type:infrastructure',
-              onlyDependOnLibsWithTags: ['type:ports', 'type:infrastructure', 'type:model', 'type:di-container'],
+              onlyDependOnLibsWithTags: [
+                'type:ports',
+                'type:infrastructure',
+                'type:models',
+                'type:di-container',
+                'scope:shared',
+              ],
             },
             {
-              sourceTag: 'type:model',
-              onlyDependOnLibsWithTags: ['type:model'],
+              sourceTag: 'type:models',
+              onlyDependOnLibsWithTags: ['type:models', 'scope:shared'],
             },
             {
               sourceTag: 'type:di-container',
