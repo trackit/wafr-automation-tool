@@ -28,7 +28,6 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
         organization = get_user_organization_id(event)
         user_email = get_user_email(event)
 
-        body = json.loads(event["body"])
         response = task.execute(
             ExportWellArchitectedToolInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
