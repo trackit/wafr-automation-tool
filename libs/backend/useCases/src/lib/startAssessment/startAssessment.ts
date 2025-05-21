@@ -1,6 +1,9 @@
 import { inject, createInjectionToken } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-import { tokenAssessmentsStateMachine } from '@backend/infrastructure';
+import {
+  tokenAssessmentsStateMachine,
+  tokenIdGenerator,
+} from '@backend/infrastructure';
 
 export type StartAssessmentUseCaseArgs = {
   name: string;
@@ -18,23 +21,17 @@ export interface StartAssessmentUseCase {
 export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
   private readonly defaultAssessmentRole = inject(tokenDefaultAssessmentRole);
-
-  private generateAssessmentId(): string {
-    // TODO: why a timestamp, can we use uuid?
-    const date = new Date();
-    const timestamp = date.getTime();
-    return timestamp.toString();
-  }
+  private readonly idGenerator = inject(tokenIdGenerator);
 
   public async startAssessment(
     args: StartAssessmentUseCaseArgs
   ): Promise<{ assessmentId: string }> {
-    const { name, regions } = args;
-    const assessmentId = this.generateAssessmentId();
+    const { name } = args;
+    const assessmentId = this.idGenerator.generate();
     const workflows =
       args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
-
-    const roleArn = args.roleArn || this.defaultAssessmentRole;
+    const regions = args.regions ?? [];
+    const roleArn = args.roleArn ?? this.defaultAssessmentRole;
 
     await this.stateMachine.startAssessment({
       name,
