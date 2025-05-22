@@ -149,9 +149,6 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: StartAssessmentFunction
-      Environment:
-        Variables:
-          DEFAULT_ASSESSMENT_ROLE: !Ref DefaultAssessmentRole
       Policies:
         - Version: '2012-10-17'
           Statement:

@@ -89,6 +89,7 @@ paths:
               type: object
               required:
                 - name
+                - roleArn
               properties:
                 name:
                   type: string
