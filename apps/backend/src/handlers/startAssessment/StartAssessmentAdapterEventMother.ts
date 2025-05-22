@@ -1,10 +1,16 @@
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
+import type { User } from '@backend/models';
 import type { operations } from '@shared/api-schema';
-import { APIGatewayProxyEventV2Mother } from '../APIGatewayProxyEventV2Mother';
+
+import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 
 export class StartAssessmentAdapterEventMother {
   private data: operations['startAssessment']['requestBody']['content']['application/json'];
+  private user: Pick<User, 'id' | 'email'> = {
+    id: 'user-id',
+    email: 'user-id@test.io',
+  };
 
   private constructor(
     data: operations['startAssessment']['requestBody']['content']['application/json']
@@ -46,9 +52,20 @@ export class StartAssessmentAdapterEventMother {
     return this;
   }
 
-  public build(): APIGatewayProxyEventV2 {
-    return APIGatewayProxyEventV2Mother.basic()
+  public withUser(
+    user: Pick<User, 'id' | 'email'>
+  ): StartAssessmentAdapterEventMother {
+    this.user = user;
+    return this;
+  }
+
+  public build(): APIGatewayProxyEvent {
+    return APIGatewayProxyEventMother.basic()
       .withBody(JSON.stringify(this.data))
+      .withUserClaims({
+        sub: this.user.id,
+        email: this.user.email,
+      })
       .build();
   }
 }

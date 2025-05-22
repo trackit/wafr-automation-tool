@@ -24,10 +24,11 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
       role_arn: assessment.roleArn,
       workflows: assessment.workflows,
       created_at: assessment.createdAt,
+      created_by: assessment.createdBy,
+      organization: assessment.organization,
     };
     const command = new StartExecutionCommand({
       input: JSON.stringify(input),
-      name: assessment.name,
       stateMachineArn: this.stateMachineArn,
     });
 

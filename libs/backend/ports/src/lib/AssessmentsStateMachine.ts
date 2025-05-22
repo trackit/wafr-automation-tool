@@ -5,6 +5,8 @@ export type AssessmentsStateMachineStartAssessmentArgs = {
   workflows: string[];
   assessmentId: string;
   createdAt: Date;
+  createdBy: string;
+  organization: string;
 };
 
 export interface AssessmentsStateMachine {

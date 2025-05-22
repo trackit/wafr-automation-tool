@@ -1,12 +1,14 @@
-import { inject, createInjectionToken } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
+import { User } from '@backend/models';
 import {
   tokenAssessmentsStateMachine,
   tokenIdGenerator,
 } from '@backend/infrastructure';
+import { inject, createInjectionToken } from '@shared/di-container';
+import { assertIsDefined } from '@shared/utils';
 
 export type StartAssessmentUseCaseArgs = {
   name: string;
+  user: User;
   regions?: string[];
   roleArn?: string;
   workflows?: string[];
@@ -26,7 +28,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   public async startAssessment(
     args: StartAssessmentUseCaseArgs
   ): Promise<{ assessmentId: string }> {
-    const { name } = args;
+    const { name, user } = args;
     const assessmentId = this.idGenerator.generate();
     const workflows =
       args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
@@ -40,6 +42,8 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       roleArn,
       assessmentId,
       createdAt: new Date(),
+      createdBy: user.id,
+      organization: user.organizationDomain,
     });
     return { assessmentId };
   }

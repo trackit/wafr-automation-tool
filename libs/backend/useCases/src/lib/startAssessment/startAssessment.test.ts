@@ -69,6 +69,8 @@ describe('startAssessment UseCase', () => {
         workflows: input.workflows,
         createdAt: date,
         assessmentId: expect.any(String),
+        createdBy: input.user.id,
+        organization: input.user.organizationDomain,
       })
     );
   });

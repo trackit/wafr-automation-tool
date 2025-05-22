@@ -10,6 +10,11 @@ export class StartAssessmentUseCaseArgsMother {
   public static basic(): StartAssessmentUseCaseArgsMother {
     return new StartAssessmentUseCaseArgsMother({
       name: 'Basic Assessment',
+      user: {
+        id: 'user-id',
+        organizationDomain: 'test.io',
+        email: 'user-id@test.io',
+      },
     });
   }
 

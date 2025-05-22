@@ -1,12 +1,10 @@
-import type {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
-import { inject } from '@shared/di-container';
-import type { operations } from '@shared/api-schema';
+import type { User } from '@backend/models';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
+import type { operations } from '@shared/api-schema';
+import { inject } from '@shared/di-container';
 
 import { BadRequestError, handleHttpRequest } from '../../handlers/HttpErrors';
 
@@ -21,8 +19,8 @@ export class StartAssessmentAdapter {
   private readonly useCase = inject(tokenStartAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEventV2
-  ): Promise<APIGatewayProxyResultV2> {
+    event: APIGatewayProxyEvent
+  ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
@@ -31,7 +29,8 @@ export class StartAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEventV2
+    event: APIGatewayProxyEvent,
+    user: User
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {
@@ -54,7 +53,10 @@ export class StartAssessmentAdapter {
       throw new BadRequestError('Invalid request body');
     }
 
-    const { assessmentId } = await this.useCase.startAssessment(parsedBody);
+    const { assessmentId } = await this.useCase.startAssessment({
+      ...parsedBody,
+      user,
+    });
     return { assessment_id: assessmentId };
   }
 }

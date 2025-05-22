@@ -62,8 +62,7 @@ export class LoggerConsole implements Logger {
         (transformedObj, key) => {
           return {
             ...transformedObj,
-            // @ts-expect-error Should be safe to access key since it's comming from Object.keys
-            [key]: this.transformErrorToJSON(obj[key]),
+            [key]: this.transformErrorToJSON(obj[key as keyof typeof obj]),
           };
         },
         {}
