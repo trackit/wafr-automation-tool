@@ -142,9 +142,9 @@ Resources:
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/start_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/startAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -165,6 +165,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: "es2020"
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   RetrieveAllAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
