@@ -21,6 +21,7 @@ export class StartAssessmentAdapterEventMother {
   public static basic(): StartAssessmentAdapterEventMother {
     return new StartAssessmentAdapterEventMother({
       name: 'Basic Assessment',
+      roleArn: 'arn:aws:iam::123456789012:role/test-role',
     });
   }
 

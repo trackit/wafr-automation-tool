@@ -10,6 +10,7 @@ export class StartAssessmentUseCaseArgsMother {
   public static basic(): StartAssessmentUseCaseArgsMother {
     return new StartAssessmentUseCaseArgsMother({
       name: 'Basic Assessment',
+      roleArn: 'arn:aws:iam::123456789012:role/test-role',
       user: {
         id: 'user-id',
         organizationDomain: 'test.io',
