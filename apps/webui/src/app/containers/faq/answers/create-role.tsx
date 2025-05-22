@@ -1,5 +1,5 @@
-import inline_policy_json from '../../../../../public/inline-policy.json';
-import trust_policy_json from '../../../../../public/trust-policy.json';
+import inline_policy_json from '../../../../assets/inline-policy.json';
+import trust_policy_json from '../../../../assets/trust-policy.json';
 
 const CreateRoleAnswer = () => {
   const inline_policy = JSON.stringify(inline_policy_json, null, 2);
