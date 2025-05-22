@@ -11,7 +11,7 @@ import { BadRequestError, handleHttpRequest } from '../../handlers/HttpErrors';
 const StartAssessmentArgsSchema = z.object({
   name: z.string(),
   regions: z.array(z.string()).optional(),
-  roleArn: z.string().optional(),
+  roleArn: z.string(),
   workflows: z.array(z.string()).optional(),
 });
 
