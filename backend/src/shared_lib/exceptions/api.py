@@ -4,3 +4,7 @@ class OrganizationExtractionError(Exception):
 
 class UserIdExtractionError(Exception):
     pass
+
+
+class EmailExtractionError(Exception):
+    pass

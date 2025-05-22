@@ -111,7 +111,7 @@ class UpdatePillarInput(BaseModel):
 class ExportWellArchitectedToolInput(BaseModel):
     assessment_id: AssessmentID
     organization: str
-    owner: str | None = None
+    owner: str
 
 
 class UpdateQuestionInput(BaseModel):
