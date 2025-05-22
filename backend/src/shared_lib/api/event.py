@@ -12,7 +12,7 @@ from utils.api import APIResponseBody
 class StartAssessmentInput(BaseModel):
     name: str
     regions: list[str] = []
-    role_arn: str | None = Field(default=None, alias="roleArn")
+    role_arn: str = Field(alias="roleArn")
     workflows: list[str] = []
     created_by: str
     organization: str

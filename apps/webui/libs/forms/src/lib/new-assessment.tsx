@@ -115,7 +115,7 @@ export function NewAssessment({
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="flex flex-col gap-2">
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Name</legend>
+          <legend className="fieldset-legend">Name*</legend>
           <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.name ? 'input-error' : ''
@@ -135,7 +135,7 @@ export function NewAssessment({
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Role ARN</legend>
+          <legend className="fieldset-legend">Role ARN*</legend>
           <div
             className={`input input-bordered flex items-center gap-2 w-full ${
               errors.roleArn ? 'input-error' : ''
@@ -152,11 +152,6 @@ export function NewAssessment({
           {errors.roleArn && (
             <p className="fieldset-label text-error">
               {errors.roleArn?.message}
-            </p>
-          )}
-          {!errors.roleArn && (
-            <p className="fieldset-label">
-              If no role is provided, the default role will be used.
             </p>
           )}
         </fieldset>

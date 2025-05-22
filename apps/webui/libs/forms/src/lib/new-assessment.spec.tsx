@@ -8,8 +8,8 @@ describe('NewAssessment', () => {
   it('renders the form with all fields', () => {
     render(<NewAssessment onSubmit={vi.fn()} />);
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Role ARN')).toBeInTheDocument();
+    expect(screen.getByText('Name*')).toBeInTheDocument();
+    expect(screen.getByText('Role ARN*')).toBeInTheDocument();
     expect(screen.getByText('Regions')).toBeInTheDocument();
     expect(screen.getByText('Workflows')).toBeInTheDocument();
     expect(screen.getByText('Submit')).toBeInTheDocument();
