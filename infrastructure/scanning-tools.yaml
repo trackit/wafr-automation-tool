@@ -108,8 +108,8 @@ Resources:
                 Action:
                   - apigateway:GET
                 Resource:
-                  - arn:aws:apigateway:::*/restapis/*
-                  - arn:aws:apigateway:::*/apis/*
+                  - arn:aws:apigateway:*::*/restapis/*
+                  - arn:aws:apigateway:*::*/apis/*
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
         - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
