@@ -1,11 +1,11 @@
 import type { APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 
-import { register, reset } from '@shared/di-container';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
 
+import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 import { StartAssessmentAdapter } from './startAssessment.adapter';
 import { StartAssessmentAdapterEventMother } from './StartAssessmentAdapterEventMother';
-import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 
 describe('startAssessment adapter', () => {
   describe('args validation', () => {

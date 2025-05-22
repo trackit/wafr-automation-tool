@@ -6,9 +6,8 @@ import {
 import { register, reset } from '@shared/di-container';
 
 import {
-  tokenDefaultAssessmentRole,
-  StartAssessmentUseCaseImpl,
   StartAssessmentUseCaseArgs,
+  StartAssessmentUseCaseImpl,
 } from './startAssessment';
 import { StartAssessmentUseCaseArgsMother } from './StartAssessmentUseCaseArgsMother';
 
@@ -31,8 +30,8 @@ describe('startAssessment UseCase', () => {
     );
   });
 
-  it('should start an assessment with default regions, workflows and role', async () => {
-    const { useCase, defaultRole, fakeAssessmentsStateMachine } = setup();
+  it('should start an assessment with default regions and workflows', async () => {
+    const { useCase, fakeAssessmentsStateMachine } = setup();
 
     const input: StartAssessmentUseCaseArgs =
       StartAssessmentUseCaseArgsMother.basic()
@@ -46,7 +45,6 @@ describe('startAssessment UseCase', () => {
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         regions: [],
-        roleArn: defaultRole,
         workflows: [],
       })
     );
@@ -106,7 +104,6 @@ describe('startAssessment UseCase', () => {
 
 const setup = () => {
   reset();
-  const defaultRole = 'arn:aws:iam::123456789012:role/default-role';
   const fakeAssessmentsStateMachine = {
     startAssessment: vitest.fn(),
   };
@@ -114,12 +111,11 @@ const setup = () => {
   register(tokenAssessmentsStateMachine, {
     useValue: fakeAssessmentsStateMachine,
   });
-  register(tokenDefaultAssessmentRole, { useValue: defaultRole });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   const date = new Date();
   vitest.setSystemTime(date);
 
   const useCase = new StartAssessmentUseCaseImpl();
 
-  return { useCase, defaultRole, fakeAssessmentsStateMachine, date };
+  return { useCase, fakeAssessmentsStateMachine, date };
 };
