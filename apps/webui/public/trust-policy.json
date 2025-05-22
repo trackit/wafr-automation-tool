@@ -1,1 +1,12 @@
-../../../resources/trust-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "ACCOUNT_ID"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
