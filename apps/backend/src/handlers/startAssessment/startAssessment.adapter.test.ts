@@ -5,7 +5,7 @@ import { tokenStartAssessmentUseCase } from '@backend/useCases';
 
 import { StartAssessmentAdapter } from './startAssessment.adapter';
 import { StartAssessmentAdapterEventMother } from './StartAssessmentAdapterEventMother';
-import { APIGatewayProxyEventV2Mother } from '../APIGatewayProxyEventV2Mother';
+import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 
 describe('startAssessment adapter', () => {
   describe('args validation', () => {
@@ -25,7 +25,7 @@ describe('startAssessment adapter', () => {
     it('should throw a bad request error without body', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventV2Mother.basic().build();
+      const event = APIGatewayProxyEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -34,7 +34,7 @@ describe('startAssessment adapter', () => {
     it('should throw a bad request error with invalid json body', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventV2Mother.basic().withBody('{').build();
+      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -43,7 +43,7 @@ describe('startAssessment adapter', () => {
     it('should throw a bad request error with invalid body', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventV2Mother.basic()
+      const event = APIGatewayProxyEventMother.basic()
         .withBody(JSON.stringify({ invalid: 'body' }))
         .build();
 
@@ -61,6 +61,7 @@ describe('startAssessment adapter', () => {
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/test-role')
         .withWorkflows(['workflow-1', 'workflow-2'])
+        .withUser({ id: 'user-id', email: 'user-id@test.io' })
         .build();
 
       await adapter.handle(event);
@@ -70,6 +71,11 @@ describe('startAssessment adapter', () => {
         regions: ['us-west-1', 'us-west-2'],
         roleArn: 'arn:aws:iam::123456789012:role/test-role',
         workflows: ['workflow-1', 'workflow-2'],
+        user: {
+          id: 'user-id',
+          organizationDomain: 'test.io',
+          email: 'user-id@test.io',
+        },
       });
     });
 

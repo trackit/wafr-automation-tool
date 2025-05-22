@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodType } from 'zod';
 
+import type { User } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
@@ -38,7 +39,8 @@ export class StartAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
+    user: User
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {

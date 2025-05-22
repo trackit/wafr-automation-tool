@@ -1,8 +1,6 @@
-import type {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
+import type { User } from '@backend/models';
 import { tokenLogger } from '@backend/infrastructure';
 import { inject } from '@shared/di-container';
 
@@ -62,18 +60,25 @@ export const handleHttpRequest = async ({
   func,
   statusCode = 200,
 }: {
-  event: APIGatewayProxyEventV2;
-  func: (event: APIGatewayProxyEventV2) => Promise<unknown>;
+  event: APIGatewayProxyEvent;
+  func: (event: APIGatewayProxyEvent, user: User) => Promise<unknown>;
   statusCode?: number;
-}): Promise<APIGatewayProxyResultV2> => {
+}): Promise<APIGatewayProxyResult> => {
   const logger = inject(tokenLogger);
   try {
-    logger.info(`[${event.requestContext.http.method}] ${event.rawPath}`, {
+    logger.info(`[${event.requestContext.httpMethod}] ${event.path}`, {
       event,
     });
+    const claims = event.requestContext.authorizer?.claims;
+    if (!claims) throw new BadRequestError('Missing claims');
+    const user: User = {
+      id: claims.sub,
+      email: claims.email,
+      organizationDomain: claims.email.split('@')[1],
+    };
     return {
       statusCode,
-      body: JSON.stringify(await func(event)),
+      body: JSON.stringify(await func(event, user)),
     };
   } catch (e: unknown) {
     if (e instanceof HttpError) {

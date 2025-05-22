@@ -27,6 +27,8 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       roleArn: TestRoleArn,
       workflows: [],
       regions: [],
+      createdBy: 'test-user',
+      organization: 'test.io',
     };
     sfnClientMock.on(StartExecutionCommand).resolves({
       startDate: new Date(),
@@ -41,7 +43,6 @@ describe('AssessmentsStateMachine Infrastructure', () => {
     const startExecutionCall = startExecutionCalls[0];
     expect(startExecutionCall.args[0].input).toEqual({
       stateMachineArn,
-      name: input.name,
       input: expect.any(String),
     });
   });
@@ -56,6 +57,8 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       roleArn: TestRoleArn,
       workflows: [],
       regions: [],
+      createdBy: 'test-user',
+      organization: 'test.io',
     };
     sfnClientMock.on(StartExecutionCommand).resolves({
       $metadata: { httpStatusCode: 500 },
@@ -76,6 +79,8 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       roleArn: TestRoleArn,
       workflows: [],
       regions: [],
+      createdBy: 'test-user',
+      organization: 'test.io',
     };
     sfnClientMock.on(StartExecutionCommand).resolves({
       startDate: new Date(),
@@ -95,6 +100,8 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       workflows: [],
       role_arn: input.roleArn,
       created_at: input.createdAt.toISOString(),
+      created_by: input.createdBy,
+      organization: input.organization,
     });
   });
 });
