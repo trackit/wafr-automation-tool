@@ -40,6 +40,10 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     }
     this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
   }
+
+  public async cancelAssessment(executionId: string): Promise<void> {
+    throw new Error('Not implemented');
+  }
 }
 
 export const tokenAssessmentsStateMachine =

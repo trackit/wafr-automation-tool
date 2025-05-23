@@ -1,8 +1,10 @@
 import {
+  FakeAssessmentsStateMachine,
   FakeIdGenerator,
   tokenAssessmentsStateMachine,
   tokenIdGenerator,
 } from '@backend/infrastructure';
+import { UserMother } from '@backend/models';
 import { register, reset } from '@shared/di-container';
 
 import {
@@ -59,11 +61,13 @@ describe('startAssessment UseCase', () => {
         .withRegions(['us-west-1', 'us-west-2'])
         .withWorkflows(['workflow-1', 'workflow-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-        .withUser({
-          id: 'user-id',
-          organizationDomain: 'test.io',
-          email: 'user-id@test.io',
-        })
+        .withUser(
+          UserMother.basic()
+            .withEmail('user-id@test.io')
+            .withId('user-id')
+            .withOrganizationDomain('test.io')
+            .build()
+        )
         .build();
     await useCase.startAssessment(input);
 
@@ -104,10 +108,9 @@ describe('startAssessment UseCase', () => {
 
 const setup = () => {
   reset();
-  const fakeAssessmentsStateMachine = {
-    startAssessment: vitest.fn(),
-  };
 
+  const fakeAssessmentsStateMachine = new FakeAssessmentsStateMachine();
+  vitest.spyOn(fakeAssessmentsStateMachine, 'startAssessment');
   register(tokenAssessmentsStateMachine, {
     useValue: fakeAssessmentsStateMachine,
   });

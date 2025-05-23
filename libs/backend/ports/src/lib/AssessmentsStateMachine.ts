@@ -13,4 +13,5 @@ export interface AssessmentsStateMachine {
   startAssessment(
     args: AssessmentsStateMachineStartAssessmentArgs
   ): Promise<void>;
+  cancelAssessment(executionId: string): Promise<void>;
 }

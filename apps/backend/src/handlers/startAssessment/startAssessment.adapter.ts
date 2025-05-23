@@ -1,13 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, ZodError, ZodType } from 'zod';
 
-import type { User } from '@backend/models';
+import { BadRequestError } from '@backend/errors';
+import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { JSONParseError, parseJson } from '@shared/utils';
 
-import { BadRequestError, handleHttpRequest } from '../../handlers/HttpErrors';
+import { handleHttpRequest } from '../../utils/handleHttpRequest';
+import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
 
 const StartAssessmentArgsSchema = z.object({
   name: z.string(),
@@ -39,8 +40,7 @@ export class StartAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent,
-    user: User
+    event: APIGatewayProxyEvent
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {
@@ -52,12 +52,12 @@ export class StartAssessmentAdapter {
     try {
       const parsedBody = this.parseBody(body);
       const { assessmentId } = await this.useCase.startAssessment({
+        user: getUserFromEvent(event),
         ...parsedBody,
-        user,
       });
       return { assessment_id: assessmentId };
     } catch (e) {
-      if (e instanceof z.ZodError) {
+      if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request body: ${e.message}`);
       } else if (e instanceof JSONParseError) {
         throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);

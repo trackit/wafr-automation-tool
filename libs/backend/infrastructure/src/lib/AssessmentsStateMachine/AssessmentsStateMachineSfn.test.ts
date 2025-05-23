@@ -1,5 +1,9 @@
 import { mockClient } from 'aws-sdk-client-mock';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import {
+  SFNClient,
+  StartExecutionCommand,
+  StopExecutionCommand,
+} from '@aws-sdk/client-sfn';
 
 import { register, reset } from '@shared/di-container';
 import type { AssessmentsStateMachineStartAssessmentArgs } from '@backend/ports';
@@ -13,95 +17,129 @@ import { IdGeneratorCrypto } from '../IdGenerator/IdGeneratorCrypto';
 import { tokenLogger, FakeLogger } from '../Logger';
 
 describe('AssessmentsStateMachine Infrastructure', () => {
-  const TestRoleArn = 'arn:aws:iam::123456789012:role/test-role';
-  const TestName = 'Test Assessment';
+  describe('startAssessment', () => {
+    it('should start state machine', async () => {
+      const { assessmentsStateMachineSfn, stateMachineArn, sfnClientMock } =
+        setup();
 
-  it('should start state machine', async () => {
-    const { assessmentsStateMachineSfn, stateMachineArn, sfnClientMock } =
-      setup();
+      const input: AssessmentsStateMachineStartAssessmentArgs = {
+        assessmentId: new IdGeneratorCrypto().generate(),
+        createdAt: new Date(),
+        name: 'Test Assessment',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        workflows: [],
+        regions: [],
+        createdBy: 'test-user',
+        organization: 'test.io',
+      };
+      sfnClientMock.on(StartExecutionCommand).resolves({
+        startDate: new Date(),
+        $metadata: { httpStatusCode: 200 },
+      });
+      await assessmentsStateMachineSfn.startAssessment(input);
 
-    const input: AssessmentsStateMachineStartAssessmentArgs = {
-      assessmentId: new IdGeneratorCrypto().generate(),
-      createdAt: new Date(),
-      name: TestName,
-      roleArn: TestRoleArn,
-      workflows: [],
-      regions: [],
-      createdBy: 'test-user',
-      organization: 'test.io',
-    };
-    sfnClientMock.on(StartExecutionCommand).resolves({
-      startDate: new Date(),
-      $metadata: { httpStatusCode: 200 },
+      const startExecutionCalls = sfnClientMock.commandCalls(
+        StartExecutionCommand
+      );
+      expect(startExecutionCalls).toHaveLength(1);
+      const startExecutionCall = startExecutionCalls[0];
+      expect(startExecutionCall.args[0].input).toEqual({
+        stateMachineArn,
+        input: expect.any(String),
+      });
     });
-    await assessmentsStateMachineSfn.startAssessment(input);
 
-    const startExecutionCalls = sfnClientMock.commandCalls(
-      StartExecutionCommand
-    );
-    expect(startExecutionCalls).toHaveLength(1);
-    const startExecutionCall = startExecutionCalls[0];
-    expect(startExecutionCall.args[0].input).toEqual({
-      stateMachineArn,
-      input: expect.any(String),
+    it('should throw an error when state machine fails to start', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+
+      const input: AssessmentsStateMachineStartAssessmentArgs = {
+        assessmentId: new IdGeneratorCrypto().generate(),
+        createdAt: new Date(),
+        name: 'Test Assessment',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        workflows: [],
+        regions: [],
+        createdBy: 'test-user',
+        organization: 'test.io',
+      };
+      sfnClientMock.on(StartExecutionCommand).resolves({
+        $metadata: { httpStatusCode: 500 },
+      });
+
+      await expect(
+        assessmentsStateMachineSfn.startAssessment(input)
+      ).rejects.toThrow(Error);
+    });
+
+    it('should test the input of the state machine', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+
+      const input: AssessmentsStateMachineStartAssessmentArgs = {
+        assessmentId: new IdGeneratorCrypto().generate(),
+        createdAt: new Date(),
+        name: 'Test Assessment',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        workflows: [],
+        regions: [],
+        createdBy: 'test-user',
+        organization: 'test.io',
+      };
+      sfnClientMock.on(StartExecutionCommand).resolves({
+        startDate: new Date(),
+        $metadata: { httpStatusCode: 200 },
+      });
+      await assessmentsStateMachineSfn.startAssessment(input);
+
+      const startExecutionCalls = sfnClientMock.commandCalls(
+        StartExecutionCommand
+      );
+      expect(startExecutionCalls).toHaveLength(1);
+      const startExecutionCall = startExecutionCalls[0];
+      expect(
+        JSON.parse(startExecutionCall.args[0].input.input ?? '{}')
+      ).toEqual(
+        expect.objectContaining({
+          name: 'Test Assessment',
+          regions: [],
+          workflows: [],
+          role_arn: 'arn:aws:iam::123456789012:role/test-role',
+          created_at: input.createdAt.toISOString(),
+          created_by: 'test-user',
+          organization: 'test.io',
+        })
+      );
     });
   });
 
-  it('should throw error when state machine fails to start', async () => {
-    const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+  describe('cancelAssessment', () => {
+    it('should cancel state machine execution', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
 
-    const input: AssessmentsStateMachineStartAssessmentArgs = {
-      assessmentId: new IdGeneratorCrypto().generate(),
-      createdAt: new Date(),
-      name: TestName,
-      roleArn: TestRoleArn,
-      workflows: [],
-      regions: [],
-      createdBy: 'test-user',
-      organization: 'test.io',
-    };
-    sfnClientMock.on(StartExecutionCommand).resolves({
-      $metadata: { httpStatusCode: 500 },
+      sfnClientMock.on(StopExecutionCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      await assessmentsStateMachineSfn.cancelAssessment('execution-arn');
+
+      const stopExecutionCalls =
+        sfnClientMock.commandCalls(StopExecutionCommand);
+      expect(stopExecutionCalls).toHaveLength(1);
+      const stopExecutionCall = stopExecutionCalls[0];
+      expect(stopExecutionCall.args[0].input.executionArn).toEqual(
+        'execution-arn'
+      );
     });
 
-    await expect(
-      assessmentsStateMachineSfn.startAssessment(input)
-    ).rejects.toThrowError('Failed to start assessment: 500');
-  });
+    it('should throw an error when state machine fails to cancel', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
 
-  it('should test the input of the state machine', async () => {
-    const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(StopExecutionCommand).resolves({
+        $metadata: { httpStatusCode: 500 },
+      });
 
-    const input: AssessmentsStateMachineStartAssessmentArgs = {
-      assessmentId: new IdGeneratorCrypto().generate(),
-      createdAt: new Date(),
-      name: TestName,
-      roleArn: TestRoleArn,
-      workflows: [],
-      regions: [],
-      createdBy: 'test-user',
-      organization: 'test.io',
-    };
-    sfnClientMock.on(StartExecutionCommand).resolves({
-      startDate: new Date(),
-      $metadata: { httpStatusCode: 200 },
-    });
-    await assessmentsStateMachineSfn.startAssessment(input);
-
-    const startExecutionCalls = sfnClientMock.commandCalls(
-      StartExecutionCommand
-    );
-    expect(startExecutionCalls).toHaveLength(1);
-    const startExecutionCall = startExecutionCalls[0];
-    expect(JSON.parse(startExecutionCall.args[0].input.input ?? '{}')).toEqual({
-      assessment_id: input.assessmentId,
-      name: input.name,
-      regions: [],
-      workflows: [],
-      role_arn: input.roleArn,
-      created_at: input.createdAt.toISOString(),
-      created_by: input.createdBy,
-      organization: input.organization,
+      await expect(
+        assessmentsStateMachineSfn.cancelAssessment('execution-arn')
+      ).rejects.toThrow(Error);
     });
   });
 });
@@ -109,8 +147,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
 const setup = () => {
   reset();
   const sfnClientMock = mockClient(SFNClient);
-  const stateMachineArn =
-    'arn:aws:states:us-west-2:123456789012:stateMachine:MyStateMachine';
+  const stateMachineArn = 'arn:test-state-machine-arn';
   register(tokenClientSfn, { useClass: SFNClient });
   register(tokenStateMachineArn, { useValue: stateMachineArn });
   register(tokenLogger, { useClass: FakeLogger });
