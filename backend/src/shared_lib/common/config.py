@@ -9,8 +9,12 @@ STATE_MACHINE_ARN = os.getenv("STATE_MACHINE_ARN", "test-state-machine")
 DDB_KEY = "PK"
 DDB_SORT_KEY = "SK"
 
-ASSESSMENT_SK = "ASSESSMENT#{}"
-FINDING_SK = "ASSESSMENT#{}#{}"
+ASSESSMENT_PK = "{}"  # "organization"
+ASSESSMENT_SK = "ASSESSMENT#{}"  # "ASSESSMENT#assessment_id"
+FINDING_PK = "{}#{}#FINDINGS"  # "organization#assessment_id#FINDINGS"
+FINDING_SK = "{}"  # "finding_id"
+FINDING_ID = "{}#{}"  # "scanning_tool#finding_id"
+FINDING_BEST_PRACTICES = "{}#{}#{}"  # "pillar#question#best_practice"
 
 SCANNING_TOOL_TITLE_PLACEHOLDER = "[SCANNING_TOOL_TITLE]"
 SCANNING_TOOL_DATA_PLACEHOLDER = "[SCANNING_TOOL_DATA]"
