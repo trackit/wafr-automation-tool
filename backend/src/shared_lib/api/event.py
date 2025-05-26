@@ -1,8 +1,8 @@
 from typing import Any
 
-from entities.api import APIAssessment
+from entities.api import APIAssessment, APIBestPracticeExtra
 from entities.assessment import AssessmentDto, AssessmentID
-from entities.best_practice import BestPracticeDto, BestPracticeExtra, BestPracticeID
+from entities.best_practice import BestPracticeDto, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID
 from entities.question import PillarDto, PillarID, QuestionDto, QuestionID
 from pydantic import BaseModel, Field
@@ -12,8 +12,10 @@ from utils.api import APIResponseBody
 class StartAssessmentInput(BaseModel):
     name: str
     regions: list[str] = []
-    role_arn: str | None = Field(default=None, alias="roleArn")
+    role_arn: str = Field(alias="roleArn")
     workflows: list[str] = []
+    created_by: str
+    organization: str
 
 
 class StartAssessmentResponseBody(APIResponseBody):
@@ -22,19 +24,23 @@ class StartAssessmentResponseBody(APIResponseBody):
 
 class StateMachineInput(BaseModel):
     assessment_id: AssessmentID
+    created_by: str
     name: str
     regions: list[str]
     role_arn: str
     workflows: list[str]
     created_at: str
+    organization: str
 
 
 class DeleteAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
 
 
 class RetrieveAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
 
 
 class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
@@ -43,6 +49,7 @@ class RetrieveAssessmentResponseBody(APIResponseBody, APIAssessment):
 
 class RescanAssessmentInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
 
 
 class RetrieveBestPracticeFindingsInput(BaseModel):
@@ -50,13 +57,16 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
+    organization: str
 
 
-RetrieveBestPracticeFindingsResponseBody = BestPracticeExtra
+class RetrieveBestPracticeFindingsResponseBody(APIResponseBody, APIBestPracticeExtra):
+    pass
 
 
 class RetrieveFindingInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     finding_id: FindingID
 
 
@@ -65,10 +75,10 @@ class RetrieveFindingResponseBody(APIResponseBody, FindingExtra):
 
 
 class RetrieveAllAssessmentsInput(BaseModel):
-    api_id: str
     limit: int
     search: str | None = None
     next_token: str | None = None
+    organization: str
 
 
 class RetrieveAllAssessmentsResponseBody(APIResponseBody):
@@ -79,10 +89,12 @@ class RetrieveAllAssessmentsResponseBody(APIResponseBody):
 class UpdateAssessmentInput(BaseModel):
     assessment_id: AssessmentID
     assessment_dto: AssessmentDto
+    organization: str
 
 
 class UpdateBestPracticeInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID
@@ -91,17 +103,20 @@ class UpdateBestPracticeInput(BaseModel):
 
 class UpdatePillarInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     pillar_id: PillarID
     pillar_dto: PillarDto
 
 
 class ExportWellArchitectedToolInput(BaseModel):
     assessment_id: AssessmentID
-    owner: str | None = None
+    organization: str
+    owner: str
 
 
 class UpdateQuestionInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     pillar_id: PillarID
     question_id: QuestionID
     question_dto: QuestionDto
@@ -109,6 +124,7 @@ class UpdateQuestionInput(BaseModel):
 
 class UpdateFindingInput(BaseModel):
     assessment_id: AssessmentID
+    organization: str
     pillar_id: PillarID
     question_id: QuestionID
     best_practice_id: BestPracticeID

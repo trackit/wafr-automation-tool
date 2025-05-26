@@ -27,22 +27,36 @@ class RetrieveAllAssessments(
             result.append(assessment_dict)
         return result
 
-    def create_filter(
-        self, event: RetrieveAllAssessmentsInput
-    ) -> tuple[str, dict[str, Any], dict[str, Any]] | tuple[None, None, None]:
-        if event.search is None:
-            return (None, None, None)
-        filter_expression = "contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)"
+    def create_filter(self, event: RetrieveAllAssessmentsInput) -> tuple[str, dict[str, Any], dict[str, Any]]:
         attribute_name = {
-            "#name": "name",
-            "#id": "id",
-            "#role_arn": "role_arn",
+            "#organization": "organization",
         }
         attribute_value = {
-            ":name": event.search,
-            ":id": event.search,
-            ":role_arn": event.search,
+            ":organization": event.organization,
         }
+
+        if event.search:
+            filter_expression = (
+                "(contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)) "
+                "AND #organization = :organization"
+            )
+            attribute_name.update(
+                {
+                    "#name": "name",
+                    "#id": "id",
+                    "#role_arn": "role_arn",
+                }
+            )
+            attribute_value.update(
+                {
+                    ":name": event.search,
+                    ":id": event.search,
+                    ":role_arn": event.search,
+                }
+            )
+        else:
+            filter_expression = "#organization = :organization"
+
         return (filter_expression, attribute_name, attribute_value)
 
     @override
@@ -55,7 +69,7 @@ class RetrieveAllAssessments(
             attribute_name=attribute_name,
             attribute_value=attribute_value,
         )
-        paginated = self.assessment_service.retrieve_all(pagination)
+        paginated = self.assessment_service.retrieve_all(pagination, event.organization)
         next_token = (
             base64.b64encode(json.dumps(paginated.next_token).encode()).decode() if paginated.next_token else None
         )

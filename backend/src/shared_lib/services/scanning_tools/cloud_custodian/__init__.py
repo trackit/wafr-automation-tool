@@ -8,7 +8,7 @@ from entities.scanning_tools import CloudCustodianPolicy, ScanningTool
 from exceptions.scanning_tool import InvalidPolicyError
 from types_boto3_s3.service_resource import ObjectSummary
 
-from services.scanning_tools import IScanningToolService
+from services.scanning_tools import BaseScanningToolService
 from services.scanning_tools.cloud_custodian.policies.ec2_stopped_instance import EC2StoppedInstance
 from services.scanning_tools.cloud_custodian.policy import Policy
 from services.storage import IStorageService
@@ -18,7 +18,7 @@ CLOUD_CUSTODIAN_POLICIES: dict[str, type[Policy]] = {
 }
 
 
-class CloudCustodianService(IScanningToolService):
+class CloudCustodianService(BaseScanningToolService):
     def __init__(self, storage_service: IStorageService) -> None:
         super().__init__(storage_service=storage_service, name=ScanningTool.CLOUD_CUSTODIAN, title="Cloud Custodian")
 

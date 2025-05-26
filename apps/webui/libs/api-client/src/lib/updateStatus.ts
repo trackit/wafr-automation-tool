@@ -1,0 +1,18 @@
+import { apiClient } from './client';
+import { paths } from '@shared/api-schema';
+export const updateStatus = async (
+  assessmentId: string,
+  pillarId: string,
+  questionId: string,
+  bestPracticeId: string,
+  status: boolean
+) => {
+  return apiClient.put<
+    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['put']['responses']['200']['content']
+  >(
+    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}`,
+    {
+      status,
+    }
+  );
+};

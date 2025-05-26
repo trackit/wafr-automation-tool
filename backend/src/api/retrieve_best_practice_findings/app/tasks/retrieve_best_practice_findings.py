@@ -20,10 +20,10 @@ class RetrieveBestPracticeFindings(
         self,
         event: RetrieveBestPracticeFindingsInput,
     ) -> APIResponse[RetrieveBestPracticeFindingsResponseBody]:
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return APIResponse(status_code=NOT_FOUND, body=None)
-        findings = self.assessment_service.retrieve_best_practice(
+        findings = self.assessment_service.retrieve_api_best_practice(
             assessment,
             event.pillar_id,
             event.question_id,
@@ -33,5 +33,5 @@ class RetrieveBestPracticeFindings(
             return APIResponse(status_code=NOT_FOUND, body=None)
         return APIResponse(
             status_code=OK,
-            body=findings,
+            body=RetrieveBestPracticeFindingsResponseBody(**findings.model_dump(exclude_none=True)),
         )

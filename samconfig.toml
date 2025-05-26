@@ -14,7 +14,7 @@ parallel = true
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
 confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "wafr-automation-tool"
@@ -61,3 +61,4 @@ parameter_overrides = [
   "Repository=https://github.com/trackit/wafr-automation-tool",
   "InitialUserEmail=contact@example.com",
 ]
+

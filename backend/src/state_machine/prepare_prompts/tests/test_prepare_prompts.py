@@ -1,23 +1,30 @@
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, PROWLER_OCSF_PATH, S3_BUCKET, STORE_PROMPT_PATH
 from entities.database import UpdateAttrsInput
+from entities.finding import FilteringRules
 from entities.scanning_tools import ScanningTool
 from exceptions.scanning_tool import InvalidScanningToolError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
+from utils.questions import QuestionSetData
 from utils.tests import load_file
 
 from state_machine.event import PreparePromptsInput
 
 
-def test_prepare_prompts():
+@patch("utils.files.get_filtering_rules", return_value=FilteringRules())
+def test_prepare_prompts(get_filtering_rules_mock: MagicMock):
     from ..app.tasks.prepare_prompts import PreparePrompts
 
     event = PreparePromptsInput(
-        assessment_id="test_assessment_id", scanning_tool=ScanningTool.PROWLER, regions=[], workflows=[]
+        assessment_id="test_assessment_id",
+        organization="test-organization",
+        scanning_tool=ScanningTool.PROWLER,
+        regions=[],
+        workflows=[],
     )
 
     fake_database_service = FakeDatabaseService()
@@ -28,28 +35,39 @@ def test_prepare_prompts():
     fake_storage_service.get = MagicMock(return_value=load_file(Path(__file__).parent / "prowler_output.json"))
     fake_storage_service.put = MagicMock()
 
-    fake_question_set = MagicMock(
-        data={
-            "pillar-1": {
-                "label": "Pillar 1",
-                "questions": {
-                    "question-1": {
-                        "label": "Question 1",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
-            }
+    fake_question_set_data = {
+        "pillar-1": {
+            "id": "pillar-1",
+            "label": "Pillar 1",
+            "primary_id": "pillar-1",
+            "disabled": False,
+            "questions": {
+                "question-1": {
+                    "id": "question-1",
+                    "label": "Question 1",
+                    "primary_id": "question-1",
+                    "none": False,
+                    "disabled": False,
+                    "best_practices": {
+                        "best-practice-1": {
+                            "id": "best-practice-1",
+                            "primary_id": "best-practice-1",
+                            "label": "Best Practice 1",
+                            "description": "Best Practice 1 Description",
+                            "risk": "High",
+                            "status": False,
+                            "results": ["1", "2", "3"],
+                            "hidden_results": [],
+                        }
+                    },
+                }
+            },
         }
+    }
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **fake_question_set_data,
+        )
     )
 
     task = PreparePrompts(
@@ -63,17 +81,25 @@ def test_prepare_prompts():
     fake_database_service.update_attrs.assert_called_once_with(
         table_name="test-table",
         event=UpdateAttrsInput(
-            key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: "test_assessment_id"},
+            key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("test_assessment_id")},
             attrs={
                 "findings": {
                     "pillar-1": {
+                        "id": "pillar-1",
                         "label": "Pillar 1",
+                        "primary_id": "pillar-1",
+                        "disabled": False,
                         "questions": {
                             "question-1": {
+                                "id": "question-1",
                                 "label": "Question 1",
+                                "primary_id": "question-1",
+                                "none": False,
+                                "disabled": False,
                                 "best_practices": {
                                     "best-practice-1": {
                                         "id": "best-practice-1",
+                                        "primary_id": "best-practice-1",
                                         "label": "Best Practice 1",
                                         "description": "Best Practice 1 Description",
                                         "risk": "High",
@@ -109,6 +135,7 @@ def test_prepare_prompts_invalid_scanning_tool():
     event = PreparePromptsInput(
         assessment_id="test_assessment_id",
         scanning_tool=ScanningTool._TEST,
+        organization="test-organization",
         regions=[],
         workflows=[],
     )
@@ -117,3 +144,73 @@ def test_prepare_prompts_invalid_scanning_tool():
 
     with pytest.raises(InvalidScanningToolError):
         task.execute(event)
+
+
+def test_prepare_prompts_self_made_finding():
+    from ..app.tasks.prepare_prompts import PreparePrompts
+
+    fake_database_service = FakeDatabaseService()
+    fake_database_service.update_attrs = MagicMock()
+    fake_database_service.update = MagicMock()
+
+    fake_storage_service = FakeStorageService()
+    fake_storage_service.get = MagicMock(
+        return_value=load_file(Path(__file__).parent / "self_made_prowler_output.json")
+    )
+    fake_storage_service.put = MagicMock()
+
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **{
+                "pillar-1": {
+                    "id": "pillar-1",
+                    "primary_id": "pillar-1",
+                    "label": "Pillar 1",
+                    "disabled": False,
+                    "questions": {
+                        "question-1": {
+                            "id": "question-1",
+                            "primary_id": "question-1",
+                            "label": "Question 1",
+                            "none": False,
+                            "disabled": False,
+                            "best_practices": {
+                                "best-practice-1": {
+                                    "id": "best-practice-1",
+                                    "primary_id": "best-practice-1",
+                                    "description": "Best Practice 1 Description",
+                                    "label": "Best Practice 1",
+                                    "risk": "Low",
+                                    "status": False,
+                                    "results": ["1", "2", "3"],
+                                    "hidden_results": [],
+                                }
+                            },
+                        }
+                    },
+                }
+            }
+        )
+    )
+
+    event = PreparePromptsInput(
+        assessment_id="test_assessment_id",
+        scanning_tool=ScanningTool.PROWLER,
+        regions=[],
+        workflows=[],
+        organization="test-organization",
+    )
+    task = PreparePrompts(
+        database_service=fake_database_service,
+        storage_service=fake_storage_service,
+        formatted_question_set=fake_question_set,
+    )
+    prompt_list = task.execute(event)
+
+    fake_storage_service.get.assert_called_once_with(
+        Bucket=S3_BUCKET, Key=PROWLER_OCSF_PATH.format(event.assessment_id)
+    )
+    fake_storage_service.put.assert_not_called()
+    fake_database_service.update.assert_called_once()
+    fake_database_service.update_attrs.assert_called_once()
+    assert prompt_list == []

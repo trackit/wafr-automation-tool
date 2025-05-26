@@ -20,8 +20,8 @@ def test_invoke_llm():
         scanning_tool_data=[
             Finding(
                 id="AID",
-                status_code="FAIL",
                 status_detail="error",
+                risk_details="risk",
             )
         ],
         scanning_tool_title="test",

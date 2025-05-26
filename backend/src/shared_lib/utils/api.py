@@ -2,6 +2,11 @@ import json
 from decimal import Decimal
 from typing import Any, override
 
+from exceptions.api import (
+    EmailExtractionError,
+    OrganizationExtractionError,
+    UserIdExtractionError,
+)
 from pydantic import BaseModel
 
 
@@ -48,3 +53,27 @@ class APIResponse[T: APIResponseBody | list[Any] | None](BaseModel):
                 "access-control-allow-credentials": "true",
             },
         }
+
+
+def get_user_organization_id(event: dict[str, Any]) -> str:
+    try:
+        return event["requestContext"]["authorizer"]["claims"]["email"].split("@")[1]
+    except (KeyError, AttributeError, IndexError) as e:
+        msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("email", None)
+        raise OrganizationExtractionError(msg) from e
+
+
+def get_user_id(event: dict[str, Any]) -> str:
+    try:
+        return event["requestContext"]["authorizer"]["claims"]["sub"]
+    except (KeyError, AttributeError, IndexError) as e:
+        msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("sub", None)
+        raise UserIdExtractionError(msg) from e
+
+
+def get_user_email(event: dict[str, Any]) -> str:
+    try:
+        return event["requestContext"]["authorizer"]["claims"]["email"]
+    except (KeyError, AttributeError, IndexError) as e:
+        msg = event.get("requestContext", {}).get("authorizer", {}).get("claims", {}).get("email", None)
+        raise EmailExtractionError(msg) from e

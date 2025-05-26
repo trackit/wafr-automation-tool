@@ -86,6 +86,7 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:UpdateItem
+                - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
             - Effect: Allow
@@ -328,11 +329,15 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $states.input.organization %}"
                 SK:
-                  S: "{% $states.input.assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $states.input.assessment_id %}"
                 id:
                   S: "{% $states.input.assessment_id %}"
+                created_by:
+                  S: "{% $states.input.created_by %}"
+                organization:
+                  S: "{% $states.input.organization %}"
                 name:
                   S: "{% $states.input.name %}"
                 regions:
@@ -351,6 +356,7 @@ Resources:
                   S: "{% $states.input.created_at %}"
             Assign:
               assessment_id: "{% $states.input.assessment_id %}"
+              organization: "{% $states.input.organization %}"
               regions: "{% $states.input.regions %}"
               role_arn: "{% $states.input.role_arn %}"
               workflows: "{% $states.input.workflows %}"
@@ -361,6 +367,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $states.input.assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           ScanningTools:
             Type: Parallel
@@ -457,6 +464,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           PreparePromptsUpdateStep:
             Type: Task
@@ -465,9 +473,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
@@ -479,6 +487,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           Prepare Prompts:
             Type: Parallel
@@ -490,6 +499,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "prowler"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"
@@ -501,6 +511,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "cloud-custodian"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"
@@ -512,6 +523,7 @@ Resources:
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
                       assessment_id: "{% $assessment_id %}"
+                      organization: "{% $organization %}"
                       scanning_tool: "cloudsploit"
                       regions: "{% $regions %}"
                       workflows: "{% $workflows %}"
@@ -524,6 +536,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           InvokeLLMUpdateStep:
             Type: Task
@@ -532,9 +545,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
@@ -547,6 +560,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           PromptMap:
             Type: Map
@@ -561,6 +575,7 @@ Resources:
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
                     assessment_id: "{% $assessment_id %}"
+                    organization: "{% $organization %}"
                     prompt_uri: "{% $states.input %}"
                     prompt_arn: !GetAtt BedrockPrompt.Arn
                   End: true
@@ -577,18 +592,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           GenerateData:
             Type: Task
             Resource: !GetAtt GenerateDataFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+              organization: "{% $organization %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
             Next: "FinishUpdateStep"
           FinishUpdateStep:
@@ -598,9 +616,9 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: "ASSESSMENT"
+                  S: "{% $organization %}"
                 SK:
-                  S: "{% $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ":newStep":
@@ -612,18 +630,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessment_id: "{% $assessment_id %}"
+              organization: "{% $organization %}"
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessment_id: "{% $assessment_id %}"
+                  organization: "{% $organization %}"
                   error: "{% $states.errorOutput %}"
             End: true
           CleanupOnError:

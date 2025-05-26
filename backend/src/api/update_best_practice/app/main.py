@@ -1,4 +1,5 @@
 import json
+from http.client import BAD_REQUEST
 from typing import Any
 
 import boto3
@@ -7,6 +8,7 @@ from pydantic import ValidationError
 from services.assessment import AssessmentService
 from services.database import DDBService
 from tasks.update_best_practice import UpdateBestPractice
+from utils.api import OrganizationExtractionError, get_user_organization_id
 
 from api.event import UpdateBestPracticeInput
 
@@ -18,11 +20,14 @@ task = UpdateBestPractice(assessment_service)
 
 def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # noqa: ANN401
     try:
+        organization = get_user_organization_id(event)
+
         body = json.loads(event["body"])
         best_practice_dto = BestPracticeDto(**body)
         response = task.execute(
             UpdateBestPracticeInput(
                 assessment_id=event["pathParameters"]["assessmentId"],
+                organization=organization,
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],
                 best_practice_id=event["pathParameters"]["bestPracticeId"],
@@ -30,8 +35,13 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
             ),
         )
         return response.build()
+    except OrganizationExtractionError as e:
+        return {
+            "statusCode": BAD_REQUEST,
+            "body": json.dumps({"error": str(e)}),
+        }
     except ValidationError as e:
         return {
-            "statusCode": 400,
+            "statusCode": BAD_REQUEST,
             "body": json.dumps({"error": e.errors()}),
         }

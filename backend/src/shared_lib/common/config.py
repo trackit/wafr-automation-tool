@@ -9,7 +9,8 @@ STATE_MACHINE_ARN = os.getenv("STATE_MACHINE_ARN", "test-state-machine")
 DDB_KEY = "PK"
 DDB_SORT_KEY = "SK"
 
-ASSESSMENT_PK = "ASSESSMENT"
+ASSESSMENT_SK = "ASSESSMENT#{}"
+FINDING_SK = "ASSESSMENT#{}#{}"
 
 SCANNING_TOOL_TITLE_PLACEHOLDER = "[SCANNING_TOOL_TITLE]"
 SCANNING_TOOL_DATA_PLACEHOLDER = "[SCANNING_TOOL_DATA]"
@@ -17,6 +18,7 @@ QUESTION_SET_DATA_PLACEHOLDER = "[QUESTION_SET_DATA]"
 PROMPT_PATH = "./data/prompt.txt"
 CUSTODIAN_POLICIES_PATH = "./policies/policies.yml"
 CUSTODIAN_FILE_NAME = "custodian.yml"
+FILTERING_RULES_PATH = "./filtering/filtering.json"
 
 PROWLER_OCSF_PATH = "assessments/{}/scans/prowler/json-ocsf/output.ocsf.json"
 PROWLER_COMPLIANCE_PATH = "assessments/{}/scans/prowler/compliance/output"

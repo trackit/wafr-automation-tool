@@ -2,11 +2,12 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-from common.config import ASSESSMENT_PK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, STORE_CHUNK_PATH
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, FINDING_SK, STORE_CHUNK_PATH
 from entities.finding import FindingExtra
 from exceptions.ai import InvalidPromptResponseError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
 from tests.__mocks__.fake_storage_service import FakeStorageService
+from utils.questions import QuestionSetData
 
 from state_machine.event import StoreResultsInput
 
@@ -27,30 +28,39 @@ def test_store_results():
     )
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
-    questions = MagicMock(
-        data={
-            "pillar-1": {
-                "id": "pillar-1",
-                "label": "Operational excellence",
-                "questions": {
-                    "question-1": {
-                        "id": "question-1",
-                        "label": "How do you determine what your priorities are?",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
-            }
+    fake_question_set_data = {
+        "pillar-1": {
+            "id": "pillar-1",
+            "label": "Pillar 1",
+            "primary_id": "pillar-1",
+            "disabled": False,
+            "questions": {
+                "question-1": {
+                    "id": "question-1",
+                    "label": "Question 1",
+                    "primary_id": "question-1",
+                    "none": False,
+                    "disabled": False,
+                    "best_practices": {
+                        "best-practice-1": {
+                            "id": "best-practice-1",
+                            "primary_id": "best-practice-1",
+                            "label": "Best Practice 1",
+                            "description": "Best Practice 1 Description",
+                            "risk": "High",
+                            "status": False,
+                            "results": ["prowler:1"],
+                            "hidden_results": [],
+                        }
+                    },
+                }
+            },
         }
+    }
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **fake_question_set_data,
+        )
     )
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
@@ -58,9 +68,12 @@ def test_store_results():
     database_service.put = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
+        assessment_id="AID",
+        organization="test-organization",
+        llm_response=llm_response,
+        prompt_uri="s3://bucket/prompts/prowler_0.json",
     )
-    task = StoreResults(database_service, storage_service, questions)
+    task = StoreResults(database_service, storage_service, fake_question_set)
     result = task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
@@ -68,9 +81,9 @@ def test_store_results():
     database_service.put.assert_called_once_with(
         table_name=DDB_TABLE,
         item={
-            **finding.model_dump(exclude={"id"}),
-            DDB_KEY: invoke_llm_input.assessment_id,
-            DDB_SORT_KEY: f"prowler:{finding.id}",
+            **finding.model_dump(),
+            DDB_KEY: invoke_llm_input.organization,
+            DDB_SORT_KEY: FINDING_SK.format(invoke_llm_input.assessment_id, "prowler#10"),
         },
     )
     assert not result
@@ -92,38 +105,50 @@ def test_store_results_with_no_finding():
     database_service.update = MagicMock(return_value=None)
 
     storage_service = FakeStorageService()
-    questions = MagicMock(
-        data={
-            "pillar-1": {
-                "id": "pillar-1",
-                "label": "Operational excellence",
-                "questions": {
-                    "question-1": {
-                        "id": "question-1",
-                        "label": "How do you determine what your priorities are?",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
-            }
+    fake_question_set_data = {
+        "pillar-1": {
+            "id": "pillar-1",
+            "label": "Pillar 1",
+            "primary_id": "pillar-1",
+            "disabled": False,
+            "questions": {
+                "question-1": {
+                    "id": "question-1",
+                    "label": "Question 1",
+                    "primary_id": "question-1",
+                    "none": False,
+                    "disabled": False,
+                    "best_practices": {
+                        "best-practice-1": {
+                            "id": "best-practice-1",
+                            "primary_id": "best-practice-1",
+                            "label": "Best Practice 1",
+                            "description": "Best Practice 1 Description",
+                            "risk": "High",
+                            "status": False,
+                            "results": ["1", "2", "3"],
+                            "hidden_results": [],
+                        }
+                    },
+                }
+            },
         }
+    }
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **fake_question_set_data,
+        )
     )
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
+        assessment_id="AID",
+        organization="test-organization",
+        llm_response=llm_response,
+        prompt_uri="s3://bucket/prompts/prowler_0.json",
     )
-    task = StoreResults(database_service, storage_service, questions)
+    task = StoreResults(database_service, storage_service, fake_question_set)
     task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
@@ -145,7 +170,7 @@ def test_store_results_with_invalid_questions():
 
     storage_service = FakeStorageService()
     database_service = FakeDatabaseService()
-    questions = MagicMock(data={})
+    questions = MagicMock(data=QuestionSetData({}))
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
     database_service.put = MagicMock(return_value=None)
@@ -153,7 +178,10 @@ def test_store_results_with_invalid_questions():
     task = StoreResults(database_service, storage_service, questions)
     task.execute(
         StoreResultsInput(
-            assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
+            assessment_id="AID",
+            organization="test-organization",
+            llm_response=llm_response,
+            prompt_uri="s3://bucket/prompts/prowler_0.json",
         )
     )
 
@@ -175,45 +203,57 @@ def test_store_results_with_no_finding_data():
     )
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
-    questions = MagicMock(
-        data={
-            "pillar-1": {
-                "id": "pillar-1",
-                "label": "Operational excellence",
-                "questions": {
-                    "question-1": {
-                        "id": "question-1",
-                        "label": "How do you determine what your priorities are?",
-                        "best_practices": {
-                            "best-practice-1": {
-                                "id": "best-practice-1",
-                                "label": "Best Practice 1",
-                                "description": "Best Practice 1 Description",
-                                "risk": "High",
-                                "status": False,
-                                "results": ["1", "2", "3"],
-                                "hidden_results": [],
-                            }
-                        },
-                    }
-                },
-            }
+    fake_question_set_data = {
+        "pillar-1": {
+            "id": "pillar-1",
+            "label": "Pillar 1",
+            "primary_id": "pillar-1",
+            "disabled": False,
+            "questions": {
+                "question-1": {
+                    "id": "question-1",
+                    "label": "Question 1",
+                    "primary_id": "question-1",
+                    "none": False,
+                    "disabled": False,
+                    "best_practices": {
+                        "best-practice-1": {
+                            "id": "best-practice-1",
+                            "primary_id": "best-practice-1",
+                            "label": "Best Practice 1",
+                            "description": "Best Practice 1 Description",
+                            "risk": "High",
+                            "status": False,
+                            "results": ["1", "2", "3"],
+                            "hidden_results": [],
+                        }
+                    },
+                }
+            },
         }
+    }
+    fake_question_set = MagicMock(
+        data=QuestionSetData(
+            **fake_question_set_data,
+        )
     )
 
     storage_service.get = MagicMock(return_value=json.dumps([finding.model_dump()]))
     database_service.update = MagicMock(return_value=None)
 
     invoke_llm_input = StoreResultsInput(
-        assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/prompts/prowler_0.json"
+        assessment_id="AID",
+        organization="test-organization",
+        llm_response=llm_response,
+        prompt_uri="s3://bucket/prompts/prowler_0.json",
     )
-    task = StoreResults(database_service, storage_service, questions)
+    task = StoreResults(database_service, storage_service, fake_question_set)
     task.execute(invoke_llm_input)
 
     storage_service.get.assert_called_once_with(Bucket="bucket", Key=STORE_CHUNK_PATH.format("AID", "prowler_0"))
     database_service.update.assert_called_once_with(
         table_name=DDB_TABLE,
-        Key={DDB_KEY: ASSESSMENT_PK, DDB_SORT_KEY: invoke_llm_input.assessment_id},
+        Key={DDB_KEY: "test-organization", DDB_SORT_KEY: ASSESSMENT_SK.format("AID")},
         UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",
         ExpressionAttributeNames={
             "#pillar": "pillar-1",
@@ -221,7 +261,7 @@ def test_store_results_with_no_finding_data():
             "#best_practice": "best-practice-1",
         },
         ExpressionAttributeValues={
-            ":new_findings": ["prowler:10"],
+            ":new_findings": ["prowler#10"],
             ":empty_list": [],
         },
     )
@@ -251,6 +291,9 @@ def test_store_results_with_invalid_llm_response():
     with pytest.raises(InvalidPromptResponseError):
         task.execute(
             StoreResultsInput(
-                assessment_id="AID", llm_response=llm_response, prompt_uri="s3://bucket/key/prowler_1.json"
+                assessment_id="AID",
+                organization="test-organization",
+                llm_response=llm_response,
+                prompt_uri="s3://bucket/key/prowler_1.json",
             )
         )

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from entities.api import APIAssessment, APIFormattedPillar, APIFormattedQuestion
 from entities.assessment import Assessment
@@ -12,18 +12,16 @@ def convert_all_assessments_to_api_assessments(assessments: list[Assessment]) ->
 
 
 def convert_assessment_to_api_assessment(assessment: Assessment) -> APIAssessment:
-    assessment_dict = assessment.model_dump(exclude={"findings", "raw_graph_datas"})
     findings: list[APIFormattedPillar] = []
-
     if assessment.findings:
-        for pillar in assessment.findings.values():
+        for pillar in assessment.findings.root.values():
             questions: list[APIFormattedQuestion] = []
-            for question in pillar.get("questions").values():
-                question_copy: Any = question.copy()
-                best_practices: list[BestPractice] = list(question.get("best_practices").values())
-                question_copy["best_practices"] = best_practices
-                questions.append(question_copy)
-            pillar_copy: Any = pillar.copy()
-            pillar_copy["questions"] = questions
-            findings.append(pillar_copy)
-    return APIAssessment(**assessment_dict, findings=findings)
+            for question in pillar.questions.values():
+                best_practices: list[BestPractice] = list(question.best_practices.values())
+                questions.append(
+                    APIFormattedQuestion(
+                        **question.model_dump(exclude={"best_practices"}), best_practices=best_practices
+                    )
+                )
+            findings.append(APIFormattedPillar(**pillar.model_dump(exclude={"questions"}), questions=questions))
+    return APIAssessment(**assessment.model_dump(exclude={"findings", "raw_graph_datas"}), findings=findings)

@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from common.config import PROWLER_OCSF_PATH, S3_BUCKET
-from entities.finding import FindingExtra, FindingRemediation, FindingResource
+from entities.finding import FindingExtra, FindingMetaData, FindingRemediation, FindingResource
 from services.scanning_tools.prowler import ProwlerService
 from utils.tests import load_file
 
@@ -28,6 +28,9 @@ def test_prowler_retrieve_findings():
             status_code="FAIL",
             status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
             severity="Low",
+            metadata=FindingMetaData(
+                event_code="accessanalyzer_enabled",
+            ),
             resources=[
                 FindingResource(
                     uid="arn:aws:accessanalyzer:ap-northeast-1:XXXXXXXXXXXX:analyzer/unknown",

@@ -18,6 +18,11 @@ class IScanningToolService(ABC):
     def retrieve_findings(self, assessment_id: AssessmentID, regions: list[str]) -> list[FindingExtra]:
         raise NotImplementedError
 
+
+class BaseScanningToolService(IScanningToolService):
+    def __init__(self, storage_service: IStorageService, name: str, title: str) -> None:
+        super().__init__(storage_service=storage_service, name=name, title=title)
+
     def is_finding_in_workflow(self, finding: FindingExtra, workflows: list[str]) -> bool:
         if not workflows:
             return True
@@ -35,9 +40,20 @@ class IScanningToolService(ABC):
         return bool(finding.status_detail and any(w in finding.status_detail.lower() for w in workflows))
 
     def is_self_made_finding(self, finding: FindingExtra) -> bool:
-        return bool(
-            finding.resources and finding.resources[0].uid and "wafr-automation-tool" in finding.resources[0].uid
-        )
+        wafr_tool_signature = "wafr-automation-tool"
+        not_self_made_resources = [
+            resource
+            for resource in finding.resources or []
+            if (resource.name and wafr_tool_signature not in resource.name.lower())
+            and (resource.uid and wafr_tool_signature not in resource.uid.lower())
+        ]
+        if not_self_made_resources:
+            finding.resources = not_self_made_resources
+        else:
+            return True
+        if finding.status_detail and wafr_tool_signature in finding.status_detail.lower():
+            return True
+        return bool(finding.risk_details and wafr_tool_signature in finding.risk_details.lower())
 
     def filter_findings(self, findings: list[FindingExtra], workflows: list[str]) -> list[FindingExtra]:
         return [

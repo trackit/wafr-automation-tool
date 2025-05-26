@@ -1,0 +1,27 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/api-schema": ["libs/shared/api-schema/src/index.ts"],
+      "@shared/di-container": ["libs/shared/di-container/src/index.ts"],
+      "@webui/api-client": ["apps/webui/libs/api-client/src/index.ts"],
+      "@webui/forms": ["apps/webui/libs/forms/src/index.ts"],
+      "@webui/types": ["apps/webui/libs/types/src/index.ts"],
+      "@webui/ui": ["apps/webui/libs/ui/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

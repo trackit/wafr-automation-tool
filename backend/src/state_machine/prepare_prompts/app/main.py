@@ -5,7 +5,7 @@ from common.config import REGION
 from services.database import DDBService
 from services.storage import S3Service
 from tasks.prepare_prompts import PreparePrompts
-from utils.questions import format_questions, retrieve_questions
+from utils.questions import retrieve_questions
 
 from state_machine.event import PreparePromptsInput
 
@@ -21,7 +21,7 @@ question_set = retrieve_questions()
 task = PreparePrompts(
     database_service=database_service,
     storage_service=storage_service,
-    formatted_question_set=format_questions(question_set),
+    formatted_question_set=question_set,
 )
 
 

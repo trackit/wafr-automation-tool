@@ -15,14 +15,19 @@ class UpdateFinding(Task[UpdateFindingInput, APIResponse[None]]):
 
     @override
     def execute(self, event: UpdateFindingInput) -> APIResponse[None]:
-        assessment = self.assessment_service.retrieve(event.assessment_id)
+        assessment = self.assessment_service.retrieve(event.assessment_id, event.organization)
         if not assessment:
             return APIResponse(
                 status_code=NOT_FOUND,
                 body=None,
             )
         self.assessment_service.update_finding(
-            assessment, event.pillar_id, event.question_id, event.best_practice_id, event.finding_id, event.finding_dto
+            assessment,
+            event.pillar_id,
+            event.question_id,
+            event.best_practice_id,
+            event.finding_id,
+            event.finding_dto,
         )
         return APIResponse(
             status_code=OK,
