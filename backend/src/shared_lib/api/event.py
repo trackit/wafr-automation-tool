@@ -58,10 +58,15 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     question_id: QuestionID
     best_practice_id: BestPracticeID
     organization: str
+    limit: int
+    search: str | None = None
+    show_hidden: bool = False
+    next_token: str | None = None
 
 
-class RetrieveBestPracticeFindingsResponseBody(APIResponseBody, APIBestPracticeExtra):
-    pass
+class RetrieveBestPracticeFindingsResponseBody(APIResponseBody):
+    items: list[FindingExtra]
+    next_token: str | None
 
 
 class RetrieveFindingInput(BaseModel):
