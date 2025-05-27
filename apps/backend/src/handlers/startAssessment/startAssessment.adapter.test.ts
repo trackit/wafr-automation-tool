@@ -1,5 +1,3 @@
-import type { APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
