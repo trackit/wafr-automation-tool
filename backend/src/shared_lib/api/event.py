@@ -1,6 +1,6 @@
 from typing import Any
 
-from entities.api import APIAssessment, APIBestPracticeExtra
+from entities.api import APIAssessment
 from entities.assessment import AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID

@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
 from boto3.dynamodb.conditions import Key
-from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, FINDING_SK
-from entities.api import APIBestPracticeExtra, APIPagination, APIPaginationOutput
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, FINDING_PK
+from entities.api import APIPagination, APIPaginationOutput
 from entities.assessment import Assessment, AssessmentData, AssessmentDto, Steps
 from entities.best_practice import BestPractice, BestPracticeDto
 from entities.database import UpdateAttrsInput
@@ -439,37 +439,17 @@ def test_assessment_service_retrieve_best_practice():
         ),
     )
 
-    best_practice = assessment_service.retrieve_api_best_practice(
-        assessment, "pillar-1", "question-1", "best-practice-1"
-    )
+    best_practice = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
 
-    assert best_practice == APIBestPracticeExtra(
+    assert best_practice == BestPractice(
         id="best-practice-1",
+        primary_id="best-practice-1",
         label="Best Practice 1",
         description="Best Practice 1 Description",
         risk="Low",
         status=False,
-        results=[
-            FindingExtra(
-                id="prowler#1",
-                status_code="FAIL",
-                status_detail="IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
-                severity="Low",
-                resources=[],
-                remediation=None,
-                hidden=False,
-            )
-        ],
+        results=["1", "2", "3"],
         hidden_results=[],
-    )
-
-    fake_database_service.bulk_get.assert_called_once_with(
-        table_name="test-table",
-        keys=[
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "1")},
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "2")},
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "3")},
-        ],
     )
 
 
@@ -489,7 +469,7 @@ def test_assessment_service_retrieve_best_practice_with_no_findings():
         findings=QuestionSetData({}),
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
     assert finding is None
 
 
@@ -519,7 +499,7 @@ def test_assessment_service_retrieve_best_practice_not_found_pillar():
         ),
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-2", "question-1", "best-practice-1")
     assert finding is None
 
 
@@ -558,7 +538,7 @@ def test_assessment_service_retrieve_best_practice_not_found_question():
         ),
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-2", "best-practice-1")
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-2", "best-practice-1")
     assert finding is None
 
 
@@ -608,7 +588,7 @@ def test_assessment_service_retrieve_best_practice_not_found_best_practice():
         ),
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-2")
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-2")
     assert finding is None
 
 
@@ -658,9 +638,10 @@ def test_assessment_service_retrieve_best_practice_with_no_results():
         ),
     )
     assessment_service = AssessmentService(database_service=fake_database_service)
-    finding = assessment_service.retrieve_api_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
-    assert finding == APIBestPracticeExtra(
+    finding = assessment_service.retrieve_best_practice(assessment, "pillar-1", "question-1", "best-practice-1")
+    assert finding == BestPractice(
         id="best-practice-1",
+        primary_id="best-practice-1",
         label="Best Practice 1",
         description="Best Practice 1 Description",
         risk="Low",
@@ -700,7 +681,7 @@ def test_assessment_service_retrieve_finding():
 
     fake_database_service.get.assert_called_once_with(
         table_name="test-table",
-        Key={DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#1")},
+        Key={DDB_KEY: FINDING_PK.format("test-organization", "test-assessment-id"), DDB_SORT_KEY: "prowler#1"},
     )
 
 
@@ -714,27 +695,38 @@ def test_assessment_service_retrieve_finding_not_found():
 
 def test_assessment_service_retrieve_findings():
     fake_database_service = FakeDatabaseService()
-    fake_database_service.bulk_get = MagicMock(
-        return_value=[
-            {
-                DDB_KEY: "test-assessment-id",
-                DDB_SORT_KEY: "prowler#1",
-                "status_code": "FAIL",
-                "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
-                "severity": "Low",
-                "resources": [],
-                "remediation": None,
-                "hidden": False,
-            }
-        ]
+    fake_database_service.query = MagicMock(
+        return_value={
+            "Items": [
+                {
+                    DDB_KEY: "test-assessment-id",
+                    DDB_SORT_KEY: "prowler#1",
+                    "status_code": "FAIL",
+                    "status_detail": "IAM Access Analyzer in account XXXXXXXXXXXX is not enabled.",
+                    "severity": "Low",
+                    "resources": [],
+                    "remediation": None,
+                    "hidden": False,
+                }
+            ],
+            "LastEvaluatedKey": {"test-key": "test-value"},
+        }
+    )
+
+    pagination = APIPagination(
+        limit=10,
+        next_token=None,
+        filter_expression="(#hidden = :hidden)",
+        attribute_name={"#hidden": "hidden"},
+        attribute_value={":hidden": False},
     )
 
     assessment_service = AssessmentService(database_service=fake_database_service)
-    findings = assessment_service.retrieve_findings(
-        "test-assessment-id", ["prowler#1", "prowler#2", "prowler#3"], organization="test-organization"
+    findings = assessment_service.retrieve_best_practice_findings(
+        pagination, "test-assessment-id", "test-organization", "PI", "QI", "BP"
     )
 
-    assert findings == [
+    assert findings.items == [
         FindingExtra(
             id="prowler#1",
             status_code="FAIL",
@@ -745,15 +737,7 @@ def test_assessment_service_retrieve_findings():
             hidden=False,
         )
     ]
-
-    fake_database_service.bulk_get.assert_called_once_with(
-        table_name="test-table",
-        keys=[
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#1")},
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#2")},
-            {DDB_KEY: "test-organization", DDB_SORT_KEY: FINDING_SK.format("test-assessment-id", "prowler#3")},
-        ],
-    )
+    fake_database_service.query.assert_called_once()
 
 
 def test_assessment_service_update():
@@ -922,7 +906,7 @@ def test_assessment_service_delete_findings():
 
     fake_database_service.bulk_delete.assert_called_once_with(
         table_name="test-table",
-        keys=[{"PK": "test-organization", "SK": FINDING_SK.format("test-assessment-id", "prowler#1")}],
+        keys=[{"PK": FINDING_PK.format("test-organization", "test-assessment-id"), "SK": "prowler#1"}],
     )
 
 

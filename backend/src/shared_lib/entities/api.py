@@ -14,16 +14,6 @@ from entities.question import PillarID, QuestionID
 WorkloadId = str
 
 
-class APIBestPracticeExtra(BaseModel):
-    id: BestPracticeID
-    label: str
-    description: str = ""
-    risk: str
-    status: bool
-    results: list[FindingExtra]
-    hidden_results: list[str]
-
-
 class APIFormattedQuestion(TypedDict):
     id: QuestionID
     label: str
