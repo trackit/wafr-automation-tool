@@ -30,6 +30,7 @@
     "@tanstack/react-query": "^5.74.9",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.6",
+    "@uidotdev/usehooks": "^2.4.1",
     "aws-amplify": "^6.14.4",
     "aws-lambda": "^1.0.7",
     "aws-sdk-client-mock": "^4.1.0",
