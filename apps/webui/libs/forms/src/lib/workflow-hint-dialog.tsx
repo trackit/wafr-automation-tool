@@ -51,7 +51,7 @@ export function WorkflowHintDialog() {
                 </div>
               </div>
               <img
-                src="/src/assets/workflow.png"
+                src="/assets/workflow.png"
                 className="max-w-72 mx-auto object-contain"
                 alt="Workflow example diagram"
               />
