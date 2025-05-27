@@ -1,7 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { getFindings, hideFinding } from '@webui/api-client';
 import { components } from '@shared/api-schema';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useDebounce } from '@uidotdev/usehooks';
+import { getFindings, hideFinding } from '@webui/api-client';
 import { Earth, FileCheck, Info, Search, Server } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -90,9 +95,10 @@ function FindingItem({
           >
             <button
               className="btn btn-xs btn-primary btn-outline mt-[-0.5em]"
-              onClick={() =>
-                onHide(finding.id?.toString() || '', !finding.hidden)
-              }
+              onClick={() => {
+                onHide(finding.id?.toString() || '', !finding.hidden);
+                finding.hidden = !finding.hidden;
+              }}
             >
               <FileCheck className="w-4 h-4 " />
             </button>
@@ -159,26 +165,41 @@ function FindingsDetails({
   pillarId,
   questionId,
 }: FindingsDetailsProps) {
-  const [showHidden, setShowHidden] = useState(false);
   const queryClient = useQueryClient();
+  const [showHidden, setShowHidden] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const findingsListRef = useRef<HTMLDivElement>(null);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  useEffect(() => {
-    if (findingsListRef.current) {
-      findingsListRef.current.scrollTop = 0;
-    }
-  }, [searchQuery]);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        'findings',
+        assessmentId,
+        pillarId,
+        questionId,
+        bestPractice.id,
+        debouncedSearchQuery,
+        showHidden,
+      ],
+      queryFn: ({ pageParam }) =>
+        getFindings(
+          assessmentId,
+          pillarId,
+          questionId,
+          bestPractice.id || '',
+          100,
+          debouncedSearchQuery,
+          showHidden,
+          pageParam
+        ),
+      getNextPageParam: (lastPage) => lastPage.next_token,
+      initialPageParam: '',
+    });
 
-  const { data, isLoading } = useQuery<
-    components['schemas']['BestPracticeExtra']
-  >({
-    queryKey: ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-    queryFn: () =>
-      getFindings(assessmentId, pillarId, questionId, bestPractice.id || ''),
-  });
+  const findings = useMemo(() => {
+    return data?.pages.flatMap((page) => page.items || []) || [];
+  }, [data]);
 
-  const findings: components['schemas']['Finding'][] = data?.results || [];
   const sortedFindings = useMemo(() => {
     return findings.sort((a, b) => {
       // Sort findings with remediation to the top
@@ -187,37 +208,6 @@ function FindingsDetails({
       return 0;
     });
   }, [findings]);
-
-  const filteredFindings = useMemo(() => {
-    return sortedFindings.filter((finding) => {
-      if (!showHidden && finding.hidden) return false;
-      if (!searchQuery) return true;
-
-      const searchLower = searchQuery.toLowerCase();
-
-      // Search through status detail
-      if (finding.status_detail?.toLowerCase().includes(searchLower))
-        return true;
-
-      // Search through risk details
-      if (finding.risk_details?.toLowerCase().includes(searchLower))
-        return true;
-
-      // Search through resources
-      if (
-        finding.resources?.some(
-          (resource) =>
-            resource.name?.toLowerCase().includes(searchLower) ||
-            resource.uid?.toLowerCase().includes(searchLower) ||
-            resource.region?.toLowerCase().includes(searchLower)
-        )
-      )
-        return true;
-
-      // Search through remediation
-      return !!finding.remediation?.desc?.toLowerCase().includes(searchLower);
-    });
-  }, [sortedFindings, showHidden, searchQuery]);
 
   const { mutate } = useMutation({
     mutationFn: ({
@@ -315,20 +305,29 @@ function FindingsDetails({
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
-    count: filteredFindings.length,
+    count: sortedFindings.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 150,
     overscan: 5,
   });
 
-  console.log(showHidden);
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-full py-8">
-        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
-      </div>
-    );
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    if (virtualItems.length === 0) return;
+    const lastItem = virtualItems[virtualItems.length - 1];
+    if (lastItem.index >= sortedFindings.length - 10) {
+      fetchNextPage();
+    }
+  }, [
+    virtualItems,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    sortedFindings.length,
+  ]);
+
   return (
     <div className="flex flex-col h-[95vh]">
       <div className="flex flex-col gap-2 px-8 py-4 border-b border-base-content/30">
@@ -343,7 +342,7 @@ function FindingsDetails({
             />
             Show resolved
           </label>
-          {data?.risk && <SeverityBadge severity={data?.risk} />}
+          {bestPractice.risk && <SeverityBadge severity={bestPractice.risk} />}
         </div>
         <label className="input w-full flex flex-row gap-2 items-center">
           <Search className="h-[1em] opacity-50" />
@@ -364,7 +363,7 @@ function FindingsDetails({
             position: 'relative',
           }}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+          {virtualItems.map((virtualRow) => (
             <div
               key={virtualRow.key}
               data-index={virtualRow.index}
@@ -378,18 +377,24 @@ function FindingsDetails({
               }}
             >
               <FindingItem
-                finding={filteredFindings[virtualRow.index]}
+                finding={sortedFindings[virtualRow.index]}
                 searchQuery={searchQuery}
                 onHide={(findingId, hidden) => mutate({ findingId, hidden })}
               />
             </div>
           ))}
         </div>
-        {filteredFindings.length === 0 && (
+        {sortedFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
-            <p className="text-sm text-base-content/80">
-              No findings found for "{searchQuery}"
-            </p>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full py-8">
+                <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+              </div>
+            ) : (
+              <p className="text-sm text-base-content/80">
+                No findings found for "{searchQuery}"
+              </p>
+            )}
           </div>
         )}
       </div>
