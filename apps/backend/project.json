@@ -13,7 +13,7 @@
       }
     },
     "build": {
-      "command": "sam build --cached --use-container --mount-symlinks",
+      "command": "sam build --cached",
       "options": {
         "cwd": "."
       }

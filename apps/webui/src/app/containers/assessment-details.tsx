@@ -344,7 +344,7 @@ export function AssessmentDetails() {
   });
 
   const rescanAssessmentMutation = useMutation({
-    mutationFn: () => rescanAssessment({ assessmentId: parseInt(id || '') }),
+    mutationFn: () => rescanAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowRescanModal(false);
       queryClient.invalidateQueries({ queryKey: ['assessment', id] });
@@ -357,7 +357,7 @@ export function AssessmentDetails() {
   });
 
   const cancelAssessmentMutation = useMutation({
-    mutationFn: () => deleteAssessment({ assessmentId: parseInt(id || '') }),
+    mutationFn: () => deleteAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowCancelModal(false);
     },
