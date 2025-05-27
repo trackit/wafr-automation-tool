@@ -369,13 +369,44 @@ paths:
           description: The ID of the best practice to retrieve findings to
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Maximum number of assessments to return
+          schema:
+            type: integer
+            default: 100
+        - name: search
+          in: query
+          description: 'Search term to filter assessments by name, role ARN, or id'
+          schema:
+            type: string
+        - name: show_hidden
+          in: query
+          description: 'Show hidden findings'
+          schema:
+            type: boolean
+        - name: next_token
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of findings related to the specified best practice
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BestPracticeExtra'
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Finding'
+                  next_token:
+                    type: string
+                    description: |
+                      Token for pagination. If there are more findings than can be returned in a single response,
+                      this token will allow you to retrieve the next set of results.
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
@@ -741,10 +772,6 @@ components:
         status:
           type: boolean
         results:
-          type: array
-          items:
-            type: string
-        hidden_results:
           type: array
           items:
             type: string
