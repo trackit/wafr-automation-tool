@@ -421,7 +421,7 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:GetItem
-                - dynamodb:BatchGetItem
+                - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
         RetrieveBestPracticeFindings:

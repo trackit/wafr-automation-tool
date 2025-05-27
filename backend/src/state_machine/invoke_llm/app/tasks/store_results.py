@@ -55,7 +55,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def store_finding_ids(
+    def store_best_practice_findings(
         self,
         organization: str,
         assessment_id: AssessmentID,

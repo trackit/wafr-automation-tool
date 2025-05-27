@@ -1,5 +1,4 @@
 from entities.best_practice import BestPractice
-from entities.finding import FindingExtra
 from entities.question import Pillar, Question
 
 from utils.questions import QuestionSetData
