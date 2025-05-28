@@ -16,8 +16,17 @@ import {
   tokenDynamoDBBatchSize,
 } from './AssessmentsRepositoryDynamoDB';
 import { FakeLogger, tokenLogger } from '../Logger';
+import { afterEach } from "vitest";
+
+afterEach(() => {
+
+})
 
 describe('AssessmentsRepositoryDynamoDB', () => {
+  describe('save', () => {
+    it.todo('should save an assessment to DynamoDB');
+  })
+
   describe('getOne', () => {
     it('should call DynamoDB GetItemCommand with correct parameters', async () => {
       const { repository, dynamoDBClientMock, tableName } = setup();
