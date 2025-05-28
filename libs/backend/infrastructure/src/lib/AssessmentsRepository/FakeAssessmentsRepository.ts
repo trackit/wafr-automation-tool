@@ -5,6 +5,21 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
   public assessmentFindings: Record<string, Finding[]> = {};
 
+  public async save(args: {
+    assessment: Assessment;
+    organization: string;
+  }): Promise<Assessment> {
+    const { assessment, organization } = args;
+    const key = `${assessment.id}#${organization}`;
+    this.assessments[key] = assessment;
+
+    if (!this.assessmentFindings[key]) {
+      this.assessmentFindings[key] = [];
+    }
+
+    return assessment;
+  }
+
   public async getOne(args: {
     assessmentId: string;
     organization: string;

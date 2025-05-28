@@ -35,6 +35,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
+  public async save(args: {
+    assessment: Assessment;
+    organization: string;
+  }): Promise<Assessment> {
+    throw new Error('Not implemented');
+  }
+
   public async getOne(args: {
     assessmentId: string;
     organization: string;
