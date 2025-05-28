@@ -74,19 +74,130 @@ describe('AssessmentsRepositoryDynamoDB', () => {
   });
 
   describe('getOne', () => {
-    it.todo('should get an assessment by ID and organization');
+    it('should get an assessment by ID and organization', async () => {
+      const { repository } = setup();
 
-    it.todo('should be scoped by organization');
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
 
-    it.todo('should return undefined if assessment does not exist');
+      await repository.save(assessment);
+
+      const fetchedAssessment = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessment).toEqual(assessment);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization2')
+        .build();
+
+      await repository.save(assessment2);
+
+      const fetchedAssessment = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessment).toEqual(assessment1);
+    });
+
+    it('should return undefined if assessment does not exist', async () => {
+      const { repository } = setup();
+
+      const fetchedAssessment = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessment).toEqual(undefined);
+    });
   });
 
   describe('delete', () => {
-    it.todo('should delete an assessment by ID and organization');
+    it('should delete an assessment by ID and organization', async () => {
+      const { repository } = setup();
 
-    it.todo('should be scoped by organization');
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
 
-    it.todo('should throw an error if the assessment does not exist');
+      await repository.save(assessment);
+
+      await repository.delete({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      const fetchedAssessment = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessment).toEqual(undefined);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization2')
+        .build();
+
+      await repository.save(assessment2);
+
+      await repository.delete({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      const fetchedAssessment1 = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      const fetchedAssessment2 = await repository.getOne({
+        assessmentId: 'assessment1',
+        organization: 'organization2',
+      });
+
+      expect(fetchedAssessment1).toEqual(undefined);
+      expect(fetchedAssessment1).toEqual(assessment2);
+    });
+
+    it('should throw an error if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.delete({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+        })
+      ).rejects.toThrow(Error);
+    });
   });
 
   describe('saveFinding', () => {
