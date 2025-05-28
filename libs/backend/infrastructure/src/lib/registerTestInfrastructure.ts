@@ -10,7 +10,7 @@ import {
   testDynamoDbConfig,
 } from './dynamodb/DynamoDbConfig';
 
-const registerTestInfrastructure = () => {
+export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenDynamoDBConfig, {
     useValue: testDynamoDbConfig,
