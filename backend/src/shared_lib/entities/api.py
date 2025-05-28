@@ -7,8 +7,7 @@ from types_boto3_dynamodb.type_defs import (
 )
 
 from entities.assessment import AssessmentData, AssessmentID, Steps
-from entities.best_practice import BestPractice, BestPracticeID
-from entities.finding import FindingExtra
+from entities.best_practice import BestPractice
 from entities.question import PillarID, QuestionID
 
 WorkloadId = str
