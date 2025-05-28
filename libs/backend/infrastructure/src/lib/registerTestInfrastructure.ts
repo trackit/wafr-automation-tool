@@ -5,8 +5,15 @@ import {
   tokenLogger,
 } from '@backend/infrastructure';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+  tokenDynamoDBConfig,
+  testDynamoDbConfig,
+} from './dynamodb/DynamoDbConfig';
 
 const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
+  register(tokenDynamoDBConfig, {
+    useValue: testDynamoDbConfig,
+  });
   register(tokenClientDynamoDB, { useClass: DynamoDBClient });
 };

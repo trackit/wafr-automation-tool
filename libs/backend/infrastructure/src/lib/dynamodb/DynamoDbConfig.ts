@@ -1,13 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
-import { Agent } from 'https';
 import { DynamoDBClientConfig } from '@aws-sdk/client-dynamodb/dist-types/DynamoDBClient';
 import { createInjectionToken, inject } from '@shared/di-container';
-
-const agent = new Agent({
-  maxSockets: 25,
-});
 
 export type DynamoDBConfig = {
   region: string;
@@ -16,10 +10,6 @@ export type DynamoDBConfig = {
 
 export const defaultDynamoDbConfig: DynamoDBClientConfig = {
   region: process.env.AWS_REGION,
-  requestHandler: new NodeHttpHandler({
-    requestTimeout: 3000,
-    httpsAgent: agent,
-  }),
 } as const;
 
 export const testDynamoDbConfig: DynamoDBClientConfig = {
@@ -27,24 +17,24 @@ export const testDynamoDbConfig: DynamoDBClientConfig = {
   region: 'us-west-2',
 };
 
-export const dynamoDBConfigToken = createInjectionToken<DynamoDBClientConfig>(
+export const tokenDynamoDBConfig = createInjectionToken<DynamoDBClientConfig>(
   'DynamoDBConfig',
   {
     useValue: defaultDynamoDbConfig,
   }
 );
 
-export const dynamoClientToken = createInjectionToken<DynamoDBClient>(
+export const tokenDynamoClient = createInjectionToken<DynamoDBClient>(
   'DynamoClient',
   {
-    useFactory: () => new DynamoDBClient(inject(dynamoDBConfigToken)),
+    useFactory: () => new DynamoDBClient(inject(tokenDynamoDBConfig)),
   }
 );
 
-export const dynamoDocumentClientToken =
+export const tokenDynamoDocumentClient =
   createInjectionToken<DynamoDBDocumentClient>('DynamoDocumentClient', {
     useFactory: () =>
-      DynamoDBDocumentClient.from(inject(dynamoClientToken), {
+      DynamoDBDocumentClient.from(inject(tokenDynamoClient), {
         marshallOptions: { removeUndefinedValues: true },
       }),
   });
