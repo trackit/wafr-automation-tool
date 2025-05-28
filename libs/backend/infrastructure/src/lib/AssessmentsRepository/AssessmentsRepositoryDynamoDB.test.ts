@@ -5,9 +5,10 @@ import {
   DeleteItemCommand,
   QueryCommand,
   BatchWriteItemCommand,
+  ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { register, reset } from '@shared/di-container';
+import { inject, register, reset } from '@shared/di-container';
 
 import {
   AssessmentsRepositoryDynamoDB,
@@ -16,16 +17,36 @@ import {
   tokenDynamoDBBatchSize,
 } from './AssessmentsRepositoryDynamoDB';
 import { FakeLogger, tokenLogger } from '../Logger';
-import { afterEach } from "vitest";
 
-afterEach(() => {
+afterEach(async () => {
+  const dynamoDBClient = inject(tokenClientDynamoDB);
+  const tableName = inject(tokenDynamoDBTableName);
 
-})
+  const scanResult = await dynamoDBClient.send(
+    new ScanCommand({
+      TableName: tableName,
+    })
+  );
+
+  await Promise.all(
+    (scanResult.Items || []).map(async (item) => {
+      await dynamoDBClient.send(
+        new DeleteItemCommand({
+          TableName: tableName,
+          Key: {
+            PK: item.PK,
+            SK: item.SK,
+          },
+        })
+      );
+    })
+  );
+});
 
 describe('AssessmentsRepositoryDynamoDB', () => {
   describe('save', () => {
     it.todo('should save an assessment to DynamoDB');
-  })
+  });
 
   describe('getOne', () => {
     it('should call DynamoDB GetItemCommand with correct parameters', async () => {
@@ -276,11 +297,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
 const setup = () => {
   reset();
-  const dynamoDBClientMock = mockClient(DynamoDBClient);
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenClientDynamoDB, { useClass: DynamoDBClient });
-  const tableName = 'test-table';
-  register(tokenDynamoDBTableName, { useValue: tableName });
+
   const repository = new AssessmentsRepositoryDynamoDB();
-  return { repository, dynamoDBClientMock, tableName };
+  return { repository, dynamoDBClientMock };
 };
