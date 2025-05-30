@@ -1,4 +1,8 @@
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import {
+  SFNClient,
+  StartExecutionCommand,
+  StopExecutionCommand,
+} from '@aws-sdk/client-sfn';
 
 import { inject, createInjectionToken } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
@@ -42,7 +46,15 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   }
 
   public async cancelAssessment(executionId: string): Promise<void> {
-    throw new Error('Not implemented');
+    const command = new StopExecutionCommand({ executionArn: executionId });
+
+    const response = await this.client.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(
+        `Failed to cancel assessment: ${response.$metadata.httpStatusCode}`
+      );
+    }
+    this.logger.info(`Cancelled Assessment Execution#${executionId}`);
   }
 }
 
