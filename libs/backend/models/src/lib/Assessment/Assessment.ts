@@ -5,12 +5,12 @@ export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn: string;
-  findings: Pillar[];
-  graphDatas: AssessmentGraphDatas;
+  findings?: Pillar[];
+  graphDatas?: AssessmentGraphDatas;
   id: string;
   name: string;
   organization: string;
-  questionVersion: string;
+  questionVersion?: string;
   rawGraphDatas: Record<string, AssessmentGraphDatas>;
   regions: string[];
   roleArn: string;
