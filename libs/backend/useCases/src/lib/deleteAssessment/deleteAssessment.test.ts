@@ -1,13 +1,8 @@
-import { NotFoundError } from '@backend/errors';
 import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
-import {
-  FakeAssessmentsRepository,
-  FakeAssessmentsStateMachine,
-  tokenAssessmentsRepository,
-  tokenAssessmentsStateMachine,
-} from '@backend/infrastructure';
-import { register, reset } from '@shared/di-container';
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { reset } from '@shared/di-container';
 
+import { NotFoundError } from '../Errors';
 import { DeleteAssessmentUseCaseImpl } from './deleteAssessment';
 import { DeleteAssessmentUseCaseArgsMother } from './DeleteAssessmentUseCaseArgsMother';
 
@@ -107,18 +102,9 @@ describe('deleteAssessment UseCase', () => {
 
 const setup = () => {
   reset();
-
-  const fakeAssessmentsStateMachine = new FakeAssessmentsStateMachine();
+  const { fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
+    registerTestInfrastructure();
   vitest.spyOn(fakeAssessmentsStateMachine, 'cancelAssessment');
-  register(tokenAssessmentsStateMachine, {
-    useValue: fakeAssessmentsStateMachine,
-  });
-
-  const fakeAssessmentsRepository = new FakeAssessmentsRepository();
-  fakeAssessmentsRepository.assessments = {};
-  fakeAssessmentsRepository.assessmentFindings = {};
-  register(tokenAssessmentsRepository, { useValue: fakeAssessmentsRepository });
-
   const useCase = new DeleteAssessmentUseCaseImpl();
   return { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine };
 };
