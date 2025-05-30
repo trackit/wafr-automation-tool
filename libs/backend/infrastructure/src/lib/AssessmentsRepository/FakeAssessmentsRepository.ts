@@ -5,19 +5,28 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
   public assessmentFindings: Record<string, Finding[]> = {};
 
-  public async save(args: {
-    assessment: Assessment;
-    organization: string;
-  }): Promise<Assessment> {
-    const { assessment, organization } = args;
-    const key = `${assessment.id}#${organization}`;
+  public async save(assessment: Assessment): Promise<void> {
+    const key = `${assessment.id}#${assessment.organization}`;
     this.assessments[key] = assessment;
 
     if (!this.assessmentFindings[key]) {
       this.assessmentFindings[key] = [];
     }
+  }
 
-    return assessment;
+  public async saveFinding(args: {
+    assessmentId: string;
+    organization: string;
+    finding: Finding;
+  }): Promise<void> {
+    const { assessmentId, organization, finding } = args;
+    const key = `${assessmentId}#${organization}`;
+
+    if (!this.assessmentFindings[key]) {
+      this.assessmentFindings[key] = [];
+    }
+
+    this.assessmentFindings[key].push(finding);
   }
 
   public async getOne(args: {
@@ -26,6 +35,18 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   }): Promise<Assessment | undefined> {
     const { assessmentId, organization } = args;
     return this.assessments[`${assessmentId}#${organization}`];
+  }
+
+  public async getOneFinding(args: {
+    assessmentId: string;
+    findingId: string;
+    organization: string;
+  }): Promise<Finding | undefined> {
+    const { assessmentId, findingId, organization } = args;
+    const key = `${assessmentId}#${organization}`;
+    return this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
   }
 
   public async delete(args: {
