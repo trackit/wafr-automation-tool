@@ -26,8 +26,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly tableName = inject(tokenDynamoDBTableName);
   private readonly batchSize = inject(tokenDynamoDBBatchSize);
 
-  private getAssessmentPK(args: { id: string; organization: string }): string {
-    return `${args.organization}#${args.id}`;
+  private getAssessmentPK(organization: string): string {
+    return organization;
   }
 
   private getAssessmentSK(assessmentId: string): string {
@@ -98,7 +98,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   private toDynamoDBAssessmentItem(assessment: Assessment): DynamoDBAssessment {
     return {
-      PK: this.getAssessmentPK(assessment),
+      PK: this.getAssessmentPK(assessment.organization),
       SK: this.getAssessmentSK(assessment.id),
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
@@ -328,7 +328,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK({ id: assessmentId, organization }),
+        PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
     };
@@ -372,7 +372,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK({ id: assessmentId, organization }),
+        PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
     };
