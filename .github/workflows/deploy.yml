@@ -2,16 +2,16 @@ name: 'Deploy to AWS'
 on:
   push:
     branches:
-      - refactor/WAFR-90-ci
+      - main
 permissions:
   id-token: write
   contents: read
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
     env:
-      STAGE: antoine
-      DEBUG: true
+      STAGE: prod
+      DEBUG: false
       REPOSITORY: https://github.com/trackit/wafr-automation-tool
       INITIAL_USER_EMAIL: antoine.berger@trackit.io
     steps:
