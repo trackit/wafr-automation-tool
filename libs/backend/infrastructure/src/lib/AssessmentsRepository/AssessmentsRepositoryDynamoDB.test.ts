@@ -288,7 +288,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         finding,
       });
 
-      const savedFinding = await repository.getOneFinding({
+      const savedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
@@ -299,7 +299,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
-  describe('getOneFinding', () => {
+  describe('getFinding', () => {
     it('should get finding for an assessment by ID and organization', async () => {
       const { repository } = setup();
 
@@ -317,7 +317,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         finding,
       });
 
-      const fetchedFinding = await repository.getOneFinding({
+      const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
@@ -336,7 +336,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment);
 
-      const fetchedFinding = await repository.getOneFinding({
+      const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
@@ -377,13 +377,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         finding: finding2,
       });
 
-      const fetchedFinding1 = await repository.getOneFinding({
+      const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
         organization: 'organization1',
       });
-      const fetchedFinding2 = await repository.getOneFinding({
+      const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
         findingId: 'finding2',
         scanningTool: 'tool2',
@@ -425,13 +425,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      const fetchedFinding1 = await repository.getOneFinding({
+      const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
         organization: 'organization1',
       });
-      const fetchedFinding2 = await repository.getOneFinding({
+      const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding2',
         scanningTool: 'tool1',
@@ -489,13 +489,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      const fetchedFinding1 = await repository.getOneFinding({
+      const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'finding1',
         scanningTool: 'tool1',
         organization: 'organization1',
       });
-      const fetchedFinding2 = await repository.getOneFinding({
+      const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
         findingId: 'finding2',
         scanningTool: 'tool2',

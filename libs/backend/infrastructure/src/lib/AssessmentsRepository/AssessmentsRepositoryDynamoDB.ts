@@ -344,7 +344,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     return this.fromDynamoDBAssessmentItem(dynamoAssessment);
   }
 
-  public async getOneFinding(args: {
+  public async getFinding(args: {
     assessmentId: string;
     findingId: string;
     scanningTool: string;

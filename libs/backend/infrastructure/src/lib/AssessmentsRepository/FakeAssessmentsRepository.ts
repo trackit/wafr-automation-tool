@@ -37,7 +37,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     return this.assessments[`${assessmentId}#${organization}`];
   }
 
-  public async getOneFinding(args: {
+  public async getFinding(args: {
     assessmentId: string;
     findingId: string;
     organization: string;

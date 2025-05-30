@@ -12,7 +12,7 @@ export interface AssessmentsRepository {
     assessmentId: string;
     organization: string;
   }): Promise<Assessment | undefined>;
-  getOneFinding(args: {
+  getFinding(args: {
     assessmentId: string;
     findingId: string;
     scanningTool: string;
