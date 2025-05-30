@@ -3,10 +3,14 @@ import logging
 from typing import override
 
 from common.config import (
+    ASSESSMENT_PK,
     ASSESSMENT_SK,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
+    FINDING_BEST_PRACTICES,
+    FINDING_ID,
+    FINDING_PK,
     FINDING_SK,
     STORE_CHUNK_PATH,
 )
@@ -51,7 +55,7 @@ class StoreResults(Task[StoreResultsInput, None]):
         chunk_content = self.storage_service.get(Bucket=s3_bucket, Key=key)
         return [FindingExtra(**item) for item in json.loads(chunk_content)]
 
-    def store_finding_ids(
+    def store_best_practice_findings(
         self,
         organization: str,
         assessment_id: AssessmentID,
@@ -63,7 +67,7 @@ class StoreResults(Task[StoreResultsInput, None]):
             return
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
+            Key={DDB_KEY: ASSESSMENT_PK.format(organization), DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             UpdateExpression="SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)",  # noqa: E501
             ExpressionAttributeNames={
                 "#pillar": best_practice_info.pillar,
@@ -76,31 +80,22 @@ class StoreResults(Task[StoreResultsInput, None]):
             },
         )
 
-    def store_findings(
+    def store_finding(
         self,
         assessment_id: AssessmentID,
         scanning_tool: ScanningTool,
-        finding_ids: list[FindingID],
-        findings_data: list[FindingExtra],
+        finding: FindingExtra,
         organization: str,
     ) -> None:
-        for finding_id in finding_ids:
-            finding_data = next(
-                (item for item in findings_data if item.id == finding_id),
-                None,
-            )
-            if finding_data is None:
-                logger.error("Finding with id %s not found", finding_id)
-                continue
-            finding_dict = finding_data.model_dump().copy()
-            self.database_service.put(
-                table_name=DDB_TABLE,
-                item={
-                    **finding_dict,
-                    DDB_KEY: organization,
-                    DDB_SORT_KEY: FINDING_SK.format(assessment_id, f"{scanning_tool}#{finding_id}"),
-                },
-            )
+        finding_dict = finding.model_dump().copy()
+        self.database_service.put(
+            table_name=DDB_TABLE,
+            item={
+                **finding_dict,
+                DDB_KEY: FINDING_PK.format(organization, assessment_id),
+                DDB_SORT_KEY: FINDING_SK.format(FINDING_ID.format(scanning_tool, finding.id)),
+            },
+        )
 
     def create_best_practices_info(self) -> dict[int, BestPracticeInfo]:
         best_practices: dict[int, BestPracticeInfo] = {}
@@ -136,8 +131,25 @@ class StoreResults(Task[StoreResultsInput, None]):
             finding_start = ai_association["start"]
             finding_end = ai_association["end"]
             finding_ids: list[FindingID] = [str(i) for i in range(finding_start, finding_end + 1)]
-            self.store_finding_ids(organization, assessment_id, scanning_tool, best_practice_info, finding_ids)
-            self.store_findings(assessment_id, scanning_tool, finding_ids, findings_data, organization)
+            best_practice_info.best_practice["findings"] = finding_ids
+            self.store_best_practice_findings(
+                organization, assessment_id, scanning_tool, best_practice_info, finding_ids
+            )
+
+        for finding_extra in findings_data:
+            finding_extra.best_practices = ",".join(
+                FINDING_BEST_PRACTICES.format(
+                    best_practice_info.pillar,
+                    best_practice_info.question,
+                    best_practice_info.best_practice["id"],
+                )
+                for best_practice_info in best_practices_info.values()
+                if "findings" in best_practice_info.best_practice
+                and finding_extra.id in best_practice_info.best_practice["findings"]
+            )
+            if not finding_extra.best_practices:
+                continue
+            self.store_finding(assessment_id, scanning_tool, finding_extra, organization)
 
     def load_response(self, llm_response: str) -> list[AIFindingAssociation]:
         try:
