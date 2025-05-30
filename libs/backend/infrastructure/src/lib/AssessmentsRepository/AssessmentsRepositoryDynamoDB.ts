@@ -103,19 +103,21 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
       execution_arn: assessment.executionArn,
-      findings: assessment.findings.reduce(
+      findings: assessment.findings?.reduce(
         (pillars, pillar) => ({
           ...pillars,
           [pillar.id]: this.toDynamoDBPillarItem(pillar),
         }),
         {}
       ),
-      graph_datas: {
-        findings: assessment.graphDatas.findings,
-        regions: assessment.graphDatas.regions,
-        resource_types: assessment.graphDatas.resourceTypes,
-        severities: assessment.graphDatas.severities,
-      },
+      ...(assessment.graphDatas && {
+        graph_datas: {
+          findings: assessment.graphDatas.findings,
+          regions: assessment.graphDatas.regions,
+          resource_types: assessment.graphDatas.resourceTypes,
+          severities: assessment.graphDatas.severities,
+        },
+      }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
@@ -222,15 +224,19 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       createdAt: new Date(assessment.created_at),
       createdBy: assessment.created_by,
       executionArn: assessment.execution_arn,
-      findings: Object.entries(assessment.findings).map(([_, pillar]) =>
-        this.fromDynamoDBPillarItem(pillar)
-      ),
-      graphDatas: {
-        findings: assessment.graph_datas.findings,
-        regions: assessment.graph_datas.regions,
-        resourceTypes: assessment.graph_datas.resource_types,
-        severities: assessment.graph_datas.severities,
-      },
+      ...(assessment.findings && {
+        findings: Object.entries(assessment.findings).map(([_, pillar]) =>
+          this.fromDynamoDBPillarItem(pillar)
+        ),
+      }),
+      ...(assessment.graph_datas && {
+        graphDatas: {
+          findings: assessment.graph_datas.findings,
+          regions: assessment.graph_datas.regions,
+          resourceTypes: assessment.graph_datas.resource_types,
+          severities: assessment.graph_datas.severities,
+        },
+      }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
@@ -397,18 +403,24 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
       throw new Error(`Assessment with ID ${assessmentId} does not exist`);
     }
-    const params = {
-      TableName: this.tableName,
-      KeyConditionExpression: 'PK = :pk',
-      ExpressionAttributeValues: {
-        ':pk': this.getFindingPK({ assessmentId, organization }),
-      },
-    };
 
     try {
-      const result = await this.client.query(params);
-      const items = result.Items || [];
-      if (items.length === 0) return;
+      let lastEvaluatedKey: Record<string, any> | undefined;
+      const items = [];
+      do {
+        const result = await this.client.query({
+          TableName: this.tableName,
+          KeyConditionExpression: 'PK = :pk',
+          ExpressionAttributeValues: {
+            ':pk': this.getFindingPK({ assessmentId, organization }),
+          },
+          ExclusiveStartKey: lastEvaluatedKey,
+          ProjectionExpression: 'PK, SK',
+        });
+        items.push(...(result.Items || []));
+        if (items.length === 0) return;
+        lastEvaluatedKey = result.LastEvaluatedKey;
+      } while (lastEvaluatedKey);
 
       const deleteRequests = items.map((item) => ({
         DeleteRequest: {
@@ -428,7 +440,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
       this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
     } catch (error) {
-      this.logger.error(`Failed to delete findings: ${error}`, params);
+      this.logger.error(`Failed to delete findings: ${error}`, args);
       throw error;
     }
   }
