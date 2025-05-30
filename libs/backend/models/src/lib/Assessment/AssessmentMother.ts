@@ -1,5 +1,9 @@
 import type { Pillar } from '../Pillar';
-import type { Assessment, AssessmentGraphDatas } from './Assessment';
+import {
+  AssessmentStep,
+  type Assessment,
+  type AssessmentGraphDatas,
+} from './Assessment';
 
 export class AssessmentMother {
   private data: Assessment;
@@ -28,6 +32,7 @@ export class AssessmentMother {
       rawGraphDatas: {},
       regions: ['us-west-2'],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
+      step: AssessmentStep.FINISHED,
       workflows: ['workflow1', 'workflow2'],
     });
   }
@@ -91,6 +96,11 @@ export class AssessmentMother {
 
   public withRoleArn(roleArn: string): AssessmentMother {
     this.data.roleArn = roleArn;
+    return this;
+  }
+
+  public withStep(step: AssessmentStep): AssessmentMother {
+    this.data.step = step;
     return this;
   }
 

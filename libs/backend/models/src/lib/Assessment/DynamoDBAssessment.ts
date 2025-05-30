@@ -1,5 +1,6 @@
 import type { SeverityType } from '../Finding';
 import type { DynamoDBPillar } from '../Pillar';
+import type { AssessmentStep } from './Assessment';
 
 export interface DynamoDBAssessment {
   PK: string;
@@ -16,6 +17,7 @@ export interface DynamoDBAssessment {
   raw_graph_datas: Record<string, DynamoDBAssessmentGraphDatas>;
   regions: string[];
   role_arn: string;
+  step: AssessmentStep;
   workflows: string[];
 }
 

@@ -2,6 +2,7 @@ import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 
 import {
   AssessmentMother,
+  AssessmentStep,
   BestPracticeMother,
   FindingMother,
   PillarMother,
@@ -83,6 +84,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withOrganization('organization1')
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
+        .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
+        .withStep(AssessmentStep.FINISHED)
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 

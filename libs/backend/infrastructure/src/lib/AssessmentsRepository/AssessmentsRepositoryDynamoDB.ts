@@ -134,6 +134,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ),
       regions: assessment.regions,
       role_arn: assessment.roleArn,
+      step: assessment.step,
       workflows: assessment.workflows,
     };
   }
@@ -248,6 +249,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ),
       regions: assessment.regions,
       roleArn: assessment.role_arn,
+      step: assessment.step,
       workflows: assessment.workflows,
     };
   }

@@ -14,6 +14,7 @@ export interface Assessment {
   rawGraphDatas: Record<string, AssessmentGraphDatas>;
   regions: string[];
   roleArn: string;
+  step: AssessmentStep;
   workflows: string[];
 }
 
@@ -22,4 +23,12 @@ export interface AssessmentGraphDatas {
   regions: Record<string, number>;
   resourceTypes: Record<string, number>;
   severities: Partial<Record<SeverityType, number>>;
+}
+
+export enum AssessmentStep {
+  SCANNING_STARTED = 'SCANNING_STARTED',
+  PREPARING_PROMPTS = 'PREPARING_PROMPTS',
+  INVOKING_LLM = 'INVOKING_LLM',
+  FINISHED = 'FINISHED',
+  ERRORED = 'ERRORED',
 }
