@@ -1,12 +1,12 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
-import { BadRequestError } from '@backend/errors';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { JSONParseError, parseJson } from '@shared/utils';
 
+import { BadRequestError } from '../../utils/HttpError';
 import { handleHttpRequest } from '../../utils/handleHttpRequest';
 import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
 

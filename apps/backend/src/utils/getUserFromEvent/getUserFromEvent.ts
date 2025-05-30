@@ -1,7 +1,8 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import { BadRequestError } from '@backend/errors';
 import type { User } from '@backend/models';
+
+import { BadRequestError } from '../HttpError';
 
 export const getUserFromEvent = (event: APIGatewayProxyEvent): User => {
   const userClaims = event.requestContext.authorizer?.claims;

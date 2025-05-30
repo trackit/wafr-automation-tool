@@ -1,4 +1,4 @@
-import { BadRequestError } from '@backend/errors';
+import { BadRequestError } from '../HttpError';
 
 import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 import { getUserFromEvent } from './getUserFromEvent';

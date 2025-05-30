@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@backend/errors": ["libs/backend/errors/src/index.ts"],
       "@backend/infrastructure": ["libs/backend/infrastructure/src/index.ts"],
       "@backend/models": ["libs/backend/models/src/index.ts"],
       "@backend/ports": ["libs/backend/ports/src/index.ts"],

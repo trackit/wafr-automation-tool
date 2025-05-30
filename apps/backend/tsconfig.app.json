@@ -10,5 +10,5 @@
     "src/**/*.spec.js",
     "src/**/*.test.js",
   ],
-  "include": ["src/**/*.js", "src/**/*.ts", "../../libs/backend/errors/src/lib/HttpErrors.ts"]
+  "include": ["src/**/*.js", "src/**/*.ts"]
 }

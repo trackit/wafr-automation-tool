@@ -1,5 +1,4 @@
-import { NotFoundError } from '@backend/errors';
-import { tokenDeleteAssessmentUseCase } from '@backend/useCases';
+import { NotFoundError, tokenDeleteAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { DeleteAssessmentAdapter } from './deleteAssessment.adapter';
