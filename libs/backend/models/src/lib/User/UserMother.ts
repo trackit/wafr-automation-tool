@@ -1,8 +1,4 @@
-export interface User {
-  id: string;
-  email: string;
-  organizationDomain: string;
-}
+import type { User } from './User';
 
 export class UserMother {
   private data: User;
