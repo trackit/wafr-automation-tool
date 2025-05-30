@@ -49,13 +49,13 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
       );
     }
 
-    await Promise.all([
-      this.deleteAssessmentFromRepository({
-        assessmentId: args.assessmentId,
-        organization: args.user.organizationDomain,
-      }),
-      this.assessmentsStateMachine.cancelAssessment(assessment.executionArn),
-    ]);
+    await this.assessmentsStateMachine.cancelAssessment(
+      assessment.executionArn
+    );
+    await this.deleteAssessmentFromRepository({
+      assessmentId: args.assessmentId,
+      organization: args.user.organizationDomain,
+    });
   }
 }
 
