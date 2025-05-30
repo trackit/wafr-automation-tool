@@ -40,4 +40,4 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Deploy
-        run: npm run deploy:backend
+        run: npm run deploy:backend -- -no-confirm-changeset
