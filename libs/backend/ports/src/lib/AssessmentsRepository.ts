@@ -8,7 +8,7 @@ export interface AssessmentsRepository {
     scanningTool: string;
     finding: Finding;
   }): Promise<void>;
-  getOne(args: {
+  get(args: {
     assessmentId: string;
     organization: string;
   }): Promise<Assessment | undefined>;

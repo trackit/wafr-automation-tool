@@ -91,7 +91,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.save(assessment);
 
-      const savedAssessment = await repository.getOne({
+      const savedAssessment = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
@@ -100,7 +100,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
-  describe('getOne', () => {
+  describe('get', () => {
     it('should get an assessment by ID and organization', async () => {
       const { repository } = setup();
 
@@ -111,7 +111,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.save(assessment);
 
-      const fetchedAssessment = await repository.getOne({
+      const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
@@ -122,7 +122,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should return undefined if assessment does not exist', async () => {
       const { repository } = setup();
 
-      const fetchedAssessment = await repository.getOne({
+      const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
@@ -151,11 +151,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment3);
 
-      const fetchedAssessment1 = await repository.getOne({
+      const fetchedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
-      const fetchedAssessment2 = await repository.getOne({
+      const fetchedAssessment2 = await repository.get({
         assessmentId: 'assessment2',
         organization: 'organization1',
       });
@@ -180,7 +180,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      const fetchedAssessment = await repository.getOne({
+      const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
@@ -209,12 +209,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      const fetchedAssessment1 = await repository.getOne({
+      const fetchedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
 
-      const fetchedAssessment2 = await repository.getOne({
+      const fetchedAssessment2 = await repository.get({
         assessmentId: 'assessment1',
         organization: 'organization2',
       });

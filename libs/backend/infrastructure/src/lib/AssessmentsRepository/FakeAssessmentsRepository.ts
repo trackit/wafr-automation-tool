@@ -29,7 +29,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     this.assessmentFindings[key].push(finding);
   }
 
-  public async getOne(args: {
+  public async get(args: {
     assessmentId: string;
     organization: string;
   }): Promise<Assessment | undefined> {

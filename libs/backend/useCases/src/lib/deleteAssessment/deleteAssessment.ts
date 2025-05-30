@@ -39,7 +39,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
   public async deleteAssessment(
     args: DeleteAssessmentUseCaseArgs
   ): Promise<void> {
-    const assessment = await this.assessmentsRepository.getOne({
+    const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
       organization: args.user.organizationDomain,
     });

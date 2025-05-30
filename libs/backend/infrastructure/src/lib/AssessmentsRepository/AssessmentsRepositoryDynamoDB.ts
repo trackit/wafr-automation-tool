@@ -326,7 +326,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
-  public async getOne(args: {
+  public async get(args: {
     assessmentId: string;
     organization: string;
   }): Promise<Assessment | undefined> {
@@ -369,7 +369,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     organization: string;
   }): Promise<void> {
     const { assessmentId, organization } = args;
-    if (!(await this.getOne({ assessmentId, organization }))) {
+    if (!(await this.get({ assessmentId, organization }))) {
       this.logger.error(
         `Attempted to delete non-existing assessment: ${assessmentId}`
       );
@@ -397,7 +397,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     organization: string;
   }): Promise<void> {
     const { assessmentId, organization } = args;
-    if (!(await this.getOne({ assessmentId, organization }))) {
+    if (!(await this.get({ assessmentId, organization }))) {
       this.logger.error(
         `Attempted to delete findings of non-existing assessment: ${assessmentId}`
       );
