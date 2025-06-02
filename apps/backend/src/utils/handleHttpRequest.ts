@@ -5,10 +5,6 @@ import { NotFoundError, ServerError } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 import { HttpError } from './HttpError';
 
-const ServerErrorStatusCode = {
-  [NotFoundError.name]: 404,
-};
-
 const buildResponse = (
   statusCode: number,
   body: unknown = {}
@@ -42,7 +38,12 @@ export const handleHttpRequest = async ({
   } catch (e: unknown) {
     if (e instanceof ServerError) {
       logger.error('ServerError', e);
-      const statusCode = ServerErrorStatusCode[e.name] || 400;
+      let statusCode: number;
+      if (e instanceof NotFoundError) {
+        statusCode = 404;
+      } else {
+        statusCode = 400;
+      }
       return buildResponse(statusCode, {
         message: e.message,
         description: e.description,
