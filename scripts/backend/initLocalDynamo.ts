@@ -27,7 +27,8 @@ const createTables = async () => {
   console.log('request to container', await res.json());
   await Promise.all(
     [env.ASSESSMENT_TABLE].map(async (table) => {
-      await dynamodb.send(
+      console.log('Creating table:', table);
+      const res = await dynamodb.send(
         new CreateTableCommand({
           TableName: table,
           BillingMode: 'PAY_PER_REQUEST', // on‑demand
@@ -41,6 +42,7 @@ const createTables = async () => {
           ],
         })
       );
+      console.log('Table creation response:', JSON.stringify(res, null, 2));
     })
   );
 };
