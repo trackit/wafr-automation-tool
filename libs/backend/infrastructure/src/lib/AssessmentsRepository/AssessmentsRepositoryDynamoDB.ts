@@ -444,12 +444,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 }
 
 export const tokenAssessmentsRepository =
-  createInjectionToken<AssessmentsRepository>('tokenAssessmentsRepository', {
+  createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {
     useClass: AssessmentsRepositoryDynamoDB,
   });
 
 export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
-  'tokenDynamoDBAssessmentTableName',
+  'DynamoDBAssessmentTableName',
   {
     useFactory: () => {
       const tableName = process.env.DDB_TABLE;
@@ -460,6 +460,6 @@ export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
 );
 
 export const tokenDynamoDBAssessmentBatchSize = createInjectionToken<number>(
-  'tokenDynamoDBAssessmentBatchSize',
+  'DynamoDBAssessmentBatchSize',
   { useValue: 25 } // Default batch size for DynamoDB operations
 );

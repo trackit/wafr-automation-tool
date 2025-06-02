@@ -60,20 +60,16 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
 }
 
 export const tokenAssessmentsStateMachine =
-  createInjectionToken<AssessmentsStateMachine>(
-    'tokenAssessmentsStateMachine',
-    {
-      useClass: AssessmentsStateMachineSfn,
-    }
-  );
+  createInjectionToken<AssessmentsStateMachine>('AssessmentsStateMachine', {
+    useClass: AssessmentsStateMachineSfn,
+  });
 
-export const tokenClientSfn = createInjectionToken<SFNClient>(
-  'tokenClientSfn',
-  { useClass: SFNClient }
-);
+export const tokenClientSfn = createInjectionToken<SFNClient>('ClientSfn', {
+  useClass: SFNClient,
+});
 
 export const tokenStateMachineArn = createInjectionToken<string>(
-  'tokenStateMachineArn',
+  'StateMachineArn',
   {
     useFactory: () => {
       const stateMachineArn = process.env.STATE_MACHINE_ARN;
