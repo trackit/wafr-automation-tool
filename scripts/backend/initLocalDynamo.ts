@@ -10,9 +10,13 @@ const dynamodb = new DynamoDBClient({
     accessKeyId: env.AWS_ACCESS_KEY_ID,
   },
   region: env.AWS_REGION,
+  logger: console,
 });
 
 const createTables = async () => {
+  console.log('Creating DynamoDB tables...');
+  console.log('config', dynamodb.config);
+  console.log('env', env);
   await Promise.all(
     [env.ASSESSMENT_TABLE].map(async (table) => {
       await dynamodb.send(
