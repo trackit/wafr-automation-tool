@@ -12,6 +12,7 @@ import type {
 } from '@backend/ports';
 
 import { tokenLogger } from '../Logger';
+import { mockClient } from 'aws-sdk-client-mock';
 
 export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly client = inject(tokenClientSfn);
@@ -70,6 +71,12 @@ export const tokenClientSfn = createInjectionToken<SFNClient>(
   'tokenClientSfn',
   { useClass: SFNClient }
 );
+
+export const tokenMockClientSfn = createInjectionToken('MockClientSfn', {
+  useFactory: () => {
+    return mockClient(SFNClient);
+  },
+});
 
 export const tokenStateMachineArn = createInjectionToken<string>(
   'tokenStateMachineArn',

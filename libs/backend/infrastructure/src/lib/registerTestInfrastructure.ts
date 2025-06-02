@@ -1,7 +1,7 @@
 import { SFNClient } from '@aws-sdk/client-sfn';
 import { mockClient } from 'aws-sdk-client-mock';
 
-import { register } from '@shared/di-container';
+import { createInjectionToken, inject, register } from '@shared/di-container';
 
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -12,6 +12,7 @@ import {
   FakeAssessmentsStateMachine,
   tokenAssessmentsStateMachine,
   tokenClientSfn,
+  tokenMockClientSfn,
   tokenStateMachineArn,
 } from './AssessmentsStateMachine';
 import {
@@ -22,8 +23,11 @@ import {
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
-  const sfnClientMock = mockClient(SFNClient);
-  register(tokenClientSfn, { useClass: SFNClient });
+
+  register(tokenClientSfn, {
+    useValue: inject(tokenMockClientSfn) as unknown as SFNClient,
+  });
+
   const stateMachineArn = 'arn:test-state-machine-arn';
   register(tokenStateMachineArn, { useValue: stateMachineArn });
   const fakeAssessmentsStateMachine = new FakeAssessmentsStateMachine();
@@ -34,7 +38,7 @@ export const registerTestInfrastructure = () => {
   register(tokenAssessmentsRepository, { useValue: fakeAssessmentsRepository });
 
   return {
-    sfnClientMock,
+    sfnClientMock: inject(tokenMockClientSfn), // TODO: remove this return and add inject when needed
     stateMachineArn,
     fakeAssessmentsStateMachine,
     fakeAssessmentsRepository,
