@@ -11,7 +11,7 @@ const dynamodb = new DynamoDBClient({
   },
   region: env.AWS_REGION,
   logger: console,
-  maxAttempts: 10, // Retry attempts
+  maxAttempts: 1,
 });
 
 const createTables = async () => {
