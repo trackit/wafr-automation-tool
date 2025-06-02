@@ -40,7 +40,7 @@ jobs:
       - name: Start docker compose
         run: |
           docker compose up -d
-          sleep 20
+          sleep 5
       - name: Install dependencies
         run: npm ci
       - name: Prepare database
