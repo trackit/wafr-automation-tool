@@ -4,7 +4,7 @@ import { CreateTableCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { env } from './localEnvironment';
 
 const dynamodb = new DynamoDBClient({
-  endpoint: 'http://127.0.0.1:8042',
+  endpoint: 'http://127.0.0.1:8000',
   credentials: {
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
     accessKeyId: env.AWS_ACCESS_KEY_ID,
@@ -17,7 +17,7 @@ const createTables = async () => {
   console.log('Creating DynamoDB tables...');
   console.log('config', dynamodb.config);
   console.log('env', env);
-  const res = await fetch('http://127.0.0.1:8042', {
+  const res = await fetch('http://127.0.0.1:8000', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
