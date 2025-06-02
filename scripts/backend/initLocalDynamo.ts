@@ -18,6 +18,13 @@ const createTables = async () => {
   console.log('Creating DynamoDB tables...');
   console.log('config', dynamodb.config);
   console.log('env', env);
+  const res = await fetch('http://127.0.0.1:8000', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  console.log('request to container', await res.json());
   await Promise.all(
     [env.ASSESSMENT_TABLE].map(async (table) => {
       await dynamodb.send(
