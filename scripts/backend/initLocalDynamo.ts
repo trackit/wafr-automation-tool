@@ -10,24 +10,12 @@ const dynamodb = new DynamoDBClient({
     accessKeyId: env.AWS_ACCESS_KEY_ID,
   },
   region: env.AWS_REGION,
-  logger: console,
 });
 
 const createTables = async () => {
-  console.log('Creating DynamoDB tables...');
-  console.log('config', dynamodb.config);
-  console.log('env', env);
-  const res = await fetch('http://127.0.0.1:8000', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  console.log('request to container', await res.json());
   await Promise.all(
     [env.ASSESSMENT_TABLE].map(async (table) => {
-      console.log('Creating table:', table);
-      const res = await dynamodb.send(
+      await dynamodb.send(
         new CreateTableCommand({
           TableName: table,
           BillingMode: 'PAY_PER_REQUEST', // on‑demand
@@ -41,7 +29,6 @@ const createTables = async () => {
           ],
         })
       );
-      console.log('Table creation response:', JSON.stringify(res, null, 2));
     })
   );
 };
