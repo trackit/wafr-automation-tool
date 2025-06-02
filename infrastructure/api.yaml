@@ -166,7 +166,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: "es2020"
+        Target: 'es2020'
         Minify: false
         Sourcemap: true
         EntryPoints:
