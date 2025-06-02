@@ -12,19 +12,16 @@ import type {
 } from '@backend/models';
 import { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
+import { assertIsDefined } from '@shared/utils';
 
 import { tokenLogger } from '../Logger';
-import {
-  tokenDynamoDBDocument,
-  tokenDynamoDBBatchSize,
-  tokenDynamoDBTableName,
-} from '../config/dynamodb/config';
+import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 
 export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly client = inject(tokenDynamoDBDocument);
   private readonly logger = inject(tokenLogger);
-  private readonly tableName = inject(tokenDynamoDBTableName);
-  private readonly batchSize = inject(tokenDynamoDBBatchSize);
+  private readonly tableName = inject(tokenDynamoDBAssessmentTableName);
+  private readonly batchSize = inject(tokenDynamoDBAssessmentBatchSize);
 
   private getAssessmentPK(organization: string): string {
     return organization;
@@ -450,3 +447,19 @@ export const tokenAssessmentsRepository =
   createInjectionToken<AssessmentsRepository>('tokenAssessmentsRepository', {
     useClass: AssessmentsRepositoryDynamoDB,
   });
+
+export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
+  'tokenDynamoDBAssessmentTableName',
+  {
+    useFactory: () => {
+      const tableName = process.env.DDB_TABLE;
+      assertIsDefined(tableName, 'DDB_TABLE is not defined');
+      return tableName;
+    },
+  }
+);
+
+export const tokenDynamoDBAssessmentBatchSize = createInjectionToken<number>(
+  'tokenDynamoDBAssessmentBatchSize',
+  { useValue: 25 } // Default batch size for DynamoDB operations
+);

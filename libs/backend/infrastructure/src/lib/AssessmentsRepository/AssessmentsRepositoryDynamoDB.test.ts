@@ -12,16 +12,16 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
-  tokenDynamoDBClient,
-  tokenDynamoDBTableName,
-} from '../config/dynamodb/config';
+  AssessmentsRepositoryDynamoDB,
+  tokenDynamoDBAssessmentTableName,
+} from './AssessmentsRepositoryDynamoDB';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { tokenDynamoDBClient } from '../config/dynamodb/config';
 
 afterEach(async () => {
   const dynamoDBClient = inject(tokenDynamoDBClient);
-  const tableName = inject(tokenDynamoDBTableName);
+  const tableName = inject(tokenDynamoDBAssessmentTableName);
 
   const scanResult = await dynamoDBClient.send(
     new ScanCommand({ TableName: tableName })
@@ -512,7 +512,7 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  register(tokenDynamoDBTableName, {
+  register(tokenDynamoDBAssessmentTableName, {
     useFactory: () => {
       assertIsDefined(
         process.env.ASSESSMENT_TABLE,
