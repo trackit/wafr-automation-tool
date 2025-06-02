@@ -1,5 +1,6 @@
 import type { Assessment, Finding } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
+import { createInjectionToken } from '@shared/di-container';
 
 export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
@@ -65,3 +66,8 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     delete this.assessmentFindings[`${assessmentId}#${organization}`];
   }
 }
+
+export const tokenFakeAssessmentsRepository =
+  createInjectionToken<FakeAssessmentsRepository>('FakeAssessmentsRepository', {
+    useClass: FakeAssessmentsRepository,
+  });

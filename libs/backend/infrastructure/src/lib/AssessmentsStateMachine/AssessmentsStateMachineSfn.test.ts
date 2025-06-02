@@ -2,11 +2,16 @@ import {
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
+import { mockClient } from 'aws-sdk-client-mock';
 
-import { reset } from '@shared/di-container';
+import { inject, reset } from '@shared/di-container';
 import type { AssessmentsStateMachineStartAssessmentArgs } from '@backend/ports';
 
-import { AssessmentsStateMachineSfn } from './AssessmentsStateMachineSfn';
+import {
+  AssessmentsStateMachineSfn,
+  tokenClientSfn,
+  tokenStateMachineArn,
+} from './AssessmentsStateMachineSfn';
 import { IdGeneratorCrypto } from '../IdGenerator/IdGeneratorCrypto';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 
@@ -140,7 +145,12 @@ describe('AssessmentsStateMachine Infrastructure', () => {
 
 const setup = () => {
   reset();
-  const { sfnClientMock, stateMachineArn } = registerTestInfrastructure();
+  registerTestInfrastructure();
   const assessmentsStateMachineSfn = new AssessmentsStateMachineSfn();
-  return { assessmentsStateMachineSfn, stateMachineArn, sfnClientMock };
+  const sfnClientMock = mockClient(inject(tokenClientSfn));
+  return {
+    assessmentsStateMachineSfn,
+    stateMachineArn: inject(tokenStateMachineArn),
+    sfnClientMock,
+  };
 };
