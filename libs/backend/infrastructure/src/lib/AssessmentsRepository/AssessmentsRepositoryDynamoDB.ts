@@ -155,11 +155,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: finding.id,
       is_ai_associated: finding.isAiAssociated,
       metadata: { event_code: finding.metadata.eventCode },
-      remediation: {
-        desc: finding.remediation.desc,
-        references: finding.remediation.references,
-      },
-      resources: finding.resources.map((resource) => ({
+      ...(finding.remediation && {
+        remediation: {
+          desc: finding.remediation.desc,
+          references: finding.remediation.references,
+        },
+      }),
+      resources: finding.resources?.map((resource) => ({
         name: resource.name,
         region: resource.region,
         type: resource.type,
@@ -268,11 +270,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: finding.id,
       isAiAssociated: finding.is_ai_associated,
       metadata: { eventCode: finding.metadata.event_code },
-      remediation: {
-        desc: finding.remediation.desc,
-        references: finding.remediation.references,
-      },
-      resources: finding.resources.map((resource) => ({
+      ...(finding.remediation && {
+        remediation: {
+          desc: finding.remediation.desc,
+          references: finding.remediation.references,
+        },
+      }),
+      resources: finding.resources?.map((resource) => ({
         name: resource.name,
         region: resource.region,
         type: resource.type,

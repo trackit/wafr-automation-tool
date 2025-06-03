@@ -4,28 +4,28 @@ export interface Finding {
   id: string;
   isAiAssociated: boolean;
   metadata: FindingMetadata;
-  remediation: FindingRemediation;
-  resources: FindingResource[];
-  riskDetails: string;
-  severity: SeverityType;
-  statusCode: string;
-  statusDetail: string;
+  remediation?: FindingRemediation;
+  resources?: FindingResource[];
+  riskDetails?: string;
+  severity?: SeverityType;
+  statusCode?: string;
+  statusDetail?: string;
 }
 
 export interface FindingMetadata {
-  eventCode: string;
+  eventCode?: string;
 }
 
 export interface FindingRemediation {
   desc: string;
-  references: string[];
+  references?: string[];
 }
 
 export interface FindingResource {
-  name: string;
-  region: string;
-  type: string;
-  uid: string;
+  name?: string;
+  region?: string;
+  type?: string;
+  uid?: string;
 }
 
 export enum SeverityType {
