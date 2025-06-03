@@ -16,6 +16,7 @@ import {
   tokenAssessmentsRepository,
   tokenFakeAssessmentsRepository,
 } from './AssessmentsRepository';
+import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
@@ -27,4 +28,5 @@ export const registerTestInfrastructure = () => {
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
   });
+  register(tokenIdGenerator, { useClass: FakeIdGenerator });
 };

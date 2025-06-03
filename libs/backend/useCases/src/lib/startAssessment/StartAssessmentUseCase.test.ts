@@ -1,11 +1,9 @@
 import {
-  FakeAssessmentsStateMachine,
-  FakeIdGenerator,
-  tokenAssessmentsStateMachine,
-  tokenIdGenerator,
+  registerTestInfrastructure,
+  tokenFakeAssessmentsStateMachine,
 } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
-import { register, reset } from '@shared/di-container';
+import { inject, reset } from '@shared/di-container';
 
 import {
   StartAssessmentUseCaseArgs,
@@ -108,17 +106,11 @@ describe('startAssessment UseCase', () => {
 
 const setup = () => {
   reset();
-
-  const fakeAssessmentsStateMachine = new FakeAssessmentsStateMachine();
+  registerTestInfrastructure();
+  const fakeAssessmentsStateMachine = inject(tokenFakeAssessmentsStateMachine);
   vitest.spyOn(fakeAssessmentsStateMachine, 'startAssessment');
-  register(tokenAssessmentsStateMachine, {
-    useValue: fakeAssessmentsStateMachine,
-  });
-  register(tokenIdGenerator, { useClass: FakeIdGenerator });
   const date = new Date();
   vitest.setSystemTime(date);
-
   const useCase = new StartAssessmentUseCaseImpl();
-
   return { useCase, fakeAssessmentsStateMachine, date };
 };
