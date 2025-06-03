@@ -7,7 +7,7 @@ describe('TagInput', () => {
     const setTags = vi.fn();
 
     const { baseElement } = render(
-        <TagInput tags={tags} setTags={setTags} inputProps={{}} />
+      <TagInput tags={tags} setTags={setTags} inputProps={{}} />
     );
     expect(baseElement).toBeTruthy();
   });

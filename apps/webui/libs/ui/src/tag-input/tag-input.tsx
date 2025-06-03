@@ -3,21 +3,24 @@ import { ChangeEvent, FocusEvent, KeyboardEvent, useState } from 'react';
 export function TagsInput({
   tags,
   setTags,
-  inputProps
+  inputProps,
 }: {
   tags: Set<string>;
   setTags: (tags: Set<string>) => void;
-  inputProps: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown' | 'onBlur'>;
+  inputProps: Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    'value' | 'onChange' | 'onKeyDown' | 'onBlur'
+  >;
 }) {
   const [inputValue, setInputValue] = useState('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const values = e.target.value.split(',').filter(Boolean);
-      if (values.length > 1) {
-          addTags(values.map(v => v.trim()));
-      } else {
-          setInputValue(e.target.value.replace(/,+$/, ''));
-      }
+    const values = e.target.value.split(',').filter(Boolean);
+    if (values.length > 1) {
+      addTags(values.map((v) => v.trim()));
+    } else {
+      setInputValue(e.target.value.replace(/,+$/, ''));
+    }
   };
 
   const addTags = (add: string[]) => {
@@ -32,10 +35,7 @@ export function TagsInput({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (
-      (e.key === 'Enter' || e.key === ',') &&
-      inputValue.trim() !== ''
-    ) {
+    if ((e.key === 'Enter' || e.key === ',') && inputValue.trim() !== '') {
       e.preventDefault();
       addTags([inputValue.trim()]);
     }
