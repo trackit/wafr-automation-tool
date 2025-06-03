@@ -191,8 +191,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   private fromDynamoDBQuestionItem(item: DynamoDBQuestion): Question {
     return {
-      bestPractices: Object.entries(item.best_practices).map(
-        ([_, bestPractice]) => this.fromDynamoDBBestPracticeItem(bestPractice)
+      bestPractices: Object.values(item.best_practices).map((bestPractice) =>
+        this.fromDynamoDBBestPracticeItem(bestPractice)
       ),
       disabled: item.disabled,
       id: item.id,
@@ -208,7 +208,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: item.id,
       label: item.label,
       primaryId: item.primary_id,
-      questions: Object.entries(item.questions).map(([_, question]) =>
+      questions: Object.values(item.questions).map((question) =>
         this.fromDynamoDBQuestionItem(question)
       ),
     };
@@ -218,13 +218,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     item: DynamoDBAssessment | undefined
   ): Assessment | undefined {
     if (!item) return undefined;
-    const { PK, SK, ...assessment } = item;
+    const assessment = item;
     return {
       createdAt: new Date(assessment.created_at),
       createdBy: assessment.created_by,
       executionArn: assessment.execution_arn,
       ...(assessment.findings && {
-        findings: Object.entries(assessment.findings).map(([_, pillar]) =>
+        findings: Object.values(assessment.findings).map((pillar) =>
           this.fromDynamoDBPillarItem(pillar)
         ),
       }),
@@ -263,7 +263,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     item: DynamoDBFinding | undefined
   ): Finding | undefined {
     if (!item) return undefined;
-    const { PK, SK, ...finding } = item;
+    const finding = item;
     return {
       bestPractices: finding.best_practices,
       hidden: finding.hidden,
@@ -406,7 +406,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
 
     try {
-      let lastEvaluatedKey: Record<string, any> | undefined;
+      let lastEvaluatedKey: Record<string, unknown> | undefined;
       const items = [];
       do {
         const result = await this.client.query({
