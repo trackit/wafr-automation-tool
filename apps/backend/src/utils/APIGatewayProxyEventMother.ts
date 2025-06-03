@@ -91,6 +91,13 @@ export class APIGatewayProxyEventMother {
     return this;
   }
 
+  public withQueryStringParameters(
+    queryStringParameters: APIGatewayProxyEvent['queryStringParameters']
+  ): APIGatewayProxyEventMother {
+    this.data.queryStringParameters = queryStringParameters;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return this.data;
   }
