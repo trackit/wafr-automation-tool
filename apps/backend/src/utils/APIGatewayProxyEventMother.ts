@@ -76,11 +76,18 @@ export class APIGatewayProxyEventMother {
     return this;
   }
 
-  public withUserClaims(userClaims: {
+  public withUserClaims(userClaims?: {
     sub: string;
     email: string;
   }): APIGatewayProxyEventMother {
     this.data.requestContext.authorizer = { claims: userClaims };
+    return this;
+  }
+
+  public withPathParameters(
+    pathParameters: APIGatewayProxyEvent['pathParameters']
+  ): APIGatewayProxyEventMother {
+    this.data.pathParameters = pathParameters;
     return this;
   }
 

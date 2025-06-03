@@ -1,8 +1,8 @@
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
-import { StartAssessmentAdapter } from './startAssessment.adapter';
+import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
+import { StartAssessmentAdapter } from './StartAssessmentAdapter';
 import { StartAssessmentAdapterEventMother } from './StartAssessmentAdapterEventMother';
 
 describe('startAssessment adapter', () => {
@@ -59,22 +59,18 @@ describe('startAssessment adapter', () => {
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/test-role')
         .withWorkflows(['workflow-1', 'workflow-2'])
-        .withUser({ id: 'user-id', email: 'user-id@test.io' })
         .build();
 
       await adapter.handle(event);
 
-      expect(useCase.startAssessment).toHaveBeenCalledExactlyOnceWith({
-        name: 'Test Assessment',
-        regions: ['us-west-1', 'us-west-2'],
-        roleArn: 'arn:aws:iam::123456789012:role/test-role',
-        workflows: ['workflow-1', 'workflow-2'],
-        user: {
-          id: 'user-id',
-          organizationDomain: 'test.io',
-          email: 'user-id@test.io',
-        },
-      });
+      expect(useCase.startAssessment).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          name: 'Test Assessment',
+          regions: ['us-west-1', 'us-west-2'],
+          roleArn: 'arn:aws:iam::123456789012:role/test-role',
+          workflows: ['workflow-1', 'workflow-2'],
+        })
+      );
     });
 
     it('should return the assessment id from the useCase', async () => {

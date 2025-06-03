@@ -20,7 +20,7 @@ export const createNodesV2: CreateNodesV2 = [
               name: projectName,
               sourceRoot: projectRoot,
               projectType: 'library',
-              tags: [`type:${type}`, `scope:${scope}-libs`],
+              tags: [`type:${scope}-${type}`, `scope:${scope}-libs`],
               targets: {
                 lint: {
                   command: 'eslint .',

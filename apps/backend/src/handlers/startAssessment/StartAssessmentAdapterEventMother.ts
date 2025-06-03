@@ -3,7 +3,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { User } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
-import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
+import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
 
 export class StartAssessmentAdapterEventMother {
   private data: operations['startAssessment']['requestBody']['content']['application/json'];

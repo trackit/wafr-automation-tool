@@ -1,4 +1,9 @@
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import {
+  SFNClient,
+  StartExecutionCommand,
+  StopExecutionCommand,
+} from '@aws-sdk/client-sfn';
+import { mockClient } from 'aws-sdk-client-mock';
 
 import { inject, createInjectionToken } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
@@ -40,23 +45,31 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     }
     this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
   }
+
+  public async cancelAssessment(executionId: string): Promise<void> {
+    const command = new StopExecutionCommand({ executionArn: executionId });
+
+    const response = await this.client.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(
+        `Failed to cancel assessment: ${response.$metadata.httpStatusCode}`
+      );
+    }
+    this.logger.info(`Cancelled Assessment Execution#${executionId}`);
+  }
 }
 
 export const tokenAssessmentsStateMachine =
-  createInjectionToken<AssessmentsStateMachine>(
-    'tokenAssessmentsStateMachine',
-    {
-      useClass: AssessmentsStateMachineSfn,
-    }
-  );
+  createInjectionToken<AssessmentsStateMachine>('AssessmentsStateMachine', {
+    useClass: AssessmentsStateMachineSfn,
+  });
 
-export const tokenClientSfn = createInjectionToken<SFNClient>(
-  'tokenClientSfn',
-  { useClass: SFNClient }
-);
+export const tokenClientSfn = createInjectionToken<SFNClient>('ClientSfn', {
+  useClass: SFNClient,
+});
 
 export const tokenStateMachineArn = createInjectionToken<string>(
-  'tokenStateMachineArn',
+  'StateMachineArn',
   {
     useFactory: () => {
       const stateMachineArn = process.env.STATE_MACHINE_ARN;

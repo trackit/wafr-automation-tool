@@ -15,6 +15,7 @@
     "build:backend": "nx build backend",
     "deploy:backend": "nx deploy backend",
     "test:backend": "nx run-many -t test -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
+    "test:backend:init": "tsx ./scripts/backend/initLocalEnvironment.ts && tsx ./scripts/backend/initLocalDynamo.ts",
     "lint:backend": "nx run-many -t lint -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "test": "nx run-many -t test",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts"
@@ -24,7 +25,9 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.1",
+    "@aws-sdk/client-dynamodb": "^3.817.0",
     "@aws-sdk/client-sfn": "^3.810.0",
+    "@aws-sdk/lib-dynamodb": "^3.817.0",
     "@headlessui/react": "^2.2.2",
     "@hookform/resolvers": "^4.1.3",
     "@tanstack/react-query": "^5.74.9",
@@ -93,6 +96,7 @@
     "prettier": "^2.6.2",
     "tailwindcss": "^4.0.13",
     "tslib": "^2.3.0",
+    "tsx": "^4.19.4",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.19.0",
     "vite": "^6.0.0",
