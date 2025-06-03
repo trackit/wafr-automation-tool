@@ -25,3 +25,13 @@ export class NotFoundError extends ServerError {
     });
   }
 }
+
+export class InvalidParametersError extends ServerError {
+  public constructor(description?: string) {
+    super({
+      message: 'Invalid parameters',
+      name: 'InvalidParametersError',
+      description,
+    });
+  }
+}
