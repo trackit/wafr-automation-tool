@@ -2,7 +2,7 @@ import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
-import { StartAssessmentAdapter } from './startAssessment.adapter';
+import { StartAssessmentAdapter } from './StartAssessmentAdapter';
 import { StartAssessmentAdapterEventMother } from './StartAssessmentAdapterEventMother';
 
 describe('startAssessment adapter', () => {

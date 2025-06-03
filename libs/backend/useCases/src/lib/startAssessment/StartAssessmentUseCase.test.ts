@@ -10,7 +10,7 @@ import { register, reset } from '@shared/di-container';
 import {
   StartAssessmentUseCaseArgs,
   StartAssessmentUseCaseImpl,
-} from './startAssessment';
+} from './StartAssessmentUseCase';
 import { StartAssessmentUseCaseArgsMother } from './StartAssessmentUseCaseArgsMother';
 
 vitest.useFakeTimers();

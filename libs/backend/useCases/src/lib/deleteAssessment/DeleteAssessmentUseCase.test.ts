@@ -7,7 +7,7 @@ import {
 import { inject, reset } from '@shared/di-container';
 
 import { NotFoundError } from '../Errors';
-import { DeleteAssessmentUseCaseImpl } from './deleteAssessment';
+import { DeleteAssessmentUseCaseImpl } from './DeleteAssessmentUseCase';
 import { DeleteAssessmentUseCaseArgsMother } from './DeleteAssessmentUseCaseArgsMother';
 
 describe('deleteAssessment UseCase', () => {

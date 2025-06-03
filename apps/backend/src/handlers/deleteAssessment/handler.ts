@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { DeleteAssessmentAdapter } from './deleteAssessment.adapter';
+import { DeleteAssessmentAdapter } from './DeleteAssessmentAdapter';
 
 const adapter = new DeleteAssessmentAdapter();
 

@@ -1,7 +1,7 @@
 import { NotFoundError, tokenDeleteAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { DeleteAssessmentAdapter } from './deleteAssessment.adapter';
+import { DeleteAssessmentAdapter } from './DeleteAssessmentAdapter';
 import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
 
 describe('deleteAssessment adapter', () => {

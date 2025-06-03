@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { StartAssessmentAdapter } from './startAssessment.adapter';
+import { StartAssessmentAdapter } from './StartAssessmentAdapter';
 
 const adapter = new StartAssessmentAdapter();
 

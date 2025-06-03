@@ -1,5 +1,5 @@
 import type { User } from '@backend/models';
-import type { DeleteAssessmentUseCaseArgs } from './deleteAssessment';
+import type { DeleteAssessmentUseCaseArgs } from './DeleteAssessmentUseCase';
 
 export class DeleteAssessmentUseCaseArgsMother {
   private data: DeleteAssessmentUseCaseArgs;
