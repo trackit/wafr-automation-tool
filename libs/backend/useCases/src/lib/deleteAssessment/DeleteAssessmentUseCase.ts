@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsStateMachine,
   tokenAssessmentsRepository,
+  tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -20,6 +21,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
     tokenAssessmentsStateMachine
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly logger = inject(tokenLogger);
 
   private async deleteAssessmentFromRepository(args: {
     assessmentId: string;
@@ -56,6 +58,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
       assessmentId: args.assessmentId,
       organization: args.user.organizationDomain,
     });
+    this.logger.info(`Assessment#${args.assessmentId} deleted successfully`);
   }
 }
 
