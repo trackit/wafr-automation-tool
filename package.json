@@ -21,7 +21,7 @@
     "test": "nx run-many -t test",
     "format": "nx format:write",
     "format:check": "nx format:check",
-    "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts"
+    "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts --empty-objects-unknown"
   },
   "nx": {
     "includedScripts": []
