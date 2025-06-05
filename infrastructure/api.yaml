@@ -207,16 +207,16 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  RetrieveAssessmentFunction:
+  GetAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/getAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveAssessmentFunction
+        Name: GetAssessmentFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -231,6 +231,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
