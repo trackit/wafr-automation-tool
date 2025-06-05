@@ -19,11 +19,6 @@ export interface Assessment {
   error?: AssessmentError;
 }
 
-export interface AssessmentError {
-  Error?: string;
-  Cause?: string;
-}
-
 export interface AssessmentGraphDatas {
   findings: number;
   regions: Record<string, number>;
@@ -37,4 +32,9 @@ export enum AssessmentStep {
   INVOKING_LLM = 'INVOKING_LLM',
   FINISHED = 'FINISHED',
   ERRORED = 'ERRORED',
+}
+
+export interface AssessmentError {
+  cause: string;
+  error: string;
 }

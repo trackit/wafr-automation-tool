@@ -136,6 +136,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       role_arn: assessment.roleArn,
       step: assessment.step,
       workflows: assessment.workflows,
+      ...(assessment.error && {
+        error: {
+          Cause: assessment.error.cause,
+          Error: assessment.error.error,
+        },
+      }),
     };
   }
 
@@ -263,6 +269,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       roleArn: assessment.role_arn,
       step: assessment.step,
       workflows: assessment.workflows,
+      ...(assessment.error && {
+        error: {
+          cause: assessment.error.Cause,
+          error: assessment.error.Error,
+        },
+      }),
     };
   }
 
