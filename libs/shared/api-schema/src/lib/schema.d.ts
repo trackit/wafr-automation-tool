@@ -322,7 +322,7 @@ export interface components {
             id?: string;
             label?: string;
             /** @enum {string} */
-            risk?: "High" | "Medium" | "Low";
+            risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description?: string;
             status?: boolean;
             results?: string[];
