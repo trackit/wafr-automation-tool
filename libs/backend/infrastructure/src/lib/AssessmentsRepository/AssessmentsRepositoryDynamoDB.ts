@@ -1,3 +1,4 @@
+import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   BestPractice,
@@ -13,7 +14,7 @@ import type {
 import { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-
+import { InvalidNextTokenError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 
@@ -148,8 +149,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): DynamoDBFinding {
     const { assessmentId, organization, scanningTool } = args;
     return {
-      PK: this.getFindingPK({ assessmentId, organization }),
-      SK: this.getFindingSK({ scanningTool, findingId: finding.id }),
+      PK: this.getFindingPK({
+        assessmentId,
+        organization,
+      }),
+      SK: this.getFindingSK({
+        scanningTool,
+        findingId: finding.id,
+      }),
       best_practices: finding.bestPractices,
       hidden: finding.hidden,
       id: finding.id,
@@ -289,6 +296,24 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
+  public static encodeNextToken(
+    nextToken?: Record<string, unknown>
+  ): string | undefined {
+    if (!nextToken) return undefined;
+    return Buffer.from(JSON.stringify(nextToken)).toString('base64');
+  }
+
+  public static decodeNextToken(
+    nextToken?: string
+  ): Record<string, unknown> | undefined {
+    if (!nextToken) return undefined;
+    try {
+      return JSON.parse(Buffer.from(nextToken, 'base64').toString('utf8'));
+    } catch {
+      throw new InvalidNextTokenError();
+    }
+  }
+
   public async save(assessment: Assessment): Promise<void> {
     const params = {
       TableName: this.tableName,
@@ -327,6 +352,67 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
+  private createGetAllQuery(args: {
+    organization: string;
+    limit?: number;
+    search?: string;
+    nextToken?: string;
+  }): QueryCommandInput {
+    const { organization, limit, search, nextToken } = args;
+    const parsedNextToken =
+      AssessmentsRepositoryDynamoDB.decodeNextToken(nextToken);
+    const params: QueryCommandInput = {
+      TableName: this.tableName,
+      KeyConditionExpression: `PK = :pk`,
+      ExpressionAttributeValues: {
+        ':pk': this.getAssessmentPK(organization),
+      },
+      ScanIndexForward: false,
+      Limit: limit,
+      ExclusiveStartKey: parsedNextToken,
+    };
+    if (search) {
+      params.FilterExpression = `contains(#name, :name) OR begins_with(#id, :id) OR contains(#role_arn, :role_arn)`;
+      params.ExpressionAttributeNames = {
+        '#name': 'name',
+        '#id': 'id',
+        '#role_arn': 'role_arn',
+      };
+      params.ExpressionAttributeValues = {
+        ...params.ExpressionAttributeValues,
+        ':name': search,
+        ':id': search,
+        ':role_arn': search,
+      };
+    }
+    return params;
+  }
+
+  public async getAll(args: {
+    organization: string;
+    limit?: number;
+    search?: string;
+    nextToken?: string;
+  }): Promise<{
+    assessments: Assessment[];
+    nextToken?: string;
+  }> {
+    const params = this.createGetAllQuery(args);
+    const result = await this.client.query(params);
+    const formattedNextToken = AssessmentsRepositoryDynamoDB.encodeNextToken(
+      result.LastEvaluatedKey
+    );
+    const assessments: Assessment[] =
+      result.Items?.map((item) =>
+        this.fromDynamoDBAssessmentItem(item as DynamoDBAssessment)
+      ).filter((assessment): assessment is Assessment => Boolean(assessment)) ??
+      [];
+    return {
+      assessments,
+      nextToken: formattedNextToken,
+    };
+  }
+
   public async get(args: {
     assessmentId: string;
     organization: string;
@@ -355,8 +441,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getFindingPK({ assessmentId, organization }),
-        SK: this.getFindingSK({ scanningTool: args.scanningTool, findingId }),
+        PK: this.getFindingPK({
+          assessmentId,
+          organization,
+        }),
+        SK: this.getFindingSK({
+          scanningTool: args.scanningTool,
+          findingId,
+        }),
       },
     };
 
@@ -413,7 +505,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           TableName: this.tableName,
           KeyConditionExpression: 'PK = :pk',
           ExpressionAttributeValues: {
-            ':pk': this.getFindingPK({ assessmentId, organization }),
+            ':pk': this.getFindingPK({
+              assessmentId,
+              organization,
+            }),
           },
           ExclusiveStartKey: lastEvaluatedKey,
           ProjectionExpression: 'PK, SK',

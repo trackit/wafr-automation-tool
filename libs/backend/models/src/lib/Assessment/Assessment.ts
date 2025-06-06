@@ -16,6 +16,12 @@ export interface Assessment {
   roleArn: string;
   step: AssessmentStep;
   workflows: string[];
+  error?: AssessmentError;
+}
+
+export interface AssessmentError {
+  Error?: string;
+  Cause?: string;
 }
 
 export interface AssessmentGraphDatas {

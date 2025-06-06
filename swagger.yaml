@@ -580,23 +580,6 @@ components:
         created_at:
           type: string
           description: ISO-formatted date when the assessment was created
-        graph_datas:
-          type: object
-          description: Processed data from the scanning tools
-          additionalProperties: false
-          properties:
-            regions:
-              type: object
-              description: Regions where findings were found
-            resource_types:
-              type: object
-              description: Resource types where findings were found
-            severities:
-              type: object
-              description: Severity levels where findings were found
-            findings:
-              type: integer
-              description: Total number of findings
         step:
           type: string
           description: Current step in the assessment process
@@ -608,9 +591,6 @@ components:
             - ERRORED
         error:
           $ref: '#/components/schemas/AssessmentError'
-        question_version:
-          type: string
-          description: The version of questions that were used for the assessment
     AssessmentContent:
       type: object
       allOf:
@@ -621,6 +601,26 @@ components:
               description: A list of findings associated with the assessment
               items:
                 $ref: '#/components/schemas/Pillar'
+            question_version:
+              type: string
+              description: The version of questions that were used for the assessment
+            graph_datas:
+              type: object
+              description: Processed data from the scanning tools
+              additionalProperties: false
+              properties:
+                regions:
+                  type: object
+                  description: Regions where findings were found
+                resource_types:
+                  type: object
+                  description: Resource types where findings were found
+                severities:
+                  type: object
+                  description: Severity levels where findings were found
+                findings:
+                  type: integer
+                  description: Total number of findings
     AssessmentError:
       type: object
       nullable: true

@@ -12,12 +12,13 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
+import { InvalidNextTokenError } from '../../Errors';
+import { tokenDynamoDBClient } from '../config/dynamodb/config';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   AssessmentsRepositoryDynamoDB,
   tokenDynamoDBAssessmentTableName,
 } from './AssessmentsRepositoryDynamoDB';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import { tokenDynamoDBClient } from '../config/dynamodb/config';
 
 afterEach(async () => {
   const dynamoDBClient = inject(tokenDynamoDBClient);
@@ -97,6 +98,152 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(savedAssessment).toEqual(assessment);
+    });
+  });
+
+  describe('getAll', () => {
+    it('should return a list of assessment if it exists', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment);
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [assessment],
+        nextToken: undefined,
+      });
+    });
+
+    it('should return all assessments with matched search criteria', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment2);
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization1',
+        search: 'assessment1',
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [assessment1],
+        nextToken: undefined,
+      });
+    });
+
+    it('should return all assessments within the limit', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment2);
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization1',
+        limit: 1,
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [expect.objectContaining({ id: 'assessment2' })],
+        nextToken: expect.any(String),
+      });
+    });
+
+    it('should return all assessments after the next token', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment2);
+
+      const nextTokenAssessment = {
+        PK: 'organization1',
+        SK: 'ASSESSMENT#assessment2',
+      };
+      const nextToken =
+        AssessmentsRepositoryDynamoDB.encodeNextToken(nextTokenAssessment);
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization1',
+        nextToken: nextToken,
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [assessment1],
+        nextToken: undefined,
+      });
+    });
+
+    it('should return an empty list if assessments does not match the organization', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment);
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization2',
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [],
+        nextToken: undefined,
+      });
+    });
+
+    it('should return an empty list if no assessments', async () => {
+      const { repository } = setup();
+
+      const fetchedAssessments = await repository.getAll({
+        organization: 'organization1',
+      });
+
+      expect(fetchedAssessments).toEqual({
+        assessments: [],
+        nextToken: undefined,
+      });
     });
   });
 
@@ -504,6 +651,21 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(fetchedFinding1).toBeUndefined();
       expect(fetchedFinding2).toEqual(finding2);
+    });
+  });
+
+  describe('nextToken validation', () => {
+    it('should throw an error if the next token is invalid', async () => {
+      const { repository } = setup();
+
+      const nextToken = 'test-token';
+
+      await expect(
+        repository.getAll({
+          organization: 'organization1',
+          nextToken,
+        })
+      ).rejects.toThrow(InvalidNextTokenError);
     });
   });
 });

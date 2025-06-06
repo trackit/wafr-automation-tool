@@ -171,16 +171,16 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  RetrieveAllAssessmentsFunction:
+  GetAllAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_all_assessments/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/getAllAssessments
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveAllAssessmentsFunction
+        Name: GetAllAssessmentsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -190,12 +190,21 @@ Resources:
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        GetAllAssessments:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   RetrieveAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:

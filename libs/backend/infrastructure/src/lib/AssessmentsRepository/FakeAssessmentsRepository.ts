@@ -1,6 +1,7 @@
 import type { Assessment, Finding } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
+import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 
 export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
@@ -28,6 +29,38 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     }
 
     this.assessmentFindings[key].push(finding);
+  }
+
+  public async getAll(args: {
+    organization: string;
+    limit?: number;
+    search?: string;
+    nextToken?: string;
+  }): Promise<{
+    assessments: Assessment[];
+    nextToken?: string;
+  }> {
+    const { organization, limit, search, nextToken } = args;
+    const assessments = Object.values(this.assessments)
+      .filter((assessment) => assessment.organization === organization)
+      .filter((assessment) => {
+        if (search) {
+          return (
+            assessment.name.includes(search) ||
+            assessment.id.startsWith(search) ||
+            assessment.roleArn.includes(search)
+          );
+        }
+        return true;
+      })
+      .slice(0, limit);
+    if (nextToken) {
+      AssessmentsRepositoryDynamoDB.decodeNextToken(nextToken);
+    }
+    return {
+      assessments,
+      nextToken,
+    };
   }
 
   public async get(args: {
