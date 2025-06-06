@@ -16,10 +16,12 @@ export const hideFinding = async ({
   findingId: string;
   hide: boolean;
 }) => {
+  const encodedFindingId = encodeURIComponent(findingId);
+
   return apiClient.put<
     paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}']['put']['responses']['200']['content']
   >(
-    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}/findings/${findingId}`,
+    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}/findings/${encodedFindingId}`,
     {
       hidden: hide,
     }

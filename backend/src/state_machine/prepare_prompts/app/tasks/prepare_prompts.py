@@ -3,11 +3,15 @@ from collections import Counter
 from typing import override
 
 from common.config import (
+    ASSESSMENT_PK,
     ASSESSMENT_SK,
     CHUNK_SIZE,
     DDB_KEY,
     DDB_SORT_KEY,
     DDB_TABLE,
+    FINDING_BEST_PRACTICES,
+    FINDING_ID,
+    FINDING_PK,
     FINDING_SK,
     S3_BUCKET,
     STORE_CHUNK_PATH,
@@ -54,28 +58,32 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
             finding_rules = filtering_rules.get(finding.metadata.event_code)
             if not finding_rules:
                 continue
-            finding_formatted_id = f"{scanning_tool}#{finding.id}"
+            finding_formatted_id = FINDING_ID.format(scanning_tool, finding.id)
+            best_pratices: list[str] = []
             is_filtered = False
             for finding_rule in finding_rules:
-                best_practice_data = get_best_practice_by_primary_id(
+                result = get_best_practice_by_primary_id(
                     self.formatted_question_set.data,
                     finding_rule.get("pillar"),
                     finding_rule.get("question"),
                     finding_rule.get("best_practice"),
                 )
-                if not best_practice_data:
+                if result is None:
                     continue
+                pillar, question, best_practice = result
                 is_filtered = True
-                best_practice_data.results.append(finding_formatted_id)
+                best_practice.results.append(finding_formatted_id)
+                best_pratices.append(FINDING_BEST_PRACTICES.format(pillar.id, question.id, best_practice.id))
             if not is_filtered:
                 continue
             finding.is_ai_associated = False
+            finding.best_practices = ",".join(best_pratices)
             self.database_service.put(
                 table_name=DDB_TABLE,
                 item={
                     **finding.model_dump(),
-                    DDB_KEY: organization,
-                    DDB_SORT_KEY: FINDING_SK.format(assessment_id, finding_formatted_id),
+                    DDB_KEY: FINDING_PK.format(organization, assessment_id),
+                    DDB_SORT_KEY: FINDING_SK.format(finding_formatted_id),
                 },
             )
             findings.remove(finding)
@@ -111,7 +119,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         self.database_service.update_attrs(
             table_name=DDB_TABLE,
             event=UpdateAttrsInput(
-                key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
+                key={DDB_KEY: ASSESSMENT_PK.format(organization), DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
                 attrs={
                     "findings": self.formatted_question_set.data.model_dump(),
                     "question_version": self.formatted_question_set.version,
@@ -120,7 +128,7 @@ class PreparePrompts(Task[PreparePromptsInput, list[str]]):
         )
         self.database_service.update(
             table_name=DDB_TABLE,
-            Key={DDB_KEY: organization, DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
+            Key={DDB_KEY: ASSESSMENT_PK.format(organization), DDB_SORT_KEY: ASSESSMENT_SK.format(assessment_id)},
             UpdateExpression="SET raw_graph_datas.#scanning_tool = :data",
             ExpressionAttributeNames={
                 "#scanning_tool": scanning_tool,

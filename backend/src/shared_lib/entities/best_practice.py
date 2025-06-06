@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 BestPracticeID = str
@@ -18,7 +20,7 @@ class BestPracticeInfo(BaseModel):
     id: int
     pillar: str
     question: str
-    best_practice: dict[str, str]
+    best_practice: dict[str, Any]
 
 
 class BestPracticeDto(BaseModel):

@@ -1,5 +1,5 @@
 import { User } from '@backend/models';
-import type { StartAssessmentUseCaseArgs } from './startAssessment';
+import type { StartAssessmentUseCaseArgs } from './StartAssessmentUseCase';
 
 export class StartAssessmentUseCaseArgsMother {
   private data: StartAssessmentUseCaseArgs;

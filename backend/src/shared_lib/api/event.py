@@ -1,6 +1,6 @@
 from typing import Any
 
-from entities.api import APIAssessment, APIBestPracticeExtra
+from entities.api import APIAssessment
 from entities.assessment import AssessmentDto, AssessmentID
 from entities.best_practice import BestPracticeDto, BestPracticeID
 from entities.finding import FindingDto, FindingExtra, FindingID
@@ -58,10 +58,15 @@ class RetrieveBestPracticeFindingsInput(BaseModel):
     question_id: QuestionID
     best_practice_id: BestPracticeID
     organization: str
+    limit: int
+    search: str | None = None
+    show_hidden: bool = False
+    next_token: str | None = None
 
 
-class RetrieveBestPracticeFindingsResponseBody(APIResponseBody, APIBestPracticeExtra):
-    pass
+class RetrieveBestPracticeFindingsResponseBody(APIResponseBody):
+    items: list[FindingExtra]
+    next_token: str | None
 
 
 class RetrieveFindingInput(BaseModel):

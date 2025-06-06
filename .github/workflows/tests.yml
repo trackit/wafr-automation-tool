@@ -38,6 +38,12 @@ jobs:
           cache-dependency-path: './package-lock.json'
       - name: Install dependencies
         run: npm ci --prefer-offline
+      - name: Start docker compose
+        run: |
+          docker compose up -d
+          sleep 5
+      - name: Prepare database
+        run: npm run test:backend:init
       - name: Run tests
         run: npm run test:backend
   ts-frontend-tests:

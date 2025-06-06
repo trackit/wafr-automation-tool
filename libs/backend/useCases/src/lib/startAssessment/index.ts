@@ -1,2 +1,2 @@
-export * from './startAssessment';
+export * from './StartAssessmentUseCase';
 export * from './StartAssessmentUseCaseArgsMother';

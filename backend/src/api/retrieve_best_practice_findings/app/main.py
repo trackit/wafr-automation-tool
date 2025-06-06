@@ -23,15 +23,21 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
     try:
         organization = get_user_organization_id(event)
 
-        response = task.execute(
-            RetrieveBestPracticeFindingsInput(
-                assessment_id=event["pathParameters"]["assessmentId"],
-                organization=organization,
-                pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
-                question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
-                best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),
-            )
+        query_string_parameters = event.get("queryStringParameters")
+        task_input = RetrieveBestPracticeFindingsInput(
+            assessment_id=event["pathParameters"]["assessmentId"],
+            organization=organization,
+            pillar_id=urllib.parse.unquote(event["pathParameters"]["pillarId"]),
+            question_id=urllib.parse.unquote(event["pathParameters"]["questionId"]),
+            best_practice_id=urllib.parse.unquote(event["pathParameters"]["bestPracticeId"]),
+            limit=-1,
         )
+        if query_string_parameters:
+            task_input.limit = int(query_string_parameters.get("limit", -1))
+            task_input.search = query_string_parameters.get("search", None)
+            task_input.show_hidden = query_string_parameters.get("show_hidden", None)
+            task_input.next_token = query_string_parameters.get("next_token", None)
+        response = task.execute(task_input)
         return response.build()
     except OrganizationExtractionError as e:
         return {

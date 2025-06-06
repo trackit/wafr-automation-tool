@@ -1,14 +1,14 @@
 import {
-  FakeIdGenerator,
-  tokenAssessmentsStateMachine,
-  tokenIdGenerator,
+  registerTestInfrastructure,
+  tokenFakeAssessmentsStateMachine,
 } from '@backend/infrastructure';
-import { register, reset } from '@shared/di-container';
+import { UserMother } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
 
 import {
   StartAssessmentUseCaseArgs,
   StartAssessmentUseCaseImpl,
-} from './startAssessment';
+} from './StartAssessmentUseCase';
 import { StartAssessmentUseCaseArgsMother } from './StartAssessmentUseCaseArgsMother';
 
 vitest.useFakeTimers();
@@ -59,11 +59,13 @@ describe('startAssessment UseCase', () => {
         .withRegions(['us-west-1', 'us-west-2'])
         .withWorkflows(['workflow-1', 'workflow-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-        .withUser({
-          id: 'user-id',
-          organizationDomain: 'test.io',
-          email: 'user-id@test.io',
-        })
+        .withUser(
+          UserMother.basic()
+            .withEmail('user-id@test.io')
+            .withId('user-id')
+            .withOrganizationDomain('test.io')
+            .build()
+        )
         .build();
     await useCase.startAssessment(input);
 
@@ -104,18 +106,11 @@ describe('startAssessment UseCase', () => {
 
 const setup = () => {
   reset();
-  const fakeAssessmentsStateMachine = {
-    startAssessment: vitest.fn(),
-  };
-
-  register(tokenAssessmentsStateMachine, {
-    useValue: fakeAssessmentsStateMachine,
-  });
-  register(tokenIdGenerator, { useClass: FakeIdGenerator });
+  registerTestInfrastructure();
+  const fakeAssessmentsStateMachine = inject(tokenFakeAssessmentsStateMachine);
+  vitest.spyOn(fakeAssessmentsStateMachine, 'startAssessment');
   const date = new Date();
   vitest.setSystemTime(date);
-
   const useCase = new StartAssessmentUseCaseImpl();
-
   return { useCase, fakeAssessmentsStateMachine, date };
 };
