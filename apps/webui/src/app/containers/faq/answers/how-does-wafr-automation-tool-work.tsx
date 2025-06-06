@@ -17,7 +17,7 @@ const HowDoesWAFRAutomationWorkAnswer = () => (
       </div>
       <img
         alt="AWS Architecture"
-        src="/src/assets/architecture.png"
+        src="/assets/architecture.png"
         className="w-full h-auto object-contain"
       />
     </div>
