@@ -349,9 +349,9 @@ Resources:
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/export_well_architected_tool/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/exportWellArchitectedTool
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -387,6 +387,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/well-architected-tool
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
