@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Network
 
@@ -80,7 +80,7 @@ Resources:
       GroupDescription: Security group for ECS
       VpcId: !Ref VPC
       SecurityGroupEgress:
-        - IpProtocol: "tcp"
+        - IpProtocol: 'tcp'
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0

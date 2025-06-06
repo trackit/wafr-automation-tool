@@ -3,7 +3,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "strictNullChecks": true,
-    "types": ["vitest"],
+    "types": ["vitest"]
   },
   "files": [],
   "include": [],

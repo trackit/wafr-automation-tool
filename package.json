@@ -17,7 +17,10 @@
     "test:backend": "nx run-many -t test -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "test:backend:init": "tsx ./scripts/backend/initLocalEnvironment.ts && tsx ./scripts/backend/initLocalDynamo.ts",
     "lint:backend": "nx run-many -t lint -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
+    "lint": "nx run-many -t lint",
     "test": "nx run-many -t test",
+    "format": "nx format:write",
+    "format:check": "nx format:check",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts"
   },
   "nx": {

@@ -7,4 +7,3 @@ export * from './tag-input/tag-input';
 export * from './theme-switcher/theme-switcher';
 export * from './timeline/timeline';
 export * from './vertical-menu/vertical-menu';
-
