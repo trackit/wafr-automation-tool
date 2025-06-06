@@ -51,14 +51,13 @@ export class ExportWellArchitectedToolUseCaseImpl
       assessment,
       args.user
     );
-    this.logger.info('Export Assessment to Well Architected Tool', {
-      assessmentId: assessment.id,
-      organization: args.user.organizationDomain,
-    });
+    this.logger.info(
+      `Export for assessment ${assessment.id} to the Well Architected Tool finished`
+    );
   }
 }
 
-export const tokenGetAllAssessmentsUseCase =
+export const tokenExportWellArchitectedToolUseCase =
   createInjectionToken<ExportWellArchitectedToolUseCase>(
     'ExportWellArchitectedToolUseCase',
     {
