@@ -13,7 +13,7 @@ jobs:
       STAGE: prod
       DEBUG: false
       REPOSITORY: https://github.com/trackit/wafr-automation-tool
-      INITIAL_USER_EMAIL: antoine.berger@trackit.io
+      INITIAL_USER_EMAIL: ${{ secrets.INITIAL_USER_EMAIL }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python 3.12
