@@ -1,7 +1,7 @@
-import { tokenGetAllAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { UserMother } from '@backend/models';
+import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
 import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
 import { ExportWellArchitectedToolAdapter } from './ExportWellArchitectedToolAdapter';
 import { ExportWellArchitectedToolAdapterEventMother } from './ExportWellArchitectedToolAdapterEventMother';
@@ -44,7 +44,7 @@ describe('exportWellArchitectedTool adapter', () => {
 
       await adapter.handle(event);
 
-      expect(useCase.getAllAssessments).toHaveBeenCalledWith({
+      expect(useCase.exportAssessment).toHaveBeenCalledWith({
         assessmentId: 'assessment-id',
         user: expect.objectContaining({
           organizationDomain: 'test.io',
@@ -65,13 +65,9 @@ describe('exportWellArchitectedTool adapter', () => {
 
 const setup = () => {
   reset();
-  const useCase = { getAllAssessments: vitest.fn() };
-  useCase.getAllAssessments.mockResolvedValueOnce(
-    Promise.resolve({
-      assessments: [],
-    })
-  );
-  register(tokenGetAllAssessmentsUseCase, { useValue: useCase });
+  const useCase = { exportAssessment: vitest.fn() };
+  useCase.exportAssessment.mockResolvedValueOnce(Promise.resolve());
+  register(tokenExportWellArchitectedToolUseCase, { useValue: useCase });
   const adapter = new ExportWellArchitectedToolAdapter();
   return { useCase, adapter };
 };

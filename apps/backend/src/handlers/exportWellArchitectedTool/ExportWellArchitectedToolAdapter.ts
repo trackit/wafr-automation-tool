@@ -4,6 +4,7 @@ import { z, ZodError, ZodType } from 'zod';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
+import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
 import { BadRequestError } from '../../utils/HttpError';
 import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../utils/handleHttpRequest';
@@ -32,7 +33,7 @@ export class ExportWellArchitectedToolAdapter {
     try {
       const parsedPath =
         ExportWellArchitectedToolPathSchema.parse(pathParameters);
-      const { assessments, nextToken } = await this.useCase.getAllAssessments({
+      await this.useCase.exportAssessment({
         user: getUserFromEvent(event),
         ...parsedPath,
       });
