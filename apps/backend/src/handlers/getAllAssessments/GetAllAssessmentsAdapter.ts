@@ -42,7 +42,7 @@ export class GetAllAssessmentsAdapter {
         user: getUserFromEvent(event),
         ...parsedQuery,
       });
-      return { assessments: assessments, next_token: nextToken };
+      return { assessments, next_token: nextToken };
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request query: ${e.message}`);
