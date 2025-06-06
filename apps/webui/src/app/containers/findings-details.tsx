@@ -75,6 +75,23 @@ function FindingItem({
   searchQuery: string;
   onHide: (findingId: string, hidden: boolean) => void;
 }) {
+  const remediations = useMemo(() => {
+    const isUrl = (str: string) => {
+      try {
+        new URL(str);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    let refs = finding.remediation?.references ?? [];
+    if (!refs.length) return null;
+    refs = refs.filter((ref) => ref !== 'No command available.');
+    const urls = refs.filter(isUrl);
+    const nonUrls = refs.filter((ref) => !isUrl(ref));
+    return { urls, nonUrls };
+  }, [finding.remediation?.references]);
+
   return (
     <div className="w-full px-8 py-8 border-b border-base-content/30">
       <div className="flex flex-row gap-2 items-start">
@@ -139,18 +156,34 @@ function FindingItem({
             <p className="text-sm text-base-content">
               {highlightText(finding.remediation.desc, searchQuery)}
             </p>
-            <div className="flex flex-row gap-2 items-center">
-              {finding.remediation.references?.map((reference, index) => (
-                <a
-                  href={reference}
-                  className="text-sm underline text-primary"
-                  key={index}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Reference {index + 1}
-                </a>
-              ))}
+            <div className="flex flex-col gap-2">
+              {remediations?.nonUrls.length ? (
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-base-content">Commands:</p>
+                  {remediations?.nonUrls.map((reference, index) => {
+                    return (
+                      <p className="bg-gray-100 rounded-md pl-3 pr-3 p-1 text-sm text-base-content">
+                        {reference}
+                      </p>
+                    );
+                  })}
+                </div>
+              ) : null}
+              <div className="flex flex-row gap-2 items-center">
+                {remediations?.urls.map((reference, index) => {
+                  return (
+                    <a
+                      href={reference}
+                      className="text-sm underline text-primary"
+                      key={index}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Reference {index + 1}
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
