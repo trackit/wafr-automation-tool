@@ -238,17 +238,11 @@ paths:
       summary: Export the assessment to Well Architected Tool
       description: |
         Exports the assessment to Well Architected Tool.
-        You can specify an owner for the workload and a name for the assessment.
       parameters:
         - name: assessmentId
           in: path
           description: The unique ID of the assessment to export
           required: true
-          schema:
-            type: string
-        - name: owner
-          in: query
-          description: The owner of the workload
           schema:
             type: string
       responses:

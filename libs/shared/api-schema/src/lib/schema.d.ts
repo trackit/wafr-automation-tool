@@ -82,7 +82,6 @@ export interface paths {
         /**
          * Export the assessment to Well Architected Tool
          * @description Exports the assessment to Well Architected Tool.
-         *     You can specify an owner for the workload and a name for the assessment.
          *
          */
         post: operations["exportWellArchitectedTool"];
@@ -616,10 +615,7 @@ export interface operations {
     };
     exportWellArchitectedTool: {
         parameters: {
-            query?: {
-                /** @description The owner of the workload */
-                owner?: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to export */
