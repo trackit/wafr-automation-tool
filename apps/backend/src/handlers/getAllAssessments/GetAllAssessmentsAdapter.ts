@@ -10,7 +10,7 @@ import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent'
 import { handleHttpRequest } from '../../utils/handleHttpRequest';
 
 const GetAllAssessmentsQuerySchema = z.object({
-  limit: z.coerce.number().min(0, "Limit can't be negative").optional(),
+  limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
   search: z.string().optional(),
   next_token: z.string().trim().base64().optional(),
 }) satisfies ZodType<operations['getAssessments']['parameters']['query']>;
@@ -38,7 +38,6 @@ export class GetAllAssessmentsAdapter {
       const parsedQuery = GetAllAssessmentsQuerySchema.parse(
         queryStringParameters
       );
-      console.log(parsedQuery);
       const { assessments, nextToken } = await this.useCase.getAllAssessments({
         user: getUserFromEvent(event),
         ...parsedQuery,
