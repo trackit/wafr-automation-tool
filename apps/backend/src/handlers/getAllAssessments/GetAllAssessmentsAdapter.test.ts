@@ -1,7 +1,7 @@
 import { tokenGetAllAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { UserMother } from '@backend/models';
+import { AssessmentMother, UserMother } from '@backend/models';
 import { GetAllAssessmentsAdapter } from './GetAllAssessmentsAdapter';
 import { GetAllAssessmentsAdapterEventMother } from './GetAllAssessmentsAdapterEventMother';
 
@@ -13,10 +13,11 @@ describe('getAllAssessments adapter', () => {
       const event = GetAllAssessmentsAdapterEventMother.basic()
         .withLimit(10)
         .withSearch('test')
-        .withNextToken('test')
+        .withNextToken('dGVzdCBiYXNlNjQ=')
         .build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
     });
 
     it('should return a 400 if the limit is negative', async () => {
@@ -30,12 +31,24 @@ describe('getAllAssessments adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
+    it('should return a 400 if the next token is not in base64', async () => {
+      const { adapter } = setup();
+
+      const event = GetAllAssessmentsAdapterEventMother.basic()
+        .withNextToken('NOT_BASE64')
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
     it('should pass without query parameters', async () => {
       const { adapter } = setup();
 
       const event = GetAllAssessmentsAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
     });
   });
 
@@ -74,6 +87,28 @@ describe('getAllAssessments adapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
+    });
+  });
+
+  describe('convertToAPIAssessment', () => {
+    it('should convert an assessment to an API assessment', () => {
+      const { adapter } = setup();
+
+      const assessment = AssessmentMother.basic().build();
+      const apiAssessment = adapter.convertToAPIAssessment([assessment]);
+      expect(apiAssessment).toHaveLength(1);
+      expect(apiAssessment?.[0]).toEqual({
+        id: assessment.id,
+        name: assessment.name,
+        created_by: assessment.createdBy,
+        organization: assessment.organization,
+        regions: assessment.regions,
+        role_arn: assessment.roleArn,
+        workflows: assessment.workflows,
+        created_at: assessment.createdAt.toISOString(),
+        step: assessment.step,
+        error: assessment.error,
+      });
     });
   });
 });
