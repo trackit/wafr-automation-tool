@@ -59,7 +59,8 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       Description: `WAFR Automation Tool Assessment: ${assessment.name}`,
       Environment: WorkloadEnvironment.PRODUCTION,
       Lenses: [WAFRLens],
-      AwsRegions: assessment.regions ?? ['us-west-2'],
+      AwsRegions:
+        assessment.regions.length > 0 ? assessment.regions : ['us-west-2'],
       ReviewOwner: `WAFR Automation Tool - ${user.email}`,
       Tags: {
         Owner: user.email,
@@ -167,21 +168,19 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     answerChoiceList: Choice[],
     answerQuestionData: Question
   ): Promise<string[]> {
-    let selectedChoiceList: string[] = [];
-    if (answerQuestionData.none) {
-      const noneChoiceId = answerChoiceList.find(
-        (choice) => choice.Title === 'None of these'
-      )?.ChoiceId;
-      if (noneChoiceId) {
-        selectedChoiceList.push(noneChoiceId);
-      }
-    } else {
-      selectedChoiceList = await this.getSelectedBestPracticeList(
-        answerChoiceList,
-        answerQuestionData.bestPractices
-      );
+    const noneChoiceId = answerChoiceList.find(
+      (choice) => choice.Title === 'None of these'
+    )?.ChoiceId;
+    if (answerQuestionData.none && noneChoiceId) {
+      return [noneChoiceId];
     }
-    return selectedChoiceList;
+    const filteredChoices = noneChoiceId
+      ? answerChoiceList.filter((choice) => choice.ChoiceId !== noneChoiceId)
+      : answerChoiceList;
+    return await this.getSelectedBestPracticeList(
+      filteredChoices,
+      answerQuestionData.bestPractices
+    );
   }
 
   public async exportAnswerList(
