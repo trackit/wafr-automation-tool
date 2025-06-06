@@ -12,7 +12,7 @@ export function StatusBadge({
     PREPARING_PROMPTS: 'Preparing',
     INVOKING_LLM: 'Invoking LLM',
     FINISHED: 'Ready',
-    ERRORED: 'Errored',
+    ERRORED: 'Failed',
   };
 
   const statusColor = {

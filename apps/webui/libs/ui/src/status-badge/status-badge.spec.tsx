@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
 import StatusBadge from './status-badge';
 
@@ -38,9 +38,9 @@ describe('StatusBadge', () => {
     expect(badge).toHaveClass('badge-success');
   });
 
-  it('renders "Errored" status with error color', () => {
+  it('renders "ERRORED" status with error color', () => {
     render(<StatusBadge status="ERRORED" />);
-    const badge = screen.getByText('Errored');
+    const badge = screen.getByText('Failed');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('badge-error');
   });
