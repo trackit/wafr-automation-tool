@@ -100,7 +100,7 @@ export class GetAssessmentAdapter {
   > {
     const { pathParameters } = event;
     if (!pathParameters) {
-      throw new BadRequestError('Request body is required');
+      throw new BadRequestError('Missing path parameters');
     }
 
     try {
@@ -112,7 +112,7 @@ export class GetAssessmentAdapter {
       return this.toGetAssessmentResponse(assessment);
     } catch (e) {
       if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request parameters: ${e.message}`);
+        throw new BadRequestError(`Invalid path parameters: ${e.message}`);
       }
       throw e;
     }
