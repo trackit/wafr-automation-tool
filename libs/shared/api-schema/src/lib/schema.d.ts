@@ -241,11 +241,11 @@ export interface components {
             /** @description Processed data from the scanning tools */
             graph_datas?: {
                 /** @description Regions where findings were found */
-                regions?: Record<string, never>;
+                regions?: Record<string, unknown>;
                 /** @description Resource types where findings were found */
-                resource_types?: Record<string, never>;
+                resource_types?: Record<string, unknown>;
                 /** @description Severity levels where findings were found */
-                severities?: Record<string, never>;
+                severities?: Record<string, unknown>;
                 /** @description Total number of findings */
                 findings?: number;
             };
@@ -322,7 +322,7 @@ export interface components {
             id?: string;
             label?: string;
             /** @enum {string} */
-            risk?: "High" | "Medium" | "Low";
+            risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description?: string;
             status?: boolean;
             results?: string[];

@@ -21,6 +21,16 @@ export class BestPracticeMother {
     });
   }
 
+  public withDescription(description: string): BestPracticeMother {
+    this.data.description = description;
+    return this;
+  }
+
+  public withHiddenResults(hiddenResults: string[]): BestPracticeMother {
+    this.data.hiddenResults = hiddenResults;
+    return this;
+  }
+
   public withId(id: string): BestPracticeMother {
     this.data.id = id;
     return this;
@@ -31,13 +41,13 @@ export class BestPracticeMother {
     return this;
   }
 
-  public withDescription(description: string): BestPracticeMother {
-    this.data.description = description;
+  public withPrimaryId(primaryId: string): BestPracticeMother {
+    this.data.primaryId = primaryId;
     return this;
   }
 
-  public withPrimaryId(primaryId: string): BestPracticeMother {
-    this.data.primaryId = primaryId;
+  public withResults(results: string[]): BestPracticeMother {
+    this.data.results = results;
     return this;
   }
 

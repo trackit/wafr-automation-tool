@@ -764,9 +764,14 @@ components:
         risk:
           type: string
           enum:
-            - High
-            - Medium
+            - Unknown
+            - Informational
             - Low
+            - Medium
+            - High
+            - Critical
+            - Fatal
+            - Other
         description:
           type: string
         status:

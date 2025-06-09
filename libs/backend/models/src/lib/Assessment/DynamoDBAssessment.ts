@@ -19,6 +19,7 @@ export interface DynamoDBAssessment {
   role_arn: string;
   step: AssessmentStep;
   workflows: string[];
+  error?: DynamoDBAssessmentError;
 }
 
 export interface DynamoDBAssessmentGraphDatas {
@@ -26,4 +27,9 @@ export interface DynamoDBAssessmentGraphDatas {
   regions: Record<string, number>;
   resource_types: Record<string, number>;
   severities: Partial<Record<SeverityType, number>>;
+}
+
+export interface DynamoDBAssessmentError {
+  Cause: string;
+  Error: string;
 }
