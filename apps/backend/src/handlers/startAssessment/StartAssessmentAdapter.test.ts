@@ -16,8 +16,9 @@ describe('startAssessment adapter', () => {
         .withRoleArn('arn:aws:iam::123456789012:role/test-role')
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
+      const response = await adapter.handle(event);
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should throw a bad request error without body', async () => {
