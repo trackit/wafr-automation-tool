@@ -46,7 +46,12 @@ export class GetAllAssessmentsAdapter {
       workflows: assessment.workflows,
       created_at: assessment.createdAt.toISOString(),
       step: assessment.step,
-      error: assessment.error,
+      ...(assessment.error && {
+        error: {
+          Cause: assessment.error.cause,
+          Error: assessment.error.error,
+        },
+      }),
     }));
   }
 
