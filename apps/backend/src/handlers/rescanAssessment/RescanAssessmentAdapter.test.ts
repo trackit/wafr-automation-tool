@@ -12,8 +12,9 @@ describe('RescanAssessmentAdapter', () => {
       const event = APIGatewayProxyEventMother.basic()
         .withPathParameters({ assessmentId: 'assessment-id' })
         .build();
+      const response = await adapter.handle(event);
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      await expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
