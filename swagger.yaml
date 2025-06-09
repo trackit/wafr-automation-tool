@@ -170,6 +170,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -630,7 +631,6 @@ components:
       properties:
         name:
           type: string
-          nullable: true
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'

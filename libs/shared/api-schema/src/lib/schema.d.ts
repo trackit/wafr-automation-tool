@@ -255,7 +255,7 @@ export interface components {
             Cause?: string;
         } | null;
         AssessmentDto: {
-            name?: string | null;
+            name?: string;
         };
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
@@ -492,7 +492,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AssessmentDto"];
             };
