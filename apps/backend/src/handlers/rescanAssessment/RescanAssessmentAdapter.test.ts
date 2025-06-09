@@ -14,7 +14,7 @@ describe('RescanAssessmentAdapter', () => {
         .build();
       const response = await adapter.handle(event);
 
-      await expect(response.statusCode).not.toBe(400);
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
