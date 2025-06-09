@@ -3,7 +3,6 @@ import {
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
-import { mockClient } from 'aws-sdk-client-mock';
 
 import { inject, createInjectionToken } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';

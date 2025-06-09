@@ -1,22 +1,22 @@
 import {
-  tokenAssessmentsStateMachine,
   tokenAssessmentsRepository,
+  tokenAssessmentsStateMachine,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NotFoundError } from '../Errors';
 
-export type DeleteAssessmentUseCaseArgs = {
+export type RescanAssessmentUseCaseArgs = {
   assessmentId: string;
   user: User;
 };
 
-export interface DeleteAssessmentUseCase {
-  deleteAssessment(args: DeleteAssessmentUseCaseArgs): Promise<void>;
+export interface RescanAssessmentUseCase {
+  rescanAssessment(args: RescanAssessmentUseCaseArgs): Promise<void>;
 }
 
-export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
+export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
   private readonly assessmentsStateMachine = inject(
     tokenAssessmentsStateMachine
   );
@@ -37,9 +37,8 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
       organization,
     });
   }
-
-  public async deleteAssessment(
-    args: DeleteAssessmentUseCaseArgs
+  public async rescanAssessment(
+    args: RescanAssessmentUseCaseArgs
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -58,11 +57,24 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
       assessmentId: args.assessmentId,
       organization: args.user.organizationDomain,
     });
-    this.logger.info(`Assessment#${args.assessmentId} deleted successfully`);
+
+    await this.assessmentsStateMachine.startAssessment({
+      assessmentId: args.assessmentId,
+      organization: args.user.organizationDomain,
+      createdAt: new Date(),
+      createdBy: args.user.id,
+      name: assessment.name,
+      regions: assessment.regions,
+      roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
+    });
+    this.logger.info(
+      `Assessment#${args.assessmentId} rescan started successfully`
+    );
   }
 }
 
-export const tokenDeleteAssessmentUseCase =
-  createInjectionToken<DeleteAssessmentUseCase>('DeleteAssessmentUseCase', {
-    useClass: DeleteAssessmentUseCaseImpl,
+export const tokenRescanAssessmentUseCase =
+  createInjectionToken<RescanAssessmentUseCase>('RescanAssessmentUseCase', {
+    useClass: RescanAssessmentUseCaseImpl,
   });

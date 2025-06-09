@@ -43,6 +43,11 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
+        StateMachineName:
+          !Select [
+            6,
+            !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
+          ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
         SharedLibsLayer: !Ref SharedLibs
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole

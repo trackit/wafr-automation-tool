@@ -9,6 +9,8 @@ Parameters:
     Type: String
   StateMachineArn:
     Type: String
+  StateMachineName:
+    Type: String
   DynamoDBArn:
     Type: String
   SharedLibsLayer:
@@ -243,17 +245,8 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action:
-                - states:StopExecution
-              Resource: !Join
-                - ''
-                - - 'arn:aws:states:'
-                  - !Ref 'AWS::Region'
-                  - ':'
-                  - !Ref 'AWS::AccountId'
-                  - ':execution:'
-                  - !Select [6, !Split [':', !Ref StateMachineArn]]
-                  - ':*'
+              Action: states:StopExecution
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
             - Effect: Allow
               Action:
                 - dynamodb:DeleteItem
@@ -305,9 +298,9 @@ Resources:
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/rescan_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/rescanAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -325,6 +318,9 @@ Resources:
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
+            - Effect: Allow
+              Action: states:StopExecution
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
       Events:
         RescanAssessment:
           Type: Api
@@ -332,6 +328,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
