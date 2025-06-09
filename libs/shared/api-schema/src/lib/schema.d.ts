@@ -256,7 +256,6 @@ export interface components {
         } | null;
         AssessmentDto: {
             name?: string | null;
-            role_arn?: string | null;
         };
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {

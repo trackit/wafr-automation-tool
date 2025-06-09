@@ -631,9 +631,6 @@ components:
         name:
           type: string
           nullable: true
-        role_arn:
-          type: string
-          nullable: true
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'
