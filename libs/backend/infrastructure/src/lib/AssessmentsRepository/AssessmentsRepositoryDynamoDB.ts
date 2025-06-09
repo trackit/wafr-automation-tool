@@ -12,7 +12,10 @@ import type {
   Pillar,
   Question,
 } from '@backend/models';
-import { AssessmentsRepository } from '@backend/ports';
+import {
+  AssessmentsRepository,
+  AssessmentsRepositoryGetBestPracticeFindingsArgs,
+} from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 import {
@@ -52,6 +55,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     findingId: string;
   }): string {
     return `${args.scanningTool}#${args.findingId}`;
+  }
+
+  public static getBestPracticeCustomId(args: {
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): string {
+    return `${args.pillarId}#${args.questionId}#${args.bestPracticeId}`;
   }
 
   private toDynamoDBBestPracticeItem(
@@ -451,6 +462,105 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     return this.fromDynamoDBAssessmentItem(dynamoAssessment);
   }
 
+  private buildGetBestPracticeFindingsQuery(
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+  ): QueryCommandInput {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      limit = 100,
+      searchTerm = '',
+      showHidden = false,
+      nextToken,
+    } = args;
+    return {
+      TableName: this.tableName,
+      KeyConditionExpression: 'PK = :pk',
+      FilterExpression: [
+        'contains(best_practices, :bestPraticeId)',
+        ...(!showHidden ? ['#hidden = :hiddenValue'] : []),
+        ...(searchTerm
+          ? [
+              'contains(risk_details, :searchTerm) or contains(status_detail, :searchTerm)',
+            ]
+          : []),
+      ].join(' and '),
+      ExpressionAttributeValues: {
+        ':pk': this.getFindingPK({ assessmentId, organization }),
+        ':bestPraticeId': AssessmentsRepositoryDynamoDB.getBestPracticeCustomId(
+          {
+            pillarId,
+            questionId,
+            bestPracticeId,
+          }
+        ),
+        ...(!showHidden && { ':hiddenValue': false }),
+        ...(searchTerm && { ':searchTerm': searchTerm }),
+      },
+      ...(!showHidden && {
+        ExpressionAttributeNames: { '#hidden': 'hidden' },
+      }),
+      Limit: limit,
+      ExclusiveStartKey:
+        AssessmentsRepositoryDynamoDB.decodeNextToken(nextToken),
+    };
+  }
+
+  public async getBestPracticeFindings(
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+  ): Promise<{ findings: Finding[]; nextToken?: string }> {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      limit = 100,
+    } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to get best practice findings for non-existing assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    this.assertBestPracticeExists({
+      assessment,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+    const params = this.buildGetBestPracticeFindingsQuery({
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      limit: args.limit,
+      nextToken: args.nextToken,
+      searchTerm: args.searchTerm,
+      showHidden: args.showHidden,
+    });
+    const items = [];
+    do {
+      const result = await this.client.query(params);
+      items.push(...((result.Items || []) as DynamoDBFinding[]));
+      params.ExclusiveStartKey = result.LastEvaluatedKey;
+    } while (params.ExclusiveStartKey && items.length < limit);
+    return {
+      findings: items.map(
+        (item) => this.fromDynamoDBFindingItem(item) as Finding
+      ),
+      nextToken: AssessmentsRepositoryDynamoDB.encodeNextToken(
+        params.ExclusiveStartKey
+      ),
+    };
+  }
+
   public async getFinding(args: {
     assessmentId: string;
     findingId: string;
@@ -479,6 +589,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public assertBestPracticeExists(args: {
     assessment: Assessment;
+    organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -490,6 +601,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId: assessment.id,
+        organization: assessment.organization,
         pillarId,
       });
     }
@@ -499,6 +611,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     if (!question) {
       throw new QuestionNotFoundError({
         assessmentId: assessment.id,
+        organization: assessment.organization,
         pillarId,
         questionId,
       });
@@ -509,6 +622,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     if (!bestPractice) {
       throw new BestPracticeNotFoundError({
         assessmentId: assessment.id,
+        organization: assessment.organization,
         pillarId,
         questionId,
         bestPracticeId,
@@ -545,6 +659,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     this.assertBestPracticeExists({
       assessment,
+      organization,
       pillarId,
       questionId,
       bestPracticeId,

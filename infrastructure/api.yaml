@@ -455,16 +455,16 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
-  RetrieveBestPracticeFindingsFunction:
+  GetBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_best_practice_findings/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/getBestPracticeFindings
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveBestPracticeFindingsFunction
+        Name: GetBestPracticeFindingsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -474,12 +474,21 @@ Resources:
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPracticeFindings:
+        GetBestPracticeFindings:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:

@@ -36,9 +36,13 @@ export class AssessmentNotFoundError extends InfrastructureError {
 }
 
 export class PillarNotFoundError extends InfrastructureError {
-  public constructor(args: { assessmentId: string; pillarId: string }) {
+  public constructor(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+  }) {
     super({
-      message: `Pillar with id ${args.pillarId} not found for assessment ${args.assessmentId}`,
+      message: `Pillar with id ${args.pillarId} not found for assessment ${args.assessmentId} in organization ${args.organization}`,
       name: 'PillarNotFoundError',
     });
   }
@@ -47,11 +51,12 @@ export class PillarNotFoundError extends InfrastructureError {
 export class QuestionNotFoundError extends InfrastructureError {
   public constructor(args: {
     assessmentId: string;
+    organization: string;
     pillarId: string;
     questionId: string;
   }) {
     super({
-      message: `Question with id ${args.questionId} not found for assessment ${args.assessmentId} and pillar ${args.pillarId}`,
+      message: `Question with id ${args.questionId} not found for assessment ${args.assessmentId} in organization ${args.organization} and pillar ${args.pillarId}`,
       name: 'QuestionNotFoundError',
     });
   }
@@ -60,12 +65,13 @@ export class QuestionNotFoundError extends InfrastructureError {
 export class BestPracticeNotFoundError extends InfrastructureError {
   public constructor(args: {
     assessmentId: string;
+    organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
   }) {
     super({
-      message: `Best Practice with id ${args.bestPracticeId} not found for assessment ${args.assessmentId} and pillar ${args.pillarId} and question ${args.questionId}`,
+      message: `Best Practice with id ${args.bestPracticeId} not found for assessment ${args.assessmentId} in organization ${args.organization} and pillar ${args.pillarId} and question ${args.questionId}`,
       name: 'BestPracticeNotFoundError',
     });
   }
