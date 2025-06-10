@@ -332,7 +332,7 @@ export interface components {
             results?: components["schemas"]["Finding"][];
         };
         BestPracticeDto: {
-            status?: boolean | null;
+            status?: boolean;
         };
     };
     responses: never;
@@ -819,15 +819,15 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
-                pillarId: number;
+                pillarId: string;
                 /** @description The ID of the question to update the best practice to */
-                questionId: number;
+                questionId: string;
                 /** @description The ID of the best practice */
-                bestPracticeId: number;
+                bestPracticeId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["BestPracticeDto"];
             };
