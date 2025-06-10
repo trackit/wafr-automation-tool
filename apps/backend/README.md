@@ -76,7 +76,7 @@ To perform a remote analysis, you must provide a custom role with these managed 
 - SecurityAudit
 - job-function/ViewOnlyAccess
 
-And the following inline policy: [Inline Policy](../../resources/inline-policy.json)
+And the following inline policy: [Inline Policy](../webui/public/inline-policy.json)
 
 Additionally, add the following trust policy to your role:
 
