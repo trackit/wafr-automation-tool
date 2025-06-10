@@ -31,7 +31,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   private readonly client = inject(tokenWellArchitectedClient);
   private readonly logger = inject(tokenLogger);
 
-  private async doesWorkloadExist(
+  private async getWorkloadSummary(
     workloadName: string
   ): Promise<WorkloadSummary | null> {
     const workloads = await this.client.send(new ListWorkloadsCommand());
@@ -50,7 +50,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     const workloadName = `wafr-${assessment.name.replace(' ', '-')}-${
       assessment.id
     }`;
-    const workload = await this.doesWorkloadExist(workloadName);
+    const workload = await this.getWorkloadSummary(workloadName);
     if (workload && workload.WorkloadId) {
       return workload.WorkloadId;
     }
