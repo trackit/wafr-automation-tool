@@ -552,6 +552,30 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       throw error;
     }
   }
+
+  private buildUpdateExpression(data: Record<string, unknown>): {
+    UpdateExpression: string;
+    ExpressionAttributeValues: Record<string, unknown>;
+    ExpressionAttributeNames: Record<string, string>;
+  } {
+    const updateExpressions: string[] = [];
+    const expressionAttributeValues: Record<string, unknown> = {};
+    const expressionAttributeNames: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      const attributeName = `#${key}`;
+      const attributeValue = `:${key}`;
+      updateExpressions.push(`${attributeName} = ${attributeValue}`);
+      expressionAttributeValues[attributeValue] = value;
+      expressionAttributeNames[attributeName] = key;
+    }
+
+    return {
+      UpdateExpression: `set ${updateExpressions.join(', ')}`,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: expressionAttributeNames,
+    };
+  }
 }
 
 export const tokenAssessmentsRepository =
