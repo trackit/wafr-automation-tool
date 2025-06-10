@@ -161,8 +161,20 @@ describe('wellArchitectedTool Infrastructure', () => {
     it('should list pillar answers of the workload', async () => {
       const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
 
+      const anwerSummary: AnswerSummary = {
+        PillarId: 'pillar-id',
+        QuestionId: 'question-id',
+        QuestionTitle: 'Question 1',
+        Choices: [
+          {
+            ChoiceId: 'choice-id',
+            Title: 'Best Practice 1',
+          },
+        ],
+      };
+
       wellArchitectedClientMock.on(ListAnswersCommand).resolves({
-        AnswerSummaries: [],
+        AnswerSummaries: [anwerSummary],
         $metadata: { httpStatusCode: 200 },
       });
 
@@ -171,7 +183,7 @@ describe('wellArchitectedTool Infrastructure', () => {
           'workload-id',
           'pillar-id'
         )
-      ).resolves.toEqual([]);
+      ).resolves.toEqual([anwerSummary]);
 
       const listPillarAnswersCalls =
         wellArchitectedClientMock.commandCalls(ListAnswersCommand);
