@@ -9,6 +9,7 @@ import {
   QuestionNotFoundError,
 } from '../../Errors';
 import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
+import { AssessmentNotFoundError } from '../../Errors';
 
 export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
@@ -158,6 +159,22 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   }): Promise<void> {
     const { assessmentId, organization } = args;
     delete this.assessmentFindings[`${assessmentId}#${organization}`];
+  }
+
+  public async update(args: {
+    assessmentId: string;
+    organization: string;
+    name?: string;
+  }): Promise<void> {
+    const { assessmentId, organization, ...data } = args;
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const assessment = this.assessments[assessmentKey];
+    for (const [key, value] of Object.entries(data)) {
+      assessment[key as keyof Assessment] = value as any;
+    }
   }
 }
 

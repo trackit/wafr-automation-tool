@@ -5,4 +5,5 @@ export * from './getAllAssessments';
 export * from './getAssessment';
 export * from './rescanAssessment';
 export * from './startAssessment';
+export * from './updateAssessment';
 export * from './updateBestPractice';

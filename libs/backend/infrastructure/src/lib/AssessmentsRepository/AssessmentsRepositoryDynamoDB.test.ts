@@ -888,6 +888,111 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).rejects.toThrow(InvalidNextTokenError);
     });
   });
+
+  describe('update', () => {
+    it('should update the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withName('Old Name')
+        .build();
+      await repository.save(assessment);
+
+      await repository.update({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        name: 'New Name',
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment).toEqual(
+        expect.objectContaining({ name: 'New Name' })
+      );
+    });
+
+    it('should silently ignore undefined fields', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withName('Old Name')
+        .build();
+      await repository.save(assessment);
+
+      await repository.update({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment).toEqual(
+        expect.objectContaining({ name: 'Old Name' })
+      );
+    });
+
+    it('should throw an error if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.update({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          name: 'New Name',
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withName('Old Name')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization2')
+        .withName('Old Name')
+        .build();
+      await repository.save(assessment2);
+
+      await repository.update({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        name: 'New Name',
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization2',
+      });
+
+      expect(updatedAssessment1).toEqual(
+        expect.objectContaining({ name: 'New Name' })
+      );
+      expect(updatedAssessment2).toEqual(
+        expect.objectContaining({ name: 'Old Name' })
+      );
+    });
+  });
 });
 
 const setup = () => {
@@ -904,6 +1009,5 @@ const setup = () => {
     },
   });
 
-  const repository = new AssessmentsRepositoryDynamoDB();
-  return { repository };
+  return { repository: new AssessmentsRepositoryDynamoDB() };
 };
