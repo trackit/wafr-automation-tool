@@ -227,26 +227,31 @@ describe('wellArchitectedTool Infrastructure', () => {
     it('should update answer of the workload', async () => {
       const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
 
-      wellArchitectedClientMock.on(ListAnswersCommand).resolves({
-        AnswerSummaries: [],
+      wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
 
-      await expect(
-        wellArchitectedToolService.listWorkloadPillarAnswers(
-          'workload-id',
-          'pillar-id'
-        )
-      ).resolves.toEqual([]);
+      const question = QuestionMother.basic().withNone(false).build();
 
-      const listPillarAnswersCalls =
-        wellArchitectedClientMock.commandCalls(ListAnswersCommand);
-      expect(listPillarAnswersCalls.length).toBe(1);
-      expect(listPillarAnswersCalls[0].args[0].input).toEqual(
+      await expect(
+        wellArchitectedToolService.updateWorkloadAnswer(
+          'workload-id',
+          'question-id',
+          [],
+          question
+        )
+      ).resolves.toBeUndefined();
+
+      const updateAnswersCalls =
+        wellArchitectedClientMock.commandCalls(UpdateAnswerCommand);
+      expect(updateAnswersCalls.length).toBe(1);
+      expect(updateAnswersCalls[0].args[0].input).toEqual(
         expect.objectContaining({
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
-          PillarId: 'pillar-id',
+          QuestionId: 'question-id',
+          SelectedChoices: [],
+          IsApplicable: true,
         })
       );
     });
