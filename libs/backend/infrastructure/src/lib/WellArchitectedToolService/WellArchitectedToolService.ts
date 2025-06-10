@@ -222,9 +222,9 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   public async exportPillarList(
     workloadId: string,
     assessmentPillarList: Pillar[],
-    workflowPillarList: PillarReviewSummary[]
+    workloadPillarList: PillarReviewSummary[]
   ): Promise<void> {
-    for (const pillar of workflowPillarList) {
+    for (const pillar of workloadPillarList) {
       const { PillarId: pillarId, PillarName: pillarName } = pillar;
       if (!pillarId || !pillarName) {
         throw new Error(
@@ -264,12 +264,12 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   ): Promise<void> {
     const assessmentPillarList = assessment.findings ?? [];
     const workloadId = await this.createWorkload(assessment, user);
-    const workflowLensReview = await this.getWorkloadLensReview(workloadId);
-    const workflowPillarList = workflowLensReview.PillarReviewSummaries ?? [];
+    const workloadLensRevieww = await this.getWorkloadLensReview(workloadId);
+    const workloadPillarList = workloadLensRevieww.PillarReviewSummaries ?? [];
     await this.exportPillarList(
       workloadId,
       assessmentPillarList,
-      workflowPillarList
+      workloadPillarList
     );
   }
 }
