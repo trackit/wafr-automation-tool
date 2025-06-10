@@ -553,23 +553,39 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
-  private buildUpdateExpression(data: Record<string, unknown>): {
+  private buildUpdateExpression(args: {
+    data: Record<string, unknown>;
+    UpdateExpressionPath?: string;
+    DefaultExpressionAttributeValues?: Record<string, unknown>;
+    DefaultExpressionAttributeNames?: Record<string, string>;
+  }): {
     UpdateExpression: string;
     ExpressionAttributeValues: Record<string, unknown>;
     ExpressionAttributeNames: Record<string, string>;
   } {
+    const {
+      data,
+      DefaultExpressionAttributeValues,
+      DefaultExpressionAttributeNames,
+    } = args;
     const updateExpressions: string[] = [];
-    const expressionAttributeValues: Record<string, unknown> = {};
-    const expressionAttributeNames: Record<string, string> = {};
+    const expressionAttributeValues: Record<string, unknown> =
+      DefaultExpressionAttributeValues || {};
+    const expressionAttributeNames: Record<string, string> =
+      DefaultExpressionAttributeNames || {};
 
+    if (args.UpdateExpressionPath && !args.UpdateExpressionPath.endsWith('.')) {
+      args.UpdateExpressionPath += '.';
+    }
     for (const [key, value] of Object.entries(data)) {
       const attributeName = `#${key}`;
       const attributeValue = `:${key}`;
-      updateExpressions.push(`${attributeName} = ${attributeValue}`);
+      updateExpressions.push(
+        `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
+      );
       expressionAttributeValues[attributeValue] = value;
       expressionAttributeNames[attributeName] = key;
     }
-
     return {
       UpdateExpression: `set ${updateExpressions.join(', ')}`,
       ExpressionAttributeValues: expressionAttributeValues,
