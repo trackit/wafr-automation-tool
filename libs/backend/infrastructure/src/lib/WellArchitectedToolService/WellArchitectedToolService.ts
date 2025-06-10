@@ -149,8 +149,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         );
       }
       const bestPracticeData = questionBestPracticeList.find(
-        (bestPractice) =>
-          bestPractice.label.toLowerCase() === bestPracticeTitle.toLowerCase()
+        (bestPractice) => bestPractice.id === bestPracticeId
       );
       if (!bestPracticeData) {
         throw new Error(
@@ -200,8 +199,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         );
       }
       const answerQuestionData = pillarQuestionList.find(
-        (answer) =>
-          answer.label.toLowerCase() === answerQuestionTitle.toLowerCase()
+        (answer) => answer.id === answerQuestionId
       );
       if (!answerQuestionData) {
         throw new Error(
@@ -234,7 +232,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         );
       }
       const pillarData = assessmentPillarList.find(
-        (pillar) => pillar.label.toLowerCase() === pillarName.toLowerCase()
+        (pillar) => pillar.id === pillarId
       );
       if (!pillarData) {
         throw new Error(
