@@ -42,7 +42,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     ).toHaveBeenCalledExactlyOnceWith(assessment, input.user);
   });
 
-  it('should return 204 if the assessment findings are empty', async () => {
+  it('should throw a NoContentError if the assessment findings are empty', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
@@ -59,7 +59,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     );
   });
 
-  it('should return 404 if the assessment doesn’t exist', async () => {
+  it('should throw a NotFoundError if the assessment doesn’t exist', async () => {
     const { useCase } = setup();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
@@ -68,7 +68,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     );
   });
 
-  it('should return 409 if the assessment findings are undefined', async () => {
+  it('should throw a ConflictError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
@@ -87,7 +87,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     );
   });
 
-  it('should return 409 if the assessment is not finished', async () => {
+  it('should throw a ConflictError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
