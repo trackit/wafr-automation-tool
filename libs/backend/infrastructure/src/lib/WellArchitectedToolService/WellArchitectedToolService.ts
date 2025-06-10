@@ -139,28 +139,23 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     answerChoiceList: Choice[],
     questionBestPracticeList: BestPractice[]
   ): Promise<string[]> {
-    const selectedBestPracticeList: string[] = [];
-    for (const bestPractice of answerChoiceList) {
-      const { ChoiceId: bestPracticeId, Title: bestPracticeTitle } =
-        bestPractice;
-      if (!bestPracticeId || !bestPracticeTitle) {
-        throw new Error(
-          `Workflow pillar question best practice ${bestPracticeId} has no ChoiceId or Title`
-        );
-      }
-      const bestPracticeData = questionBestPracticeList.find(
-        (bestPractice) => bestPractice.id === bestPracticeId
-      );
-      if (!bestPracticeData) {
-        throw new Error(
-          `Workflow pillar question best practice ${bestPracticeId} does not exist in assessment pillars`
-        );
-      }
-      if (bestPracticeData.status) {
-        selectedBestPracticeList.push(bestPracticeId);
-      }
-    }
-    return selectedBestPracticeList;
+    return answerChoiceList
+      .map(({ ChoiceId: id, Title: title }) => {
+        if (!id || !title) {
+          throw new Error(
+            `Workflow pillar question best practice ${id} has no ChoiceId or Title`
+          );
+        }
+        const data = questionBestPracticeList.find((bp) => bp.id === id);
+        if (!data) {
+          throw new Error(
+            `Workflow pillar question best practice ${id} does not exist in assessment pillars`
+          );
+        }
+        return { id, status: data.status };
+      })
+      .filter((item) => item.status)
+      .map((item) => item.id);
   }
 
   public async getAnswerSelectedChoiceList(

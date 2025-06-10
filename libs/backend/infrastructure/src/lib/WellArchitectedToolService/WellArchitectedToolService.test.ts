@@ -292,10 +292,12 @@ describe('wellArchitectedTool Infrastructure', () => {
         .withName('assessment-name')
         .withFindings([
           PillarMother.basic()
+            .withId('pillar-id')
             .withLabel('Pillar 1')
             .withDisabled(false)
             .withQuestions([
               QuestionMother.basic()
+                .withId('question-id')
                 .withLabel('Question 1')
                 .withDisabled(false)
                 .withNone(false)
@@ -328,7 +330,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         LensReview: {
           PillarReviewSummaries: [
             {
-              PillarId: 'pillar-review-id',
+              PillarId: 'pillar-id',
               PillarName: 'Pillar 1',
             },
           ],
@@ -343,7 +345,7 @@ describe('wellArchitectedTool Infrastructure', () => {
             QuestionTitle: 'Question 1',
             Choices: [
               {
-                ChoiceId: 'choice-id',
+                ChoiceId: 'best-practice-id',
                 Title: 'Best Practice 1',
               },
             ],
@@ -378,7 +380,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         expect.objectContaining({
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
-          PillarId: 'pillar-review-id',
+          PillarId: 'pillar-id',
         })
       );
 
@@ -389,7 +391,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadId: 'workload-id',
         LensAlias: WAFRLens,
         QuestionId: 'question-id',
-        SelectedChoices: ['choice-id'],
+        SelectedChoices: ['best-practice-id'],
         IsApplicable: true,
       });
     });
@@ -532,13 +534,14 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       const questionBestPracticeList = [
         BestPracticeMother.basic()
+          .withId('best-practice-id')
           .withLabel('Best Practice 1')
           .withStatus(false)
           .build(),
       ];
 
       const answerChoice: Choice = {
-        ChoiceId: 'choice-id',
+        ChoiceId: 'best-practice-id',
         Title: 'Best Practice 1',
       };
 
