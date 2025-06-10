@@ -34,7 +34,9 @@ export class UpdateAssessmentUseCaseArgsMother {
     return this;
   }
 
-  public withName(name: Partial<Assessment>['name']): UpdateAssessmentUseCaseArgsMother {
+  public withName(
+    name: Partial<Assessment>['name']
+  ): UpdateAssessmentUseCaseArgsMother {
     this.data.assessmentData = {
       ...this.data.assessmentData,
       name,
