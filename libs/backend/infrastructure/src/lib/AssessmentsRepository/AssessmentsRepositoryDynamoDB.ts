@@ -2,6 +2,7 @@ import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   BestPractice,
+  BestPracticeBody,
   DynamoDBAssessment,
   DynamoDBBestPractice,
   DynamoDBFinding,
@@ -14,7 +15,14 @@ import type {
 import { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-import { InvalidNextTokenError } from '../../Errors';
+import {
+  AssessmentNotFoundError,
+  BestPracticeNotFoundError,
+  InvalidNextTokenError,
+  NoUpdateBodyError,
+  PillarNotFoundError,
+  QuestionNotFoundError,
+} from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 
@@ -467,6 +475,94 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const result = await this.client.get(params);
     const dynamoFinding = result.Item as DynamoDBFinding | undefined;
     return this.fromDynamoDBFindingItem(dynamoFinding);
+  }
+
+  public doesBestPracticeExist(args: {
+    assessment: Assessment;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): void {
+    const { assessment, pillarId, questionId, bestPracticeId } = args;
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError();
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId.toString()
+    );
+    if (!question) {
+      throw new QuestionNotFoundError();
+    }
+    const bestPractice = question.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    );
+    if (!bestPractice) {
+      throw new BestPracticeNotFoundError();
+    }
+  }
+
+  public async updateBestPractice(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeBody: BestPracticeBody;
+  }) {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeBody,
+    } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment best practice: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError(
+        `Assessment with ID ${assessmentId} does not exist`
+      );
+    }
+
+    this.doesBestPracticeExist({
+      assessment,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
+    if (Object.keys(bestPracticeBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
+      );
+      throw new NoUpdateBodyError(
+        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
+      );
+    }
+    const updateExppression = this.buildUpdateExpression({
+      data: { ...bestPracticeBody },
+      UpdateExpressionPath:
+        'findings.#pillar.questions.#question.best_practices.#best_practice',
+      DefaultExpressionAttributeNames: {
+        '#pillar': pillarId,
+        '#question': questionId,
+        '#best_practice': bestPracticeId,
+      },
+    });
+    await this.client.update({
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      TableName: this.tableName,
+      ...updateExppression,
+    });
   }
 
   public async delete(args: {

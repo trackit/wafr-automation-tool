@@ -10,3 +10,7 @@ export interface BestPractice {
   risk: SeverityType;
   status: boolean;
 }
+
+export interface BestPracticeBody {
+  status?: boolean;
+}
