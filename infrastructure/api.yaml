@@ -474,9 +474,9 @@ Resources:
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_best_practice/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/updateBestPractice
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -496,6 +496,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
