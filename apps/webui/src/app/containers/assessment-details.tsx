@@ -66,16 +66,16 @@ export function AssessmentDetails() {
       pillarId,
       questionId,
       bestPracticeId,
-      status,
+      checked,
     }: {
       assessmentId: string;
       pillarId: string;
       questionId: string;
       bestPracticeId: string;
-      status: boolean;
+      checked: boolean;
     }) =>
-      updateStatus(assessmentId, pillarId, questionId, bestPracticeId, status),
-    onMutate: async ({ pillarId, questionId, bestPracticeId, status }) => {
+      updateStatus(assessmentId, pillarId, questionId, bestPracticeId, checked),
+    onMutate: async ({ pillarId, questionId, bestPracticeId, checked }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
@@ -104,7 +104,7 @@ export function AssessmentDetails() {
             if (question.id === questionId) {
               for (const practice of question.best_practices || []) {
                 if (practice.id === bestPracticeId) {
-                  practice.status = status;
+                  practice.checked = checked;
                   updated = true;
                   break;
                 }
@@ -126,7 +126,9 @@ export function AssessmentDetails() {
       ) {
         const updatedBestPractices = activeQuestion.best_practices?.map(
           (practice) =>
-            practice.id === bestPracticeId ? { ...practice, status } : practice
+            practice.id === bestPracticeId
+              ? { ...practice, status: checked }
+              : practice
         );
         setActiveQuestion({
           ...activeQuestion,
@@ -505,7 +507,7 @@ export function AssessmentDetails() {
               checked={
                 activeQuestion?.none && info.row.original.id !== 'resolve'
                   ? false
-                  : info.row.original.status || false
+                  : info.row.original.checked || false
               }
               disabled={
                 activeQuestion?.none && info.row.original.id !== 'resolve'
@@ -644,11 +646,11 @@ export function AssessmentDetails() {
       );
 
       if (hasHighSeverityPractices) {
-        // Check if all high severity best practices in this question have status true
+        // Check if all high severity best practices in this question have checked true
         const allHighSeverityPracticesComplete =
           question.best_practices?.every(
             (bestPractice) =>
-              bestPractice.risk !== 'High' || bestPractice.status === true
+              bestPractice.risk !== 'High' || bestPractice.checked === true
           ) ?? false;
 
         if (allHighSeverityPracticesComplete) {
@@ -904,11 +906,11 @@ export function AssessmentDetails() {
                       latestQuestion.best_practices?.every(
                         (bestPractice) =>
                           bestPractice.risk !== 'High' ||
-                          bestPractice.status === true
+                          bestPractice.checked === true
                       ) ?? false,
                     started:
                       latestQuestion.best_practices?.some(
-                        (bestPractice) => bestPractice.status
+                        (bestPractice) => bestPractice.checked
                       ) ?? false,
                     error: latestQuestion.none,
                     disabled: latestQuestion.disabled,
