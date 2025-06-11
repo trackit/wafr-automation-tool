@@ -545,24 +545,29 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
       );
     }
-    const updateExppression = this.buildUpdateExpression({
-      data: { ...bestPracticeBody },
-      UpdateExpressionPath:
-        'findings.#pillar.questions.#question.best_practices.#best_practice',
-      DefaultExpressionAttributeNames: {
-        '#pillar': pillarId,
-        '#question': questionId,
-        '#best_practice': bestPracticeId,
-      },
-    });
-    await this.client.update({
+    const params = {
+      TableName: this.tableName,
       Key: {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      TableName: this.tableName,
-      ...updateExppression,
-    });
+      ...this.buildUpdateExpression({
+        data: { ...bestPracticeBody },
+        UpdateExpressionPath:
+          'findings.#pillar.questions.#question.best_practices.#best_practice',
+        DefaultExpressionAttributeNames: {
+          '#pillar': pillarId,
+          '#question': questionId,
+          '#best_practice': bestPracticeId,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+    } catch (error) {
+      this.logger.error(`Failed to update best practice: ${error}`, params);
+      throw error;
+    }
   }
 
   public async delete(args: {
