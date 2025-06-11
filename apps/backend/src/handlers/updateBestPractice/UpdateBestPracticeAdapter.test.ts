@@ -7,20 +7,19 @@ import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
 import { UpdateBestPracticeAdapter } from './UpdateBestPracticeAdapter';
+import { UpdateBestPracticeAdapterEventMother } from './UpdateBestPracticeAdapterEventMother';
 
 describe('UpdateBestPracticeAdapter', () => {
   describe('args validation', () => {
     it('should validate args parameters', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({ status: true }))
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withPillarId('1')
+        .withQuestionId('2')
+        .withBestPracticeId('3')
+        .withBody({ status: true })
         .build();
       const response = await adapter.handle(event);
 
@@ -76,14 +75,12 @@ describe('UpdateBestPracticeAdapter', () => {
     it('should call useCase with path parameters and BestPracticeBody', async () => {
       const { adapter, useCase } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({ status: true }))
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withPillarId('1')
+        .withQuestionId('2')
+        .withBestPracticeId('3')
+        .withBody({ status: true })
         .build();
 
       await adapter.handle(event);
@@ -101,14 +98,13 @@ describe('UpdateBestPracticeAdapter', () => {
 
     it('should return a 200 status code', async () => {
       const { adapter } = setup();
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({ status: true }))
+
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withPillarId('1')
+        .withQuestionId('2')
+        .withBestPracticeId('3')
+        .withBody({ status: true })
         .build();
 
       const response = await adapter.handle(event);
@@ -118,14 +114,12 @@ describe('UpdateBestPracticeAdapter', () => {
     it('should return a 204 if useCase throws a NoContentError', async () => {
       const { adapter, useCase } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({}))
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withPillarId('1')
+        .withQuestionId('2')
+        .withBestPracticeId('3')
+        .withBody({ status: true })
         .build();
       useCase.updateBestPractice.mockRejectedValue(new NoContentError());
 
@@ -136,14 +130,12 @@ describe('UpdateBestPracticeAdapter', () => {
     it('should return a 404 if useCase throws a NotFoundError', async () => {
       const { adapter, useCase } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({}))
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withPillarId('1')
+        .withQuestionId('2')
+        .withBestPracticeId('3')
+        .withBody({ status: true })
         .build();
       useCase.updateBestPractice.mockRejectedValue(new NotFoundError());
 
