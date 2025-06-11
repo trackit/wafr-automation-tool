@@ -61,7 +61,7 @@ describe('UpdateAssessmentAdapter', () => {
       expect(useCase.updateAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-          assessmentData: {
+          assessmentBody: {
             name: 'New Assessment Name',
           },
         })

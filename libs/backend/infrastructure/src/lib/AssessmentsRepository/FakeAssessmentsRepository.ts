@@ -164,15 +164,17 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async update(args: {
     assessmentId: string;
     organization: string;
-    name?: string;
+    assessmentBody: {
+      name?: string;
+    };
   }): Promise<void> {
-    const { assessmentId, organization, ...data } = args;
+    const { assessmentId, organization, assessmentBody } = args;
     const assessmentKey = `${assessmentId}#${organization}`;
     if (!this.assessments[assessmentKey]) {
       throw new AssessmentNotFoundError({ assessmentId, organization });
     }
     const assessment = this.assessments[assessmentKey];
-    for (const [key, value] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(assessmentBody)) {
       assessment[key as keyof Assessment] = value as any;
     }
   }

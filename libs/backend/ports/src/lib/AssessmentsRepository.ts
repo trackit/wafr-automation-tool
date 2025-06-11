@@ -43,6 +43,8 @@ export interface AssessmentsRepository {
   update(args: {
     assessmentId: string;
     organization: string;
-    name?: string;
+    assessmentBody: {
+      name?: string;
+    };
   }): Promise<void>;
 }

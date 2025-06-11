@@ -16,14 +16,14 @@ export class UpdateAssessmentUseCaseArgsMother {
         organizationDomain: 'test.io',
         email: 'user-id@test.io',
       },
-      assessmentData: {
+      assessmentBody: {
         name: 'Test Assessment',
       },
     });
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: Assessment['id']
   ): UpdateAssessmentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -37,8 +37,8 @@ export class UpdateAssessmentUseCaseArgsMother {
   public withName(
     name: Partial<Assessment>['name']
   ): UpdateAssessmentUseCaseArgsMother {
-    this.data.assessmentData = {
-      ...this.data.assessmentData,
+    this.data.assessmentBody = {
+      ...this.data.assessmentBody,
       name,
     };
     return this;

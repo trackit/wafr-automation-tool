@@ -710,9 +710,11 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   public async update(args: {
     assessmentId: string;
     organization: string;
-    name?: string;
+    assessmentBody: {
+      name?: string;
+    };
   }): Promise<void> {
-    const { assessmentId, organization, ...data } = args;
+    const { assessmentId, organization, assessmentBody } = args;
     const assessment = await this.get({ assessmentId, organization });
     if (!assessment) {
       this.logger.error(
@@ -720,7 +722,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
       throw new AssessmentNotFoundError({ assessmentId, organization });
     }
-    if (Object.keys(data).length === 0) {
+    if (Object.keys(assessmentBody).length === 0) {
       this.logger.info(`No updates provided for assessment: ${assessmentId}`);
       return;
     }
@@ -730,7 +732,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      ...this.buildUpdateExpression({ data }),
+      ...this.buildUpdateExpression({ data: assessmentBody }),
     };
     try {
       await this.client.update(params);

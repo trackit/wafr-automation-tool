@@ -10,7 +10,7 @@ import { NotFoundError } from '../Errors';
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
   user: User;
-  assessmentData: {
+  assessmentBody: {
     name?: string;
   };
 };
@@ -30,7 +30,7 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
       .update({
         assessmentId: args.assessmentId,
         organization: args.user.organizationDomain,
-        ...args.assessmentData,
+        assessmentBody: args.assessmentBody,
       })
       .catch((error) => {
         if (error instanceof AssessmentNotFoundError) {

@@ -903,7 +903,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        name: 'New Name',
+        assessmentBody: { name: 'New Name' },
       });
 
       const updatedAssessment = await repository.get({
@@ -929,6 +929,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
+        assessmentBody: {},
       });
 
       const updatedAssessment = await repository.get({
@@ -948,7 +949,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         repository.update({
           assessmentId: 'assessment1',
           organization: 'organization1',
-          name: 'New Name',
+          assessmentBody: { name: 'New Name' },
         })
       ).rejects.toThrow(AssessmentNotFoundError);
     });
@@ -973,7 +974,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        name: 'New Name',
+        assessmentBody: { name: 'New Name' },
       });
 
       const updatedAssessment1 = await repository.get({

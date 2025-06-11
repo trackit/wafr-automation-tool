@@ -53,11 +53,11 @@ export class UpdateAssessmentAdapter {
     try {
       const { assessmentId } =
         UpdateAssessmentPathParametersSchema.parse(pathParameters);
-      const assessmentData = this.parseBody(body);
+      const assessmentBody = this.parseBody(body);
       await this.useCase.updateAssessment({
         user: getUserFromEvent(event),
         assessmentId,
-        assessmentData,
+        assessmentBody,
       });
     } catch (error) {
       if (error instanceof ZodError) {
