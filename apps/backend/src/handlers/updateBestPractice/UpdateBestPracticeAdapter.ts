@@ -5,7 +5,7 @@ import { tokenUpdateBestPracticeUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { parseJson } from '@shared/utils';
+import { JSONParseError, parseJson } from '@shared/utils';
 import { BadRequestError } from '../../utils/HttpError';
 import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../utils/handleHttpRequest';
@@ -68,6 +68,8 @@ export class UpdateBestPracticeAdapter {
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid parameters: ${e.message}`);
+      } else if (e instanceof JSONParseError) {
+        throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);
       }
       throw e;
     }
