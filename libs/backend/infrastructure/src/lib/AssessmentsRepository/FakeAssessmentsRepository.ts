@@ -140,7 +140,8 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         bestPracticeId,
       });
     }
-    bestPractice.status = args.bestPracticeBody.status ?? bestPractice.status;
+    bestPractice.checked =
+      args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
   public async delete(args: {

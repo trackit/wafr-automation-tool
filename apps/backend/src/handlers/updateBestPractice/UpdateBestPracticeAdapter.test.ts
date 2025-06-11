@@ -19,7 +19,7 @@ describe('UpdateBestPracticeAdapter', () => {
         .withPillarId('1')
         .withQuestionId('2')
         .withBestPracticeId('3')
-        .withBody({ status: true })
+        .withBody({ checked: true })
         .build();
       const response = await adapter.handle(event);
 
@@ -80,7 +80,7 @@ describe('UpdateBestPracticeAdapter', () => {
         .withPillarId('1')
         .withQuestionId('2')
         .withBestPracticeId('3')
-        .withBody({ status: true })
+        .withBody({ checked: true })
         .build();
 
       await adapter.handle(event);
@@ -91,7 +91,7 @@ describe('UpdateBestPracticeAdapter', () => {
           pillarId: '1',
           questionId: '2',
           bestPracticeId: '3',
-          bestPracticeBody: { status: true },
+          bestPracticeBody: { checked: true },
         })
       );
     });
@@ -104,7 +104,7 @@ describe('UpdateBestPracticeAdapter', () => {
         .withPillarId('1')
         .withQuestionId('2')
         .withBestPracticeId('3')
-        .withBody({ status: true })
+        .withBody({ checked: true })
         .build();
 
       const response = await adapter.handle(event);
@@ -119,7 +119,7 @@ describe('UpdateBestPracticeAdapter', () => {
         .withPillarId('1')
         .withQuestionId('2')
         .withBestPracticeId('3')
-        .withBody({ status: true })
+        .withBody({ checked: true })
         .build();
       useCase.updateBestPractice.mockRejectedValue(new NoContentError());
 
@@ -135,7 +135,7 @@ describe('UpdateBestPracticeAdapter', () => {
         .withPillarId('1')
         .withQuestionId('2')
         .withBestPracticeId('3')
-        .withBody({ status: true })
+        .withBody({ checked: true })
         .build();
       useCase.updateBestPractice.mockRejectedValue(new NotFoundError());
 

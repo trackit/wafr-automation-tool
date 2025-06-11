@@ -65,7 +65,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       primary_id: bestPractice.primaryId,
       results: bestPractice.results,
       risk: bestPractice.risk,
-      status: bestPractice.status,
+      checked: bestPractice.checked,
     };
   }
 
@@ -206,7 +206,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       primaryId: item.primary_id,
       results: item.results,
       risk: item.risk,
-      status: item.status,
+      checked: item.checked,
     };
   }
 

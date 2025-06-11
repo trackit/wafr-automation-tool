@@ -7,8 +7,8 @@ import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
 import { BadRequestError } from '../../utils/HttpError';
-import { handleHttpRequest } from '../../utils/handleHttpRequest';
 import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../utils/handleHttpRequest';
 
 const GetAssessmentArgsSchema = z.object({
   assessmentId: z.string(),
@@ -46,7 +46,7 @@ export class GetAssessmentAdapter {
               label: bestPractice.label,
               results: bestPractice.results,
               risk: bestPractice.risk,
-              status: bestPractice.status,
+              status: bestPractice.checked,
             })),
             disabled: question.disabled,
             id: question.id,

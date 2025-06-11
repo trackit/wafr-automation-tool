@@ -76,7 +76,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
                     .withLabel('Best Practice 1')
                     .withPrimaryId('bp1-primary')
                     .withRisk(SeverityType.Medium)
-                    .withStatus(true)
+                    .withChecked(true)
                     .build(),
                 ])
                 .withDisabled(false)
@@ -335,7 +335,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('0')
-                    .withStatus(false)
+                    .withChecked(false)
                     .build(),
                 ])
                 .build(),
@@ -353,7 +353,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           questionId: '0',
           bestPracticeId: '0',
           bestPracticeBody: {
-            status: true,
+            checked: true,
           },
         })
       ).resolves.not.toThrow();
@@ -363,7 +363,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
       expect(
         updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0]
-          .status
+          .checked
       ).toBe(true);
     });
 
@@ -397,7 +397,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('0')
-                    .withStatus(false)
+                    .withChecked(false)
                     .build(),
                 ])
                 .build(),
@@ -509,7 +509,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('0')
-                    .withStatus(false)
+                    .withChecked(false)
                     .build(),
                 ])
                 .build(),

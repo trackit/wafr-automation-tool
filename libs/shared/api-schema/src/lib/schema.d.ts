@@ -323,7 +323,7 @@ export interface components {
             /** @enum {string} */
             risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description?: string;
-            status?: boolean;
+            checked?: boolean;
             results?: string[];
             hidden_results?: string[];
         };
@@ -332,7 +332,7 @@ export interface components {
             results?: components["schemas"]["Finding"][];
         };
         BestPracticeDto: {
-            status?: boolean;
+            checked?: boolean;
         };
     };
     responses: never;

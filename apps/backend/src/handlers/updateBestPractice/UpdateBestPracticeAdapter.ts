@@ -19,7 +19,7 @@ const UpdateBestPracticePathSchema = z.object({
 
 const UpdateBestPracticeBodySchema = z
   .object({
-    status: z.boolean().optional(),
+    checked: z.boolean().optional(),
   })
   .strict() satisfies ZodType<
   operations['updateBestPractice']['requestBody']['content']['application/json']

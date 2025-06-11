@@ -1,8 +1,6 @@
 import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
-import { GetAssessmentAdapter } from './GetAssessmentAdapter';
 import {
   AssessmentMother,
   AssessmentStep,
@@ -11,6 +9,8 @@ import {
   QuestionMother,
   SeverityType,
 } from '@backend/models';
+import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
+import { GetAssessmentAdapter } from './GetAssessmentAdapter';
 
 describe('GetAssessmentAdapter', () => {
   describe('args validation', () => {
@@ -112,7 +112,7 @@ describe('GetAssessmentAdapter', () => {
                     .withLabel('best practice')
                     .withResults(['prowler#1', 'prowler#2'])
                     .withRisk(SeverityType.Medium)
-                    .withStatus(true)
+                    .withChecked(true)
                     .build(),
                 ])
                 .withDisabled(false)

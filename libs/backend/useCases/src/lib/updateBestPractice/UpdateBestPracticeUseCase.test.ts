@@ -30,7 +30,7 @@ describe('UpdateBestPracticeUseCase', () => {
               .withBestPractices([
                 BestPracticeMother.basic()
                   .withId('1')
-                  .withStatus(false)
+                  .withChecked(false)
                   .build(),
               ])
               .build(),

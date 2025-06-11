@@ -8,9 +8,9 @@ export interface BestPractice {
   primaryId: string;
   results: string[];
   risk: SeverityType;
-  status: boolean;
+  checked: boolean;
 }
 
 export interface BestPracticeBody {
-  status?: boolean;
+  checked?: boolean;
 }

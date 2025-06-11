@@ -17,7 +17,7 @@ export class BestPracticeMother {
       primaryId: 'primary-id',
       results: [],
       risk: SeverityType.Medium,
-      status: true,
+      checked: true,
     });
   }
 
@@ -56,8 +56,8 @@ export class BestPracticeMother {
     return this;
   }
 
-  public withStatus(status: boolean): BestPracticeMother {
-    this.data.status = status;
+  public withChecked(checked: boolean): BestPracticeMother {
+    this.data.checked = checked;
     return this;
   }
 

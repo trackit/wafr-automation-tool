@@ -769,7 +769,7 @@ components:
             - Other
         description:
           type: string
-        status:
+        checked:
           type: boolean
         results:
           type: array
@@ -792,5 +792,5 @@ components:
     BestPracticeDto:
       type: object
       properties:
-        status:
+        checked:
           type: boolean
