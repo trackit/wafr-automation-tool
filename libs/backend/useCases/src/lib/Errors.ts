@@ -16,11 +16,31 @@ export class ServerError extends Error {
   }
 }
 
+export class NoContentError extends ServerError {
+  public constructor(description?: string) {
+    super({
+      message: 'No Content',
+      name: 'NoContentError',
+      description,
+    });
+  }
+}
+
 export class NotFoundError extends ServerError {
   public constructor(description?: string) {
     super({
       message: 'Not Found',
       name: 'NotFoundError',
+      description,
+    });
+  }
+}
+
+export class ConflictError extends ServerError {
+  public constructor(description?: string) {
+    super({
+      message: 'Conflict',
+      name: 'ConflictError',
       description,
     });
   }

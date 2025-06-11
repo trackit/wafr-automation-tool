@@ -1,7 +1,12 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { tokenLogger } from '@backend/infrastructure';
-import { NotFoundError, ServerError } from '@backend/useCases';
+import {
+  ConflictError,
+  NoContentError,
+  NotFoundError,
+  ServerError,
+} from '@backend/useCases';
 import { inject } from '@shared/di-container';
 import { HttpError } from './HttpError';
 
@@ -39,8 +44,12 @@ export const handleHttpRequest = async ({
     if (e instanceof ServerError) {
       logger.error('ServerError', e);
       let statusCode: number;
-      if (e instanceof NotFoundError) {
+      if (e instanceof NoContentError) {
+        statusCode = 204;
+      } else if (e instanceof NotFoundError) {
         statusCode = 404;
+      } else if (e instanceof ConflictError) {
+        statusCode = 409;
       } else {
         statusCode = 400;
       }

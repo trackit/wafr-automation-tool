@@ -52,7 +52,7 @@ export class AssessmentMother {
     return this;
   }
 
-  public withFindings(findings: Pillar[]): AssessmentMother {
+  public withFindings(findings: Pillar[] | undefined): AssessmentMother {
     this.data.findings = findings;
     return this;
   }
