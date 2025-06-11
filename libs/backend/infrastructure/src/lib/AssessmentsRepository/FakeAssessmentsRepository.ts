@@ -102,7 +102,10 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       args;
     const assessment = this.assessments[`${assessmentId}#${organization}`];
     if (!assessment) {
-      throw new AssessmentNotFoundError();
+      throw new AssessmentNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+      });
     }
     if (Object.keys(args.bestPracticeBody).length === 0) {
       throw new EmptyUpdateBodyError();
@@ -111,19 +114,31 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
-      throw new PillarNotFoundError();
+      throw new PillarNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+      });
     }
     const question = pillar.questions.find(
       (question) => question.id === questionId.toString()
     );
     if (!question) {
-      throw new QuestionNotFoundError();
+      throw new QuestionNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+        questionId,
+      });
     }
     const bestPractice = question.bestPractices.find(
       (bestPractice) => bestPractice.id === bestPracticeId.toString()
     );
     if (!bestPractice) {
-      throw new BestPracticeNotFoundError();
+      throw new BestPracticeNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
     }
     bestPractice.status = args.bestPracticeBody.status ?? bestPractice.status;
   }
