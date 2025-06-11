@@ -71,11 +71,11 @@ export class BestPracticeNotFoundError extends InfrastructureError {
   }
 }
 
-export class NoUpdateBodyError extends InfrastructureError {
+export class EmptyUpdateBodyError extends InfrastructureError {
   public constructor(description?: string) {
     super({
-      message: 'No update body',
-      name: 'NoUpdateBodyError',
+      message: 'Empty update body',
+      name: 'EmptyUpdateBodyError',
       description,
     });
   }

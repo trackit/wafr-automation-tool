@@ -1,7 +1,7 @@
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
-  NoUpdateBodyError,
+  EmptyUpdateBodyError,
   PillarNotFoundError,
   QuestionNotFoundError,
   tokenAssessmentsRepository,
@@ -45,7 +45,7 @@ export class UpdateBestPracticeUseCaseImpl
         e instanceof BestPracticeNotFoundError
       ) {
         throw new NotFoundError(e.message);
-      } else if (e instanceof NoUpdateBodyError) {
+      } else if (e instanceof EmptyUpdateBodyError) {
         throw new NoContentError(e.description);
       }
       throw e;

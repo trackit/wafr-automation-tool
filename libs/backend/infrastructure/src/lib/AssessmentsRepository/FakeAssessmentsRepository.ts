@@ -4,7 +4,7 @@ import { createInjectionToken } from '@shared/di-container';
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
-  NoUpdateBodyError,
+  EmptyUpdateBodyError,
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
@@ -105,7 +105,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       throw new AssessmentNotFoundError();
     }
     if (Object.keys(args.bestPracticeBody).length === 0) {
-      throw new NoUpdateBodyError();
+      throw new EmptyUpdateBodyError();
     }
     const pillar = assessment.findings?.find(
       (pillar) => pillar.id === pillarId.toString()

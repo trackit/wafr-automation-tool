@@ -18,8 +18,8 @@ import { assertIsDefined } from '@shared/utils';
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
+  EmptyUpdateBodyError,
   InvalidNextTokenError,
-  NoUpdateBodyError,
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
@@ -554,7 +554,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       this.logger.error(
         `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
       );
-      throw new NoUpdateBodyError(
+      throw new EmptyUpdateBodyError(
         `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
       );
     }
