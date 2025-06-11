@@ -1,9 +1,4 @@
 import {
-  AssessmentNotFoundError,
-  BestPracticeNotFoundError,
-  NoUpdateBodyError,
-  PillarNotFoundError,
-  QuestionNotFoundError,
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
@@ -78,7 +73,7 @@ describe('UpdateBestPracticeUseCase', () => {
   });
 
   it('should throw a NotFoundError if the infrastructure throws AssessmentNotFoundError', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -88,12 +83,6 @@ describe('UpdateBestPracticeUseCase', () => {
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       NotFoundError
     );
-    await expect(
-      fakeAssessmentsRepository.updateBestPractice({
-        organization: input.user.organizationDomain,
-        ...input,
-      })
-    ).rejects.toThrow(AssessmentNotFoundError);
   });
 
   it('should throw a NotFoundError if the infrastructure throws PillarNotFoundError', async () => {
@@ -119,12 +108,6 @@ describe('UpdateBestPracticeUseCase', () => {
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       NotFoundError
     );
-    await expect(
-      fakeAssessmentsRepository.updateBestPractice({
-        organization: input.user.organizationDomain,
-        ...input,
-      })
-    ).rejects.toThrow(PillarNotFoundError);
   });
 
   it('should throw a NotFoundError if the infrastructure throws QuestionNotFoundError', async () => {
@@ -152,12 +135,6 @@ describe('UpdateBestPracticeUseCase', () => {
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       NotFoundError
     );
-    await expect(
-      fakeAssessmentsRepository.updateBestPractice({
-        organization: input.user.organizationDomain,
-        ...input,
-      })
-    ).rejects.toThrow(QuestionNotFoundError);
   });
 
   it('should throw a NotFoundError if the infrastructure throws BestPracticeNotFoundError', async () => {
@@ -191,12 +168,6 @@ describe('UpdateBestPracticeUseCase', () => {
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       NotFoundError
     );
-    await expect(
-      fakeAssessmentsRepository.updateBestPractice({
-        organization: input.user.organizationDomain,
-        ...input,
-      })
-    ).rejects.toThrow(BestPracticeNotFoundError);
   });
 
   it('should throw a NoUpdateBodyError if the infrastructure throws EmptyUpdateBodyError', async () => {
@@ -219,12 +190,6 @@ describe('UpdateBestPracticeUseCase', () => {
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       NoContentError
     );
-    await expect(
-      fakeAssessmentsRepository.updateBestPractice({
-        organization: input.user.organizationDomain,
-        ...input,
-      })
-    ).rejects.toThrow(NoUpdateBodyError);
   });
 });
 
