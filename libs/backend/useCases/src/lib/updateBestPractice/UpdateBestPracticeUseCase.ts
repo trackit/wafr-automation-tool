@@ -44,7 +44,7 @@ export class UpdateBestPracticeUseCaseImpl
         e instanceof QuestionNotFoundError ||
         e instanceof BestPracticeNotFoundError
       ) {
-        throw new NotFoundError(e.description);
+        throw new NotFoundError(e.message);
       } else if (e instanceof NoUpdateBodyError) {
         throw new NoContentError(e.description);
       }

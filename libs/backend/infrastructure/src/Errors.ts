@@ -27,41 +27,46 @@ export class InvalidNextTokenError extends InfrastructureError {
 }
 
 export class AssessmentNotFoundError extends InfrastructureError {
-  public constructor(description?: string) {
+  public constructor(args: { assessmentId: string; organization: string }) {
     super({
-      message: 'Assessment not found',
+      message: `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`,
       name: 'AssessmentNotFoundError',
-      description,
     });
   }
 }
 
 export class PillarNotFoundError extends InfrastructureError {
-  public constructor(description?: string) {
+  public constructor(args: { assessmentId: string; pillarId: string }) {
     super({
-      message: 'Pillar not found',
+      message: `Pillar with id ${args.pillarId} not found for assessment ${args.assessmentId}`,
       name: 'PillarNotFoundError',
-      description,
     });
   }
 }
 
 export class QuestionNotFoundError extends InfrastructureError {
-  public constructor(description?: string) {
+  public constructor(args: {
+    assessmentId: string;
+    pillarId: string;
+    questionId: string;
+  }) {
     super({
-      message: 'Question not found',
+      message: `Question with id ${args.questionId} not found for assessment ${args.assessmentId} and pillar ${args.pillarId}`,
       name: 'QuestionNotFoundError',
-      description,
     });
   }
 }
 
 export class BestPracticeNotFoundError extends InfrastructureError {
-  public constructor(description?: string) {
+  public constructor(args: {
+    assessmentId: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }) {
     super({
-      message: 'Best Practice not found',
+      message: `Best Practice with id ${args.bestPracticeId} not found for assessment ${args.assessmentId} and pillar ${args.pillarId} and question ${args.questionId}`,
       name: 'BestPracticeNotFoundError',
-      description,
     });
   }
 }

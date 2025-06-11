@@ -488,19 +488,31 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
-      throw new PillarNotFoundError();
+      throw new PillarNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+      });
     }
     const question = pillar.questions.find(
       (question) => question.id === questionId.toString()
     );
     if (!question) {
-      throw new QuestionNotFoundError();
+      throw new QuestionNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+        questionId,
+      });
     }
     const bestPractice = question.bestPractices.find(
       (bestPractice) => bestPractice.id === bestPracticeId.toString()
     );
     if (!bestPractice) {
-      throw new BestPracticeNotFoundError();
+      throw new BestPracticeNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
     }
   }
 
@@ -525,9 +537,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       this.logger.error(
         `Attempted to update non-existing assessment best practice: ${assessmentId}`
       );
-      throw new AssessmentNotFoundError(
-        `Assessment with ID ${assessmentId} does not exist`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organization,
+      });
     }
 
     this.doesBestPracticeExist({
