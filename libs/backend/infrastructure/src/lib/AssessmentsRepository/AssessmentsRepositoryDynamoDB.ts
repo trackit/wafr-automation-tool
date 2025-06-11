@@ -477,7 +477,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     return this.fromDynamoDBFindingItem(dynamoFinding);
   }
 
-  public doesBestPracticeExist(args: {
+  public assertBestPracticeExists(args: {
     assessment: Assessment;
     pillarId: string;
     questionId: string;
@@ -543,7 +543,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       });
     }
 
-    this.doesBestPracticeExist({
+    this.assertBestPracticeExists({
       assessment,
       pillarId,
       questionId,
