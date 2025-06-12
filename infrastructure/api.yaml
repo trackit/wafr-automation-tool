@@ -282,9 +282,9 @@ Resources:
   UpdateAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/updateAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -304,6 +304,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:

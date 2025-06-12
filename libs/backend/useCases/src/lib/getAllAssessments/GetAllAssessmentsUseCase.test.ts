@@ -58,7 +58,7 @@ describe('getAllAssessments UseCase', () => {
       GetAllAssessmentsUseCaseArgsMother.basic()
         .withNextToken('dGVzdA==')
         .build();
-    expect(useCase.getAllAssessments(input)).rejects.toThrow(
+    await expect(useCase.getAllAssessments(input)).rejects.toThrow(
       InvalidParametersError
     );
   });

@@ -706,6 +706,46 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ExpressionAttributeNames: expressionAttributeNames,
     };
   }
+
+  public async update(args: {
+    assessmentId: string;
+    organization: string;
+    assessmentBody: {
+      name?: string;
+    };
+  }): Promise<void> {
+    const { assessmentId, organization, assessmentBody } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment with id ${assessmentId} and organization ${organization}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    if (Object.keys(assessmentBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
+      );
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({ data: assessmentBody }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(`Assessment updated: ${assessmentId}`);
+    } catch (error) {
+      this.logger.error(`Failed to update assessment: ${error}`, params);
+      throw error;
+    }
+  }
 }
 
 export const tokenAssessmentsRepository =

@@ -255,8 +255,7 @@ export interface components {
             Cause?: string;
         } | null;
         AssessmentDto: {
-            name?: string | null;
-            role_arn?: string | null;
+            name?: string;
         };
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
@@ -493,7 +492,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AssessmentDto"];
             };
@@ -501,6 +500,13 @@ export interface operations {
         responses: {
             /** @description The assessment has been successfully updated */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The assessment has no fields to update */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -835,6 +841,13 @@ export interface operations {
         responses: {
             /** @description The best practice has been successfully updated */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The best practice has no fields to update */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

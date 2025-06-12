@@ -170,6 +170,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -177,6 +178,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully updated
+        '204':
+          description: The assessment has no fields to update
         '400':
           description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
@@ -446,6 +449,8 @@ paths:
       responses:
         '200':
           description: The best practice has been successfully updated
+        '204':
+          description: The best practice has no fields to update
         '400':
           description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
@@ -630,10 +635,6 @@ components:
       properties:
         name:
           type: string
-          nullable: true
-        role_arn:
-          type: string
-          nullable: true
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'
