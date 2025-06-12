@@ -424,20 +424,21 @@ paths:
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question to update the best practice to
           schema:
-            type: integer
+            type: string
         - name: bestPracticeId
           in: path
           required: true
           description: The ID of the best practice
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -768,7 +769,7 @@ components:
             - Other
         description:
           type: string
-        status:
+        checked:
           type: boolean
         results:
           type: array
@@ -791,6 +792,5 @@ components:
     BestPracticeDto:
       type: object
       properties:
-        status:
+        checked:
           type: boolean
-          nullable: true

@@ -12,7 +12,14 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { InvalidNextTokenError } from '../../Errors';
+import {
+  AssessmentNotFoundError,
+  BestPracticeNotFoundError,
+  InvalidNextTokenError,
+  NoUpdateBodyError,
+  PillarNotFoundError,
+  QuestionNotFoundError,
+} from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
@@ -69,7 +76,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
                     .withLabel('Best Practice 1')
                     .withPrimaryId('bp1-primary')
                     .withRisk(SeverityType.Medium)
-                    .withStatus(true)
+                    .withChecked(true)
                     .build(),
                 ])
                 .withDisabled(false)
@@ -309,6 +316,219 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(fetchedAssessment1).toEqual(assessment1);
       expect(fetchedAssessment2).toBeUndefined();
+    });
+  });
+
+  describe('updateBestPractice', () => {
+    it('should update the best practice status', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic()
+                    .withId('0')
+                    .withChecked(false)
+                    .build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {
+            checked: true,
+          },
+        })
+      ).resolves.not.toThrow();
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      expect(
+        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0]
+          .checked
+      ).toBe(true);
+    });
+
+    it('should throw AssessmentNotFound if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw AssessmentNotFound if assessment exist for another organization', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization2')
+        .withFindings([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic()
+                    .withId('0')
+                    .withChecked(false)
+                    .build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw PillarNotFoundError if the pillar doesn’t exist in the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(PillarNotFoundError);
+    });
+
+    it('should throw QuestionNotFoundError if the question doesn’t exist in the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic().withId('0').withQuestions([]).build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(QuestionNotFoundError);
+    });
+
+    it('should throw BestPracticeNotFoundError if the best practice doesn’t exist in the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic().withId('0').withBestPractices([]).build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(BestPracticeNotFoundError);
+    });
+
+    it('should throw NoUpdateBodyError if bestPracticeBody is empty', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic()
+                    .withId('0')
+                    .withChecked(false)
+                    .build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {},
+        })
+      ).rejects.toThrow(NoUpdateBodyError);
     });
   });
 

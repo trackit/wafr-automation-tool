@@ -8,5 +8,5 @@ export interface DynamoDBBestPractice {
   primary_id: string;
   results: string[];
   risk: SeverityType;
-  status: boolean;
+  checked: boolean;
 }

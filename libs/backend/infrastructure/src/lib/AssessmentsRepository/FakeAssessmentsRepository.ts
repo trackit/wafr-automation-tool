@@ -1,6 +1,13 @@
-import type { Assessment, Finding } from '@backend/models';
+import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
+import {
+  AssessmentNotFoundError,
+  BestPracticeNotFoundError,
+  EmptyUpdateBodyError,
+  PillarNotFoundError,
+  QuestionNotFoundError,
+} from '../../Errors';
 import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 
 export class FakeAssessmentsRepository implements AssessmentsRepository {
@@ -81,6 +88,60 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     return this.assessmentFindings[key]?.find(
       (finding) => finding.id === findingId
     );
+  }
+
+  public async updateBestPractice(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeBody: BestPracticeBody;
+  }): Promise<void> {
+    const { assessmentId, organization, pillarId, questionId, bestPracticeId } =
+      args;
+    const assessment = this.assessments[`${assessmentId}#${organization}`];
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+      });
+    }
+    if (Object.keys(args.bestPracticeBody).length === 0) {
+      throw new EmptyUpdateBodyError();
+    }
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+      });
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId.toString()
+    );
+    if (!question) {
+      throw new QuestionNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+        questionId,
+      });
+    }
+    const bestPractice = question.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    );
+    if (!bestPractice) {
+      throw new BestPracticeNotFoundError({
+        assessmentId: assessmentId,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
+    }
+    bestPractice.checked =
+      args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
   public async delete(args: {

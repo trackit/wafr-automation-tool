@@ -2,6 +2,7 @@ import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   BestPractice,
+  BestPracticeBody,
   DynamoDBAssessment,
   DynamoDBBestPractice,
   DynamoDBFinding,
@@ -14,7 +15,14 @@ import type {
 import { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-import { InvalidNextTokenError } from '../../Errors';
+import {
+  AssessmentNotFoundError,
+  BestPracticeNotFoundError,
+  EmptyUpdateBodyError,
+  InvalidNextTokenError,
+  PillarNotFoundError,
+  QuestionNotFoundError,
+} from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 
@@ -57,7 +65,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       primary_id: bestPractice.primaryId,
       results: bestPractice.results,
       risk: bestPractice.risk,
-      status: bestPractice.status,
+      checked: bestPractice.checked,
     };
   }
 
@@ -198,7 +206,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       primaryId: item.primary_id,
       results: item.results,
       risk: item.risk,
-      status: item.status,
+      checked: item.checked,
     };
   }
 
@@ -469,6 +477,112 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     return this.fromDynamoDBFindingItem(dynamoFinding);
   }
 
+  public assertBestPracticeExists(args: {
+    assessment: Assessment;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): void {
+    const { assessment, pillarId, questionId, bestPracticeId } = args;
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+      });
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId.toString()
+    );
+    if (!question) {
+      throw new QuestionNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+        questionId,
+      });
+    }
+    const bestPractice = question.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    );
+    if (!bestPractice) {
+      throw new BestPracticeNotFoundError({
+        assessmentId: assessment.id,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
+    }
+  }
+
+  public async updateBestPractice(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeBody: BestPracticeBody;
+  }) {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeBody,
+    } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment best practice: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organization,
+      });
+    }
+
+    this.assertBestPracticeExists({
+      assessment,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
+    if (Object.keys(bestPracticeBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
+      );
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({
+        data: { ...bestPracticeBody },
+        UpdateExpressionPath:
+          'findings.#pillar.questions.#question.best_practices.#best_practice',
+        DefaultExpressionAttributeNames: {
+          '#pillar': pillarId,
+          '#question': questionId,
+          '#best_practice': bestPracticeId,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+    } catch (error) {
+      this.logger.error(`Failed to update best practice: ${error}`, params);
+      throw error;
+    }
+  }
+
   public async delete(args: {
     assessmentId: string;
     organization: string;
@@ -551,6 +665,46 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       this.logger.error(`Failed to delete findings: ${error}`, args);
       throw error;
     }
+  }
+
+  private buildUpdateExpression(args: {
+    data: Record<string, unknown>;
+    UpdateExpressionPath?: string;
+    DefaultExpressionAttributeValues?: Record<string, unknown>;
+    DefaultExpressionAttributeNames?: Record<string, string>;
+  }): {
+    UpdateExpression: string;
+    ExpressionAttributeValues: Record<string, unknown>;
+    ExpressionAttributeNames: Record<string, string>;
+  } {
+    const {
+      data,
+      DefaultExpressionAttributeValues,
+      DefaultExpressionAttributeNames,
+    } = args;
+    const updateExpressions: string[] = [];
+    const expressionAttributeValues: Record<string, unknown> =
+      DefaultExpressionAttributeValues || {};
+    const expressionAttributeNames: Record<string, string> =
+      DefaultExpressionAttributeNames || {};
+
+    if (args.UpdateExpressionPath && !args.UpdateExpressionPath.endsWith('.')) {
+      args.UpdateExpressionPath += '.';
+    }
+    for (const [key, value] of Object.entries(data)) {
+      const attributeName = `#${key}`;
+      const attributeValue = `:${key}`;
+      updateExpressions.push(
+        `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
+      );
+      expressionAttributeValues[attributeValue] = value;
+      expressionAttributeNames[attributeName] = key;
+    }
+    return {
+      UpdateExpression: `set ${updateExpressions.join(', ')}`,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: expressionAttributeNames,
+    };
   }
 }
 
