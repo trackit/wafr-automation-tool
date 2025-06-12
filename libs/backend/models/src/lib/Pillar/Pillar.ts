@@ -7,3 +7,7 @@ export interface Pillar {
   primaryId: string;
   questions: Question[];
 }
+
+export interface PillarBody {
+  disabled?: boolean;
+}
