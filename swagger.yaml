@@ -178,6 +178,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully updated
+        '204':
+          description: The assessment has no fields to update
         '400':
           description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
