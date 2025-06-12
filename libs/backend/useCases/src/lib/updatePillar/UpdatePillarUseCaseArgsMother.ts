@@ -1,4 +1,4 @@
-import type { PillarBody, User } from '@backend/models';
+import type { Assessment, Pillar, PillarBody, User } from '@backend/models';
 import type { UpdatePillarUseCaseArgs } from './UpdatePillarUseCase';
 
 export class UpdatePillarUseCaseArgsMother {
@@ -21,7 +21,9 @@ export class UpdatePillarUseCaseArgsMother {
     });
   }
 
-  public withAssessmentId(assessmentId: string): UpdatePillarUseCaseArgsMother {
+  public withAssessmentId(
+    assessmentId: Assessment['id']
+  ): UpdatePillarUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
@@ -31,7 +33,7 @@ export class UpdatePillarUseCaseArgsMother {
     return this;
   }
 
-  public withPillarId(pillarId: string): UpdatePillarUseCaseArgsMother {
+  public withPillarId(pillarId: Pillar['id']): UpdatePillarUseCaseArgsMother {
     this.data.pillarId = pillarId;
     return this;
   }

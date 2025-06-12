@@ -4,7 +4,9 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  Pillar,
   PillarBody,
+  User,
 } from '@backend/models';
 import type {
   AssessmentsRepository,
@@ -223,9 +225,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   }
 
   public async updatePillar(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
+    assessmentId: Assessment['id'];
+    organization: User['organizationDomain'];
+    pillarId: Pillar['id'];
     pillarBody: PillarBody;
   }): Promise<void> {
     const { assessmentId, organization, pillarId, pillarBody } = args;
