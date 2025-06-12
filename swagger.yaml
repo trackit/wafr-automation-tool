@@ -759,10 +759,6 @@ components:
           type: array
           items:
             type: string
-        hidden_results:
-          type: array
-          items:
-            type: string
     BestPracticeExtra:
       type: object
       description: 'Enhanced best practice information, including associated findings'

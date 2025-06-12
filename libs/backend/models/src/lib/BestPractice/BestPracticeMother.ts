@@ -11,7 +11,6 @@ export class BestPracticeMother {
   public static basic(): BestPracticeMother {
     return new BestPracticeMother({
       description: 'This is a description of the best practice.',
-      hiddenResults: [],
       id: 'best-practice-id',
       label: 'Best Practice Label',
       primaryId: 'primary-id',
@@ -23,11 +22,6 @@ export class BestPracticeMother {
 
   public withDescription(description: string): BestPracticeMother {
     this.data.description = description;
-    return this;
-  }
-
-  public withHiddenResults(hiddenResults: string[]): BestPracticeMother {
-    this.data.hiddenResults = hiddenResults;
     return this;
   }
 

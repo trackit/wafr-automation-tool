@@ -308,7 +308,6 @@ export interface components {
             description?: string;
             checked?: boolean;
             results?: string[];
-            hidden_results?: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {

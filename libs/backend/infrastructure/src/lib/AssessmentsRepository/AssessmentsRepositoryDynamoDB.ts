@@ -64,7 +64,6 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): DynamoDBBestPractice {
     return {
       description: bestPractice.description,
-      hidden_results: bestPractice.hiddenResults,
       id: bestPractice.id,
       label: bestPractice.label,
       primary_id: bestPractice.primaryId,
@@ -201,7 +200,6 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): BestPractice {
     return {
       description: item.description,
-      hiddenResults: item.hidden_results,
       id: item.id,
       label: item.label,
       primaryId: item.primary_id,
