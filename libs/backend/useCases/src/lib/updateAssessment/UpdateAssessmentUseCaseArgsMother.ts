@@ -16,9 +16,7 @@ export class UpdateAssessmentUseCaseArgsMother {
         organizationDomain: 'test.io',
         email: 'user-id@test.io',
       },
-      assessmentBody: {
-        name: 'Test Assessment',
-      },
+      assessmentBody: {},
     });
   }
 

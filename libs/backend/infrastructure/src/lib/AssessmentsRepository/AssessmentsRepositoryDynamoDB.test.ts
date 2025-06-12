@@ -16,7 +16,7 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   InvalidNextTokenError,
-  NoUpdateBodyError,
+  EmptyUpdateBodyError,
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
@@ -494,7 +494,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).rejects.toThrow(BestPracticeNotFoundError);
     });
 
-    it('should throw NoUpdateBodyError if bestPracticeBody is empty', async () => {
+    it('should throw EmptyUpdateBodyError if bestPracticeBody is empty', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
@@ -528,7 +528,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           bestPracticeId: '0',
           bestPracticeBody: {},
         })
-      ).rejects.toThrow(NoUpdateBodyError);
+      ).rejects.toThrow(EmptyUpdateBodyError);
     });
   });
 
@@ -916,7 +916,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
     });
 
-    it('should silently ignore undefined fields', async () => {
+    it('should throw a EmptyUpdateBodyError in case of empty assessment body', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
@@ -926,20 +926,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment);
 
-      await repository.update({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
-        assessmentBody: {},
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
-      });
-
-      expect(updatedAssessment).toEqual(
-        expect.objectContaining({ name: 'Old Name' })
-      );
+      await expect(
+        repository.update({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          assessmentBody: {},
+        })
+      ).rejects.toThrow(EmptyUpdateBodyError);
     });
 
     it('should throw an error if the assessment does not exist', async () => {

@@ -5,7 +5,7 @@ import {
 } from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { NoContentError, NotFoundError } from '../Errors';
 import { UpdateAssessmentUseCaseImpl } from './UpdateAssessmentUseCase';
 import { UpdateAssessmentUseCaseArgsMother } from './UpdateAssessmentUseCaseArgsMother';
 
@@ -34,6 +34,23 @@ describe('UpdateAssessmentUseCase', () => {
       .build();
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
       NotFoundError
+    );
+  });
+
+  it('should throw a NoContentError if there are no fields to update', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .build();
+    const input = UpdateAssessmentUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .build();
+
+    await expect(useCase.updateAssessment(input)).rejects.toThrow(
+      NoContentError
     );
   });
 

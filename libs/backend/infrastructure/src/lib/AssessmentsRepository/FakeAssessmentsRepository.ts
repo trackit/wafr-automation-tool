@@ -9,7 +9,6 @@ import {
   QuestionNotFoundError,
 } from '../../Errors';
 import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
-import { AssessmentNotFoundError } from '../../Errors';
 
 export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
@@ -172,6 +171,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessmentKey = `${assessmentId}#${organization}`;
     if (!this.assessments[assessmentKey]) {
       throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    if (Object.keys(assessmentBody).length === 0) {
+      throw new EmptyUpdateBodyError();
     }
     const assessment = this.assessments[assessmentKey];
     for (const [key, value] of Object.entries(assessmentBody)) {

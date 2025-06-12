@@ -1,11 +1,12 @@
 import {
   AssessmentNotFoundError,
+  EmptyUpdateBodyError,
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -35,6 +36,8 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
       .catch((error) => {
         if (error instanceof AssessmentNotFoundError) {
           throw new NotFoundError(error.message);
+        } else if (error instanceof EmptyUpdateBodyError) {
+          throw new NoContentError(error.description);
         }
         throw error;
       });

@@ -723,8 +723,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       throw new AssessmentNotFoundError({ assessmentId, organization });
     }
     if (Object.keys(assessmentBody).length === 0) {
-      this.logger.info(`No updates provided for assessment: ${assessmentId}`);
-      return;
+      this.logger.error(
+        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
+      );
     }
     const params = {
       TableName: this.tableName,
