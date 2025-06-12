@@ -277,8 +277,9 @@ paths:
           required: true
           description: The ID of the pillar
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -705,7 +706,6 @@ components:
       properties:
         disabled:
           type: boolean
-          nullable: true
     Question:
       type: object
       additionalProperties: false
