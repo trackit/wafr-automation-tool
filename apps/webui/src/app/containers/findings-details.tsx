@@ -252,9 +252,6 @@ function FindingsDetails({
     }) =>
       hideFinding({
         assessmentId,
-        pillarId,
-        questionId,
-        bestPracticeId: bestPractice.id || '',
         findingId,
         hide: hidden,
       }),

@@ -17,7 +17,6 @@ export interface AssessmentsRepository {
   saveFinding(args: {
     assessmentId: string;
     organization: string;
-    scanningTool: string;
     finding: Finding;
   }): Promise<void>;
   getAll(args: {
@@ -42,17 +41,8 @@ export interface AssessmentsRepository {
   getFinding(args: {
     assessmentId: string;
     findingId: string;
-    scanningTool: string;
     organization: string;
   }): Promise<Finding | undefined>;
-  updateBestPractice(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeBody: BestPracticeBody;
-  }): Promise<void>;
   delete(args: { assessmentId: string; organization: string }): Promise<void>;
   deleteFindings(args: {
     assessmentId: string;
@@ -64,5 +54,19 @@ export interface AssessmentsRepository {
     assessmentBody: {
       name?: string;
     };
+  }): Promise<void>;
+  updateBestPractice(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeBody: BestPracticeBody;
+  }): Promise<void>;
+  updateFinding(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    findingBody: { hidden?: boolean };
   }): Promise<void>;
 }

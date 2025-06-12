@@ -8,3 +8,4 @@ export * from './rescanAssessment';
 export * from './startAssessment';
 export * from './updateAssessment';
 export * from './updateBestPractice';
+export * from './updateFinding';

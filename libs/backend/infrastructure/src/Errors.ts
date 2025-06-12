@@ -35,6 +35,19 @@ export class AssessmentNotFoundError extends InfrastructureError {
   }
 }
 
+export class FindingNotFoundError extends InfrastructureError {
+  public constructor(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+  }) {
+    super({
+      message: `Finding with findingId ${args.findingId} not found for assessment ${args.assessmentId} in organization ${args.organization}`,
+      name: 'FindingNotFoundError',
+    });
+  }
+}
+
 export class PillarNotFoundError extends InfrastructureError {
   public constructor(args: {
     assessmentId: string;

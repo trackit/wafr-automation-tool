@@ -22,6 +22,7 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
   QuestionNotFoundError,
@@ -48,13 +49,6 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     organization: string;
   }): string {
     return `${args.organization}#${args.assessmentId}#FINDINGS`;
-  }
-
-  private getFindingSK(args: {
-    scanningTool: string;
-    findingId: string;
-  }): string {
-    return `${args.scanningTool}#${args.findingId}`;
   }
 
   public static getBestPracticeCustomId(args: {
@@ -169,19 +163,15 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     args: {
       assessmentId: string;
       organization: string;
-      scanningTool: string;
     }
   ): DynamoDBFinding {
-    const { assessmentId, organization, scanningTool } = args;
+    const { assessmentId, organization } = args;
     return {
       PK: this.getFindingPK({
         assessmentId,
         organization,
       }),
-      SK: this.getFindingSK({
-        scanningTool,
-        findingId: finding.id,
-      }),
+      SK: finding.id,
       best_practices: finding.bestPractices,
       hidden: finding.hidden,
       id: finding.id,
@@ -305,7 +295,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     return {
       bestPractices: finding.best_practices,
       hidden: finding.hidden,
-      id: finding.id,
+      id: finding.SK,
       isAiAssociated: finding.is_ai_associated,
       metadata: { eventCode: finding.metadata.event_code },
       ...(finding.remediation && {
@@ -363,7 +353,6 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   public async saveFinding(args: {
     assessmentId: string;
     organization: string;
-    scanningTool: string;
     finding: Finding;
   }): Promise<void> {
     const { assessmentId, finding } = args;
@@ -563,11 +552,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async getFinding(args: {
     assessmentId: string;
-    findingId: string;
-    scanningTool: string;
     organization: string;
+    findingId: string;
   }): Promise<Finding | undefined> {
-    const { assessmentId, findingId, organization } = args;
+    const { assessmentId, organization, findingId } = args;
     const params = {
       TableName: this.tableName,
       Key: {
@@ -575,10 +563,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           assessmentId,
           organization,
         }),
-        SK: this.getFindingSK({
-          scanningTool: args.scanningTool,
-          findingId,
-        }),
+        SK: findingId,
       },
     };
 
@@ -858,6 +843,59 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       this.logger.info(`Assessment updated: ${assessmentId}`);
     } catch (error) {
       this.logger.error(`Failed to update assessment: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateFinding(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    findingBody: {
+      hidden?: boolean;
+    };
+  }): Promise<void> {
+    const { assessmentId, organization, findingId, findingBody } = args;
+    const finding = await this.getFinding({
+      assessmentId,
+      organization,
+      findingId,
+    });
+    if (!finding) {
+      this.logger.error(
+        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
+    if (Object.keys(findingBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
+      );
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getFindingPK({ assessmentId, organization }),
+        SK: findingId,
+      },
+      ...this.buildUpdateExpression({
+        data: findingBody,
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Finding updated: ${findingId} for assessment: ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update finding: ${error}`, params);
       throw error;
     }
   }

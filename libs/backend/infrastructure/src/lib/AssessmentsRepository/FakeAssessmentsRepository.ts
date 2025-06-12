@@ -6,6 +6,7 @@ import type {
 import { createInjectionToken } from '@shared/di-container';
 import {
   AssessmentNotFoundError,
+  FindingNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
   PillarNotFoundError,
@@ -147,8 +148,8 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
 
   public async getFinding(args: {
     assessmentId: string;
-    findingId: string;
     organization: string;
+    findingId: string;
   }): Promise<Finding | undefined> {
     const { assessmentId, findingId, organization } = args;
     const key = `${assessmentId}#${organization}`;
@@ -230,6 +231,14 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     delete this.assessmentFindings[`${assessmentId}#${organization}`];
   }
 
+  private updateAssessmentBody<T extends keyof Assessment>(
+    assessment: Assessment,
+    field: T,
+    value: Assessment[T]
+  ): void {
+    assessment[field] = value;
+  }
+
   public async update(args: {
     assessmentId: string;
     organization: string;
@@ -247,7 +256,54 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     }
     const assessment = this.assessments[assessmentKey];
     for (const [key, value] of Object.entries(assessmentBody)) {
-      assessment[key as keyof Assessment] = value as any;
+      this.updateAssessmentBody(
+        assessment,
+        key as keyof Assessment,
+        value as Assessment[keyof Assessment]
+      );
+    }
+  }
+
+  private updateFindingBody<T extends keyof Finding>(
+    finding: Finding,
+    field: T,
+    value: Finding[T]
+  ): void {
+    finding[field] = value;
+  }
+
+  public async updateFinding(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    findingBody: { hidden?: boolean };
+  }): Promise<void> {
+    const { assessmentId, organization, findingId, findingBody } = args;
+    const key = `${assessmentId}#${organization}`;
+    const assessment = this.assessments[key];
+    if (!assessment) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const finding = this.assessmentFindings[key]?.find(
+      (f) => f.id === findingId
+    );
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
+    if (Object.keys(findingBody).length === 0) {
+      throw new EmptyUpdateBodyError();
+    }
+    for (const [field, value] of Object.entries(findingBody)) {
+      // Only update fields that exist on the finding object
+      this.updateFindingBody(
+        finding,
+        field as keyof Finding,
+        value as Finding[keyof Finding]
+      );
     }
   }
 }
