@@ -46,7 +46,7 @@ export class GetAssessmentAdapter {
               label: bestPractice.label,
               results: bestPractice.results,
               risk: bestPractice.risk,
-              status: bestPractice.checked,
+              checked: bestPractice.checked,
             })),
             disabled: question.disabled,
             id: question.id,

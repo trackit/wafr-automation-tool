@@ -477,7 +477,7 @@ export function AssessmentDetails() {
   }, [selectedPillar, activeQuestionIndex]);
 
   const handleUpdateStatus = useCallback(
-    (bestPracticeId: string, status: boolean) => {
+    (bestPracticeId: string, checked: boolean) => {
       if (!id || !selectedPillar?.id || !activeQuestion?.id) return;
 
       updateStatusMutation.mutate({
@@ -485,7 +485,7 @@ export function AssessmentDetails() {
         pillarId: selectedPillar.id,
         questionId: activeQuestion.id,
         bestPracticeId,
-        status,
+        checked,
       });
     },
     [id, selectedPillar?.id, activeQuestion?.id, updateStatusMutation]

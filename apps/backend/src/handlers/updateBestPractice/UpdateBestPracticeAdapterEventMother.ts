@@ -30,7 +30,7 @@ export class UpdateBestPracticeAdapterEventMother {
         bestPracticeId: '1',
       },
       {
-        status: true,
+        checked: true,
       }
     );
   }

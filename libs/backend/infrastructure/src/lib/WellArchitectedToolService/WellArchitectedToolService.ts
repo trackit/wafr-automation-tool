@@ -152,9 +152,9 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
             `Workflow pillar question best practice ${id} does not exist in assessment pillars`
           );
         }
-        return { id, status: data.status };
+        return { id, checked: data.checked };
       })
-      .filter((item) => item.status)
+      .filter((item) => item.checked)
       .map((item) => item.id);
   }
 

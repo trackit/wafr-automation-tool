@@ -310,7 +310,7 @@ describe('wellArchitectedTool Infrastructure', () => {
                   BestPracticeMother.basic()
                     .withId('best-practice-id')
                     .withLabel('Best Practice 1')
-                    .withStatus(true)
+                    .withChecked(true)
                     .build(),
                 ])
                 .build(),
@@ -541,7 +541,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         BestPracticeMother.basic()
           .withId('best-practice-id')
           .withLabel('Best Practice 1')
-          .withStatus(false)
+          .withChecked(false)
           .build(),
       ];
 

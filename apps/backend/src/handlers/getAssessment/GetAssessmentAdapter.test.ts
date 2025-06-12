@@ -167,7 +167,7 @@ describe('GetAssessmentAdapter', () => {
                     label: 'best practice',
                     results: ['prowler#1', 'prowler#2'],
                     risk: SeverityType.Medium,
-                    status: true,
+                    checked: true,
                   },
                 ],
                 disabled: false,

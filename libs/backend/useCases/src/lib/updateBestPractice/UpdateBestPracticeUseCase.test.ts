@@ -51,7 +51,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .withQuestionId('1')
       .withBestPracticeId('1')
       .withBestPracticeBody({
-        status: true,
+        checked: true,
       })
       .build();
 
@@ -63,7 +63,7 @@ describe('UpdateBestPracticeUseCase', () => {
         assessmentId: 'assessment-id',
         bestPracticeId: '1',
         bestPracticeBody: {
-          status: true,
+          checked: true,
         },
         pillarId: '1',
         questionId: '1',
@@ -101,7 +101,7 @@ describe('UpdateBestPracticeUseCase', () => {
       )
       .withPillarId('1')
       .withBestPracticeBody({
-        status: true,
+        checked: true,
       })
       .build();
 
@@ -128,7 +128,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .withPillarId('1')
       .withQuestionId('1')
       .withBestPracticeBody({
-        status: true,
+        checked: true,
       })
       .build();
 
@@ -161,7 +161,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .withQuestionId('1')
       .withBestPracticeId('1')
       .withBestPracticeBody({
-        status: true,
+        checked: true,
       })
       .build();
 
