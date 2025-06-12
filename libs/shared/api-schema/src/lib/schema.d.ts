@@ -776,11 +776,11 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
-                pillarId: number;
+                pillarId: string;
                 /** @description The ID of the question to retrieve the best practices to */
-                questionId: number;
+                questionId: string;
                 /** @description The ID of the best practice to retrieve findings to */
-                bestPracticeId: number;
+                bestPracticeId: string;
             };
             cookie?: never;
         };

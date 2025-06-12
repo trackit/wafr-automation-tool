@@ -26,6 +26,7 @@ import {
   AssessmentsRepositoryDynamoDB,
   tokenDynamoDBAssessmentTableName,
 } from './AssessmentsRepositoryDynamoDB';
+import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
 
 afterEach(async () => {
   const dynamoDBClient = inject(tokenDynamoDBClient);
@@ -985,6 +986,639 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(updatedAssessment2).toEqual(
         expect.objectContaining({ name: 'Old Name' })
       );
+    });
+  });
+
+  describe('getBestPracticeFindings', () => {
+    it('should return all findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .build()
+      );
+
+      expect(findings).toEqual([
+        expect.objectContaining({ id: 'finding1' }),
+        expect.objectContaining({ id: 'finding2' }),
+      ]);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment1);
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization2')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment2);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment2',
+        organization: 'organization2',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .build()
+      );
+
+      expect(findings).toEqual([expect.objectContaining({ id: 'finding1' })]);
+    });
+
+    it('should return an empty array if no findings exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .build()
+      );
+
+      expect(findings).toEqual([]);
+    });
+
+    it('should throw an error if the pillar does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.getBestPracticeFindings(
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('assessment1')
+            .withOrganization('organization1')
+            .withPillarId('pillar1')
+            .withQuestionId('question1')
+            .withBestPracticeId('bp1')
+            .build()
+        )
+      ).rejects.toThrow(PillarNotFoundError);
+    });
+
+    it('should throw an error if the question does not exist', async () => {
+      const { repository } = setup();
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic().withId('pillar1').withQuestions([]).build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.getBestPracticeFindings(
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('assessment1')
+            .withOrganization('organization1')
+            .withPillarId('pillar1')
+            .withQuestionId('question1')
+            .withBestPracticeId('bp1')
+            .build()
+        )
+      ).rejects.toThrow(QuestionNotFoundError);
+    });
+
+    it('should throw an error if the best practice does not exist', async () => {
+      const { repository } = setup();
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+      await expect(
+        repository.getBestPracticeFindings(
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('assessment1')
+            .withOrganization('organization1')
+            .withPillarId('pillar1')
+            .withQuestionId('question1')
+            .withBestPracticeId('bp1')
+            .build()
+        )
+      ).rejects.toThrow(BestPracticeNotFoundError);
+    });
+
+    it('should not return the hidden findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .withHidden(false)
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .withHidden(true)
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .build()
+      );
+
+      expect(findings).toEqual([expect.objectContaining({ id: 'finding1' })]);
+    });
+
+    it('should only return the matching findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .withRiskDetails('dummy risk details')
+        .withStatusDetail('dummy status detail')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .withStatusDetail('searchterm')
+        .build();
+      const finding3 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding3')
+        .withRiskDetails('searchterm')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding3,
+      });
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .withSearchTerm('searchterm')
+          .build()
+      );
+
+      expect(findings).toEqual([
+        expect.objectContaining({ id: 'finding2' }),
+        expect.objectContaining({ id: 'finding3' }),
+      ]);
+    });
+
+    it('should only return a limited number of findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .build();
+      const finding3 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding3')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding3,
+      });
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .withLimit(2)
+          .build()
+      );
+
+      expect(findings).toEqual([
+        expect.objectContaining({ id: 'finding1' }),
+        expect.objectContaining({ id: 'finding2' }),
+      ]);
+    });
+
+    it('should also return the hidden findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .withHidden(false)
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .withHidden(true)
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+
+      const { findings } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .withShowHidden(true)
+          .build()
+      );
+
+      expect(findings).toEqual([
+        expect.objectContaining({ id: 'finding1' }),
+        expect.objectContaining({ id: 'finding2' }),
+      ]);
+    });
+
+    it('should return a nextToken if more results are available', async () => {
+      const { repository } = setup();
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+
+      const { nextToken } = await repository.getBestPracticeFindings(
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('assessment1')
+          .withOrganization('organization1')
+          .withPillarId('pillar1')
+          .withQuestionId('question1')
+          .withBestPracticeId('bp1')
+          .withLimit(1)
+          .build()
+      );
+      expect(nextToken).toBeDefined();
+    });
+
+    it('should return more results using nextToken', async () => {
+      const { repository } = setup();
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bp1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('finding2')
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: 'tool1',
+        finding: finding2,
+      });
+
+      const { findings: firstFindings, nextToken } =
+        await repository.getBestPracticeFindings(
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('assessment1')
+            .withOrganization('organization1')
+            .withPillarId('pillar1')
+            .withQuestionId('question1')
+            .withBestPracticeId('bp1')
+            .withLimit(1)
+            .build()
+        );
+      const { findings: secondFindings } =
+        await repository.getBestPracticeFindings(
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('assessment1')
+            .withOrganization('organization1')
+            .withPillarId('pillar1')
+            .withQuestionId('question1')
+            .withBestPracticeId('bp1')
+            .withNextToken(nextToken as string)
+            .build()
+        );
+
+      expect(firstFindings).not.toEqual(secondFindings);
+      expect(firstFindings.length).toBe(1);
+      expect(secondFindings.length).toBe(1);
     });
   });
 });

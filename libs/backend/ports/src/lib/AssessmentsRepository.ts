@@ -1,5 +1,17 @@
 import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
 
+export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
+  assessmentId: string;
+  organization: string;
+  pillarId: string;
+  questionId: string;
+  bestPracticeId: string;
+  limit?: number;
+  searchTerm?: string;
+  showHidden?: boolean;
+  nextToken?: string;
+}
+
 export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
   saveFinding(args: {
@@ -21,6 +33,12 @@ export interface AssessmentsRepository {
     assessmentId: string;
     organization: string;
   }): Promise<Assessment | undefined>;
+  getBestPracticeFindings(
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+  ): Promise<{
+    findings: Finding[];
+    nextToken?: string;
+  }>;
   getFinding(args: {
     assessmentId: string;
     findingId: string;

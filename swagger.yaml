@@ -353,19 +353,19 @@ paths:
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question to retrieve the best practices to
           schema:
-            type: integer
+            type: string
         - name: bestPracticeId
           in: path
           required: true
           description: The ID of the best practice to retrieve findings to
           schema:
-            type: integer
+            type: string
         - name: limit
           in: query
           description: Maximum number of assessments to return

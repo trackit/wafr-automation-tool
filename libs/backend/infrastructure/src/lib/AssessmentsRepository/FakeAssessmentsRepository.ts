@@ -1,5 +1,8 @@
 import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
-import type { AssessmentsRepository } from '@backend/ports';
+import type {
+  AssessmentsRepository,
+  AssessmentsRepositoryGetBestPracticeFindingsArgs,
+} from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 import {
   AssessmentNotFoundError,
@@ -78,6 +81,70 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     return this.assessments[`${assessmentId}#${organization}`];
   }
 
+  public async getBestPracticeFindings(
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+  ): Promise<{
+    findings: Finding[];
+    nextToken?: string;
+  }> {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      limit = 100,
+      searchTerm,
+      showHidden,
+    } = args;
+    const key = `${assessmentId}#${organization}`;
+    if (
+      !this.assessmentFindings[key] ||
+      !this.assessments[key].findings?.find(
+        (pillar) =>
+          pillar.id === pillarId &&
+          pillar.questions.find(
+            (question) =>
+              question.id === questionId &&
+              question.bestPractices.find((bp) => bp.id === bestPracticeId)
+          )
+      )
+    ) {
+      throw new BestPracticeNotFoundError({
+        assessmentId,
+        organization,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
+    }
+    const findings =
+      this.assessmentFindings[key]
+        ?.filter((finding) =>
+          finding.bestPractices.includes(
+            AssessmentsRepositoryDynamoDB.getBestPracticeCustomId({
+              pillarId,
+              questionId,
+              bestPracticeId,
+            })
+          )
+        )
+        .filter((finding) => {
+          if (!searchTerm) return true;
+          return (
+            finding.riskDetails?.includes(searchTerm) ||
+            finding.statusDetail?.includes(searchTerm)
+          );
+        })
+        .filter((finding) => (!showHidden ? !finding.hidden : true))
+        .slice(0, limit) || [];
+
+    return {
+      findings,
+      nextToken: undefined, // No pagination in this fake implementation
+    };
+  }
+
   public async getFinding(args: {
     assessmentId: string;
     findingId: string;
@@ -116,6 +183,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId: assessmentId,
+        organization,
         pillarId,
       });
     }
@@ -125,6 +193,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (!question) {
       throw new QuestionNotFoundError({
         assessmentId: assessmentId,
+        organization,
         pillarId,
         questionId,
       });
@@ -135,6 +204,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (!bestPractice) {
       throw new BestPracticeNotFoundError({
         assessmentId: assessmentId,
+        organization,
         pillarId,
         questionId,
         bestPracticeId,

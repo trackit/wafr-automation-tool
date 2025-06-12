@@ -3,6 +3,7 @@ export * from './Errors';
 export * from './exportWellArchitectedTool';
 export * from './getAllAssessments';
 export * from './getAssessment';
+export * from './getBestPracticeFindings';
 export * from './rescanAssessment';
 export * from './startAssessment';
 export * from './updateAssessment';
