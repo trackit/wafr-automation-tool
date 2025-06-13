@@ -38,3 +38,7 @@ export interface AssessmentError {
   cause: string;
   error: string;
 }
+
+export interface AssessmentBody {
+  name?: string;
+}

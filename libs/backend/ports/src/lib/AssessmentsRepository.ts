@@ -1,4 +1,10 @@
-import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
+import type {
+  Assessment,
+  AssessmentBody,
+  BestPracticeBody,
+  Finding,
+  FindingBody,
+} from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
   assessmentId: string;
@@ -17,7 +23,6 @@ export interface AssessmentsRepository {
   saveFinding(args: {
     assessmentId: string;
     organization: string;
-    scanningTool: string;
     finding: Finding;
   }): Promise<void>;
   getAll(args: {
@@ -42,17 +47,8 @@ export interface AssessmentsRepository {
   getFinding(args: {
     assessmentId: string;
     findingId: string;
-    scanningTool: string;
     organization: string;
   }): Promise<Finding | undefined>;
-  updateBestPractice(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeBody: BestPracticeBody;
-  }): Promise<void>;
   delete(args: { assessmentId: string; organization: string }): Promise<void>;
   deleteFindings(args: {
     assessmentId: string;
@@ -61,8 +57,20 @@ export interface AssessmentsRepository {
   update(args: {
     assessmentId: string;
     organization: string;
-    assessmentBody: {
-      name?: string;
-    };
+    assessmentBody: AssessmentBody;
+  }): Promise<void>;
+  updateBestPractice(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeBody: BestPracticeBody;
+  }): Promise<void>;
+  updateFinding(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    findingBody: FindingBody;
   }): Promise<void>;
 }

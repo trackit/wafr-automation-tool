@@ -107,7 +107,6 @@ describe('GetAssessmentAdapter', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withDescription('best practice description')
-                    .withHiddenResults([])
                     .withId('best-practice-id')
                     .withLabel('best practice')
                     .withResults(['prowler#1', 'prowler#2'])
@@ -162,7 +161,6 @@ describe('GetAssessmentAdapter', () => {
                 best_practices: [
                   {
                     description: 'best practice description',
-                    hidden_results: [],
                     id: 'best-practice-id',
                     label: 'best practice',
                     results: ['prowler#1', 'prowler#2'],

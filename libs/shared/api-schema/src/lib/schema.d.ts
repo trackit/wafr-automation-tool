@@ -159,27 +159,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update the details of a specific finding
-         * @description Updates the details of a specific finding.
-         *
-         */
-        put: operations["updateFinding"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/assessments/{assessmentId}/findings/{findingId}": {
         parameters: {
             query?: never;
@@ -194,7 +173,12 @@ export interface paths {
          *
          */
         get: operations["getFinding"];
-        put?: never;
+        /**
+         * Update the details of a specific finding
+         * @description Updates the details of a specific finding.
+         *
+         */
+        put: operations["updateFinding"];
         post?: never;
         delete?: never;
         options?: never;
@@ -293,7 +277,7 @@ export interface components {
             is_ai_associated?: boolean;
         };
         FindingDto: {
-            hidden?: boolean | null;
+            hidden?: boolean;
         };
         Pillar: {
             id?: string;
@@ -324,7 +308,6 @@ export interface components {
             description?: string;
             checked?: boolean;
             results?: string[];
-            hidden_results?: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
@@ -876,60 +859,6 @@ export interface operations {
             };
         };
     };
-    updateFinding: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the assessment to which the finding belongs */
-                assessmentId: string;
-                /** @description The ID of the pillar under which the question falls */
-                pillarId: number;
-                /** @description The ID of the question to update the best practice to */
-                questionId: number;
-                /** @description The ID of the best practice to update the status to */
-                bestPracticeId: number;
-                /** @description The unique ID of the finding to retrieve */
-                findingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["FindingDto"];
-            };
-        };
-        responses: {
-            /** @description The finding has been successfully updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The specified assessment could not be found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     getFinding: {
         parameters: {
             query?: never;
@@ -961,6 +890,61 @@ export interface operations {
                 content?: never;
             };
             /** @description The specified assessment or finding could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateFinding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to retrieve */
+                findingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FindingDto"];
+            };
+        };
+        responses: {
+            /** @description The finding has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The finding has no fields to update */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
             404: {
                 headers: {
                     [name: string]: unknown;

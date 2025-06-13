@@ -2,7 +2,6 @@ import type { SeverityType } from '../Finding';
 
 export interface BestPractice {
   description: string;
-  hiddenResults: string[];
   id: string;
   label: string;
   primaryId: string;

@@ -19,6 +19,7 @@ import {
   EmptyUpdateBodyError,
   PillarNotFoundError,
   QuestionNotFoundError,
+  FindingNotFoundError,
 } from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
@@ -627,9 +628,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const finding = FindingMother.basic()
+        .withId('scanningTool#1')
         .withBestPractices('0#0#0')
         .withHidden(false)
-        .withId('finding1')
         .withIsAiAssociated(false)
         .withMetadata({ eventCode: 'event1' })
         .withRemediation({
@@ -652,14 +653,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding,
       });
 
       const savedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
 
@@ -677,18 +676,16 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment);
 
-      const finding = FindingMother.basic().withId('finding1').build();
+      const finding = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding,
       });
 
       const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
 
@@ -706,8 +703,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
 
@@ -729,32 +725,28 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment2);
 
-      const finding1 = FindingMother.basic().withId('finding1').build();
+      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('finding2').build();
+      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment2',
         organization: 'organization2',
-        scanningTool: 'tool2',
         finding: finding2,
       });
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
-        findingId: 'finding2',
-        scanningTool: 'tool2',
+        findingId: 'scanningTool#2',
         organization: 'organization1',
       });
 
@@ -773,18 +765,16 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment);
 
-      const finding1 = FindingMother.basic().withId('finding1').build();
-      const finding2 = FindingMother.basic().withId('finding2').build();
+      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
+      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -795,14 +785,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding2',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#2',
         organization: 'organization1',
       });
 
@@ -836,19 +824,17 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.save(assessment2);
 
-      const finding1 = FindingMother.basic().withId('finding1').build();
+      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('finding2').build();
+      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment2',
         organization: 'organization2',
-        scanningTool: 'tool2',
         finding: finding2,
       });
 
@@ -859,14 +845,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
-        findingId: 'finding1',
-        scanningTool: 'tool1',
+        findingId: 'scanningTool#1',
         organization: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
-        findingId: 'finding2',
-        scanningTool: 'tool2',
+        findingId: 'scanningTool#2',
         organization: 'organization2',
       });
 
@@ -1014,22 +998,20 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -1044,8 +1026,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'finding1' }),
-        expect.objectContaining({ id: 'finding2' }),
+        expect.objectContaining({ id: 'tool#1' }),
+        expect.objectContaining({ id: 'tool#2' }),
       ]);
     });
 
@@ -1090,22 +1072,20 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#1')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment2',
         organization: 'organization2',
-        scanningTool: 'tool1',
         finding: finding2,
       });
       const { findings } = await repository.getBestPracticeFindings(
@@ -1118,7 +1098,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           .build()
       );
 
-      expect(findings).toEqual([expect.objectContaining({ id: 'finding1' })]);
+      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
     });
 
     it('should return an empty array if no findings exist', async () => {
@@ -1258,24 +1238,22 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .withHidden(false)
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .withHidden(true)
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -1289,7 +1267,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           .build()
       );
 
-      expect(findings).toEqual([expect.objectContaining({ id: 'finding1' })]);
+      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
     });
 
     it('should only return the matching findings', async () => {
@@ -1316,36 +1294,33 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .withRiskDetails('dummy risk details')
         .withStatusDetail('dummy status detail')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .withStatusDetail('searchterm')
         .build();
       const finding3 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding3')
+        .withId('tool#3')
         .withRiskDetails('searchterm')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding3,
       });
 
@@ -1361,8 +1336,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'finding2' }),
-        expect.objectContaining({ id: 'finding3' }),
+        expect.objectContaining({ id: 'tool#2' }),
+        expect.objectContaining({ id: 'tool#3' }),
       ]);
     });
 
@@ -1390,32 +1365,29 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .build();
       const finding3 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding3')
+        .withId('tool#3')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding3,
       });
 
@@ -1431,8 +1403,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'finding1' }),
-        expect.objectContaining({ id: 'finding2' }),
+        expect.objectContaining({ id: 'tool#1' }),
+        expect.objectContaining({ id: 'tool#2' }),
       ]);
     });
 
@@ -1460,24 +1432,22 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .withHidden(false)
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .withHidden(true)
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -1493,8 +1463,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'finding1' }),
-        expect.objectContaining({ id: 'finding2' }),
+        expect.objectContaining({ id: 'tool#1' }),
+        expect.objectContaining({ id: 'tool#2' }),
       ]);
     });
 
@@ -1520,22 +1490,20 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -1574,22 +1542,20 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding1')
+        .withId('tool#1')
         .build();
       const finding2 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
-        .withId('finding2')
+        .withId('tool#2')
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        scanningTool: 'tool1',
         finding: finding2,
       });
 
@@ -1619,6 +1585,126 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(firstFindings).not.toEqual(secondFindings);
       expect(firstFindings.length).toBe(1);
       expect(secondFindings.length).toBe(1);
+    });
+  });
+
+  describe('updateFinding', () => {
+    it('should update the finding visibility', async () => {
+      const { repository } = setup();
+
+      const finding = FindingMother.basic()
+        .withId('tool#1')
+        .withHidden(false)
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      await repository.updateFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: 'tool#1',
+        findingBody: {
+          hidden: true,
+        },
+      });
+
+      const fetchedFinding = await repository.getFinding({
+        assessmentId: 'assessment1',
+        findingId: 'tool#1',
+        organization: 'organization1',
+      });
+
+      expect(fetchedFinding).toEqual(
+        expect.objectContaining({
+          id: 'tool#1',
+          hidden: true,
+        })
+      );
+    });
+
+    it('should throw a EmptyUpdateBodyError in case of empty finding body', async () => {
+      const { repository } = setup();
+
+      const finding = FindingMother.basic().withId('tool#1').build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      await expect(
+        repository.updateFinding({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          findingId: 'tool#1',
+          findingBody: {},
+        })
+      ).rejects.toThrow(EmptyUpdateBodyError);
+    });
+
+    it('should throw an error if the finding does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateFinding({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          findingId: 'tool#1',
+          findingBody: {
+            hidden: true,
+          },
+        })
+      ).rejects.toThrow(FindingNotFoundError);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const finding1 = FindingMother.basic()
+        .withId('tool#1')
+        .withHidden(false)
+        .build();
+      const finding2 = FindingMother.basic()
+        .withId('tool#1')
+        .withHidden(false)
+        .build();
+
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization2',
+        finding: finding2,
+      });
+
+      await repository.updateFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: 'tool#1',
+        findingBody: {
+          hidden: true,
+        },
+      });
+
+      const updatedFinding = await repository.getFinding({
+        assessmentId: 'assessment1',
+        findingId: 'tool#1',
+        organization: 'organization1',
+      });
+      const otherFinding = await repository.getFinding({
+        assessmentId: 'assessment1',
+        findingId: 'tool#1',
+        organization: 'organization2',
+      });
+
+      expect(updatedFinding).toEqual(expect.objectContaining({ hidden: true }));
+      expect(otherFinding).toEqual(expect.objectContaining({ hidden: false }));
     });
   });
 });

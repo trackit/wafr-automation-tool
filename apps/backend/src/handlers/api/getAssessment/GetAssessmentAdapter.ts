@@ -41,7 +41,6 @@ export class GetAssessmentAdapter {
           questions: pillar.questions.map((question) => ({
             best_practices: question.bestPractices.map((bestPractice) => ({
               description: bestPractice.description,
-              hidden_results: bestPractice.hiddenResults,
               id: bestPractice.id,
               label: bestPractice.label,
               results: bestPractice.results,
