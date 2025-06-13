@@ -633,7 +633,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/updateFinding
+      CodeUri: ../apps/backend/src/handlers/api/updateFinding
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project

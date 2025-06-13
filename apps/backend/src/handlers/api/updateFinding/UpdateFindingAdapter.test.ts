@@ -6,7 +6,7 @@ import {
 import { register, reset } from '@shared/di-container';
 
 import { UpdateFindingAdapter } from './UpdateFindingAdapter';
-import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
+import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { UpdateFindingAdapterArgsMother } from './UpdateFindingAdapterArgsMother';
 
 describe('UpdateFindingAdapter', () => {

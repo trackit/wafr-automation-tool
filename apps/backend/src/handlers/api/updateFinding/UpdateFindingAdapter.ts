@@ -6,9 +6,9 @@ import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { JSONParseError, parseJson } from '@shared/utils';
 
-import { BadRequestError } from '../../utils/HttpError';
-import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
-import { handleHttpRequest } from '../../utils/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const updateFindingPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),

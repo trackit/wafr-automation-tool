@@ -3,7 +3,7 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
-import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
+import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
 export class UpdateFindingAdapterArgsMother {
   private pathParameters: operations['updateFinding']['parameters']['path'];
