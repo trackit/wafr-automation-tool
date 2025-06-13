@@ -18,6 +18,9 @@ Parameters:
     Type: String
   InitialUserEmail:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Resources:
   SharedLibs:
@@ -52,6 +55,7 @@ Resources:
         SharedLibsLayer: !Ref SharedLibs
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
+        LogRetentionInDays: !Ref LogRetentionInDays
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -76,6 +80,7 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref 'AWS::StackName'
         S3BucketName: !Ref S3Bucket
+        LogRetentionInDays: !Ref LogRetentionInDays
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:
@@ -102,6 +107,7 @@ Resources:
         CloudSploitTaskRole: !GetAtt ScanningTools.Outputs.CloudSploitTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
+        LogRetentionInDays: !Ref LogRetentionInDays
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:

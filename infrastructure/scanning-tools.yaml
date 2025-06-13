@@ -11,6 +11,9 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Resources:
   DefaultAssessmentRole:
@@ -152,7 +155,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/ecs/${ParentStackName}-logs'
-      RetentionInDays: 14
+      RetentionInDays: !Ref LogRetentionInDays
   ProwlerTaskRole:
     Type: AWS::IAM::Role
     Properties:

@@ -19,6 +19,9 @@ Parameters:
     Type: String
   InitialUserEmail:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Globals:
   Function:
@@ -141,6 +144,12 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: APIGateway
+
+  StartAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${StartAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -173,6 +182,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  GetAllAssessmentsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAllAssessmentsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   GetAllAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -207,6 +222,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  GetAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   GetAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -240,6 +261,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  DeleteAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeleteAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -279,6 +306,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  UpdateAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -313,6 +346,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  RescanAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RescanAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -355,6 +394,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  ExportAssessmentWellArchitectedToolLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ExportAssessmentWellArchitectedToolFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -405,6 +450,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  UpdatePillarLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdatePillarFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -430,6 +481,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}
             Method: PUT
+
+  UpdateQuestionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateQuestionFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -455,6 +512,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
+
+  GetBestPracticeFindingsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetBestPracticeFindingsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   GetBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -489,6 +552,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  UpdateBestPracticeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateBestPracticeFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -523,6 +592,12 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  RetrieveFindingLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RetrieveFindingFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -547,6 +622,12 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
+
+  UpdateFindingLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateFindingFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
