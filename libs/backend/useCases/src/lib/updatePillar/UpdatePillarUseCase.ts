@@ -4,14 +4,14 @@ import {
   PillarNotFoundError,
   tokenAssessmentsRepository,
 } from '@backend/infrastructure';
-import type { Assessment, Pillar, PillarBody, User } from '@backend/models';
+import type { PillarBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdatePillarUseCaseArgs = {
   user: User;
-  assessmentId: Assessment['id'];
-  pillarId: Pillar['id'];
+  assessmentId: string;
+  pillarId: string;
   pillarBody: PillarBody;
 };
 

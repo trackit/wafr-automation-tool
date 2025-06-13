@@ -14,7 +14,6 @@ import type {
   Pillar,
   PillarBody,
   Question,
-  User,
 } from '@backend/models';
 import {
   AssessmentsRepository,
@@ -687,7 +686,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public assertPillarExists(args: {
     assessment: Assessment;
-    pillarId: Pillar['id'];
+    pillarId: string;
   }): void {
     const { assessment, pillarId } = args;
     const pillar = assessment.findings?.find(
@@ -703,9 +702,9 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }
 
   public async updatePillar(args: {
-    assessmentId: Assessment['id'];
-    organization: User['organizationDomain'];
-    pillarId: Pillar['id'];
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
     pillarBody: PillarBody;
   }) {
     const { assessmentId, organization, pillarId, pillarBody } = args;
