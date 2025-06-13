@@ -685,7 +685,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
-  public assertPillarExist(args: {
+  public assertPillarExists(args: {
     assessment: Assessment;
     pillarId: Pillar['id'];
   }): void {
@@ -720,7 +720,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       });
     }
 
-    this.assertPillarExist({
+    this.assertPillarExists({
       assessment,
       pillarId,
     });
