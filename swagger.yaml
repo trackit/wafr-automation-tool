@@ -313,14 +313,15 @@ paths:
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -727,10 +728,8 @@ components:
       properties:
         none:
           type: boolean
-          nullable: true
         disabled:
           type: boolean
-          nullable: true
     BestPractice:
       type: object
       description: A best practice related to a question and pillar in the assessment

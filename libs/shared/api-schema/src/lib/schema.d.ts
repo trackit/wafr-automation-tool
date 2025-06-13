@@ -296,8 +296,8 @@ export interface components {
             best_practices?: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
-            none?: boolean | null;
-            disabled?: boolean | null;
+            none?: boolean;
+            disabled?: boolean;
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
@@ -700,13 +700,13 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
-                pillarId: number;
+                pillarId: string;
                 /** @description The ID of the question */
-                questionId: number;
+                questionId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["QuestionDto"];
             };
