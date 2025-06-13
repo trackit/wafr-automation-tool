@@ -6,9 +6,9 @@ import { inject } from '@shared/di-container';
 
 import { tokenUpdatePillarUseCase } from '@backend/useCases';
 import { JSONParseError, parseJson } from '@shared/utils';
-import { BadRequestError } from '../../utils/HttpError';
-import { getUserFromEvent } from '../../utils/getUserFromEvent/getUserFromEvent';
-import { handleHttpRequest } from '../../utils/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const UpdatePillarPathSchema = z.object({
   assessmentId: z.string(),

@@ -5,7 +5,7 @@ import {
 } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { APIGatewayProxyEventMother } from '../../utils/APIGatewayProxyEventMother';
+import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { UpdatePillarAdapter } from './UpdatePillarAdapter';
 import { UpdatePillarAdapterEventMother } from './UpdatePillarAdapterEventMother';
 
