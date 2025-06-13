@@ -13,7 +13,7 @@ Parameters:
     Type: String
   LogRetentionInDays:
     Type: Number
-    Default: 7
+    Default: 14
 
 Resources:
   DefaultAssessmentRole:
