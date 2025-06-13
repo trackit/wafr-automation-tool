@@ -739,7 +739,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
-        data: { ...pillarBody },
+        data: pillarBody as Record<string, unknown>,
         UpdateExpressionPath: 'findings.#pillar',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
