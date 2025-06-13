@@ -155,7 +155,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/startAssessment
+      CodeUri: ../apps/backend/src/handlers/api/startAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -193,7 +193,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/getAllAssessments
+      CodeUri: ../apps/backend/src/handlers/api/getAllAssessments
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -233,7 +233,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/getAssessment
+      CodeUri: ../apps/backend/src/handlers/api/getAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -272,7 +272,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/deleteAssessment
+      CodeUri: ../apps/backend/src/handlers/api/deleteAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -317,7 +317,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/updateAssessment
+      CodeUri: ../apps/backend/src/handlers/api/updateAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -357,7 +357,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/rescanAssessment
+      CodeUri: ../apps/backend/src/handlers/api/rescanAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -405,7 +405,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/exportWellArchitectedTool
+      CodeUri: ../apps/backend/src/handlers/api/exportWellArchitectedTool
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -523,7 +523,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/getBestPracticeFindings
+      CodeUri: ../apps/backend/src/handlers/api/getBestPracticeFindings
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -563,7 +563,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/updateBestPractice
+      CodeUri: ../apps/backend/src/handlers/api/updateBestPractice
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
