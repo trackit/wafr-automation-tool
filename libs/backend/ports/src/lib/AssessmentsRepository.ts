@@ -5,6 +5,7 @@ import type {
   Finding,
   FindingBody,
   PillarBody,
+  QuestionBody,
 } from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
@@ -79,5 +80,12 @@ export interface AssessmentsRepository {
     organization: string;
     findingId: string;
     findingBody: FindingBody;
+  }): Promise<void>;
+  updateQuestion(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    questionBody: QuestionBody;
   }): Promise<void>;
 }

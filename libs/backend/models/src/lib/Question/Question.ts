@@ -8,3 +8,8 @@ export interface Question {
   none: boolean;
   primaryId: string;
 }
+
+export interface QuestionBody {
+  disabled?: boolean;
+  none?: boolean;
+}

@@ -1810,6 +1810,218 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(otherFinding).toEqual(expect.objectContaining({ hidden: false }));
     });
   });
+
+  describe('updateQuestion', () => {
+    it('should update a question in an assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withDisabled(false)
+                .withNone(false)
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.updateQuestion({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: 'pillar1',
+        questionId: 'question1',
+        questionBody: {
+          disabled: true,
+          none: true,
+        },
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment?.findings?.[0]?.questions?.[0]).toEqual(
+        expect.objectContaining({ id: 'question1', disabled: true, none: true })
+      );
+    });
+
+    it('should throw a EmptyBodyError if questionBody is empty', async () => {
+      const { repository } = setup();
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withDisabled(false)
+                .withNone(false)
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+      await expect(
+        repository.updateQuestion({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: 'pillar1',
+          questionId: 'question1',
+          questionBody: {},
+        })
+      ).rejects.toThrow(EmptyUpdateBodyError);
+    });
+
+    it('should throw a AssessmentNotFound if assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateQuestion({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: 'pillar1',
+          questionId: 'question1',
+          questionBody: {
+            disabled: true,
+            none: true,
+          },
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw a PillarNotFound if pillar does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateQuestion({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: 'pillar1',
+          questionId: 'question1',
+          questionBody: {
+            disabled: true,
+            none: true,
+          },
+        })
+      ).rejects.toThrow(PillarNotFoundError);
+    });
+
+    it('should throw a QuestionNotFound if question does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic().withId('pillar1').withQuestions([]).build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateQuestion({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: 'pillar1',
+          questionId: 'question1',
+          questionBody: {
+            disabled: true,
+            none: true,
+          },
+        })
+      ).rejects.toThrow(QuestionNotFoundError);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withDisabled(false)
+                .withNone(false)
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization2')
+        .withFindings([
+          PillarMother.basic()
+            .withId('pillar1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question1')
+                .withDisabled(false)
+                .withNone(false)
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment2);
+
+      await repository.updateQuestion({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: 'pillar1',
+        questionId: 'question1',
+        questionBody: {
+          disabled: true,
+          none: true,
+        },
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: 'assessment2',
+        organization: 'organization2',
+      });
+
+      expect(updatedAssessment1?.findings?.[0]?.questions?.[0]).toEqual(
+        expect.objectContaining({ id: 'question1', disabled: true, none: true })
+      );
+      expect(updatedAssessment2?.findings?.[0]?.questions?.[0]).toEqual(
+        expect.objectContaining({
+          id: 'question1',
+          disabled: false,
+          none: false,
+        })
+      );
+    });
+  });
 });
 
 const setup = () => {
