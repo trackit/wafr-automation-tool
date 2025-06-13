@@ -5,7 +5,7 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import type { User } from '@backend/models';
+import type { FindingBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NoContentError, NotFoundError } from '../Errors';
 
@@ -13,9 +13,7 @@ export type UpdateFindingUseCaseArgs = {
   assessmentId: string;
   findingId: string;
   user: User;
-  findingBody: {
-    hidden?: boolean;
-  };
+  findingBody: FindingBody;
 };
 
 export interface UpdateFindingUseCase {
@@ -36,10 +34,7 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
         findingBody,
       })
       .catch((error) => {
-        if (
-          error instanceof AssessmentNotFoundError ||
-          error instanceof FindingNotFoundError
-        ) {
+        if (error instanceof FindingNotFoundError) {
           throw new NotFoundError(error.message);
         } else if (error instanceof EmptyUpdateBodyError) {
           throw new NoContentError('No content to update for finding');

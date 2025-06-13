@@ -1592,27 +1592,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the finding visibility', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withFindings([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
       const finding = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .withHidden(false)
         .build();
@@ -1648,29 +1628,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should throw a EmptyUpdateBodyError in case of empty finding body', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withFindings([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
+      const finding = FindingMother.basic().withId('tool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
         organization: 'organization1',
@@ -1690,25 +1648,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should throw an error if the finding does not exist', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withFindings([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
       await expect(
         repository.updateFinding({
           assessmentId: 'assessment1',
@@ -1724,32 +1663,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should be scoped by organization', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withFindings([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
       const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .withHidden(false)
         .build();
       const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .withHidden(false)
         .build();

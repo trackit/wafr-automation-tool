@@ -4,16 +4,14 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import type { User } from '@backend/models';
+import type { AssessmentBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
   user: User;
-  assessmentBody: {
-    name?: string;
-  };
+  assessmentBody: AssessmentBody;
 };
 
 export interface UpdateAssessmentUseCase {

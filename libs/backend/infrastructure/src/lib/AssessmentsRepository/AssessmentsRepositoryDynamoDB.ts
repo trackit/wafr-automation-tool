@@ -1,6 +1,7 @@
 import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
+  AssessmentBody,
   BestPractice,
   BestPracticeBody,
   DynamoDBAssessment,
@@ -9,6 +10,7 @@ import type {
   DynamoDBPillar,
   DynamoDBQuestion,
   Finding,
+  FindingBody,
   Pillar,
   Question,
 } from '@backend/models';
@@ -808,9 +810,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   public async update(args: {
     assessmentId: string;
     organization: string;
-    assessmentBody: {
-      name?: string;
-    };
+    assessmentBody: AssessmentBody;
   }): Promise<void> {
     const { assessmentId, organization, assessmentBody } = args;
     const assessment = await this.get({ assessmentId, organization });
@@ -834,7 +834,9 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      ...this.buildUpdateExpression({ data: assessmentBody }),
+      ...this.buildUpdateExpression({
+        data: assessmentBody as Record<string, unknown>,
+      }),
     };
     try {
       await this.client.update(params);
@@ -849,9 +851,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     assessmentId: string;
     organization: string;
     findingId: string;
-    findingBody: {
-      hidden?: boolean;
-    };
+    findingBody: FindingBody;
   }): Promise<void> {
     const { assessmentId, organization, findingId, findingBody } = args;
     const finding = await this.getFinding({
@@ -884,7 +884,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: findingId,
       },
       ...this.buildUpdateExpression({
-        data: findingBody,
+        data: findingBody as Record<string, unknown>,
       }),
     };
     try {

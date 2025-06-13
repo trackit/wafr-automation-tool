@@ -1,4 +1,4 @@
-import type { Assessment, User } from '@backend/models';
+import type { User } from '@backend/models';
 import type { UpdateAssessmentUseCaseArgs } from './UpdateAssessmentUseCase';
 
 export class UpdateAssessmentUseCaseArgsMother {
@@ -21,7 +21,7 @@ export class UpdateAssessmentUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: Assessment['id']
+    assessmentId: string
   ): UpdateAssessmentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -32,9 +32,7 @@ export class UpdateAssessmentUseCaseArgsMother {
     return this;
   }
 
-  public withName(
-    name: Partial<Assessment>['name']
-  ): UpdateAssessmentUseCaseArgsMother {
+  public withName(name: string): UpdateAssessmentUseCaseArgsMother {
     this.data.assessmentBody = {
       ...this.data.assessmentBody,
       name,

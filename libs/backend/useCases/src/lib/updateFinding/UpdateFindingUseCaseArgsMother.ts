@@ -1,4 +1,4 @@
-import type { Assessment, Finding, User } from '@backend/models';
+import type { User } from '@backend/models';
 import type { UpdateFindingUseCaseArgs } from './UpdateFindingUseCase';
 
 export class UpdateFindingUseCaseArgsMother {
@@ -22,7 +22,7 @@ export class UpdateFindingUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: Assessment['id']
+    assessmentId: string
   ): UpdateFindingUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -33,7 +33,7 @@ export class UpdateFindingUseCaseArgsMother {
     return this;
   }
 
-  public withHidden(hidden: Finding['hidden']): UpdateFindingUseCaseArgsMother {
+  public withHidden(hidden: boolean): UpdateFindingUseCaseArgsMother {
     this.data.findingBody = {
       ...this.data.findingBody,
       hidden,

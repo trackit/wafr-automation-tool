@@ -1,4 +1,10 @@
-import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
+import type {
+  Assessment,
+  AssessmentBody,
+  BestPracticeBody,
+  Finding,
+  FindingBody,
+} from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
   assessmentId: string;
@@ -51,9 +57,7 @@ export interface AssessmentsRepository {
   update(args: {
     assessmentId: string;
     organization: string;
-    assessmentBody: {
-      name?: string;
-    };
+    assessmentBody: AssessmentBody;
   }): Promise<void>;
   updateBestPractice(args: {
     assessmentId: string;
@@ -67,6 +71,6 @@ export interface AssessmentsRepository {
     assessmentId: string;
     organization: string;
     findingId: string;
-    findingBody: { hidden?: boolean };
+    findingBody: FindingBody;
   }): Promise<void>;
 }

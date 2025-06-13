@@ -1,4 +1,10 @@
-import type { Assessment, BestPracticeBody, Finding } from '@backend/models';
+import type {
+  Assessment,
+  AssessmentBody,
+  BestPracticeBody,
+  Finding,
+  FindingBody,
+} from '@backend/models';
 import type {
   AssessmentsRepository,
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
@@ -242,9 +248,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async update(args: {
     assessmentId: string;
     organization: string;
-    assessmentBody: {
-      name?: string;
-    };
+    assessmentBody: AssessmentBody;
   }): Promise<void> {
     const { assessmentId, organization, assessmentBody } = args;
     const assessmentKey = `${assessmentId}#${organization}`;
@@ -276,14 +280,10 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     assessmentId: string;
     organization: string;
     findingId: string;
-    findingBody: { hidden?: boolean };
+    findingBody: FindingBody;
   }): Promise<void> {
     const { assessmentId, organization, findingId, findingBody } = args;
     const key = `${assessmentId}#${organization}`;
-    const assessment = this.assessments[key];
-    if (!assessment) {
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
     const finding = this.assessmentFindings[key]?.find(
       (f) => f.id === findingId
     );

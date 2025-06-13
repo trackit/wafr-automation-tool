@@ -38,3 +38,7 @@ export enum SeverityType {
   Fatal = 'Fatal',
   Other = 'Other',
 }
+
+export interface FindingBody {
+  hidden?: boolean;
+}
