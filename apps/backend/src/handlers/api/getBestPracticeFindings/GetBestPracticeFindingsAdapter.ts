@@ -45,7 +45,7 @@ export class GetBestPracticeFindingsAdapter {
     findings: Finding[]
   ): operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items'] {
     return findings.map((finding) => ({
-      id: Number(finding.id), // TODO: modify frontend to accept string IDs
+      id: finding.id,
       severity: finding.severity,
       status_code: finding.statusCode,
       status_detail: finding.statusDetail,

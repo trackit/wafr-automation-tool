@@ -113,7 +113,7 @@ function FindingItem({
             <button
               className="btn btn-xs btn-primary btn-outline mt-[-0.5em]"
               onClick={() => {
-                onHide(finding.id?.toString() || '', !finding.hidden);
+                onHide(finding.id || '', !finding.hidden);
                 finding.hidden = !finding.hidden;
               }}
             >
@@ -289,7 +289,7 @@ function FindingsDetails({
       if (newData.results) {
         const findings = newData.results as components['schemas']['Finding'][];
         const updatedFindings = findings.map((finding) =>
-          finding.id && finding.id.toString() === findingId
+          finding.id === findingId
             ? { ...finding, hidden }
             : finding
         );

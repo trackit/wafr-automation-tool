@@ -244,7 +244,7 @@ export interface components {
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
             /** @description Unique identifier of the finding */
-            id?: number;
+            id?: string;
             /** @description Severity level of the finding (e.g., Low, Medium, High) */
             severity?: string;
             /** @description The status of the finding (e.g., MANUAL, FAIL) */

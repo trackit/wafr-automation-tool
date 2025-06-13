@@ -151,9 +151,9 @@ describe('GetBestPracticeFindings adapter', () => {
       const { adapter, useCase } = setup();
       const findings = [
         FindingMother.basic()
+          .withId('scanning-tool#1')
           .withBestPractices('0#0#0')
           .withHidden(false)
-          .withId('1')
           .withIsAiAssociated(false)
           .withMetadata({ eventCode: 'event-code' })
           .withRemediation({
@@ -182,7 +182,7 @@ describe('GetBestPracticeFindings adapter', () => {
       const body = JSON.parse(response.body || '{}');
       expect(body.items[0]).toEqual(
         expect.objectContaining({
-          id: 1, // TODO: modify frontend to accept string IDs
+          id: 'scanning-tool#1',
           severity: SeverityType.Medium,
           status_code: '200',
           status_detail: 'status detail',
