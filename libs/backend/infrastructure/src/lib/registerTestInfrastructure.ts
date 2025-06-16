@@ -9,7 +9,11 @@ import {
   tokenFakeAssessmentsStateMachine,
   tokenStateMachineArn,
 } from './AssessmentsStateMachine';
-import { tokenS3Bucket } from './AssessmentsStorage';
+import {
+  tokenAssessmentsStorage,
+  tokenFakeAssessmentsStorage,
+  tokenS3Bucket,
+} from './AssessmentsStorage';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -31,6 +35,9 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
+  });
+  register(tokenAssessmentsStorage, {
+    useFactory: () => inject(tokenFakeAssessmentsStorage),
   });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenWellArchitectedToolService, {
