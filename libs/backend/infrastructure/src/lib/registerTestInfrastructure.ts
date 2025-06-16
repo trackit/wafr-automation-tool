@@ -9,6 +9,7 @@ import {
   tokenFakeAssessmentsStateMachine,
   tokenStateMachineArn,
 } from './AssessmentsStateMachine';
+import { tokenS3Bucket } from './AssessmentsStorage';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -24,6 +25,7 @@ export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
+  register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
   register(tokenAssessmentsStateMachine, {
     useFactory: () => inject(tokenFakeAssessmentsStateMachine),
   });
