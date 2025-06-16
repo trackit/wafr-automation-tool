@@ -651,7 +651,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
+            Path: /assessments/{assessmentId}/findings/{findingId}
             Method: PUT
     Metadata:
       BuildMethod: esbuild
