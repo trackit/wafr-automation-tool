@@ -41,4 +41,5 @@ export interface AssessmentError {
 
 export interface AssessmentBody {
   name?: string;
+  error?: AssessmentError;
 }
