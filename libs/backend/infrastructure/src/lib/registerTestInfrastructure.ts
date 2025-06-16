@@ -13,11 +13,6 @@ import {
   testDynamoDbConfig,
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
-import {
-  tokenFakeObjectsStorage,
-  tokenObjectsStorage,
-  tokenS3Bucket,
-} from './ObjectsStorage';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
