@@ -15,8 +15,8 @@ import { assertIsDefined } from '@shared/utils';
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
-  InvalidNextTokenError,
   EmptyUpdateBodyError,
+  InvalidNextTokenError,
   PillarNotFoundError,
   QuestionNotFoundError,
   FindingNotFoundError,
@@ -529,6 +529,109 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           questionId: '0',
           bestPracticeId: '0',
           bestPracticeBody: {},
+        })
+      ).rejects.toThrow(EmptyUpdateBodyError);
+    });
+  });
+
+  describe('updatePillar', () => {
+    it('should update the pillar disabled status', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([
+          PillarMother.basic().withId('0').withDisabled(false).build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updatePillar({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          pillarBody: {
+            disabled: true,
+          },
+        })
+      ).resolves.not.toThrow();
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      expect(updatedAssessment?.findings?.[0].disabled).toBe(true);
+    });
+
+    it('should throw AssessmentNotFound if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updatePillar({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          pillarBody: {},
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw AssessmentNotFound if assessment exist for another organization', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization2')
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updatePillar({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          pillarBody: {},
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw PillarNotFoundError if the pillar doesn’t exist in the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updatePillar({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          pillarBody: {},
+        })
+      ).rejects.toThrow(PillarNotFoundError);
+    });
+
+    it('should throw EmptyUpdateBodyError if pillarBody is empty', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withFindings([PillarMother.basic().withId('0').build()])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updatePillar({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          pillarId: '0',
+          pillarBody: {},
         })
       ).rejects.toThrow(EmptyUpdateBodyError);
     });

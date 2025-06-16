@@ -289,9 +289,7 @@ function FindingsDetails({
       if (newData.results) {
         const findings = newData.results as components['schemas']['Finding'][];
         const updatedFindings = findings.map((finding) =>
-          finding.id === findingId
-            ? { ...finding, hidden }
-            : finding
+          finding.id === findingId ? { ...finding, hidden } : finding
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type

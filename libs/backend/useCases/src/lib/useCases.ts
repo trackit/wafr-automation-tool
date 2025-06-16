@@ -9,3 +9,4 @@ export * from './startAssessment';
 export * from './updateAssessment';
 export * from './updateBestPractice';
 export * from './updateFinding';
+export * from './updatePillar';

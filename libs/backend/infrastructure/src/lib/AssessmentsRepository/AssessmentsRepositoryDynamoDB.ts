@@ -12,6 +12,7 @@ import type {
   Finding,
   FindingBody,
   Pillar,
+  PillarBody,
   Question,
 } from '@backend/models';
 import {
@@ -679,6 +680,76 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       await this.client.update(params);
     } catch (error) {
       this.logger.error(`Failed to update best practice: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public assertPillarExists(args: {
+    assessment: Assessment;
+    pillarId: string;
+  }): void {
+    const { assessment, pillarId } = args;
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        pillarId,
+      });
+    }
+  }
+
+  public async updatePillar(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    pillarBody: PillarBody;
+  }) {
+    const { assessmentId, organization, pillarId, pillarBody } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment pillar: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organization,
+      });
+    }
+
+    this.assertPillarExists({
+      assessment,
+      pillarId,
+    });
+
+    if (Object.keys(pillarBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
+      );
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({
+        data: pillarBody as Record<string, unknown>,
+        UpdateExpressionPath: 'findings.#pillar',
+        DefaultExpressionAttributeNames: {
+          '#pillar': pillarId,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+    } catch (error) {
+      this.logger.error(`Failed to update pillar: ${error}`, params);
       throw error;
     }
   }

@@ -286,7 +286,7 @@ export interface components {
             questions?: components["schemas"]["Question"][];
         };
         PillarDto: {
-            disabled?: boolean | null;
+            disabled?: boolean;
         };
         Question: {
             id?: string;
@@ -652,11 +652,11 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar */
-                pillarId: number;
+                pillarId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["PillarDto"];
             };
