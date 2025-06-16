@@ -14,8 +14,6 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
-  Repository:
-    Type: String
   InitialUserEmail:
     Type: String
   LogRetentionInDays:
@@ -154,8 +152,23 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         ParentStackName: !Ref AWS::StackName
-        Repository: !Ref Repository
-        ApiEndpoint: !GetAtt Api.Outputs.ApiEndpoint
-        UserPoolId: !GetAtt Api.Outputs.UserPoolId
-        IdentityPoolId: !GetAtt Api.Outputs.IdentityPoolId
-        UserPoolClientId: !GetAtt Api.Outputs.UserPoolClientId
+
+Outputs:
+  ApiEndpoint:
+    Description: API Endpoint
+    Value: !GetAtt Api.Outputs.ApiEndpoint
+  CognitoUserPoolId:
+    Description: User Pool ID
+    Value: !GetAtt Api.Outputs.UserPoolId
+  CognitoUserPoolClientId:
+    Description: User Pool Client ID
+    Value: !GetAtt Api.Outputs.UserPoolClientId
+  CognitoIdentityPoolId:
+    Description: Identity Pool ID
+    Value: !GetAtt Api.Outputs.IdentityPoolId
+  CloudFrontS3BucketName:
+    Description: CloudFront S3 Bucket Name
+    Value: !GetAtt Frontend.Outputs.S3BucketName
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !GetAtt Frontend.Outputs.DistributionId

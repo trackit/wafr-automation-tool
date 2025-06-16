@@ -32,33 +32,3 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
-
-[dev.deploy.parameters]
-stack_name = "wafr-automation-tool-dev"
-resolve_s3 = true
-s3_prefix = "wafr-automation-tool-dev"
-region = "us-west-2"
-confirm_changeset = true
-capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
-image_repositories = []
-parameter_overrides = [
-  "Owner=TrackIt",
-  "Debug=true",
-  "Repository=https://github.com/trackit/wafr-automation-tool",
-  "InitialUserEmail=contact@example.com",
-]
-
-[prod.deploy.parameters]
-stack_name = "wafr-automation-tool-prod"
-resolve_s3 = true
-s3_prefix = "wafr-automation-tool-prod"
-region = "us-west-2"
-confirm_changeset = true
-capabilities = ["CAPABILITY_IAM", "CAPABILITY_AUTO_EXPAND"]
-image_repositories = []
-parameter_overrides = [
-  "Owner=TrackIt",
-  "Repository=https://github.com/trackit/wafr-automation-tool",
-  "InitialUserEmail=contact@example.com",
-]
-

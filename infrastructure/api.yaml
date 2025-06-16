@@ -670,9 +670,9 @@ Outputs:
   UserPoolId:
     Description: User Pool ID
     Value: !Ref UserPool
-  IdentityPoolId:
-    Description: Identity Pool ID
-    Value: !Ref IdentityPool
   UserPoolClientId:
     Description: User Pool Client ID
     Value: !Ref UserPoolClient
+  IdentityPoolId:
+    Description: Identity Pool ID
+    Value: !Ref IdentityPool

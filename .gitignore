@@ -562,7 +562,7 @@ $RECYCLE.BIN/
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
-.env.test
+.env.*
 
 .idea
 
