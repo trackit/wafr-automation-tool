@@ -12,9 +12,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const updateFindingPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),
-  findingId: z
-    .string()
-    .regex(/.+#.+/, 'Invalid scanning tool finding ID format'),
+  findingId: z.string(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
 const updateFindingBodySchema = z.object({
@@ -60,7 +58,7 @@ export class UpdateFindingAdapter {
       await this.useCase.updateFinding({
         user: getUserFromEvent(event),
         assessmentId,
-        findingId,
+        findingId: decodeURIComponent(findingId),
         findingBody,
       });
     } catch (error) {
