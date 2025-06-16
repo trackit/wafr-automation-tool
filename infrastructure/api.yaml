@@ -461,7 +461,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/updatePillar
+      CodeUri: ../apps/backend/src/handlers/api/updatePillar
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
