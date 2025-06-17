@@ -30,6 +30,6 @@ export interface DynamoDBAssessmentGraphDatas {
 }
 
 export interface DynamoDBAssessmentError {
-  Cause: string;
-  Error: string;
+  cause: string;
+  error: string;
 }

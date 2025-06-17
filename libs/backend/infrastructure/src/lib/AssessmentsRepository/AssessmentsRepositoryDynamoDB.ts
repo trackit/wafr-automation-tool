@@ -282,8 +282,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       workflows: assessment.workflows,
       ...(assessment.error && {
         error: {
-          cause: assessment.error.Cause,
-          error: assessment.error.Error,
+          cause: assessment.error.cause,
+          error: assessment.error.error,
         },
       }),
     };

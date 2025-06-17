@@ -1,10 +1,11 @@
 import {
   tokenAssessmentsRepository,
-  tokenAssessmentsStorage,
   tokenLogger,
+  tokenObjectStorage,
 } from '@backend/infrastructure';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
+import { format } from 'util';
 import { NotFoundError } from '../Errors';
 
 export type StateMachineError = {
@@ -22,15 +23,25 @@ export interface CleanupUseCase {
   execute(args: CleanupUseCaseArgs): Promise<void>;
 }
 
+export const ASSESSMENTS_PATH = 'assessments/%s';
+
 export class CleanupUseCaseImpl implements CleanupUseCase {
-  private readonly assessmentsStorage = inject(tokenAssessmentsStorage);
+  private readonly assessmentsStorage = inject(tokenObjectStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly logger = inject(tokenLogger);
-  public debug = inject(tokenDebug);
+  private readonly debug = inject(tokenDebug);
 
   public async execute(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
-      this.assessmentsStorage.delete(args.assessmentId);
+      const listObjects = await this.assessmentsStorage.list({
+        prefix: format(ASSESSMENTS_PATH, args.assessmentId),
+      });
+      this.logger.info(`Deleting assessment: ${listObjects}`);
+      if (listObjects.length !== 0) {
+        this.assessmentsStorage.bulkDelete({
+          keys: listObjects,
+        });
+      }
       this.logger.info(`Debug mode is disabled, deleting assessment`);
     }
     if (args.error) {
@@ -48,6 +59,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
           assessmentId: assessment.id,
           organization: assessment.organization,
         });
+        this.logger.info(`Deleting findings for assessment ${assessment.id}`);
       }
       await this.assessmentsRepository.update({
         assessmentId: assessment.id,
@@ -59,6 +71,9 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
           },
         },
       });
+      this.logger.info(
+        `Updating assessment ${assessment.id} with error ${args.error.Error} caused by ${args.error.Cause}`
+      );
     }
   }
 }
