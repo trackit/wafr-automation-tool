@@ -5,4 +5,4 @@ const adapter = new CleanupAdapter();
 
 export const main = async (
   event: z.infer<typeof CleanupInput>
-): Promise<CleanupOutput> => adapter.handle(event);
+): Promise<CleanupOutput> => await adapter.handle(event);
