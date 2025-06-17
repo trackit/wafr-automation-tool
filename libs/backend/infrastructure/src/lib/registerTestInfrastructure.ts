@@ -10,20 +10,20 @@ import {
   tokenStateMachineArn,
 } from './AssessmentsStateMachine';
 import {
-  tokenAssessmentsStorage,
-  tokenFakeAssessmentsStorage,
-  tokenS3Bucket,
-} from './AssessmentsStorage';
+  testDynamoDbConfig,
+  tokenDynamoDBConfig,
+} from './config/dynamodb/config';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
+import {
+  tokenFakeObjectStorage,
+  tokenObjectStorage,
+  tokenS3Bucket,
+} from './ObjectStorage';
 import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
 } from './WellArchitectedToolService';
-import {
-  testDynamoDbConfig,
-  tokenDynamoDBConfig,
-} from './config/dynamodb/config';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
@@ -36,8 +36,8 @@ export const registerTestInfrastructure = () => {
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
   });
-  register(tokenAssessmentsStorage, {
-    useFactory: () => inject(tokenFakeAssessmentsStorage),
+  register(tokenObjectStorage, {
+    useFactory: () => inject(tokenFakeObjectStorage),
   });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenWellArchitectedToolService, {
