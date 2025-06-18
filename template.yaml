@@ -14,10 +14,11 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
-  Repository:
-    Type: String
   InitialUserEmail:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Resources:
   SharedLibs:
@@ -43,10 +44,16 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
+        StateMachineName:
+          !Select [
+            6,
+            !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
+          ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
         SharedLibsLayer: !Ref SharedLibs
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
+        LogRetentionInDays: !Ref LogRetentionInDays
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -71,6 +78,7 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref 'AWS::StackName'
         S3BucketName: !Ref S3Bucket
+        LogRetentionInDays: !Ref LogRetentionInDays
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:
@@ -97,6 +105,7 @@ Resources:
         CloudSploitTaskRole: !GetAtt ScanningTools.Outputs.CloudSploitTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
+        LogRetentionInDays: !Ref LogRetentionInDays
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -143,8 +152,23 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         ParentStackName: !Ref AWS::StackName
-        Repository: !Ref Repository
-        ApiEndpoint: !GetAtt Api.Outputs.ApiEndpoint
-        UserPoolId: !GetAtt Api.Outputs.UserPoolId
-        IdentityPoolId: !GetAtt Api.Outputs.IdentityPoolId
-        UserPoolClientId: !GetAtt Api.Outputs.UserPoolClientId
+
+Outputs:
+  ApiEndpoint:
+    Description: API Endpoint
+    Value: !GetAtt Api.Outputs.ApiEndpoint
+  CognitoUserPoolId:
+    Description: User Pool ID
+    Value: !GetAtt Api.Outputs.UserPoolId
+  CognitoUserPoolClientId:
+    Description: User Pool Client ID
+    Value: !GetAtt Api.Outputs.UserPoolClientId
+  CognitoIdentityPoolId:
+    Description: Identity Pool ID
+    Value: !GetAtt Api.Outputs.IdentityPoolId
+  CloudFrontS3BucketName:
+    Description: CloudFront S3 Bucket Name
+    Value: !GetAtt Frontend.Outputs.S3BucketName
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !GetAtt Frontend.Outputs.DistributionId

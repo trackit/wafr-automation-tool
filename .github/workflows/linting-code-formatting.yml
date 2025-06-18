@@ -1,4 +1,4 @@
-name: "Linting and Code Formatting check"
+name: 'Linting and Code Formatting check'
 on:
   pull_request:
   push:
@@ -6,19 +6,47 @@ on:
       - main
 
 jobs:
-  ruff-lint:
+  py-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          args: "check"
-          src: "./backend"
-  ruff-format:
+          args: 'check'
+          src: './backend'
+  py-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          args: "format --check"
-          src: "./backend"
+          args: 'format --check'
+          src: './backend'
+  ts-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node and cache dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      - name: Run linting
+        run: npm run lint
+  ts-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node and cache dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      - name: Run formatting
+        run: npm run format:check

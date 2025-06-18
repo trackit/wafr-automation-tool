@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Scanning Tools
 
@@ -11,30 +11,33 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Resources:
   DefaultAssessmentRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               AWS: !GetAtt ProwlerTaskRole.Arn
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
           - Effect: Allow
             Principal:
               AWS: !GetAtt CloudCustodianTaskRole.Arn
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
           - Effect: Allow
             Principal:
               AWS: !GetAtt CloudSploitTaskRole.Arn
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSTaskPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Sid: AllowMoreReadOnly
                 Effect: Allow
@@ -102,7 +105,7 @@ Resources:
                   - voiceid:ListDomains
                   - wellarchitected:List*
                   - wisdom:ListAssistants
-                Resource: "*"
+                Resource: '*'
               - Sid: AllowAPIGatewayReadOnly
                 Effect: Allow
                 Action:
@@ -116,7 +119,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub "${ParentStackName}-ecs-cluster"
+      ClusterName: !Sub '${ParentStackName}-ecs-cluster'
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -128,16 +131,16 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSExecutionPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
@@ -147,42 +150,42 @@ Resources:
                   - ecr:BatchGetImage
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*"
+                Resource: '*'
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/ecs/${ParentStackName}-logs"
-      RetentionInDays: 14
+      LogGroupName: !Sub '/ecs/${ParentStackName}-logs'
+      RetentionInDays: !Ref LogRetentionInDays
   ProwlerTaskRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSTaskPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+                  - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
-                Resource: "*"
+                Resource: '*'
   ProwlerTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub "${ParentStackName}-prowler"
-      Cpu: "2048"
-      Memory: "4096"
+      Family: !Sub '${ParentStackName}-prowler'
+      Cpu: '2048'
+      Memory: '4096'
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -190,15 +193,15 @@ Resources:
       TaskRoleArn: !GetAtt ProwlerTaskRole.Arn
       ContainerDefinitions:
         - Name: prowler-container
-          Image: "toniblyx/prowler:5.1.5"
+          Image: 'toniblyx/prowler:5.1.5'
           Essential: true
           Cpu: 2048
           Memory: 4096
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
-              awslogs-region: !Ref "AWS::Region"
+              awslogs-group: !Sub '/ecs/${ParentStackName}-logs'
+              awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: prowler
               mode: non-blocking
               max-buffer-size: 25m
@@ -206,8 +209,8 @@ Resources:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
           EntryPoint:
-            - "/bin/sh"
-            - "-c"
+            - '/bin/sh'
+            - '-c'
           Command:
             - prowler
               aws
@@ -231,16 +234,16 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSTaskPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
@@ -248,17 +251,17 @@ Resources:
                   - s3:HeadObject
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+                  - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
-                Resource: "*"
+                Resource: '*'
   CloudCustodianTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub "${ParentStackName}-cloud-custodian"
-      Cpu: "1024"
-      Memory: "4096"
+      Family: !Sub '${ParentStackName}-cloud-custodian'
+      Cpu: '1024'
+      Memory: '4096'
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -273,8 +276,8 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
-              awslogs-region: !Ref "AWS::Region"
+              awslogs-group: !Sub '/ecs/${ParentStackName}-logs'
+              awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: cloud-custodian
               mode: non-blocking
               max-buffer-size: 25m
@@ -282,8 +285,8 @@ Resources:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
           EntryPoint:
-            - "/bin/bash"
-            - "-c"
+            - '/bin/bash'
+            - '-c'
           Command:
             - >-
               aws s3 cp $POLICIES_URI /tmp/policies.yml
@@ -294,33 +297,33 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: "sts:AssumeRole"
+            Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSTaskPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+                  - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
-                Resource: "*"
+                Resource: '*'
   CloudSploitTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub "${ParentStackName}-cloudsploit"
-      Cpu: "1024"
-      Memory: "4096"
+      Family: !Sub '${ParentStackName}-cloudsploit'
+      Cpu: '1024'
+      Memory: '4096'
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -328,15 +331,15 @@ Resources:
       TaskRoleArn: !GetAtt CloudSploitTaskRole.Arn
       ContainerDefinitions:
         - Name: cloudsploit-container
-          Image: "576872909007.dkr.ecr.us-west-2.amazonaws.com/wafr-automation-tool/cloudsploit@sha256:14ef2534a6c0920c5efb5944eb82b1154b31af769e48886cb4d6d580c024263c"
+          Image: '576872909007.dkr.ecr.us-west-2.amazonaws.com/wafr-automation-tool/cloudsploit@sha256:14ef2534a6c0920c5efb5944eb82b1154b31af769e48886cb4d6d580c024263c'
           Essential: true
           Cpu: 1024
           Memory: 4096
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Sub "/ecs/${ParentStackName}-logs"
-              awslogs-region: !Ref "AWS::Region"
+              awslogs-group: !Sub '/ecs/${ParentStackName}-logs'
+              awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: cloudsploit
               mode: non-blocking
               max-buffer-size: 25m
@@ -344,8 +347,8 @@ Resources:
             - Name: S3_BUCKET
               Value: !Ref S3BucketName
           EntryPoint:
-            - "/bin/bash"
-            - "-c"
+            - '/bin/bash'
+            - '-c'
           Command:
             - >-
               (eval "$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name "cloudsploit-session" --query 'Credentials.{AWS_ACCESS_KEY_ID:AccessKeyId,AWS_SECRET_ACCESS_KEY:SecretAccessKey,AWS_SESSION_TOKEN:SessionToken}' --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1 "\nexport AWS_SECRET_ACCESS_KEY="$2 "\nexport AWS_SESSION_TOKEN="$3}')"

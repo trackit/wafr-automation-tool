@@ -89,6 +89,7 @@ paths:
               type: object
               required:
                 - name
+                - roleArn
               properties:
                 name:
                   type: string
@@ -121,7 +122,7 @@ paths:
                 type: object
                 properties:
                   assessment_id:
-                    type: integer
+                    type: string
                     description: The unique ID of the newly created assessment
         '400':
           description: Bad Request. Missing or invalid parameters were provided. Or a issue occurred while trying to retrieve the organization of the user or the user id
@@ -142,7 +143,7 @@ paths:
           description: The unique ID of the assessment to retrieve
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: Detailed information about the specified assessment
@@ -167,8 +168,9 @@ paths:
           description: The unique ID of the assessment to update
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -176,6 +178,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully updated
+        '204':
+          description: The assessment has no fields to update
         '400':
           description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
@@ -195,7 +199,7 @@ paths:
           description: The unique ID of the assessment to rescan
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: The assessment has been successfully rescanned
@@ -219,7 +223,7 @@ paths:
           description: The unique ID of the assessment to delete
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: The assessment has been successfully deleted
@@ -237,17 +241,11 @@ paths:
       summary: Export the assessment to Well Architected Tool
       description: |
         Exports the assessment to Well Architected Tool.
-        You can specify an owner for the workload and a name for the assessment.
       parameters:
         - name: assessmentId
           in: path
           description: The unique ID of the assessment to export
           required: true
-          schema:
-            type: integer
-        - name: owner
-          in: query
-          description: The owner of the workload
           schema:
             type: string
       responses:
@@ -273,14 +271,15 @@ paths:
           required: true
           description: The ID of the assessment
           schema:
-            type: integer
+            type: string
         - name: pillarId
           in: path
           required: true
           description: The ID of the pillar
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -308,20 +307,21 @@ paths:
           required: true
           description: The ID of the assessment
           schema:
-            type: integer
+            type: string
         - name: pillarId
           in: path
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -349,32 +349,63 @@ paths:
           required: true
           description: The ID of the assessment
           schema:
-            type: integer
+            type: string
         - name: pillarId
           in: path
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question to retrieve the best practices to
           schema:
-            type: integer
+            type: string
         - name: bestPracticeId
           in: path
           required: true
           description: The ID of the best practice to retrieve findings to
           schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of assessments to return
+          schema:
             type: integer
+            default: 100
+        - name: search
+          in: query
+          description: 'Search term to filter assessments by name, role ARN, or id'
+          schema:
+            type: string
+        - name: show_hidden
+          in: query
+          description: 'Show hidden findings'
+          schema:
+            type: boolean
+        - name: next_token
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of findings related to the specified best practice
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BestPracticeExtra'
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Finding'
+                  next_token:
+                    type: string
+                    description: |
+                      Token for pagination. If there are more findings than can be returned in a single response,
+                      this token will allow you to retrieve the next set of results.
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
@@ -392,26 +423,27 @@ paths:
           required: true
           description: The ID of the assessment
           schema:
-            type: integer
+            type: string
         - name: pillarId
           in: path
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question to update the best practice to
           schema:
-            type: integer
+            type: string
         - name: bestPracticeId
           in: path
           required: true
           description: The ID of the best practice
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -419,63 +451,12 @@ paths:
       responses:
         '200':
           description: The best practice has been successfully updated
+        '204':
+          description: The best practice has no fields to update
         '400':
           description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment, pillar, question, or best practice could not be found
-        '500':
-          description: Internal server error.
-  '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}':
-    put:
-      operationId: updateFinding
-      tags:
-        - Best Practices
-      summary: Update the details of a specific finding
-      description: |
-        Updates the details of a specific finding.
-      parameters:
-        - name: assessmentId
-          in: path
-          required: true
-          description: The ID of the assessment to which the finding belongs
-          schema:
-            type: integer
-        - name: pillarId
-          in: path
-          required: true
-          description: The ID of the pillar under which the question falls
-          schema:
-            type: integer
-        - name: questionId
-          in: path
-          required: true
-          description: The ID of the question to update the best practice to
-          schema:
-            type: integer
-        - name: bestPracticeId
-          in: path
-          required: true
-          description: The ID of the best practice to update the status to
-          schema:
-            type: integer
-        - name: findingId
-          in: path
-          required: true
-          description: The unique ID of the finding to retrieve
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FindingDto'
-      responses:
-        '200':
-          description: The finding has been successfully updated
-        '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
-        '404':
-          description: The specified assessment could not be found
         '500':
           description: Internal server error.
   '/assessments/{assessmentId}/findings/{findingId}':
@@ -493,7 +474,7 @@ paths:
           required: true
           description: The ID of the assessment to which the finding belongs
           schema:
-            type: integer
+            type: string
         - name: findingId
           in: path
           required: true
@@ -511,6 +492,43 @@ paths:
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment or finding could not be found
+        '500':
+          description: Internal server error.
+    put:
+      operationId: updateFinding
+      tags:
+        - Findings
+      summary: Update the details of a specific finding
+      description: |
+        Updates the details of a specific finding.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindingDto'
+      responses:
+        '200':
+          description: The finding has been successfully updated
+        '204':
+          description: The finding has no fields to update
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
         '500':
           description: Internal server error.
 components:
@@ -548,23 +566,6 @@ components:
         created_at:
           type: string
           description: ISO-formatted date when the assessment was created
-        graph_datas:
-          type: object
-          description: Processed data from the scanning tools
-          additionalProperties: false
-          properties:
-            regions:
-              type: object
-              description: Regions where findings were found
-            resource_types:
-              type: object
-              description: Resource types where findings were found
-            severities:
-              type: object
-              description: Severity levels where findings were found
-            findings:
-              type: integer
-              description: Total number of findings
         step:
           type: string
           description: Current step in the assessment process
@@ -576,9 +577,6 @@ components:
             - ERRORED
         error:
           $ref: '#/components/schemas/AssessmentError'
-        question_version:
-          type: string
-          description: The version of questions that were used for the assessment
     AssessmentContent:
       type: object
       allOf:
@@ -589,6 +587,26 @@ components:
               description: A list of findings associated with the assessment
               items:
                 $ref: '#/components/schemas/Pillar'
+            question_version:
+              type: string
+              description: The version of questions that were used for the assessment
+            graph_datas:
+              type: object
+              description: Processed data from the scanning tools
+              additionalProperties: false
+              properties:
+                regions:
+                  type: object
+                  description: Regions where findings were found
+                resource_types:
+                  type: object
+                  description: Resource types where findings were found
+                severities:
+                  type: object
+                  description: Severity levels where findings were found
+                findings:
+                  type: integer
+                  description: Total number of findings
     AssessmentError:
       type: object
       nullable: true
@@ -603,17 +621,13 @@ components:
       properties:
         name:
           type: string
-          nullable: true
-        role_arn:
-          type: string
-          nullable: true
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'
       additionalProperties: false
       properties:
         id:
-          type: integer
+          type: string
           description: Unique identifier of the finding
         severity:
           type: string
@@ -674,7 +688,6 @@ components:
       properties:
         hidden:
           type: boolean
-          nullable: true
     Pillar:
       type: object
       additionalProperties: false
@@ -694,7 +707,6 @@ components:
       properties:
         disabled:
           type: boolean
-          nullable: true
     Question:
       type: object
       additionalProperties: false
@@ -716,10 +728,8 @@ components:
       properties:
         none:
           type: boolean
-          nullable: true
         disabled:
           type: boolean
-          nullable: true
     BestPractice:
       type: object
       description: A best practice related to a question and pillar in the assessment
@@ -732,18 +742,19 @@ components:
         risk:
           type: string
           enum:
-            - High
-            - Medium
+            - Unknown
+            - Informational
             - Low
+            - Medium
+            - High
+            - Critical
+            - Fatal
+            - Other
         description:
           type: string
-        status:
+        checked:
           type: boolean
         results:
-          type: array
-          items:
-            type: string
-        hidden_results:
           type: array
           items:
             type: string
@@ -760,6 +771,5 @@ components:
     BestPracticeDto:
       type: object
       properties:
-        status:
+        checked:
           type: boolean
-          nullable: true

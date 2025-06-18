@@ -1,7 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { getFindings, hideFinding } from '@webui/api-client';
 import { components } from '@shared/api-schema';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useDebounce } from '@uidotdev/usehooks';
+import { getFindings, hideFinding } from '@webui/api-client';
 import { Earth, FileCheck, Info, Search, Server } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -70,6 +75,23 @@ function FindingItem({
   searchQuery: string;
   onHide: (findingId: string, hidden: boolean) => void;
 }) {
+  const remediations = useMemo(() => {
+    const isUrl = (str: string) => {
+      try {
+        new URL(str);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    let refs = finding.remediation?.references ?? [];
+    if (!refs.length) return null;
+    refs = refs.filter((ref) => ref !== 'No command available.');
+    const urls = refs.filter(isUrl);
+    const nonUrls = refs.filter((ref) => !isUrl(ref));
+    return { urls, nonUrls };
+  }, [finding.remediation?.references]);
+
   return (
     <div className="w-full px-8 py-8 border-b border-base-content/30">
       <div className="flex flex-row gap-2 items-start">
@@ -90,9 +112,10 @@ function FindingItem({
           >
             <button
               className="btn btn-xs btn-primary btn-outline mt-[-0.5em]"
-              onClick={() =>
-                onHide(finding.id?.toString() || '', !finding.hidden)
-              }
+              onClick={() => {
+                onHide(finding.id || '', !finding.hidden);
+                finding.hidden = !finding.hidden;
+              }}
             >
               <FileCheck className="w-4 h-4 " />
             </button>
@@ -133,18 +156,34 @@ function FindingItem({
             <p className="text-sm text-base-content">
               {highlightText(finding.remediation.desc, searchQuery)}
             </p>
-            <div className="flex flex-row gap-2 items-center">
-              {finding.remediation.references?.map((reference, index) => (
-                <a
-                  href={reference}
-                  className="text-sm underline text-primary"
-                  key={index}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Reference {index + 1}
-                </a>
-              ))}
+            <div className="flex flex-col gap-2">
+              {remediations?.nonUrls.length ? (
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-base-content">Commands:</p>
+                  {remediations?.nonUrls.map((reference, index) => {
+                    return (
+                      <p className="bg-gray-100 rounded-md pl-3 pr-3 p-1 text-sm text-base-content">
+                        {reference}
+                      </p>
+                    );
+                  })}
+                </div>
+              ) : null}
+              <div className="flex flex-row gap-2 items-center">
+                {remediations?.urls.map((reference, index) => {
+                  return (
+                    <a
+                      href={reference}
+                      className="text-sm underline text-primary"
+                      key={index}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Reference {index + 1}
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -159,26 +198,41 @@ function FindingsDetails({
   pillarId,
   questionId,
 }: FindingsDetailsProps) {
-  const [showHidden, setShowHidden] = useState(false);
   const queryClient = useQueryClient();
+  const [showHidden, setShowHidden] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const findingsListRef = useRef<HTMLDivElement>(null);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  useEffect(() => {
-    if (findingsListRef.current) {
-      findingsListRef.current.scrollTop = 0;
-    }
-  }, [searchQuery]);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: [
+        'findings',
+        assessmentId,
+        pillarId,
+        questionId,
+        bestPractice.id,
+        debouncedSearchQuery,
+        showHidden,
+      ],
+      queryFn: ({ pageParam }) =>
+        getFindings(
+          assessmentId,
+          pillarId,
+          questionId,
+          bestPractice.id || '',
+          100,
+          debouncedSearchQuery,
+          showHidden,
+          pageParam
+        ),
+      getNextPageParam: (lastPage) => lastPage.next_token,
+      initialPageParam: '',
+    });
 
-  const { data, isLoading } = useQuery<
-    components['schemas']['BestPracticeExtra']
-  >({
-    queryKey: ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-    queryFn: () =>
-      getFindings(assessmentId, pillarId, questionId, bestPractice.id || ''),
-  });
+  const findings = useMemo(() => {
+    return data?.pages.flatMap((page) => page.items || []) || [];
+  }, [data]);
 
-  const findings: components['schemas']['Finding'][] = data?.results || [];
   const sortedFindings = useMemo(() => {
     return findings.sort((a, b) => {
       // Sort findings with remediation to the top
@@ -187,37 +241,6 @@ function FindingsDetails({
       return 0;
     });
   }, [findings]);
-
-  const filteredFindings = useMemo(() => {
-    return sortedFindings.filter((finding) => {
-      if (!showHidden && finding.hidden) return false;
-      if (!searchQuery) return true;
-
-      const searchLower = searchQuery.toLowerCase();
-
-      // Search through status detail
-      if (finding.status_detail?.toLowerCase().includes(searchLower))
-        return true;
-
-      // Search through risk details
-      if (finding.risk_details?.toLowerCase().includes(searchLower))
-        return true;
-
-      // Search through resources
-      if (
-        finding.resources?.some(
-          (resource) =>
-            resource.name?.toLowerCase().includes(searchLower) ||
-            resource.uid?.toLowerCase().includes(searchLower) ||
-            resource.region?.toLowerCase().includes(searchLower)
-        )
-      )
-        return true;
-
-      // Search through remediation
-      return !!finding.remediation?.desc?.toLowerCase().includes(searchLower);
-    });
-  }, [sortedFindings, showHidden, searchQuery]);
 
   const { mutate } = useMutation({
     mutationFn: ({
@@ -229,9 +252,6 @@ function FindingsDetails({
     }) =>
       hideFinding({
         assessmentId,
-        pillarId,
-        questionId,
-        bestPracticeId: bestPractice.id || '',
         findingId,
         hide: hidden,
       }),
@@ -269,9 +289,7 @@ function FindingsDetails({
       if (newData.results) {
         const findings = newData.results as components['schemas']['Finding'][];
         const updatedFindings = findings.map((finding) =>
-          finding.id && finding.id.toString() === findingId
-            ? { ...finding, hidden }
-            : finding
+          finding.id === findingId ? { ...finding, hidden } : finding
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type
@@ -315,20 +333,29 @@ function FindingsDetails({
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
-    count: filteredFindings.length,
+    count: sortedFindings.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 150,
     overscan: 5,
   });
 
-  console.log(showHidden);
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-full py-8">
-        <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
-      </div>
-    );
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    if (virtualItems.length === 0) return;
+    const lastItem = virtualItems[virtualItems.length - 1];
+    if (lastItem.index >= sortedFindings.length - 10) {
+      fetchNextPage();
+    }
+  }, [
+    virtualItems,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    sortedFindings.length,
+  ]);
+
   return (
     <div className="flex flex-col h-[95vh]">
       <div className="flex flex-col gap-2 px-8 py-4 border-b border-base-content/30">
@@ -343,7 +370,7 @@ function FindingsDetails({
             />
             Show resolved
           </label>
-          {data?.risk && <SeverityBadge severity={data?.risk} />}
+          {bestPractice.risk && <SeverityBadge severity={bestPractice.risk} />}
         </div>
         <label className="input w-full flex flex-row gap-2 items-center">
           <Search className="h-[1em] opacity-50" />
@@ -364,7 +391,7 @@ function FindingsDetails({
             position: 'relative',
           }}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+          {virtualItems.map((virtualRow) => (
             <div
               key={virtualRow.key}
               data-index={virtualRow.index}
@@ -378,18 +405,24 @@ function FindingsDetails({
               }}
             >
               <FindingItem
-                finding={filteredFindings[virtualRow.index]}
+                finding={sortedFindings[virtualRow.index]}
                 searchQuery={searchQuery}
                 onHide={(findingId, hidden) => mutate({ findingId, hidden })}
               />
             </div>
           ))}
         </div>
-        {filteredFindings.length === 0 && (
+        {sortedFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
-            <p className="text-sm text-base-content/80">
-              No findings found for "{searchQuery}"
-            </p>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full py-8">
+                <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+              </div>
+            ) : (
+              <p className="text-sm text-base-content/80">
+                No findings found for "{searchQuery}"
+              </p>
+            )}
           </div>
         )}
       </div>

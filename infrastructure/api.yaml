@@ -9,6 +9,8 @@ Parameters:
     Type: String
   StateMachineArn:
     Type: String
+  StateMachineName:
+    Type: String
   DynamoDBArn:
     Type: String
   SharedLibsLayer:
@@ -17,6 +19,9 @@ Parameters:
     Type: String
   InitialUserEmail:
     Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
 
 Globals:
   Function:
@@ -139,12 +144,18 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         Name: APIGateway
+
+  StartAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${StartAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/start_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/startAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -162,16 +173,31 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
-  RetrieveAllAssessmentsFunction:
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetAllAssessmentsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAllAssessmentsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetAllAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_all_assessments/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/getAllAssessments
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveAllAssessmentsFunction
+        Name: GetAllAssessmentsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -181,22 +207,37 @@ Resources:
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPractice:
+        GetAllAssessments:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments
             Method: GET
-  RetrieveAssessmentFunction:
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/getAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveAssessmentFunction
+        Name: GetAssessmentFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -211,12 +252,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  DeleteAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeleteAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/delete_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/deleteAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -225,17 +281,8 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action:
-                - states:StopExecution
-              Resource: !Join
-                - ''
-                - - 'arn:aws:states:'
-                  - !Ref 'AWS::Region'
-                  - ':'
-                  - !Ref 'AWS::AccountId'
-                  - ':execution:'
-                  - !Select [6, !Split [':', !Ref StateMachineArn]]
-                  - ':*'
+              Action: states:StopExecution
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
             - Effect: Allow
               Action:
                 - dynamodb:DeleteItem
@@ -250,12 +297,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  UpdateAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updateAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -275,12 +337,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  RescanAssessmentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RescanAssessmentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/rescan_assessment/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/rescanAssessment
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -298,6 +375,9 @@ Resources:
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
+            - Effect: Allow
+              Action: states:StopExecution
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
       Events:
         RescanAssessment:
           Type: Api
@@ -305,12 +385,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  ExportAssessmentWellArchitectedToolLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ExportAssessmentWellArchitectedToolFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/export_well_architected_tool/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/exportWellArchitectedTool
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -346,12 +441,27 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/well-architected-tool
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  UpdatePillarLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdatePillarFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_pillar/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updatePillar
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -371,12 +481,26 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  UpdateQuestionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateQuestionFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_question/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updateQuestion
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -396,37 +520,67 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
-  RetrieveBestPracticeFindingsFunction:
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetBestPracticeFindingsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetBestPracticeFindingsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_best_practice_findings/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/getBestPracticeFindings
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: RetrieveBestPracticeFindingsFunction
+        Name: GetBestPracticeFindingsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
                 - dynamodb:GetItem
-                - dynamodb:BatchGetItem
+                - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        RetrieveBestPracticeFindings:
+        GetBestPracticeFindings:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  UpdateBestPracticeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateBestPracticeFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_best_practice/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updateBestPractice
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -446,6 +600,21 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  RetrieveFindingLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RetrieveFindingFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   RetrieveFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -470,12 +639,18 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}
             Method: GET
+
+  UpdateFindingLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateFindingFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
   UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_finding/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updateFinding
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -493,8 +668,17 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
+            Path: /assessments/{assessmentId}/findings/{findingId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
 
 Outputs:
   ApiEndpoint:
@@ -503,9 +687,9 @@ Outputs:
   UserPoolId:
     Description: User Pool ID
     Value: !Ref UserPool
-  IdentityPoolId:
-    Description: Identity Pool ID
-    Value: !Ref IdentityPool
   UserPoolClientId:
     Description: User Pool Client ID
     Value: !Ref UserPoolClient
+  IdentityPoolId:
+    Description: Identity Pool ID
+    Value: !Ref IdentityPool

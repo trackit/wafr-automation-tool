@@ -35,6 +35,7 @@ class FindingExtra(Finding):
     remediation: FindingRemediation | None = None
     hidden: bool = False
     is_ai_associated: bool = True
+    best_practices: str | None = None
 
 
 class FindingDto(BaseModel):

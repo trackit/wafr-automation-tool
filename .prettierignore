@@ -3,3 +3,5 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+.aws-sam
+libs/shared/api-schema/src/lib/schema.d.ts

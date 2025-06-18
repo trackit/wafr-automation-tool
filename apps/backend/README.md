@@ -4,16 +4,18 @@
 
 ## Table of contents
 
-- [Overview](#overview)
-- [Getting started](#getting-started)
-  - [Tests](#tests)
-- [Deployment](#deployment)
-  - [Environment Variables](#environment-variables)
-  - [Deployment Command](#deployment-command)
-- [Usage](#usage)
-  - [Requirements](#requirements-1)
-  - [Local](#local)
-  - [Remote](#remote)
+- [Backend Home](#backend-home)
+  - [Table of contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Getting started](#getting-started)
+    - [Tests](#tests)
+  - [Deployment](#deployment)
+    - [Environment Variables](#environment-variables)
+    - [Deployment Command](#deployment-command)
+  - [Usage](#usage)
+    - [Requirements](#requirements)
+    - [Local](#local)
+    - [Remote](#remote)
 
 ## Overview
 
@@ -29,6 +31,7 @@ The results produced by these tools are stored in Amazon S3 and DynamoDB, then a
 To run backend tests locally, execute:
 
 ```shell
+$ docker-compose up -d
 $ npm run test:backend
 ```
 
@@ -73,7 +76,7 @@ To perform a remote analysis, you must provide a custom role with these managed 
 - SecurityAudit
 - job-function/ViewOnlyAccess
 
-And the following inline policy: [Inline Policy](../../resources/inline-policy.json)
+And the following inline policy: [Inline Policy](../webui/public/inline-policy.json)
 
 Additionally, add the following trust policy to your role:
 

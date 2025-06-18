@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 from http.client import BAD_REQUEST
 from typing import Any
 
@@ -31,7 +32,7 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:  # n
                 pillar_id=event["pathParameters"]["pillarId"],
                 question_id=event["pathParameters"]["questionId"],
                 best_practice_id=event["pathParameters"]["bestPracticeId"],
-                finding_id=event["pathParameters"]["findingId"],
+                finding_id=urllib.parse.unquote(event["pathParameters"]["findingId"]),
                 finding_dto=finding_dto,
             ),
         )

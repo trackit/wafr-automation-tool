@@ -2,7 +2,7 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, FINDING_SK, STORE_CHUNK_PATH
+from common.config import ASSESSMENT_SK, DDB_KEY, DDB_SORT_KEY, DDB_TABLE, FINDING_PK, FINDING_SK, STORE_CHUNK_PATH
 from entities.finding import FindingExtra
 from exceptions.ai import InvalidPromptResponseError
 from tests.__mocks__.fake_database_service import FakeDatabaseService
@@ -25,6 +25,7 @@ def test_store_results():
         remediation=None,
         risk_details="Risk details",
         hidden=False,
+        best_practices="pillar-1#question-1#best-practice-1",
     )
     database_service = FakeDatabaseService()
     storage_service = FakeStorageService()
@@ -82,8 +83,8 @@ def test_store_results():
         table_name=DDB_TABLE,
         item={
             **finding.model_dump(),
-            DDB_KEY: invoke_llm_input.organization,
-            DDB_SORT_KEY: FINDING_SK.format(invoke_llm_input.assessment_id, "prowler#10"),
+            DDB_KEY: FINDING_PK.format(invoke_llm_input.organization, invoke_llm_input.assessment_id),
+            DDB_SORT_KEY: FINDING_SK.format("prowler#10"),
         },
     )
     assert not result
