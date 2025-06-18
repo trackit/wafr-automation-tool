@@ -1,10 +1,9 @@
-import { z } from 'zod';
 import { CleanupInput } from './Cleanup';
 
 export class CleanupAdapterEventMother {
-  private data: z.infer<typeof CleanupInput>;
+  private data: CleanupInput;
 
-  private constructor(data: z.infer<typeof CleanupInput>) {
+  private constructor(data: CleanupInput) {
     this.data = data;
   }
 
@@ -20,27 +19,25 @@ export class CleanupAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: z.infer<typeof CleanupInput>['assessmentId']
+    assessmentId: CleanupInput['assessmentId']
   ): CleanupAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganization(
-    organization: z.infer<typeof CleanupInput>['organization']
+    organization: CleanupInput['organization']
   ): CleanupAdapterEventMother {
     this.data.organization = organization;
     return this;
   }
 
-  public withError(
-    error: z.infer<typeof CleanupInput>['error']
-  ): CleanupAdapterEventMother {
+  public withError(error: CleanupInput['error']): CleanupAdapterEventMother {
     this.data.error = error;
     return this;
   }
 
-  public build(): z.infer<typeof CleanupInput> {
+  public build(): CleanupInput {
     return this.data;
   }
 }

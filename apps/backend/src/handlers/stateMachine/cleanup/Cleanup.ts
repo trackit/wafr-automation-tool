@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { tokenCleanupUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
-export const CleanupInput = z.object({
+export const CleanupInputSchema = z.object({
   assessmentId: z.string(),
   organization: z.string(),
   error: z
@@ -14,15 +14,14 @@ export const CleanupInput = z.object({
     .optional(),
 });
 
+export type CleanupInput = z.infer<typeof CleanupInputSchema>;
 export type CleanupOutput = void;
 
 export class CleanupAdapter {
   private readonly useCase = inject(tokenCleanupUseCase);
 
-  public async handle(
-    event: z.infer<typeof CleanupInput>
-  ): Promise<CleanupOutput> {
-    const parsedEvent = CleanupInput.parse(event);
+  public async handle(event: Record<string, unknown>): Promise<CleanupOutput> {
+    const parsedEvent = CleanupInputSchema.parse(event);
     await this.useCase.execute(parsedEvent);
   }
 }
