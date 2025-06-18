@@ -14,6 +14,7 @@ import type {
   Pillar,
   PillarBody,
   Question,
+  QuestionBody,
 } from '@backend/models';
 import {
   AssessmentsRepository,
@@ -965,6 +966,92 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
     } catch (error) {
       this.logger.error(`Failed to update finding: ${error}`, params);
+      throw error;
+    }
+  }
+
+  private assertQuestionExists(args: {
+    assessment: Assessment;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+  }): void {
+    const { assessment, pillarId, questionId } = args;
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        pillarId,
+      });
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId
+    );
+    if (!question) {
+      throw new QuestionNotFoundError({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        pillarId,
+        questionId,
+      });
+    }
+  }
+
+  public async updateQuestion(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    questionBody: QuestionBody;
+  }): Promise<void> {
+    const { assessmentId, organization, pillarId, questionId, questionBody } =
+      args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment question: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    this.assertQuestionExists({
+      assessment,
+      organization,
+      pillarId,
+      questionId,
+    });
+    if (Object.keys(questionBody).length === 0) {
+      this.logger.error(
+        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
+      );
+      throw new EmptyUpdateBodyError(
+        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
+      );
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({
+        data: questionBody as Record<string, unknown>,
+        UpdateExpressionPath: 'findings.#pillar.questions.#question',
+        DefaultExpressionAttributeNames: {
+          '#pillar': pillarId,
+          '#question': questionId,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization} updated successfully`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update question: ${error}`, params);
       throw error;
     }
   }
