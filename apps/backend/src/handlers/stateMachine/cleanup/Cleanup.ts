@@ -4,7 +4,7 @@ import { tokenCleanupUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 export const CleanupInput = z.object({
-  assessment_id: z.string(),
+  assessmentId: z.string(),
   organization: z.string(),
   error: z
     .object({
@@ -23,10 +23,6 @@ export class CleanupAdapter {
     event: z.infer<typeof CleanupInput>
   ): Promise<CleanupOutput> {
     const parsedEvent = CleanupInput.parse(event);
-    await this.useCase.execute({
-      assessmentId: parsedEvent.assessment_id,
-      organization: parsedEvent.organization,
-      error: parsedEvent.error,
-    });
+    await this.useCase.execute(parsedEvent);
   }
 }

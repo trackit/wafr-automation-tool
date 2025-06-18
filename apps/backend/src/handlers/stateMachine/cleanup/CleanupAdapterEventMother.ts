@@ -10,7 +10,7 @@ export class CleanupAdapterEventMother {
 
   public static basic(): CleanupAdapterEventMother {
     return new CleanupAdapterEventMother({
-      assessment_id: 'assessment-id',
+      assessmentId: 'assessment-id',
       organization: 'test.io',
       error: {
         Cause: 'test-cause',
@@ -20,9 +20,9 @@ export class CleanupAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: z.infer<typeof CleanupInput>['assessment_id']
+    assessmentId: z.infer<typeof CleanupInput>['assessmentId']
   ): CleanupAdapterEventMother {
-    this.data.assessment_id = assessmentId;
+    this.data.assessmentId = assessmentId;
     return this;
   }
 
