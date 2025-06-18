@@ -1,4 +1,5 @@
 import type { Pillar } from '../Pillar';
+import type { ScanningTool } from '../ScanningTool';
 import {
   AssessmentStep,
   type Assessment,
@@ -83,7 +84,7 @@ export class AssessmentMother {
   }
 
   public withRawGraphDatas(
-    rawGraphDatas: Record<string, AssessmentGraphDatas>
+    rawGraphDatas: Partial<Record<ScanningTool, AssessmentGraphDatas>>
   ): AssessmentMother {
     this.data.rawGraphDatas = rawGraphDatas;
     return this;
