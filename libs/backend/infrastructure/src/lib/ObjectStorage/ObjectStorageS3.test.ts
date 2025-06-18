@@ -53,19 +53,19 @@ describe('ObjectStorage Infrastructure', () => {
       });
     });
 
-    it('should throw an error when object fails to delete', async () => {
+    it('should throw an error when list fails', async () => {
       const { objectStorage, s3ClientMock } = setup();
 
-      s3ClientMock.on(DeleteObjectsCommand).resolves({
+      s3ClientMock.on(ListObjectsV2Command).resolves({
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(
-        objectStorage.bulkDelete({ keys: ['key1', 'key2'] })
-      ).rejects.toThrow(Error);
+      await expect(objectStorage.list({ prefix: 'prefix' })).rejects.toThrow(
+        Error
+      );
     });
   });
-  describe('blukDelete', () => {
+  describe('bulkDelete', () => {
     it('should delete a list of objects', async () => {
       const { objectStorage, s3ClientMock, bucket } = setup();
 
