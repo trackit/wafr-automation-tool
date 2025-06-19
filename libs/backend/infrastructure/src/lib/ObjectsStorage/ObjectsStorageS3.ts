@@ -1,6 +1,7 @@
 import {
   DeleteObjectsCommand,
   ListObjectsV2Command,
+  PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 
@@ -58,6 +59,26 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       this.logger.info(`Deleted objects: ${keys}`);
     } catch (error) {
       this.logger.error(`Failed to delete objects: ${error}`, keys);
+      throw error;
+    }
+  }
+
+  public async put(args: { key: string; body: string }): Promise<void> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: args.key,
+      Body: args.body,
+    });
+    try {
+      const response = await this.client.send(command);
+      if (response.$metadata.httpStatusCode !== 200) {
+        throw new Error(
+          `Failed to put object: ${response.$metadata.httpStatusCode}`
+        );
+      }
+      this.logger.info(`Object succesfuly added: ${args.key}`);
+    } catch (error) {
+      this.logger.error(`Failed to put object: ${error}`, args.key);
       throw error;
     }
   }

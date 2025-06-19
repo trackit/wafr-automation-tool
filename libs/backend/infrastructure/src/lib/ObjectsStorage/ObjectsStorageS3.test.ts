@@ -109,6 +109,12 @@ describe('ObjectsStorage Infrastructure', () => {
       expect(bulkDeleteExecutionCalls).toHaveLength(0);
     });
   });
+
+  describe('put', () => {
+    it('should put an object', async () => {});
+
+    it('should throw an exception if put object fail', async () => {});
+  });
 });
 
 const setup = () => {
