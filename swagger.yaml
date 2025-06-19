@@ -612,9 +612,9 @@ components:
       nullable: true
       description: Error details if an issue occurred during the assessment process.
       properties:
-        Error:
+        error:
           type: string
-        Cause:
+        cause:
           type: string
     AssessmentDto:
       type: object
