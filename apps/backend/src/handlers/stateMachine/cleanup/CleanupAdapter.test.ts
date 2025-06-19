@@ -1,7 +1,7 @@
 import { tokenCleanupUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { CleanupAdapter } from './Cleanup';
+import { CleanupAdapter } from './CleanupAdapter';
 import { CleanupAdapterEventMother } from './CleanupAdapterEventMother';
 
 describe('cleanup adapter', () => {

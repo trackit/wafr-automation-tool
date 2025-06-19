@@ -1,4 +1,4 @@
-import { CleanupInput } from './Cleanup';
+import { CleanupInput } from './CleanupAdapter';
 
 export class CleanupAdapterEventMother {
   private data: CleanupInput;
