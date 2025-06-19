@@ -37,11 +37,9 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
         prefix: format(ASSESSMENTS_PATH, args.assessmentId),
       });
       this.logger.info(`Deleting assessment: ${listObjects}`);
-      if (listObjects.length !== 0) {
-        this.assessmentsStorage.bulkDelete({
-          keys: listObjects,
-        });
-      }
+      this.assessmentsStorage.bulkDelete({
+        keys: listObjects,
+      });
       this.logger.info(`Debug mode is disabled, deleting assessment`);
     }
     if (args.error) {
