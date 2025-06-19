@@ -1,7 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenLogger,
-  tokenObjectStorage,
+  tokenObjectsStorage,
 } from '@backend/infrastructure';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
@@ -26,7 +26,7 @@ export interface CleanupUseCase {
 export const ASSESSMENTS_PATH = 'assessments/%s';
 
 export class CleanupUseCaseImpl implements CleanupUseCase {
-  private readonly assessmentsStorage = inject(tokenObjectStorage);
+  private readonly assessmentsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly logger = inject(tokenLogger);
   private readonly debug = inject(tokenDebug);

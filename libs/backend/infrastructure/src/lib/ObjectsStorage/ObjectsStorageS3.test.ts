@@ -3,12 +3,12 @@ import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
-  ObjectStorageS3,
+  ObjectsStorageS3,
   tokenClientS3,
   tokenS3Bucket,
-} from './ObjectStorageS3';
+} from './ObjectsStorageS3';
 
-describe('ObjectStorage Infrastructure', () => {
+describe('ObjectsStorage Infrastructure', () => {
   describe('list', () => {
     it('should return an empty list when no objects are found', async () => {
       const { objectStorage, s3ClientMock, bucket } = setup();
@@ -104,7 +104,7 @@ describe('ObjectStorage Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const objectStorage = new ObjectStorageS3();
+  const objectStorage = new ObjectsStorageS3();
   const s3ClientMock = mockClient(inject(tokenClientS3));
   return {
     objectStorage,

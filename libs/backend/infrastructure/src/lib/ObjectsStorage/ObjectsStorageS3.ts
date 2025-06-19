@@ -4,12 +4,12 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 
-import { ObjectStorage } from '@backend/ports';
+import { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 import { tokenLogger } from '../Logger';
 
-export class ObjectStorageS3 implements ObjectStorage {
+export class ObjectsStorageS3 implements ObjectsStorage {
   private readonly client = inject(tokenClientS3);
   private readonly logger = inject(tokenLogger);
   private readonly bucket = inject(tokenS3Bucket);
@@ -59,10 +59,10 @@ export class ObjectStorageS3 implements ObjectStorage {
   }
 }
 
-export const tokenObjectStorage = createInjectionToken<ObjectStorage>(
-  'ObjectStorage',
+export const tokenObjectsStorage = createInjectionToken<ObjectsStorage>(
+  'ObjectsStorage',
   {
-    useClass: ObjectStorageS3,
+    useClass: ObjectsStorageS3,
   }
 );
 

@@ -16,10 +16,10 @@ import {
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
-  tokenFakeObjectStorage,
-  tokenObjectStorage,
+  tokenFakeObjectsStorage,
+  tokenObjectsStorage,
   tokenS3Bucket,
-} from './ObjectStorage';
+} from './ObjectsStorage';
 import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
@@ -36,8 +36,8 @@ export const registerTestInfrastructure = () => {
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
   });
-  register(tokenObjectStorage, {
-    useFactory: () => inject(tokenFakeObjectStorage),
+  register(tokenObjectsStorage, {
+    useFactory: () => inject(tokenFakeObjectsStorage),
   });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenWellArchitectedToolService, {

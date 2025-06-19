@@ -1,7 +1,8 @@
-import type { ObjectStorage } from '@backend/ports';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
-export class FakeObjectStorage implements ObjectStorage {
+export class FakeObjectsStorage implements ObjectsStorage {
   list(args: { prefix: string }): Promise<string[]> {
     // No-op for fake implementation
     return Promise.resolve([]);
@@ -13,9 +14,9 @@ export class FakeObjectStorage implements ObjectStorage {
   }
 }
 
-export const tokenFakeObjectStorage = createInjectionToken<FakeObjectStorage>(
-  'FakeObjectStorage',
+export const tokenFakeObjectsStorage = createInjectionToken<FakeObjectsStorage>(
+  'FakeObjectsStorage',
   {
-    useClass: FakeObjectStorage,
+    useClass: FakeObjectsStorage,
   }
 );

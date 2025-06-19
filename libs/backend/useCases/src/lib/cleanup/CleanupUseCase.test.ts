@@ -1,7 +1,7 @@
 import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
-  tokenFakeObjectStorage,
+  tokenFakeObjectsStorage,
 } from '@backend/infrastructure';
 import { inject, register, reset } from '@shared/di-container';
 
@@ -141,7 +141,7 @@ const setup = (debug = false) => {
   reset();
   registerTestInfrastructure();
   register(tokenDebug, { useValue: debug });
-  const fakeAssessmentsStorage = inject(tokenFakeObjectStorage);
+  const fakeAssessmentsStorage = inject(tokenFakeObjectsStorage);
   vitest.spyOn(fakeAssessmentsStorage, 'list');
   const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
   vitest.spyOn(fakeAssessmentsRepository, 'deleteFindings');
