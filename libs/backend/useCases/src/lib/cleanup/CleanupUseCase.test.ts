@@ -12,23 +12,23 @@ import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
 
 describe('CleanupUseCase', () => {
   it('should delete assessment storage if not in debug mode', async () => {
-    const { useCase, fakeAssessmentsStorage } = setup();
+    const { useCase, fakeObjectsStorage } = setup();
 
     const input = CleanupUseCaseArgsMother.basic().withError(undefined).build();
     await useCase.cleanup(input);
 
-    expect(fakeAssessmentsStorage.list).toHaveBeenCalledExactlyOnceWith({
+    expect(fakeObjectsStorage.list).toHaveBeenCalledExactlyOnceWith({
       prefix: 'assessments/assessment-id',
     });
   });
 
   it('should not delete assessment storage if debug mode is enabled', async () => {
-    const { useCase, fakeAssessmentsStorage } = setup(true);
+    const { useCase, fakeObjectsStorage } = setup(true);
 
     const input = CleanupUseCaseArgsMother.basic().withError(undefined).build();
     await useCase.cleanup(input);
 
-    expect(fakeAssessmentsStorage.list).not.toHaveBeenCalled();
+    expect(fakeObjectsStorage.list).not.toHaveBeenCalled();
   });
 
   it('should throw a NotFoundError if the assessment doesn’t exist and error is defined', async () => {
@@ -141,14 +141,14 @@ const setup = (debug = false) => {
   reset();
   registerTestInfrastructure();
   register(tokenDebug, { useValue: debug });
-  const fakeAssessmentsStorage = inject(tokenFakeObjectsStorage);
-  vitest.spyOn(fakeAssessmentsStorage, 'list');
+  const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
+  vitest.spyOn(fakeObjectsStorage, 'list');
   const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
   vitest.spyOn(fakeAssessmentsRepository, 'deleteFindings');
   vitest.spyOn(fakeAssessmentsRepository, 'update');
   return {
     useCase: new CleanupUseCaseImpl(),
     fakeAssessmentsRepository,
-    fakeAssessmentsStorage,
+    fakeObjectsStorage,
   };
 };
