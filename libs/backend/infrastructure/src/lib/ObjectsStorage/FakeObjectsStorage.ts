@@ -10,7 +10,7 @@ export class FakeObjectsStorage implements ObjectsStorage {
   }
 
   list(args: { prefix: string }): Promise<string[]> {
-    const objects = Object.values(this.objects).filter((object) =>
+    const objects = Object.keys(this.objects).filter((object) =>
       object.startsWith(args.prefix)
     );
     return Promise.resolve(objects);
