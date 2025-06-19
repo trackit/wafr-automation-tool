@@ -5,7 +5,6 @@ import {
 } from '@backend/infrastructure';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-import { format } from 'util';
 import { NotFoundError } from '../Errors';
 
 export type StateMachineError = {
@@ -22,8 +21,6 @@ export type CleanupUseCaseArgs = {
 export interface CleanupUseCase {
   cleanup(args: CleanupUseCaseArgs): Promise<void>;
 }
-
-export const ASSESSMENTS_PATH = 'assessments/%s';
 
 export class CleanupUseCaseImpl implements CleanupUseCase {
   private readonly assessmentsStorage = inject(tokenObjectsStorage);
@@ -67,7 +64,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   public async cleanup(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
       const listObjects = await this.assessmentsStorage.list({
-        prefix: format(ASSESSMENTS_PATH, args.assessmentId),
+        prefix: `assessments/${args.assessmentId}`,
       });
       this.logger.info(`Deleting assessment: ${listObjects}`);
       this.assessmentsStorage.bulkDelete({
