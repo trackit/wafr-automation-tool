@@ -297,18 +297,18 @@ describe('wellArchitectedTool Infrastructure', () => {
         .withName('assessment-name')
         .withFindings([
           PillarMother.basic()
-            .withId('pillar-id')
+            .withPrimaryId('pillar-id')
             .withLabel('Pillar 1')
             .withDisabled(false)
             .withQuestions([
               QuestionMother.basic()
-                .withId('question-id')
+                .withPrimaryId('question-id')
                 .withLabel('Question 1')
                 .withDisabled(false)
                 .withNone(false)
                 .withBestPractices([
                   BestPracticeMother.basic()
-                    .withId('best-practice-id')
+                    .withPrimaryId('best-practice-id')
                     .withLabel('Best Practice 1')
                     .withChecked(true)
                     .build(),
@@ -434,7 +434,11 @@ describe('wellArchitectedTool Infrastructure', () => {
       const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
 
       const assessmentPillarList = [
-        PillarMother.basic().withLabel('Pillar 1').withDisabled(true).build(),
+        PillarMother.basic()
+          .withPrimaryId('pillar-id')
+          .withLabel('Pillar 1')
+          .withDisabled(true)
+          .build(),
       ];
 
       const workflowPillar: PillarReviewSummary = {
@@ -539,7 +543,7 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       const questionBestPracticeList = [
         BestPracticeMother.basic()
-          .withId('best-practice-id')
+          .withPrimaryId('best-practice-id')
           .withLabel('Best Practice 1')
           .withChecked(false)
           .build(),

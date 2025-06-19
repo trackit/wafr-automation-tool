@@ -1,3 +1,4 @@
+export * from './cleanup';
 export * from './deleteAssessment';
 export * from './Errors';
 export * from './exportWellArchitectedTool';

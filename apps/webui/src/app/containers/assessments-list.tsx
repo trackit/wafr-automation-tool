@@ -81,7 +81,7 @@ function AssessmentsList() {
   });
 
   const exportToAWSMutation = useMutation({
-    mutationFn: (id: string) => exportToAWS({ assessmentId: parseInt(id) }),
+    mutationFn: (id: string) => exportToAWS({ assessmentId: id }),
     onMutate: () => {
       enqueueSnackbar({
         message: 'Exporting to AWS...',

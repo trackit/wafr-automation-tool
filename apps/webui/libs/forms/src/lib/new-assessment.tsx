@@ -33,7 +33,7 @@ type Region = (typeof awsRegions)[number];
 type NewAssessmentProps = {
   onSubmit: (data: {
     name: string;
-    roleArn?: string;
+    roleArn: string;
     regions?: Region[];
     workflows?: string[];
   }) => void;
@@ -51,9 +51,7 @@ export function NewAssessment({
       .regex(
         /^arn:aws:iam::\d{12}:role\/[a-zA-Z0-9_+=,.@-]+$/,
         'Invalid AWS role ARN format'
-      )
-      .optional()
-      .or(z.literal('')),
+      ),
     regions: z.array(z.enum(awsRegions)).optional(),
     workflows: z.array(z.string()).optional(),
   });
@@ -105,7 +103,7 @@ export function NewAssessment({
   const handleFormSubmit = (data: z.infer<typeof formSchema>) => {
     onSubmit({
       name: data.name,
-      roleArn: data.roleArn || undefined,
+      roleArn: data.roleArn,
       regions: data.regions,
       workflows: data.workflows,
     });

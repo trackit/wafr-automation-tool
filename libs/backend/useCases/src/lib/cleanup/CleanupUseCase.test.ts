@@ -1,0 +1,171 @@
+import {
+  registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
+  tokenFakeObjectsStorage,
+} from '@backend/infrastructure';
+import { inject, register, reset } from '@shared/di-container';
+
+import { AssessmentMother, FindingMother } from '@backend/models';
+import { NotFoundError } from '../Errors';
+import { CleanupUseCaseImpl, tokenDebug } from './CleanupUseCase';
+import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
+
+describe('CleanupUseCase', () => {
+  it('should delete assessment storage if not in debug mode', async () => {
+    const { useCase, fakeObjectsStorage } = setup();
+
+    fakeObjectsStorage.put({
+      key: 'assessments/assessment-id/test',
+      body: 'hello world',
+    });
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withError(undefined)
+      .build();
+    await useCase.cleanup(input);
+
+    expect(
+      fakeObjectsStorage.objects['assessments/assessment-id/test']
+    ).toBeUndefined();
+  });
+
+  it('should not delete assessment storage if debug mode is enabled', async () => {
+    const { useCase, fakeObjectsStorage } = setup(true);
+
+    fakeObjectsStorage.put({
+      key: 'assessments/assessment-id/test',
+      body: 'hello world',
+    });
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withError(undefined)
+      .build();
+    await useCase.cleanup(input);
+
+    expect(
+      fakeObjectsStorage.objects['assessments/assessment-id/test']
+    ).toBeDefined();
+  });
+
+  it('should throw a NotFoundError if the assessment doesn’t exist and error is defined', async () => {
+    const { useCase } = setup();
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withOrganization('test.io')
+      .withError({ Cause: 'test-cause', Error: 'test-error' })
+      .build();
+    await expect(useCase.cleanup(input)).rejects.toThrow(NotFoundError);
+  });
+
+  it('should throw a NotFoundError if the assessment exist for an another organization and error is defined', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
+    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('other-org.io')
+        .build();
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withError({ Cause: 'test-cause', Error: 'test-error' })
+      .withAssessmentId('assessment-id')
+      .withOrganization('test.io')
+      .build();
+    await expect(useCase.cleanup(input)).rejects.toThrow(NotFoundError);
+  });
+
+  it('should delete assessment findings if not in debug mode and error is defined', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
+    fakeAssessmentsRepository.save(
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .build()
+    );
+    fakeAssessmentsRepository.saveFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      finding: FindingMother.basic().build(),
+    });
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withOrganization('test.io')
+      .withError({ Cause: 'test-cause', Error: 'test-error' })
+      .build();
+    await useCase.cleanup(input);
+
+    expect(
+      fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+    ).toBeUndefined();
+  });
+
+  it('should not delete assessment findings if debug mode is enabled and error is defined', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup(true);
+
+    fakeAssessmentsRepository.save(
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .build()
+    );
+    fakeAssessmentsRepository.saveFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      finding: FindingMother.basic().build(),
+    });
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withOrganization('test.io')
+      .withError({ Cause: 'test-cause', Error: 'test-error' })
+      .build();
+    await useCase.cleanup(input);
+
+    expect(
+      fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+    ).toBeDefined();
+  });
+
+  it('should update assessment error if error is defined', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup(true);
+
+    fakeAssessmentsRepository.save(
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .build()
+    );
+
+    const input = CleanupUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withOrganization('test.io')
+      .withError({ Cause: 'test-cause', Error: 'test-error' })
+      .build();
+    await useCase.cleanup(input);
+
+    const updatedAssessment =
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'];
+    expect(updatedAssessment.error).toEqual({
+      error: 'test-error',
+      cause: 'test-cause',
+    });
+  });
+});
+
+const setup = (debug = false) => {
+  reset();
+  registerTestInfrastructure();
+  register(tokenDebug, { useValue: debug });
+  const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
+  const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
+  return {
+    useCase: new CleanupUseCaseImpl(),
+    fakeAssessmentsRepository,
+    fakeObjectsStorage,
+  };
+};
