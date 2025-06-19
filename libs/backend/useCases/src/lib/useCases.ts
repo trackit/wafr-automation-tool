@@ -1,3 +1,4 @@
+export * from './cleanup';
 export * from './computeGraphData';
 export * from './deleteAssessment';
 export * from './Errors';
@@ -10,3 +11,5 @@ export * from './startAssessment';
 export * from './updateAssessment';
 export * from './updateBestPractice';
 export * from './updateFinding';
+export * from './updatePillar';
+export * from './updateQuestion';

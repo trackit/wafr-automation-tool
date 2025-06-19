@@ -235,8 +235,8 @@ export interface components {
         };
         /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
-            Error?: string;
-            Cause?: string;
+            error?: string;
+            cause?: string;
         } | null;
         AssessmentDto: {
             name?: string;
@@ -286,7 +286,7 @@ export interface components {
             questions?: components["schemas"]["Question"][];
         };
         PillarDto: {
-            disabled?: boolean | null;
+            disabled?: boolean;
         };
         Question: {
             id?: string;
@@ -296,8 +296,8 @@ export interface components {
             best_practices?: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
-            none?: boolean | null;
-            disabled?: boolean | null;
+            none?: boolean;
+            disabled?: boolean;
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
@@ -652,11 +652,11 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar */
-                pillarId: number;
+                pillarId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["PillarDto"];
             };
@@ -700,13 +700,13 @@ export interface operations {
                 /** @description The ID of the assessment */
                 assessmentId: string;
                 /** @description The ID of the pillar under which the question falls */
-                pillarId: number;
+                pillarId: string;
                 /** @description The ID of the question */
-                questionId: number;
+                questionId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["QuestionDto"];
             };

@@ -146,7 +146,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
             `Workflow pillar question best practice ${id} has no ChoiceId or Title`
           );
         }
-        const data = questionBestPracticeList.find((bp) => bp.id === id);
+        const data = questionBestPracticeList.find((bp) => bp.primaryId === id);
         if (!data) {
           throw new Error(
             `Workflow pillar question best practice ${id} does not exist in assessment pillars`
@@ -194,7 +194,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         );
       }
       const answerQuestionData = pillarQuestionList.find(
-        (answer) => answer.id === answerQuestionId
+        (answer) => answer.primaryId === answerQuestionId
       );
       if (!answerQuestionData) {
         throw new Error(
@@ -227,7 +227,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         );
       }
       const pillarData = assessmentPillarList.find(
-        (pillar) => pillar.id === pillarId
+        (pillar) => pillar.primaryId === pillarId
       );
       if (!pillarData) {
         throw new Error(

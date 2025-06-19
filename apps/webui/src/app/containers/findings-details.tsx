@@ -17,22 +17,37 @@ interface FindingsDetailsProps {
   questionId: string;
 }
 
+export type Severity =
+  | 'Unknown'
+  | 'Informational'
+  | 'Low'
+  | 'Medium'
+  | 'High'
+  | 'Critical'
+  | 'Fatal'
+  | 'Other';
+
+const severityBadgeClass: Record<Severity, string> = {
+  Unknown: 'badge-secondary',
+  Informational: 'badge-info',
+  Low: 'badge-info',
+  Medium: 'badge-warning',
+  High: 'badge-error',
+  Critical: 'badge-error',
+  Fatal: 'badge-error',
+  Other: 'badge-info',
+};
+
 const SeverityBadge = ({
   severity,
   className,
 }: {
-  severity: 'High' | 'Medium' | 'Low' | 'Critical';
+  severity: Severity;
   className?: string;
 }) => {
   return (
     <div
-      className={`font-bold badge badge-soft ${
-        severity === 'High' || severity === 'Critical'
-          ? 'badge-error'
-          : severity === 'Medium'
-          ? 'badge-warning'
-          : 'badge-warning'
-      } ${className}`}
+      className={`font-bold badge badge-soft ${severityBadgeClass[severity]} ${className}`}
     >
       {severity}
     </div>
@@ -289,9 +304,7 @@ function FindingsDetails({
       if (newData.results) {
         const findings = newData.results as components['schemas']['Finding'][];
         const updatedFindings = findings.map((finding) =>
-          finding.id === findingId
-            ? { ...finding, hidden }
-            : finding
+          finding.id === findingId ? { ...finding, hidden } : finding
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type

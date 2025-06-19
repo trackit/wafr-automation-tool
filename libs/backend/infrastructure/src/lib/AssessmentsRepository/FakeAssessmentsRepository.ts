@@ -4,6 +4,8 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  PillarBody,
+  QuestionBody,
 } from '@backend/models';
 import type {
   AssessmentsRepository,
@@ -12,9 +14,9 @@ import type {
 import { createInjectionToken } from '@shared/di-container';
 import {
   AssessmentNotFoundError,
-  FindingNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FindingNotFoundError,
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
@@ -221,6 +223,36 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
+  public async updatePillar(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    pillarBody: PillarBody;
+  }): Promise<void> {
+    const { assessmentId, organization, pillarId, pillarBody } = args;
+    const assessment = this.assessments[`${assessmentId}#${organization}`];
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+      });
+    }
+    if (Object.keys(pillarBody).length === 0) {
+      throw new EmptyUpdateBodyError();
+    }
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+        pillarId,
+      });
+    }
+    pillar.disabled = pillarBody.disabled ?? pillar.disabled;
+  }
+
   public async delete(args: {
     assessmentId: string;
     organization: string;
@@ -303,6 +335,61 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         finding,
         field as keyof Finding,
         value as Finding[keyof Finding]
+      );
+    }
+  }
+
+  private updateQuestionBody<T extends keyof QuestionBody>(
+    question: QuestionBody,
+    field: T,
+    value: QuestionBody[T]
+  ): void {
+    question[field] = value;
+  }
+
+  public async updateQuestion(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    questionBody: QuestionBody;
+  }): Promise<void> {
+    const { assessmentId, organization, pillarId, questionId, questionBody } =
+      args;
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    if (Object.keys(questionBody).length === 0) {
+      throw new EmptyUpdateBodyError();
+    }
+    const assessment = this.assessments[assessmentKey];
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId,
+        organization,
+        pillarId,
+      });
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId
+    );
+    if (!question) {
+      throw new QuestionNotFoundError({
+        assessmentId,
+        organization,
+        pillarId,
+        questionId,
+      });
+    }
+    for (const [key, value] of Object.entries(questionBody)) {
+      this.updateQuestionBody(
+        question,
+        key as keyof QuestionBody,
+        value as QuestionBody[keyof QuestionBody]
       );
     }
   }

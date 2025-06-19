@@ -277,8 +277,9 @@ paths:
           required: true
           description: The ID of the pillar
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -312,14 +313,15 @@ paths:
           required: true
           description: The ID of the pillar under which the question falls
           schema:
-            type: integer
+            type: string
         - name: questionId
           in: path
           required: true
           description: The ID of the question
           schema:
-            type: integer
+            type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -610,9 +612,9 @@ components:
       nullable: true
       description: Error details if an issue occurred during the assessment process.
       properties:
-        Error:
+        error:
           type: string
-        Cause:
+        cause:
           type: string
     AssessmentDto:
       type: object
@@ -705,7 +707,6 @@ components:
       properties:
         disabled:
           type: boolean
-          nullable: true
     Question:
       type: object
       additionalProperties: false
@@ -727,10 +728,8 @@ components:
       properties:
         none:
           type: boolean
-          nullable: true
         disabled:
           type: boolean
-          nullable: true
     BestPractice:
       type: object
       description: A best practice related to a question and pillar in the assessment

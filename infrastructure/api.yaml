@@ -459,9 +459,9 @@ Resources:
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_pillar/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updatePillar
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -481,7 +481,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}
             Method: PUT
-
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   UpdateQuestionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -490,9 +498,9 @@ Resources:
   UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/update_question/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/api/updateQuestion
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -512,6 +520,15 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}
             Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
 
   GetBestPracticeFindingsLogGroup:
     Type: AWS::Logs::LogGroup
@@ -651,7 +668,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}/findings/{findingId}
+            Path: /assessments/{assessmentId}/findings/{findingId}
             Method: PUT
     Metadata:
       BuildMethod: esbuild
