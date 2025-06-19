@@ -20,7 +20,7 @@ export type CleanupUseCaseArgs = {
 };
 
 export interface CleanupUseCase {
-  execute(args: CleanupUseCaseArgs): Promise<void>;
+  cleanup(args: CleanupUseCaseArgs): Promise<void>;
 }
 
 export const ASSESSMENTS_PATH = 'assessments/%s';
@@ -31,7 +31,40 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   private readonly logger = inject(tokenLogger);
   private readonly debug = inject(tokenDebug);
 
-  public async execute(args: CleanupUseCaseArgs): Promise<void> {
+  private async cleanupError(args: CleanupUseCaseArgs): Promise<void> {
+    if (!args.error) return Promise.resolve();
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId: args.assessmentId,
+      organization: args.organization,
+    });
+    if (!assessment) {
+      throw new NotFoundError(
+        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
+      );
+    }
+    if (!this.debug) {
+      await this.assessmentsRepository.deleteFindings({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+      this.logger.info(`Deleting findings for assessment ${assessment.id}`);
+    }
+    await this.assessmentsRepository.update({
+      assessmentId: assessment.id,
+      organization: assessment.organization,
+      assessmentBody: {
+        error: {
+          error: args.error.Error,
+          cause: args.error.Cause,
+        },
+      },
+    });
+    this.logger.info(
+      `Updating assessment ${assessment.id} with error ${args.error.Error} caused by ${args.error.Cause}`
+    );
+  }
+
+  public async cleanup(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
       const listObjects = await this.assessmentsStorage.list({
         prefix: format(ASSESSMENTS_PATH, args.assessmentId),
@@ -42,37 +75,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       });
       this.logger.info(`Debug mode is disabled, deleting assessment`);
     }
-    if (args.error) {
-      const assessment = await this.assessmentsRepository.get({
-        assessmentId: args.assessmentId,
-        organization: args.organization,
-      });
-      if (!assessment) {
-        throw new NotFoundError(
-          `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-        );
-      }
-      if (!this.debug) {
-        await this.assessmentsRepository.deleteFindings({
-          assessmentId: assessment.id,
-          organization: assessment.organization,
-        });
-        this.logger.info(`Deleting findings for assessment ${assessment.id}`);
-      }
-      await this.assessmentsRepository.update({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        assessmentBody: {
-          error: {
-            error: args.error.Error,
-            cause: args.error.Cause,
-          },
-        },
-      });
-      this.logger.info(
-        `Updating assessment ${assessment.id} with error ${args.error.Error} caused by ${args.error.Cause}`
-      );
-    }
+    await this.cleanupError(args);
   }
 }
 

@@ -15,7 +15,7 @@ describe('CleanupUseCase', () => {
     const { useCase, fakeAssessmentsStorage } = setup();
 
     const input = CleanupUseCaseArgsMother.basic().withError(undefined).build();
-    await useCase.execute(input);
+    await useCase.cleanup(input);
 
     expect(fakeAssessmentsStorage.list).toHaveBeenCalledExactlyOnceWith({
       prefix: 'assessments/assessment-id',
@@ -26,7 +26,7 @@ describe('CleanupUseCase', () => {
     const { useCase, fakeAssessmentsStorage } = setup(true);
 
     const input = CleanupUseCaseArgsMother.basic().withError(undefined).build();
-    await useCase.execute(input);
+    await useCase.cleanup(input);
 
     expect(fakeAssessmentsStorage.list).not.toHaveBeenCalled();
   });
@@ -39,7 +39,7 @@ describe('CleanupUseCase', () => {
       .withOrganization('test.io')
       .withError({ Cause: 'test-cause', Error: 'test-error' })
       .build();
-    await expect(useCase.execute(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.cleanup(input)).rejects.toThrow(NotFoundError);
   });
 
   it('should throw a NotFoundError if the assessment exist for an another organization and error is defined', async () => {
@@ -56,7 +56,7 @@ describe('CleanupUseCase', () => {
       .withAssessmentId('assessment-id')
       .withOrganization('test.io')
       .build();
-    await expect(useCase.execute(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.cleanup(input)).rejects.toThrow(NotFoundError);
   });
 
   it('should delete assessment findings if not in debug mode and error is defined', async () => {
@@ -73,7 +73,7 @@ describe('CleanupUseCase', () => {
       .withOrganization('test.io')
       .withError({ Cause: 'test-cause', Error: 'test-error' })
       .build();
-    await useCase.execute(input);
+    await useCase.cleanup(input);
 
     expect(
       fakeAssessmentsRepository.deleteFindings
@@ -97,7 +97,7 @@ describe('CleanupUseCase', () => {
       .withOrganization('test.io')
       .withError({ Cause: 'test-cause', Error: 'test-error' })
       .build();
-    await useCase.execute(input);
+    await useCase.cleanup(input);
 
     expect(fakeAssessmentsRepository.deleteFindings).not.toHaveBeenCalled();
   });
@@ -116,7 +116,7 @@ describe('CleanupUseCase', () => {
       .withOrganization('test.io')
       .withError({ Cause: 'test-cause', Error: 'test-error' })
       .build();
-    await useCase.execute(input);
+    await useCase.cleanup(input);
 
     expect(fakeAssessmentsRepository.update).toHaveBeenCalledExactlyOnceWith({
       assessmentId: 'assessment-id',

@@ -28,7 +28,7 @@ describe('cleanup adapter', () => {
         .build();
 
       await expect(adapter.handle(event)).resolves.toBeUndefined();
-      expect(useCase.execute).toHaveBeenCalledExactlyOnceWith(
+      expect(useCase.cleanup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId: 'assessment-id',
           organization: 'test.io',
@@ -41,7 +41,7 @@ describe('cleanup adapter', () => {
 
 const setup = () => {
   reset();
-  const useCase = { execute: vitest.fn() };
+  const useCase = { cleanup: vitest.fn() };
   register(tokenCleanupUseCase, { useValue: useCase });
   const adapter = new CleanupAdapter();
   return { useCase, adapter };

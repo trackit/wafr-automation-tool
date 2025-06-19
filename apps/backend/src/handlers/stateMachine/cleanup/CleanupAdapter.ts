@@ -22,6 +22,6 @@ export class CleanupAdapter {
 
   public async handle(event: Record<string, unknown>): Promise<CleanupOutput> {
     const parsedEvent = CleanupInputSchema.parse(event);
-    await this.useCase.execute(parsedEvent);
+    await this.useCase.cleanup(parsedEvent);
   }
 }
