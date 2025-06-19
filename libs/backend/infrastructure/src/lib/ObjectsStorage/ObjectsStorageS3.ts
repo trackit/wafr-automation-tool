@@ -39,7 +39,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     const { keys } = args;
 
     if (keys.length === 0) {
-      return Promise.resolve();
+      return;
     }
     const command = new DeleteObjectsCommand({
       Bucket: this.bucket,

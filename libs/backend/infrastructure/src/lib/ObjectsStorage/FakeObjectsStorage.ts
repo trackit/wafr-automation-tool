@@ -4,21 +4,19 @@ import { createInjectionToken } from '@shared/di-container';
 export class FakeObjectsStorage implements ObjectsStorage {
   public objects: Record<string, string> = {};
 
-  put(args: { key: string; object: string }): Promise<void> {
-    this.objects[args.key] = args.object;
-    return Promise.resolve();
+  public async put(args: { key: string; body: string }): Promise<void> {
+    this.objects[args.key] = args.body;
   }
 
-  list(args: { prefix: string }): Promise<string[]> {
+  public async list(args: { prefix: string }): Promise<string[]> {
     const objects = Object.keys(this.objects).filter((object) =>
       object.startsWith(args.prefix)
     );
-    return Promise.resolve(objects);
+    return objects;
   }
 
-  bulkDelete(args: { keys: string[] }): Promise<void> {
+  public async bulkDelete(args: { keys: string[] }): Promise<void> {
     args.keys.forEach((key) => delete this.objects[key]);
-    return Promise.resolve();
   }
 }
 

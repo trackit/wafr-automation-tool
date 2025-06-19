@@ -5,7 +5,7 @@ import {
 } from '@backend/infrastructure';
 import { inject, register, reset } from '@shared/di-container';
 
-import { AssessmentMother } from '@backend/models';
+import { AssessmentMother, FindingMother } from '@backend/models';
 import { NotFoundError } from '../Errors';
 import { CleanupUseCaseImpl, tokenDebug } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
@@ -16,7 +16,7 @@ describe('CleanupUseCase', () => {
 
     fakeObjectsStorage.put({
       key: 'assessments/assessment-id/test',
-      object: 'hello world',
+      body: 'hello world',
     });
 
     const input = CleanupUseCaseArgsMother.basic()
@@ -35,7 +35,7 @@ describe('CleanupUseCase', () => {
 
     fakeObjectsStorage.put({
       key: 'assessments/assessment-id/test',
-      object: 'hello world',
+      body: 'hello world',
     });
 
     const input = CleanupUseCaseArgsMother.basic()
@@ -80,11 +80,17 @@ describe('CleanupUseCase', () => {
   it('should delete assessment findings if not in debug mode and error is defined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+    fakeAssessmentsRepository.save(
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .build();
+        .build()
+    );
+    fakeAssessmentsRepository.saveFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      finding: FindingMother.basic().build(),
+    });
 
     const input = CleanupUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -94,21 +100,24 @@ describe('CleanupUseCase', () => {
     await useCase.cleanup(input);
 
     expect(
-      fakeAssessmentsRepository.deleteFindings
-    ).toHaveBeenCalledExactlyOnceWith({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
-    });
+      fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+    ).toBeUndefined();
   });
 
   it('should not delete assessment findings if debug mode is enabled and error is defined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup(true);
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+    fakeAssessmentsRepository.save(
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .build();
+        .build()
+    );
+    fakeAssessmentsRepository.saveFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      finding: FindingMother.basic().build(),
+    });
 
     const input = CleanupUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -117,17 +126,20 @@ describe('CleanupUseCase', () => {
       .build();
     await useCase.cleanup(input);
 
-    expect(fakeAssessmentsRepository.deleteFindings).not.toHaveBeenCalled();
+    expect(
+      fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+    ).toBeDefined();
   });
 
   it('should update assessment error if error is defined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup(true);
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+    fakeAssessmentsRepository.save(
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .build();
+        .build()
+    );
 
     const input = CleanupUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -136,16 +148,6 @@ describe('CleanupUseCase', () => {
       .build();
     await useCase.cleanup(input);
 
-    expect(fakeAssessmentsRepository.update).toHaveBeenCalledExactlyOnceWith({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
-      assessmentBody: {
-        error: {
-          error: 'test-error',
-          cause: 'test-cause',
-        },
-      },
-    });
     const updatedAssessment =
       fakeAssessmentsRepository.assessments['assessment-id#test.io'];
     expect(updatedAssessment.error).toEqual({
@@ -161,8 +163,6 @@ const setup = (debug = false) => {
   register(tokenDebug, { useValue: debug });
   const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
   const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
-  vitest.spyOn(fakeAssessmentsRepository, 'deleteFindings');
-  vitest.spyOn(fakeAssessmentsRepository, 'update');
   return {
     useCase: new CleanupUseCaseImpl(),
     fakeAssessmentsRepository,
