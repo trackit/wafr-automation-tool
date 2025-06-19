@@ -370,7 +370,7 @@ export function AssessmentDetails() {
   });
 
   const exportToAWSMutation = useMutation({
-    mutationFn: () => exportToAWS({ assessmentId: parseInt(id || '') }),
+    mutationFn: () => exportToAWS({ assessmentId: id || '' }),
     onMutate: () => {
       enqueueSnackbar({
         message: 'Exporting to AWS...',
@@ -697,7 +697,7 @@ export function AssessmentDetails() {
       id: 'resolve',
       label: 'None of the above',
       risk: undefined,
-      status: activeQuestion?.none || false,
+      checked: activeQuestion?.none || false,
       results: undefined,
       name: 'resolve',
     });

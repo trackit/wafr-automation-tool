@@ -1,7 +1,7 @@
+import { paths } from '@shared/api-schema';
 import { useMutation } from '@tanstack/react-query';
 import { postAssessment } from '@webui/api-client';
 import { NewAssessment } from '@webui/forms';
-import { paths } from '@shared/api-schema';
 import { Modal } from '@webui/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -12,7 +12,7 @@ function NewAssessmentDialog() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: {
       name: string;
-      roleArn?: string;
+      roleArn: string;
       regions?: string[];
       workflows?: string[];
     }) => {
@@ -32,13 +32,13 @@ function NewAssessmentDialog() {
 
   const onSubmit = (data: {
     name: string;
-    roleArn?: string;
+    roleArn: string;
     regions?: string[];
     workflows?: string[];
   }) => {
     mutate({
       name: data.name,
-      roleArn: data.roleArn || undefined,
+      roleArn: data.roleArn,
       regions: data.regions?.length ? data.regions : undefined,
       workflows: data.workflows?.length ? data.workflows : undefined,
     });
