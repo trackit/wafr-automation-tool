@@ -8,7 +8,7 @@ import {
   AssessmentsStorageS3,
   tokenClientS3,
   tokenS3Bucket,
-} from './AssessmentsStorageS3';
+} from './ObjectStorageS3';
 
 describe('AssessmentStorage Infrastructure', () => {
   describe('delete', () => {
@@ -41,6 +41,12 @@ describe('AssessmentStorage Infrastructure', () => {
         Error
       );
     });
+  });
+
+  describe('put', () => {
+    it('should put an object', async () => {});
+
+    it('should throw an exception if put object fail', async () => {});
   });
 });
 

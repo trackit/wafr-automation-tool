@@ -1,2 +1,2 @@
-export * from './AssessmentsStorageS3';
-export * from './FakeAssessmentsStorage';
+export * from './ObjectStorageS3';
+export * from './FakeObjectStorage';
