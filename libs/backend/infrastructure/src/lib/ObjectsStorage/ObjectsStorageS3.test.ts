@@ -98,6 +98,16 @@ describe('ObjectsStorage Infrastructure', () => {
         objectStorage.bulkDelete({ keys: ['key1', 'key2'] })
       ).rejects.toThrow(Error);
     });
+
+    it('should not call client send if keys array is empty', async () => {
+      const { objectStorage, s3ClientMock } = setup();
+
+      await objectStorage.bulkDelete({ keys: [] });
+
+      const bulkDeleteExecutionCalls =
+        s3ClientMock.commandCalls(DeleteObjectsCommand);
+      expect(bulkDeleteExecutionCalls).toHaveLength(0);
+    });
   });
 });
 
