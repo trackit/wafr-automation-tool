@@ -235,8 +235,8 @@ export interface components {
         };
         /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
-            Error?: string;
-            Cause?: string;
+            error?: string;
+            cause?: string;
         } | null;
         AssessmentDto: {
             name?: string;

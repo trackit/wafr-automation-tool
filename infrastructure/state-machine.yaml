@@ -162,9 +162,9 @@ Resources:
   CleanupFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/cleanup/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/stateMachine/cleanup
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -191,6 +191,15 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   PrepareCustodianLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -394,7 +403,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $states.input.assessment_id %}'
+                  assessmentId: '{% $states.input.assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           ScanningTools:
@@ -491,7 +500,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           PreparePromptsUpdateStep:
@@ -514,7 +523,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           Prepare Prompts:
@@ -563,7 +572,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           InvokeLLMUpdateStep:
@@ -587,7 +596,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           PromptMap:
@@ -619,7 +628,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           GenerateData:
@@ -633,7 +642,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
             Next: 'FinishUpdateStep'
@@ -657,21 +666,21 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
-              assessment_id: '{% $assessment_id %}'
+              assessmentId: '{% $assessment_id %}'
               organization: '{% $organization %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessment_id: '{% $assessment_id %}'
+                  assessmentId: '{% $assessment_id %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
             End: true
