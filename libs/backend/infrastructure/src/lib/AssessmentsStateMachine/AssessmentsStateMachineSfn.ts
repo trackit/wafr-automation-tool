@@ -22,13 +22,13 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     assessment: AssessmentsStateMachineStartAssessmentArgs
   ): Promise<void> {
     const input = {
-      assessment_id: assessment.assessmentId,
+      assessmentId: assessment.assessmentId,
       name: assessment.name,
       regions: assessment.regions,
-      role_arn: assessment.roleArn,
+      roleArn: assessment.roleArn,
       workflows: assessment.workflows,
-      created_at: assessment.createdAt,
-      created_by: assessment.createdBy,
+      createdAt: assessment.createdAt,
+      createdBy: assessment.createdBy,
       organization: assessment.organization,
     };
     const command = new StartExecutionCommand({
