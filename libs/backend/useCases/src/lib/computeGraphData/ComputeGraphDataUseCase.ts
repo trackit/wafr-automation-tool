@@ -47,11 +47,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
       `Computing graph data for assessment with id ${args.assessmentId}`
     );
     const assessmentGraphData = AssessmentGraphDatasMother.basic().build();
-    for (const scanningTool of Object.values(ScanningTool)) {
-      const scanningToolData = assessment.rawGraphDatas?.[scanningTool];
-      if (!scanningToolData) {
-        continue;
-      }
+    for (const scanningToolData of Object.values(assessment.rawGraphDatas)) {
       assessmentGraphData.regions = this.mergeCounters(
         assessmentGraphData.regions,
         scanningToolData.regions
