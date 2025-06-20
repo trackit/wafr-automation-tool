@@ -2,7 +2,11 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import { ScanningTool, type AssessmentGraphDatas } from '@backend/models';
+import {
+  AssessmentGraphDatasMother,
+  ScanningTool,
+  type AssessmentGraphDatas,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NotFoundError } from '../Errors';
 
@@ -46,12 +50,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
     this.logger.info(
       `Computing graph data for assessment with id ${args.assessmentId}`
     );
-    const assessmentGraphData: AssessmentGraphDatas = {
-      findings: 0,
-      resourceTypes: {},
-      regions: {},
-      severities: {},
-    };
+    const assessmentGraphData = AssessmentGraphDatasMother.basic().build();
     for (const scanningTool of Object.values(ScanningTool)) {
       const scanningToolData = assessment.rawGraphDatas?.[scanningTool];
       if (!scanningToolData) {
