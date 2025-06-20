@@ -1,5 +1,6 @@
 import {
   DeleteObjectsCommand,
+  GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
@@ -15,8 +16,27 @@ export class ObjectsStorageS3 implements ObjectsStorage {
   private readonly logger = inject(tokenLogger);
   private readonly bucket = inject(tokenS3Bucket);
 
-  public async list(args: { prefix: string }): Promise<string[]> {
-    const { prefix } = args;
+  public async get(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+    try {
+      const response = await this.client.send(command);
+      if (response.$metadata.httpStatusCode !== 200) {
+        throw new Error(
+          `Failed to get object: ${response.$metadata.httpStatusCode}`
+        );
+      }
+      this.logger.info(`Getting object: ${key}`);
+      return response.Body?.transformToString() ?? '';
+    } catch (error) {
+      this.logger.error(`Failed to get object: ${error}`, key);
+      throw error;
+    }
+  }
+
+  public async list(prefix: string): Promise<string[]> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucket,
       Prefix: prefix,
@@ -36,9 +56,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     }
   }
 
-  public async bulkDelete(args: { keys: string[] }): Promise<void> {
-    const { keys } = args;
-
+  public async bulkDelete(keys: string[]): Promise<void> {
     if (keys.length === 0) {
       return;
     }
@@ -81,6 +99,12 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       this.logger.error(`Failed to put object: ${error}`, args.key);
       throw error;
     }
+  }
+
+  public parseURI(uri: string): { bucket: string; key: string } {
+    const { hostname: bucket, pathname } = new URL(uri);
+    const key = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+    return { bucket, key };
   }
 }
 
