@@ -2,11 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import {
-  AssessmentGraphDatasMother,
-  ScanningTool,
-  type AssessmentGraphDatas,
-} from '@backend/models';
+import { AssessmentGraphDatasMother, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NotFoundError } from '../Errors';
 

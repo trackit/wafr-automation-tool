@@ -21,7 +21,9 @@ export class AssessmentGraphDatasMother {
     return this;
   }
 
-  public withRegions(regions: Record<string, number>): AssessmentGraphDatasMother {
+  public withRegions(
+    regions: Record<string, number>
+  ): AssessmentGraphDatasMother {
     this.data.regions = regions;
     return this;
   }
@@ -33,7 +35,9 @@ export class AssessmentGraphDatasMother {
     return this;
   }
 
-  public withSeverities(severities: Record<string, number>): AssessmentGraphDatasMother {
+  public withSeverities(
+    severities: Record<string, number>
+  ): AssessmentGraphDatasMother {
     this.data.severities = severities;
     return this;
   }
