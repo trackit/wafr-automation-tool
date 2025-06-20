@@ -13,3 +13,19 @@ export interface BestPractice {
 export interface BestPracticeBody {
   checked?: boolean;
 }
+
+export interface RawBestPractice {
+  primary_id: string;
+  label: string;
+  description: string;
+  risk: SeverityType;
+}
+
+export interface BestPracticeLLM {
+  id: string;
+  pillar: string;
+  question: string;
+  bestPractice: {
+    id: string;
+  };
+}

@@ -10,7 +10,7 @@ export class QuestionMother {
 
   public static basic(): QuestionMother {
     return new QuestionMother({
-      bestPractices: [],
+      bestPractices: {},
       disabled: false,
       id: 'question-id',
       label: 'Question Label',
@@ -19,7 +19,9 @@ export class QuestionMother {
     });
   }
 
-  public withBestPractices(bestPractices: BestPractice[]): QuestionMother {
+  public withBestPractices(
+    bestPractices: Record<string, BestPractice>
+  ): QuestionMother {
     this.data.bestPractices = bestPractices;
     return this;
   }

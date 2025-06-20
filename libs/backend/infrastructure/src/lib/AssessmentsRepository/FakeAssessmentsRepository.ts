@@ -112,10 +112,12 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       !this.assessments[key].findings?.find(
         (pillar) =>
           pillar.id === pillarId &&
-          pillar.questions.find(
+          Object.values(pillar.questions).find(
             (question) =>
               question.id === questionId &&
-              question.bestPractices.find((bp) => bp.id === bestPracticeId)
+              Object.values(question.bestPractices).find(
+                (bp) => bp.id === bestPracticeId
+              )
           )
       )
     ) {
@@ -196,7 +198,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         pillarId,
       });
     }
-    const question = pillar.questions.find(
+    const question = Object.values(pillar.questions).find(
       (question) => question.id === questionId.toString()
     );
     if (!question) {
@@ -207,7 +209,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         questionId,
       });
     }
-    const bestPractice = question.bestPractices.find(
+    const bestPractice = Object.values(question.bestPractices).find(
       (bestPractice) => bestPractice.id === bestPracticeId.toString()
     );
     if (!bestPractice) {
