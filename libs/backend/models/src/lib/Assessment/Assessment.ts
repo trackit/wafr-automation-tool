@@ -1,5 +1,6 @@
 import type { SeverityType } from '../Finding';
 import type { Pillar } from '../Pillar';
+import type { ScanningTool } from '../ScanningTool';
 
 export interface Assessment {
   createdAt: Date;
@@ -11,7 +12,7 @@ export interface Assessment {
   name: string;
   organization: string;
   questionVersion?: string;
-  rawGraphDatas: Record<string, AssessmentGraphDatas>;
+  rawGraphDatas: Partial<Record<ScanningTool, AssessmentGraphDatas>>;
   regions: string[];
   roleArn: string;
   step: AssessmentStep;
@@ -41,5 +42,6 @@ export interface AssessmentError {
 
 export interface AssessmentBody {
   name?: string;
+  graphDatas?: AssessmentGraphDatas;
   error?: AssessmentError;
 }

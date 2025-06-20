@@ -2,9 +2,11 @@ import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentGraphDatas,
   BestPractice,
   BestPracticeBody,
   DynamoDBAssessment,
+  DynamoDBAssessmentGraphDatas,
   DynamoDBBestPractice,
   DynamoDBFinding,
   DynamoDBPillar,
@@ -110,6 +112,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
+  private toDynamoDBAssessmentGraphDatas(
+    graphDatas: AssessmentGraphDatas
+  ): DynamoDBAssessmentGraphDatas {
+    return {
+      findings: graphDatas.findings,
+      regions: graphDatas.regions,
+      resource_types: graphDatas.resourceTypes,
+      severities: graphDatas.severities,
+    };
+  }
+
   private toDynamoDBAssessmentItem(assessment: Assessment): DynamoDBAssessment {
     return {
       PK: this.getAssessmentPK(assessment.organization),
@@ -125,12 +138,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         {}
       ),
       ...(assessment.graphDatas && {
-        graph_datas: {
-          findings: assessment.graphDatas.findings,
-          regions: assessment.graphDatas.regions,
-          resource_types: assessment.graphDatas.resourceTypes,
-          severities: assessment.graphDatas.severities,
-        },
+        graph_datas: this.toDynamoDBAssessmentGraphDatas(assessment.graphDatas),
       }),
       id: assessment.id,
       name: assessment.name,
@@ -238,6 +246,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
+  private fromDynamoDBAssessmentGraphDatas(
+    graphDatas: DynamoDBAssessmentGraphDatas
+  ): AssessmentGraphDatas {
+    return {
+      findings: graphDatas.findings,
+      regions: graphDatas.regions,
+      resourceTypes: graphDatas.resource_types,
+      severities: graphDatas.severities,
+    };
+  }
+
   private fromDynamoDBAssessmentItem(
     item: DynamoDBAssessment | undefined
   ): Assessment | undefined {
@@ -253,12 +272,9 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         ),
       }),
       ...(assessment.graph_datas && {
-        graphDatas: {
-          findings: assessment.graph_datas.findings,
-          regions: assessment.graph_datas.regions,
-          resourceTypes: assessment.graph_datas.resource_types,
-          severities: assessment.graph_datas.severities,
-        },
+        graphDatas: this.fromDynamoDBAssessmentGraphDatas(
+          assessment.graph_datas
+        ),
       }),
       id: assessment.id,
       name: assessment.name,
@@ -907,7 +923,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
-        data: assessmentBody as Record<string, unknown>,
+        data: {
+          ...(assessmentBody.name && { name: assessmentBody.name }),
+          ...(assessmentBody.graphDatas && {
+            graph_datas: this.toDynamoDBAssessmentGraphDatas(
+              assessmentBody.graphDatas
+            ),
+          }),
+        },
       }),
     };
     try {

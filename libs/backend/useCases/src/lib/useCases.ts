@@ -1,4 +1,5 @@
 export * from './cleanup';
+export * from './computeGraphData';
 export * from './deleteAssessment';
 export * from './Errors';
 export * from './exportWellArchitectedTool';

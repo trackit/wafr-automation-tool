@@ -1,5 +1,6 @@
 import type { SeverityType } from '../Finding';
 import type { DynamoDBPillar } from '../Pillar';
+import type { ScanningTool } from '../ScanningTool';
 import type { AssessmentStep } from './Assessment';
 
 export interface DynamoDBAssessment {
@@ -14,7 +15,7 @@ export interface DynamoDBAssessment {
   name: string;
   organization: string;
   question_version?: string;
-  raw_graph_datas: Record<string, DynamoDBAssessmentGraphDatas>;
+  raw_graph_datas: Partial<Record<ScanningTool, DynamoDBAssessmentGraphDatas>>;
   regions: string[];
   role_arn: string;
   step: AssessmentStep;

@@ -225,22 +225,22 @@ Resources:
                 - s3:PutObject
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
-  GenerateDataLogGroup:
+  ComputeGraphDataLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${GenerateDataFunction}'
+      LogGroupName: !Sub '/aws/lambda/${ComputeGraphDataFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  GenerateDataFunction:
+  ComputeGraphDataFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/generate_data/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/stateMachine/computeGraphData
       Timeout: 600
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: GenerateDataFunction
+        Name: ComputeGraphDataFunction
       MemorySize: 128
       Policies:
         - Version: '2012-10-17'
@@ -249,10 +249,17 @@ Resources:
               Action:
                 - dynamodb:GetItem
                 - dynamodb:UpdateItem
-                - dynamodb:DeleteItem
-                - dynamodb:Query
               Resource:
                 - !Ref DynamoDBArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   BedrockPrompt:
     Type: 'AWS::Bedrock::Prompt'
     Properties:
@@ -353,7 +360,7 @@ Resources:
                 - !GetAtt InvokeLLMFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
-                - !GetAtt GenerateDataFunction.Arn
+                - !GetAtt ComputeGraphDataFunction.Arn
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
@@ -622,7 +629,7 @@ Resources:
                       BackoffRate: 2
                       IntervalSeconds: 1
                       MaxAttempts: 3
-            Next: GenerateData
+            Next: ComputeGraphData
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -631,11 +638,11 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          GenerateData:
+          ComputeGraphData:
             Type: Task
-            Resource: !GetAtt GenerateDataFunction.Arn
+            Resource: !GetAtt ComputeGraphDataFunction.Arn
             Arguments:
-              assessment_id: '{% $assessmentId %}'
+              assessmentId: '{% $assessmentId %}'
               organization: '{% $organization %}'
             Catch:
               - ErrorEquals:

@@ -7,6 +7,7 @@ import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
+  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -133,7 +134,7 @@ describe('GetAssessmentAdapter', () => {
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
         .withRawGraphDatas({
-          prowler: {
+          [ScanningTool.PROWLER]: {
             findings: 2,
             regions: { 'us-west-2': 2 },
             resourceTypes: { type: 2 },
