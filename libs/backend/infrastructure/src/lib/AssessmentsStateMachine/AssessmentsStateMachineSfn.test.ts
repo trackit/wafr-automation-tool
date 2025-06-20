@@ -101,9 +101,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           name: 'Test Assessment',
           regions: [],
           workflows: [],
-          role_arn: 'arn:aws:iam::123456789012:role/test-role',
-          created_at: input.createdAt.toISOString(),
-          created_by: 'test-user',
+          roleArn: 'arn:aws:iam::123456789012:role/test-role',
+          createdAt: input.createdAt.toISOString(),
+          createdBy: 'test-user',
           organization: 'test.io',
         })
       );

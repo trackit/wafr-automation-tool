@@ -375,11 +375,11 @@ Resources:
                 PK:
                   S: '{% $states.input.organization %}'
                 SK:
-                  S: "{% 'ASSESSMENT#' & $states.input.assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
                 id:
-                  S: '{% $states.input.assessment_id %}'
+                  S: '{% $states.input.assessmentId %}'
                 created_by:
-                  S: '{% $states.input.created_by %}'
+                  S: '{% $states.input.createdBy %}'
                 organization:
                   S: '{% $states.input.organization %}'
                 name:
@@ -387,7 +387,7 @@ Resources:
                 regions:
                   L: '{% $states.input.regions %}'
                 role_arn:
-                  S: '{% $states.input.role_arn %}'
+                  S: '{% $states.input.roleArn %}'
                 workflows:
                   L: '{% $states.input.workflows %}'
                 step:
@@ -397,12 +397,12 @@ Resources:
                 execution_arn:
                   S: '{% $states.context.Execution.Id %}'
                 created_at:
-                  S: '{% $states.input.created_at %}'
+                  S: '{% $states.input.createdAt %}'
             Assign:
-              assessment_id: '{% $states.input.assessment_id %}'
+              assessmentId: '{% $states.input.assessmentId %}'
               organization: '{% $states.input.organization %}'
               regions: '{% $states.input.regions %}'
-              role_arn: '{% $states.input.role_arn %}'
+              roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
             Next: ScanningTools
             Catch:
@@ -410,7 +410,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $states.input.assessment_id %}'
+                  assessmentId: '{% $states.input.assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           ScanningTools:
@@ -437,11 +437,11 @@ Resources:
                           - Name: prowler-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: '{% $assessmentId %}'
                               - Name: REGIONS
                                 Value: "{% $count($regions) > 0 ? '--filter-region ' & $join($regions, ' ') : '' %}"
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: '{% $roleArn %}'
                     End: true
               - StartAt: PrepareCustodian
                 States:
@@ -468,13 +468,13 @@ Resources:
                           - Name: cloud-custodian-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: '{% $assessmentId %}'
                               - Name: REGIONS
                                 Value: "{% $join([$map($regions, function($r) { '--region ' & $r })], ' ') %}"
                               - Name: POLICIES_URI
                                 Value: '{% $states.input %}'
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: '{% $roleArn %}'
                     End: true
               - StartAt: CloudSploitScan
                 States:
@@ -497,9 +497,9 @@ Resources:
                           - Name: cloudsploit-container
                             Environment:
                               - Name: ASSESSMENT_ID
-                                Value: '{% $assessment_id %}'
+                                Value: '{% $assessmentId %}'
                               - Name: ROLE_ARN
-                                Value: '{% $role_arn %}'
+                                Value: '{% $roleArn %}'
                     End: true
             Next: PreparePromptsUpdateStep
             Catch:
@@ -507,7 +507,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           PreparePromptsUpdateStep:
@@ -519,7 +519,7 @@ Resources:
                 PK:
                   S: '{% $organization %}'
                 SK:
-                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ':newStep':
@@ -530,7 +530,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           Prepare Prompts:
@@ -542,7 +542,7 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
+                      assessment_id: '{% $assessmentId %}'
                       organization: '{% $organization %}'
                       scanning_tool: 'prowler'
                       regions: '{% $regions %}'
@@ -554,7 +554,7 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
+                      assessment_id: '{% $assessmentId %}'
                       organization: '{% $organization %}'
                       scanning_tool: 'cloud-custodian'
                       regions: '{% $regions %}'
@@ -566,7 +566,7 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessment_id %}'
+                      assessment_id: '{% $assessmentId %}'
                       organization: '{% $organization %}'
                       scanning_tool: 'cloudsploit'
                       regions: '{% $regions %}'
@@ -579,7 +579,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           InvokeLLMUpdateStep:
@@ -591,7 +591,7 @@ Resources:
                 PK:
                   S: '{% $organization %}'
                 SK:
-                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ':newStep':
@@ -603,7 +603,7 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           PromptMap:
@@ -618,7 +618,7 @@ Resources:
                   Type: Task
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
-                    assessment_id: '{% $assessment_id %}'
+                    assessment_id: '{% $assessmentId %}'
                     organization: '{% $organization %}'
                     prompt_uri: '{% $states.input %}'
                     prompt_arn: !GetAtt BedrockPrompt.Arn
@@ -635,21 +635,21 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           ComputeGraphData:
             Type: Task
             Resource: !GetAtt ComputeGraphDataFunction.Arn
             Arguments:
-              assessmentId: '{% $assessment_id %}'
+              assessmentId: '{% $assessmentId %}'
               organization: '{% $organization %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
             Next: 'FinishUpdateStep'
@@ -662,7 +662,7 @@ Resources:
                 PK:
                   S: '{% $organization %}'
                 SK:
-                  S: "{% 'ASSESSMENT#' & $assessment_id %}"
+                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ':newStep':
@@ -673,21 +673,21 @@ Resources:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
-              assessmentId: '{% $assessment_id %}'
+              assessmentId: '{% $assessmentId %}'
               organization: '{% $organization %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
-                  assessmentId: '{% $assessment_id %}'
+                  assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
             End: true
