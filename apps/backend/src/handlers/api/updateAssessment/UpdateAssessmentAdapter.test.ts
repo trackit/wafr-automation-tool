@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { NotFoundError, tokenUpdateAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -97,6 +98,7 @@ describe('UpdateAssessmentAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { updateAssessment: vitest.fn() };
   register(tokenUpdateAssessmentUseCase, { useValue: useCase });
   return { useCase, adapter: new UpdateAssessmentAdapter() };

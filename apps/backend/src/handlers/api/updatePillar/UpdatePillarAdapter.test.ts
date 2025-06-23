@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   NoContentError,
   NotFoundError,
@@ -131,6 +132,7 @@ describe('UpdatePillarAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { updatePillar: vitest.fn() };
   register(tokenUpdatePillarUseCase, { useValue: useCase });
   return { useCase, adapter: new UpdatePillarAdapter() };

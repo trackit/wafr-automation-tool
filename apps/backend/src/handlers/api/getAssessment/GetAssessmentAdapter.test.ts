@@ -1,6 +1,4 @@
-import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
-import { register, reset } from '@shared/di-container';
-
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   AssessmentMother,
   AssessmentStep,
@@ -10,6 +8,9 @@ import {
   ScanningTool,
   SeverityType,
 } from '@backend/models';
+import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
+
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { GetAssessmentAdapter } from './GetAssessmentAdapter';
 
@@ -206,6 +207,7 @@ describe('GetAssessmentAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { getAssessment: vitest.fn() };
   register(tokenGetAssessmentUseCase, { useValue: useCase });
   const date = new Date();

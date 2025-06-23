@@ -1,7 +1,8 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { AssessmentMother, UserMother } from '@backend/models';
 import { tokenGetAllAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { AssessmentMother, UserMother } from '@backend/models';
 import { GetAllAssessmentsAdapter } from './GetAllAssessmentsAdapter';
 import { GetAllAssessmentsAdapterEventMother } from './GetAllAssessmentsAdapterEventMother';
 
@@ -115,6 +116,7 @@ describe('getAllAssessments adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { getAllAssessments: vitest.fn() };
   useCase.getAllAssessments.mockResolvedValueOnce(
     Promise.resolve({
