@@ -10,12 +10,12 @@ export interface DynamoDBAssessment {
   created_by: string;
   execution_arn: string;
   findings?: Record<string, DynamoDBPillar>;
-  graph_datas?: DynamoDBAssessmentGraphDatas;
+  graph_datas?: DynamoDBAssessmentGraphData;
   id: string;
   name: string;
   organization: string;
   question_version?: string;
-  raw_graph_datas: Partial<Record<ScanningTool, DynamoDBAssessmentGraphDatas>>;
+  raw_graph_datas: Partial<Record<ScanningTool, DynamoDBAssessmentGraphData>>;
   regions: string[];
   role_arn: string;
   step: AssessmentStep;
@@ -23,7 +23,7 @@ export interface DynamoDBAssessment {
   error?: DynamoDBAssessmentError;
 }
 
-export interface DynamoDBAssessmentGraphDatas {
+export interface DynamoDBAssessmentGraphData {
   findings: number;
   regions: Record<string, number>;
   resource_types: Record<string, number>;

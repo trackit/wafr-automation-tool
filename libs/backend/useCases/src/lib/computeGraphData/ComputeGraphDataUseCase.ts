@@ -2,7 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import { AssessmentGraphDatasMother, ScanningTool } from '@backend/models';
+import { AssessmentGraphDataMother } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NotFoundError } from '../Errors';
 
@@ -46,8 +46,8 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
     this.logger.info(
       `Computing graph data for assessment with id ${args.assessmentId}`
     );
-    const assessmentGraphData = AssessmentGraphDatasMother.basic().build();
-    for (const scanningToolData of Object.values(assessment.rawGraphDatas)) {
+    const assessmentGraphData = AssessmentGraphDataMother.basic().build();
+    for (const scanningToolData of Object.values(assessment.rawGraphData)) {
       assessmentGraphData.regions = this.mergeCounters(
         assessmentGraphData.regions,
         scanningToolData.regions
@@ -70,7 +70,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
       assessmentId: assessment.id,
       organization: assessment.organization,
       assessmentBody: {
-        graphDatas: assessmentGraphData,
+        graphData: assessmentGraphData,
       },
     });
   }

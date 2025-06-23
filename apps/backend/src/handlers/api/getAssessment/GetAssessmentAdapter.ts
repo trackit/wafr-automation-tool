@@ -53,20 +53,20 @@ export class GetAssessmentAdapter {
             none: question.none,
           })),
         })) ?? [],
-      ...(assessment.graphDatas && {
+      ...(assessment.graphData && {
         graph_datas: {
-          findings: assessment.graphDatas.findings,
-          regions: assessment.graphDatas.regions,
-          resource_types: assessment.graphDatas.resourceTypes,
-          severities: assessment.graphDatas.severities,
+          findings: assessment.graphData.findings,
+          regions: assessment.graphData.regions,
+          resource_types: assessment.graphData.resourceTypes,
+          severities: assessment.graphData.severities,
         },
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       question_version: assessment.questionVersion,
-      ...(assessment.rawGraphDatas && {
-        raw_graph_datas: Object.entries(assessment.rawGraphDatas).reduce(
+      ...(assessment.rawGraphData && {
+        raw_graph_datas: Object.entries(assessment.rawGraphData).reduce(
           (acc, [key, value]) => ({
             ...acc,
             [key]: {

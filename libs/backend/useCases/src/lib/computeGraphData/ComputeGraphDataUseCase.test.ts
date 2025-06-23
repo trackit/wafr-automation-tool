@@ -3,7 +3,7 @@ import {
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
 import {
-  AssessmentGraphDatasMother,
+  AssessmentGraphDataMother,
   AssessmentMother,
   ScanningTool,
   SeverityType,
@@ -20,8 +20,8 @@ describe('computeGraphData UseCase', () => {
   it('should compute the correct graph data', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const rawGraphDatas = {
-      [ScanningTool.PROWLER]: AssessmentGraphDatasMother.basic()
+    const rawGraphData = {
+      [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
         .withFindings(150)
         .withResourceTypes({
           AwsAccount: 4,
@@ -40,7 +40,7 @@ describe('computeGraphData UseCase', () => {
           [SeverityType.Low]: 10,
         })
         .build(),
-      [ScanningTool.CLOUDSPLOIT]: AssessmentGraphDatasMother.basic()
+      [ScanningTool.CLOUDSPLOIT]: AssessmentGraphDataMother.basic()
         .withFindings(300)
         .withResourceTypes({
           AwsAccount: 4,
@@ -60,10 +60,10 @@ describe('computeGraphData UseCase', () => {
         })
         .build(),
       [ScanningTool.CLOUD_CUSTODIAN]:
-        AssessmentGraphDatasMother.basic().build(),
+        AssessmentGraphDataMother.basic().build(),
     };
     const fakeAssessmentMother =
-      AssessmentMother.basic().withRawGraphDatas(rawGraphDatas);
+      AssessmentMother.basic().withRawGraphData(rawGraphData);
     const fakeAssessment = fakeAssessmentMother.build();
     await fakeAssessmentsRepository.save(fakeAssessment);
 
@@ -75,7 +75,7 @@ describe('computeGraphData UseCase', () => {
     expect(fakeAssessmentsRepository.assessments).toEqual({
       [`${fakeAssessment.id}#${fakeAssessment.organization}`]:
         fakeAssessmentMother
-          .withGraphDatas({
+          .withGraphData({
             findings: 450,
             regions: {
               'us-east-1': 30,

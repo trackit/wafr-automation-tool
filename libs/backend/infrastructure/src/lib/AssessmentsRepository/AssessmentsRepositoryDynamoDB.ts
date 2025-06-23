@@ -2,11 +2,11 @@ import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
-  AssessmentGraphDatas,
+  AssessmentGraphData,
   BestPractice,
   BestPracticeBody,
   DynamoDBAssessment,
-  DynamoDBAssessmentGraphDatas,
+  DynamoDBAssessmentGraphData,
   DynamoDBBestPractice,
   DynamoDBFinding,
   DynamoDBPillar,
@@ -112,14 +112,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
-  private toDynamoDBAssessmentGraphDatas(
-    graphDatas: AssessmentGraphDatas
-  ): DynamoDBAssessmentGraphDatas {
+  private toDynamoDBAssessmentGraphData(
+    graphData: AssessmentGraphData
+  ): DynamoDBAssessmentGraphData {
     return {
-      findings: graphDatas.findings,
-      regions: graphDatas.regions,
-      resource_types: graphDatas.resourceTypes,
-      severities: graphDatas.severities,
+      findings: graphData.findings,
+      regions: graphData.regions,
+      resource_types: graphData.resourceTypes,
+      severities: graphData.severities,
     };
   }
 
@@ -137,22 +137,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         }),
         {}
       ),
-      ...(assessment.graphDatas && {
-        graph_datas: this.toDynamoDBAssessmentGraphDatas(assessment.graphDatas),
+      ...(assessment.graphData && {
+        graph_datas: this.toDynamoDBAssessmentGraphData(assessment.graphData),
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       question_version: assessment.questionVersion,
-      raw_graph_datas: Object.entries(assessment.rawGraphDatas).reduce(
-        (rawGraphDatas, [key, value]) => ({
-          ...rawGraphDatas,
-          [key]: {
-            findings: value.findings,
-            regions: value.regions,
-            resource_types: value.resourceTypes,
-            severities: value.severities,
-          },
+      raw_graph_datas: Object.entries(assessment.rawGraphData).reduce(
+        (rawGraphData, [key, value]) => ({
+          ...rawGraphData,
+          [key]: this.toDynamoDBAssessmentGraphData(value),
         }),
         {}
       ),
@@ -246,14 +241,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
-  private fromDynamoDBAssessmentGraphDatas(
-    graphDatas: DynamoDBAssessmentGraphDatas
-  ): AssessmentGraphDatas {
+  private fromDynamoDBAssessmentGraphData(
+    graphData: DynamoDBAssessmentGraphData
+  ): AssessmentGraphData {
     return {
-      findings: graphDatas.findings,
-      regions: graphDatas.regions,
-      resourceTypes: graphDatas.resource_types,
-      severities: graphDatas.severities,
+      findings: graphData.findings,
+      regions: graphData.regions,
+      resourceTypes: graphData.resource_types,
+      severities: graphData.severities,
     };
   }
 
@@ -272,17 +267,15 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         ),
       }),
       ...(assessment.graph_datas && {
-        graphDatas: this.fromDynamoDBAssessmentGraphDatas(
-          assessment.graph_datas
-        ),
+        graphData: this.fromDynamoDBAssessmentGraphData(assessment.graph_datas),
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       questionVersion: assessment.question_version,
-      rawGraphDatas: Object.entries(assessment.raw_graph_datas).reduce(
-        (rawGraphDatas, [key, value]) => ({
-          ...rawGraphDatas,
+      rawGraphData: Object.entries(assessment.raw_graph_datas).reduce(
+        (rawGraphData, [key, value]) => ({
+          ...rawGraphData,
           [key]: {
             findings: value.findings,
             regions: value.regions,
@@ -988,9 +981,9 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ...this.buildUpdateExpression({
         data: {
           ...(assessmentBody.name && { name: assessmentBody.name }),
-          ...(assessmentBody.graphDatas && {
-            graph_datas: this.toDynamoDBAssessmentGraphDatas(
-              assessmentBody.graphDatas
+          ...(assessmentBody.graphData && {
+            graph_datas: this.toDynamoDBAssessmentGraphData(
+              assessmentBody.graphData
             ),
           }),
         },

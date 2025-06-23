@@ -124,7 +124,7 @@ describe('GetAssessmentAdapter', () => {
             ])
             .build(),
         ])
-        .withGraphDatas({
+        .withGraphData({
           findings: 2,
           regions: { 'us-west-2': 2 },
           resourceTypes: { type: 2 },
@@ -134,7 +134,7 @@ describe('GetAssessmentAdapter', () => {
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
-        .withRawGraphDatas({
+        .withRawGraphData({
           [ScanningTool.PROWLER]: {
             findings: 2,
             regions: { 'us-west-2': 2 },
