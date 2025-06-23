@@ -42,16 +42,16 @@ describe('QuestionSet Infrastructure', () => {
 
       const questionSet = questionSetService.get();
 
-      const questionSetData: QuestionSet['data'] = {
-        '0': {
+      const questionSetData: QuestionSet['data'] = [
+        {
           primaryId: 'pillar-id',
           label: 'pillar-label',
           disabled: false,
           id: '0',
-          questions: {
-            '0': {
-              bestPractices: {
-                '0': {
+          questions: [
+            {
+              bestPractices: [
+                {
                   id: '0',
                   primaryId: 'best-practice-id',
                   label: 'best-practice-label',
@@ -60,16 +60,16 @@ describe('QuestionSet Infrastructure', () => {
                   results: [],
                   checked: false,
                 },
-              },
+              ],
               disabled: false,
               id: '0',
               label: 'question-label',
               none: false,
               primaryId: 'question-id',
             },
-          },
+          ],
         },
-      };
+      ];
       expect(questionSet.data).toEqual(questionSetData);
       expect(questionSet.version).toEqual('questions_20230625');
     });
