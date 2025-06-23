@@ -14,7 +14,7 @@ export class PillarMother {
       id: 'pillar-id',
       label: 'Pillar Label',
       primaryId: 'primary-id',
-      questions: {},
+      questions: [],
     });
   }
 
@@ -38,7 +38,7 @@ export class PillarMother {
     return this;
   }
 
-  public withQuestions(questions: Record<string, Question>): PillarMother {
+  public withQuestions(questions: Question[]): PillarMother {
     this.data.questions = questions;
     return this;
   }

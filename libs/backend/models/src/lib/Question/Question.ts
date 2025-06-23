@@ -1,7 +1,7 @@
 import type { BestPractice, RawBestPractice } from '../BestPractice';
 
 export interface Question {
-  bestPractices: Record<string, BestPractice>;
+  bestPractices: BestPractice[];
   disabled: boolean;
   id: string;
   label: string;

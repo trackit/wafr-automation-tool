@@ -1,3 +1,4 @@
+export * from './AIBestPracticeService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './ObjectsStorage';
