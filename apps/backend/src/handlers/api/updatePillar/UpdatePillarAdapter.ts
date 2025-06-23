@@ -5,7 +5,7 @@ import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
 import { tokenUpdatePillarUseCase } from '@backend/useCases';
-import { JSONParseError, parseJson } from '@shared/utils';
+import { JSONParseError, parseJsonObject } from '@shared/utils';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
@@ -29,7 +29,7 @@ export class UpdatePillarAdapter {
   private parseBody(
     body?: string
   ): operations['updatePillar']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJson(body);
+    const parsedBody = parseJsonObject(body);
     return UpdatePillarBodySchema.parse(parsedBody);
   }
 

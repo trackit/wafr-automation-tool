@@ -5,7 +5,7 @@ export class JSONParseError extends Error {
   }
 }
 
-export function parseJson(jsonString?: string): Record<string, unknown> {
+export function parseJsonObject(jsonString?: string): Record<string, unknown> {
   try {
     return JSON.parse(jsonString || '{}');
   } catch (error) {
