@@ -9,7 +9,7 @@ export class QuestionSetMother {
 
   public static basic(): QuestionSetMother {
     return new QuestionSetMother({
-      data: {},
+      data: [],
       version: 'version',
     });
   }

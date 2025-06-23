@@ -1,7 +1,7 @@
 import { Pillar, RawPillar } from '../Pillar';
 
 export interface QuestionSet {
-  data: Record<string, Pillar>;
+  data: Pillar[];
   version: string;
 }
 

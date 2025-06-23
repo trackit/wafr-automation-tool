@@ -20,12 +20,3 @@ export interface RawBestPractice {
   description: string;
   risk: SeverityType;
 }
-
-export interface BestPracticeLLM {
-  id: string;
-  pillar: string;
-  question: string;
-  bestPractice: {
-    id: string;
-  };
-}

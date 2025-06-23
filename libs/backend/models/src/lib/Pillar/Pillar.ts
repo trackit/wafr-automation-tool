@@ -5,7 +5,7 @@ export interface Pillar {
   id: string;
   label: string;
   primaryId: string;
-  questions: Record<string, Question>;
+  questions: Question[];
 }
 
 export interface PillarBody {

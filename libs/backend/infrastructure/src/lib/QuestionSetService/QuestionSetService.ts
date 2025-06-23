@@ -39,20 +39,20 @@ export class QuestionSetService implements QuestionSetPort {
     rawQuestionSet: RawQuestionSet,
     version: string
   ): QuestionSet {
-    const questionSet: QuestionSet = { data: {}, version };
+    const questionSet: QuestionSet = { data: [], version };
     for (const [pillarId, rawPillar] of Object.entries(rawQuestionSet)) {
       const pillar: Pillar = {
         disabled: false,
         id: pillarId,
         label: rawPillar.label,
         primaryId: rawPillar.primary_id,
-        questions: {},
+        questions: [],
       };
       for (const [questionId, rawQuestion] of Object.entries(
         rawPillar.questions
       )) {
         const question: Question = {
-          bestPractices: {},
+          bestPractices: [],
           disabled: false,
           id: questionId,
           label: rawQuestion.label,
@@ -62,17 +62,17 @@ export class QuestionSetService implements QuestionSetPort {
         for (const [bestPracticeId, rawBestPractice] of Object.entries(
           rawQuestion.best_practices
         )) {
-          question.bestPractices[bestPracticeId] = {
+          question.bestPractices.push({
             ...{ ...rawBestPractice, primary_id: undefined },
             id: bestPracticeId,
             primaryId: rawBestPractice.primary_id,
             results: [],
             checked: false,
-          };
+          });
         }
-        pillar.questions[questionId] = question;
+        pillar.questions.push(question);
       }
-      questionSet.data[pillarId] = pillar;
+      questionSet.data.push(pillar);
     }
     return questionSet;
   }
@@ -83,8 +83,8 @@ export class QuestionSetService implements QuestionSetPort {
   }
 }
 
-export const tokenQuestionSet = createInjectionToken<QuestionSetService>(
-  'QuestionSet',
+export const tokenQuestionSetService = createInjectionToken<QuestionSetService>(
+  'QuestionSetService',
   {
     useClass: QuestionSetService,
   }

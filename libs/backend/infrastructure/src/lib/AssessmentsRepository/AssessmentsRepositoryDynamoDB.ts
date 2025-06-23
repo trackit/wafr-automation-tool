@@ -81,11 +81,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   private toDynamoDBQuestionItem(question: Question): DynamoDBQuestion {
     return {
-      best_practices: Object.fromEntries(
-        Object.entries(question.bestPractices).map(([key, bestPractice]) => [
-          key,
-          this.toDynamoDBBestPracticeItem(bestPractice),
-        ])
+      best_practices: question.bestPractices.reduce(
+        (bestPractices, bestPractice) => ({
+          ...bestPractices,
+          [bestPractice.id]: this.toDynamoDBBestPracticeItem(bestPractice),
+        }),
+        {}
       ),
       disabled: question.disabled,
       id: question.id,
@@ -101,11 +102,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: pillar.id,
       label: pillar.label,
       primary_id: pillar.primaryId,
-      questions: Object.fromEntries(
-        Object.entries(pillar.questions).map(([key, question]) => [
-          key,
-          this.toDynamoDBQuestionItem(question),
-        ])
+      questions: pillar.questions.reduce(
+        (questions, question) => ({
+          ...questions,
+          [question.id]: this.toDynamoDBQuestionItem(question),
+        }),
+        {}
       ),
     };
   }
@@ -221,11 +223,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   private fromDynamoDBQuestionItem(item: DynamoDBQuestion): Question {
     return {
-      bestPractices: Object.fromEntries(
-        Object.entries(item.best_practices).map(([key, bestPractice]) => [
-          key,
-          this.fromDynamoDBBestPracticeItem(bestPractice),
-        ])
+      bestPractices: Object.values(item.best_practices).map((bestPractice) =>
+        this.fromDynamoDBBestPracticeItem(bestPractice)
       ),
       disabled: item.disabled,
       id: item.id,
@@ -241,11 +240,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: item.id,
       label: item.label,
       primaryId: item.primary_id,
-      questions: Object.fromEntries(
-        Object.entries(item.questions).map(([key, question]) => [
-          key,
-          this.fromDynamoDBQuestionItem(question),
-        ])
+      questions: Object.values(item.questions).map((question) =>
+        this.fromDynamoDBQuestionItem(question)
       ),
     };
   }
@@ -612,7 +608,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         pillarId,
       });
     }
-    const question = Object.values(pillar.questions).find(
+    const question = pillar.questions.find(
       (question) => question.id === questionId.toString()
     );
     if (!question) {
@@ -623,7 +619,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         questionId,
       });
     }
-    const bestPractice = Object.values(question.bestPractices).find(
+    const bestPractice = question.bestPractices.find(
       (bestPractice) => bestPractice.id === bestPracticeId.toString()
     );
     if (!bestPractice) {
@@ -1014,7 +1010,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         pillarId,
       });
     }
-    const question = Object.values(pillar.questions).find(
+    const question = pillar.questions.find(
       (question) => question.id === questionId
     );
     if (!question) {

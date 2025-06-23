@@ -16,10 +16,10 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
   QuestionNotFoundError,
-  FindingNotFoundError,
 } from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
