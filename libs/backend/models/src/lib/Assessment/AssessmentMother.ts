@@ -3,7 +3,7 @@ import type { ScanningTool } from '../ScanningTool';
 import {
   AssessmentStep,
   type Assessment,
-  type AssessmentGraphDatas,
+  type AssessmentGraphData,
 } from './Assessment';
 
 export class AssessmentMother {
@@ -19,8 +19,8 @@ export class AssessmentMother {
       createdBy: 'user-id',
       executionArn:
         'arn:aws:states:us-west-2:123456789012:execution:state-machine:execution-arn',
-      findings: [],
-      graphDatas: {
+      pillars: [],
+      graphData: {
         findings: 0,
         regions: {},
         resourceTypes: {},
@@ -30,11 +30,11 @@ export class AssessmentMother {
       name: 'Test Assessment',
       organization: 'organization-id',
       questionVersion: '1.0',
-      rawGraphDatas: {},
-      regions: ['us-west-2'],
+      rawGraphData: {},
+      regions: [],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       step: AssessmentStep.FINISHED,
-      workflows: ['workflow1', 'workflow2'],
+      workflows: [],
     });
   }
 
@@ -53,13 +53,13 @@ export class AssessmentMother {
     return this;
   }
 
-  public withFindings(findings: Pillar[] | undefined): AssessmentMother {
-    this.data.findings = findings;
+  public withPillars(pillars: Pillar[] | undefined): AssessmentMother {
+    this.data.pillars = pillars;
     return this;
   }
 
-  public withGraphDatas(graphDatas: AssessmentGraphDatas): AssessmentMother {
-    this.data.graphDatas = graphDatas;
+  public withGraphData(graphData: AssessmentGraphData): AssessmentMother {
+    this.data.graphData = graphData;
     return this;
   }
 
@@ -83,10 +83,10 @@ export class AssessmentMother {
     return this;
   }
 
-  public withRawGraphDatas(
-    rawGraphDatas: Partial<Record<ScanningTool, AssessmentGraphDatas>>
+  public withRawGraphData(
+    rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>
   ): AssessmentMother {
-    this.data.rawGraphDatas = rawGraphDatas;
+    this.data.rawGraphData = rawGraphData;
     return this;
   }
 

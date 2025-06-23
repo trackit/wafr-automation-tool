@@ -1,9 +1,12 @@
-export interface Finding {
-  bestPractices: string;
+export interface Finding extends ScanFinding {
   hidden: boolean;
-  id: string;
   isAiAssociated: boolean;
-  metadata: FindingMetadata;
+  bestPractices: string;
+}
+
+export interface ScanFinding {
+  id: string;
+  metadata?: FindingMetadata;
   remediation?: FindingRemediation;
   resources?: FindingResource[];
   riskDetails?: string;

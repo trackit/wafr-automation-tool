@@ -4,7 +4,7 @@ import { z, ZodError, ZodType } from 'zod';
 import { tokenUpdateFindingUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJson } from '@shared/utils';
+import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
@@ -27,7 +27,7 @@ export class UpdateFindingAdapter {
   private parseBody(
     body: string
   ): operations['updateFinding']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJson(body);
+    const parsedBody = parseJsonObject(body);
     return updateFindingBodySchema.parse(parsedBody);
   }
 

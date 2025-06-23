@@ -6,13 +6,13 @@ export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn: string;
-  findings?: Pillar[];
-  graphDatas?: AssessmentGraphDatas;
+  pillars?: Pillar[];
+  graphData?: AssessmentGraphData;
   id: string;
   name: string;
   organization: string;
   questionVersion?: string;
-  rawGraphDatas: Partial<Record<ScanningTool, AssessmentGraphDatas>>;
+  rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>;
   regions: string[];
   roleArn: string;
   step: AssessmentStep;
@@ -20,7 +20,7 @@ export interface Assessment {
   error?: AssessmentError;
 }
 
-export interface AssessmentGraphDatas {
+export interface AssessmentGraphData {
   findings: number;
   regions: Record<string, number>;
   resourceTypes: Record<string, number>;
@@ -42,6 +42,9 @@ export interface AssessmentError {
 
 export interface AssessmentBody {
   name?: string;
-  graphDatas?: AssessmentGraphDatas;
+  graphData?: AssessmentGraphData;
   error?: AssessmentError;
+  rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
+  pillars?: Pillar[];
+  questionVersion?: string;
 }

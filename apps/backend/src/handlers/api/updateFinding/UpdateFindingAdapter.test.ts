@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   NoContentError,
   NotFoundError,
@@ -105,6 +106,7 @@ describe('UpdateFindingAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { updateFinding: vitest.fn() };
   register(tokenUpdateFindingUseCase, { useValue: useCase });
   return { useCase, adapter: new UpdateFindingAdapter() };

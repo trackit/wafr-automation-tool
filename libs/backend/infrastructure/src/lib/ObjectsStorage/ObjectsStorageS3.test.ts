@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -12,36 +13,44 @@ import {
   tokenClientS3,
   tokenS3Bucket,
 } from './ObjectsStorageS3';
+import { stringToStream } from '@shared/utils';
 
 describe('ObjectsStorage Infrastructure', () => {
   describe('get', () => {
     it('should get an object', async () => {
-      const { objectsStorage, s3ClientMock, bucket } = setup();
+      const { objectsStorage, s3ClientMock } = setup();
 
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        Body: stringToStream('object-content') as any,
       });
-      await expect(objectsStorage.get('key')).resolves.toEqual('');
 
-      const getExecutionCalls = s3ClientMock.commandCalls(GetObjectCommand);
-      expect(getExecutionCalls).toHaveLength(1);
-      const getExecutionCall = getExecutionCalls[0];
-      expect(getExecutionCall.args[0].input).toEqual({
-        Bucket: bucket,
-        Key: 'key',
-      });
+      const result = await objectsStorage.get('assessment-id');
+      expect(result).toBe('object-content');
     });
 
-    it('should throw an exception if the object has failed to be retrieved', async () => {
+    it('should return null if object does not exist', async () => {
+      const { objectsStorage, s3ClientMock } = setup();
+
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 404 },
+      });
+
+      const result = await objectsStorage.get('non-existent-assessment-id');
+      expect(result).toBeNull();
+    });
+
+    it('should throw an error if get object fails', async () => {
       const { objectsStorage, s3ClientMock } = setup();
 
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.get('key')).rejects.toThrow(Error);
+      await expect(objectsStorage.get('assessment-id')).rejects.toThrow(Error);
     });
   });
+
   describe('list', () => {
     it('should return an empty list when no objects are found', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
@@ -94,6 +103,7 @@ describe('ObjectsStorage Infrastructure', () => {
       await expect(objectsStorage.list('prefix')).rejects.toThrow(Error);
     });
   });
+
   describe('bulkDelete', () => {
     it('should delete a list of objects', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
@@ -143,20 +153,44 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should put an object', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        Body: stringToStream('object-content') as any,
+      });
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
       s3ClientMock.on(PutObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
 
-      await objectsStorage.put({ key: 'test-key', body: 'test-body' });
+      await objectsStorage.put({
+        key: 'assessment-id',
+        body: 'object-content',
+      });
 
       const putExecutionCalls = s3ClientMock.commandCalls(PutObjectCommand);
       expect(putExecutionCalls).toHaveLength(1);
       const putExecutionCall = putExecutionCalls[0];
       expect(putExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: 'test-key',
-        Body: 'test-body',
+        Key: 'assessment-id',
+        Body: 'object-content',
       });
+    });
+
+    it('should return the S3 URI of the object', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+      s3ClientMock.on(PutObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      const uri = await objectsStorage.put({
+        key: 'assessment-id',
+        body: 'object-content',
+      });
+      expect(uri).toBe(`s3://${bucket}/assessment-id`);
     });
 
     it('should throw an exception if put object fail', async () => {
@@ -167,8 +201,8 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await expect(
-        objectsStorage.put({ key: 'test-key', body: 'test-body' })
-      ).rejects.toThrow('Failed to put object: 500');
+        objectsStorage.put({ key: 'assessment-id', body: 'object-content' })
+      ).rejects.toThrow(Error);
     });
   });
 
@@ -187,6 +221,40 @@ describe('ObjectsStorage Infrastructure', () => {
       const { objectsStorage } = setup();
 
       expect(() => objectsStorage.parseURI('invalid-uri')).toThrow(Error);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete an object', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      await objectsStorage.delete(
+        ObjectsStorageS3.getAssessmentsPath('assessment-id')
+      );
+
+      const deleteExecutionCalls =
+        s3ClientMock.commandCalls(DeleteObjectCommand);
+      expect(deleteExecutionCalls).toHaveLength(1);
+      const deleteExecutionCall = deleteExecutionCalls[0];
+      expect(deleteExecutionCall.args[0].input).toEqual({
+        Bucket: bucket,
+        Key: ObjectsStorageS3.getAssessmentsPath('assessment-id'),
+      });
+    });
+
+    it('should throw an error when object fails to delete', async () => {
+      const { objectsStorage, s3ClientMock } = setup();
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 500 },
+      });
+
+      await expect(objectsStorage.delete('assessment-id')).rejects.toThrow(
+        Error
+      );
     });
   });
 });

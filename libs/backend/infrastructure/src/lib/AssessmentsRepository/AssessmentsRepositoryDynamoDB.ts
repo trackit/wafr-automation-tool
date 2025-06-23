@@ -2,11 +2,11 @@ import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
-  AssessmentGraphDatas,
+  AssessmentGraphData,
   BestPractice,
   BestPracticeBody,
   DynamoDBAssessment,
-  DynamoDBAssessmentGraphDatas,
+  DynamoDBAssessmentGraphData,
   DynamoDBBestPractice,
   DynamoDBFinding,
   DynamoDBPillar,
@@ -17,6 +17,7 @@ import type {
   PillarBody,
   Question,
   QuestionBody,
+  ScanningTool,
 } from '@backend/models';
 import {
   AssessmentsRepository,
@@ -73,7 +74,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: bestPractice.id,
       label: bestPractice.label,
       primary_id: bestPractice.primaryId,
-      results: bestPractice.results,
+      results:
+        bestPractice.results.size > 0
+          ? bestPractice.results
+          : new Set<string>(['']), // Dirty hack because DynamoDB does not allow empty sets
       risk: bestPractice.risk,
       checked: bestPractice.checked,
     };
@@ -112,14 +116,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
-  private toDynamoDBAssessmentGraphDatas(
-    graphDatas: AssessmentGraphDatas
-  ): DynamoDBAssessmentGraphDatas {
+  private toDynamoDBAssessmentGraphData(
+    graphData: AssessmentGraphData
+  ): DynamoDBAssessmentGraphData {
     return {
-      findings: graphDatas.findings,
-      regions: graphDatas.regions,
-      resource_types: graphDatas.resourceTypes,
-      severities: graphDatas.severities,
+      findings: graphData.findings,
+      regions: graphData.regions,
+      resource_types: graphData.resourceTypes,
+      severities: graphData.severities,
     };
   }
 
@@ -130,29 +134,24 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
       execution_arn: assessment.executionArn,
-      findings: assessment.findings?.reduce(
+      pillars: assessment.pillars?.reduce(
         (pillars, pillar) => ({
           ...pillars,
           [pillar.id]: this.toDynamoDBPillarItem(pillar),
         }),
         {}
       ),
-      ...(assessment.graphDatas && {
-        graph_datas: this.toDynamoDBAssessmentGraphDatas(assessment.graphDatas),
+      ...(assessment.graphData && {
+        graph_datas: this.toDynamoDBAssessmentGraphData(assessment.graphData),
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       question_version: assessment.questionVersion,
-      raw_graph_datas: Object.entries(assessment.rawGraphDatas).reduce(
-        (rawGraphDatas, [key, value]) => ({
-          ...rawGraphDatas,
-          [key]: {
-            findings: value.findings,
-            regions: value.regions,
-            resource_types: value.resourceTypes,
-            severities: value.severities,
-          },
+      raw_graph_datas: Object.entries(assessment.rawGraphData).reduce(
+        (rawGraphData, [key, value]) => ({
+          ...rawGraphData,
+          [key]: this.toDynamoDBAssessmentGraphData(value),
         }),
         {}
       ),
@@ -165,6 +164,35 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           cause: assessment.error.cause,
           error: assessment.error.error,
         },
+      }),
+    };
+  }
+
+  private toDynamoDBAssessmentBody(
+    assessmentBody: AssessmentBody
+  ): Record<string, unknown> {
+    return {
+      ...assessmentBody,
+      ...(assessmentBody.rawGraphData && {
+        raw_graph_datas: Object.entries(assessmentBody.rawGraphData).reduce(
+          (rawGraphData, [key, value]) => ({
+            ...rawGraphData,
+            [key]: this.toDynamoDBAssessmentGraphData(value),
+          }),
+          {}
+        ),
+      }),
+      ...(assessmentBody.pillars && {
+        pillars: assessmentBody.pillars.reduce(
+          (pillars, pillar) => ({
+            ...pillars,
+            [pillar.id]: this.toDynamoDBPillarItem(pillar),
+          }),
+          {}
+        ),
+      }),
+      ...(assessmentBody.questionVersion && {
+        question_version: assessmentBody.questionVersion,
       }),
     };
   }
@@ -187,7 +215,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       hidden: finding.hidden,
       id: finding.id,
       is_ai_associated: finding.isAiAssociated,
-      metadata: { event_code: finding.metadata.eventCode },
+      metadata: { event_code: finding.metadata?.eventCode },
       ...(finding.remediation && {
         remediation: {
           desc: finding.remediation.desc,
@@ -215,7 +243,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: item.id,
       label: item.label,
       primaryId: item.primary_id,
-      results: item.results,
+      results: new Set([...item.results].filter((result) => result !== '')), // Filter out empty strings due to our dirty hack
       risk: item.risk,
       checked: item.checked,
     };
@@ -246,14 +274,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
-  private fromDynamoDBAssessmentGraphDatas(
-    graphDatas: DynamoDBAssessmentGraphDatas
-  ): AssessmentGraphDatas {
+  private fromDynamoDBAssessmentGraphData(
+    graphData: DynamoDBAssessmentGraphData
+  ): AssessmentGraphData {
     return {
-      findings: graphDatas.findings,
-      regions: graphDatas.regions,
-      resourceTypes: graphDatas.resource_types,
-      severities: graphDatas.severities,
+      findings: graphData.findings,
+      regions: graphData.regions,
+      resourceTypes: graphData.resource_types,
+      severities: graphData.severities,
     };
   }
 
@@ -266,23 +294,21 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       createdAt: new Date(assessment.created_at),
       createdBy: assessment.created_by,
       executionArn: assessment.execution_arn,
-      ...(assessment.findings && {
-        findings: Object.values(assessment.findings).map((pillar) =>
+      ...(assessment.pillars && {
+        pillars: Object.values(assessment.pillars).map((pillar) =>
           this.fromDynamoDBPillarItem(pillar)
         ),
       }),
       ...(assessment.graph_datas && {
-        graphDatas: this.fromDynamoDBAssessmentGraphDatas(
-          assessment.graph_datas
-        ),
+        graphData: this.fromDynamoDBAssessmentGraphData(assessment.graph_datas),
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       questionVersion: assessment.question_version,
-      rawGraphDatas: Object.entries(assessment.raw_graph_datas).reduce(
-        (rawGraphDatas, [key, value]) => ({
-          ...rawGraphDatas,
+      rawGraphData: Object.entries(assessment.raw_graph_datas).reduce(
+        (rawGraphData, [key, value]) => ({
+          ...rawGraphData,
           [key]: {
             findings: value.findings,
             regions: value.regions,
@@ -598,7 +624,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     bestPracticeId: string;
   }): void {
     const { assessment, pillarId, questionId, bestPracticeId } = args;
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -685,7 +711,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ...this.buildUpdateExpression({
         data: { ...bestPracticeBody },
         UpdateExpressionPath:
-          'findings.#pillar.questions.#question.best_practices.#best_practice',
+          'pillars.#pillar.questions.#question.best_practices.#best_practice',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
           '#question': questionId,
@@ -701,13 +727,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
-  public async updateBestPracticeFindings(args: {
+  public async addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }) {
     const {
       assessmentId,
@@ -742,15 +768,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      UpdateExpression: `SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)`,
+      UpdateExpression: `
+        ADD pillars.#pillar.questions.#question.best_practices.#bestPractice.results :newFindings
+      `,
       ExpressionAttributeNames: {
         '#pillar': pillarId,
         '#question': questionId,
-        '#best_practice': bestPracticeId,
+        '#bestPractice': bestPracticeId,
       },
       ExpressionAttributeValues: {
-        ':empty_list': [],
-        ':new_findings': bestPracticeFindingIds,
+        ':newFindings': bestPracticeFindingIds,
       },
     };
     try {
@@ -769,7 +796,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     pillarId: string;
   }): void {
     const { assessment, pillarId } = args;
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -820,7 +847,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       },
       ...this.buildUpdateExpression({
         data: pillarBody as Record<string, unknown>,
-        UpdateExpressionPath: 'findings.#pillar',
+        UpdateExpressionPath: 'pillars.#pillar',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
         },
@@ -986,14 +1013,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
-        data: {
-          ...(assessmentBody.name && { name: assessmentBody.name }),
-          ...(assessmentBody.graphDatas && {
-            graph_datas: this.toDynamoDBAssessmentGraphDatas(
-              assessmentBody.graphDatas
-            ),
-          }),
-        },
+        data: this.toDynamoDBAssessmentBody(assessmentBody),
       }),
     };
     try {
@@ -1063,9 +1083,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     questionId: string;
   }): void {
     const { assessment, pillarId, questionId } = args;
-    const pillar = assessment.findings?.find(
-      (pillar) => pillar.id === pillarId
-    );
+    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId: assessment.id,
@@ -1124,7 +1142,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       },
       ...this.buildUpdateExpression({
         data: questionBody as Record<string, unknown>,
-        UpdateExpressionPath: 'findings.#pillar.questions.#question',
+        UpdateExpressionPath: 'pillars.#pillar.questions.#question',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
           '#question': questionId,
@@ -1138,6 +1156,42 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
     } catch (error) {
       this.logger.error(`Failed to update question: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateRawGraphDataForScanningTool(args: {
+    assessmentId: string;
+    organization: string;
+    scanningTool: ScanningTool;
+    graphData: AssessmentGraphData;
+  }): Promise<void> {
+    const { assessmentId, organization, scanningTool, graphData } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update raw graph data for non-existing assessment: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({
+        data: { [scanningTool]: this.toDynamoDBAssessmentGraphData(graphData) },
+        UpdateExpressionPath: 'raw_graph_datas',
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update raw graph data: ${error}`, params);
       throw error;
     }
   }

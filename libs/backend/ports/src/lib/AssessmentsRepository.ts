@@ -1,11 +1,13 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentGraphData,
   BestPracticeBody,
   Finding,
   FindingBody,
   PillarBody,
   QuestionBody,
+  ScanningTool,
 } from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
@@ -75,13 +77,13 @@ export interface AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
   }): Promise<void>;
-  updateBestPracticeFindings(args: {
+  addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }): Promise<void>;
   updateFinding(args: {
     assessmentId: string;
@@ -95,5 +97,11 @@ export interface AssessmentsRepository {
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
+  }): Promise<void>;
+  updateRawGraphDataForScanningTool(args: {
+    assessmentId: string;
+    organization: string;
+    scanningTool: ScanningTool;
+    graphData: AssessmentGraphData;
   }): Promise<void>;
 }

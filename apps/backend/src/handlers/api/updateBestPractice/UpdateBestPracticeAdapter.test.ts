@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   NoContentError,
   NotFoundError,
@@ -147,6 +148,7 @@ describe('UpdateBestPracticeAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { updateBestPractice: vitest.fn() };
   register(tokenUpdateBestPracticeUseCase, { useValue: useCase });
   return { useCase, adapter: new UpdateBestPracticeAdapter() };

@@ -29,7 +29,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       .withId('assessment-id')
       .withOrganization('test.io')
       .withStep(AssessmentStep.FINISHED)
-      .withFindings([PillarMother.basic().build()])
+      .withPillars([PillarMother.basic().build()])
       .build();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
@@ -50,7 +50,7 @@ describe('exportWellArchitectedTool UseCase', () => {
         .withId('assessment-id')
         .withOrganization('test.io')
         .withStep(AssessmentStep.FINISHED)
-        .withFindings([])
+        .withPillars([])
         .build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
@@ -75,7 +75,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings(undefined)
+        .withPillars(undefined)
         .build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()

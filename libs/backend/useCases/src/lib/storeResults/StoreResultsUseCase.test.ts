@@ -13,6 +13,8 @@ import {
   FindingMother,
   PillarMother,
   QuestionMother,
+  QuestionSetMother,
+  ScanningTool,
 } from '@backend/models';
 import { StoreResultsUseCaseImpl } from './StoreResultsUseCase';
 
@@ -20,8 +22,8 @@ describe('StoreResultsUseCase', () => {
   it('should extract scanning tool and chunkId from prompt uri', async () => {
     const { useCase } = setup();
 
-    expect(useCase.parseKey('scanningtool_chunkId')).toEqual({
-      scanningTool: 'scanningtool',
+    expect(useCase.parseKey('prowler_chunkId')).toEqual({
+      scanningTool: ScanningTool.PROWLER,
       chunkId: 'chunkId',
     });
   });
@@ -49,36 +51,52 @@ describe('StoreResultsUseCase', () => {
         { id: 1, start: 1, end: 3 },
         { id: 2, start: 4, end: 6 },
       ];
+      const findings = [
+        FindingMother.basic().withId('prowler#1').build(),
+        FindingMother.basic().withId('prowler#2').build(),
+        FindingMother.basic().withId('prowler#3').build(),
+        FindingMother.basic().withId('prowler#4').build(),
+        FindingMother.basic().withId('prowler#5').build(),
+        FindingMother.basic().withId('prowler#6').build(),
+      ];
 
-      vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
-        pillars: [
-          PillarMother.basic()
-            .withId('pillarId1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('questionId1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bestPracticeId1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-          PillarMother.basic()
-            .withId('pillarId2')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('questionId2')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bestPracticeId2').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ],
-        version: 'version1',
-      });
+      vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
+        QuestionSetMother.basic()
+          .withVersion('version1')
+          .withPillars([
+            PillarMother.basic()
+              .withId('pillarId1')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('questionId1')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('bestPracticeId1')
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+            PillarMother.basic()
+              .withId('pillarId2')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('questionId2')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('bestPracticeId2')
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build()
+      );
       const associations = useCase.getAiBestPracticeAssociations(
-        aiFindingAssociations
+        aiFindingAssociations,
+        findings,
+        ScanningTool.PROWLER
       );
 
       expect(associations).toEqual({
@@ -107,7 +125,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -135,7 +153,7 @@ describe('StoreResultsUseCase', () => {
           bestPracticeFindingNumberIds: [1, 2, 3],
         },
       };
-      const scanningTool = 'scanningtool';
+      const scanningTool = ScanningTool.PROWLER;
 
       await expect(
         useCase.storeBestPractices(
@@ -158,12 +176,10 @@ describe('StoreResultsUseCase', () => {
         organization: 'organization',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions[0].bestPractices[0].results
-      ).toEqual([
-        `${scanningTool}#1`,
-        `${scanningTool}#2`,
-        `${scanningTool}#3`,
-      ]);
+        updatedAssessment?.pillars?.[0].questions[0].bestPractices[0].results
+      ).toEqual(
+        new Set([`${scanningTool}#1`, `${scanningTool}#2`, `${scanningTool}#3`])
+      );
     });
 
     it('shoud throw an error if the best practice is not found', async () => {
@@ -172,7 +188,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -192,7 +208,7 @@ describe('StoreResultsUseCase', () => {
         string,
         AIBestPracticeAssociation
       > = {};
-      const scanningTool = 'scanningtool';
+      const scanningTool = ScanningTool.PROWLER;
 
       await expect(
         useCase.storeBestPractices(
@@ -222,7 +238,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -231,7 +247,7 @@ describe('StoreResultsUseCase', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('bestPracticeId')
-                    .withResults([`${findings[0].id}`])
+                    .withResults(new Set([`${findings[0].id}`]))
                     .build(),
                 ])
                 .build(),
@@ -287,7 +303,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -296,7 +312,7 @@ describe('StoreResultsUseCase', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('bestPracticeId')
-                    .withResults([])
+                    .withResults(new Set([]))
                     .build(),
                 ])
                 .build(),

@@ -48,8 +48,8 @@ export class GetAllAssessmentsAdapter {
       step: assessment.step,
       ...(assessment.error && {
         error: {
-          Cause: assessment.error.cause,
-          Error: assessment.error.error,
+          cause: assessment.error.cause,
+          error: assessment.error.error,
         },
       }),
     }));

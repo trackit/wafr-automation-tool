@@ -37,12 +37,12 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    if (!assessment.findings || assessment.step !== AssessmentStep.FINISHED) {
+    if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
       throw new ConflictError(
         `Assessment with id ${assessment.id} is not finished`
       );
     }
-    if (assessment.findings.length === 0) {
+    if (assessment.pillars.length === 0) {
       throw new NoContentError(
         `Assessment with id ${assessment.id} has no findings`
       );

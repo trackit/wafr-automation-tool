@@ -1,11 +1,13 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentGraphData,
   BestPracticeBody,
   Finding,
   FindingBody,
   PillarBody,
   QuestionBody,
+  ScanningTool,
 } from '@backend/models';
 import type {
   AssessmentsRepository,
@@ -109,7 +111,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const key = `${assessmentId}#${organization}`;
     if (
       !this.assessmentFindings[key] ||
-      !this.assessments[key].findings?.find(
+      !this.assessments[key].pillars?.find(
         (pillar) =>
           pillar.id === pillarId &&
           pillar.questions.find(
@@ -186,7 +188,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (Object.keys(args.bestPracticeBody).length === 0) {
       throw new EmptyUpdateBodyError();
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -223,13 +225,13 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
-  public async updateBestPracticeFindings(args: {
+  public async addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }): Promise<void> {
     const {
       assessmentId,
@@ -246,7 +248,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         organization,
       });
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -279,7 +281,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         bestPracticeId,
       });
     }
-    bestPractice.results.push(...bestPracticeFindingIds);
+    for (const findingId of bestPracticeFindingIds) {
+      bestPractice.results.add(findingId);
+    }
   }
 
   public async updatePillar(args: {
@@ -299,7 +303,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (Object.keys(pillarBody).length === 0) {
       throw new EmptyUpdateBodyError();
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -423,9 +427,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       throw new EmptyUpdateBodyError();
     }
     const assessment = this.assessments[assessmentKey];
-    const pillar = assessment.findings?.find(
-      (pillar) => pillar.id === pillarId
-    );
+    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId,
@@ -451,6 +453,24 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         value as QuestionBody[keyof QuestionBody]
       );
     }
+  }
+
+  public async updateRawGraphDataForScanningTool(args: {
+    assessmentId: string;
+    organization: string;
+    scanningTool: ScanningTool;
+    graphData: AssessmentGraphData;
+  }): Promise<void> {
+    const { assessmentId, organization, scanningTool, graphData } = args;
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.rawGraphData) {
+      assessment.rawGraphData = {};
+    }
+    assessment.rawGraphData[scanningTool] = graphData;
   }
 }
 
