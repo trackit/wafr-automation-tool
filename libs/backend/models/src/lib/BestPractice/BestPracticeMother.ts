@@ -14,7 +14,7 @@ export class BestPracticeMother {
       id: 'best-practice-id',
       label: 'Best Practice Label',
       primaryId: 'primary-id',
-      results: [],
+      results: new Set([]),
       risk: SeverityType.Medium,
       checked: true,
     });
@@ -40,7 +40,7 @@ export class BestPracticeMother {
     return this;
   }
 
-  public withResults(results: string[]): BestPracticeMother {
+  public withResults(results: Set<string>): BestPracticeMother {
     this.data.results = results;
     return this;
   }

@@ -582,9 +582,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/Assessment'
         - properties:
-            findings:
+            pillars:
               type: array
-              description: A list of findings associated with the assessment
+              description: The assessment pillars including questions and best practices
               items:
                 $ref: '#/components/schemas/Pillar'
             question_version:

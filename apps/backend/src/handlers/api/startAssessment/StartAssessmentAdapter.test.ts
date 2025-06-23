@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -98,6 +99,7 @@ describe('startAssessment adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { startAssessment: vitest.fn() };
   useCase.startAssessment.mockResolvedValueOnce({
     assessmentId: 'assessment-id',

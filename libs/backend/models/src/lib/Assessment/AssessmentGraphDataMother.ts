@@ -1,14 +1,14 @@
-import { AssessmentGraphDatas } from './Assessment';
+import { AssessmentGraphData } from './Assessment';
 
-export class AssessmentGraphDatasMother {
-  private data: AssessmentGraphDatas;
+export class AssessmentGraphDataMother {
+  private data: AssessmentGraphData;
 
-  private constructor(data: AssessmentGraphDatas) {
+  private constructor(data: AssessmentGraphData) {
     this.data = data;
   }
 
-  public static basic(): AssessmentGraphDatasMother {
-    return new AssessmentGraphDatasMother({
+  public static basic(): AssessmentGraphDataMother {
+    return new AssessmentGraphDataMother({
       findings: 0,
       regions: {},
       resourceTypes: {},
@@ -16,33 +16,33 @@ export class AssessmentGraphDatasMother {
     });
   }
 
-  public withFindings(findings: number): AssessmentGraphDatasMother {
+  public withFindings(findings: number): AssessmentGraphDataMother {
     this.data.findings = findings;
     return this;
   }
 
   public withRegions(
     regions: Record<string, number>
-  ): AssessmentGraphDatasMother {
+  ): AssessmentGraphDataMother {
     this.data.regions = regions;
     return this;
   }
 
   public withResourceTypes(
     resourceTypes: Record<string, number>
-  ): AssessmentGraphDatasMother {
+  ): AssessmentGraphDataMother {
     this.data.resourceTypes = resourceTypes;
     return this;
   }
 
   public withSeverities(
     severities: Record<string, number>
-  ): AssessmentGraphDatasMother {
+  ): AssessmentGraphDataMother {
     this.data.severities = severities;
     return this;
   }
 
-  public build(): AssessmentGraphDatas {
+  public build(): AssessmentGraphData {
     return this.data;
   }
 }

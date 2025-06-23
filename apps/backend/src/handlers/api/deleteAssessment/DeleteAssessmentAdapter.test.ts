@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { NotFoundError, tokenDeleteAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -82,6 +83,7 @@ describe('deleteAssessment adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { deleteAssessment: vitest.fn() };
   register(tokenDeleteAssessmentUseCase, { useValue: useCase });
   const adapter = new DeleteAssessmentAdapter();

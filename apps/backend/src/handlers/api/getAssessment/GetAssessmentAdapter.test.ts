@@ -1,6 +1,4 @@
-import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
-import { register, reset } from '@shared/di-container';
-
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   AssessmentMother,
   AssessmentStep,
@@ -10,6 +8,9 @@ import {
   ScanningTool,
   SeverityType,
 } from '@backend/models';
+import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
+
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { GetAssessmentAdapter } from './GetAssessmentAdapter';
 
@@ -98,7 +99,7 @@ describe('GetAssessmentAdapter', () => {
       const assessment = AssessmentMother.basic()
         .withCreatedAt(date)
         .withCreatedBy('user-id')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withDisabled(false)
             .withId('pillar-id')
@@ -110,7 +111,7 @@ describe('GetAssessmentAdapter', () => {
                     .withDescription('best practice description')
                     .withId('best-practice-id')
                     .withLabel('best practice')
-                    .withResults(['prowler#1', 'prowler#2'])
+                    .withResults(new Set(['prowler#1', 'prowler#2']))
                     .withRisk(SeverityType.Medium)
                     .withChecked(true)
                     .build(),
@@ -123,7 +124,7 @@ describe('GetAssessmentAdapter', () => {
             ])
             .build(),
         ])
-        .withGraphDatas({
+        .withGraphData({
           findings: 2,
           regions: { 'us-west-2': 2 },
           resourceTypes: { type: 2 },
@@ -133,7 +134,7 @@ describe('GetAssessmentAdapter', () => {
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
-        .withRawGraphDatas({
+        .withRawGraphData({
           [ScanningTool.PROWLER]: {
             findings: 2,
             regions: { 'us-west-2': 2 },
@@ -152,7 +153,7 @@ describe('GetAssessmentAdapter', () => {
       expect(JSON.parse(response.body)).toEqual({
         created_at: date.toISOString(),
         created_by: 'user-id',
-        findings: [
+        pillars: [
           {
             disabled: false,
             id: 'pillar-id',
@@ -206,6 +207,7 @@ describe('GetAssessmentAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { getAssessment: vitest.fn() };
   register(tokenGetAssessmentUseCase, { useValue: useCase });
   const date = new Date();

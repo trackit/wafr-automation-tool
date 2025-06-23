@@ -1,4 +1,4 @@
-import { AssessmentMother, UserMother } from '@backend/models';
+import { AssessmentMother } from '@backend/models';
 import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
@@ -30,7 +30,7 @@ describe('UpdateAssessmentUseCase', () => {
 
     const input = UpdateAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withOrganization('test.io')
       .build();
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
       NotFoundError
@@ -46,7 +46,7 @@ describe('UpdateAssessmentUseCase', () => {
         .build();
     const input = UpdateAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withOrganization('test.io')
       .build();
 
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
@@ -66,7 +66,7 @@ describe('UpdateAssessmentUseCase', () => {
 
     const input = UpdateAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withOrganization('test.io')
       .withName('New Name')
       .build();
     await useCase.updateAssessment(input);
