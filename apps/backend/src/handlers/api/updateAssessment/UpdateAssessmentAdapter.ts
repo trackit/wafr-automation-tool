@@ -55,7 +55,7 @@ export class UpdateAssessmentAdapter {
         UpdateAssessmentPathParametersSchema.parse(pathParameters);
       const assessmentBody = this.parseBody(body);
       await this.useCase.updateAssessment({
-        user: getUserFromEvent(event),
+        organization: getUserFromEvent(event).organizationDomain,
         assessmentId,
         assessmentBody,
       });

@@ -10,7 +10,7 @@ import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
-  user: User;
+  organization: string;
   assessmentBody: AssessmentBody;
 };
 
@@ -28,7 +28,7 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
     await this.assessmentsRepository
       .update({
         assessmentId: args.assessmentId,
-        organization: args.user.organizationDomain,
+        organization: args.organization,
         assessmentBody: args.assessmentBody,
       })
       .catch((error) => {
