@@ -33,7 +33,7 @@ describe('AIBestPracticeService Infrastructure', () => {
         .build();
 
       const aiBestPracticeMetadata =
-        aiBestPracticeService.createAIBestPracticeMetadata({
+        aiBestPracticeService.createAIBestPracticeMetadatas({
           questionSet: questionSet.data,
         });
 
@@ -68,7 +68,7 @@ describe('AIBestPracticeService Infrastructure', () => {
         .build();
 
       const aiBestPracticeAssociation =
-        aiBestPracticeService.createAIBestPracticeAssociation({
+        aiBestPracticeService.createAIBestPracticeAssociations({
           questionSet: questionSet.data,
         });
 
@@ -78,7 +78,7 @@ describe('AIBestPracticeService Infrastructure', () => {
         pillarId: 'pillarId',
         questionId: 'questionId',
         bestPracticeId: 'bestPracticeId',
-        bestPracticeFindings: [],
+        bestPracticeFindingNumberIds: [],
       });
     });
   });
