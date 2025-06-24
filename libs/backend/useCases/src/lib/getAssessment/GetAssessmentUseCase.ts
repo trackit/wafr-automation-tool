@@ -1,11 +1,11 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
-import type { Assessment, User } from '@backend/models';
+import type { Assessment } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { NotFoundError } from '../Errors';
 
 export type GetAssessmentUseCaseArgs = {
   assessmentId: string;
-  user: User;
+  organization: string;
 };
 
 export interface GetAssessmentUseCase {
@@ -20,11 +20,11 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   ): Promise<Assessment> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organization: args.organization,
     });
     if (!assessment) {
       throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
+        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
       );
     }
     return assessment;
