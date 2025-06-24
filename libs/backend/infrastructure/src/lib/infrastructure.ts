@@ -4,5 +4,6 @@ export * from './AssessmentsStateMachine';
 export * from './ObjectsStorage';
 export * from './IdGenerator';
 export * from './Logger';
+export * from './QuestionSetService';
 export * from './registerTestInfrastructure';
 export * from './WellArchitectedToolService';

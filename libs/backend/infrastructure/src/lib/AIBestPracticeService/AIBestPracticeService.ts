@@ -7,15 +7,15 @@ import { AIBestPracticePort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class AIBestPracticeService implements AIBestPracticePort {
-  createAIBestPracticeMetadata(args: {
+  createAIBestPracticeMetadatas(args: {
     questionSet: QuestionSet['data'];
   }): AIBestPracticeMetadata[] {
     const aiBestPracticeMetadata: AIBestPracticeMetadata[] = [];
     let globalId = 1;
 
-    for (const pillar of Object.values(args.questionSet)) {
-      for (const question of Object.values(pillar.questions)) {
-        for (const bestPractice of Object.values(question.bestPractices)) {
+    for (const pillar of args.questionSet) {
+      for (const question of pillar.questions) {
+        for (const bestPractice of question.bestPractices) {
           aiBestPracticeMetadata.push({
             globalId: globalId++,
             pillarLabel: pillar.label,
@@ -29,22 +29,22 @@ export class AIBestPracticeService implements AIBestPracticePort {
     return aiBestPracticeMetadata;
   }
 
-  createAIBestPracticeAssociation(args: {
+  createAIBestPracticeAssociations(args: {
     questionSet: QuestionSet['data'];
   }): Record<string, AIBestPracticeAssociation> {
     const aiBestPracticeAssociation: Record<string, AIBestPracticeAssociation> =
       {};
     let globalId = 1;
 
-    for (const pillar of Object.values(args.questionSet)) {
-      for (const question of Object.values(pillar.questions)) {
-        for (const bestPractice of Object.values(question.bestPractices)) {
+    for (const pillar of args.questionSet) {
+      for (const question of pillar.questions) {
+        for (const bestPractice of question.bestPractices) {
           aiBestPracticeAssociation[globalId.toString()] = {
             globalId: globalId++,
             pillarId: pillar.id,
             questionId: question.id,
             bestPracticeId: bestPractice.id,
-            bestPracticeFindings: [],
+            bestPracticeFindingNumberIds: [],
           };
         }
       }
