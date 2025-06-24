@@ -44,4 +44,7 @@ export interface AssessmentBody {
   name?: string;
   graphData?: AssessmentGraphData;
   error?: AssessmentError;
+  rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
+  findings?: Pillar[];
+  questionVersion?: string;
 }

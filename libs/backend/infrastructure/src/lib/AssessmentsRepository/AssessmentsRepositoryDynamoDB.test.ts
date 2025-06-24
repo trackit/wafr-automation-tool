@@ -987,13 +987,50 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withId('assessment1')
         .withOrganization('organization1')
         .withName('Old Name')
+        .withFindings([])
+        .withQuestionVersion('0.1')
+        .withRawGraphData({
+          [ScanningTool.PROWLER]: {
+            findings: 0,
+            regions: {},
+            resourceTypes: {},
+            severities: {},
+          },
+        })
         .build();
       await repository.save(assessment);
 
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        assessmentBody: { name: 'New Name' },
+        assessmentBody: {
+          name: 'New Name',
+          findings: [
+            PillarMother.basic()
+              .withId('pillar-1')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('question-1')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('best-practice-1')
+                      .withResults(['prowler#1'])
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+          ],
+          questionVersion: '1.0',
+          rawGraphData: {
+            [ScanningTool.PROWLER]: {
+              findings: 1,
+              regions: { 'us-west-2': 1 },
+              resourceTypes: { 'aws-ec2': 1 },
+              severities: { [SeverityType.High]: 1 },
+            },
+          },
+        },
       });
 
       const updatedAssessment = await repository.get({
@@ -1002,7 +1039,34 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(updatedAssessment).toEqual(
-        expect.objectContaining({ name: 'New Name' })
+        expect.objectContaining({
+          name: 'New Name',
+          findings: [
+            expect.objectContaining({
+              id: 'pillar-1',
+              questions: [
+                expect.objectContaining({
+                  id: 'question-1',
+                  bestPractices: [
+                    expect.objectContaining({
+                      id: 'best-practice-1',
+                      results: ['prowler#1'],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          questionVersion: '1.0',
+          rawGraphData: {
+            [ScanningTool.PROWLER]: {
+              findings: 1,
+              regions: { 'us-west-2': 1 },
+              resourceTypes: { 'aws-ec2': 1 },
+              severities: { [SeverityType.High]: 1 },
+            },
+          },
+        })
       );
     });
 

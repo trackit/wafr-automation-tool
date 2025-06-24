@@ -165,6 +165,35 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
+  private toDynamoDBAssessmentBody(
+    assessmentBody: AssessmentBody
+  ): Record<string, unknown> {
+    return {
+      ...assessmentBody,
+      ...(assessmentBody.rawGraphData && {
+        raw_graph_datas: Object.entries(assessmentBody.rawGraphData).reduce(
+          (rawGraphData, [key, value]) => ({
+            ...rawGraphData,
+            [key]: this.toDynamoDBAssessmentGraphData(value),
+          }),
+          {}
+        ),
+      }),
+      ...(assessmentBody.findings && {
+        findings: assessmentBody.findings.reduce(
+          (pillars, pillar) => ({
+            ...pillars,
+            [pillar.id]: this.toDynamoDBPillarItem(pillar),
+          }),
+          {}
+        ),
+      }),
+      ...(assessmentBody.questionVersion && {
+        question_version: assessmentBody.questionVersion,
+      }),
+    };
+  }
+
   private toDynamoDBFindingItem(
     finding: Finding,
     args: {
@@ -183,7 +212,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       hidden: finding.hidden,
       id: finding.id,
       is_ai_associated: finding.isAiAssociated,
-      metadata: { event_code: finding.metadata.eventCode },
+      metadata: { event_code: finding.metadata?.eventCode },
       ...(finding.remediation && {
         remediation: {
           desc: finding.remediation.desc,
@@ -980,14 +1009,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
-        data: {
-          ...(assessmentBody.name && { name: assessmentBody.name }),
-          ...(assessmentBody.graphData && {
-            graph_datas: this.toDynamoDBAssessmentGraphData(
-              assessmentBody.graphData
-            ),
-          }),
-        },
+        data: this.toDynamoDBAssessmentBody(assessmentBody),
       }),
     };
     try {

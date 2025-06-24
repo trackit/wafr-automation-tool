@@ -31,10 +31,10 @@ export class AssessmentMother {
       organization: 'organization-id',
       questionVersion: '1.0',
       rawGraphData: {},
-      regions: ['us-west-2'],
+      regions: [],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       step: AssessmentStep.FINISHED,
-      workflows: ['workflow1', 'workflow2'],
+      workflows: [],
     });
   }
 
