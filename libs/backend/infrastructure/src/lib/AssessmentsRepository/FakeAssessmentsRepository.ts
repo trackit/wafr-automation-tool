@@ -1,11 +1,13 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentGraphData,
   BestPracticeBody,
   Finding,
   FindingBody,
   PillarBody,
   QuestionBody,
+  ScanningTool,
 } from '@backend/models';
 import type {
   AssessmentsRepository,
@@ -451,6 +453,24 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         value as QuestionBody[keyof QuestionBody]
       );
     }
+  }
+
+  public async updateRawGraphDataForScanningTool(args: {
+    assessmentId: string;
+    organization: string;
+    scanningTool: ScanningTool;
+    graphData: AssessmentGraphData;
+  }): Promise<void> {
+    const { assessmentId, organization, scanningTool, graphData } = args;
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.rawGraphData) {
+      assessment.rawGraphData = {};
+    }
+    assessment.rawGraphData[scanningTool] = graphData;
   }
 }
 

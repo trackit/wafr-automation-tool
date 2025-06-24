@@ -17,6 +17,7 @@ import type {
   PillarBody,
   Question,
   QuestionBody,
+  ScanningTool,
 } from '@backend/models';
 import {
   AssessmentsRepository,
@@ -1131,6 +1132,45 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
     } catch (error) {
       this.logger.error(`Failed to update question: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateRawGraphDataForScanningTool(args: {
+    assessmentId: string;
+    organization: string;
+    scanningTool: ScanningTool;
+    graphData: AssessmentGraphData;
+  }): Promise<void> {
+    const { assessmentId, organization, scanningTool, graphData } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update raw graph data for non-existing assessment: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      UpdateExpression: 'set raw_graph_datas.#scanningTool = :graphData',
+      ExpressionAttributeNames: {
+        '#scanningTool': scanningTool,
+      },
+      ExpressionAttributeValues: {
+        ':graphData': this.toDynamoDBAssessmentGraphData(graphData),
+      },
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update raw graph data: ${error}`, params);
       throw error;
     }
   }
