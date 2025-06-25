@@ -26,3 +26,9 @@ export interface AIBestPracticeAssociation {
   bestPracticeId: string;
   bestPracticeFindingNumberIds: number[];
 }
+
+export interface AIFinding {
+  id: string;
+  statusDetail: string;
+  riskDetails: string;
+}
