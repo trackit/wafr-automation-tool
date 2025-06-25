@@ -1,3 +1,5 @@
+import { AIBestPracticeMetadata } from '../AI';
+import { Finding } from '../Finding';
 import type { PromptVariables } from './PromptVariables';
 
 export class PromptVariablesMother {
@@ -10,8 +12,8 @@ export class PromptVariablesMother {
   public static basic(): PromptVariablesMother {
     return new PromptVariablesMother({
       scanningToolTitle: 'Scanning Tool Title',
-      questionSetData: 'Question Set Data',
-      scanningToolData: 'Scanning Tool Data',
+      questionSetData: [],
+      scanningToolData: [],
     });
   }
 
@@ -22,12 +24,16 @@ export class PromptVariablesMother {
     return this;
   }
 
-  public withQuestionSetData(questionSetData: string): PromptVariablesMother {
+  public withQuestionSetData(
+    questionSetData: AIBestPracticeMetadata[]
+  ): PromptVariablesMother {
     this.data.questionSetData = questionSetData;
     return this;
   }
 
-  public withScanningToolData(scanningToolData: string): PromptVariablesMother {
+  public withScanningToolData(
+    scanningToolData: Finding[]
+  ): PromptVariablesMother {
     this.data.scanningToolData = scanningToolData;
     return this;
   }

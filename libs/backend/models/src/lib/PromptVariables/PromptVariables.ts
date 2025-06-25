@@ -1,5 +1,7 @@
+import { AIBestPracticeMetadata, AIFinding } from '../AI';
+
 export interface PromptVariables {
   scanningToolTitle: string;
-  questionSetData: string;
-  scanningToolData: string;
+  questionSetData: AIBestPracticeMetadata[];
+  scanningToolData: AIFinding[];
 }
