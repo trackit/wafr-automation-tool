@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
   ListObjectsV2Command,
@@ -8,7 +9,7 @@ import {
 
 import { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
+import { assertIsDefined, streamToString, type Readable } from '@shared/utils';
 import { tokenLogger } from '../Logger';
 
 export class ObjectsStorageS3 implements ObjectsStorage {
@@ -16,8 +17,34 @@ export class ObjectsStorageS3 implements ObjectsStorage {
   private readonly logger = inject(tokenLogger);
   private readonly bucket = inject(tokenS3Bucket);
 
-  public async get(key: string): Promise<string> {
+  static getAssessmentsPath(assessmentId: string): string {
+    return `assessments/${assessmentId}`;
+  }
+
+  public async get(key: string): Promise<string | null> {
     const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+    try {
+      const response = await this.client.send(command);
+      if (
+        !response.$metadata.httpStatusCode ||
+        ![200, 404].includes(response.$metadata.httpStatusCode)
+      ) {
+        throw new Error(
+          `Failed to get object: ${response.$metadata.httpStatusCode}`
+        );
+      }
+      return response.Body ? streamToString(response.Body as Readable) : null;
+    } catch (error) {
+      this.logger.error(`Failed to get object: ${error}`, key);
+      throw error;
+    }
+  }
+
+  public async delete(key: string): Promise<void> {
+    const command = new DeleteObjectCommand({
       Bucket: this.bucket,
       Key: key,
     });
@@ -25,13 +52,12 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       const response = await this.client.send(command);
       if (response.$metadata.httpStatusCode !== 200) {
         throw new Error(
-          `Failed to get object: ${response.$metadata.httpStatusCode}`
+          `Failed to delete assessment: ${response.$metadata.httpStatusCode}`
         );
       }
-      this.logger.info(`Getting object: ${key}`);
-      return response.Body?.transformToString() ?? '';
+      this.logger.info(`Object deleted: ${key}`);
     } catch (error) {
-      this.logger.error(`Failed to get object: ${error}`, key);
+      this.logger.error(`Failed to delete object: ${error}`, key);
       throw error;
     }
   }

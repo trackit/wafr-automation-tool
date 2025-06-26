@@ -4,4 +4,5 @@ export interface ObjectsStorage {
   bulkDelete(keys: string[]): Promise<void>;
   put(args: { key: string; body: string }): Promise<void>;
   parseURI(uri: string): { bucket: string; key: string };
+  delete(key: string): Promise<void>;
 }
