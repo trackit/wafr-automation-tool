@@ -24,13 +24,17 @@ export class FakeObjectsStorage implements ObjectsStorage {
   }
 
   public async bulkDelete(keys: string[]): Promise<void> {
-    keys.forEach((key) => delete this.objects[key]);
+    keys.forEach((key) => this.delete(key));
   }
 
   public parseURI(uri: string): { bucket: string; key: string } {
     const { hostname: bucket, pathname } = new URL(uri);
     const key = pathname.startsWith('/') ? pathname.slice(1) : pathname;
     return { bucket, key };
+  }
+
+  public async delete(key: string): Promise<void> {
+    delete this.objects[key];
   }
 }
 
