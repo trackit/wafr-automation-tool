@@ -101,7 +101,7 @@ export class QuestionSetService implements QuestionSetPort {
   }
 }
 
-export const tokenQuestionSetService = createInjectionToken<QuestionSetService>(
+export const tokenQuestionSetService = createInjectionToken<QuestionSetPort>(
   'QuestionSetService',
   {
     useClass: QuestionSetService,
