@@ -68,9 +68,9 @@ Resources:
   PreparePromptsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/prepare_prompts/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/stateMachine/preparePrompts
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -93,6 +93,7 @@ Resources:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
             - Effect: Allow
               Action:
+                - dynamodb:GetItem
                 - dynamodb:UpdateItem
                 - dynamodb:PutItem
               Resource:
@@ -103,6 +104,15 @@ Resources:
                 - bedrock:ListPrompts
               Resource:
                 - !GetAtt BedrockPrompt.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   InvokeLLMLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -562,9 +572,9 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessmentId %}'
+                      assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
-                      scanning_tool: 'prowler'
+                      scanningTool: 'prowler'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
@@ -574,9 +584,9 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessmentId %}'
+                      assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
-                      scanning_tool: 'cloud-custodian'
+                      scanningTool: 'cloud-custodian'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
@@ -586,9 +596,9 @@ Resources:
                     Type: Task
                     Resource: !GetAtt PreparePromptsFunction.Arn
                     Arguments:
-                      assessment_id: '{% $assessmentId %}'
+                      assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
-                      scanning_tool: 'cloudsploit'
+                      scanningTool: 'cloudsploit'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
