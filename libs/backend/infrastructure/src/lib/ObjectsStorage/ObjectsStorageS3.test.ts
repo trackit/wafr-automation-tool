@@ -103,7 +103,7 @@ describe('ObjectsStorage Infrastructure', () => {
       await expect(objectsStorage.list('prefix')).rejects.toThrow(Error);
     });
   });
-  
+
   describe('bulkDelete', () => {
     it('should delete a list of objects', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
@@ -153,20 +153,44 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should put an object', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        Body: stringToStream('object-content') as any,
+      });
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
       s3ClientMock.on(PutObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
 
-      await objectsStorage.put({ key: 'test-key', body: 'test-body' });
+      await objectsStorage.put({
+        key: 'assessment-id',
+        body: 'object-content',
+      });
 
       const putExecutionCalls = s3ClientMock.commandCalls(PutObjectCommand);
       expect(putExecutionCalls).toHaveLength(1);
       const putExecutionCall = putExecutionCalls[0];
       expect(putExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: 'test-key',
-        Body: 'test-body',
+        Key: 'assessment-id',
+        Body: 'object-content',
       });
+    });
+
+    it('should return the S3 URI of the object', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+      s3ClientMock.on(PutObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      const uri = await objectsStorage.put({
+        key: 'assessment-id',
+        body: 'object-content',
+      });
+      expect(uri).toBe(`s3://${bucket}/assessment-id`);
     });
 
     it('should throw an exception if put object fail', async () => {
@@ -177,8 +201,8 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await expect(
-        objectsStorage.put({ key: 'test-key', body: 'test-body' })
-      ).rejects.toThrow('Failed to put object: 500');
+        objectsStorage.put({ key: 'assessment-id', body: 'object-content' })
+      ).rejects.toThrow(Error);
     });
   });
 

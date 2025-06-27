@@ -4,14 +4,15 @@ import { createInjectionToken } from '@shared/di-container';
 export class FakeObjectsStorage implements ObjectsStorage {
   public objects: Record<string, string> = {};
 
-  public async put(args: { key: string; body: string }): Promise<void> {
+  public async put(args: { key: string; body: string }): Promise<string> {
     this.objects[args.key] = args.body;
+    return `https://fake-storage.com/${args.key}`;
   }
 
-  public async get(key: string): Promise<string> {
+  public async get(key: string): Promise<string | null> {
     const object = this.objects[key];
     if (!object) {
-      throw new Error(`Object not found: ${key}`);
+      return null;
     }
     return object;
   }

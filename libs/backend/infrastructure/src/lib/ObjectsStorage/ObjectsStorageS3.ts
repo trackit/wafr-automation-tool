@@ -21,6 +21,10 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     return `assessments/${assessmentId}`;
   }
 
+  private buildURI(key: string): string {
+    return `s3://${this.bucket}/${key}`;
+  }
+
   public async get(key: string): Promise<string | null> {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
@@ -107,7 +111,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     }
   }
 
-  public async put(args: { key: string; body: string }): Promise<void> {
+  public async put(args: { key: string; body: string }): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: args.key,
@@ -121,6 +125,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
         );
       }
       this.logger.info(`Object succesfuly added: ${args.key}`);
+      return this.buildURI(args.key);
     } catch (error) {
       this.logger.error(`Failed to put object: ${error}`, args.key);
       throw error;
