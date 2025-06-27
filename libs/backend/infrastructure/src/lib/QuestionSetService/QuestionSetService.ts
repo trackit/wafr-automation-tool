@@ -1,36 +1,33 @@
 import { Pillar, Question, QuestionSet, RawQuestionSet } from '@backend/models';
 import { QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
-import { parseJson } from '@shared/utils';
-import fs from 'fs';
-import path from 'path';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import question from '../../../../../../scripts/questions/questions_05072025.json';
 
 export class QuestionSetService implements QuestionSetPort {
   private getRawQuestionSet(): {
     rawQuestionSet: RawQuestionSet;
     version: string;
   } {
-    const files = fs
-      .readdirSync('./questions')
-      .filter((name) => /^questions_\d{8}\.json$/.test(name));
-    if (files.length === 0) {
-      throw new Error('No question set found');
-    }
-    files.sort((a, b) => {
-      const parseDate = (filename: string): number => {
-        const match = filename.match(/^questions_(\d{2})(\d{2})(\d{4})\.json$/);
-        if (!match) return 0;
-        const [, mm, dd, yyyy] = match;
-        return new Date(`${yyyy}-${mm}-${dd}`).getTime();
-      };
-      return parseDate(a) - parseDate(b);
-    });
-    const latestFile = files[files.length - 1];
-    const version = path.basename(latestFile, '.json');
+    // const files = fs
+    //   .readdirSync('./questions')
+    //   .filter((name) => /^questions_\d{8}\.json$/.test(name));
+    // if (files.length === 0) {
+    //   throw new Error('No question set found');
+    // }
+    // files.sort((a, b) => {
+    //   const parseDate = (filename: string): number => {
+    //     const match = filename.match(/^questions_(\d{2})(\d{2})(\d{4})\.json$/);
+    //     if (!match) return 0;
+    //     const [, mm, dd, yyyy] = match;
+    //     return new Date(`${yyyy}-${mm}-${dd}`).getTime();
+    //   };
+    //   return parseDate(a) - parseDate(b);
+    // });
+    // const latestFile = files[files.length - 1];
+    const version = '05072025';
     return {
-      rawQuestionSet: parseJson(
-        fs.readFileSync(path.join('./questions', latestFile), 'utf8')
-      ) as RawQuestionSet,
+      rawQuestionSet: question as RawQuestionSet,
       version,
     };
   }
