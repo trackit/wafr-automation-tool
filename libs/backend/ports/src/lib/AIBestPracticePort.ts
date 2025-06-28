@@ -5,10 +5,10 @@ import {
 } from '@backend/models';
 
 export interface AIBestPracticePort {
-  createAIBestPracticeMetadata(args: {
+  createAIBestPracticeMetadatas(args: {
     questionSet: QuestionSet['data'];
   }): AIBestPracticeMetadata[];
-  createAIBestPracticeAssociation(args: {
+  createAIBestPracticeAssociations(args: {
     questionSet: QuestionSet['data'];
   }): Record<string, AIBestPracticeAssociation>;
 }

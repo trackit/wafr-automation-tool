@@ -1,3 +1,4 @@
+export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './AIBestPracticePort';
