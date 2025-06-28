@@ -1,44 +1,11 @@
 import { QuestionSet, RawQuestionSet, SeverityType } from '@backend/models';
 import { reset } from '@shared/di-container';
-import fs from 'fs';
 import { QuestionSetService } from './QuestionSetService';
 
 describe('QuestionSet Infrastructure', () => {
   describe('get', () => {
     it('should get the lastest version of the question set', async () => {
       const { questionSetService } = setup();
-      const mockFiles = [
-        'questions_20230615.json',
-        'questions_20230620.json',
-        'questions_20230625.json',
-      ] as string[];
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      vi.spyOn(fs, 'readdirSync').mockReturnValue(mockFiles);
-
-      const mockFileContent: RawQuestionSet = {
-        '0': {
-          primary_id: 'pillar-id',
-          label: 'pillar-label',
-          questions: {
-            '0': {
-              primary_id: 'question-id',
-              label: 'question-label',
-              best_practices: {
-                '0': {
-                  primary_id: 'best-practice-id',
-                  label: 'best-practice-label',
-                  risk: SeverityType.High,
-                  description: 'best-practice-description',
-                },
-              },
-            },
-          },
-        },
-      };
-      vi.spyOn(fs, 'readFileSync').mockReturnValue(
-        JSON.stringify(mockFileContent)
-      );
 
       const questionSet = questionSetService.get();
 
@@ -71,14 +38,38 @@ describe('QuestionSet Infrastructure', () => {
         },
       ];
       expect(questionSet.data).toEqual(questionSetData);
-      expect(questionSet.version).toEqual('questions_20230625');
+      expect(questionSet.version).toEqual('questions_05072025');
     });
   });
 });
 
 const setup = () => {
   reset();
-  vi.mock('fs');
+  vi.mock(
+    '../../../../../../scripts/questions/questions_05072025.json',
+    () => ({
+      default: {
+        '0': {
+          primary_id: 'pillar-id',
+          label: 'pillar-label',
+          questions: {
+            '0': {
+              primary_id: 'question-id',
+              label: 'question-label',
+              best_practices: {
+                '0': {
+                  primary_id: 'best-practice-id',
+                  label: 'best-practice-label',
+                  risk: SeverityType.High,
+                  description: 'best-practice-description',
+                },
+              },
+            },
+          },
+        },
+      } as RawQuestionSet,
+    })
+  );
   return {
     questionSetService: new QuestionSetService(),
   };
