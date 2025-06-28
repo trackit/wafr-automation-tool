@@ -1,5 +1,4 @@
-import { AIBestPracticeMetadata } from '../AI';
-import { Finding } from '../Finding';
+import { AIBestPracticeMetadata, AIFinding } from '../AI';
 import type { PromptVariables } from './PromptVariables';
 
 export class PromptVariablesMother {
@@ -32,7 +31,7 @@ export class PromptVariablesMother {
   }
 
   public withScanningToolData(
-    scanningToolData: Finding[]
+    scanningToolData: AIFinding[]
   ): PromptVariablesMother {
     this.data.scanningToolData = scanningToolData;
     return this;
