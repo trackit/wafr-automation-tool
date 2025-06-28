@@ -1,7 +1,8 @@
 import {
   DeleteObjectsCommand,
-  ListObjectsV2Command,
   PutObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
 } from '@aws-sdk/client-s3';
 import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -13,6 +14,34 @@ import {
 } from './ObjectsStorageS3';
 
 describe('ObjectsStorage Infrastructure', () => {
+  describe('get', () => {
+    it('should get an object', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      await expect(objectsStorage.get({ key: 'key' })).resolves.toEqual('');
+
+      const getExecutionCalls = s3ClientMock.commandCalls(GetObjectCommand);
+      expect(getExecutionCalls).toHaveLength(1);
+      const getExecutionCall = getExecutionCalls[0];
+      expect(getExecutionCall.args[0].input).toEqual({
+        Bucket: bucket,
+        Key: 'key',
+      });
+    });
+
+    it('should throw an exception if the object has failed to be retrieved', async () => {
+      const { objectsStorage, s3ClientMock } = setup();
+
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 500 },
+      });
+
+      await expect(objectsStorage.get({ key: 'key' })).rejects.toThrow(Error);
+    });
+  });
   describe('list', () => {
     it('should return an empty list when no objects are found', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
@@ -144,6 +173,24 @@ describe('ObjectsStorage Infrastructure', () => {
       await expect(
         objectsStorage.put({ key: 'test-key', body: 'test-body' })
       ).rejects.toThrow('Failed to put object: 500');
+    });
+  });
+
+  describe('parseURI', () => {
+    it('should parse a URI into a bucket and key', () => {
+      const { objectsStorage } = setup();
+
+      const { bucket, key } = objectsStorage.parseURI(
+        's3://test-s3-bucket/key'
+      );
+      expect(bucket).toEqual('test-s3-bucket');
+      expect(key).toEqual('key');
+    });
+
+    it('should throw an error if the URI is invalid', () => {
+      const { objectsStorage } = setup();
+
+      expect(() => objectsStorage.parseURI('invalid-uri')).toThrow(Error);
     });
   });
 });

@@ -8,6 +8,14 @@ export class FakeObjectsStorage implements ObjectsStorage {
     this.objects[args.key] = args.body;
   }
 
+  public async get(args: { key: string }): Promise<string> {
+    const object = this.objects[args.key];
+    if (!object) {
+      throw new Error(`Object not found: ${args.key}`);
+    }
+    return object;
+  }
+
   public async list(args: { prefix: string }): Promise<string[]> {
     const objects = Object.keys(this.objects).filter((object) =>
       object.startsWith(args.prefix)
@@ -17,6 +25,12 @@ export class FakeObjectsStorage implements ObjectsStorage {
 
   public async bulkDelete(args: { keys: string[] }): Promise<void> {
     args.keys.forEach((key) => delete this.objects[key]);
+  }
+
+  public parseURI(uri: string): { bucket: string; key: string } {
+    const { hostname: bucket, pathname } = new URL(uri);
+    const key = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+    return { bucket, key };
   }
 }
 
