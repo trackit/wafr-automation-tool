@@ -1,5 +1,6 @@
 import { inject, register } from '@shared/di-container';
 
+import { tokenAIService, tokenFakeAIService } from './AIService';
 import {
   tokenAssessmentsRepository,
   tokenFakeAssessmentsRepository,
@@ -39,6 +40,9 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
+  });
+  register(tokenAIService, {
+    useFactory: () => inject(tokenFakeAIService),
   });
   register(tokenQuestionSetService, {
     useFactory: () => inject(tokenFakeQuestionSetService),
