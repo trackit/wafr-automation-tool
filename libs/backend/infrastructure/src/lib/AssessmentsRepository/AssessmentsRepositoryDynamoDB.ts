@@ -1,4 +1,4 @@
-import { QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
@@ -697,6 +697,69 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       await this.client.update(params);
     } catch (error) {
       this.logger.error(`Failed to update best practice: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateBestPracticeFindings(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: string[];
+  }) {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update non-existing assessment best practice: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organization,
+      });
+    }
+
+    this.assertBestPracticeExists({
+      assessment,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
+    const params: UpdateCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      UpdateExpression: `SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)`,
+      ExpressionAttributeNames: {
+        '#pillar': pillarId,
+        '#question': questionId,
+        '#best_practice': bestPracticeId,
+      },
+      ExpressionAttributeValues: {
+        ':empty_list': [],
+        ':new_findings': bestPracticeFindingIds,
+      },
+    };
+    try {
+      await this.client.update(params);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update best practice findings: ${error}`,
+        params
+      );
       throw error;
     }
   }

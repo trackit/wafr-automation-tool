@@ -198,7 +198,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         pillarId,
       });
     }
-    const question = Object.values(pillar.questions).find(
+    const question = pillar.questions.find(
       (question) => question.id === questionId.toString()
     );
     if (!question) {
@@ -209,7 +209,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         questionId,
       });
     }
-    const bestPractice = Object.values(question.bestPractices).find(
+    const bestPractice = question.bestPractices.find(
       (bestPractice) => bestPractice.id === bestPracticeId.toString()
     );
     if (!bestPractice) {
@@ -223,6 +223,65 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     }
     bestPractice.checked =
       args.bestPracticeBody.checked ?? bestPractice.checked;
+  }
+
+  public async updateBestPracticeFindings(args: {
+    assessmentId: string;
+    organization: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: string[];
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organization,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+    const assessment = this.assessments[`${assessmentId}#${organization}`];
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+      });
+    }
+    const pillar = assessment.findings?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    if (!pillar) {
+      throw new PillarNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+        pillarId,
+      });
+    }
+    const question = pillar.questions.find(
+      (question) => question.id === questionId.toString()
+    );
+    if (!question) {
+      throw new QuestionNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+        pillarId,
+        questionId,
+      });
+    }
+    const bestPractice = question.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    );
+    if (!bestPractice) {
+      throw new BestPracticeNotFoundError({
+        assessmentId: assessmentId,
+        organization,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
+    }
+    bestPractice.results.push(...bestPracticeFindingIds);
   }
 
   public async updatePillar(args: {
