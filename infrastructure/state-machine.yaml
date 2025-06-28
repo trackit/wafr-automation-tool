@@ -111,9 +111,9 @@ Resources:
   InvokeLLMFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/invoke_llm/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/stateMachine/invokeLLM
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -149,11 +149,22 @@ Resources:
               Action:
                 - dynamodb:UpdateItem
                 - dynamodb:PutItem
+                - dynamodb:GetItem
               Resource:
                 - !Ref DynamoDBArn
       Environment:
         Variables:
           AI_MODEL: claude-3-7-sonnet
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   CleanupLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -627,10 +638,10 @@ Resources:
                   Type: Task
                   Resource: !GetAtt InvokeLLMFunction.Arn
                   Arguments:
-                    assessment_id: '{% $assessmentId %}'
+                    assessmentId: '{% $assessmentId %}'
                     organization: '{% $organization %}'
-                    prompt_uri: '{% $states.input %}'
-                    prompt_arn: !GetAtt BedrockPrompt.Arn
+                    promptUri: '{% $states.input %}'
+                    promptArn: !GetAtt BedrockPrompt.Arn
                   End: true
                   Retry:
                     - ErrorEquals:
