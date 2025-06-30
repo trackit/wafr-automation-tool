@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   BestPracticeMother,
   PillarMother,
@@ -5,13 +6,12 @@ import {
   QuestionSetMother,
 } from '@backend/models';
 import { reset } from '@shared/di-container';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { AIBestPracticeService } from './AIBestPracticeService';
 
 describe('AIBestPracticeService Infrastructure', () => {
   describe('createAIBestPracticeMetadata', () => {
     it('should create AI best practice metadata', async () => {
-      const { aiBestPracticeService } = setup();
+      setup();
 
       const questionSet = QuestionSetMother.basic()
         .withData([
@@ -33,7 +33,7 @@ describe('AIBestPracticeService Infrastructure', () => {
         .build();
 
       const aiBestPracticeMetadata =
-        aiBestPracticeService.createAIBestPracticeMetadatas({
+        AIBestPracticeService.createAIBestPracticeMetadatas({
           questionSet: questionSet.data,
         });
 
@@ -49,7 +49,7 @@ describe('AIBestPracticeService Infrastructure', () => {
   });
   describe('createAIBestPracticeAssociation', () => {
     it('should create AI best practice association', async () => {
-      const { aiBestPracticeService } = setup();
+      setup();
 
       const questionSet = QuestionSetMother.basic()
         .withData([
@@ -68,7 +68,7 @@ describe('AIBestPracticeService Infrastructure', () => {
         .build();
 
       const aiBestPracticeAssociation =
-        aiBestPracticeService.createAIBestPracticeAssociations({
+        AIBestPracticeService.createAIBestPracticeAssociations({
           questionSet: questionSet.data,
         });
 
@@ -87,7 +87,4 @@ describe('AIBestPracticeService Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  return {
-    aiBestPracticeService: new AIBestPracticeService(),
-  };
 };

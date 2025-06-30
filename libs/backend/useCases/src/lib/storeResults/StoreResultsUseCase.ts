@@ -1,5 +1,4 @@
 import {
-  tokenAIBestPracticeService,
   tokenAssessmentsRepository,
   tokenLogger,
   tokenObjectsStorage,
@@ -12,6 +11,7 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJson } from '@shared/utils';
+import { AIBestPracticeService } from '../../services/AIBestPracticeService';
 
 export type StoreResultsUseCaseArgs = {
   assessmentId: string;
@@ -28,7 +28,6 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
   private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly questionSetService = inject(tokenQuestionSetService);
-  private readonly aiBestPracticeService = inject(tokenAIBestPracticeService);
   private readonly logger = inject(tokenLogger);
 
   public parseKey(chunkFileName: string): {
@@ -136,7 +135,7 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
 
     const questionSet = this.questionSetService.get();
     const aiBestPracticeAssociations =
-      this.aiBestPracticeService.createAIBestPracticeAssociations({
+      AIBestPracticeService.createAIBestPracticeAssociations({
         questionSet: questionSet.data,
       });
     await this.storeBestPractices(

@@ -1,7 +1,6 @@
 export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
-export * from './AIBestPracticePort';
 export * from './IdGenerator';
 export * from './Logger';
 export * from './ObjectsStorage';
