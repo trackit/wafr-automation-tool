@@ -8,7 +8,7 @@ import {
   PromptVariables,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { parseJson } from '@shared/utils';
+import { parseJsonArray } from '@shared/utils';
 import { tokenStoreResultsUseCase } from '../storeResults';
 
 export type InvokeLLMUseCaseArgs = {
@@ -36,7 +36,7 @@ export class InvokeLLMUseCaseImpl implements InvokeLLMUseCase {
     if (!promptVariables) {
       throw new Error(`Prompt variables not found for URI: ${promptUri}`);
     }
-    const parsedPromptVariables = parseJson(
+    const parsedPromptVariables = parseJsonArray(
       promptVariables
     ) as unknown as PromptVariables;
     return parsedPromptVariables;
@@ -50,7 +50,7 @@ export class InvokeLLMUseCaseImpl implements InvokeLLMUseCase {
       promptVariables: promptVariables as unknown as Record<string, unknown>,
     });
     const parsedResponse = AIFindingAssociationListSchema.parse(
-      parseJson(response)
+      parseJsonArray(response)
     );
     this.logger.info(`Converse#${args.promptArn} response`, response);
     await this.storeResultsUseCase.storeResults({

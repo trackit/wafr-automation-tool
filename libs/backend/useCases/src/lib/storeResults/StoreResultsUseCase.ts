@@ -10,7 +10,7 @@ import {
   Finding,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { parseJson } from '@shared/utils';
+import { parseJsonArray } from '@shared/utils';
 import { AIBestPracticeService } from '../../services/AIBestPracticeService';
 
 export type StoreResultsUseCaseArgs = {
@@ -48,7 +48,7 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     if (!chunkContent) {
       throw new Error(`Chunk content not found for key: ${key}`);
     }
-    return parseJson(chunkContent) as unknown as Finding[];
+    return parseJsonArray(chunkContent) as unknown as Finding[];
   }
 
   private getBestPracticeFindingNumberIdsFromAiFindingAssociation(
