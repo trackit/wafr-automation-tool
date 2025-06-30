@@ -11,5 +11,10 @@
     "vite": "^6.0.0",
     "vite-plugin-dts": "~4.5.0",
     "@nx/vite": "20.5.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
   }
 }

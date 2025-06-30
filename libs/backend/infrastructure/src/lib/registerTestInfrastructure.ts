@@ -43,7 +43,4 @@ export const registerTestInfrastructure = () => {
   register(tokenWellArchitectedToolService, {
     useFactory: () => inject(tokenFakeWellArchitectedToolService),
   });
-  register(tokenObjectsStorage, {
-    useFactory: () => inject(tokenFakeObjectsStorage),
-  });
 };
