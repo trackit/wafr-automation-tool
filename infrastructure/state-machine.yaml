@@ -208,9 +208,9 @@ Resources:
   PrepareCustodianFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/state_machine/prepare_custodian/app
+      Handler: handler.main
+      Runtime: nodejs22.x
+      CodeUri: ../apps/backend/src/handlers/stateMachine/prepareCustodian
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
@@ -225,6 +225,15 @@ Resources:
                 - s3:PutObject
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
   ComputeGraphDataLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:

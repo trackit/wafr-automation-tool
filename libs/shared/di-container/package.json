@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "main": "./index.js",
+  "main": "./src/index.ts",
   "types": "./index.d.ts",
   "dependencies": {
     "reflect-metadata": "^0.2.2",
@@ -11,5 +11,10 @@
     "vite": "^6.0.0",
     "vite-plugin-dts": "~4.5.0",
     "@nx/vite": "20.5.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
   }
 }
