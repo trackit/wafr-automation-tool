@@ -125,7 +125,13 @@ describe('StorePrompts UseCase', () => {
       .withAssessmentId('assessment-id')
       .withOrganization('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
-      .withScanFindings([ScanFindingMother.basic().withId('prowler#1').build()])
+      .withScanFindings([
+        ScanFindingMother.basic()
+          .withId('prowler#1')
+          .withStatusDetail('Sample status detail')
+          .withRiskDetails('Sample risk details')
+          .build(),
+      ])
       .build();
     await useCase.storePrompts(args);
 
@@ -141,8 +147,8 @@ describe('StorePrompts UseCase', () => {
       scanningToolData: [
         expect.objectContaining({
           id: 'prowler#1',
-          isAiAssociated: true,
-          hidden: false,
+          statusDetail: 'Sample status detail',
+          riskDetails: 'Sample risk details',
         }),
       ],
       questionSetData: [

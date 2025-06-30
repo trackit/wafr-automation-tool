@@ -1,5 +1,5 @@
 import { createInjectionToken, inject } from '@shared/di-container';
-import { Finding, ScanFinding, ScanningTool } from '@backend/models';
+import { AIFinding, Finding, ScanFinding, ScanningTool } from '@backend/models';
 import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
@@ -57,9 +57,16 @@ export class StorePromptsUseCaseImpl implements StorePromptsUseCase {
       });
     return Promise.all(
       findingsChunks.map((findings, index) => {
+        const aiFindings = findings.map<AIFinding>(
+          ({ id, statusDetail, riskDetails }) => ({
+            id,
+            statusDetail: statusDetail ?? '',
+            riskDetails: riskDetails ?? '',
+          })
+        );
         const promptVariables = {
           scanningToolTitle: scanningTool,
-          scanningToolData: findings,
+          scanningToolData: aiFindings,
           questionSetData: aiBestPracticeMetadatas,
         };
         return this.objectsStorage.put({
