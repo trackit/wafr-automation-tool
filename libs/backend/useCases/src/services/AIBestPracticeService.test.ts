@@ -8,7 +8,7 @@ import {
 import { reset } from '@shared/di-container';
 import { AIBestPracticeService } from './AIBestPracticeService';
 
-describe('AIBestPracticeService Infrastructure', () => {
+describe('AIBestPracticeService Service', () => {
   describe('createAIBestPracticeMetadata', () => {
     it('should create AI best practice metadata', async () => {
       setup();
