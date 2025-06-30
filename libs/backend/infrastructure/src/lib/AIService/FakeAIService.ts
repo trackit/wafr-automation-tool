@@ -3,12 +3,12 @@ import type { AIService } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeAIService implements AIService {
-  converse(args: {
+  async converse(args: {
     promptArn: string;
     promptVariables: PromptVariables;
   }): Promise<string> {
     // No-op for fake implementation
-    return Promise.resolve('');
+    return '';
   }
 }
 
