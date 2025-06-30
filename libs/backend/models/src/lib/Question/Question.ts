@@ -1,4 +1,4 @@
-import type { BestPractice, RawBestPractice } from '../BestPractice';
+import type { BestPractice } from '../BestPractice';
 
 export interface Question {
   bestPractices: BestPractice[];
@@ -12,10 +12,4 @@ export interface Question {
 export interface QuestionBody {
   disabled?: boolean;
   none?: boolean;
-}
-
-export interface RawQuestion {
-  primary_id: string;
-  label: string;
-  best_practices: Record<string, RawBestPractice>;
 }
