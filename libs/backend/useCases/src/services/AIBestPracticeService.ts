@@ -3,11 +3,9 @@ import {
   AIBestPracticeMetadata,
   QuestionSet,
 } from '@backend/models';
-import { AIBestPracticePort } from '@backend/ports';
-import { createInjectionToken } from '@shared/di-container';
 
-export class AIBestPracticeService implements AIBestPracticePort {
-  createAIBestPracticeMetadatas(args: {
+export class AIBestPracticeService {
+  public static createAIBestPracticeMetadatas(args: {
     questionSet: QuestionSet['data'];
   }): AIBestPracticeMetadata[] {
     const aiBestPracticeMetadata: AIBestPracticeMetadata[] = [];
@@ -29,7 +27,7 @@ export class AIBestPracticeService implements AIBestPracticePort {
     return aiBestPracticeMetadata;
   }
 
-  createAIBestPracticeAssociations(args: {
+  public static createAIBestPracticeAssociations(args: {
     questionSet: QuestionSet['data'];
   }): Record<string, AIBestPracticeAssociation> {
     const aiBestPracticeAssociation: Record<string, AIBestPracticeAssociation> =
@@ -52,8 +50,3 @@ export class AIBestPracticeService implements AIBestPracticePort {
     return aiBestPracticeAssociation;
   }
 }
-
-export const tokenAIBestPracticeService =
-  createInjectionToken<AIBestPracticeService>('AIBestPracticeService', {
-    useClass: AIBestPracticeService,
-  });
