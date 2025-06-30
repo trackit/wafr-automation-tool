@@ -112,12 +112,10 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       !this.assessments[key].findings?.find(
         (pillar) =>
           pillar.id === pillarId &&
-          Object.values(pillar.questions).find(
+          pillar.questions.find(
             (question) =>
               question.id === questionId &&
-              Object.values(question.bestPractices).find(
-                (bp) => bp.id === bestPracticeId
-              )
+              question.bestPractices.find((bp) => bp.id === bestPracticeId)
           )
       )
     ) {
