@@ -1,8 +1,35 @@
-import { Pillar, Question, QuestionSet, RawQuestionSet } from '@backend/models';
+import {
+  Pillar,
+  Question,
+  QuestionSet,
+  RawQuestionSet,
+  SeverityType,
+} from '@backend/models';
 import { QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import question from '../../../../../../scripts/questions/questions_05072025.json';
+
+interface RawBestPractice {
+  primary_id: string;
+  label: string;
+  description: string;
+  risk: SeverityType;
+}
+
+interface RawQuestion {
+  primary_id: string;
+  label: string;
+  best_practices: Record<string, RawBestPractice>;
+}
+
+interface RawPillar {
+  primary_id: string;
+  label: string;
+  questions: Record<string, RawQuestion>;
+}
+
+type RawQuestionSet = Record<string, RawPillar>;
 
 export class QuestionSetService implements QuestionSetPort {
   private getRawQuestionSet(): {

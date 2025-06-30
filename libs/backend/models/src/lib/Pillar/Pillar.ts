@@ -1,4 +1,4 @@
-import type { Question, RawQuestion } from '../Question';
+import type { Question } from '../Question';
 
 export interface Pillar {
   disabled: boolean;
@@ -10,10 +10,4 @@ export interface Pillar {
 
 export interface PillarBody {
   disabled?: boolean;
-}
-
-export interface RawPillar {
-  primary_id: string;
-  label: string;
-  questions: Record<string, RawQuestion>;
 }
