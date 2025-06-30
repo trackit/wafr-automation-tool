@@ -173,7 +173,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       : answerChoiceList;
     return await this.getSelectedBestPracticeList(
       filteredChoices,
-      Object.values(answerQuestionData.bestPractices)
+      answerQuestionData.bestPractices
     );
   }
 
@@ -244,7 +244,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         workloadId,
         pillarId
       );
-      const pillarQuestionList = Object.values(pillarData.questions);
+      const pillarQuestionList = pillarData.questions;
       await this.exportAnswerList(
         workloadId,
         pillarAnswerList,
