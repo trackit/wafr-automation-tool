@@ -1,10 +1,4 @@
-import {
-  Pillar,
-  Question,
-  QuestionSet,
-  RawQuestionSet,
-  SeverityType,
-} from '@backend/models';
+import { Pillar, Question, QuestionSet, SeverityType } from '@backend/models';
 import { QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -29,7 +23,7 @@ interface RawPillar {
   questions: Record<string, RawQuestion>;
 }
 
-type RawQuestionSet = Record<string, RawPillar>;
+export type RawQuestionSet = Record<string, RawPillar>;
 
 export class QuestionSetService implements QuestionSetPort {
   private getRawQuestionSet(): {
@@ -63,7 +57,7 @@ export class QuestionSetService implements QuestionSetPort {
     rawQuestionSet: RawQuestionSet,
     version: string
   ): QuestionSet {
-    const questionSet: QuestionSet = { data: [], version };
+    const questionSet: QuestionSet = { pillars: [], version };
     for (const [pillarId, rawPillar] of Object.entries(rawQuestionSet)) {
       const pillar: Pillar = {
         disabled: false,
@@ -96,7 +90,7 @@ export class QuestionSetService implements QuestionSetPort {
         }
         pillar.questions.push(question);
       }
-      questionSet.data.push(pillar);
+      questionSet.pillars.push(pillar);
     }
     return questionSet;
   }

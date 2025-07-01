@@ -1,6 +1,6 @@
 import { Pillar } from '../Pillar';
 
 export interface QuestionSet {
-  data: Pillar[];
+  pillars: Pillar[];
   version: string;
 }

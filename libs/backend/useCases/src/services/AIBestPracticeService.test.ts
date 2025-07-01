@@ -14,7 +14,7 @@ describe('AIBestPracticeService Service', () => {
       setup();
 
       const questionSet = QuestionSetMother.basic()
-        .withData([
+        .withPillars([
           PillarMother.basic()
             .withLabel('Pillar')
             .withQuestions([
@@ -34,7 +34,7 @@ describe('AIBestPracticeService Service', () => {
 
       const aiBestPracticeMetadata =
         AIBestPracticeService.createAIBestPracticeMetadatas({
-          questionSet: questionSet.data,
+          questionSetData: questionSet.pillars,
         });
 
       expect(aiBestPracticeMetadata).toHaveLength(1);
@@ -52,7 +52,7 @@ describe('AIBestPracticeService Service', () => {
       setup();
 
       const questionSet = QuestionSetMother.basic()
-        .withData([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -69,7 +69,7 @@ describe('AIBestPracticeService Service', () => {
 
       const aiBestPracticeAssociation =
         AIBestPracticeService.createAIBestPracticeAssociations({
-          questionSet: questionSet.data,
+          questionSetData: questionSet.pillars,
         });
 
       expect(aiBestPracticeAssociation).toHaveProperty('1');

@@ -1,4 +1,3 @@
-export * from '../../../useCases/src/services';
 export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';

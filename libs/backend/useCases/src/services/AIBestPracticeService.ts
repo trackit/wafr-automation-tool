@@ -1,17 +1,17 @@
 import {
   AIBestPracticeAssociation,
   AIBestPracticeMetadata,
-  QuestionSet,
+  Pillar,
 } from '@backend/models';
 
 export class AIBestPracticeService {
   public static createAIBestPracticeMetadatas(args: {
-    questionSet: QuestionSet['data'];
+    questionSetData: Pillar[];
   }): AIBestPracticeMetadata[] {
     const aiBestPracticeMetadata: AIBestPracticeMetadata[] = [];
     let globalId = 1;
 
-    for (const pillar of args.questionSet) {
+    for (const pillar of args.questionSetData) {
       for (const question of pillar.questions) {
         for (const bestPractice of question.bestPractices) {
           aiBestPracticeMetadata.push({
@@ -28,13 +28,13 @@ export class AIBestPracticeService {
   }
 
   public static createAIBestPracticeAssociations(args: {
-    questionSet: QuestionSet['data'];
+    questionSetData: Pillar[];
   }): Record<string, AIBestPracticeAssociation> {
     const aiBestPracticeAssociation: Record<string, AIBestPracticeAssociation> =
       {};
     let globalId = 1;
 
-    for (const pillar of args.questionSet) {
+    for (const pillar of args.questionSetData) {
       for (const question of pillar.questions) {
         for (const bestPractice of question.bestPractices) {
           aiBestPracticeAssociation[globalId.toString()] = {

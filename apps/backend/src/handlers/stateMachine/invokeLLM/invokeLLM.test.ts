@@ -1,6 +1,7 @@
 import { tokenInvokeLLMUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { InvokeLLMAdapterEventMother } from './InvokeLLMAdapterEventMother';
 import { InvokeLLMAdapter } from './invokeLLM';
 
@@ -10,7 +11,7 @@ describe('invokeLLM adapter', () => {
       const { adapter } = setup();
 
       const event = InvokeLLMAdapterEventMother.basic().build();
-      await adapter.handle(event);
+      await expect(adapter.handle(event)).resolves.toBeUndefined();
     });
     it('should throw with invalid args', async () => {
       const { adapter } = setup();
@@ -48,6 +49,7 @@ describe('invokeLLM adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { invokeLLM: vitest.fn() };
   register(tokenInvokeLLMUseCase, { useValue: useCase });
   const adapter = new InvokeLLMAdapter();

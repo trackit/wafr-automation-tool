@@ -16,31 +16,23 @@ export class InvokeLLMAdapterEventMother {
     });
   }
 
-  public withAssessmentId(
-    assessmentId: InvokeLLMInput['assessmentId']
-  ): InvokeLLMAdapterEventMother {
+  public withAssessmentId(assessmentId: string): InvokeLLMAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
-  public withOrganization(
-    organization: InvokeLLMInput['organization']
-  ): InvokeLLMAdapterEventMother {
+  public withOrganization(organization: string): InvokeLLMAdapterEventMother {
     this.data.organization = organization;
     return this;
   }
 
-  public withPromptArn(
-    prompt_arn: InvokeLLMInput['promptArn']
-  ): InvokeLLMAdapterEventMother {
-    this.data.promptArn = prompt_arn;
+  public withPromptArn(promptArn: string): InvokeLLMAdapterEventMother {
+    this.data.promptArn = promptArn;
     return this;
   }
 
-  public withPromptUri(
-    prompt_uri: InvokeLLMInput['promptUri']
-  ): InvokeLLMAdapterEventMother {
-    this.data.promptUri = prompt_uri;
+  public withPromptUri(promptUri: string): InvokeLLMAdapterEventMother {
+    this.data.promptUri = promptUri;
     return this;
   }
 
