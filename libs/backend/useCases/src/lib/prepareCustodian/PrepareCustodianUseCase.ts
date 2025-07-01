@@ -1,34 +1,11 @@
-import {
-  tokenAssessmentsStateMachine,
-  tokenAssessmentsRepository,
-  tokenLogger,
-} from '@backend/infrastructure';
-import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
 import { tokenObjectsStorage, tokenS3Bucket } from '@backend/infrastructure';
+
+import { readFileSync } from 'fs';
 
 export interface PrepareCustodianUseCase {
   prepareCustodian(): Promise<string>;
-  getPolicies(): string;
 }
-
-const policies = `policies:
-  - name: ec2-stopped-instance
-    resource: aws.ec2
-    filters:
-      - "State.Name": stopped
-    actions:
-      - terminate
-  - name: s3-bucket-unencrypted
-    resource: aws.s3
-    filters:
-      - type: bucket-encryption
-        state: absent
-    actions:
-      - type: set-bucket-encryption
-        crypto: AES256
-`;
 
 export const CUSTODIAN_FILE_NAME = 'custodian.yml';
 
@@ -37,7 +14,7 @@ export class PrepareCustodianUseCaseImpl implements PrepareCustodianUseCase {
   private readonly s3Bucket = inject(tokenS3Bucket);
 
   public getPolicies(): string {
-    return policies;
+    return readFileSync('./policies/policies.yml', 'utf8');
   }
 
   public getS3Uri(): string {

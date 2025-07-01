@@ -19,7 +19,7 @@ describe('Prepare custodian use case', () => {
 
     expect(fakeObjectsStorage.put).toHaveBeenCalledExactlyOnceWith({
       key: CUSTODIAN_FILE_NAME,
-      body: useCase.getPolicies(),
+      body: 'mocked-policies-content',
     });
   });
 });
@@ -27,8 +27,8 @@ describe('Prepare custodian use case', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  vi.mock('./policies/policies.yml', () => ({
-    default: 'policies',
+  vi.mock('fs', () => ({
+    readFileSync: vi.fn(() => 'mocked-policies-content'),
   }));
   const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
   vitest.spyOn(fakeObjectsStorage, 'put');

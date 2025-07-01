@@ -3,13 +3,3 @@ policies:
     resource: aws.ec2
     filters:
       - 'State.Name': stopped
-    actions:
-      - terminate
-  - name: s3-bucket-unencrypted
-    resource: aws.s3
-    filters:
-      - type: bucket-encryption
-        state: absent
-    actions:
-      - type: set-bucket-encryption
-        crypto: AES256
