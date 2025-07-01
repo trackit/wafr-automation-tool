@@ -1,6 +1,6 @@
-import { QuestionSet, RawQuestionSet, SeverityType } from '@backend/models';
+import { Pillar, SeverityType } from '@backend/models';
 import { reset } from '@shared/di-container';
-import { QuestionSetService } from './QuestionSetService';
+import { QuestionSetService, RawQuestionSet } from './QuestionSetService';
 
 describe('QuestionSet Infrastructure', () => {
   describe('get', () => {
@@ -9,7 +9,7 @@ describe('QuestionSet Infrastructure', () => {
 
       const questionSet = questionSetService.get();
 
-      const questionSetData: QuestionSet['data'] = [
+      const questionSetData: Pillar[] = [
         {
           primaryId: 'pillar-id',
           label: 'pillar-label',
@@ -37,7 +37,7 @@ describe('QuestionSet Infrastructure', () => {
           ],
         },
       ];
-      expect(questionSet.data).toEqual(questionSetData);
+      expect(questionSet.pillars).toEqual(questionSetData);
       expect(questionSet.version).toEqual('questions_05072025');
     });
   });

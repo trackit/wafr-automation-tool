@@ -5,7 +5,7 @@ import { createInjectionToken } from '@shared/di-container';
 export class FakeQuestionSetService implements QuestionSetPort {
   public get(): QuestionSet {
     return {
-      data: [],
+      pillars: [],
       version: '1.0.0',
     };
   }

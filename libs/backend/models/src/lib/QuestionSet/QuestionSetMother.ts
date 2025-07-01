@@ -9,13 +9,13 @@ export class QuestionSetMother {
 
   public static basic(): QuestionSetMother {
     return new QuestionSetMother({
-      data: [],
+      pillars: [],
       version: 'version',
     });
   }
 
-  public withData(data: QuestionSet['data']): QuestionSetMother {
-    this.data.data = data;
+  public withPillars(pillars: QuestionSet['pillars']): QuestionSetMother {
+    this.data.pillars = pillars;
     return this;
   }
 

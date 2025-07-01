@@ -46,7 +46,7 @@ export class InvokeLLMUseCaseImpl implements InvokeLLMUseCase {
     this.logger.info(`InvokeLLM#${args.promptArn}`, promptVariables);
     const response = await this.aiService.converse({
       promptArn: args.promptArn,
-      promptVariables,
+      promptVariables: promptVariables as unknown as Record<string, unknown>,
     });
     const parsedResponse = AIFindingAssociationListSchema.parse(
       parseJson(response)

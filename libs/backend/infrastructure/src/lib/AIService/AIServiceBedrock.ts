@@ -7,7 +7,6 @@ import {
 import type { AIService } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { PromptVariables } from '@backend/models';
 import { tokenLogger } from '../Logger';
 
 export class AIServiceBedrock implements AIService {
@@ -25,7 +24,7 @@ export class AIServiceBedrock implements AIService {
     }
     for await (const item of response.stream) {
       const text = item.contentBlockDelta?.delta?.text;
-      if (typeof text === 'string' && text.length) {
+      if (text && text.length > 0) {
         result += text;
       }
     }
@@ -34,7 +33,7 @@ export class AIServiceBedrock implements AIService {
 
   public async converse(args: {
     promptArn: string;
-    promptVariables: PromptVariables;
+    promptVariables: Record<string, unknown>;
   }): Promise<string> {
     const command = new ConverseStreamCommand({
       modelId: args.promptArn,

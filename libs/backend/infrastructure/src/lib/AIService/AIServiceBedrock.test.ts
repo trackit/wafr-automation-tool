@@ -55,7 +55,10 @@ describe('AIService Infrastructure', () => {
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables,
+          promptVariables: promptVariables as unknown as Record<
+            string,
+            unknown
+          >,
         })
       ).resolves.toEqual('Hello world');
 
@@ -97,7 +100,10 @@ describe('AIService Infrastructure', () => {
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables,
+          promptVariables: promptVariables as unknown as Record<
+            string,
+            unknown
+          >,
         })
       ).rejects.toThrow(Error);
     });
@@ -119,7 +125,10 @@ describe('AIService Infrastructure', () => {
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables,
+          promptVariables: promptVariables as unknown as Record<
+            string,
+            unknown
+          >,
         })
       ).rejects.toThrow(Error);
     });

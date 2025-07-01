@@ -48,6 +48,16 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     return parseJson(chunkContent) as unknown as Finding[];
   }
 
+  public setAIBestPracticeAssociationBestPracticeFindingNumberIds(
+    aiBestPracticeAssociation: AIBestPracticeAssociation,
+    aiAssociation: AIFindingAssociation
+  ): void {
+    aiBestPracticeAssociation.bestPracticeFindingNumberIds = Array.from(
+      { length: aiAssociation.end - aiAssociation.start + 1 },
+      (_, index) => aiAssociation.start + index
+    );
+  }
+
   public async storeBestPractices(
     assessmentId: string,
     organization: string,
@@ -63,9 +73,9 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
           `Best practice association for AI finding ${aiAssociation.id} not found`
         );
       }
-      aiBestPracticeAssociation.bestPracticeFindingNumberIds = Array.from(
-        { length: aiAssociation.end - aiAssociation.start + 1 },
-        (_, index) => aiAssociation.start + index
+      this.setAIBestPracticeAssociationBestPracticeFindingNumberIds(
+        aiBestPracticeAssociation,
+        aiAssociation
       );
       if (aiBestPracticeAssociation.bestPracticeFindingNumberIds.length === 0) {
         continue;
@@ -90,29 +100,33 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     findings: Finding[],
     aiBestPracticeAssociations: Record<string, AIBestPracticeAssociation>
   ) {
-    for (const finding of findings) {
-      const findingNumberId = parseInt(finding.id.split('#')[1]);
-      finding.bestPractices = Object.values(aiBestPracticeAssociations)
-        .filter((bestPracticeInfo) =>
-          bestPracticeInfo.bestPracticeFindingNumberIds?.includes(
-            findingNumberId
+    const findingsToSave = findings
+      .map((finding) => {
+        const findingNumberId = parseInt(finding.id.split('#')[1]);
+        finding.bestPractices = Object.values(aiBestPracticeAssociations)
+          .filter((bestPracticeInfo) =>
+            bestPracticeInfo.bestPracticeFindingNumberIds?.includes(
+              findingNumberId
+            )
           )
-        )
-        .map(
-          (bestPracticeInfo) =>
-            `${bestPracticeInfo.pillarId}#${bestPracticeInfo.questionId}#${bestPracticeInfo.bestPracticeId}`
-        )
-        .join(',');
-      if (finding.bestPractices.length === 0) {
-        continue;
-      }
-      finding.isAiAssociated = true;
-      await this.assessmentsRepository.saveFinding({
-        assessmentId,
-        organization,
-        finding,
-      });
-    }
+          .map(
+            (bestPracticeInfo) =>
+              `${bestPracticeInfo.pillarId}#${bestPracticeInfo.questionId}#${bestPracticeInfo.bestPracticeId}`
+          )
+          .join(',');
+        finding.isAiAssociated = true;
+        return finding;
+      })
+      .filter((finding) => finding.bestPractices.length > 0);
+    await Promise.all(
+      findingsToSave.map((finding) =>
+        this.assessmentsRepository.saveFinding({
+          assessmentId,
+          organization,
+          finding,
+        })
+      )
+    );
   }
 
   public async storeResults(args: StoreResultsUseCaseArgs): Promise<void> {
@@ -136,7 +150,7 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     const questionSet = this.questionSetService.get();
     const aiBestPracticeAssociations =
       AIBestPracticeService.createAIBestPracticeAssociations({
-        questionSet: questionSet.data,
+        questionSetData: questionSet.pillars,
       });
     await this.storeBestPractices(
       assessmentId,
