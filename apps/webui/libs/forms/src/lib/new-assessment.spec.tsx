@@ -20,10 +20,17 @@ describe('NewAssessment', () => {
     render(<NewAssessment onSubmit={onSubmitMock} />);
 
     const nameInput = screen.getByPlaceholderText('Enter assessment name');
+    const roleInput = screen.getByPlaceholderText('Enter AWS role ARN');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'Test Assessment' } });
+    });
+
+    await act(async () => {
+      fireEvent.change(roleInput, {
+        target: { value: 'arn:aws:iam::123456789012:role/test-role' },
+      });
     });
 
     await act(async () => {
@@ -33,7 +40,7 @@ describe('NewAssessment', () => {
     await vi.waitFor(() => {
       expect(onSubmitMock).toHaveBeenCalledWith({
         name: 'Test Assessment',
-        roleArn: undefined,
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
         regions: [],
         workflows: [],
       });
@@ -106,11 +113,18 @@ describe('NewAssessment', () => {
     render(<NewAssessment onSubmit={onSubmitMock} />);
 
     const nameInput = screen.getByPlaceholderText('Enter assessment name');
+    const roleInput = screen.getByPlaceholderText('Enter AWS role ARN');
     const workflowInput = screen.getByPlaceholderText('Enter a workflow name');
     const submitButton = screen.getByRole('button', { name: /submit/i });
 
     await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'Test Assessment' } });
+    });
+
+    await act(async () => {
+      fireEvent.change(roleInput, {
+        target: { value: 'arn:aws:iam::123456789012:role/test-role' },
+      });
     });
 
     await act(async () => {
@@ -126,7 +140,7 @@ describe('NewAssessment', () => {
     await vi.waitFor(() => {
       expect(onSubmitMock).toHaveBeenCalledWith({
         name: 'Test Assessment',
-        roleArn: undefined,
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
         regions: [],
         workflows: ['workflow1', 'workflow2', 'workflow3'],
       });
