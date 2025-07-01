@@ -59,8 +59,7 @@ describe('computeGraphData UseCase', () => {
           [SeverityType.Low]: 40,
         })
         .build(),
-      [ScanningTool.CLOUD_CUSTODIAN]:
-        AssessmentGraphDataMother.basic().build(),
+      [ScanningTool.CLOUD_CUSTODIAN]: AssessmentGraphDataMother.basic().build(),
     };
     const fakeAssessmentMother =
       AssessmentMother.basic().withRawGraphData(rawGraphData);
