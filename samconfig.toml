@@ -45,5 +45,4 @@ parameter_overrides = [
   "Debug=true",
   "Repository=https://github.com/trackit/wafr-automation-tool",
   "InitialUserEmail=auguste.mulley@trackit.io",
-  "Owner=auguste.mulley@trackit.io",
 ]

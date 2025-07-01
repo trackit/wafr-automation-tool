@@ -7,5 +7,4 @@ export class PrepareCustodianUseCaseArgsMother {
   private constructor(data: PrepareCustodianUseCase) {
     this.data = data;
   }
-
 }
