@@ -41,6 +41,65 @@ describe('StoreResultsUseCase', () => {
     ).resolves.toEqual([finding]);
   });
 
+  describe('getAiBestPracticeAssociations', () => {
+    it('should use ai finding associations to create best practice associations', async () => {
+      const { useCase, fakeQuestionSetService } = setup();
+
+      const aiFindingAssociations = [
+        { id: 1, start: 1, end: 3 },
+        { id: 2, start: 4, end: 6 },
+      ];
+
+      vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
+        pillars: [
+          PillarMother.basic()
+            .withId('pillarId1')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('questionId1')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bestPracticeId1').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+          PillarMother.basic()
+            .withId('pillarId2')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('questionId2')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('bestPracticeId2').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ],
+        version: 'version1',
+      });
+      const associations = useCase.getAiBestPracticeAssociations(
+        aiFindingAssociations
+      );
+
+      expect(associations).toEqual({
+        '1': {
+          globalId: 1,
+          pillarId: 'pillarId1',
+          questionId: 'questionId1',
+          bestPracticeId: 'bestPracticeId1',
+          bestPracticeFindingNumberIds: [1, 2, 3],
+        },
+        '2': {
+          globalId: 2,
+          pillarId: 'pillarId2',
+          questionId: 'questionId2',
+          bestPracticeId: 'bestPracticeId2',
+          bestPracticeFindingNumberIds: [4, 5, 6],
+        },
+      });
+    });
+  });
+
   describe('storeBestPractices', () => {
     it('should update the best practice results variables with the list of finding ids', async () => {
       const { useCase, fakeAssessmentsRepository } = setup();
@@ -73,7 +132,7 @@ describe('StoreResultsUseCase', () => {
           pillarId: 'pillarId',
           questionId: 'questionId',
           bestPracticeId: 'bestPracticeId',
-          bestPracticeFindingNumberIds: [],
+          bestPracticeFindingNumberIds: [1, 2, 3],
         },
       };
       const scanningTool = 'scanningtool';
@@ -93,9 +152,6 @@ describe('StoreResultsUseCase', () => {
           aiBestPracticeAssociations
         )
       ).resolves.toBeUndefined();
-      expect(
-        aiBestPracticeAssociations[0].bestPracticeFindingNumberIds
-      ).toEqual([1, 2, 3]);
 
       const updatedAssessment = await fakeAssessmentsRepository.get({
         assessmentId: 'assessment_id',
@@ -212,7 +268,13 @@ describe('StoreResultsUseCase', () => {
         organization: 'organization',
         findingId: findings[0].id,
       });
-      expect(createdFinding).toEqual(findings[0]);
+      expect(createdFinding).toEqual(
+        expect.objectContaining({
+          id: findings[0].id,
+          bestPractices: 'pillarId#questionId#bestPracticeId',
+          isAiAssociated: true,
+        })
+      );
       expect(createdFinding?.bestPractices).toEqual(
         'pillarId#questionId#bestPracticeId'
       );

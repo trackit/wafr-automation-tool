@@ -48,13 +48,42 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     return parseJson(chunkContent) as unknown as Finding[];
   }
 
-  public setAIBestPracticeAssociationBestPracticeFindingNumberIds(
-    aiBestPracticeAssociation: AIBestPracticeAssociation,
-    aiAssociation: AIFindingAssociation
-  ): void {
-    aiBestPracticeAssociation.bestPracticeFindingNumberIds = Array.from(
-      { length: aiAssociation.end - aiAssociation.start + 1 },
-      (_, index) => aiAssociation.start + index
+  private getBestPracticeFindingNumberIdsFromAiFindingAssociation(
+    aiFindingAssociation: AIFindingAssociation
+  ): number[] {
+    return Array.from(
+      { length: aiFindingAssociation.end - aiFindingAssociation.start + 1 },
+      (_, index) => aiFindingAssociation.start + index
+    );
+  }
+
+  public getAiBestPracticeAssociations(
+    aiFindingAssociations: { id: number; start: number; end: number }[]
+  ): Record<string, AIBestPracticeAssociation> {
+    const questionSet = this.questionSetService.get();
+    const aiBestPracticeAssociations =
+      AIBestPracticeService.createAIBestPracticeAssociations({
+        questionSetData: questionSet.pillars,
+      });
+    return Object.entries(aiBestPracticeAssociations).reduce(
+      (acc, [id, aiBestPracticeAssociation]) => {
+        const aiAssociation = aiFindingAssociations.find(
+          ({ id: aiFindingAssociationId }) =>
+            aiFindingAssociationId === Number(id)
+        );
+        return {
+          ...acc,
+          [id]: {
+            ...aiBestPracticeAssociation,
+            bestPracticeFindingNumberIds: aiAssociation
+              ? this.getBestPracticeFindingNumberIdsFromAiFindingAssociation(
+                  aiAssociation
+                )
+              : [],
+          },
+        };
+      },
+      {}
     );
   }
 
@@ -73,10 +102,6 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
           `Best practice association for AI finding ${aiAssociation.id} not found`
         );
       }
-      this.setAIBestPracticeAssociationBestPracticeFindingNumberIds(
-        aiBestPracticeAssociation,
-        aiAssociation
-      );
       if (aiBestPracticeAssociation.bestPracticeFindingNumberIds.length === 0) {
         continue;
       }
@@ -103,19 +128,21 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     const findingsToSave = findings
       .map((finding) => {
         const findingNumberId = parseInt(finding.id.split('#')[1]);
-        finding.bestPractices = Object.values(aiBestPracticeAssociations)
-          .filter((bestPracticeInfo) =>
-            bestPracticeInfo.bestPracticeFindingNumberIds?.includes(
-              findingNumberId
+        return {
+          ...finding,
+          bestPractices: Object.values(aiBestPracticeAssociations)
+            .filter((bestPracticeInfo) =>
+              bestPracticeInfo.bestPracticeFindingNumberIds?.includes(
+                findingNumberId
+              )
             )
-          )
-          .map(
-            (bestPracticeInfo) =>
-              `${bestPracticeInfo.pillarId}#${bestPracticeInfo.questionId}#${bestPracticeInfo.bestPracticeId}`
-          )
-          .join(',');
-        finding.isAiAssociated = true;
-        return finding;
+            .map(
+              (bestPracticeInfo) =>
+                `${bestPracticeInfo.pillarId}#${bestPracticeInfo.questionId}#${bestPracticeInfo.bestPracticeId}`
+            )
+            .join(','),
+          isAiAssociated: true,
+        };
       })
       .filter((finding) => finding.bestPractices.length > 0);
     await Promise.all(
@@ -147,11 +174,9 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
       findings,
     });
 
-    const questionSet = this.questionSetService.get();
-    const aiBestPracticeAssociations =
-      AIBestPracticeService.createAIBestPracticeAssociations({
-        questionSetData: questionSet.pillars,
-      });
+    const aiBestPracticeAssociations = this.getAiBestPracticeAssociations(
+      aiFindingAssociations
+    );
     await this.storeBestPractices(
       assessmentId,
       organization,
