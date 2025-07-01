@@ -303,12 +303,12 @@ Resources:
           TemplateConfiguration:
             Text:
               InputVariables:
-                - Name: scanning_tool_title
-                - Name: question_set_data
-                - Name: scanning_tool_data
+                - Name: scanningToolTitle
+                - Name: questionSetData
+                - Name: scanningToolData
               Text: |
                 Context:
-                - We have a set of {{scanning_tool_title}} findings from our AWS environment.
+                - We have a set of {{scanningToolTitle}} findings from our AWS environment.
                 - Each finding must be assessed and mapped to a specific WAFR best practice based on our predefined pillars and questions.
                 Objective:
                 - Transform the scanning tool findings into a JSON mapping where each mapping associates a contiguous range of findings with a unique WAFR best practice ID.
@@ -318,16 +318,16 @@ Resources:
                 - Example:
                   [{"id":101,"start":201,"end":203}]
                 Instructions:
-                1. For each best practice (defined as a unique combination of pillar, question, and best practice), determine the contiguous range of findings it applies to from the {{scanning_tool_title}} Findings.
+                1. For each best practice (defined as a unique combination of pillar, question, and best practice), determine the contiguous range of findings it applies to from the {{scanningToolTitle}} Findings.
                 2. Use the predefined unique ID from the WAFR question set for the "id" field.
                 3. Define "start" as the starting index and "end" as the ending index (inclusive) of the range of findings for that best practice.
                 4. Return ONLY the FINAL MINIFIED JSON object. No additional text, comments, or formatting is allowed.
                 5. Do not prefix or suffix the output with any extra characters or messages. Any deviation from the exact specified structure will result in a failure of the state machine.
                 Inputs:
                 - WAFR Pillars, Questions, and Best Practices:
-                  {{question_set_data}}
-                - {{scanning_tool_title}} Findings:
-                  {{scanning_tool_data}}
+                  {{questionSetData}}
+                - {{scanningToolTitle}} Findings:
+                  {{scanningToolData}}
           InferenceConfiguration:
             Text:
               Temperature: 0
