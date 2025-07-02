@@ -83,14 +83,14 @@ describe('StoreResultsUseCase', () => {
 
       expect(associations).toEqual({
         '1': {
-          globalId: 1,
+          id: 1,
           pillarId: 'pillarId1',
           questionId: 'questionId1',
           bestPracticeId: 'bestPracticeId1',
           bestPracticeFindingNumberIds: [1, 2, 3],
         },
         '2': {
-          globalId: 2,
+          id: 2,
           pillarId: 'pillarId2',
           questionId: 'questionId2',
           bestPracticeId: 'bestPracticeId2',
