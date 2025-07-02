@@ -51,7 +51,7 @@ export class InvokeLLMUseCaseImpl implements InvokeLLMUseCase {
     const parsedResponse = AIFindingAssociationListSchema.parse(
       parseJson(response)
     );
-    this.logger.info(`Converse#${args.promptArn}`, promptVariables);
+    this.logger.info(`Converse#${args.promptArn} response`, response);
     await this.storeResultsUseCase.storeResults({
       assessmentId: args.assessmentId,
       organization: args.organization,
