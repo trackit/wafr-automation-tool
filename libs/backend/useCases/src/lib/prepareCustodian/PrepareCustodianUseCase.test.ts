@@ -17,10 +17,9 @@ describe('Prepare custodian use case', () => {
       's3://test-s3-bucket/custodian.yml'
     );
 
-    expect(fakeObjectsStorage.put).toHaveBeenCalledExactlyOnceWith({
-      key: CUSTODIAN_FILE_NAME,
-      body: 'mocked-policies-content',
-    });
+    expect(fakeObjectsStorage.objects[CUSTODIAN_FILE_NAME]).toEqual(
+      'mocked-policies-content'
+    );
   });
 });
 
