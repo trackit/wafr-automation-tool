@@ -128,7 +128,7 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
-      DeletionProtectionEnabled: false
+      DeletionProtectionEnabled: true
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
