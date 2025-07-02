@@ -9,7 +9,7 @@ export class AIBestPracticeMetadataMother {
 
   public static basic(): AIBestPracticeMetadataMother {
     return new AIBestPracticeMetadataMother({
-      globalId: 1,
+      id: 1,
       pillarLabel: 'pillar-label',
       questionLabel: 'question-label',
       bestPracticeLabel: 'best-practice-label',
@@ -17,8 +17,8 @@ export class AIBestPracticeMetadataMother {
     });
   }
 
-  public withGlobalId(globalId: number): AIBestPracticeMetadataMother {
-    this.data.globalId = globalId;
+  public withId(id: number): AIBestPracticeMetadataMother {
+    this.data.id = id;
     return this;
   }
 

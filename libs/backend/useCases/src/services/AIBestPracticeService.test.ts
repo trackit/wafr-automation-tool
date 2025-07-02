@@ -39,7 +39,7 @@ describe('AIBestPracticeService Service', () => {
 
       expect(aiBestPracticeMetadata).toHaveLength(1);
       expect(aiBestPracticeMetadata[0]).toEqual({
-        globalId: 1,
+        id: 1,
         pillarLabel: 'Pillar',
         questionLabel: 'Question',
         bestPracticeLabel: 'Best Practice',
@@ -74,7 +74,7 @@ describe('AIBestPracticeService Service', () => {
 
       expect(aiBestPracticeAssociation).toHaveProperty('1');
       expect(aiBestPracticeAssociation['1']).toEqual({
-        globalId: 1,
+        id: 1,
         pillarId: 'pillarId',
         questionId: 'questionId',
         bestPracticeId: 'bestPracticeId',
