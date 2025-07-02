@@ -8,23 +8,23 @@ export class FakeObjectsStorage implements ObjectsStorage {
     this.objects[args.key] = args.body;
   }
 
-  public async get(args: { key: string }): Promise<string> {
-    const object = this.objects[args.key];
+  public async get(key: string): Promise<string> {
+    const object = this.objects[key];
     if (!object) {
-      throw new Error(`Object not found: ${args.key}`);
+      throw new Error(`Object not found: ${key}`);
     }
     return object;
   }
 
-  public async list(args: { prefix: string }): Promise<string[]> {
+  public async list(prefix: string): Promise<string[]> {
     const objects = Object.keys(this.objects).filter((object) =>
-      object.startsWith(args.prefix)
+      object.startsWith(prefix)
     );
     return objects;
   }
 
-  public async bulkDelete(args: { keys: string[] }): Promise<void> {
-    args.keys.forEach((key) => delete this.objects[key]);
+  public async bulkDelete(keys: string[]): Promise<void> {
+    keys.forEach((key) => delete this.objects[key]);
   }
 
   public parseURI(uri: string): { bucket: string; key: string } {

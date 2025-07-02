@@ -32,9 +32,10 @@ export class InvokeLLMUseCaseImpl implements InvokeLLMUseCase {
     promptUri: string
   ): Promise<PromptVariables> {
     const { key } = this.objectsStorage.parseURI(promptUri);
-    const promptVariables = await this.objectsStorage.get({
-      key,
-    });
+    const promptVariables = await this.objectsStorage.get(key);
+    if (!promptVariables) {
+      throw new Error(`Prompt variables not found for URI: ${promptUri}`);
+    }
     const parsedPromptVariables = parseJson(
       promptVariables
     ) as unknown as PromptVariables;

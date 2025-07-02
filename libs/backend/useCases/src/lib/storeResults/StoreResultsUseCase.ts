@@ -44,7 +44,10 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     chunkFileNameWithoutExtension: string
   ): Promise<Finding[]> {
     const key = `assessments/${assessmentId}/chunks/${chunkFileNameWithoutExtension}.json`;
-    const chunkContent = await this.objectsStorage.get({ key });
+    const chunkContent = await this.objectsStorage.get(key);
+    if (!chunkContent) {
+      throw new Error(`Chunk content not found for key: ${key}`);
+    }
     return parseJson(chunkContent) as unknown as Finding[];
   }
 
