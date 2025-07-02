@@ -37,9 +37,9 @@ describe('InvokeLLMUseCase', () => {
       useCase.retrievePromptVariables(input.promptUri)
     ).resolves.toEqual(promptVariables);
 
-    expect(fakeObjectsStorage.get).toHaveBeenCalledExactlyOnceWith({
-      key: 'prompt-uri',
-    });
+    expect(fakeObjectsStorage.get).toHaveBeenCalledExactlyOnceWith(
+      'prompt-uri'
+    );
   });
 
   it('should call converse in AIService', async () => {

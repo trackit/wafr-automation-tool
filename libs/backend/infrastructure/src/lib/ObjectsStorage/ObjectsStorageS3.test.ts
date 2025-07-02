@@ -21,7 +21,7 @@ describe('ObjectsStorage Infrastructure', () => {
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
-      await expect(objectsStorage.get({ key: 'key' })).resolves.toEqual('');
+      await expect(objectsStorage.get('key')).resolves.toEqual('');
 
       const getExecutionCalls = s3ClientMock.commandCalls(GetObjectCommand);
       expect(getExecutionCalls).toHaveLength(1);
@@ -39,7 +39,7 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.get({ key: 'key' })).rejects.toThrow(Error);
+      await expect(objectsStorage.get('key')).rejects.toThrow(Error);
     });
   });
   describe('list', () => {
@@ -50,9 +50,7 @@ describe('ObjectsStorage Infrastructure', () => {
         Contents: [],
         $metadata: { httpStatusCode: 200 },
       });
-      await expect(objectsStorage.list({ prefix: 'prefix' })).resolves.toEqual(
-        []
-      );
+      await expect(objectsStorage.list('prefix')).resolves.toEqual([]);
 
       const listExecutionCalls =
         s3ClientMock.commandCalls(ListObjectsV2Command);
@@ -71,7 +69,7 @@ describe('ObjectsStorage Infrastructure', () => {
         Contents: [{ Key: 'prefix/key1' }, { Key: 'prefix/key2' }],
         $metadata: { httpStatusCode: 200 },
       });
-      await expect(objectsStorage.list({ prefix: 'prefix' })).resolves.toEqual([
+      await expect(objectsStorage.list('prefix')).resolves.toEqual([
         'prefix/key1',
         'prefix/key2',
       ]);
@@ -93,9 +91,7 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.list({ prefix: 'prefix' })).rejects.toThrow(
-        Error
-      );
+      await expect(objectsStorage.list('prefix')).rejects.toThrow(Error);
     });
   });
   describe('bulkDelete', () => {
@@ -105,7 +101,7 @@ describe('ObjectsStorage Infrastructure', () => {
       s3ClientMock.on(DeleteObjectsCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
-      await objectsStorage.bulkDelete({ keys: ['key1', 'key2'] });
+      await objectsStorage.bulkDelete(['key1', 'key2']);
 
       const bulkDeleteExecutionCalls =
         s3ClientMock.commandCalls(DeleteObjectsCommand);
@@ -127,15 +123,15 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(
-        objectsStorage.bulkDelete({ keys: ['key1', 'key2'] })
-      ).rejects.toThrow(Error);
+      await expect(objectsStorage.bulkDelete(['key1', 'key2'])).rejects.toThrow(
+        Error
+      );
     });
 
     it('should not call client send if keys array is empty', async () => {
       const { objectsStorage, s3ClientMock } = setup();
 
-      await objectsStorage.bulkDelete({ keys: [] });
+      await objectsStorage.bulkDelete([]);
 
       const bulkDeleteExecutionCalls =
         s3ClientMock.commandCalls(DeleteObjectsCommand);

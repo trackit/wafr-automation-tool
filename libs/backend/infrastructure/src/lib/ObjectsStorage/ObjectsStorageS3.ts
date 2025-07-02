@@ -16,8 +16,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
   private readonly logger = inject(tokenLogger);
   private readonly bucket = inject(tokenS3Bucket);
 
-  public async get(args: { key: string }): Promise<string> {
-    const { key } = args;
+  public async get(key: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
@@ -37,8 +36,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     }
   }
 
-  public async list(args: { prefix: string }): Promise<string[]> {
-    const { prefix } = args;
+  public async list(prefix: string): Promise<string[]> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucket,
       Prefix: prefix,
@@ -58,9 +56,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     }
   }
 
-  public async bulkDelete(args: { keys: string[] }): Promise<void> {
-    const { keys } = args;
-
+  public async bulkDelete(keys: string[]): Promise<void> {
     if (keys.length === 0) {
       return;
     }
