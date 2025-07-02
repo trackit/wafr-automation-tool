@@ -9,13 +9,13 @@ export class AIBestPracticeService {
     questionSetData: Pillar[];
   }): AIBestPracticeMetadata[] {
     const aiBestPracticeMetadata: AIBestPracticeMetadata[] = [];
-    let globalId = 1;
+    let id = 1;
 
     for (const pillar of args.questionSetData) {
       for (const question of pillar.questions) {
         for (const bestPractice of question.bestPractices) {
           aiBestPracticeMetadata.push({
-            globalId: globalId++,
+            id: id++,
             pillarLabel: pillar.label,
             questionLabel: question.label,
             bestPracticeLabel: bestPractice.label,
@@ -32,13 +32,13 @@ export class AIBestPracticeService {
   }): Record<string, AIBestPracticeAssociation> {
     const aiBestPracticeAssociation: Record<string, AIBestPracticeAssociation> =
       {};
-    let globalId = 1;
+    let id = 1;
 
     for (const pillar of args.questionSetData) {
       for (const question of pillar.questions) {
         for (const bestPractice of question.bestPractices) {
-          aiBestPracticeAssociation[globalId.toString()] = {
-            globalId: globalId++,
+          aiBestPracticeAssociation[id.toString()] = {
+            id: id++,
             pillarId: pillar.id,
             questionId: question.id,
             bestPracticeId: bestPractice.id,

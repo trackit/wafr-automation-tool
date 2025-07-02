@@ -128,7 +128,7 @@ describe('StoreResultsUseCase', () => {
         AIBestPracticeAssociation
       > = {
         0: {
-          globalId: 0,
+          id: 0,
           pillarId: 'pillarId',
           questionId: 'questionId',
           bestPracticeId: 'bestPracticeId',
@@ -246,7 +246,7 @@ describe('StoreResultsUseCase', () => {
         AIBestPracticeAssociation
       > = {
         0: {
-          globalId: 0,
+          id: 0,
           pillarId: 'pillarId',
           questionId: 'questionId',
           bestPracticeId: 'bestPracticeId',
@@ -311,7 +311,7 @@ describe('StoreResultsUseCase', () => {
         AIBestPracticeAssociation
       > = {
         0: {
-          globalId: 0,
+          id: 0,
           pillarId: 'pillarId',
           questionId: 'questionId',
           bestPracticeId: 'bestPracticeId',

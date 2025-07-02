@@ -12,7 +12,7 @@ export const AIFindingAssociationListSchema =
 export type AIFindingAssociation = z.infer<typeof AIFindingAssociationSchema>;
 
 export interface AIBestPracticeMetadata {
-  globalId: number;
+  id: number;
   pillarLabel: string;
   questionLabel: string;
   bestPracticeLabel: string;
@@ -20,7 +20,7 @@ export interface AIBestPracticeMetadata {
 }
 
 export interface AIBestPracticeAssociation {
-  globalId: number;
+  id: number;
   pillarId: string;
   questionId: string;
   bestPracticeId: string;
