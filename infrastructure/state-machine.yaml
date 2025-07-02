@@ -321,7 +321,7 @@ Resources:
           InferenceConfiguration:
             Text:
               Temperature: 0
-              MaxTokens: 2048
+              MaxTokens: 8192
       Tags:
         Project: !Ref Project
         Owner: !Ref Owner
