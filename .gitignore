@@ -565,6 +565,3 @@ vitest.config.*.timestamp*
 .env.*
 
 .idea
-
-# Act temporary files
-.secrets
