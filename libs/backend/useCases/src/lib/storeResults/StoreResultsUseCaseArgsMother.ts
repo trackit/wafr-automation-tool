@@ -10,9 +10,9 @@ export class StoreResultsUseCaseArgsMother {
 
   public static basic(): StoreResultsUseCaseArgsMother {
     return new StoreResultsUseCaseArgsMother({
-      assessmentId: 'assessment_id',
+      assessmentId: 'assessmentId',
       organization: 'organization',
-      promptUri: 'prompt_uri',
+      promptUri: 'promptUri',
       aiFindingAssociations: [],
     });
   }
