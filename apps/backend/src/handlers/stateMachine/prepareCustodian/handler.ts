@@ -1,7 +1,5 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { PrepareCustodianAdapter } from './PrepareCustodianAdapter';
 
-import { prepareCustodianAdapter } from './prepareCustodianAdapter';
-
-const adapter = new prepareCustodianAdapter();
+const adapter = new PrepareCustodianAdapter();
 
 export const main = async (): Promise<string> => await adapter.handle();

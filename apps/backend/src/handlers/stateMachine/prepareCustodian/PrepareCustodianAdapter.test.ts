@@ -1,12 +1,7 @@
-import {
-  NotFoundError,
-  tokenPrepareCustodianUseCase,
-  tokenStartAssessmentUseCase,
-} from '@backend/useCases';
+import { tokenPrepareCustodianUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
-import { prepareCustodianAdapter } from './prepareCustodianAdapter';
+import { PrepareCustodianAdapter } from './PrepareCustodianAdapter';
 
 describe('Prepare custodian adapter', () => {
   describe('useCase call', () => {
@@ -26,6 +21,6 @@ const setup = () => {
     prepareCustodian: vi.fn().mockResolvedValue('test-s3-uri'),
   };
   register(tokenPrepareCustodianUseCase, { useValue: useCase });
-  const adapter = new prepareCustodianAdapter();
+  const adapter = new PrepareCustodianAdapter();
   return { useCase, adapter };
 };
