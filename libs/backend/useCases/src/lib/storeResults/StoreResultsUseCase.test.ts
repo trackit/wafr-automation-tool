@@ -13,6 +13,7 @@ import {
   FindingMother,
   PillarMother,
   QuestionMother,
+  ScanningTool,
 } from '@backend/models';
 import { StoreResultsUseCaseImpl } from './StoreResultsUseCase';
 
@@ -20,8 +21,8 @@ describe('StoreResultsUseCase', () => {
   it('should extract scanning tool and chunkId from prompt uri', async () => {
     const { useCase } = setup();
 
-    expect(useCase.parseKey('scanningtool_chunkId')).toEqual({
-      scanningTool: 'scanningtool',
+    expect(useCase.parseKey('prowler_chunkId')).toEqual({
+      scanningTool: ScanningTool.PROWLER,
       chunkId: 'chunkId',
     });
   });
@@ -48,6 +49,14 @@ describe('StoreResultsUseCase', () => {
       const aiFindingAssociations = [
         { id: 1, start: 1, end: 3 },
         { id: 2, start: 4, end: 6 },
+      ];
+      const findings = [
+        FindingMother.basic().withId('prowler#1').build(),
+        FindingMother.basic().withId('prowler#2').build(),
+        FindingMother.basic().withId('prowler#3').build(),
+        FindingMother.basic().withId('prowler#4').build(),
+        FindingMother.basic().withId('prowler#5').build(),
+        FindingMother.basic().withId('prowler#6').build(),
       ];
 
       vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
@@ -78,7 +87,9 @@ describe('StoreResultsUseCase', () => {
         version: 'version1',
       });
       const associations = useCase.getAiBestPracticeAssociations(
-        aiFindingAssociations
+        aiFindingAssociations,
+        findings,
+        ScanningTool.PROWLER
       );
 
       expect(associations).toEqual({
@@ -135,7 +146,7 @@ describe('StoreResultsUseCase', () => {
           bestPracticeFindingNumberIds: [1, 2, 3],
         },
       };
-      const scanningTool = 'scanningtool';
+      const scanningTool = ScanningTool.PROWLER;
 
       await expect(
         useCase.storeBestPractices(
@@ -190,7 +201,7 @@ describe('StoreResultsUseCase', () => {
         string,
         AIBestPracticeAssociation
       > = {};
-      const scanningTool = 'scanningtool';
+      const scanningTool = ScanningTool.PROWLER;
 
       await expect(
         useCase.storeBestPractices(

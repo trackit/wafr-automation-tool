@@ -8,10 +8,12 @@ import {
   AIBestPracticeAssociation,
   AIFindingAssociation,
   Finding,
+  ScanningTool,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 import { AIBestPracticeService } from '../../services/AIBestPracticeService';
+import { z } from 'zod';
 
 export type StoreResultsUseCaseArgs = {
   assessmentId: string;
@@ -31,12 +33,15 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
   private readonly logger = inject(tokenLogger);
 
   public parseKey(chunkFileName: string): {
-    scanningTool: string;
+    scanningTool: ScanningTool;
     chunkId: string;
   } {
     const chunkFileNameWithoutExtension = chunkFileName.split('.')[0];
     const [scanningTool, chunkId] = chunkFileNameWithoutExtension.split('_');
-    return { scanningTool, chunkId };
+    return {
+      scanningTool: z.nativeEnum(ScanningTool).parse(scanningTool),
+      chunkId,
+    };
   }
 
   public async retrieveFindings(
@@ -52,16 +57,24 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
   }
 
   private getBestPracticeFindingNumberIdsFromAiFindingAssociation(
-    aiFindingAssociation: AIFindingAssociation
+    aiFindingAssociation: AIFindingAssociation,
+    findings: Finding[],
+    scanningTool: ScanningTool
   ): number[] {
     return Array.from(
       { length: aiFindingAssociation.end - aiFindingAssociation.start + 1 },
       (_, index) => aiFindingAssociation.start + index
+    ).filter((findingNumberId) =>
+      findings.find(
+        (finding) => finding.id === `${scanningTool}#${findingNumberId}`
+      )
     );
   }
 
   public getAiBestPracticeAssociations(
-    aiFindingAssociations: { id: number; start: number; end: number }[]
+    aiFindingAssociations: AIFindingAssociation[],
+    findings: Finding[],
+    scanningTool: ScanningTool
   ): Record<string, AIBestPracticeAssociation> {
     const questionSet = this.questionSetService.get();
     const aiBestPracticeAssociations =
@@ -80,7 +93,9 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
             ...aiBestPracticeAssociation,
             bestPracticeFindingNumberIds: aiAssociation
               ? this.getBestPracticeFindingNumberIdsFromAiFindingAssociation(
-                  aiAssociation
+                  aiAssociation,
+                  findings,
+                  scanningTool
                 )
               : [],
           },
@@ -93,7 +108,7 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
   public async storeBestPractices(
     assessmentId: string,
     organization: string,
-    scanningTool: string,
+    scanningTool: ScanningTool,
     aiAssociations: AIFindingAssociation[],
     aiBestPracticeAssociations: Record<string, AIBestPracticeAssociation>
   ) {
@@ -179,7 +194,9 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
     });
 
     const aiBestPracticeAssociations = this.getAiBestPracticeAssociations(
-      aiFindingAssociations
+      aiFindingAssociations,
+      findings,
+      scanningTool
     );
     await this.storeBestPractices(
       assessmentId,
