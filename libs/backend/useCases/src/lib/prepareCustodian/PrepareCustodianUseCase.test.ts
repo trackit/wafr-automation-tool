@@ -30,7 +30,6 @@ const setup = () => {
     readFileSync: vi.fn(() => 'mocked-policies-content'),
   }));
   const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
-  vitest.spyOn(fakeObjectsStorage, 'put');
   return {
     useCase: new PrepareCustodianUseCaseImpl(),
     fakeObjectsStorage,
