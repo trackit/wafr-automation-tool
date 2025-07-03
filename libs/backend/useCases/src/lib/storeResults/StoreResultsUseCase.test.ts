@@ -159,11 +159,9 @@ describe('StoreResultsUseCase', () => {
       });
       expect(
         updatedAssessment?.findings?.[0].questions[0].bestPractices[0].results
-      ).toEqual([
-        `${scanningTool}#1`,
-        `${scanningTool}#2`,
-        `${scanningTool}#3`,
-      ]);
+      ).toEqual(
+        new Set([`${scanningTool}#1`, `${scanningTool}#2`, `${scanningTool}#3`])
+      );
     });
 
     it('shoud throw an error if the best practice is not found', async () => {
@@ -231,7 +229,7 @@ describe('StoreResultsUseCase', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('bestPracticeId')
-                    .withResults([`${findings[0].id}`])
+                    .withResults(new Set([`${findings[0].id}`]))
                     .build(),
                 ])
                 .build(),
@@ -296,7 +294,7 @@ describe('StoreResultsUseCase', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('bestPracticeId')
-                    .withResults([])
+                    .withResults(new Set([]))
                     .build(),
                 ])
                 .build(),

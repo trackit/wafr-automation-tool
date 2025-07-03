@@ -74,7 +74,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: bestPractice.id,
       label: bestPractice.label,
       primary_id: bestPractice.primaryId,
-      results: bestPractice.results,
+      results:
+        bestPractice.results.size > 0
+          ? bestPractice.results
+          : new Set<string>(['']), // Dirty hack because DynamoDB does not allow empty sets
       risk: bestPractice.risk,
       checked: bestPractice.checked,
     };
@@ -240,7 +243,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: item.id,
       label: item.label,
       primaryId: item.primary_id,
-      results: item.results,
+      results: new Set([...item.results].filter((result) => result !== '')), // Filter out empty strings due to our dirty hack
       risk: item.risk,
       checked: item.checked,
     };
@@ -724,13 +727,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
-  public async updateBestPracticeFindings(args: {
+  public async addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }) {
     const {
       assessmentId,
@@ -765,15 +768,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      UpdateExpression: `SET findings.#pillar.questions.#question.best_practices.#best_practice.results = list_append(if_not_exists(findings.#pillar.questions.#question.best_practices.#best_practice.results, :empty_list), :new_findings)`,
+      UpdateExpression: `
+        ADD findings.#pillar.questions.#question.best_practices.#bestPractice.results :newFindings
+      `,
       ExpressionAttributeNames: {
         '#pillar': pillarId,
         '#question': questionId,
-        '#best_practice': bestPracticeId,
+        '#bestPractice': bestPracticeId,
       },
       ExpressionAttributeValues: {
-        ':empty_list': [],
-        ':new_findings': bestPracticeFindingIds,
+        ':newFindings': bestPracticeFindingIds,
       },
     };
     try {

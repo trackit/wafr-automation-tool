@@ -111,7 +111,7 @@ describe('GetAssessmentAdapter', () => {
                     .withDescription('best practice description')
                     .withId('best-practice-id')
                     .withLabel('best practice')
-                    .withResults(['prowler#1', 'prowler#2'])
+                    .withResults(new Set(['prowler#1', 'prowler#2']))
                     .withRisk(SeverityType.Medium)
                     .withChecked(true)
                     .build(),

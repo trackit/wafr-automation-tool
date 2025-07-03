@@ -225,13 +225,13 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
-  public async updateBestPracticeFindings(args: {
+  public async addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }): Promise<void> {
     const {
       assessmentId,
@@ -281,7 +281,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         bestPracticeId,
       });
     }
-    bestPractice.results.push(...bestPracticeFindingIds);
+    for (const findingId of bestPracticeFindingIds) {
+      bestPractice.results.add(findingId);
+    }
   }
 
   public async updatePillar(args: {

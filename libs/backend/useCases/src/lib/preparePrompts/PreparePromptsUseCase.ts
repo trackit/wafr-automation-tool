@@ -101,7 +101,9 @@ export class PreparePromptsUseCaseImpl implements PreparePromptsUseCase {
             .map(({ scanFinding }) => scanFinding);
           return {
             ...bestPractice,
-            results: scanFindingsMatchingBestPractice.map(({ id }) => id),
+            results: new Set(
+              scanFindingsMatchingBestPractice.map(({ id }) => id)
+            ),
           };
         }),
       })),

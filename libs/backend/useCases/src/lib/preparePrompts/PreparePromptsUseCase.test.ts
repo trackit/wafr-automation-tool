@@ -340,7 +340,7 @@ describe('PreparePrompts Use Case', () => {
       fakeAssessmentsRepository.assessments[
         '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
       ].findings?.[0].questions[0].bestPractices[0].results
-    ).toEqual(['prowler#1', 'prowler#2']);
+    ).toEqual(new Set(['prowler#1', 'prowler#2']));
   });
 
   it('should save scan findings with mapped best practices', async () => {
@@ -611,7 +611,7 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-1',
-                  results: ['scanningTool#1'],
+                  results: new Set(['scanningTool#1']),
                 }),
               ],
             }),
@@ -657,7 +657,7 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-1',
-                  results: [],
+                  results: new Set([]),
                 }),
               ],
             }),
@@ -715,11 +715,11 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-1',
-                  results: ['scanningTool#1'],
+                  results: new Set(['scanningTool#1']),
                 }),
                 expect.objectContaining({
                   id: 'best-practice-2',
-                  results: ['scanningTool#1'],
+                  results: new Set(['scanningTool#1']),
                 }),
               ],
             }),
@@ -783,7 +783,7 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-1',
-                  results: ['scanningTool#1', 'scanningTool#2'],
+                  results: new Set(['scanningTool#1', 'scanningTool#2']),
                 }),
               ],
             }),
@@ -853,7 +853,7 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-1',
-                  results: ['scanningTool#1'],
+                  results: new Set(['scanningTool#1']),
                 }),
               ],
             }),
@@ -862,7 +862,7 @@ describe('PreparePrompts Use Case', () => {
               bestPractices: [
                 expect.objectContaining({
                   id: 'best-practice-2',
-                  results: ['scanningTool#2'],
+                  results: new Set(['scanningTool#2']),
                 }),
               ],
             }),

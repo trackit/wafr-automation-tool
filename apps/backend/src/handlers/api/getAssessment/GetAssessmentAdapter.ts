@@ -43,7 +43,7 @@ export class GetAssessmentAdapter {
               description: bestPractice.description,
               id: bestPractice.id,
               label: bestPractice.label,
-              results: bestPractice.results,
+              results: [...bestPractice.results],
               risk: bestPractice.risk,
               checked: bestPractice.checked,
             })),

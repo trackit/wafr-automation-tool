@@ -77,13 +77,13 @@ export interface AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
   }): Promise<void>;
-  updateBestPracticeFindings(args: {
+  addBestPracticeFindings(args: {
     assessmentId: string;
     organization: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
-    bestPracticeFindingIds: string[];
+    bestPracticeFindingIds: Set<string>;
   }): Promise<void>;
   updateFinding(args: {
     assessmentId: string;

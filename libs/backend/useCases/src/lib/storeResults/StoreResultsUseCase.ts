@@ -108,16 +108,17 @@ export class StoreResultsUseCaseImpl implements StoreResultsUseCase {
       if (aiBestPracticeAssociation.bestPracticeFindingNumberIds.length === 0) {
         continue;
       }
-      await this.assessmentsRepository.updateBestPracticeFindings({
+      await this.assessmentsRepository.addBestPracticeFindings({
         assessmentId,
         organization,
         pillarId: aiBestPracticeAssociation.pillarId,
         questionId: aiBestPracticeAssociation.questionId,
         bestPracticeId: aiBestPracticeAssociation.bestPracticeId,
-        bestPracticeFindingIds:
+        bestPracticeFindingIds: new Set(
           aiBestPracticeAssociation.bestPracticeFindingNumberIds.map(
             (id) => `${scanningTool}#${id}`
-          ),
+          )
+        ),
       });
     }
   }
