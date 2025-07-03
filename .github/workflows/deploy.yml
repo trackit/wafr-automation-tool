@@ -40,7 +40,6 @@ jobs:
 
       - name: Build Backend
         run: npm run build:backend
-
       - name: Build Frontend
         run: npm run build:webui
 
