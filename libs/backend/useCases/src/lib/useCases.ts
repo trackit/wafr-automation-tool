@@ -13,3 +13,4 @@ export * from './updateBestPractice';
 export * from './updateFinding';
 export * from './updatePillar';
 export * from './updateQuestion';
+export * from './prepareCustodian';
