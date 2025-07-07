@@ -65,7 +65,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withExecutionArn(
           'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1'
         )
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withDisabled(false)
             .withId('pillar1')
@@ -330,7 +330,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -366,7 +366,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0]
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
           .checked
       ).toBe(true);
     });
@@ -392,7 +392,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -429,7 +429,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -451,7 +451,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('0').withQuestions([]).build(),
         ])
         .build();
@@ -475,7 +475,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -504,7 +504,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -543,7 +543,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -573,7 +573,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0].results.has(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#1'
         )
       ).toBe(true);
@@ -585,7 +585,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -615,12 +615,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0].results.has(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#1'
         )
       ).toBe(true);
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0].results.has(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#2'
         )
       ).toBe(true);
@@ -632,7 +632,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -671,12 +671,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0].results.has(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#1'
         )
       ).toBe(true);
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0].results.has(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#2'
         )
       ).toBe(true);
@@ -690,7 +690,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('0').withDisabled(false).build(),
         ])
         .build();
@@ -710,7 +710,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
-      expect(updatedAssessment?.findings?.[0].disabled).toBe(true);
+      expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
     });
 
     it('should throw AssessmentNotFound if the assessment does not exist', async () => {
@@ -751,7 +751,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -771,7 +771,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([PillarMother.basic().withId('0').build()])
+        .withPillars([PillarMother.basic().withId('0').build()])
         .build();
       await repository.save(assessment);
 
@@ -863,7 +863,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -1134,7 +1134,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withId('assessment1')
         .withOrganization('organization1')
         .withName('Old Name')
-        .withFindings([])
+        .withPillars([])
         .withQuestionVersion('0.1')
         .withRawGraphData({
           [ScanningTool.PROWLER]: {
@@ -1152,7 +1152,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
         assessmentBody: {
           name: 'New Name',
-          findings: [
+          pillars: [
             PillarMother.basic()
               .withId('pillar-1')
               .withQuestions([
@@ -1188,7 +1188,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(updatedAssessment).toEqual(
         expect.objectContaining({
           name: 'New Name',
-          findings: [
+          pillars: [
             expect.objectContaining({
               id: 'pillar-1',
               questions: [
@@ -1296,7 +1296,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1352,7 +1352,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment1 = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1370,7 +1370,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment2 = AssessmentMother.basic()
         .withId('assessment2')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1423,7 +1423,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1458,7 +1458,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -1480,7 +1480,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('pillar1').withQuestions([]).build(),
         ])
         .build();
@@ -1504,7 +1504,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1536,7 +1536,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1592,7 +1592,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1663,7 +1663,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1730,7 +1730,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1789,7 +1789,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1841,7 +1841,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2031,7 +2031,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2062,7 +2062,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      expect(updatedAssessment?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({ id: 'question1', disabled: true, none: true })
       );
     });
@@ -2072,7 +2072,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2120,7 +2120,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -2144,7 +2144,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('pillar1').withQuestions([]).build(),
         ])
         .build();
@@ -2170,7 +2170,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment1 = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2188,7 +2188,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment2 = AssessmentMother.basic()
         .withId('assessment2')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2223,10 +2223,10 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization2',
       });
 
-      expect(updatedAssessment1?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment1?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({ id: 'question1', disabled: true, none: true })
       );
-      expect(updatedAssessment2?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment2?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({
           id: 'question1',
           disabled: false,
@@ -2248,7 +2248,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
+        .withPillars(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,
@@ -2298,7 +2298,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
+        .withPillars(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,
@@ -2370,7 +2370,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
+        .withPillars(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,

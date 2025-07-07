@@ -111,7 +111,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const key = `${assessmentId}#${organization}`;
     if (
       !this.assessmentFindings[key] ||
-      !this.assessments[key].findings?.find(
+      !this.assessments[key].pillars?.find(
         (pillar) =>
           pillar.id === pillarId &&
           pillar.questions.find(
@@ -188,7 +188,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (Object.keys(args.bestPracticeBody).length === 0) {
       throw new EmptyUpdateBodyError();
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -248,7 +248,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         organization,
       });
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -303,7 +303,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     if (Object.keys(pillarBody).length === 0) {
       throw new EmptyUpdateBodyError();
     }
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -427,9 +427,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       throw new EmptyUpdateBodyError();
     }
     const assessment = this.assessments[assessmentKey];
-    const pillar = assessment.findings?.find(
-      (pillar) => pillar.id === pillarId
-    );
+    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId,

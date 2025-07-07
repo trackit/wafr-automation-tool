@@ -339,7 +339,7 @@ describe('PreparePrompts Use Case', () => {
     expect(
       fakeAssessmentsRepository.assessments[
         '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-      ].findings?.[0].questions[0].bestPractices[0].results
+      ].pillars?.[0].questions[0].bestPractices[0].results
     ).toEqual(new Set(['prowler#1', 'prowler#2']));
   });
 

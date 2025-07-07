@@ -118,7 +118,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -169,7 +169,7 @@ describe('StoreResultsUseCase', () => {
         organization: 'organization',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions[0].bestPractices[0].results
+        updatedAssessment?.pillars?.[0].questions[0].bestPractices[0].results
       ).toEqual(
         new Set([`${scanningTool}#1`, `${scanningTool}#2`, `${scanningTool}#3`])
       );
@@ -181,7 +181,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -231,7 +231,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([
@@ -296,7 +296,7 @@ describe('StoreResultsUseCase', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment_id')
         .withOrganization('organization')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillarId')
             .withQuestions([

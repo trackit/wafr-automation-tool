@@ -99,7 +99,7 @@ describe('GetAssessmentAdapter', () => {
       const assessment = AssessmentMother.basic()
         .withCreatedAt(date)
         .withCreatedBy('user-id')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withDisabled(false)
             .withId('pillar-id')
@@ -153,7 +153,7 @@ describe('GetAssessmentAdapter', () => {
       expect(JSON.parse(response.body)).toEqual({
         created_at: date.toISOString(),
         created_by: 'user-id',
-        findings: [
+        pillars: [
           {
             disabled: false,
             id: 'pillar-id',

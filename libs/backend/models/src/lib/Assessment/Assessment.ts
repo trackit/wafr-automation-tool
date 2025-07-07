@@ -6,7 +6,7 @@ export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn: string;
-  findings?: Pillar[];
+  pillars?: Pillar[];
   graphData?: AssessmentGraphData;
   id: string;
   name: string;
@@ -45,6 +45,6 @@ export interface AssessmentBody {
   graphData?: AssessmentGraphData;
   error?: AssessmentError;
   rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
-  findings?: Pillar[];
+  pillars?: Pillar[];
   questionVersion?: string;
 }

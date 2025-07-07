@@ -175,7 +175,7 @@ export class PreparePromptsUseCaseImpl implements PreparePromptsUseCase {
           assessmentId,
           organization,
           assessmentBody: {
-            findings: this.formatPillarsForAssessmentUpdate({
+            pillars: this.formatPillarsForAssessmentUpdate({
               rawPillars: questionSet.pillars,
               scanFindingsToBestPractices,
             }),

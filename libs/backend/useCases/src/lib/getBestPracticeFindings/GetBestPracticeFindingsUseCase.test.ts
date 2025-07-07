@@ -56,7 +56,7 @@ describe('GetBestPracticeFindings UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('other-pillar-id')
             .withQuestions([
@@ -96,7 +96,7 @@ describe('GetBestPracticeFindings UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar-id')
             .withQuestions([
@@ -130,7 +130,7 @@ describe('GetBestPracticeFindings UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
