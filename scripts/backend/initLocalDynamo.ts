@@ -14,7 +14,7 @@ const dynamodb = new DynamoDBClient({
 
 const createTables = async () => {
   await Promise.all(
-    [env.ASSESSMENT_TABLE].map(async (table) => {
+    [env.DDB_TABLE].map(async (table) => {
       await dynamodb.send(
         new CreateTableCommand({
           TableName: table,
