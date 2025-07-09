@@ -21,7 +21,7 @@ describe('UpdateBestPracticeUseCase', () => {
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('other-org.io')
-      .withFindings([
+      .withPillars([
         PillarMother.basic()
           .withId('1')
           .withQuestions([
@@ -117,7 +117,7 @@ describe('UpdateBestPracticeUseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('other-org.io')
-        .withFindings([PillarMother.basic().withId('1').build()])
+        .withPillars([PillarMother.basic().withId('1').build()])
         .build();
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
@@ -144,7 +144,7 @@ describe('UpdateBestPracticeUseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('other-org.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('1')
             .withQuestions([QuestionMother.basic().withId('1').build()])

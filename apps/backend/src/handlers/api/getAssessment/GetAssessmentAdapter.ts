@@ -33,8 +33,8 @@ export class GetAssessmentAdapter {
     return {
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
-      findings:
-        assessment.findings?.map((pillar) => ({
+      pillars:
+        assessment.pillars?.map((pillar) => ({
           disabled: pillar.disabled,
           id: pillar.id,
           label: pillar.label,

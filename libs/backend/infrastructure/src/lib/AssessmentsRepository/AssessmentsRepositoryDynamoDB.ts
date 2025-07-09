@@ -134,7 +134,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
       execution_arn: assessment.executionArn,
-      findings: assessment.findings?.reduce(
+      pillars: assessment.pillars?.reduce(
         (pillars, pillar) => ({
           ...pillars,
           [pillar.id]: this.toDynamoDBPillarItem(pillar),
@@ -182,8 +182,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           {}
         ),
       }),
-      ...(assessmentBody.findings && {
-        findings: assessmentBody.findings.reduce(
+      ...(assessmentBody.pillars && {
+        pillars: assessmentBody.pillars.reduce(
           (pillars, pillar) => ({
             ...pillars,
             [pillar.id]: this.toDynamoDBPillarItem(pillar),
@@ -294,8 +294,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       createdAt: new Date(assessment.created_at),
       createdBy: assessment.created_by,
       executionArn: assessment.execution_arn,
-      ...(assessment.findings && {
-        findings: Object.values(assessment.findings).map((pillar) =>
+      ...(assessment.pillars && {
+        pillars: Object.values(assessment.pillars).map((pillar) =>
           this.fromDynamoDBPillarItem(pillar)
         ),
       }),
@@ -624,7 +624,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     bestPracticeId: string;
   }): void {
     const { assessment, pillarId, questionId, bestPracticeId } = args;
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -711,7 +711,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       ...this.buildUpdateExpression({
         data: { ...bestPracticeBody },
         UpdateExpressionPath:
-          'findings.#pillar.questions.#question.best_practices.#best_practice',
+          'pillars.#pillar.questions.#question.best_practices.#best_practice',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
           '#question': questionId,
@@ -769,7 +769,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: this.getAssessmentSK(assessmentId),
       },
       UpdateExpression: `
-        ADD findings.#pillar.questions.#question.best_practices.#bestPractice.results :newFindings
+        ADD pillars.#pillar.questions.#question.best_practices.#bestPractice.results :newFindings
       `,
       ExpressionAttributeNames: {
         '#pillar': pillarId,
@@ -796,7 +796,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     pillarId: string;
   }): void {
     const { assessment, pillarId } = args;
-    const pillar = assessment.findings?.find(
+    const pillar = assessment.pillars?.find(
       (pillar) => pillar.id === pillarId.toString()
     );
     if (!pillar) {
@@ -847,7 +847,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       },
       ...this.buildUpdateExpression({
         data: pillarBody as Record<string, unknown>,
-        UpdateExpressionPath: 'findings.#pillar',
+        UpdateExpressionPath: 'pillars.#pillar',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
         },
@@ -1083,9 +1083,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     questionId: string;
   }): void {
     const { assessment, pillarId, questionId } = args;
-    const pillar = assessment.findings?.find(
-      (pillar) => pillar.id === pillarId
-    );
+    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
     if (!pillar) {
       throw new PillarNotFoundError({
         assessmentId: assessment.id,
@@ -1144,7 +1142,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       },
       ...this.buildUpdateExpression({
         data: questionBody as Record<string, unknown>,
-        UpdateExpressionPath: 'findings.#pillar.questions.#question',
+        UpdateExpressionPath: 'pillars.#pillar.questions.#question',
         DefaultExpressionAttributeNames: {
           '#pillar': pillarId,
           '#question': questionId,

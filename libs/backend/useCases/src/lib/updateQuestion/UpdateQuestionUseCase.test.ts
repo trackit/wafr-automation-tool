@@ -46,7 +46,7 @@ describe('UpdateQuestionUseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([])
+        .withPillars([])
         .build();
 
     const input = UpdateQuestionUseCaseArgsMother.basic()
@@ -64,7 +64,7 @@ describe('UpdateQuestionUseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('pillar-id').withQuestions([]).build(),
         ])
         .build();
@@ -99,7 +99,7 @@ describe('UpdateQuestionUseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar-id')
             .withQuestions([
@@ -125,7 +125,7 @@ describe('UpdateQuestionUseCase', () => {
 
     const updatedQuestion =
       fakeAssessmentsRepository.assessments['assessment-id#test.io']
-        ?.findings?.[0].questions?.[0];
+        ?.pillars?.[0].questions?.[0];
     expect(updatedQuestion).toEqual(
       expect.objectContaining({
         id: 'question-id',

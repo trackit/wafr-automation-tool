@@ -257,7 +257,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment,
     user: User
   ): Promise<void> {
-    const assessmentPillarList = assessment.findings ?? [];
+    const assessmentPillarList = assessment.pillars ?? [];
     const workloadId = await this.createWorkload(assessment, user);
     const workloadLensRevieww = await this.getWorkloadLensReview(workloadId);
     const workloadPillarList = workloadLensRevieww.PillarReviewSummaries ?? [];

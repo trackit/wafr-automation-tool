@@ -19,7 +19,7 @@ export class AssessmentMother {
       createdBy: 'user-id',
       executionArn:
         'arn:aws:states:us-west-2:123456789012:execution:state-machine:execution-arn',
-      findings: [],
+      pillars: [],
       graphData: {
         findings: 0,
         regions: {},
@@ -53,8 +53,8 @@ export class AssessmentMother {
     return this;
   }
 
-  public withFindings(findings: Pillar[] | undefined): AssessmentMother {
-    this.data.findings = findings;
+  public withPillars(pillars: Pillar[] | undefined): AssessmentMother {
+    this.data.pillars = pillars;
     return this;
   }
 

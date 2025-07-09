@@ -9,7 +9,7 @@ export interface DynamoDBAssessment {
   created_at: string;
   created_by: string;
   execution_arn: string;
-  findings?: Record<string, DynamoDBPillar>;
+  pillars?: Record<string, DynamoDBPillar>;
   graph_datas?: DynamoDBAssessmentGraphData;
   id: string;
   name: string;

@@ -16,7 +16,7 @@ export class AssessmentGraphDataMother {
     });
   }
 
-  public withFindings(findings: number): AssessmentGraphDataMother {
+  public withPillars(findings: number): AssessmentGraphDataMother {
     this.data.findings = findings;
     return this;
   }
