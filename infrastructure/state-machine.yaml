@@ -448,7 +448,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $states.input.assessmentId %}'
-                  organization: '{% $organization %}'
+                  organization: '{% $states.input.organization %}'
                   error: '{% $states.errorOutput %}'
           ScanningTools:
             Type: Parallel
