@@ -14,12 +14,20 @@ import {
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
 import {
+  tokenFakeMarketplaceService,
+  tokenMarketplaceService,
+} from './MarketplaceService';
+import {
   tokenFakeObjectsStorage,
   tokenObjectsStorage,
   tokenS3Bucket,
 } from './ObjectsStorage';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
+import {
+  tokenFakeOrganizationRepository,
+  tokenOrganizationRepository,
+} from './OrganizationRepository';
 import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
@@ -42,5 +50,11 @@ export const registerTestInfrastructure = () => {
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenWellArchitectedToolService, {
     useFactory: () => inject(tokenFakeWellArchitectedToolService),
+  });
+  register(tokenOrganizationRepository, {
+    useFactory: () => inject(tokenFakeOrganizationRepository),
+  });
+  register(tokenMarketplaceService, {
+    useFactory: () => inject(tokenFakeMarketplaceService),
   });
 };
