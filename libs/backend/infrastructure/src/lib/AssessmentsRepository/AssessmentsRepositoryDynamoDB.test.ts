@@ -9,17 +9,16 @@ import {
   QuestionMother,
   SeverityType,
 } from '@backend/models';
-import { inject, register, reset } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
+import { inject, reset } from '@shared/di-container';
 
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
   QuestionNotFoundError,
-  FindingNotFoundError,
 } from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
@@ -2027,16 +2026,5 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-
-  register(tokenDynamoDBAssessmentTableName, {
-    useFactory: () => {
-      assertIsDefined(
-        process.env.ASSESSMENT_TABLE,
-        'ASSESSMENT_TABLE is not defined'
-      );
-      return process.env.ASSESSMENT_TABLE;
-    },
-  });
-
   return { repository: new AssessmentsRepositoryDynamoDB() };
 };
