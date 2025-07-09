@@ -30,6 +30,9 @@
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.1",
     "@aws-sdk/client-dynamodb": "^3.817.0",
+    "@aws-sdk/client-marketplace-agreement": "^3.840.0",
+    "@aws-sdk/client-marketplace-entitlement-service": "^3.840.0",
+    "@aws-sdk/client-marketplace-metering": "^3.840.0",
     "@aws-sdk/client-s3": "^3.828.0",
     "@aws-sdk/client-sfn": "^3.810.0",
     "@aws-sdk/client-wellarchitected": "^3.823.0",
