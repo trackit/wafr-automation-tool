@@ -67,7 +67,7 @@ export const handleHttpRequest = async ({
         description: e.description,
       });
     }
-    console.log(`Internal Server Error: ${e}`);
+    logger.error('Internal Server Error', e);
     return buildResponse(500, {
       message: 'Internal Server Error.',
       description: 'An unexpected error occurred.',
