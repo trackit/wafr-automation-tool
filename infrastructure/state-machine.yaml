@@ -191,6 +191,11 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+            - Effect: Allow
+              Action:
+                - aws-marketplace:GetEntitlements
+                - aws-marketplace:BatchMeterUsage
+              Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

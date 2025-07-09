@@ -166,6 +166,14 @@ Resources:
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - aws-marketplace:GetEntitlements
+                - aws-marketplace:DescribeAgreement
+              Resource: '*'
       Events:
         StartAssessment:
           Type: Api
