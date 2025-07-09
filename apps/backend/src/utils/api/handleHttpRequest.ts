@@ -5,6 +5,7 @@ import {
   ConflictError,
   NoContentError,
   NotFoundError,
+  PaymentRequiredError,
   ServerError,
 } from '@backend/useCases';
 import { inject } from '@shared/di-container';
@@ -46,6 +47,8 @@ export const handleHttpRequest = async ({
       let statusCode: number;
       if (e instanceof NoContentError) {
         statusCode = 204;
+      } else if (e instanceof PaymentRequiredError) {
+        statusCode = 402;
       } else if (e instanceof NotFoundError) {
         statusCode = 404;
       } else if (e instanceof ConflictError) {
@@ -64,7 +67,7 @@ export const handleHttpRequest = async ({
         description: e.description,
       });
     }
-    logger.error('Internal Server Error', e);
+    console.log(`Internal Server Error: ${e}`);
     return buildResponse(500, {
       message: 'Internal Server Error.',
       description: 'An unexpected error occurred.',
