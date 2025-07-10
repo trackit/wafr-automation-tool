@@ -107,33 +107,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
     const { bestPracticeIdToFindingIdsAssociations, findings, pillars } = args;
     const flattenedBestPractices =
       this.flattenBestPracticesWithPillarAndQuestionFromPillars(pillars);
-    // for (const classification of bestPracticeIdToFindingIdsAssociations) {
-    //   const bestPractice = bestPractices[classification.id];
-    //   if (!bestPractice) {
-    //     continue; // TODO: Throw an error and retry converse
-    //   }
-    //   const bestPracticeFindings =
-    //     this.getBestPracticeFindingsFromClassification({
-    //       classification,
-    //       findings,
-    //       scanningTool,
-    //     });
-    //   for (const finding of bestPracticeFindings) {
-    //     if (!findingIdToFindingToBestPracticesAssociation[finding.id]) {
-    //       findingIdToFindingToBestPracticesAssociation[finding.id] = {
-    //         finding,
-    //         bestPractices: [],
-    //       };
-    //     }
-    //     findingIdToFindingToBestPracticesAssociation[
-    //       finding.id
-    //     ].bestPractices.push({
-    //       pillarId: bestPractice.pillar.id,
-    //       questionId: bestPractice.question.id,
-    //       bestPracticeId: bestPractice.id,
-    //     });
-    //   }
-    // }
     return findings.map((finding) => {
       const findingNumericId = Number(finding.id.split('#')?.[1]);
       if (isNaN(findingNumericId)) {
