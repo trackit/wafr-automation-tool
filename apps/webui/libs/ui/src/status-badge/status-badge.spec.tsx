@@ -26,7 +26,7 @@ describe('StatusBadge', () => {
 
   it('renders "Invoking LLM" status with info color', () => {
     render(<StatusBadge status="ASSOCIATING_FINDINGS" />);
-    const badge = screen.getByText('Invoking LLM');
+    const badge = screen.getByText('Associating Findings to Best Practices');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('badge-info');
   });
