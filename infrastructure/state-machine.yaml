@@ -60,21 +60,21 @@ Globals:
         DDB_TABLE: !Ref DynamoDBArn
 
 Resources:
-  PreparePromptsLogGroup:
+  PrepareFindingsAssociationsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${PreparePromptsFunction}'
+      LogGroupName: !Sub '/aws/lambda/${PrepareFindingsAssociationsFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  PreparePromptsFunction:
+  PrepareFindingsAssociationsFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/stateMachine/preparePrompts
+      CodeUri: ../apps/backend/src/handlers/stateMachine/prepareFindingsAssociations
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: PreparePromptsFunction
+        Name: PrepareFindingsAssociationsFunction
       Timeout: 600
       MemorySize: 1024
       Policies:
@@ -113,21 +113,21 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  InvokeLLMLogGroup:
+  AssociateFindingsChunkToBestPracticesLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${InvokeLLMFunction}'
+      LogGroupName: !Sub '/aws/lambda/${AssociateFindingsChunkToBestPracticesFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  InvokeLLMFunction:
+  AssociateFindingsChunkToBestPracticesFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/stateMachine/invokeLLM
+      CodeUri: ../apps/backend/src/handlers/stateMachine/AssociateFindingsChunkToBestPractices
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
-        Name: InvokeLLMFunction
+        Name: AssociateFindingsChunkToBestPracticesFunction
       Timeout: 900
       MemorySize: 128
       Policies:
@@ -165,6 +165,7 @@ Resources:
       Environment:
         Variables:
           AI_MODEL: claude-3-7-sonnet
+          PROMPT_ARN: !GetAtt BedrockPrompt.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -304,8 +305,8 @@ Resources:
             Text:
               InputVariables:
                 - Name: scanningToolTitle
-                - Name: questionSetData
-                - Name: scanningToolData
+                - Name: questionSet
+                - Name: scanningToolFindings
               Text: |
                 Context:
                 - We have a set of {{scanningToolTitle}} findings from our AWS environment.
@@ -325,9 +326,9 @@ Resources:
                 5. Do not prefix or suffix the output with any extra characters or messages. Any deviation from the exact specified structure will result in a failure of the state machine.
                 Inputs:
                 - WAFR Pillars, Questions, and Best Practices:
-                  {{questionSetData}}
+                  {{questionSet}}
                 - {{scanningToolTitle}} Findings:
-                  {{scanningToolData}}
+                  {{scanningToolFindings}}
           InferenceConfiguration:
             Text:
               Temperature: 0
@@ -386,8 +387,8 @@ Resources:
               Action:
                 - lambda:InvokeFunction
               Resource:
-                - !GetAtt PreparePromptsFunction.Arn
-                - !GetAtt InvokeLLMFunction.Arn
+                - !GetAtt PrepareFindingsAssociationsFunction.Arn
+                - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
                 - !GetAtt ComputeGraphDataFunction.Arn
@@ -531,7 +532,7 @@ Resources:
                               - Name: ROLE_ARN
                                 Value: '{% $roleArn %}'
                     End: true
-            Next: PreparePromptsUpdateStep
+            Next: PrepareFindingsAssociationsUpdateStep
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -540,7 +541,7 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          PreparePromptsUpdateStep:
+          PrepareFindingsAssociationsUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
@@ -553,8 +554,8 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ':newStep':
-                  S: 'PREPARING_PROMPTS'
-            Next: Prepare Prompts
+                  S: 'PREPARING_ASSOCIATIONS'
+            Next: Prepare Findings Associations
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -563,14 +564,14 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          Prepare Prompts:
+          Prepare Findings Associations:
             Type: Parallel
             Branches:
-              - StartAt: Prepare Prowler Prompts
+              - StartAt: Prepare Prowler Findings Associations
                 States:
-                  Prepare Prowler Prompts:
+                  Prepare Prowler Findings Associations:
                     Type: Task
-                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
@@ -578,11 +579,11 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare Cloud Custodian Prompts
+              - StartAt: Prepare Cloud Custodian Findings Associations
                 States:
-                  Prepare Cloud Custodian Prompts:
+                  Prepare Cloud Custodian Findings Associations:
                     Type: Task
-                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
@@ -590,11 +591,11 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare CloudSploit Prompts
+              - StartAt: Prepare CloudSploit Findings Associations
                 States:
-                  Prepare CloudSploit Prompts:
+                  Prepare CloudSploit Findings Associations:
                     Type: Task
-                    Resource: !GetAtt PreparePromptsFunction.Arn
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
                       organization: '{% $organization %}'
@@ -602,7 +603,7 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-            Next: InvokeLLMUpdateStep
+            Next: AssociateFindingsChunkToBestPracticesUpdateStep
             Output: '{% [$spread($states.result)] %}'
             Catch:
               - ErrorEquals:
@@ -612,7 +613,7 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          InvokeLLMUpdateStep:
+          AssociateFindingsChunkToBestPracticesUpdateStep:
             Type: Task
             Resource: arn:aws:states:::dynamodb:updateItem
             Arguments:
@@ -625,7 +626,7 @@ Resources:
               UpdateExpression: SET step = :newStep
               ExpressionAttributeValues:
                 ':newStep':
-                  S: 'INVOKING_LLM'
+                  S: 'ASSOCIATING_FINDINGS'
             Next: PromptMap
             Output: '{% $states.input %}'
             Catch:
@@ -642,16 +643,15 @@ Resources:
             ItemProcessor:
               ProcessorConfig:
                 Mode: INLINE
-              StartAt: InvokeLLM
+              StartAt: AssociateFindingsChunkToBestPractices
               States:
-                InvokeLLM:
+                AssociateFindingsChunkToBestPractices:
                   Type: Task
-                  Resource: !GetAtt InvokeLLMFunction.Arn
+                  Resource: !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                   Arguments:
                     assessmentId: '{% $assessmentId %}'
                     organization: '{% $organization %}'
-                    promptUri: '{% $states.input %}'
-                    promptArn: !GetAtt BedrockPrompt.Arn
+                    findingsChunkURI: '{% $states.input %}'
                   End: true
                   Retry:
                     - ErrorEquals:

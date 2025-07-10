@@ -9,16 +9,16 @@ export function StatusBadge({
 }) {
   const statusMap = {
     SCANNING_STARTED: 'Scanning',
-    PREPARING_PROMPTS: 'Preparing',
-    INVOKING_LLM: 'Invoking LLM',
+    PREPARING_ASSOCIATIONS: 'Preparing',
+    ASSOCIATING_FINDINGS: 'Associating Findings to Best Practices',
     FINISHED: 'Ready',
     ERRORED: 'Failed',
   };
 
   const statusColor = {
     SCANNING_STARTED: 'info',
-    PREPARING_PROMPTS: 'info',
-    INVOKING_LLM: 'info',
+    PREPARING_ASSOCIATIONS: 'info',
+    ASSOCIATING_FINDINGS: 'info',
     FINISHED: 'success',
     ERRORED: 'error',
   };

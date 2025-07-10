@@ -18,14 +18,14 @@ describe('StatusBadge', () => {
   });
 
   it('renders "Preparing" status with info color', () => {
-    render(<StatusBadge status="PREPARING_PROMPTS" />);
+    render(<StatusBadge status="PREPARING_ASSOCIATIONS" />);
     const badge = screen.getByText('Preparing');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('badge-info');
   });
 
   it('renders "Invoking LLM" status with info color', () => {
-    render(<StatusBadge status="INVOKING_LLM" />);
+    render(<StatusBadge status="ASSOCIATING_FINDINGS" />);
     const badge = screen.getByText('Invoking LLM');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('badge-info');

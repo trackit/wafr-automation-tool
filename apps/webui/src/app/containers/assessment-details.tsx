@@ -768,17 +768,17 @@ export function AssessmentDetails() {
       },
       {
         text: 'Preparing prompts',
-        loading: data?.step === 'PREPARING_PROMPTS',
+        loading: data?.step === 'PREPARING_ASSOCIATIONS',
         completed:
-          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'PREPARING_ASSOCIATIONS' &&
           data?.step !== 'SCANNING_STARTED',
       },
       {
         text: 'Invoking LLMs',
-        loading: data?.step === 'INVOKING_LLM',
+        loading: data?.step === 'ASSOCIATING_FINDINGS',
         completed:
-          data?.step !== 'INVOKING_LLM' &&
-          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'ASSOCIATING_FINDINGS' &&
+          data?.step !== 'PREPARING_ASSOCIATIONS' &&
           data?.step !== 'SCANNING_STARTED',
       },
     ];
@@ -1056,8 +1056,8 @@ export function AssessmentDetails() {
       </div>
 
       {data?.step === 'SCANNING_STARTED' ||
-      data?.step === 'PREPARING_PROMPTS' ||
-      data?.step === 'INVOKING_LLM'
+      data?.step === 'PREPARING_ASSOCIATIONS' ||
+      data?.step === 'ASSOCIATING_FINDINGS'
         ? loading
         : null}
       {data?.step === 'FINISHED' ? details : null}

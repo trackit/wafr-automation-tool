@@ -1,0 +1,29 @@
+import { z } from 'zod';
+
+import { tokenPrepareFindingsAssociationsUseCase } from '@backend/useCases';
+import { ScanningTool } from '@backend/models';
+import { inject } from '@shared/di-container';
+
+const PrepareFindingsAssociationsInputSchema = z.object({
+  assessmentId: z.string().uuid(),
+  scanningTool: z.nativeEnum(ScanningTool),
+  regions: z.array(z.string()),
+  workflows: z.array(z.string()),
+  organization: z.string(),
+});
+
+export type PrepareFindingsAssociationsInput = z.infer<
+  typeof PrepareFindingsAssociationsInputSchema
+>;
+export type PrepareFindingsAssociationsOutput = string[];
+
+export class PrepareFindingsAssociationsAdapter {
+  private readonly useCase = inject(tokenPrepareFindingsAssociationsUseCase);
+
+  public async handle(
+    event: Record<string, unknown>
+  ): Promise<PrepareFindingsAssociationsOutput> {
+    const parsedInput = PrepareFindingsAssociationsInputSchema.parse(event);
+    return this.useCase.prepareFindingsAssociations(parsedInput);
+  }
+}
