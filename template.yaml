@@ -19,6 +19,10 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
 
 Resources:
   SharedLibs:
@@ -54,6 +58,8 @@ Resources:
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -106,6 +112,8 @@ Resources:
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
         LogRetentionInDays: !Ref LogRetentionInDays
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:

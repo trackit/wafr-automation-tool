@@ -50,7 +50,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       agreementId: organization.unitBasedAgreementId,
     });
     if (perUnit) {
-      this.logger.info(`User ${args.user.id} has a per unit subscription`);
+      this.logger.info(`User ${args.user.id} has a unit based subscription`);
       return true;
     }
     this.logger.info(`User ${args.user.id} does not have a subscription`);

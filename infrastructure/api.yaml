@@ -22,6 +22,10 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
 
 Globals:
   Function:
@@ -181,6 +185,10 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+      Environment:
+        Variables:
+          UNIT_BASED_PRICING_PRODUCT_CODE: !Ref UnitBasedPricingProductCode
+          MONTHLY_SUBSCRIPTION_PRODUCT_CODE: !Ref MonthlySubscriptionProductCode
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

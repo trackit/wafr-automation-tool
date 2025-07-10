@@ -22,11 +22,6 @@ export enum PricingDimension {
 }
 
 export class MarketplaceService implements MarketplacePort {
-  // private readonly UNIT_BASED_PRICING_PRODUCT_CODE =
-  //   '2qlr2ozzhlcjid2g2lvb78dgu';
-  // private readonly MONTHLY_SUBSCRIPTION_PRODUCT_CODE =
-  //   '9t76jju0dt46foul95n8hm3s4';
-
   private readonly meterclient = inject(tokenMarketplaceMeteringClient);
   private readonly entitlementClient = inject(
     tokenMarketplaceEntitlementServiceClient
