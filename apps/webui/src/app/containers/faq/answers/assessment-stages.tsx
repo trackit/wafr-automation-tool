@@ -8,13 +8,13 @@ const AssessmentStagesAnswer = () => (
         assessment. It the one who take the most time to complete.
       </li>
       <li>
-        <strong>PREPARING_ASSOCIATIONS:</strong> In this stage, the tool prepares
-        prompts based on the data collected to initiate the review process and
-        trigger the next steps in the analysis.
+        <strong>PREPARING_ASSOCIATIONS:</strong> In this stage, the tool
+        prepares prompts based on the data collected to initiate the review
+        process and trigger the next steps in the analysis.
       </li>
       <li>
-        <strong>ASSOCIATING_FINDINGS:</strong> At this stage, the large language model
-        (LLM) is invoked to process the gathered data and map the findings
+        <strong>ASSOCIATING_FINDINGS:</strong> At this stage, the large language
+        model (LLM) is invoked to process the gathered data and map the findings
         against AWS best practices.
       </li>
       <li>
