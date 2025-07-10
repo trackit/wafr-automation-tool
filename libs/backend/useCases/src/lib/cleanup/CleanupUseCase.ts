@@ -5,6 +5,7 @@ import {
   tokenObjectsStorage,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
+import { AssessmentStep } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 import { NotFoundError } from '../Errors';
@@ -53,6 +54,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       assessmentId: assessment.id,
       organization: assessment.organization,
       assessmentBody: {
+        step: AssessmentStep.ERRORED,
         error: args.error
           ? {
               error: args.error.Error,

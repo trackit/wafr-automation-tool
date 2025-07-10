@@ -44,4 +44,5 @@ export interface AssessmentBody {
   name?: string;
   graphDatas?: AssessmentGraphDatas;
   error?: AssessmentError;
+  step?: AssessmentStep;
 }

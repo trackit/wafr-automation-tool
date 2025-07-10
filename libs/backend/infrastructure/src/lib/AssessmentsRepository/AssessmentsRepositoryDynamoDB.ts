@@ -930,6 +930,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
               assessmentBody.graphDatas
             ),
           }),
+          ...(assessmentBody.step && { step: assessmentBody.step }),
+          ...(assessmentBody.error && { error: assessmentBody.error }),
         },
       }),
     };
