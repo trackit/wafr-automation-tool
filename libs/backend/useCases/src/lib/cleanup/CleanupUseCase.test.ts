@@ -9,6 +9,7 @@ import { inject, register, reset } from '@shared/di-container';
 
 import {
   AssessmentMother,
+  AssessmentStep,
   FindingMother,
   OrganizationMother,
 } from '@backend/models';
@@ -167,6 +168,7 @@ describe('CleanupUseCase', () => {
         error: 'test-error',
         cause: 'test-cause',
       });
+      expect(updatedAssessment.step).toEqual(AssessmentStep.ERRORED);
     });
   });
 
