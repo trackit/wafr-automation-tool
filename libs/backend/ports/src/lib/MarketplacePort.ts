@@ -1,5 +1,11 @@
+import { Organization } from '@backend/models';
+
 export interface MarketplacePort {
-  hasMonthlySubscription(args: { customerAccountId: string }): Promise<boolean>;
-  hasUnitBasedSubscription(args: { agreementId?: string }): Promise<boolean>;
-  consumeReviewUnit(args: { customerAccountId: string }): Promise<void>;
+  hasMonthlySubscription(args: {
+    organization: Organization;
+  }): Promise<boolean>;
+  hasUnitBasedSubscription(args: {
+    organization: Organization;
+  }): Promise<boolean>;
+  consumeReviewUnit(args: { organization: Organization }): Promise<void>;
 }

@@ -4,7 +4,6 @@ import { inject, reset } from '@shared/di-container';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
-  ORGANIZATION_PK,
   OrganizationRepositoryDynamoDB,
   tokenDynamoDBOrganizationTableName,
 } from './OrganizationRepositoryDynamoDB';
@@ -23,9 +22,7 @@ afterEach(async () => {
         new DeleteItemCommand({
           TableName: tableName,
           Key: {
-            PK: {
-              S: ORGANIZATION_PK,
-            },
+            PK: item.PK,
             SK: item.SK,
           },
         })

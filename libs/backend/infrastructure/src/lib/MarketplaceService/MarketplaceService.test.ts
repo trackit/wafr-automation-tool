@@ -2,11 +2,11 @@ import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { DescribeAgreementCommand } from '@aws-sdk/client-marketplace-agreement';
 import { GetEntitlementsCommand } from '@aws-sdk/client-marketplace-entitlement-service';
 import { BatchMeterUsageCommand } from '@aws-sdk/client-marketplace-metering';
+import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
 import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
-import { ORGANIZATION_PK } from '../OrganizationRepository';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MarketplaceService,
@@ -29,9 +29,7 @@ afterEach(async () => {
         new DeleteItemCommand({
           TableName: tableName,
           Key: {
-            PK: {
-              S: ORGANIZATION_PK,
-            },
+            PK: item.PK,
             SK: item.SK,
           },
         })
@@ -57,7 +55,9 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          customerAccountId: 'accountId',
+          organization: OrganizationMother.basic()
+            .withAccountId('accountId')
+            .build(),
         });
 
       expect(hasMonthlySubscription).toBe(true);
@@ -72,7 +72,9 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          customerAccountId: 'accountId',
+          organization: OrganizationMother.basic()
+            .withAccountId('accountId')
+            .build(),
         });
 
       expect(hasMonthlySubscription).toBe(false);
@@ -92,7 +94,9 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          customerAccountId: 'accountId',
+          organization: OrganizationMother.basic()
+            .withAccountId('accountId')
+            .build(),
         });
 
       expect(hasMonthlySubscription).toBe(false);
@@ -111,7 +115,9 @@ describe('MarketplaceService', () => {
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          agreementId: 'agreementId',
+          organization: OrganizationMother.basic()
+            .withUnitBasedAgreementId('agreementId')
+            .build(),
         });
 
       expect(hasUnitBasedSubscription).toBe(true);
@@ -127,7 +133,9 @@ describe('MarketplaceService', () => {
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          agreementId: 'agreementId',
+          organization: OrganizationMother.basic()
+            .withUnitBasedAgreementId('agreementId')
+            .build(),
         });
 
       expect(hasUnitBasedSubscription).toBe(false);
@@ -144,7 +152,9 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          customerAccountId: 'accountId',
+          organization: OrganizationMother.basic()
+            .withAccountId('accountId')
+            .build(),
         })
       ).resolves.toBeUndefined();
     });
@@ -157,7 +167,9 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          customerAccountId: 'accountId',
+          organization: OrganizationMother.basic()
+            .withAccountId('accountId')
+            .build(),
         })
       ).rejects.toThrowError();
     });

@@ -76,14 +76,14 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       throw new NotFoundError('Organization not found');
     }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
-      customerAccountId: args.organization,
+      organization,
     });
     if (!monthly) {
       this.logger.info(
         `Consume review unit for ${args.organization} because it is not a monthly subscription`
       );
       await this.marketplaceService.consumeReviewUnit({
-        customerAccountId: organization.accountId,
+        organization,
       });
     }
   }

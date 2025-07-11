@@ -228,7 +228,7 @@ describe('CleanupUseCase', () => {
       expect(
         fakeMarketplaceService.consumeReviewUnit
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ customerAccountId: 'accountId' })
+        expect.objectContaining({ organization })
       );
     });
   });

@@ -40,14 +40,14 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       throw new NotFoundError('Organization not found');
     }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
-      customerAccountId: organization.accountId,
+      organization,
     });
     if (monthly) {
       this.logger.info(`User ${args.user.id} has a monthly subscription`);
       return true;
     }
     const perUnit = await this.marketplaceService.hasUnitBasedSubscription({
-      agreementId: organization.unitBasedAgreementId,
+      organization,
     });
     if (perUnit) {
       this.logger.info(`User ${args.user.id} has a unit based subscription`);
@@ -67,7 +67,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const regions = args.regions ?? [];
 
     if (!(await this.canStartAssessment(args))) {
-      throw new ForbiddenError("You don't have a subscription");
+      throw new ForbiddenError(
+        'Organization does not have an active subscription'
+      );
     }
     await this.stateMachine.startAssessment({
       name,

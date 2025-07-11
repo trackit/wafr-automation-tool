@@ -1,4 +1,5 @@
 import {
+  AgreementStatus,
   DescribeAgreementCommand,
   MarketplaceAgreementClient,
 } from '@aws-sdk/client-marketplace-agreement';
@@ -10,6 +11,7 @@ import {
   BatchMeterUsageCommand,
   MarketplaceMeteringClient,
 } from '@aws-sdk/client-marketplace-metering';
+import { Organization } from '@backend/models';
 import type { MarketplacePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
@@ -22,7 +24,7 @@ export enum PricingDimension {
 }
 
 export class MarketplaceService implements MarketplacePort {
-  private readonly meterclient = inject(tokenMarketplaceMeteringClient);
+  private readonly meteringClient = inject(tokenMarketplaceMeteringClient);
   private readonly entitlementClient = inject(
     tokenMarketplaceEntitlementServiceClient
   );
@@ -34,14 +36,14 @@ export class MarketplaceService implements MarketplacePort {
   );
 
   public async hasMonthlySubscription(args: {
-    customerAccountId: string;
+    organization: Organization;
   }): Promise<boolean> {
-    const { customerAccountId } = args;
+    const { organization } = args;
 
     const command = new GetEntitlementsCommand({
       ProductCode: this.monthlySubscriptionProductCode,
       Filter: {
-        CUSTOMER_AWS_ACCOUNT_ID: [customerAccountId],
+        CUSTOMER_AWS_ACCOUNT_ID: [organization.accountId],
         DIMENSION: [PricingDimension.Monthly],
       },
     });
@@ -52,7 +54,9 @@ export class MarketplaceService implements MarketplacePort {
           message: `Failed to get entitlements: ${response.$metadata.httpStatusCode}`,
         });
       }
-      this.logger.info(`Get entitlements for customer: ${customerAccountId}`);
+      this.logger.info(
+        `Get entitlements for customer: ${organization.accountId}`
+      );
       if (response.Entitlements?.[0]?.ExpirationDate) {
         return new Date(response.Entitlements[0].ExpirationDate) > new Date();
       }
@@ -64,12 +68,12 @@ export class MarketplaceService implements MarketplacePort {
   }
 
   public async hasUnitBasedSubscription(args: {
-    agreementId?: string;
+    organization: Organization;
   }): Promise<boolean> {
-    const { agreementId } = args;
+    const { organization } = args;
 
     const cmd = new DescribeAgreementCommand({
-      agreementId,
+      agreementId: organization.unitBasedAgreementId,
     });
     try {
       const res = await this.agreementClient.send(cmd);
@@ -78,8 +82,11 @@ export class MarketplaceService implements MarketplacePort {
           message: `Failed to get entitlements: ${res.$metadata.httpStatusCode}`,
         });
       }
-      this.logger.info(`DescribeAgreement for ${agreementId}:`, res);
-      return res.status === 'ACTIVE';
+      this.logger.info(
+        `DescribeAgreement for ${organization.unitBasedAgreementId}:`,
+        res
+      );
+      return res.status === AgreementStatus.ACTIVE;
     } catch (err) {
       this.logger.error(`Error fetching agreement: ${err}`);
       throw err;
@@ -87,15 +94,15 @@ export class MarketplaceService implements MarketplacePort {
   }
 
   public async consumeReviewUnit(args: {
-    customerAccountId: string;
+    organization: Organization;
   }): Promise<void> {
-    const { customerAccountId } = args;
+    const { organization } = args;
 
     const cmd = new BatchMeterUsageCommand({
       ProductCode: this.unitBasedProductCode,
       UsageRecords: [
         {
-          CustomerAWSAccountId: customerAccountId,
+          CustomerAWSAccountId: organization.accountId,
           Dimension: PricingDimension.UnitBased,
           Quantity: 1,
           Timestamp: new Date(),
@@ -103,13 +110,13 @@ export class MarketplaceService implements MarketplacePort {
       ],
     });
     try {
-      const res = await this.meterclient.send(cmd);
+      const res = await this.meteringClient.send(cmd);
       if (res.$metadata.httpStatusCode !== 200) {
         throw new InfrastructureError({
           message: `RegisterUsage failed: ${res.$metadata.httpStatusCode}`,
         });
       }
-      this.logger.info(`RegisterUsage for ${customerAccountId}:`, res);
+      this.logger.info(`RegisterUsage for ${organization.accountId}:`, res);
     } catch (err) {
       this.logger.error(`Error fetching metering: ${err}`);
       throw err;
