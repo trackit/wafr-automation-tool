@@ -44,6 +44,12 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  GenAIMaxRetries:
+    Type: Number
+    Default: 3
+  AIFindingsAssociationChunkSize:
+    Type: Number
+    Default: 400
 
 Globals:
   Function:
@@ -58,6 +64,8 @@ Globals:
         REGION: !Ref AWS::Region
         S3_BUCKET: !Ref S3BucketName
         DDB_TABLE: !Ref DynamoDBArn
+        GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
+        AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
 
 Resources:
   PrepareFindingsAssociationsLogGroup:

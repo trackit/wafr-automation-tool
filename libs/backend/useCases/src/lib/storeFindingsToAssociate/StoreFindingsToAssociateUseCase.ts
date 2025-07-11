@@ -5,8 +5,9 @@ import {
   tokenObjectsStorage,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { chunk } from '@shared/utils';
+import { assertIsDefined, chunk } from '@shared/utils';
 import { NotFoundError } from '../Errors';
+import z from 'zod';
 
 export interface StoreFindingsToAssociateUseCaseArgs {
   assessmentId: string;
@@ -98,5 +99,15 @@ export const tokenStoreFindingsToAssociateUseCase =
 
 export const tokenStoreFindingsToAssociateUseCaseChunkSize =
   createInjectionToken<number>('StoreFindingsToAssociateUseCaseChunkSize', {
-    useValue: 400,
+    useFactory: () => {
+      const chunkSize = process.env.AI_FINDINGS_ASSOCIATION_CHUNK_SIZE;
+      assertIsDefined(
+        chunkSize,
+        'AI_FINDINGS_ASSOCIATION_CHUNK_SIZE is not defined'
+      );
+      return z.coerce
+        .number()
+        .min(1, 'Chunk size must be at least 1')
+        .parse(chunkSize);
+    },
   });

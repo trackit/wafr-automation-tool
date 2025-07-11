@@ -204,6 +204,13 @@ export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
   createInjectionToken<number>(
     'FindingToBestPracticesAssociationServiceGenAIMaxRetries',
     {
-      useValue: 3,
+      useFactory: () => {
+        const genAIMaxRetries = process.env.GEN_AI_MAX_RETRIES;
+        assertIsDefined(genAIMaxRetries, 'GEN_AI_MAX_RETRIES is not defined');
+        return z.coerce
+          .number()
+          .positive('GEN_AI_MAX_RETRIES must be a positive number')
+          .parse(genAIMaxRetries);
+      },
     }
   );
