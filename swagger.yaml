@@ -126,7 +126,7 @@ paths:
                     description: The unique ID of the newly created assessment
         '400':
           description: Bad Request. Missing or invalid parameters were provided. Or a issue occurred while trying to retrieve the organization of the user or the user id
-        '402':
+        '403':
           description: Payment Required. The user does not have a subscription
         '500':
           description: Internal server error.

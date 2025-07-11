@@ -56,11 +56,11 @@ export class InvalidParametersError extends ServerError {
   }
 }
 
-export class PaymentRequiredError extends ServerError {
+export class ForbiddenError extends ServerError {
   public constructor(description?: string) {
     super({
-      message: 'Payment required',
-      name: 'PaymentRequiredError',
+      message: 'Forbidden',
+      name: 'ForbiddenError',
       description,
     });
   }

@@ -7,7 +7,7 @@ import {
 import { OrganizationMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { PaymentRequiredError } from '../Errors';
+import { ForbiddenError } from '../Errors';
 import {
   StartAssessmentUseCaseArgs,
   StartAssessmentUseCaseImpl,
@@ -179,7 +179,7 @@ describe('startAssessment UseCase', () => {
           )
           .build();
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
-        PaymentRequiredError
+        ForbiddenError
       );
     });
   });

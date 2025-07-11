@@ -6,6 +6,7 @@ import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 
 export type DynamoDBOrganization = Organization & { PK: string; SK: string };
+export const ORGANIZATION_PK = 'ORGANIZATION';
 
 export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   private readonly client = inject(tokenDynamoDBDocument);
@@ -16,7 +17,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     const params = {
       TableName: this.tableName,
       Item: {
-        PK: 'ORGANIZATION',
+        PK: ORGANIZATION_PK,
         SK: organization.domain,
         ...organization,
       },
@@ -38,7 +39,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: 'ORGANIZATION',
+        PK: ORGANIZATION_PK,
         SK: organizationDomain,
       },
     };

@@ -420,7 +420,7 @@ export interface operations {
                 content?: never;
             };
             /** @description Payment Required. The user does not have a subscription */
-            402: {
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

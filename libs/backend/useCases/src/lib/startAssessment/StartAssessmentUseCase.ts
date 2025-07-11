@@ -7,7 +7,7 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError, PaymentRequiredError } from '../Errors';
+import { ForbiddenError, NotFoundError } from '../Errors';
 
 export type StartAssessmentUseCaseArgs = {
   name: string;
@@ -67,7 +67,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const regions = args.regions ?? [];
 
     if (!(await this.canStartAssessment(args))) {
-      throw new PaymentRequiredError("You don't have a subscription");
+      throw new ForbiddenError("You don't have a subscription");
     }
     await this.stateMachine.startAssessment({
       name,

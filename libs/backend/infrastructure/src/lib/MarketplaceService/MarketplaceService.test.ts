@@ -6,6 +6,7 @@ import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
 import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
+import { ORGANIZATION_PK } from '../OrganizationRepository';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MarketplaceService,
@@ -29,7 +30,7 @@ afterEach(async () => {
           TableName: tableName,
           Key: {
             PK: {
-              S: 'ORGANIZATION',
+              S: ORGANIZATION_PK,
             },
             SK: item.SK,
           },
