@@ -2248,7 +2248,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withPillars(100)
+        .withFindings(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,
@@ -2298,7 +2298,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withPillars(100)
+        .withFindings(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,
@@ -2370,7 +2370,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const graphData = AssessmentGraphDataMother.basic()
-        .withPillars(100)
+        .withFindings(100)
         .withRegions({
           'us-west-2': 50,
           'us-east-1': 50,

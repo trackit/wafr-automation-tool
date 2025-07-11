@@ -22,7 +22,7 @@ describe('computeGraphData UseCase', () => {
 
     const rawGraphData = {
       [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
-        .withPillars(150)
+        .withFindings(150)
         .withResourceTypes({
           AwsAccount: 4,
           AwsEc2Instance: 1,
@@ -41,7 +41,7 @@ describe('computeGraphData UseCase', () => {
         })
         .build(),
       [ScanningTool.CLOUDSPLOIT]: AssessmentGraphDataMother.basic()
-        .withPillars(300)
+        .withFindings(300)
         .withResourceTypes({
           AwsAccount: 4,
           AwsIamUser: 30,
