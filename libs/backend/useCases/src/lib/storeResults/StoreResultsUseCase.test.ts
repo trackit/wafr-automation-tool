@@ -13,6 +13,7 @@ import {
   FindingMother,
   PillarMother,
   QuestionMother,
+  QuestionSetMother,
   ScanningTool,
 } from '@backend/models';
 import { StoreResultsUseCaseImpl } from './StoreResultsUseCase';
@@ -59,33 +60,39 @@ describe('StoreResultsUseCase', () => {
         FindingMother.basic().withId('prowler#6').build(),
       ];
 
-      vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
-        pillars: [
-          PillarMother.basic()
-            .withId('pillarId1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('questionId1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bestPracticeId1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-          PillarMother.basic()
-            .withId('pillarId2')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('questionId2')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bestPracticeId2').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ],
-        version: 'version1',
-      });
+      vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
+        QuestionSetMother.basic()
+          .withVersion('version1')
+          .withPillars([
+            PillarMother.basic()
+              .withId('pillarId1')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('questionId1')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('bestPracticeId1')
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+            PillarMother.basic()
+              .withId('pillarId2')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('questionId2')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('bestPracticeId2')
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build()
+      );
       const associations = useCase.getAiBestPracticeAssociations(
         aiFindingAssociations,
         findings,

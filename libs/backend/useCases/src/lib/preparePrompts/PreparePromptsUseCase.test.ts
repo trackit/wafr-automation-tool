@@ -11,6 +11,7 @@ import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
+  QuestionSetMother,
   ScanFindingMother,
   ScanningTool,
   SeverityType,
@@ -110,10 +111,12 @@ describe('PreparePrompts Use Case', () => {
         ])
         .build(),
     ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
-      version: questionVersion,
-      pillars,
-    });
+    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
+      QuestionSetMother.basic()
+        .withVersion(questionVersion)
+        .withPillars(pillars)
+        .build()
+    );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
@@ -200,10 +203,12 @@ describe('PreparePrompts Use Case', () => {
         ])
         .build(),
     ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
-      version: questionVersion,
-      pillars,
-    });
+    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
+      QuestionSetMother.basic()
+        .withVersion(questionVersion)
+        .withPillars(pillars)
+        .build()
+    );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
@@ -288,10 +293,12 @@ describe('PreparePrompts Use Case', () => {
         ])
         .build(),
     ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue({
-      version: questionVersion,
-      pillars,
-    });
+    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
+      QuestionSetMother.basic()
+        .withVersion(questionVersion)
+        .withPillars(pillars)
+        .build()
+    );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       [
         {
