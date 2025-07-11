@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { tokenObjectsStorage } from '@backend/infrastructure';
+import { tokenLogger, tokenObjectsStorage } from '@backend/infrastructure';
 import { Pillar, ScanFinding } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJsonObject } from '@shared/utils';
@@ -36,6 +36,7 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
   implements MapScanFindingsToBestPracticesUseCase
 {
   private readonly objectsStorage = inject(tokenObjectsStorage);
+  private readonly logger = inject(tokenLogger);
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
   private async getMapping(): Promise<z.infer<typeof MappingSchema>> {
@@ -43,6 +44,7 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
       MapScanFindingsToBestPracticesUseCaseImpl.mappingKey
     );
     if (!rawMapping) {
+      this.logger.info('No mapping found, continuing with an empty one');
       return {};
     }
     return MappingSchema.parse(parseJsonObject(rawMapping));
