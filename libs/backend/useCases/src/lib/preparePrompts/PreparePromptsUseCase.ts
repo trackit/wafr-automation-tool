@@ -90,14 +90,14 @@ export class PreparePromptsUseCaseImpl implements PreparePromptsUseCase {
         ...question,
         bestPractices: question.bestPractices.map((bestPractice) => {
           const scanFindingsMatchingBestPractice = scanFindingsToBestPractices
-            .filter((scanFindingToBestPractices) => {
-              return scanFindingToBestPractices.bestPractices.some(
+            .filter((scanFindingToBestPractices) =>
+              scanFindingToBestPractices.bestPractices.some(
                 (bp) =>
                   bp.bestPracticeId === bestPractice.id &&
                   bp.questionId === question.id &&
                   bp.pillarId === pillar.id
-              );
-            })
+              )
+            )
             .map(({ scanFinding }) => scanFinding);
           return {
             ...bestPractice,
