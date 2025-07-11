@@ -1137,16 +1137,22 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withPillars([])
         .withQuestionVersion('0.1')
         .withRawGraphData({
-          [ScanningTool.PROWLER]: {
-            findings: 0,
-            regions: {},
-            resourceTypes: {},
-            severities: {},
-          },
+          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
+            .withFindings(0)
+            .withRegions({})
+            .withResourceTypes({})
+            .withSeverities({})
+            .build(),
         })
         .build();
       await repository.save(assessment);
 
+      const updatedProwlerGraphData = AssessmentGraphDataMother.basic()
+        .withFindings(1)
+        .withRegions({ 'us-west-2': 1 })
+        .withResourceTypes({ 'aws-ec2': 1 })
+        .withSeverities({ [SeverityType.High]: 1 })
+        .build();
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
@@ -1170,12 +1176,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           ],
           questionVersion: '1.0',
           rawGraphData: {
-            [ScanningTool.PROWLER]: {
-              findings: 1,
-              regions: { 'us-west-2': 1 },
-              resourceTypes: { 'aws-ec2': 1 },
-              severities: { [SeverityType.High]: 1 },
-            },
+            [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
         },
       });
@@ -1206,12 +1207,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           ],
           questionVersion: '1.0',
           rawGraphData: {
-            [ScanningTool.PROWLER]: {
-              findings: 1,
-              regions: { 'us-west-2': 1 },
-              resourceTypes: { 'aws-ec2': 1 },
-              severities: { [SeverityType.High]: 1 },
-            },
+            [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
         })
       );

@@ -7,6 +7,7 @@ import { inject, register, reset } from '@shared/di-container';
 
 import { PreparePromptsUseCaseArgsMother } from './PreparePromptsUseCaseArgsMother';
 import {
+  AssessmentGraphDataMother,
   AssessmentMother,
   BestPracticeMother,
   PillarMother,
@@ -162,23 +163,27 @@ describe('PreparePrompts Use Case', () => {
         .withResources([{ type: 'type-2', region: 'us-east-1' }])
         .build(),
     ];
-    const cloudSploitGraphData = {
-      findings: 8,
-      regions: { 'us-east-1': 5, 'us-west-2': 3 },
-      resourceTypes: {
+    const cloudSploitGraphData = AssessmentGraphDataMother.basic()
+      .withFindings(8)
+      .withRegions({
+        'us-east-1': 5,
+        'us-west-2': 3,
+      })
+      .withResourceTypes({
         AwsAccount: 1,
         AwsEc2Instance: 2,
         AwsIamUser: 3,
         AwsS3Bucket: 1,
         AwsS3BucketPolicy: 1,
-      },
-      severities: {
+      })
+      .withSeverities({
         [SeverityType.Critical]: 2,
         [SeverityType.High]: 3,
         [SeverityType.Medium]: 2,
         [SeverityType.Low]: 1,
-      },
-    };
+      })
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withRawGraphData({ [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData })
       .build();
@@ -229,18 +234,15 @@ describe('PreparePrompts Use Case', () => {
     ).toEqual(
       expect.objectContaining({
         rawGraphData: {
-          [ScanningTool.PROWLER]: {
-            findings: 3,
-            regions: { 'us-east-1': 3 },
-            resourceTypes: {
-              'type-1': 1,
-              'type-2': 2,
-            },
-            severities: {
+          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
+            .withFindings(3)
+            .withRegions({ 'us-east-1': 3 })
+            .withResourceTypes({ 'type-1': 1, 'type-2': 2 })
+            .withSeverities({
               [SeverityType.Medium]: 1,
               [SeverityType.Low]: 2,
-            },
-          },
+            })
+            .build(),
           [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData,
         },
       })
