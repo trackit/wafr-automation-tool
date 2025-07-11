@@ -19,6 +19,11 @@ describe('parseJsonObject', () => {
     const invalidJsonString = '{"key": "value", "number": 42, "boolean": true'; // Missing closing brace
     expect(() => parseJsonObject(invalidJsonString)).toThrow(JSONParseError);
   });
+
+  it('should throw a JSONParseError for non-object JSON strings', () => {
+    const nonObjectJsonString = '[1, 2, 3]'; // Not an object
+    expect(() => parseJsonObject(nonObjectJsonString)).toThrow(JSONParseError);
+  });
 });
 
 describe('parseJsonArray', () => {
@@ -32,6 +37,12 @@ describe('parseJsonArray', () => {
     ]);
   });
 
+  it('should parse a JSON array with non objects', () => {
+    const jsonString = '[1, 2, 3]';
+    const result = parseJsonArray(jsonString);
+    expect(result).toEqual([1, 2, 3]);
+  });
+
   it('should return an empty array for undefined', () => {
     expect(parseJsonArray(undefined)).toEqual([]);
   });
@@ -43,5 +54,10 @@ describe('parseJsonArray', () => {
   it('should throw a JSONParseError for invalid JSON arrays', () => {
     const invalidJsonString = '[{"key": "value", "number": 42, "boolean": true';
     expect(() => parseJsonArray(invalidJsonString)).toThrow(JSONParseError);
+  });
+
+  it('should throw a JSONParseError for non-array JSON strings', () => {
+    const nonArrayJsonString = '{"key": "value"}'; // Not an array
+    expect(() => parseJsonArray(nonArrayJsonString)).toThrow(JSONParseError);
   });
 });
