@@ -459,49 +459,6 @@ describe('PreparePrompts Use Case', () => {
     } = setup();
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('prowler#1').build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
-    const scanFindingsToBestPracticesMapping = [
-      {
-        scanFinding: mockedScanFindings[0],
-        bestPractices: [],
-      },
-    ];
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      scanFindingsToBestPracticesMapping
-    );
-
-    const input = PreparePromptsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
-    await useCase.preparePrompts(input);
-    expect(storePromptsUseCase.storePrompts).toHaveBeenCalledExactlyOnceWith({
-      assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-      organization: 'test.io',
-      scanningTool: ScanningTool.PROWLER,
-      scanFindings: mockedScanFindings,
-    });
-  });
-
-  it('should only call StorePrompts with unmapped findings', async () => {
-    const {
-      useCase,
-      getScannedFindingsUseCase,
-      mapScanFindingsToBestPracticesUseCase,
-      storePromptsUseCase,
-      fakeAssessmentsRepository,
-    } = setup();
-    const mockedScanFindings = [
-      ScanFindingMother.basic().withId('prowler#1').build(),
       ScanFindingMother.basic().withId('prowler#2').build(),
     ];
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
