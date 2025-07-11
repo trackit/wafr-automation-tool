@@ -1180,13 +1180,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         PK: this.getAssessmentPK(organization),
         SK: this.getAssessmentSK(assessmentId),
       },
-      UpdateExpression: 'set raw_graph_datas.#scanningTool = :graphData',
-      ExpressionAttributeNames: {
-        '#scanningTool': scanningTool,
-      },
-      ExpressionAttributeValues: {
-        ':graphData': this.toDynamoDBAssessmentGraphData(graphData),
-      },
+      ...this.buildUpdateExpression({
+        data: { [scanningTool]: this.toDynamoDBAssessmentGraphData(graphData) },
+        UpdateExpressionPath: 'raw_graph_datas',
+      }),
     };
     try {
       await this.client.update(params);
