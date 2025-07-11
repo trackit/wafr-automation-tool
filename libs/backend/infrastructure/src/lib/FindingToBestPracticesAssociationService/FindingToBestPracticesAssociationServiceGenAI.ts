@@ -123,7 +123,9 @@ export class FindingToBestPracticesAssociationServiceGenAI
         .map((bestPracticeIdx) => {
           const bestPractice = flattenedBestPractices[bestPracticeIdx];
           if (!bestPractice) {
-            return null; // TODO: Throw an error and retry converse
+            throw new Error(
+              'Best practice not found for index: ' + bestPracticeIdx
+            );
           }
           return {
             pillarId: bestPractice.pillar.id,
@@ -171,9 +173,10 @@ export class FindingToBestPracticesAssociationServiceGenAI
       } catch (error) {
         if (error instanceof JSONParseError) {
           this.logger.error(`Failed to parse AI response: ${error.message}.`);
-        }
-        if (error instanceof z.ZodError) {
+        } else if (error instanceof z.ZodError) {
           this.logger.error(`AI response validation failed: ${error.message}.`);
+        } else if (error instanceof Error) {
+          this.logger.error(`AI error: ${error.message}`);
         }
         continue; // Retry with a new AI call
       }
