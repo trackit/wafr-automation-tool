@@ -86,7 +86,7 @@ export function AssessmentDetails() {
         | components['schemas']['AssessmentContent']
         | undefined;
 
-      if (!previousData?.findings) {
+      if (!previousData?.pillars) {
         console.log('No previous data found');
         return { previousData };
       }
@@ -98,7 +98,7 @@ export function AssessmentDetails() {
 
       // Find and update the specific best practice using all IDs
       let updated = false;
-      for (const pillar of newData.findings || []) {
+      for (const pillar of newData.pillars || []) {
         if (pillar.id === pillarId) {
           for (const question of pillar.questions || []) {
             if (question.id === questionId) {
@@ -146,8 +146,8 @@ export function AssessmentDetails() {
         queryClient.setQueryData(['assessment', id], context.previousData);
 
         // Find the current pillar and question in the previous data
-        if (context.previousData.findings) {
-          const pillar = context.previousData.findings.find(
+        if (context.previousData.pillars) {
+          const pillar = context.previousData.pillars.find(
             (p) => p.id === selectedPillar?.id
           );
           if (pillar) {
@@ -189,7 +189,7 @@ export function AssessmentDetails() {
         | components['schemas']['AssessmentContent']
         | undefined;
 
-      if (!previousData?.findings) {
+      if (!previousData?.pillars) {
         console.log('No previous data found');
         return { previousData };
       }
@@ -200,7 +200,7 @@ export function AssessmentDetails() {
       ) as components['schemas']['AssessmentContent'];
 
       // Find and update the specific pillar
-      for (const pillar of newData.findings || []) {
+      for (const pillar of newData.pillars || []) {
         if (pillar.id === pillarId) {
           pillar.disabled = disabled;
           break;
@@ -228,8 +228,8 @@ export function AssessmentDetails() {
         queryClient.setQueryData(['assessment', id], context.previousData);
 
         // Find the current pillar in the previous data
-        if (context.previousData.findings) {
-          const pillar = context.previousData.findings.find(
+        if (context.previousData.pillars) {
+          const pillar = context.previousData.pillars.find(
             (p) => p.id === selectedPillar?.id
           );
           if (pillar) {
@@ -271,7 +271,7 @@ export function AssessmentDetails() {
         | components['schemas']['AssessmentContent']
         | undefined;
 
-      if (!previousData?.findings) {
+      if (!previousData?.pillars) {
         console.log('No previous data found');
         return { previousData };
       }
@@ -283,7 +283,7 @@ export function AssessmentDetails() {
 
       // Find and update the specific question
       let updated = false;
-      for (const pillar of newData.findings || []) {
+      for (const pillar of newData.pillars || []) {
         if (pillar.id === pillarId) {
           for (const question of pillar.questions || []) {
             if (question.id === questionId) {
@@ -323,8 +323,8 @@ export function AssessmentDetails() {
         queryClient.setQueryData(['assessment', id], context.previousData);
 
         // Find the current question in the previous data
-        if (context.previousData.findings) {
-          const pillar = context.previousData.findings.find(
+        if (context.previousData.pillars) {
+          const pillar = context.previousData.pillars.find(
             (p) => p.id === selectedPillar?.id
           );
           if (pillar) {
@@ -439,8 +439,8 @@ export function AssessmentDetails() {
 
   // Add effect to sync active question with cache
   useEffect(() => {
-    if (data?.findings && selectedPillar?.id && activeQuestion?.id) {
-      const pillar = data.findings.find((p) => p.id === selectedPillar.id);
+    if (data?.pillars && selectedPillar?.id && activeQuestion?.id) {
+      const pillar = data.pillars.find((p) => p.id === selectedPillar.id);
       if (pillar) {
         const question = pillar.questions?.find(
           (q) => q.id === activeQuestion.id
@@ -454,14 +454,10 @@ export function AssessmentDetails() {
 
   // Set the first pillar as selected ONLY on initial load
   useEffect(() => {
-    if (
-      data?.findings &&
-      data.findings.length > 0 &&
-      selectedPillarIndex === 0
-    ) {
-      setSelectedPillar(data.findings[0]);
+    if (data?.pillars && data.pillars.length > 0 && selectedPillarIndex === 0) {
+      setSelectedPillar(data.pillars[0]);
     }
-  }, [data?.findings, selectedPillarIndex]);
+  }, [data?.pillars, selectedPillarIndex]);
 
   // Set question from the selected indices
   useEffect(() => {
@@ -665,15 +661,15 @@ export function AssessmentDetails() {
   };
 
   useEffect(() => {
-    if (!data?.findings) return;
-    const completedQuestions = data.findings.reduce((acc, pillar) => {
+    if (!data?.pillars) return;
+    const completedQuestions = data.pillars.reduce((acc, pillar) => {
       return acc + calculateCompletedQuestions(pillar.questions || []);
     }, 0);
-    const totalQuestions = data.findings.reduce((acc, pillar) => {
+    const totalQuestions = data.pillars.reduce((acc, pillar) => {
       return acc + (pillar.questions?.filter((q) => !q.disabled).length || 0);
     }, 0);
     setProgress(Math.round((completedQuestions / totalQuestions) * 100));
-  }, [data?.findings]);
+  }, [data?.pillars]);
 
   const handleNextQuestion = () => {
     if (!selectedPillar?.questions) return;
@@ -705,8 +701,8 @@ export function AssessmentDetails() {
   }, [activeQuestion?.best_practices, activeQuestion?.none]);
 
   const tabs = useMemo(() => {
-    if (!data?.findings) return [];
-    return data.findings.map((pillar, index) => ({
+    if (!data?.pillars) return [];
+    return data.pillars.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
           ? `${calculateCompletedQuestions(pillar.questions)}/${
@@ -761,7 +757,7 @@ export function AssessmentDetails() {
         </div>
       ),
     }));
-  }, [data?.findings, handleDisabledPillar]);
+  }, [data?.pillars, handleDisabledPillar]);
 
   const timelineSteps = useMemo(() => {
     return [
@@ -772,17 +768,17 @@ export function AssessmentDetails() {
       },
       {
         text: 'Preparing prompts',
-        loading: data?.step === 'PREPARING_PROMPTS',
+        loading: data?.step === 'PREPARING_ASSOCIATIONS',
         completed:
-          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'PREPARING_ASSOCIATIONS' &&
           data?.step !== 'SCANNING_STARTED',
       },
       {
         text: 'Invoking LLMs',
-        loading: data?.step === 'INVOKING_LLM',
+        loading: data?.step === 'ASSOCIATING_FINDINGS',
         completed:
-          data?.step !== 'INVOKING_LLM' &&
-          data?.step !== 'PREPARING_PROMPTS' &&
+          data?.step !== 'ASSOCIATING_FINDINGS' &&
+          data?.step !== 'PREPARING_ASSOCIATIONS' &&
           data?.step !== 'SCANNING_STARTED',
       },
     ];
@@ -870,9 +866,9 @@ export function AssessmentDetails() {
         tabs={tabs}
         activeTab={selectedPillar?.id || ''}
         onChange={(tabId) => {
-          const index = data?.findings?.findIndex((p) => p.id === tabId) ?? 0;
+          const index = data?.pillars?.findIndex((p) => p.id === tabId) ?? 0;
           setSelectedPillarIndex(index);
-          setSelectedPillar(data?.findings?.[index] || null);
+          setSelectedPillar(data?.pillars?.[index] || null);
           setActiveQuestionIndex(0);
         }}
       />
@@ -892,7 +888,7 @@ export function AssessmentDetails() {
                 .map((question, index) => {
                   // Find the latest question data from the cache
                   const latestQuestion =
-                    data?.findings
+                    data?.pillars
                       ?.find((p) => p.id === selectedPillar?.id)
                       ?.questions?.find((q) => q.id === question.id) ||
                     question;
@@ -1060,8 +1056,8 @@ export function AssessmentDetails() {
       </div>
 
       {data?.step === 'SCANNING_STARTED' ||
-      data?.step === 'PREPARING_PROMPTS' ||
-      data?.step === 'INVOKING_LLM'
+      data?.step === 'PREPARING_ASSOCIATIONS' ||
+      data?.step === 'ASSOCIATING_FINDINGS'
         ? loading
         : null}
       {data?.step === 'FINISHED' ? details : null}

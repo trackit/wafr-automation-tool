@@ -1,7 +1,8 @@
 import { register, reset } from '@shared/di-container';
-
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
 import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
+
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { ExportWellArchitectedToolAdapter } from './ExportWellArchitectedToolAdapter';
 import { ExportWellArchitectedToolAdapterEventMother } from './ExportWellArchitectedToolAdapterEventMother';
@@ -65,6 +66,7 @@ describe('exportWellArchitectedTool adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { exportAssessment: vitest.fn() };
   useCase.exportAssessment.mockResolvedValueOnce(Promise.resolve());
   register(tokenExportWellArchitectedToolUseCase, { useValue: useCase });

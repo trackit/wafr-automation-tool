@@ -39,6 +39,7 @@ export const tokenDynamoDBDocument = createInjectionToken<DynamoDBDocument>(
       DynamoDBDocument.from(inject(tokenDynamoDBClient), {
         marshallOptions: {
           removeUndefinedValues: true,
+          convertEmptyValues: true,
         },
       }),
   }

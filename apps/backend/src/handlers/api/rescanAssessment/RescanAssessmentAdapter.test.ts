@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { NotFoundError, tokenRescanAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -82,6 +83,7 @@ describe('RescanAssessmentAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { rescanAssessment: vitest.fn() };
   register(tokenRescanAssessmentUseCase, { useValue: useCase });
   const adapter = new RescanAssessmentAdapter();

@@ -1,12 +1,14 @@
 import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 
 import {
+  AssessmentGraphDataMother,
   AssessmentMother,
   AssessmentStep,
   BestPracticeMother,
   FindingMother,
   PillarMother,
   QuestionMother,
+  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
@@ -16,10 +18,10 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
   QuestionNotFoundError,
-  FindingNotFoundError,
 } from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
@@ -63,7 +65,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withExecutionArn(
           'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1'
         )
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withDisabled(false)
             .withId('pillar1')
@@ -328,7 +330,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -364,7 +366,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
       expect(
-        updatedAssessment?.findings?.[0].questions?.[0].bestPractices?.[0]
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
           .checked
       ).toBe(true);
     });
@@ -390,7 +392,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -427,7 +429,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -449,7 +451,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('0').withQuestions([]).build(),
         ])
         .build();
@@ -473,7 +475,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -502,7 +504,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -534,6 +536,153 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('addBestPracticeFindings', () => {
+    it('should add findings to a best practice', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.addBestPracticeFindings({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+    });
+
+    it('should add several findings to a best practice', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.addBestPracticeFindings({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#2'
+        )
+      ).toBe(true);
+    });
+
+    it('should be able to add findings several times', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.addBestPracticeFindings({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1']),
+      });
+
+      await repository.addBestPracticeFindings({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#2']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#2'
+        )
+      ).toBe(true);
+    });
+  });
+
   describe('updatePillar', () => {
     it('should update the pillar disabled status', async () => {
       const { repository } = setup();
@@ -541,7 +690,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('0').withDisabled(false).build(),
         ])
         .build();
@@ -561,7 +710,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         assessmentId: 'assessment1',
         organization: 'organization1',
       });
-      expect(updatedAssessment?.findings?.[0].disabled).toBe(true);
+      expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
     });
 
     it('should throw AssessmentNotFound if the assessment does not exist', async () => {
@@ -602,7 +751,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -622,7 +771,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([PillarMother.basic().withId('0').build()])
+        .withPillars([PillarMother.basic().withId('0').build()])
         .build();
       await repository.save(assessment);
 
@@ -714,7 +863,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('0')
             .withQuestions([
@@ -985,13 +1134,51 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withId('assessment1')
         .withOrganization('organization1')
         .withName('Old Name')
+        .withPillars([])
+        .withQuestionVersion('0.1')
+        .withRawGraphData({
+          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
+            .withFindings(0)
+            .withRegions({})
+            .withResourceTypes({})
+            .withSeverities({})
+            .build(),
+        })
         .build();
       await repository.save(assessment);
 
+      const updatedProwlerGraphData = AssessmentGraphDataMother.basic()
+        .withFindings(1)
+        .withRegions({ 'us-west-2': 1 })
+        .withResourceTypes({ 'aws-ec2': 1 })
+        .withSeverities({ [SeverityType.High]: 1 })
+        .build();
       await repository.update({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        assessmentBody: { name: 'New Name' },
+        assessmentBody: {
+          name: 'New Name',
+          pillars: [
+            PillarMother.basic()
+              .withId('pillar-1')
+              .withQuestions([
+                QuestionMother.basic()
+                  .withId('question-1')
+                  .withBestPractices([
+                    BestPracticeMother.basic()
+                      .withId('best-practice-1')
+                      .withResults(new Set(['prowler#1']))
+                      .build(),
+                  ])
+                  .build(),
+              ])
+              .build(),
+          ],
+          questionVersion: '1.0',
+          rawGraphData: {
+            [ScanningTool.PROWLER]: updatedProwlerGraphData,
+          },
+        },
       });
 
       const updatedAssessment = await repository.get({
@@ -1000,7 +1187,29 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(updatedAssessment).toEqual(
-        expect.objectContaining({ name: 'New Name' })
+        expect.objectContaining({
+          name: 'New Name',
+          pillars: [
+            expect.objectContaining({
+              id: 'pillar-1',
+              questions: [
+                expect.objectContaining({
+                  id: 'question-1',
+                  bestPractices: [
+                    expect.objectContaining({
+                      id: 'best-practice-1',
+                      results: new Set(['prowler#1']),
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          questionVersion: '1.0',
+          rawGraphData: {
+            [ScanningTool.PROWLER]: updatedProwlerGraphData,
+          },
+        })
       );
     });
 
@@ -1083,7 +1292,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1139,7 +1348,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment1 = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1157,7 +1366,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment2 = AssessmentMother.basic()
         .withId('assessment2')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1210,7 +1419,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1245,7 +1454,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -1267,7 +1476,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('pillar1').withQuestions([]).build(),
         ])
         .build();
@@ -1291,7 +1500,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1323,7 +1532,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1379,7 +1588,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1450,7 +1659,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1517,7 +1726,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1576,7 +1785,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1628,7 +1837,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1818,7 +2027,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1849,7 +2058,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization1',
       });
 
-      expect(updatedAssessment?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({ id: 'question1', disabled: true, none: true })
       );
     });
@@ -1859,7 +2068,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1907,7 +2116,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([])
+        .withPillars([])
         .build();
       await repository.save(assessment);
 
@@ -1931,7 +2140,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic().withId('pillar1').withQuestions([]).build(),
         ])
         .build();
@@ -1957,7 +2166,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment1 = AssessmentMother.basic()
         .withId('assessment1')
         .withOrganization('organization1')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -1975,7 +2184,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const assessment2 = AssessmentMother.basic()
         .withId('assessment2')
         .withOrganization('organization2')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withId('pillar1')
             .withQuestions([
@@ -2010,16 +2219,241 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         organization: 'organization2',
       });
 
-      expect(updatedAssessment1?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment1?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({ id: 'question1', disabled: true, none: true })
       );
-      expect(updatedAssessment2?.findings?.[0]?.questions?.[0]).toEqual(
+      expect(updatedAssessment2?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({
           id: 'question1',
           disabled: false,
           none: false,
         })
       );
+    });
+  });
+
+  describe('updateRawGraphDataForScanningTool', () => {
+    it('should update the raw graph data for a scanning tool', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withRawGraphData({})
+        .build();
+      await repository.save(assessment);
+
+      const graphData = AssessmentGraphDataMother.basic()
+        .withFindings(100)
+        .withRegions({
+          'us-west-2': 50,
+          'us-east-1': 50,
+        })
+        .withResourceTypes({
+          AwsAccount: 5,
+          AwsEc2Instance: 10,
+          AwsIamUser: 20,
+          AwsS3Bucket: 30,
+        })
+        .withSeverities({
+          [SeverityType.Critical]: 10,
+          [SeverityType.High]: 20,
+          [SeverityType.Medium]: 30,
+          [SeverityType.Low]: 40,
+        })
+        .build();
+
+      await repository.updateRawGraphDataForScanningTool({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: ScanningTool.PROWLER,
+        graphData,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment?.rawGraphData).toEqual({
+        [ScanningTool.PROWLER]: graphData,
+      });
+    });
+
+    it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withRawGraphData({})
+        .build();
+      await repository.save(assessment);
+
+      const graphData = AssessmentGraphDataMother.basic()
+        .withFindings(100)
+        .withRegions({
+          'us-west-2': 50,
+          'us-east-1': 50,
+        })
+        .withResourceTypes({
+          AwsAccount: 5,
+          AwsEc2Instance: 10,
+          AwsIamUser: 20,
+          AwsS3Bucket: 30,
+        })
+        .withSeverities({
+          [SeverityType.Critical]: 10,
+          [SeverityType.High]: 20,
+          [SeverityType.Medium]: 30,
+          [SeverityType.Low]: 40,
+        })
+        .build();
+
+      await repository.updateRawGraphDataForScanningTool({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: ScanningTool.CLOUD_CUSTODIAN,
+        graphData,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment?.rawGraphData).toEqual({
+        [ScanningTool.CLOUD_CUSTODIAN]: graphData,
+      });
+    });
+
+    it('should not overwrite existing raw graph data for other scanning tools', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withRawGraphData({
+          [ScanningTool.CLOUD_CUSTODIAN]:
+            AssessmentGraphDataMother.basic().build(),
+        })
+        .build();
+      await repository.save(assessment);
+
+      const graphData = AssessmentGraphDataMother.basic()
+        .withFindings(100)
+        .withRegions({
+          'us-west-2': 50,
+          'us-east-1': 50,
+        })
+        .withResourceTypes({
+          AwsAccount: 5,
+          AwsEc2Instance: 10,
+          AwsIamUser: 20,
+          AwsS3Bucket: 30,
+        })
+        .withSeverities({
+          [SeverityType.Critical]: 10,
+          [SeverityType.High]: 20,
+          [SeverityType.Medium]: 30,
+          [SeverityType.Low]: 40,
+        })
+        .build();
+
+      await repository.updateRawGraphDataForScanningTool({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: ScanningTool.PROWLER,
+        graphData,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment?.rawGraphData).toEqual({
+        [ScanningTool.PROWLER]: graphData,
+        [ScanningTool.CLOUD_CUSTODIAN]: expect.any(Object),
+      });
+    });
+
+    it('should throw an error if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateRawGraphDataForScanningTool({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          scanningTool: ScanningTool.PROWLER,
+          graphData: AssessmentGraphDataMother.basic().build(),
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withRawGraphData({
+          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
+        })
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment2')
+        .withOrganization('organization2')
+        .withRawGraphData({
+          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
+        })
+        .build();
+      await repository.save(assessment2);
+
+      const graphData = AssessmentGraphDataMother.basic()
+        .withFindings(100)
+        .withRegions({
+          'us-west-2': 50,
+          'us-east-1': 50,
+        })
+        .withResourceTypes({
+          AwsAccount: 5,
+          AwsEc2Instance: 10,
+          AwsIamUser: 20,
+          AwsS3Bucket: 30,
+        })
+        .withSeverities({
+          [SeverityType.Critical]: 10,
+          [SeverityType.High]: 20,
+          [SeverityType.Medium]: 30,
+          [SeverityType.Low]: 40,
+        })
+        .build();
+
+      await repository.updateRawGraphDataForScanningTool({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: ScanningTool.PROWLER,
+        graphData,
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: 'assessment2',
+        organization: 'organization2',
+      });
+
+      expect(updatedAssessment1?.rawGraphData).toEqual({
+        [ScanningTool.PROWLER]: graphData,
+      });
+      expect(updatedAssessment2?.rawGraphData).toEqual({
+        [ScanningTool.PROWLER]: expect.any(Object),
+      });
     });
   });
 });

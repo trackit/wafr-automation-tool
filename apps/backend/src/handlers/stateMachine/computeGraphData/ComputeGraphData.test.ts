@@ -1,6 +1,9 @@
+import { ZodError } from 'zod';
+
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenComputeGraphDataUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
-import { ZodError } from 'zod';
+
 import { ComputeGraphDataAdapter } from './ComputeGraphAdapter';
 import { ComputeGraphDataAdapterArgsMother } from './ComputeGraphDataAdapterArgsMother';
 
@@ -52,6 +55,7 @@ describe('ComputeGraphDataAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { computeGraphData: vitest.fn() };
   register(tokenComputeGraphDataUseCase, { useValue: useCase });
   return { useCase, adapter: new ComputeGraphDataAdapter() };

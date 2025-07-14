@@ -19,6 +19,12 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  GenAIMaxRetries:
+    Type: Number
+    Default: 3
+  AIFindingsAssociationChunkSize:
+    Type: Number
+    Default: 400
 
 Resources:
   SharedLibs:
@@ -106,6 +112,8 @@ Resources:
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
         LogRetentionInDays: !Ref LogRetentionInDays
+        GenAIMaxRetries: !Ref GenAIMaxRetries
+        AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:

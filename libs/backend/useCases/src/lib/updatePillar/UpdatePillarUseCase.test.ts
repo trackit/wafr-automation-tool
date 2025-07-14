@@ -15,7 +15,7 @@ describe('UpdatePillarUseCase', () => {
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('other-org.io')
-      .withFindings([
+      .withPillars([
         PillarMother.basic().withId('1').withDisabled(false).build(),
       ])
       .build();

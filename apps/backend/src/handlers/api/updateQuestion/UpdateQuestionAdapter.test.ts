@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   NoContentError,
   NotFoundError,
@@ -119,6 +120,7 @@ describe('UpdateQuestionAdapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { updateQuestion: vitest.fn() };
   register(tokenUpdateQuestionUseCase, { useValue: useCase });
   return { useCase, adapter: new UpdateQuestionAdapter() };

@@ -33,8 +33,8 @@ export class GetAssessmentAdapter {
     return {
       created_at: assessment.createdAt.toISOString(),
       created_by: assessment.createdBy,
-      findings:
-        assessment.findings?.map((pillar) => ({
+      pillars:
+        assessment.pillars?.map((pillar) => ({
           disabled: pillar.disabled,
           id: pillar.id,
           label: pillar.label,
@@ -43,7 +43,7 @@ export class GetAssessmentAdapter {
               description: bestPractice.description,
               id: bestPractice.id,
               label: bestPractice.label,
-              results: bestPractice.results,
+              results: [...bestPractice.results],
               risk: bestPractice.risk,
               checked: bestPractice.checked,
             })),
@@ -53,20 +53,20 @@ export class GetAssessmentAdapter {
             none: question.none,
           })),
         })) ?? [],
-      ...(assessment.graphDatas && {
+      ...(assessment.graphData && {
         graph_datas: {
-          findings: assessment.graphDatas.findings,
-          regions: assessment.graphDatas.regions,
-          resource_types: assessment.graphDatas.resourceTypes,
-          severities: assessment.graphDatas.severities,
+          findings: assessment.graphData.findings,
+          regions: assessment.graphData.regions,
+          resource_types: assessment.graphData.resourceTypes,
+          severities: assessment.graphData.severities,
         },
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       question_version: assessment.questionVersion,
-      ...(assessment.rawGraphDatas && {
-        raw_graph_datas: Object.entries(assessment.rawGraphDatas).reduce(
+      ...(assessment.rawGraphData && {
+        raw_graph_datas: Object.entries(assessment.rawGraphData).reduce(
           (acc, [key, value]) => ({
             ...acc,
             [key]: {
@@ -85,8 +85,8 @@ export class GetAssessmentAdapter {
       workflows: assessment.workflows,
       ...(assessment.error && {
         error: {
-          Cause: assessment.error.cause,
-          Error: assessment.error.error,
+          cause: assessment.error.cause,
+          error: assessment.error.error,
         },
       }),
     };
@@ -105,7 +105,7 @@ export class GetAssessmentAdapter {
     try {
       const { assessmentId } = GetAssessmentArgsSchema.parse(pathParameters);
       const assessment = await this.useCase.getAssessment({
-        user: getUserFromEvent(event),
+        organization: getUserFromEvent(event).organizationDomain,
         assessmentId,
       });
       return this.toGetAssessmentResponse(assessment);

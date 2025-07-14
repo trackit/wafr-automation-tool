@@ -18,7 +18,7 @@ const mockAssessment = {
   id: '1',
   name: 'Test Assessment',
   step: 'FINISHED',
-  findings: [
+  pillars: [
     {
       id: 'pillar-1',
       label: 'Security',
@@ -195,15 +195,15 @@ describe('AssessmentDetails', () => {
   it('shows findings details modal when clicking on failed findings count', async () => {
     const assessmentWithResults = {
       ...mockAssessment,
-      findings: [
+      pillars: [
         {
-          ...mockAssessment.findings[0],
+          ...mockAssessment.pillars[0],
           questions: [
             {
-              ...mockAssessment.findings[0].questions[0],
+              ...mockAssessment.pillars[0].questions[0],
               best_practices: [
                 {
-                  ...mockAssessment.findings[0].questions[0].best_practices[0],
+                  ...mockAssessment.pillars[0].questions[0].best_practices[0],
                   results: [{ id: 'result-1', details: 'Test result' }],
                 },
               ],
@@ -234,8 +234,8 @@ describe('AssessmentDetails', () => {
   //   it('updates pillar when tab is clicked', async () => {
   //     const assessmentWithMultiplePillars = {
   //       ...mockAssessment,
-  //       findings: [
-  //         mockAssessment.findings[0],
+  //       pillars: [
+  //         mockAssessment.pillars[0],
   //         {
   //           id: 'pillar-2',
   //           label: 'Cost Optimization',
