@@ -213,7 +213,7 @@ export interface components {
              * @description Current step in the assessment process
              * @enum {string}
              */
-            step?: "SCANNING_STARTED" | "PREPARING_PROMPTS" | "INVOKING_LLM" | "FINISHED" | "ERRORED";
+            step?: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
             error?: components["schemas"]["AssessmentError"];
         };
         AssessmentContent: components["schemas"]["Assessment"] & {

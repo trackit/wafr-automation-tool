@@ -24,7 +24,7 @@ describe('QuestionSet Infrastructure', () => {
                   label: 'best-practice-label',
                   risk: SeverityType.High,
                   description: 'best-practice-description',
-                  results: [],
+                  results: new Set(),
                   checked: false,
                 },
               ],

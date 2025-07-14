@@ -94,7 +94,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_PROMPTS)
+        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
         .build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()

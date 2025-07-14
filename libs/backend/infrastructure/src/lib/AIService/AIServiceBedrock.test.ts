@@ -6,11 +6,6 @@ import {
   ConverseStreamCommand,
   ConverseStreamOutput,
 } from '@aws-sdk/client-bedrock-runtime';
-import {
-  AIBestPracticeMetadataMother,
-  AIFindingMother,
-  PromptVariablesMother,
-} from '@backend/models';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   AIServiceBedrock,
@@ -45,20 +40,18 @@ describe('AIService Infrastructure', () => {
         })(),
         $metadata: { httpStatusCode: 200 },
       });
-      const promptVariables = PromptVariablesMother.basic()
-        .withQuestionSetData([AIBestPracticeMetadataMother.basic().build()])
-        .withScanningToolData([AIFindingMother.basic().build()])
-        .withScanningToolTitle('Test Scanning Tool Title')
-        .build();
 
       await expect(
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables as unknown as Record<
-            string,
-            unknown
-          >,
+          promptVariables: {
+            var1: {
+              subVar1: 'value1',
+              subVar2: 'value2',
+            },
+            var2: 'value2',
+          },
         })
       ).resolves.toEqual('Hello world');
 
@@ -69,13 +62,12 @@ describe('AIService Infrastructure', () => {
       const converseExecutionCall = converseStreamCalls[0];
       expect(converseExecutionCall.args[0].input).toEqual({
         modelId: 'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-        promptVariables: Object.entries(promptVariables).reduce(
-          (promptVariables, [key, value]) => ({
-            ...promptVariables,
-            [key]: { text: JSON.stringify(value) },
-          }),
-          {}
-        ),
+        promptVariables: {
+          var1: {
+            text: JSON.stringify({ subVar1: 'value1', subVar2: 'value2' }),
+          },
+          var2: { text: JSON.stringify('value2') },
+        },
       });
     });
 
@@ -90,20 +82,12 @@ describe('AIService Infrastructure', () => {
         })(),
         $metadata: { httpStatusCode: 500 },
       });
-      const promptVariables = PromptVariablesMother.basic()
-        .withQuestionSetData([AIBestPracticeMetadataMother.basic().build()])
-        .withScanningToolData([AIFindingMother.basic().build()])
-        .withScanningToolTitle('Test Scanning Tool Title')
-        .build();
 
       await expect(
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables as unknown as Record<
-            string,
-            unknown
-          >,
+          promptVariables: { var1: 'value1' },
         })
       ).rejects.toThrow(Error);
     });
@@ -115,20 +99,12 @@ describe('AIService Infrastructure', () => {
         stream: undefined,
         $metadata: { httpStatusCode: 200 },
       });
-      const promptVariables = PromptVariablesMother.basic()
-        .withQuestionSetData([AIBestPracticeMetadataMother.basic().build()])
-        .withScanningToolData([AIFindingMother.basic().build()])
-        .withScanningToolTitle('Test Scanning Tool Title')
-        .build();
 
       await expect(
         aiServiceBedrock.converse({
           promptArn:
             'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: promptVariables as unknown as Record<
-            string,
-            unknown
-          >,
+          promptVariables: { var1: 'value1' },
         })
       ).rejects.toThrow(Error);
     });

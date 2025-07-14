@@ -970,8 +970,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       args.UpdateExpressionPath += '.';
     }
     for (const [key, value] of Object.entries(data)) {
-      const attributeName = `#${key}`;
-      const attributeValue = `:${key}`;
+      const attributeName = `#${key.replace('-', '_')}`;
+      const attributeValue = `:${key.replace('-', '_')}`;
       updateExpressions.push(
         `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
       );
