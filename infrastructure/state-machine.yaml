@@ -131,7 +131,7 @@ Resources:
     Properties:
       Handler: handler.main
       Runtime: nodejs22.x
-      CodeUri: ../apps/backend/src/handlers/stateMachine/AssociateFindingsChunkToBestPractices
+      CodeUri: ../apps/backend/src/handlers/stateMachine/associateFindingsChunkToBestPractices
       Tags:
         Owner: !Ref Owner
         Project: !Ref Project
