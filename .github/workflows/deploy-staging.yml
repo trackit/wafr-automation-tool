@@ -18,12 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ./backend/.python-version
-          cache: pip
-
       - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
