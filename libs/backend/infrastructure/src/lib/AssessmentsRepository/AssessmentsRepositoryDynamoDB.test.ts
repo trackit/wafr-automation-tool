@@ -2280,6 +2280,53 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
     });
 
+    it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .withRawGraphData({})
+        .build();
+      await repository.save(assessment);
+
+      const graphData = AssessmentGraphDataMother.basic()
+        .withFindings(100)
+        .withRegions({
+          'us-west-2': 50,
+          'us-east-1': 50,
+        })
+        .withResourceTypes({
+          AwsAccount: 5,
+          AwsEc2Instance: 10,
+          AwsIamUser: 20,
+          AwsS3Bucket: 30,
+        })
+        .withSeverities({
+          [SeverityType.Critical]: 10,
+          [SeverityType.High]: 20,
+          [SeverityType.Medium]: 30,
+          [SeverityType.Low]: 40,
+        })
+        .build();
+
+      await repository.updateRawGraphDataForScanningTool({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        scanningTool: ScanningTool.CLOUD_CUSTODIAN,
+        graphData,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+      });
+
+      expect(updatedAssessment?.rawGraphData).toEqual({
+        [ScanningTool.CLOUD_CUSTODIAN]: graphData,
+      });
+    });
+
     it('should not overwrite existing raw graph data for other scanning tools', async () => {
       const { repository } = setup();
 

@@ -571,8 +571,8 @@ components:
           description: Current step in the assessment process
           enum:
             - SCANNING_STARTED
-            - PREPARING_PROMPTS
-            - INVOKING_LLM
+            - PREPARING_ASSOCIATIONS
+            - ASSOCIATING_FINDINGS
             - FINISHED
             - ERRORED
         error:

@@ -1,0 +1,113 @@
+import { createInjectionToken, inject } from '@shared/di-container';
+import { Finding, ScanFinding, ScanningTool } from '@backend/models';
+import {
+  tokenAssessmentsRepository,
+  tokenObjectsStorage,
+  tokenQuestionSetService,
+} from '@backend/infrastructure';
+import { assertIsDefined, chunk } from '@shared/utils';
+import { NotFoundError } from '../Errors';
+import z from 'zod';
+
+export interface StoreFindingsToAssociateUseCaseArgs {
+  assessmentId: string;
+  organization: string;
+  scanningTool: ScanningTool;
+  scanFindings: ScanFinding[];
+}
+
+export interface StoreFindingsToAssociateUseCase {
+  storeFindingsToAssociate(
+    args: StoreFindingsToAssociateUseCaseArgs
+  ): Promise<string[]>;
+}
+
+export class StoreFindingsToAssociateUseCaseImpl
+  implements StoreFindingsToAssociateUseCase
+{
+  private readonly objectsStorage = inject(tokenObjectsStorage);
+  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly chunkSize = inject(
+    tokenStoreFindingsToAssociateUseCaseChunkSize
+  );
+
+  static getFindingsChunkPath(args: {
+    assessmentId: string;
+    scanningTool: string;
+    chunkIndex: number;
+  }): string {
+    const { assessmentId, scanningTool, chunkIndex } = args;
+    return `assessments/${assessmentId}/chunks/${scanningTool}_${chunkIndex}.json`;
+  }
+
+  private async storeFindingsChunks(args: {
+    findingsChunks: Finding[][];
+    assessmentId: string;
+    scanningTool: ScanningTool;
+  }): Promise<string[]> {
+    const { findingsChunks, assessmentId, scanningTool } = args;
+    return Promise.all(
+      findingsChunks.map((findings, index) =>
+        this.objectsStorage.put({
+          key: StoreFindingsToAssociateUseCaseImpl.getFindingsChunkPath({
+            assessmentId,
+            scanningTool,
+            chunkIndex: index,
+          }),
+          body: JSON.stringify(findings),
+        })
+      )
+    );
+  }
+
+  public async storeFindingsToAssociate(
+    args: StoreFindingsToAssociateUseCaseArgs
+  ): Promise<string[]> {
+    const { assessmentId, organization, scanningTool, scanFindings } = args;
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organization,
+    });
+    if (!assessment) {
+      throw new NotFoundError(
+        `Assessment with id ${assessmentId} not found in organization ${organization}`
+      );
+    }
+    const findings = scanFindings.map<Finding>((scanFinding) => ({
+      ...scanFinding,
+      isAiAssociated: true,
+      hidden: false,
+      bestPractices: '',
+    }));
+    const findingsChunks = chunk(findings, this.chunkSize);
+    const findingsChunksURIs = await this.storeFindingsChunks({
+      findingsChunks,
+      assessmentId,
+      scanningTool,
+    });
+    return findingsChunksURIs;
+  }
+}
+
+export const tokenStoreFindingsToAssociateUseCase =
+  createInjectionToken<StoreFindingsToAssociateUseCase>(
+    'StoreFindingsToAssociateUseCase',
+    {
+      useClass: StoreFindingsToAssociateUseCaseImpl,
+    }
+  );
+
+export const tokenStoreFindingsToAssociateUseCaseChunkSize =
+  createInjectionToken<number>('StoreFindingsToAssociateUseCaseChunkSize', {
+    useFactory: () => {
+      const chunkSize = process.env.AI_FINDINGS_ASSOCIATION_CHUNK_SIZE;
+      assertIsDefined(
+        chunkSize,
+        'AI_FINDINGS_ASSOCIATION_CHUNK_SIZE is not defined'
+      );
+      return z.coerce
+        .number()
+        .min(1, 'Chunk size must be at least 1')
+        .parse(chunkSize);
+    },
+  });

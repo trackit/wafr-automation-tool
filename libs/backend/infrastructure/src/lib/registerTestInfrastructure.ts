@@ -29,12 +29,19 @@ import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
 } from './WellArchitectedToolService';
+import {
+  tokenFakeFindingToBestPracticesAssociationService,
+  tokenFindingToBestPracticesAssociationService,
+  tokenPromptArn,
+} from './FindingToBestPracticesAssociationService';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
+  register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
+  register(tokenPromptArn, { useValue: 'arn:test-prompt-arn' });
   register(tokenAssessmentsStateMachine, {
     useFactory: () => inject(tokenFakeAssessmentsStateMachine),
   });
@@ -50,8 +57,10 @@ export const registerTestInfrastructure = () => {
   register(tokenObjectsStorage, {
     useFactory: () => inject(tokenFakeObjectsStorage),
   });
-  register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenWellArchitectedToolService, {
     useFactory: () => inject(tokenFakeWellArchitectedToolService),
+  });
+  register(tokenFindingToBestPracticesAssociationService, {
+    useFactory: () => inject(tokenFakeFindingToBestPracticesAssociationService),
   });
 };
