@@ -12,6 +12,7 @@ export class OrganizationMother {
       domain: 'domain',
       accountId: 'accountId',
       unitBasedAgreementId: 'unitBasedAgreementId',
+      freeAssessmentsLeft: 0,
     });
   }
 
@@ -29,6 +30,13 @@ export class OrganizationMother {
     unitBasedAgreementId: string
   ): OrganizationMother {
     this.data.unitBasedAgreementId = unitBasedAgreementId;
+    return this;
+  }
+
+  public withFreeAssessmentsLeft(
+    freeAssessmentsLeft: number
+  ): OrganizationMother {
+    this.data.freeAssessmentsLeft = freeAssessmentsLeft;
     return this;
   }
 

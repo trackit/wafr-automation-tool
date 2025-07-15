@@ -75,16 +75,36 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     if (!organization) {
       throw new NotFoundError('Organization not found');
     }
+    if (
+      organization.freeAssessmentsLeft &&
+      organization.freeAssessmentsLeft > 0
+    ) {
+      this.logger.info(`Consume free assessment for ${args.organization}`);
+      organization.freeAssessmentsLeft--;
+      await this.organizationRepository.save({
+        organization,
+      });
+      return;
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
       organization,
     });
     if (!monthly) {
-      this.logger.info(
-        `Consume review unit for ${args.organization} because it is not a monthly subscription`
-      );
-      await this.marketplaceService.consumeReviewUnit({
+      const perUnit = await this.marketplaceService.hasUnitBasedSubscription({
         organization,
       });
+      if (perUnit) {
+        this.logger.info(
+          `Consume review unit for ${args.organization} because it is not a monthly subscription`
+        );
+        await this.marketplaceService.consumeReviewUnit({
+          organization,
+        });
+      } else {
+        throw new NotFoundError(
+          `Organization ${args.organization} does not have a subscription`
+        );
+      }
     }
   }
 

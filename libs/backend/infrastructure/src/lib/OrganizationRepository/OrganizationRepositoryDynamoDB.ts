@@ -12,7 +12,8 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   private readonly logger = inject(tokenLogger);
   private readonly tableName = inject(tokenDynamoDBOrganizationTableName);
 
-  public async save(organization: Organization): Promise<void> {
+  public async save(args: { organization: Organization }): Promise<void> {
+    const { organization } = args;
     const params = {
       TableName: this.tableName,
       Item: {

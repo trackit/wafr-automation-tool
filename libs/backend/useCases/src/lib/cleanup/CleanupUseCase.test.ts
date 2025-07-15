@@ -185,6 +185,26 @@ describe('CleanupUseCase', () => {
       );
     });
 
+    it('should consume a free assessment trial if available', async () => {
+      const { useCase, fakeOrganizationRepository } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withFreeAssessmentsLeft(1)
+        .build();
+      fakeOrganizationRepository.save({
+        organization,
+      });
+
+      const input = CleanupUseCaseArgsMother.basic()
+        .withAssessmentId('assessment-id')
+        .withOrganization('test.io')
+        .build();
+      await useCase.cleanupSuccessful(input);
+
+      expect(organization.freeAssessmentsLeft).toEqual(0);
+    });
+
     it('should not consume any review unit if the organization has a monthly subscription', async () => {
       const { useCase, fakeOrganizationRepository, fakeMarketplaceService } =
         setup();
@@ -192,7 +212,9 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
         .build();
-      fakeOrganizationRepository.save(organization);
+      fakeOrganizationRepository.save({
+        organization,
+      });
       fakeMarketplaceService.hasMonthlySubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(true));
@@ -214,10 +236,15 @@ describe('CleanupUseCase', () => {
         .withDomain('test.io')
         .withAccountId('accountId')
         .build();
-      fakeOrganizationRepository.save(organization);
+      fakeOrganizationRepository.save({
+        organization,
+      });
       fakeMarketplaceService.hasMonthlySubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(false));
+      fakeMarketplaceService.hasUnitBasedSubscription = vitest
+        .fn()
+        .mockImplementation(() => Promise.resolve(true));
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('assessment-id')

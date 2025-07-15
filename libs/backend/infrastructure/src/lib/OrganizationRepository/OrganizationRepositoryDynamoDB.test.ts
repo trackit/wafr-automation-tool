@@ -39,7 +39,7 @@ describe('OrganizationRepositoryDynamoDB', () => {
         .withDomain('test.io')
         .build();
 
-      await repository.save(organization);
+      await repository.save({ organization });
 
       const fetchedOrganization = await repository.get({
         organizationDomain: 'test.io',

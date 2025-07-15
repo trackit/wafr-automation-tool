@@ -7,7 +7,8 @@ export class FakeOrganizationRepositoryDynamoDB
 {
   public organizations: Record<string, Organization> = {};
 
-  async save(organization: Organization): Promise<void> {
+  async save(args: { organization: Organization }): Promise<void> {
+    const { organization } = args;
     this.organizations[organization.domain] = organization;
   }
 

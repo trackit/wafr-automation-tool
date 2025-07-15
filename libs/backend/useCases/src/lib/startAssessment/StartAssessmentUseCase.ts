@@ -39,6 +39,15 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     if (!organization) {
       throw new NotFoundError('Organization not found');
     }
+    if (
+      organization.freeAssessmentsLeft &&
+      organization.freeAssessmentsLeft > 0
+    ) {
+      this.logger.info(
+        `User ${args.user.id} has ${organization.freeAssessmentsLeft} free assessments left`
+      );
+      return true;
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
       organization,
     });

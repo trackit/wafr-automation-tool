@@ -99,6 +99,36 @@ describe('startAssessment UseCase', () => {
   });
 
   describe('canStartAssessment', () => {
+    it('should start an assessment if the organization has free assessments left', async () => {
+      const {
+        useCase,
+        fakeAssessmentsStateMachine,
+        fakeOrganizationRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withFreeAssessmentsLeft(1)
+        .build();
+      fakeOrganizationRepository.save({ organization });
+
+      const input: StartAssessmentUseCaseArgs =
+        StartAssessmentUseCaseArgsMother.basic()
+          .withName('test assessment')
+          .withUser(
+            UserMother.basic().withOrganizationDomain('test.io').build()
+          )
+          .build();
+      await useCase.startAssessment(input);
+
+      expect(
+        fakeAssessmentsStateMachine.startAssessment
+      ).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ name: 'test assessment' })
+      );
+      expect(organization.freeAssessmentsLeft).toEqual(1);
+    });
+
     it('should start an assessment if the user has a monthly subscription', async () => {
       const {
         useCase,
@@ -109,8 +139,9 @@ describe('startAssessment UseCase', () => {
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
+        .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save(organization);
+      fakeOrganizationRepository.save({ organization });
       fakeMarketplaceService.hasMonthlySubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(true));
@@ -141,8 +172,9 @@ describe('startAssessment UseCase', () => {
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
+        .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save(organization);
+      fakeOrganizationRepository.save({ organization });
       fakeMarketplaceService.hasUnitBasedSubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(true));
@@ -163,13 +195,14 @@ describe('startAssessment UseCase', () => {
       );
     });
 
-    it('should throw an error if the user does not have a subscription', async () => {
+    it('should throw an error if the user does not have a subscription or free assessments left', async () => {
       const { useCase, fakeOrganizationRepository } = setup();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
+        .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save(organization);
+      fakeOrganizationRepository.save({ organization });
 
       const input: StartAssessmentUseCaseArgs =
         StartAssessmentUseCaseArgsMother.basic()
