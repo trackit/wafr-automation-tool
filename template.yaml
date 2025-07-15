@@ -23,6 +23,12 @@ Parameters:
     Type: String
   MonthlySubscriptionProductCode:
     Type: String
+  GenAIMaxRetries:
+    Type: Number
+    Default: 3
+  AIFindingsAssociationChunkSize:
+    Type: Number
+    Default: 400
 
 Resources:
   SharedLibs:
@@ -116,6 +122,8 @@ Resources:
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        GenAIMaxRetries: !Ref GenAIMaxRetries
+        AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:

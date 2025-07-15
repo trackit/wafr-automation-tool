@@ -1,4 +1,3 @@
-import type { User } from '@backend/models';
 import type { GetAssessmentUseCaseArgs } from './GetAssessmentUseCase';
 
 export class GetAssessmentUseCaseArgsMother {
@@ -11,11 +10,7 @@ export class GetAssessmentUseCaseArgsMother {
   public static basic(): GetAssessmentUseCaseArgsMother {
     return new GetAssessmentUseCaseArgsMother({
       assessmentId: 'assessment-id',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      organization: 'test.io',
     });
   }
 
@@ -26,8 +21,10 @@ export class GetAssessmentUseCaseArgsMother {
     return this;
   }
 
-  public withUser(user: User): GetAssessmentUseCaseArgsMother {
-    this.data.user = user;
+  public withOrganization(
+    organization: string
+  ): GetAssessmentUseCaseArgsMother {
+    this.data.organization = organization;
     return this;
   }
 

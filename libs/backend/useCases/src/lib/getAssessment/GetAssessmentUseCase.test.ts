@@ -1,8 +1,7 @@
-import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
+import { AssessmentMother, FindingMother } from '@backend/models';
 import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
-  tokenFakeAssessmentsStateMachine,
 } from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
 
@@ -32,7 +31,7 @@ describe('GetAssessmentUseCase', () => {
 
     const input = GetAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withOrganization('test.io')
       .build();
     await expect(useCase.getAssessment(input)).rejects.toThrow(NotFoundError);
   });
@@ -51,7 +50,7 @@ describe('GetAssessmentUseCase', () => {
 
     const input = GetAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withOrganization('test.io')
       .build();
     const assessment = await useCase.getAssessment(input);
 

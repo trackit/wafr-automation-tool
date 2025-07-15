@@ -4,5 +4,6 @@ export * from './Finding';
 export * from './Organization';
 export * from './Pillar';
 export * from './Question';
+export * from './QuestionSet';
 export * from './ScanningTool';
 export * from './User';

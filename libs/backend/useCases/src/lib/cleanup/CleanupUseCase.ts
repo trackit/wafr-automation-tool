@@ -110,13 +110,11 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
 
   public async cleanup(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
-      const listObjects = await this.assessmentsStorage.list({
-        prefix: `assessments/${args.assessmentId}`,
-      });
+      const listObjects = await this.assessmentsStorage.list(
+        `assessments/${args.assessmentId}`
+      );
       this.logger.info(`Deleting assessment: ${listObjects}`);
-      this.assessmentsStorage.bulkDelete({
-        keys: listObjects,
-      });
+      this.assessmentsStorage.bulkDelete(listObjects);
       this.logger.info(`Debug mode is disabled, deleting assessment`);
     }
     try {

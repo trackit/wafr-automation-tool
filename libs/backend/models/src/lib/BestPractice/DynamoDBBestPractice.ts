@@ -5,7 +5,7 @@ export interface DynamoDBBestPractice {
   id: string;
   label: string;
   primary_id: string;
-  results: string[];
+  results: Set<string>;
   risk: SeverityType;
   checked: boolean;
 }

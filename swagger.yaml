@@ -573,8 +573,8 @@ components:
           description: Current step in the assessment process
           enum:
             - SCANNING_STARTED
-            - PREPARING_PROMPTS
-            - INVOKING_LLM
+            - PREPARING_ASSOCIATIONS
+            - ASSOCIATING_FINDINGS
             - FINISHED
             - ERRORED
         error:
@@ -584,9 +584,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/Assessment'
         - properties:
-            findings:
+            pillars:
               type: array
-              description: A list of findings associated with the assessment
+              description: The assessment pillars including questions and best practices
               items:
                 $ref: '#/components/schemas/Pillar'
             question_version:

@@ -295,7 +295,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       const assessment = AssessmentMother.basic()
         .withId('assessment-id')
         .withName('assessment-name')
-        .withFindings([
+        .withPillars([
           PillarMother.basic()
             .withPrimaryId('pillar-id')
             .withLabel('Pillar 1')

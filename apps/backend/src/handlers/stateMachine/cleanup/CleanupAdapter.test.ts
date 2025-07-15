@@ -1,3 +1,4 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenCleanupUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -41,6 +42,7 @@ describe('cleanup adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { cleanup: vitest.fn() };
   register(tokenCleanupUseCase, { useValue: useCase });
   const adapter = new CleanupAdapter();

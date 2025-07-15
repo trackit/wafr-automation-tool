@@ -1,10 +1,11 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { FindingMother, SeverityType } from '@backend/models';
 import {
   NotFoundError,
   tokenGetBestPracticeFindingsUseCase,
 } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { FindingMother, SeverityType } from '@backend/models';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { GetBestPracticeFindingsAdapter } from './GetBestPracticeFindingsAdapter';
 import { GetBestPracticeFindingsAdapterEventMother } from './GetBestPracticeFindingsAdapterEventMother';
@@ -209,6 +210,7 @@ describe('GetBestPracticeFindings adapter', () => {
 
 const setup = () => {
   reset();
+  registerTestInfrastructure();
   const useCase = { getBestPracticeFindings: vitest.fn() };
   register(tokenGetBestPracticeFindingsUseCase, { useValue: useCase });
   return { useCase, adapter: new GetBestPracticeFindingsAdapter() };

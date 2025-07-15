@@ -25,10 +25,7 @@ export class FindingMother {
         references: [],
       },
       resources: [],
-      riskDetails: 'This is a risk detail.',
       severity: SeverityType.Medium,
-      statusCode: 'status-code',
-      statusDetail: 'This is a status detail.',
     });
   }
 
@@ -67,7 +64,7 @@ export class FindingMother {
     return this;
   }
 
-  public withRiskDetails(riskDetails: string): FindingMother {
+  public withRiskDetails(riskDetails?: string): FindingMother {
     this.data.riskDetails = riskDetails;
     return this;
   }
@@ -77,12 +74,12 @@ export class FindingMother {
     return this;
   }
 
-  public withStatusCode(statusCode: string): FindingMother {
+  public withStatusCode(statusCode?: string): FindingMother {
     this.data.statusCode = statusCode;
     return this;
   }
 
-  public withStatusDetail(statusDetail: string): FindingMother {
+  public withStatusDetail(statusDetail?: string): FindingMother {
     this.data.statusDetail = statusDetail;
     return this;
   }

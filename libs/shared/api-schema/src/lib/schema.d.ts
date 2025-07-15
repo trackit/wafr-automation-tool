@@ -213,12 +213,12 @@ export interface components {
              * @description Current step in the assessment process
              * @enum {string}
              */
-            step?: "SCANNING_STARTED" | "PREPARING_PROMPTS" | "INVOKING_LLM" | "FINISHED" | "ERRORED";
+            step?: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
             error?: components["schemas"]["AssessmentError"];
         };
         AssessmentContent: components["schemas"]["Assessment"] & {
-            /** @description A list of findings associated with the assessment */
-            findings?: components["schemas"]["Pillar"][];
+            /** @description The assessment pillars including questions and best practices */
+            pillars?: components["schemas"]["Pillar"][];
             /** @description The version of questions that were used for the assessment */
             question_version?: string;
             /** @description Processed data from the scanning tools */

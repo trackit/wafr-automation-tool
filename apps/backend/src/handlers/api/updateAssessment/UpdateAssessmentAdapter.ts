@@ -4,7 +4,7 @@ import { z, ZodError, ZodType } from 'zod';
 import { tokenUpdateAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJson } from '@shared/utils';
+import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
@@ -26,7 +26,7 @@ export class UpdateAssessmentAdapter {
   private parseBody(
     body: string
   ): operations['updateAssessment']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJson(body);
+    const parsedBody = parseJsonObject(body);
     return UpdateAssessmentBodySchema.parse(parsedBody);
   }
 
@@ -55,7 +55,7 @@ export class UpdateAssessmentAdapter {
         UpdateAssessmentPathParametersSchema.parse(pathParameters);
       const assessmentBody = this.parseBody(body);
       await this.useCase.updateAssessment({
-        user: getUserFromEvent(event),
+        organization: getUserFromEvent(event).organizationDomain,
         assessmentId,
         assessmentBody,
       });
