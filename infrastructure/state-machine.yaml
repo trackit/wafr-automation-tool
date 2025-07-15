@@ -19,6 +19,8 @@ Parameters:
     Type: String
   DynamoDBArn:
     Type: String
+  OrganizationTableArn:
+    Type: String
   S3BucketName:
     Type: String
   ECSCluster:
@@ -62,6 +64,7 @@ Globals:
         REGION: !Ref AWS::Region
         S3_BUCKET: !Ref S3BucketName
         DDB_TABLE: !Ref DynamoDBArn
+        ORGANIZATION_TABLE: !Ref OrganizationTableArn
 
 Resources:
   PreparePromptsLogGroup:
@@ -185,6 +188,10 @@ Resources:
                 - dynamodb:GetItem
               Resource:
                 - !Ref DynamoDBArn
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource:
+                - !Ref OrganizationTableArn
             - Effect: Allow
               Action:
                 - s3:DeleteObject

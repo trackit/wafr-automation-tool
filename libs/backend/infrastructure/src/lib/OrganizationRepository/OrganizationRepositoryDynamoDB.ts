@@ -5,8 +5,7 @@ import { assertIsDefined } from '@shared/utils';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 
-export type DynamoDBOrganization = Organization & { PK: string; SK: string };
-export const ORGANIZATION_PK = 'ORGANIZATION';
+export type DynamoDBOrganization = Organization & { PK: string };
 
 export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   private readonly client = inject(tokenDynamoDBDocument);
@@ -17,8 +16,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     const params = {
       TableName: this.tableName,
       Item: {
-        PK: ORGANIZATION_PK,
-        SK: organization.domain,
+        PK: organization.domain,
         ...organization,
       },
     };
@@ -39,8 +37,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: ORGANIZATION_PK,
-        SK: organizationDomain,
+        PK: organizationDomain,
       },
     };
 
@@ -51,7 +48,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
       return undefined;
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { PK, SK, ...organization } = dynamoOrganization;
+    const { PK, ...organization } = dynamoOrganization;
     return organization;
   }
 }
@@ -65,8 +62,8 @@ export const tokenDynamoDBOrganizationTableName = createInjectionToken<string>(
   'DynamoDBOrganizationTableName',
   {
     useFactory: () => {
-      const tableName = process.env.DDB_TABLE;
-      assertIsDefined(tableName, 'DDB_TABLE is not defined');
+      const tableName = process.env.ORGANIZATION_TABLE;
+      assertIsDefined(tableName, 'ORGANIZATION_TABLE is not defined');
       return tableName;
     },
   }

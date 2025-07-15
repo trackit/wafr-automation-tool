@@ -23,7 +23,6 @@ afterEach(async () => {
           TableName: tableName,
           Key: {
             PK: item.PK,
-            SK: item.SK,
           },
         })
       );

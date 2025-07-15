@@ -22,6 +22,8 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  OrganizationTableArn:
+    Type: String
   UnitBasedPricingProductCode:
     Type: String
   MonthlySubscriptionProductCode:
@@ -39,6 +41,7 @@ Globals:
         REGION: !Ref AWS::Region
         DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
+        ORGANIZATION_TABLE: !Ref OrganizationTableArn
 
 Resources:
   UserPool:
@@ -172,7 +175,9 @@ Resources:
               Resource: !Ref StateMachineArn
             - Effect: Allow
               Action: dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
+              Resource:
+                - !Ref DynamoDBArn
+                - !Ref OrganizationTableArn
             - Effect: Allow
               Action:
                 - aws-marketplace:GetEntitlements
