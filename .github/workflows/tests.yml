@@ -6,27 +6,7 @@ on:
       - main
 
 jobs:
-  py-backend-tests:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: backend/uv.lock
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: backend/.python-version
-      - name: Install dependencies
-        run: uv sync --all-extras --dev
-      - name: Run tests
-        run: uv run pytest src
-  ts-backend-tests:
+  backend-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +26,7 @@ jobs:
         run: npm run test:backend:init
       - name: Run tests
         run: npm run test:backend
-  ts-frontend-tests:
+  frontend-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

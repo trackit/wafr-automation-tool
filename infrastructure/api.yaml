@@ -13,8 +13,6 @@ Parameters:
     Type: String
   DynamoDBArn:
     Type: String
-  SharedLibsLayer:
-    Type: String
   DefaultAssessmentRole:
     Type: String
   InitialUserEmail:
@@ -27,12 +25,13 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 128
-    Runtime: python3.12
-    Layers:
-      - !Ref SharedLibsLayer
+    Handler: handler.main
+    Runtime: nodejs22.x
+    Tags:
+      Owner: !Ref Owner
+      Project: !Ref Project
     Environment:
       Variables:
-        REGION: !Ref AWS::Region
         DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
 
@@ -153,12 +152,8 @@ Resources:
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/startAssessment
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: StartAssessmentFunction
       Policies:
         - Version: '2012-10-17'
@@ -191,12 +186,8 @@ Resources:
   GetAllAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/getAllAssessments
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: GetAllAssessmentsFunction
       Policies:
         - Version: '2012-10-17'
@@ -231,12 +222,8 @@ Resources:
   GetAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/getAssessment
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: GetAssessmentFunction
       Policies:
         - Version: '2012-10-17'
@@ -270,12 +257,8 @@ Resources:
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/deleteAssessment
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: DeleteAssessmentFunction
       Policies:
         - Version: '2012-10-17'
@@ -315,12 +298,8 @@ Resources:
   UpdateAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/updateAssessment
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: UpdateAssessmentFunction
       Policies:
         - Version: '2012-10-17'
@@ -355,12 +334,8 @@ Resources:
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/rescanAssessment
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: RescanAssessmentFunction
       Policies:
         - Version: '2012-10-17'
@@ -403,12 +378,8 @@ Resources:
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/exportWellArchitectedTool
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: ExportAssessmentWellArchitectedToolFunction
       Policies:
         - Version: '2012-10-17'
@@ -459,12 +430,8 @@ Resources:
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/updatePillar
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: UpdatePillarFunction
       Policies:
         - Version: '2012-10-17'
@@ -498,12 +465,8 @@ Resources:
   UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/updateQuestion
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: UpdateQuestionFunction
       Policies:
         - Version: '2012-10-17'
@@ -538,12 +501,8 @@ Resources:
   GetBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/getBestPracticeFindings
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: GetBestPracticeFindingsFunction
       Policies:
         - Version: '2012-10-17'
@@ -578,12 +537,8 @@ Resources:
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/updateBestPractice
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: UpdateBestPracticeFunction
       Policies:
         - Version: '2012-10-17'
@@ -610,36 +565,6 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  RetrieveFindingLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${RetrieveFindingFunction}'
-      RetentionInDays: !Ref LogRetentionInDays
-  RetrieveFindingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: main.lambda_handler
-      Runtime: python3.12
-      CodeUri: ../backend/src/api/retrieve_finding/app
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: RetrieveFindingFunction
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
-      Events:
-        RetrieveFinding:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}
-            Method: GET
-
   UpdateFindingLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -648,12 +573,8 @@ Resources:
   UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/api/updateFinding
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: UpdateFindingFunction
       Policies:
         - Version: '2012-10-17'

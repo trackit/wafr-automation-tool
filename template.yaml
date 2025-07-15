@@ -27,17 +27,6 @@ Parameters:
     Default: 400
 
 Resources:
-  SharedLibs:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: !Sub '${AWS::StackName}-SharedLibs'
-      Description: Shared libs used by Lambdas
-      ContentUri: ./backend/src/shared_lib
-      CompatibleRuntimes:
-        - python3.12
-      RetentionPolicy: Delete
-    Metadata:
-      BuildMethod: python3.12
   Api:
     Type: AWS::Serverless::Application
     Properties:
@@ -56,7 +45,6 @@ Resources:
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
-        SharedLibsLayer: !Ref SharedLibs
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
@@ -98,7 +86,6 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref 'AWS::StackName'
         Debug: !Ref Debug
-        SharedLibsLayer: !Ref SharedLibs
         DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster

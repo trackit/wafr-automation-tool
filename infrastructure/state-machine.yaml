@@ -15,8 +15,6 @@ Parameters:
     AllowedValues:
       - true
       - false
-  SharedLibsLayer:
-    Type: String
   DynamoDBArn:
     Type: String
   S3BucketName:
@@ -55,13 +53,14 @@ Globals:
   Function:
     Timeout: 30
     MemorySize: 128
-    Runtime: python3.12
-    Layers:
-      - !Ref SharedLibsLayer
+    Handler: handler.main
+    Runtime: nodejs22.x
+    Tags:
+      Owner: !Ref Owner
+      Project: !Ref Project
     Environment:
       Variables:
         DEBUG: !Ref Debug
-        REGION: !Ref AWS::Region
         S3_BUCKET: !Ref S3BucketName
         DDB_TABLE: !Ref DynamoDBArn
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
@@ -76,12 +75,8 @@ Resources:
   PrepareFindingsAssociationsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/stateMachine/prepareFindingsAssociations
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: PrepareFindingsAssociationsFunction
       Timeout: 600
       MemorySize: 1024
@@ -129,15 +124,10 @@ Resources:
   AssociateFindingsChunkToBestPracticesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/stateMachine/associateFindingsChunkToBestPractices
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: AssociateFindingsChunkToBestPracticesFunction
       Timeout: 900
-      MemorySize: 128
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -192,12 +182,8 @@ Resources:
   CleanupFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/stateMachine/cleanup
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: CleanupFunction
       Policies:
         - Version: '2012-10-17'
@@ -238,15 +224,10 @@ Resources:
   PrepareCustodianFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/stateMachine/prepareCustodian
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: PrepareCustodianFunction
       Timeout: 600
-      MemorySize: 128
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -272,15 +253,10 @@ Resources:
   ComputeGraphDataFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handler.main
-      Runtime: nodejs22.x
       CodeUri: ../apps/backend/src/handlers/stateMachine/computeGraphData
       Timeout: 600
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
         Name: ComputeGraphDataFunction
-      MemorySize: 128
       Policies:
         - Version: '2012-10-17'
           Statement:
