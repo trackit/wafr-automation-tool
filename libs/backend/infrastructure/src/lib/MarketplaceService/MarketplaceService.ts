@@ -14,7 +14,6 @@ import {
 import { Organization } from '@backend/models';
 import type { MarketplacePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
 import { InfrastructureError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 
@@ -161,30 +160,20 @@ export const tokenMarketplaceAgreementClient =
     }
   );
 
-export const tokenUnitBasedProductCode = createInjectionToken<string>(
-  'UnitBasedProductCode',
-  {
-    useFactory: () => {
-      const productCode = process.env.UNIT_BASED_PRICING_PRODUCT_CODE;
-      assertIsDefined(
-        productCode,
-        'UNIT_BASED_PRICING_PRODUCT_CODE is not defined'
-      );
-      return productCode;
-    },
-  }
-);
+export const tokenUnitBasedProductCode = createInjectionToken<
+  string | undefined
+>('UnitBasedProductCode', {
+  useFactory: () => {
+    const productCode = process.env.UNIT_BASED_PRICING_PRODUCT_CODE;
+    return productCode;
+  },
+});
 
-export const tokenMonthlySubscriptionProductCode = createInjectionToken<string>(
-  'MonthlySubscriptionProductCode',
-  {
-    useFactory: () => {
-      const productCode = process.env.MONTHLY_SUBSCRIPTION_PRODUCT_CODE;
-      assertIsDefined(
-        productCode,
-        'MONTHLY_SUBSCRIPTION_PRODUCT_CODE is not defined'
-      );
-      return productCode;
-    },
-  }
-);
+export const tokenMonthlySubscriptionProductCode = createInjectionToken<
+  string | undefined
+>('MonthlySubscriptionProductCode', {
+  useFactory: () => {
+    const productCode = process.env.MONTHLY_SUBSCRIPTION_PRODUCT_CODE;
+    return productCode;
+  },
+});
