@@ -10,4 +10,3 @@ export * from './OrganizationRepository';
 export * from './QuestionSetService';
 export * from './registerTestInfrastructure';
 export * from './WellArchitectedToolService';
-
