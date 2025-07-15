@@ -1,6 +1,7 @@
 import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
+  tokenFakeFeatureToggleRepository,
   tokenFakeMarketplaceService,
   tokenFakeObjectsStorage,
   tokenFakeOrganizationRepository,
@@ -205,9 +206,13 @@ describe('CleanupUseCase', () => {
       expect(organization.freeAssessmentsLeft).toEqual(0);
     });
 
-    it('should not consume any review unit if the organization has a monthly subscription', async () => {
-      const { useCase, fakeOrganizationRepository, fakeMarketplaceService } =
-        setup();
+    it('should skip marketplace check if the marketplace feature toggle is disabled', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeMarketplaceService,
+        fakeFeatureToggleRepository,
+      } = setup();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
@@ -215,6 +220,38 @@ describe('CleanupUseCase', () => {
       fakeOrganizationRepository.save({
         organization,
       });
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => false);
+
+      const input = CleanupUseCaseArgsMother.basic()
+        .withAssessmentId('assessment-id')
+        .withOrganization('test.io')
+        .build();
+      await useCase.cleanupSuccessful(input);
+
+      expect(
+        fakeMarketplaceService.hasMonthlySubscription
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should not consume any review unit if the organization has a monthly subscription', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeMarketplaceService,
+        fakeFeatureToggleRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .build();
+      fakeOrganizationRepository.save({
+        organization,
+      });
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
       fakeMarketplaceService.hasMonthlySubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(true));
@@ -225,12 +262,17 @@ describe('CleanupUseCase', () => {
         .build();
       await useCase.cleanupSuccessful(input);
 
+      expect(fakeMarketplaceService.hasMonthlySubscription).toHaveBeenCalled();
       expect(fakeMarketplaceService.consumeReviewUnit).not.toHaveBeenCalled();
     });
 
     it('should consume a review unit if the organization has not a monthly subscription', async () => {
-      const { useCase, fakeOrganizationRepository, fakeMarketplaceService } =
-        setup();
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeMarketplaceService,
+        fakeFeatureToggleRepository,
+      } = setup();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
@@ -239,6 +281,9 @@ describe('CleanupUseCase', () => {
       fakeOrganizationRepository.save({
         organization,
       });
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
       fakeMarketplaceService.hasMonthlySubscription = vitest
         .fn()
         .mockImplementation(() => Promise.resolve(false));
@@ -270,11 +315,15 @@ const setup = (debug = false) => {
   const fakeOrganizationRepository = inject(tokenFakeOrganizationRepository);
   const fakeMarketplaceService = inject(tokenFakeMarketplaceService);
   vitest.spyOn(fakeMarketplaceService, 'consumeReviewUnit');
+  vitest.spyOn(fakeMarketplaceService, 'hasMonthlySubscription');
+  vitest.spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription');
+  const fakeFeatureToggleRepository = inject(tokenFakeFeatureToggleRepository);
   return {
     useCase: new CleanupUseCaseImpl(),
     fakeAssessmentsRepository,
     fakeObjectsStorage,
     fakeOrganizationRepository,
     fakeMarketplaceService,
+    fakeFeatureToggleRepository,
   };
 };

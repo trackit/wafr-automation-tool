@@ -1,5 +1,6 @@
 import {
   tokenAssessmentsRepository,
+  tokenFeatureToggleRepository,
   tokenLogger,
   tokenMarketplaceService,
   tokenObjectsStorage,
@@ -26,10 +27,13 @@ export interface CleanupUseCase {
 }
 
 export class CleanupUseCaseImpl implements CleanupUseCase {
-  private readonly assessmentsStorage = inject(tokenObjectsStorage);
+  private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
+  private readonly featureToggleRepository = inject(
+    tokenFeatureToggleRepository
+  );
   private readonly logger = inject(tokenLogger);
   private readonly debug = inject(tokenDebug);
 
@@ -86,6 +90,12 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       });
       return;
     }
+    if (!this.featureToggleRepository.marketplaceIntegration()) {
+      this.logger.info(
+        `Marketplace integration is disabled, not consuming any subscription`
+      );
+      return;
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
       organization,
     });
@@ -110,11 +120,11 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
 
   public async cleanup(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
-      const listObjects = await this.assessmentsStorage.list(
+      const listObjects = await this.objectsStorage.list(
         `assessments/${args.assessmentId}`
       );
       this.logger.info(`Deleting assessment: ${listObjects}`);
-      this.assessmentsStorage.bulkDelete(listObjects);
+      this.objectsStorage.bulkDelete(listObjects);
       this.logger.info(`Debug mode is disabled, deleting assessment`);
     }
     try {

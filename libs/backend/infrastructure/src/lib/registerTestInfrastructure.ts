@@ -15,6 +15,10 @@ import {
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
 import {
+  tokenFakeFeatureToggleRepository,
+  tokenFeatureToggleRepository,
+} from './FeatureToggleRepository';
+import {
   tokenFakeFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationService,
   tokenPromptArn,
@@ -76,5 +80,8 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenFindingToBestPracticesAssociationService, {
     useFactory: () => inject(tokenFakeFindingToBestPracticesAssociationService),
+  });
+  register(tokenFeatureToggleRepository, {
+    useFactory: () => inject(tokenFakeFeatureToggleRepository),
   });
 };

@@ -1,5 +1,6 @@
 import {
   tokenAssessmentsStateMachine,
+  tokenFeatureToggleRepository,
   tokenIdGenerator,
   tokenLogger,
   tokenMarketplaceService,
@@ -27,6 +28,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
+  private readonly featureToggleRepository = inject(
+    tokenFeatureToggleRepository
+  );
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly logger = inject(tokenLogger);
 
@@ -45,6 +49,12 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     ) {
       this.logger.info(
         `User ${args.user.id} has ${organization.freeAssessmentsLeft} free assessments left`
+      );
+      return true;
+    }
+    if (!this.featureToggleRepository.marketplaceIntegration()) {
+      this.logger.info(
+        `Marketplace integration is disabled, not checking for subscription`
       );
       return true;
     }
