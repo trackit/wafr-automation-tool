@@ -134,7 +134,7 @@ export const tokenMarketplaceMeteringClient =
   createInjectionToken<MarketplaceMeteringClient>('MarketplaceMeteringClient', {
     useFactory: () =>
       new MarketplaceMeteringClient({
-        region: 'us-east-1',
+        region: 'us-east-1', // Service only supports us-east-1
       }),
   });
 
@@ -144,7 +144,7 @@ export const tokenMarketplaceEntitlementServiceClient =
     {
       useFactory: () =>
         new MarketplaceEntitlementServiceClient({
-          region: 'us-east-1',
+          region: 'us-east-1', // Service only supports us-east-1
         }),
     }
   );
@@ -155,7 +155,7 @@ export const tokenMarketplaceAgreementClient =
     {
       useFactory: () =>
         new MarketplaceAgreementClient({
-          region: 'us-east-1',
+          region: 'us-east-1', // Service only supports us-east-1
         }),
     }
   );
