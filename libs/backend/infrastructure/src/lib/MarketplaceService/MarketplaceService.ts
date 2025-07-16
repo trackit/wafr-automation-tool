@@ -165,6 +165,9 @@ export const tokenUnitBasedProductCode = createInjectionToken<
 >('UnitBasedProductCode', {
   useFactory: () => {
     const productCode = process.env.UNIT_BASED_PRICING_PRODUCT_CODE;
+    if (productCode === '') {
+      return undefined;
+    }
     return productCode;
   },
 });
@@ -174,6 +177,9 @@ export const tokenMonthlySubscriptionProductCode = createInjectionToken<
 >('MonthlySubscriptionProductCode', {
   useFactory: () => {
     const productCode = process.env.MONTHLY_SUBSCRIPTION_PRODUCT_CODE;
+    if (productCode === '') {
+      return undefined;
+    }
     return productCode;
   },
 });
