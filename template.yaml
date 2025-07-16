@@ -19,6 +19,10 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
   GenAIMaxRetries:
     Type: Number
     Default: 3
@@ -48,6 +52,9 @@ Resources:
         DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
+        OrganizationTableArn: !GetAtt OrganizationTable.Arn
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -99,6 +106,9 @@ Resources:
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
         LogRetentionInDays: !Ref LogRetentionInDays
+        OrganizationTableArn: !GetAtt OrganizationTable.Arn
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         GenAIMaxRetries: !Ref GenAIMaxRetries
         AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
   DynamoDB:
@@ -123,6 +133,25 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
+      DeletionProtectionEnabled: true
+  OrganizationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${AWS::StackName}-organization'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: OrganizationTable
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
       DeletionProtectionEnabled: true
   S3Bucket:
     Type: AWS::S3::Bucket

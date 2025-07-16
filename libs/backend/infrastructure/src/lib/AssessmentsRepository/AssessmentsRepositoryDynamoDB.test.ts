@@ -11,8 +11,7 @@ import {
   ScanningTool,
   SeverityType,
 } from '@backend/models';
-import { inject, register, reset } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
+import { inject, reset } from '@shared/di-container';
 
 import {
   AssessmentNotFoundError,
@@ -2461,16 +2460,5 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-
-  register(tokenDynamoDBAssessmentTableName, {
-    useFactory: () => {
-      assertIsDefined(
-        process.env.ASSESSMENT_TABLE,
-        'ASSESSMENT_TABLE is not defined'
-      );
-      return process.env.ASSESSMENT_TABLE;
-    },
-  });
-
   return { repository: new AssessmentsRepositoryDynamoDB() };
 };

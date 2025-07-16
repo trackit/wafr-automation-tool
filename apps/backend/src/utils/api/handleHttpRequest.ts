@@ -3,6 +3,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { tokenLogger } from '@backend/infrastructure';
 import {
   ConflictError,
+  ForbiddenError,
   NoContentError,
   NotFoundError,
   ServerError,
@@ -46,6 +47,8 @@ export const handleHttpRequest = async ({
       let statusCode: number;
       if (e instanceof NoContentError) {
         statusCode = 204;
+      } else if (e instanceof ForbiddenError) {
+        statusCode = 403;
       } else if (e instanceof NotFoundError) {
         statusCode = 404;
       } else if (e instanceof ConflictError) {

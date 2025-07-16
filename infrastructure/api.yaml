@@ -20,6 +20,12 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  OrganizationTableArn:
+    Type: String
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
 
 Globals:
   Function:
@@ -34,6 +40,7 @@ Globals:
       Variables:
         DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
+        ORGANIZATION_TABLE: !Ref OrganizationTableArn
 
 Resources:
   UserPool:
@@ -161,6 +168,16 @@ Resources:
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource:
+                - !Ref DynamoDBArn
+                - !Ref OrganizationTableArn
+            - Effect: Allow
+              Action:
+                - aws-marketplace:GetEntitlements
+                - aws-marketplace:DescribeAgreement
+              Resource: '*'
       Events:
         StartAssessment:
           Type: Api
@@ -168,6 +185,10 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments
             Method: POST
+      Environment:
+        Variables:
+          UNIT_BASED_PRICING_PRODUCT_CODE: !Ref UnitBasedPricingProductCode
+          MONTHLY_SUBSCRIPTION_PRODUCT_CODE: !Ref MonthlySubscriptionProductCode
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

@@ -15,12 +15,29 @@ import {
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
 import {
+  tokenFakeFeatureToggleRepository,
+  tokenFeatureToggleRepository,
+} from './FeatureToggleRepository';
+import {
+  tokenFakeFindingToBestPracticesAssociationService,
+  tokenFindingToBestPracticesAssociationService,
+  tokenPromptArn,
+} from './FindingToBestPracticesAssociationService';
+import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
+import { FakeLogger, tokenLogger } from './Logger';
+import {
+  tokenFakeMarketplaceService,
+  tokenMarketplaceService,
+} from './MarketplaceService';
+import {
   tokenFakeObjectsStorage,
   tokenObjectsStorage,
   tokenS3Bucket,
 } from './ObjectsStorage';
-import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
-import { FakeLogger, tokenLogger } from './Logger';
+import {
+  tokenFakeOrganizationRepository,
+  tokenOrganizationRepository,
+} from './OrganizationRepository';
 import {
   tokenFakeQuestionSetService,
   tokenQuestionSetService,
@@ -29,11 +46,6 @@ import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
 } from './WellArchitectedToolService';
-import {
-  tokenFakeFindingToBestPracticesAssociationService,
-  tokenFindingToBestPracticesAssociationService,
-  tokenPromptArn,
-} from './FindingToBestPracticesAssociationService';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
@@ -60,7 +72,16 @@ export const registerTestInfrastructure = () => {
   register(tokenWellArchitectedToolService, {
     useFactory: () => inject(tokenFakeWellArchitectedToolService),
   });
+  register(tokenOrganizationRepository, {
+    useFactory: () => inject(tokenFakeOrganizationRepository),
+  });
+  register(tokenMarketplaceService, {
+    useFactory: () => inject(tokenFakeMarketplaceService),
+  });
   register(tokenFindingToBestPracticesAssociationService, {
     useFactory: () => inject(tokenFakeFindingToBestPracticesAssociationService),
+  });
+  register(tokenFeatureToggleRepository, {
+    useFactory: () => inject(tokenFakeFeatureToggleRepository),
   });
 };

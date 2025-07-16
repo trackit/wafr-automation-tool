@@ -17,6 +17,8 @@ Parameters:
       - false
   DynamoDBArn:
     Type: String
+  OrganizationTableArn:
+    Type: String
   S3BucketName:
     Type: String
   ECSCluster:
@@ -42,6 +44,10 @@ Parameters:
   LogRetentionInDays:
     Type: Number
     Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
   GenAIMaxRetries:
     Type: Number
     Default: 3
@@ -63,6 +69,7 @@ Globals:
         DEBUG: !Ref Debug
         S3_BUCKET: !Ref S3BucketName
         DDB_TABLE: !Ref DynamoDBArn
+        ORGANIZATION_TABLE: !Ref OrganizationTableArn
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
 
@@ -199,6 +206,12 @@ Resources:
                 - !Ref DynamoDBArn
             - Effect: Allow
               Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource:
+                - !Ref OrganizationTableArn
+            - Effect: Allow
+              Action:
                 - s3:DeleteObject
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
@@ -207,6 +220,15 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+            - Effect: Allow
+              Action:
+                - aws-marketplace:GetEntitlements
+                - aws-marketplace:BatchMeterUsage
+              Resource: '*'
+      Environment:
+        Variables:
+          UNIT_BASED_PRICING_PRODUCT_CODE: !Ref UnitBasedPricingProductCode
+          MONTHLY_SUBSCRIPTION_PRODUCT_CODE: !Ref MonthlySubscriptionProductCode
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

@@ -55,3 +55,13 @@ export class InvalidParametersError extends ServerError {
     });
   }
 }
+
+export class ForbiddenError extends ServerError {
+  public constructor(description?: string) {
+    super({
+      message: 'Forbidden',
+      name: 'ForbiddenError',
+      description,
+    });
+  }
+}

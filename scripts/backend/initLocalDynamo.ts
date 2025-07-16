@@ -13,24 +13,30 @@ const dynamodb = new DynamoDBClient({
 });
 
 const createTables = async () => {
-  await Promise.all(
-    [env.ASSESSMENT_TABLE].map(async (table) => {
-      await dynamodb.send(
-        new CreateTableCommand({
-          TableName: table,
-          BillingMode: 'PAY_PER_REQUEST', // on‑demand
-          KeySchema: [
-            { AttributeName: 'PK', KeyType: 'HASH' },
-            { AttributeName: 'SK', KeyType: 'RANGE' },
-          ],
-          AttributeDefinitions: [
-            { AttributeName: 'PK', AttributeType: 'S' },
-            { AttributeName: 'SK', AttributeType: 'S' },
-          ],
-        })
-      );
-    })
-  );
+  await Promise.all([
+    dynamodb.send(
+      new CreateTableCommand({
+        TableName: env.DDB_TABLE,
+        BillingMode: 'PAY_PER_REQUEST', // on‑demand
+        KeySchema: [
+          { AttributeName: 'PK', KeyType: 'HASH' },
+          { AttributeName: 'SK', KeyType: 'RANGE' },
+        ],
+        AttributeDefinitions: [
+          { AttributeName: 'PK', AttributeType: 'S' },
+          { AttributeName: 'SK', AttributeType: 'S' },
+        ],
+      })
+    ),
+    dynamodb.send(
+      new CreateTableCommand({
+        TableName: env.ORGANIZATION_TABLE,
+        BillingMode: 'PAY_PER_REQUEST', // on‑demand
+        KeySchema: [{ AttributeName: 'PK', KeyType: 'HASH' }],
+        AttributeDefinitions: [{ AttributeName: 'PK', AttributeType: 'S' }],
+      })
+    ),
+  ]);
 };
 
 createTables()
