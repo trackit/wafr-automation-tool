@@ -10,14 +10,15 @@ describe('FeatureToggleRepository', () => {
   describe('marketplaceIntegration', () => {
     it('should return true if all marketplace variables are defined', () => {
       const { featureToggleRepository } = setup({
-        removeMarketplaceVariables: false,
+        withMarketplaceVariables: true,
       });
 
       expect(featureToggleRepository.marketplaceIntegration()).toBe(true);
     });
+
     it('should return false if all marketplace variables are undefined', () => {
       const { featureToggleRepository } = setup({
-        removeMarketplaceVariables: true,
+        withMarketplaceVariables: false,
       });
 
       expect(featureToggleRepository.marketplaceIntegration()).toBe(false);
@@ -25,17 +26,19 @@ describe('FeatureToggleRepository', () => {
   });
 });
 
-const setup = ({ removeMarketplaceVariables = false } = {}) => {
+const setup = ({ withMarketplaceVariables = true } = {}) => {
   reset();
   registerTestInfrastructure();
-  if (removeMarketplaceVariables) {
-    register(tokenUnitBasedProductCode, {
-      useFactory: () => undefined,
-    });
-    register(tokenMonthlySubscriptionProductCode, {
-      useFactory: () => undefined,
-    });
-  }
+  register(tokenUnitBasedProductCode, {
+    useValue: withMarketplaceVariables
+      ? 'test-unit-based-product-code'
+      : undefined,
+  });
+  register(tokenMonthlySubscriptionProductCode, {
+    useValue: withMarketplaceVariables
+      ? 'test-monthly-subscription-product-code'
+      : undefined,
+  });
   const featureToggleRepository = new FeatureToggleRepository();
   return {
     featureToggleRepository,
