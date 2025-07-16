@@ -18,9 +18,9 @@ export class AssociateFindingsToBestPracticesUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessment_id: string
+    assessmentId: string
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
-    this.data.assessmentId = assessment_id;
+    this.data.assessmentId = assessmentId;
     return this;
   }
 
