@@ -21,8 +21,10 @@ Parameters:
     Default: 14
   UnitBasedPricingProductCode:
     Type: String
+    Default: ''
   MonthlySubscriptionProductCode:
     Type: String
+    Default: ''
   GenAIMaxRetries:
     Type: Number
     Default: 3
