@@ -15,4 +15,5 @@ sam deploy \
   --s3-prefix="wafr-automation-tool-$STAGE" \
   --tags Project=wafr-automation-tool Owner="$STAGE" Name="wafr-automation-tool-$STAGE" \
   --parameter-overrides $PARAMS \
-  --no-fail-on-empty-changeset
+  --no-fail-on-empty-changeset \
+  $@
