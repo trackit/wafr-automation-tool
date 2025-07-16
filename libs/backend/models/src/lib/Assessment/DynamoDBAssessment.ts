@@ -6,18 +6,18 @@ import type { AssessmentStep } from './Assessment';
 export interface DynamoDBAssessment {
   PK: string;
   SK: string;
-  created_at: string;
-  created_by: string;
-  execution_arn: string;
+  createdAt: string;
+  createdBy: string;
+  executionArn: string;
   pillars?: Record<string, DynamoDBPillar>;
-  graph_datas?: DynamoDBAssessmentGraphData;
+  graphData?: DynamoDBAssessmentGraphData;
   id: string;
   name: string;
   organization: string;
-  question_version?: string;
-  raw_graph_datas: Partial<Record<ScanningTool, DynamoDBAssessmentGraphData>>;
+  questionVersion?: string;
+  rawGraphData: Partial<Record<ScanningTool, DynamoDBAssessmentGraphData>>;
   regions: string[];
-  role_arn: string;
+  roleArn: string;
   step: AssessmentStep;
   workflows: string[];
   error?: DynamoDBAssessmentError;
@@ -26,7 +26,7 @@ export interface DynamoDBAssessment {
 export interface DynamoDBAssessmentGraphData {
   findings: number;
   regions: Record<string, number>;
-  resource_types: Record<string, number>;
+  resourceTypes: Record<string, number>;
   severities: Partial<Record<SeverityType, number>>;
 }
 

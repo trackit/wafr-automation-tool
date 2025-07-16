@@ -3,21 +3,21 @@ import type { SeverityType } from './Finding';
 export interface DynamoDBFinding {
   PK: string;
   SK: string;
-  best_practices: string;
+  bestPractices: string;
   hidden: boolean;
   id: string;
-  is_ai_associated: boolean;
+  isAIAssociated: boolean;
   metadata: DynamoDBFindingMetadata;
   remediation?: DynamoDBFindingRemediation;
   resources?: DynamoDBFindingResource[];
-  risk_details?: string;
+  riskDetails?: string;
   severity?: SeverityType;
-  status_code?: string;
-  status_detail?: string;
+  statusCode?: string;
+  statusDetail?: string;
 }
 
 export interface DynamoDBFindingMetadata {
-  event_code?: string;
+  eventCode?: string;
 }
 
 export interface DynamoDBFindingRemediation {

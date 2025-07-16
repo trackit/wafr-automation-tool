@@ -415,7 +415,7 @@ Resources:
                   S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
                 id:
                   S: '{% $states.input.assessmentId %}'
-                created_by:
+                createdBy:
                   S: '{% $states.input.createdBy %}'
                 organization:
                   S: '{% $states.input.organization %}'
@@ -423,17 +423,17 @@ Resources:
                   S: '{% $states.input.name %}'
                 regions:
                   L: '{% $states.input.regions %}'
-                role_arn:
+                roleArn:
                   S: '{% $states.input.roleArn %}'
                 workflows:
                   L: '{% $states.input.workflows %}'
                 step:
                   S: 'SCANNING_STARTED'
-                raw_graph_datas:
+                rawGraphData:
                   M: {}
-                execution_arn:
+                executionArn:
                   S: '{% $states.context.Execution.Id %}'
-                created_at:
+                createdAt:
                   S: '{% $states.input.createdAt %}'
             Assign:
               assessmentId: '{% $states.input.assessmentId %}'

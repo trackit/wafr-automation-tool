@@ -4,6 +4,6 @@ export interface DynamoDBPillar {
   disabled: boolean;
   id: string;
   label: string;
-  primary_id: string;
+  primaryId: string;
   questions: Record<string, DynamoDBQuestion>;
 }

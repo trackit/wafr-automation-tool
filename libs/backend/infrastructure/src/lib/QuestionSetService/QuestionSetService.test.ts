@@ -50,15 +50,15 @@ const setup = () => {
     () => ({
       default: {
         '0': {
-          primary_id: 'pillar-id',
+          primaryId: 'pillar-id',
           label: 'pillar-label',
           questions: {
             '0': {
-              primary_id: 'question-id',
+              primaryId: 'question-id',
               label: 'question-label',
-              best_practices: {
+              bestPractices: {
                 '0': {
-                  primary_id: 'best-practice-id',
+                  primaryId: 'best-practice-id',
                   label: 'best-practice-label',
                   risk: SeverityType.High,
                   description: 'best-practice-description',

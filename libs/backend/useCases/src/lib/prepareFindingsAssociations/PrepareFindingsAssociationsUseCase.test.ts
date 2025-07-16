@@ -403,7 +403,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
       expect.objectContaining({
         id: 'prowler#1',
         bestPractices: 'pillar-1#question-1#best-practice-1',
-        isAiAssociated: false,
+        isAIAssociated: false,
         hidden: false,
       }),
     ]);

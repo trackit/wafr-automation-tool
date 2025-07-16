@@ -1,6 +1,6 @@
 export interface Finding extends ScanFinding {
   hidden: boolean;
-  isAiAssociated: boolean;
+  isAIAssociated: boolean;
   bestPractices: string;
 }
 
