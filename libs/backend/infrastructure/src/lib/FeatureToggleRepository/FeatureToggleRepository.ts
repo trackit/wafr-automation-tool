@@ -15,8 +15,8 @@ export class FeatureToggleRepository implements FeatureTogglePort {
 
   public marketplaceIntegration(): boolean {
     return (
-      this.marketplaceUnitBasedProductCode !== undefined &&
-      this.marketplaceMonthlySubscriptionProductCode !== undefined
+      !!this.marketplaceUnitBasedProductCode &&
+      !!this.marketplaceMonthlySubscriptionProductCode
     );
   }
 }

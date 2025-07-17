@@ -163,23 +163,11 @@ export const tokenMarketplaceAgreementClient =
 export const tokenUnitBasedProductCode = createInjectionToken<
   string | undefined
 >('UnitBasedProductCode', {
-  useFactory: () => {
-    const productCode = process.env.UNIT_BASED_PRICING_PRODUCT_CODE;
-    if (productCode === '') {
-      return undefined;
-    }
-    return productCode;
-  },
+  useValue: process.env.UNIT_BASED_PRICING_PRODUCT_CODE,
 });
 
 export const tokenMonthlySubscriptionProductCode = createInjectionToken<
   string | undefined
 >('MonthlySubscriptionProductCode', {
-  useFactory: () => {
-    const productCode = process.env.MONTHLY_SUBSCRIPTION_PRODUCT_CODE;
-    if (productCode === '') {
-      return undefined;
-    }
-    return productCode;
-  },
+  useValue: process.env.MONTHLY_SUBSCRIPTION_PRODUCT_CODE,
 });

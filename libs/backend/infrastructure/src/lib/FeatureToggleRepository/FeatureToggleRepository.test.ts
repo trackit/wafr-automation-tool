@@ -30,17 +30,14 @@ const setup = ({ withMarketplaceVariables = true } = {}) => {
   reset();
   registerTestInfrastructure();
   register(tokenUnitBasedProductCode, {
-    useValue: withMarketplaceVariables
-      ? 'test-unit-based-product-code'
-      : undefined,
+    useValue: withMarketplaceVariables ? 'test-unit-based-product-code' : '',
   });
   register(tokenMonthlySubscriptionProductCode, {
     useValue: withMarketplaceVariables
       ? 'test-monthly-subscription-product-code'
-      : undefined,
+      : '',
   });
-  const featureToggleRepository = new FeatureToggleRepository();
   return {
-    featureToggleRepository,
+    featureToggleRepository: new FeatureToggleRepository(),
   };
 };
