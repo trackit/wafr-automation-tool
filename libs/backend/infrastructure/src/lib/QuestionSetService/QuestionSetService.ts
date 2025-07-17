@@ -5,20 +5,20 @@ import { createInjectionToken } from '@shared/di-container';
 import question from '../../../../../../scripts/questions/questions_05072025.json';
 
 interface RawBestPractice {
-  primary_id: string;
+  primaryId: string;
   label: string;
   description: string;
   risk: SeverityType;
 }
 
 interface RawQuestion {
-  primary_id: string;
+  primaryId: string;
   label: string;
-  best_practices: Record<string, RawBestPractice>;
+  bestPractices: Record<string, RawBestPractice>;
 }
 
 interface RawPillar {
-  primary_id: string;
+  primaryId: string;
   label: string;
   questions: Record<string, RawQuestion>;
 }
@@ -63,7 +63,7 @@ export class QuestionSetService implements QuestionSetPort {
         disabled: false,
         id: pillarId,
         label: rawPillar.label,
-        primaryId: rawPillar.primary_id,
+        primaryId: rawPillar.primaryId,
         questions: [],
       };
       for (const [questionId, rawQuestion] of Object.entries(
@@ -75,15 +75,15 @@ export class QuestionSetService implements QuestionSetPort {
           id: questionId,
           label: rawQuestion.label,
           none: false,
-          primaryId: rawQuestion.primary_id,
+          primaryId: rawQuestion.primaryId,
         };
         for (const [bestPracticeId, rawBestPractice] of Object.entries(
-          rawQuestion.best_practices
+          rawQuestion.bestPractices
         )) {
           question.bestPractices.push({
-            ...{ ...rawBestPractice, primary_id: undefined },
+            ...{ ...rawBestPractice, primaryId: undefined },
             id: bestPracticeId,
-            primaryId: rawBestPractice.primary_id,
+            primaryId: rawBestPractice.primaryId,
             results: new Set(),
             checked: false,
           });

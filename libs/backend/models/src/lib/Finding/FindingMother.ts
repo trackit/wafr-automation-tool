@@ -18,7 +18,7 @@ export class FindingMother {
       bestPractices: '1#1#1',
       hidden: false,
       id: 'finding-id',
-      isAiAssociated: false,
+      isAIAssociated: false,
       metadata: { eventCode: 'event-code' },
       remediation: {
         desc: 'This is a remediation description.',
@@ -44,8 +44,8 @@ export class FindingMother {
     return this;
   }
 
-  public withIsAiAssociated(isAiAssociated: boolean): FindingMother {
-    this.data.isAiAssociated = isAiAssociated;
+  public withIsAIAssociated(isAiAssociated: boolean): FindingMother {
+    this.data.isAIAssociated = isAiAssociated;
     return this;
   }
 

@@ -155,7 +155,7 @@ describe('GetBestPracticeFindings adapter', () => {
           .withId('scanning-tool#1')
           .withBestPractices('0#0#0')
           .withHidden(false)
-          .withIsAiAssociated(false)
+          .withIsAIAssociated(false)
           .withMetadata({ eventCode: 'event-code' })
           .withRemediation({
             desc: 'remediation description',

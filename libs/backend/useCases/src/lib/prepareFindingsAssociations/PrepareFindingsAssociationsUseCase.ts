@@ -126,7 +126,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const findings = scanFindingsToBestPractices.map<Finding>(
       ({ scanFinding, bestPractices }) => ({
         ...scanFinding,
-        isAiAssociated: false,
+        isAIAssociated: false,
         bestPractices: bestPractices
           .map((bp) => `${bp.pillarId}#${bp.questionId}#${bp.bestPracticeId}`)
           .join(', '),
