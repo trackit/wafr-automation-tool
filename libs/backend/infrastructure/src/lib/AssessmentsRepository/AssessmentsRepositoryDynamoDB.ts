@@ -30,10 +30,12 @@ import {
 } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
-import { DynamoDBAssessment } from './DynamoDBAssessment';
-import { DynamoDBFinding } from './DynamoDBFinding';
-import { DynamoDBPillar } from './DynamoDBPillar';
-import { DynamoDBQuestion } from './DynamoDBQuestion';
+import {
+  DynamoDBAssessment,
+  DynamoDBFinding,
+  DynamoDBPillar,
+  DynamoDBQuestion,
+} from './AssessmentsRepositoryDynamoDBModels';
 
 export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly client = inject(tokenDynamoDBDocument);
