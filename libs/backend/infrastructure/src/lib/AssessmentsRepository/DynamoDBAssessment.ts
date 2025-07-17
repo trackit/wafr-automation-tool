@@ -1,7 +1,5 @@
-import type { SeverityType } from '../Finding';
-import type { DynamoDBPillar } from '../Pillar';
-import type { ScanningTool } from '../ScanningTool';
-import type { AssessmentStep } from './Assessment';
+import { AssessmentStep, ScanningTool, SeverityType } from '@backend/models';
+import { DynamoDBPillar } from './DynamoDBPillar';
 
 export interface DynamoDBAssessment {
   PK: string;

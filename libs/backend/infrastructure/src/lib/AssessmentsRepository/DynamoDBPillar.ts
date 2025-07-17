@@ -1,4 +1,4 @@
-import type { DynamoDBQuestion } from '../Question';
+import { DynamoDBQuestion } from './DynamoDBQuestion';
 
 export interface DynamoDBPillar {
   disabled: boolean;

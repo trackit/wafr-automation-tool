@@ -5,10 +5,6 @@ import type {
   AssessmentGraphData,
   BestPractice,
   BestPracticeBody,
-  DynamoDBAssessment,
-  DynamoDBFinding,
-  DynamoDBPillar,
-  DynamoDBQuestion,
   Finding,
   FindingBody,
   Pillar,
@@ -34,6 +30,10 @@ import {
 } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
+import { DynamoDBAssessment } from './DynamoDBAssessment';
+import { DynamoDBFinding } from './DynamoDBFinding';
+import { DynamoDBPillar } from './DynamoDBPillar';
+import { DynamoDBQuestion } from './DynamoDBQuestion';
 
 export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly client = inject(tokenDynamoDBDocument);
@@ -126,9 +126,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         }),
         {}
       ),
-      ...(assessment.graphData && {
-        graphData: assessment.graphData,
-      }),
+      graphData: assessment.graphData,
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
@@ -138,7 +136,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       roleArn: assessment.roleArn,
       step: assessment.step,
       workflows: assessment.workflows,
-      ...(assessment.error && { error: assessment.error }),
+      error: assessment.error,
     };
   }
 
@@ -178,18 +176,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       id: finding.id,
       isAIAssociated: finding.isAIAssociated,
       metadata: { eventCode: finding.metadata?.eventCode },
-      ...(finding.remediation && {
-        remediation: {
-          desc: finding.remediation.desc,
-          references: finding.remediation.references,
-        },
-      }),
-      resources: finding.resources?.map((resource) => ({
-        name: resource.name,
-        region: resource.region,
-        type: resource.type,
-        uid: resource.uid,
-      })),
+      remediation: finding.remediation,
+      resources: finding.resources,
       riskDetails: finding.riskDetails,
       severity: finding.severity,
       statusCode: finding.statusCode,

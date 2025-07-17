@@ -1,4 +1,4 @@
-import type { DynamoDBBestPractice } from '../BestPractice';
+import { DynamoDBBestPractice } from './DynamoDBBestPractice';
 
 export interface DynamoDBQuestion {
   bestPractices: Record<string, DynamoDBBestPractice>;
