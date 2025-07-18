@@ -28,10 +28,11 @@ The results produced by these tools are stored in Amazon S3 and DynamoDB, then a
 
 ### Tests
 
-To run backend tests locally, execute:
+To run backend tests locally, we need to start the local dynamodb container, initialize the tables and then we can execute the tests.
 
 ```shell
 $ docker-compose up -d
+$ npm run test:backend:init
 $ npm run test:backend
 ```
 
