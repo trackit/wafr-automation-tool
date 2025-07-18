@@ -77,21 +77,6 @@ To perform a remote analysis, you must provide a custom role with these managed 
 - SecurityAudit
 - job-function/ViewOnlyAccess
 
-And the following inline policy: [Inline Policy](../webui/public/inline-policy.json)
+And the following inline policy: [Inline Policy](../webui/src/assets/inline-policy.json)
 
-Additionally, add the following trust policy to your role:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "ACCOUNT_ID"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-```
+Additionally, add the following [Trust Policy](../webui/src/assets/trust-policy.json) to your role
