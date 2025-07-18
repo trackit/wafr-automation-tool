@@ -159,8 +159,8 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         'assessment-id#organization-id'
       ]
     ).toEqual([
-      expect.objectContaining({ id: 'prowler#1' }),
-      expect.objectContaining({ id: 'prowler#2' }),
+      expect.objectContaining({ id: 'prowler#1', isAIAssociated: true }),
+      expect.objectContaining({ id: 'prowler#2', isAIAssociated: true }),
     ]);
   });
 

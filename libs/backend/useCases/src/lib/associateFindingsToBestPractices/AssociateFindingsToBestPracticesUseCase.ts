@@ -53,7 +53,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
                     `${pillarId}#${questionId}#${bestPracticeId}`
                 )
                 .join(','),
-              isAiAssociated: true,
+              isAIAssociated: true,
             },
           })
         )
