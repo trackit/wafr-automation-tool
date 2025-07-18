@@ -21,7 +21,6 @@ import {
 import {
   tokenFakeFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationService,
-  tokenPromptArn,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
@@ -53,7 +52,6 @@ export const registerTestInfrastructure = () => {
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
-  register(tokenPromptArn, { useValue: 'arn:test-prompt-arn' });
   register(tokenAssessmentsStateMachine, {
     useFactory: () => inject(tokenFakeAssessmentsStateMachine),
   });

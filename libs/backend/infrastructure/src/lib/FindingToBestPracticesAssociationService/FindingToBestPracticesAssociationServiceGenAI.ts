@@ -14,6 +14,7 @@ import type {
 } from '@backend/models';
 import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';
 import { tokenLogger } from '../Logger';
+import { tokenObjectsStorage } from '../ObjectsStorage';
 
 interface BestPracticeIdToFindingIdsAssociation {
   id: number;
@@ -40,11 +41,48 @@ export class FindingToBestPracticesAssociationServiceGenAI
   implements FindingToBestPracticesAssociationService
 {
   private readonly aiService = inject(tokenAIService);
-  private readonly promptArn = inject(tokenPromptArn);
   private readonly logger = inject(tokenLogger);
   private readonly maxRetries = inject(
     tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries
   );
+  private readonly objectsStorage = inject(tokenObjectsStorage);
+  static readonly promptKey =
+    'findings-to-best-practices-association-prompt.txt';
+
+  public async fetchPrompt(args: {
+    scanningTool: ScanningTool;
+    pillars: Pillar[];
+    findings: Finding[];
+  }): Promise<string | null> {
+    const { scanningTool, pillars, findings } = args;
+    const prompt = await this.objectsStorage.get(
+      FindingToBestPracticesAssociationServiceGenAI.promptKey
+    );
+    if (!prompt) return null;
+    return this.replacePromptVariables({
+      prompt,
+      variables: {
+        scanningToolTitle: scanningTool,
+        questionSet: this.formatQuestionSet(pillars),
+        scanningToolFindings: this.formatScanningToolFindings(findings),
+      },
+    });
+  }
+
+  public replacePromptVariables(args: {
+    prompt: string;
+    variables: Record<string, unknown>;
+  }): string {
+    const { prompt, variables } = args;
+    return Object.entries(variables).reduce(
+      (updatedPrompt, [key, value]) =>
+        updatedPrompt.replace(
+          new RegExp(`{{${key}}}`, 'g'), // Replace all occurrences
+          JSON.stringify(value)
+        ),
+      prompt
+    );
+  }
 
   public flattenBestPracticesWithPillarAndQuestionFromPillars(
     pillars: Pillar[]
@@ -147,20 +185,22 @@ export class FindingToBestPracticesAssociationServiceGenAI
     pillars: Pillar[];
   }): Promise<FindingToBestPracticesAssociation[]> {
     const { scanningTool, findings, pillars } = args;
+    const prompt = await this.fetchPrompt({
+      scanningTool,
+      pillars,
+      findings,
+    });
+    if (!prompt) {
+      this.logger.warn('Prompt not found, not associating findings.');
+      return [];
+    }
     let maxRetries = this.maxRetries;
     this.logger.info(
       `Associating findings to best practices for scanning tool: ${scanningTool}`,
       { findings }
     );
     do {
-      const stringifiedAIResponse = await this.aiService.converse({
-        promptArn: this.promptArn,
-        promptVariables: {
-          scanningToolTitle: scanningTool,
-          questionSet: this.formatQuestionSet(pillars),
-          scanningToolFindings: this.formatScanningToolFindings(findings),
-        },
-      });
+      const stringifiedAIResponse = await this.aiService.converse({ prompt });
       try {
         const aiResponse = parseJsonArray(stringifiedAIResponse);
         const bestPracticeIdToFindingIdsAssociations =
@@ -194,14 +234,6 @@ export const tokenFindingToBestPracticesAssociationService =
       useClass: FindingToBestPracticesAssociationServiceGenAI,
     }
   );
-
-export const tokenPromptArn = createInjectionToken<string>('PromptArn', {
-  useFactory: () => {
-    const promptArn = process.env.PROMPT_ARN;
-    assertIsDefined(promptArn, 'PROMPT_ARN is not defined');
-    return promptArn;
-  },
-});
 
 export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
   createInjectionToken<number>(

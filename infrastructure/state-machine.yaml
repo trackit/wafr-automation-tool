@@ -108,12 +108,6 @@ Resources:
                 - dynamodb:PutItem
               Resource:
                 - !Ref DynamoDBArn
-            - Effect: Allow
-              Action:
-                - bedrock:GetPrompt
-                - bedrock:ListPrompts
-              Resource:
-                - !GetAtt BedrockPrompt.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -157,20 +151,11 @@ Resources:
                 - 'arn:aws:bedrock:*::foundation-model/*'
             - Effect: Allow
               Action:
-                - bedrock:RenderPrompt
-              Resource:
-                - !GetAtt BedrockPrompt.Arn
-            - Effect: Allow
-              Action:
                 - dynamodb:UpdateItem
                 - dynamodb:PutItem
                 - dynamodb:GetItem
               Resource:
                 - !Ref DynamoDBArn
-      Environment:
-        Variables:
-          AI_MODEL: claude-3-7-sonnet
-          PROMPT_ARN: !GetAtt BedrockPrompt.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -297,52 +282,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  BedrockPrompt:
-    Type: 'AWS::Bedrock::Prompt'
-    Properties:
-      Name: !Sub ${ParentStackName}-prompt
-      Description: 'The prompt used to generate responses.'
-      DefaultVariant: 'prompt'
-      Variants:
-        - Name: 'prompt'
-          TemplateType: 'TEXT'
-          ModelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
-          TemplateConfiguration:
-            Text:
-              InputVariables:
-                - Name: scanningToolTitle
-                - Name: questionSet
-                - Name: scanningToolFindings
-              Text: |
-                Context:
-                - We have a set of {{scanningToolTitle}} findings from our AWS environment.
-                - Each finding must be assessed and mapped to a specific WAFR best practice based on our predefined pillars and questions.
-                Objective:
-                - Transform the scanning tool findings into a JSON mapping where each mapping associates a contiguous range of findings with a unique WAFR best practice ID.
-                Output Format:
-                - The final output must be a minified JSON array containing objects with the following structure:
-                  [{"id": integer, "start": integer, "end": integer}]
-                - Example:
-                  [{"id":101,"start":201,"end":203}]
-                Instructions:
-                1. For each best practice (defined as a unique combination of pillar, question, and best practice), determine the contiguous range of findings it applies to from the {{scanningToolTitle}} Findings.
-                2. Use the predefined unique ID from the WAFR question set for the "id" field.
-                3. Define "start" as the starting index and "end" as the ending index (inclusive) of the range of findings for that best practice.
-                4. Return ONLY the FINAL MINIFIED JSON object. No additional text, comments, or formatting is allowed.
-                5. Do not prefix or suffix the output with any extra characters or messages. Any deviation from the exact specified structure will result in a failure of the state machine.
-                Inputs:
-                - WAFR Pillars, Questions, and Best Practices:
-                  {{questionSet}}
-                - {{scanningToolTitle}} Findings:
-                  {{scanningToolFindings}}
-          InferenceConfiguration:
-            Text:
-              Temperature: 0
-              MaxTokens: 8192
-      Tags:
-        Project: !Ref Project
-        Owner: !Ref Owner
-        Name: BedrockPrompt
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
