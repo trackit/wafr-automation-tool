@@ -68,7 +68,7 @@ In both cases, a complete analysis takes a long time, depending on the size of t
 ### Local
 
 To perform a local analysis, you don't need to provide any custom roles or policies.
-<br>A default role will be created for you and automatically used if no explicit role is provided.
+<br>A default role will be created for you during the deployment.
 
 ### Remote
 
