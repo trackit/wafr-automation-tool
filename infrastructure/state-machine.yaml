@@ -495,13 +495,7 @@ Resources:
                     organizationDomain: '{% $organizationDomain %}'
                     findingsChunkURI: '{% $states.input %}'
                   End: true
-                  Retry:
-                    - ErrorEquals:
-                        - States.TaskFailed
-                      BackoffRate: 2
-                      IntervalSeconds: 1
-                      MaxAttempts: 3
-            Next: Cleanup
+            Next: ComputeGraphData
             Catch:
               - ErrorEquals:
                   - States.ALL
