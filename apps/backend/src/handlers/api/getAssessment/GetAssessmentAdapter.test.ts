@@ -151,8 +151,8 @@ describe('GetAssessmentAdapter', () => {
       useCase.getAssessment.mockResolvedValue(assessment);
       const response = await adapter.handle(event);
       expect(JSON.parse(response.body)).toEqual({
-        created_at: date.toISOString(),
-        created_by: 'user-id',
+        createdAt: date.toISOString(),
+        createdBy: 'user-id',
         pillars: [
           {
             disabled: false,
@@ -160,7 +160,7 @@ describe('GetAssessmentAdapter', () => {
             label: 'pillar',
             questions: [
               {
-                best_practices: [
+                bestPractices: [
                   {
                     description: 'best practice description',
                     id: 'best-practice-id',
@@ -178,26 +178,26 @@ describe('GetAssessmentAdapter', () => {
             ],
           },
         ],
-        graph_datas: {
+        graphData: {
           findings: 2,
           regions: { 'us-west-2': 2 },
-          resource_types: { type: 2 },
+          resourceTypes: { type: 2 },
           severities: { [SeverityType.Medium]: 2 },
         },
         id: 'assessment-id',
         name: 'assessment name',
         organization: 'test.io',
-        question_version: '1.0.0',
-        raw_graph_datas: {
+        questionVersion: '1.0.0',
+        rawGraphData: {
           prowler: {
             findings: 2,
             regions: { 'us-west-2': 2 },
-            resource_types: { type: 2 },
+            resourceTypes: { type: 2 },
             severities: { [SeverityType.Medium]: 2 },
           },
         },
         regions: ['us-west-2'],
-        role_arn: 'role-arn',
+        roleArn: 'role-arn',
         step: AssessmentStep.FINISHED,
         workflows: [],
       });

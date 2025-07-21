@@ -14,8 +14,8 @@ export const getFindings = async (
   const params = new URLSearchParams();
   if (limit) params.set('limit', limit.toString());
   if (search) params.set('search', search);
-  if (showHidden) params.set('show_hidden', 'true');
-  if (nextToken) params.set('next_token', nextToken);
+  if (showHidden) params.set('showHidden', 'true');
+  if (nextToken) params.set('nextToken', nextToken);
 
   return apiClient.get<
     paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']

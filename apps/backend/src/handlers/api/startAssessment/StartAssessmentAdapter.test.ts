@@ -83,7 +83,7 @@ describe('startAssessment adapter', () => {
       const response = await adapter.handle(event);
       const body = JSON.parse(response.body ?? '{}');
 
-      expect(body).toEqual({ assessment_id: 'assessment-id' });
+      expect(body).toEqual({ assessmentId: 'assessment-id' });
     });
 
     it('should return a 201 status code', async () => {

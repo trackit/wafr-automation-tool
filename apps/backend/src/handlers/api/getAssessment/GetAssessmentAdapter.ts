@@ -31,15 +31,15 @@ export class GetAssessmentAdapter {
     assessment: Assessment
   ): operations['getAssessment']['responses'][200]['content']['application/json'] {
     return {
-      created_at: assessment.createdAt.toISOString(),
-      created_by: assessment.createdBy,
+      createdAt: assessment.createdAt.toISOString(),
+      createdBy: assessment.createdBy,
       pillars:
         assessment.pillars?.map((pillar) => ({
           disabled: pillar.disabled,
           id: pillar.id,
           label: pillar.label,
           questions: pillar.questions.map((question) => ({
-            best_practices: question.bestPractices.map((bestPractice) => ({
+            bestPractices: question.bestPractices.map((bestPractice) => ({
               description: bestPractice.description,
               id: bestPractice.id,
               label: bestPractice.label,
@@ -54,40 +54,21 @@ export class GetAssessmentAdapter {
           })),
         })) ?? [],
       ...(assessment.graphData && {
-        graph_datas: {
-          findings: assessment.graphData.findings,
-          regions: assessment.graphData.regions,
-          resource_types: assessment.graphData.resourceTypes,
-          severities: assessment.graphData.severities,
-        },
+        graphData: assessment.graphData,
       }),
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
-      question_version: assessment.questionVersion,
+      questionVersion: assessment.questionVersion,
       ...(assessment.rawGraphData && {
-        raw_graph_datas: Object.entries(assessment.rawGraphData).reduce(
-          (acc, [key, value]) => ({
-            ...acc,
-            [key]: {
-              findings: value.findings,
-              regions: value.regions,
-              resource_types: value.resourceTypes,
-              severities: value.severities,
-            },
-          }),
-          {}
-        ),
+        rawGraphData: assessment.rawGraphData,
       }),
       regions: assessment.regions,
-      role_arn: assessment.roleArn,
+      roleArn: assessment.roleArn,
       step: assessment.step,
       workflows: assessment.workflows,
       ...(assessment.error && {
-        error: {
-          cause: assessment.error.cause,
-          error: assessment.error.error,
-        },
+        error: assessment.error,
       }),
     };
   }
