@@ -36,6 +36,12 @@ type FindingIdToBestPracticeIdAssociations = z.infer<
   typeof FindingIdToBestPracticeIdAssociationsSchema
 >;
 
+export enum RetryErrorType {
+  JSONParseError,
+  ZodError,
+  Error,
+}
+
 export class FindingToBestPracticesAssociationServiceGenAI
   implements FindingToBestPracticesAssociationService
 {
@@ -294,11 +300,17 @@ export class FindingToBestPracticesAssociationServiceGenAI
         }
       } catch (error) {
         if (error instanceof JSONParseError) {
-          this.logger.error(`Failed to parse AI response: ${error.message}.`);
+          this.logger.error(
+            `Failed to parse AI response: ${error.message}.`,
+            RetryErrorType.JSONParseError,
+          );
         } else if (error instanceof z.ZodError) {
-          this.logger.error(`AI response validation failed: ${error.message}.`);
+          this.logger.error(
+            `AI response validation failed: ${error.message}.`,
+            RetryErrorType.ZodError,
+          );
         } else if (error instanceof Error) {
-          this.logger.error(`AI error: ${error.message}`);
+          this.logger.error(`AI error: ${error.message}`, RetryErrorType.Error);
         }
       }
     }
