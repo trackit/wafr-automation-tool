@@ -23,7 +23,7 @@ export default defineConfig(() => ({
   // Configuration for building your library.
   // See: https://vitejs.dev/guide/build.html#library-mode
   test: {
-    name: 'backend-lib',
+    name: 'backend-libs',
     watch: false,
     globals: true,
     passWithNoTests: true,
