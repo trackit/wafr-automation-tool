@@ -1,15 +1,54 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-
-import { type Logger } from '@backend/ports';
+import { Logger, LogLevel } from '@backend/ports';
+import { createInjectionToken } from '@shared/di-container';
 
 export class FakeLogger implements Logger {
-  debug(): void {}
+  public logs: {
+    level: LogLevel;
+    message: string;
+    data: unknown;
+  }[] = [];
 
-  error(): void {}
+  debug(message: string, data: unknown): void {
+    this.logs.push({
+      level: 'debug',
+      message,
+      data,
+    });
+  }
 
-  info(): void {}
+  error(message: string, data: unknown): void {
+    this.logs.push({
+      level: 'error',
+      message,
+      data,
+    });
+  }
 
-  warn(): void {}
+  info(message: string, data: unknown): void {
+    this.logs.push({
+      level: 'info',
+      message,
+      data,
+    });
+  }
 
-  log(): void {}
+  warn(message: string, data: unknown): void {
+    this.logs.push({
+      level: 'warn',
+      message,
+      data,
+    });
+  }
+
+  log(message: string, data: unknown): void {
+    this.logs.push({
+      level: 'log',
+      message,
+      data,
+    });
+  }
 }
+
+export const tokenFakeLogger = createInjectionToken<FakeLogger>('FakeLogger', {
+  useClass: FakeLogger,
+});
