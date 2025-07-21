@@ -9,11 +9,6 @@ export class FakeAIService implements AIService {
     // No-op for fake implementation
     return '';
   }
-
-  async invoke(args: { prompt: string }): Promise<string> {
-    // No-op for fake implementation
-    return '';
-  }
 }
 
 export const tokenFakeAIService = createInjectionToken<FakeAIService>(
