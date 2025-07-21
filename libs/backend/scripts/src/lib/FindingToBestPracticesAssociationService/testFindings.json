@@ -1,0 +1,1450 @@
+{
+  "apigateway_restapi_client_certificate_enabled": [
+    {
+      "id": "prowler#10",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage DeployStage does not have client certificate enabled.",
+      "riskDetails": "Possible man in the middle attacks and other similar risks.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_client_certificate_enabled"
+      }
+    },
+    {
+      "id": "prowler#11",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage Dev does not have client certificate enabled.",
+      "riskDetails": "Possible man in the middle attacks and other similar risks.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_client_certificate_enabled"
+      }
+    },
+    {
+      "id": "prowler#12",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 in stage DeployStage does not have client certificate enabled.",
+      "riskDetails": "Possible man in the middle attacks and other similar risks.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_client_certificate_enabled"
+      }
+    },
+    {
+      "id": "prowler#13",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 in stage Dev does not have client certificate enabled.",
+      "riskDetails": "Possible man in the middle attacks and other similar risks.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_client_certificate_enabled"
+      }
+    },
+    {
+      "id": "prowler#9",
+      "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine does not have client certificate enabled.",
+      "riskDetails": "Possible man in the middle attacks and other similar risks.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_client_certificate_enabled"
+      }
+    }
+  ],
+  "awslambda_function_invoke_api_operations_cloudtrail_logging_enabled": [
+    {
+      "id": "prowler#100",
+      "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME is not recorded by CloudTrail.",
+      "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "metadata": {
+        "eventCode": "awslambda_function_invoke_api_operations_cloudtrail_logging_enabled"
+      }
+    }
+  ],
+  "s3_bucket_no_mfa_delete": [
+    {
+      "id": "prowler#1014",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME has MFA Delete disabled.",
+      "riskDetails": "Your security credentials are compromised or unauthorized access is granted.",
+      "metadata": {
+        "eventCode": "s3_bucket_no_mfa_delete"
+      }
+    }
+  ],
+  "s3_bucket_object_versioning": [
+    {
+      "id": "prowler#1046",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME has versioning disabled.",
+      "riskDetails": "With versioning, you can easily recover from both unintended user actions and application failures.",
+      "metadata": {
+        "eventCode": "s3_bucket_object_versioning"
+      }
+    }
+  ],
+  "s3_bucket_secure_transport_policy": [
+    {
+      "id": "prowler#1058",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME does not have a bucket policy, thus it allows HTTP requests.",
+      "riskDetails": "If HTTPS is not enforced on the bucket policy, communication between clients and S3 buckets can use unencrypted HTTP. As a result, sensitive information could be transmitted in clear text over the network or internet.",
+      "metadata": {
+        "eventCode": "s3_bucket_secure_transport_policy"
+      }
+    },
+    {
+      "id": "prowler#1065",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME allows requests over insecure transport in the bucket policy.",
+      "riskDetails": "If HTTPS is not enforced on the bucket policy, communication between clients and S3 buckets can use unencrypted HTTP. As a result, sensitive information could be transmitted in clear text over the network or internet.",
+      "metadata": {
+        "eventCode": "s3_bucket_secure_transport_policy"
+      }
+    }
+  ],
+  "s3_bucket_server_access_logging_enabled": [
+    {
+      "id": "prowler#1068",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME has server access logging disabled.",
+      "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+      "metadata": {
+        "eventCode": "s3_bucket_server_access_logging_enabled"
+      }
+    }
+  ],
+  "secretsmanager_automatic_rotation_enabled": [
+    {
+      "id": "prowler#1083",
+      "statusDetail": "SecretsManager secret CdnSecret32008E6A-W8kAVoVr93kk has rotation disabled.",
+      "riskDetails": "Rotating secrets minimizes exposure to attacks using stolen secrets.",
+      "metadata": {
+        "eventCode": "secretsmanager_automatic_rotation_enabled"
+      }
+    },
+    {
+      "id": "prowler#1084",
+      "statusDetail": "SecretsManager secret test-antoine-QumuloAPISecrets has rotation disabled.",
+      "riskDetails": "Rotating secrets minimizes exposure to attacks using stolen secrets.",
+      "metadata": {
+        "eventCode": "secretsmanager_automatic_rotation_enabled"
+      }
+    }
+  ],
+  "awslambda_function_no_secrets_in_code": [
+    {
+      "id": "prowler#131",
+      "statusDetail": "Potential secrets found in Lambda function LAMBDA_FUNCTION_NAME code -> bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing.  If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_code"
+      }
+    },
+    {
+      "id": "prowler#132",
+      "statusDetail": "Potential secrets found in Lambda function LAMBDA_FUNCTION_NAME code -> bundle.mjs: Hex High Entropy String on line 5855, Secret Keyword on line 6170, Secret Keyword on line 10329; bundle.mjs: Hex High Entropy String on line 5855, Secret Keyword on line 6170, Secret Keyword on line 10329; bundle.mjs: Hex High Entropy String on line 5855, Secret Keyword on line 6170, Secret Keyword on line 10329.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing.  If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_code"
+      }
+    },
+    {
+      "id": "prowler#133",
+      "statusDetail": "Potential secrets found in Lambda function LAMBDA_FUNCTION_NAME code -> bundle.mjs: Hex High Entropy String on line 4273, Secret Keyword on line 4674, Secret Keyword on line 9843; bundle.mjs: Hex High Entropy String on line 4273, Secret Keyword on line 4674, Secret Keyword on line 9843; bundle.mjs: Hex High Entropy String on line 4273, Secret Keyword on line 4674, Secret Keyword on line 9843.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing.  If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_code"
+      }
+    }
+  ],
+  "awslambda_function_no_secrets_in_variables": [
+    {
+      "id": "prowler#134",
+      "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable SECRET_NAME.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_variables"
+      }
+    },
+    {
+      "id": "prowler#146",
+      "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable ENSEMBLE_DATA_API_KEY, Secret Keyword in variable TWELVE_LABS_API_KEY.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_variables"
+      }
+    },
+    {
+      "id": "prowler#149",
+      "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable AUTH_PASSWORD.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_variables"
+      }
+    },
+    {
+      "id": "prowler#150",
+      "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable AUTH_USERNAME.",
+      "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+      "metadata": {
+        "eventCode": "awslambda_function_no_secrets_in_variables"
+      }
+    }
+  ],
+  "apigateway_restapi_logging_enabled": [
+    {
+      "id": "prowler#14",
+      "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine has logging disabled.",
+      "riskDetails": "If not enabled, monitoring of service use is not possible. Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_logging_enabled"
+      }
+    },
+    {
+      "id": "prowler#15",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage DeployStage has logging disabled.",
+      "riskDetails": "If not enabled, monitoring of service use is not possible. Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_logging_enabled"
+      }
+    },
+    {
+      "id": "prowler#16",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 in stage DeployStage has logging disabled.",
+      "riskDetails": "If not enabled, monitoring of service use is not possible. Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_logging_enabled"
+      }
+    }
+  ],
+  "awslambda_function_not_publicly_accessible": [
+    {
+      "id": "prowler#151",
+      "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a policy resource-based policy with public access.",
+      "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+      "metadata": {
+        "eventCode": "awslambda_function_not_publicly_accessible"
+      }
+    }
+  ],
+  "awslambda_function_url_cors_policy": [
+    {
+      "id": "prowler#153",
+      "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME URL has a wide CORS configuration.",
+      "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+      "metadata": {
+        "eventCode": "awslambda_function_url_cors_policy"
+      }
+    }
+  ],
+  "awslambda_function_url_public": [
+    {
+      "id": "prowler#155",
+      "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a publicly accessible function URL.",
+      "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+      "metadata": {
+        "eventCode": "awslambda_function_url_public"
+      }
+    }
+  ],
+  "cloudformation_stack_outputs_find_secrets": [
+    {
+      "id": "prowler#159",
+      "statusDetail": "Potential secret found in CloudFormation Stack QumuloOnPremCalculator-test-antoine Outputs -> Hex High Entropy String in Output 26.",
+      "riskDetails": "Secrets hardcoded into CloudFormation outputs can be used by malware and bad actors to gain lateral access to other services.",
+      "metadata": {
+        "eventCode": "cloudformation_stack_outputs_find_secrets"
+      }
+    }
+  ],
+  "apigateway_restapi_public": [
+    {
+      "id": "prowler#17",
+      "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 is internet accessible.",
+      "riskDetails": "If accessible from internet without restrictions opens up attack / abuse surface for any malicious user.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_public"
+      }
+    },
+    {
+      "id": "prowler#18",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob is internet accessible.",
+      "riskDetails": "If accessible from internet without restrictions opens up attack / abuse surface for any malicious user.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_public"
+      }
+    },
+    {
+      "id": "prowler#19",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 is internet accessible.",
+      "riskDetails": "If accessible from internet without restrictions opens up attack / abuse surface for any malicious user.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_public"
+      }
+    }
+  ],
+  "cloudfront_distributions_field_level_encryption_enabled": [
+    {
+      "id": "prowler#195",
+      "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID has Field Level Encryption disabled.",
+      "riskDetails": "Allows you protect specific data throughout system processing so that only certain applications can see it.",
+      "metadata": {
+        "eventCode": "cloudfront_distributions_field_level_encryption_enabled"
+      }
+    }
+  ],
+  "account_maintain_current_contact_details": [
+    {
+      "id": "prowler#2",
+      "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+      "riskDetails": "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question.",
+      "metadata": {
+        "eventCode": "account_maintain_current_contact_details"
+      }
+    }
+  ],
+  "cloudfront_distributions_https_enabled": [
+    {
+      "id": "prowler#231",
+      "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID viewers can use HTTP or HTTPS.",
+      "riskDetails": "If not enabled sensitive information in transit is not protected. Surveillance and other threats are risks may exists.",
+      "metadata": {
+        "eventCode": "cloudfront_distributions_https_enabled"
+      }
+    }
+  ],
+  "cloudfront_distributions_logging_enabled": [
+    {
+      "id": "prowler#233",
+      "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID has logging disabled.",
+      "riskDetails": "If not enabled monitoring of service use is not possible.",
+      "metadata": {
+        "eventCode": "cloudfront_distributions_logging_enabled"
+      }
+    }
+  ],
+  "cloudfront_distributions_using_deprecated_ssl_protocols": [
+    {
+      "id": "prowler#266",
+      "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID is using a deprecated SSL protocol.",
+      "riskDetails": "Using insecure ciphers could affect privacy of in transit information.",
+      "metadata": {
+        "eventCode": "cloudfront_distributions_using_deprecated_ssl_protocols"
+      }
+    }
+  ],
+  "cloudfront_distributions_using_waf": [
+    {
+      "id": "prowler#268",
+      "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID is not using AWS WAF web ACL.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "cloudfront_distributions_using_waf"
+      }
+    }
+  ],
+  "apigateway_restapi_waf_acl_attached": [
+    {
+      "id": "prowler#28",
+      "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine does not have WAF ACL attached.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_waf_acl_attached"
+      }
+    },
+    {
+      "id": "prowler#29",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage DeployStage does not have WAF ACL attached.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_waf_acl_attached"
+      }
+    },
+    {
+      "id": "prowler#30",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage Dev does not have WAF ACL attached.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_waf_acl_attached"
+      }
+    },
+    {
+      "id": "prowler#31",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 in stage DeployStage does not have WAF ACL attached.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_waf_acl_attached"
+      }
+    },
+    {
+      "id": "prowler#32",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 in stage Dev does not have WAF ACL attached.",
+      "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_waf_acl_attached"
+      }
+    }
+  ],
+  "cloudtrail_cloudwatch_logging_enabled": [
+    {
+      "id": "prowler#283",
+      "statusDetail": "Multiregion trail aws-controltower-BaselineCloudTrail has not been logging in the last 24h or is not configured to deliver logs.",
+      "riskDetails": "Sending CloudTrail logs to CloudWatch Logs will facilitate real-time and historic activity logging based on user, API, resource, and IP address, and provides opportunity to establish alarms and notifications for anomalous or sensitivity account activity.",
+      "metadata": {
+        "eventCode": "cloudtrail_cloudwatch_logging_enabled"
+      }
+    }
+  ],
+  "cloudtrail_kms_encryption_enabled": [
+    {
+      "id": "prowler#284",
+      "statusDetail": "Multiregion trail aws-controltower-BaselineCloudTrail has encryption disabled.",
+      "riskDetails": "By default, the log files delivered by CloudTrail to your bucket are encrypted by Amazon server-side encryption with Amazon S3-managed encryption keys (SSE-S3). To provide a security layer that is directly manageable, you can instead use server-side encryption with AWS KMS–managed keys (SSE-KMS) for your CloudTrail log files.",
+      "metadata": {
+        "eventCode": "cloudtrail_kms_encryption_enabled"
+      }
+    }
+  ],
+  "cloudtrail_logs_s3_bucket_access_logging_enabled": [
+    {
+      "id": "prowler#285",
+      "statusDetail": "Trail aws-controltower-BaselineCloudTrail is delivering logs to bucket aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2 which is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+      "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+      "metadata": {
+        "eventCode": "cloudtrail_logs_s3_bucket_access_logging_enabled"
+      }
+    }
+  ],
+  "cloudtrail_logs_s3_bucket_is_not_publicly_accessible": [
+    {
+      "id": "prowler#286",
+      "statusDetail": "Trail aws-controltower-BaselineCloudTrail bucket (aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2) is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+      "riskDetails": "Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected accounts use or configuration.",
+      "metadata": {
+        "eventCode": "cloudtrail_logs_s3_bucket_is_not_publicly_accessible"
+      }
+    }
+  ],
+  "cloudtrail_s3_dataevents_read_enabled": [
+    {
+      "id": "prowler#289",
+      "statusDetail": "No CloudTrail trails have a data event to record all S3 object-level API operations.",
+      "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "metadata": {
+        "eventCode": "cloudtrail_s3_dataevents_read_enabled"
+      }
+    }
+  ],
+  "cloudwatch_log_group_kms_encryption_enabled": [
+    {
+      "id": "prowler#295",
+      "statusDetail": "Log Group /aws/apigateway/welcome does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#296",
+      "statusDetail": "Log Group /aws/codebuild does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#297",
+      "statusDetail": "Log Group /aws/connect/trackitconnectnova does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#298",
+      "statusDetail": "Log Group /aws/imagebuilder/test-ami-recipe does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#299",
+      "statusDetail": "Log Group /aws/lambda/DeadlineResourceTracker-FleetHealthReporter does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#300",
+      "statusDetail": "Log Group /aws/lambda/DeadlineResourceTracker-FleetTableCleaner does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#301",
+      "statusDetail": "Log Group /aws/lambda/DeadlineResourceTracker-LostNodeGatherer does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#302",
+      "statusDetail": "Log Group /aws/lambda/DeadlineResourceTracker-TableCleaner does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#303",
+      "statusDetail": "Log Group /aws/lambda/DynamicFormatImageOptimizationFunction does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#304",
+      "statusDetail": "Log Group /aws/lambda/LiveStreaming-CustomResource8CDCD7A7-vG0QtnJnqc6g does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#305",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-clone_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#306",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-cluster_details does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#307",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-create_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#308",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-csv_export does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#309",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-delete_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#310",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-existing does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#311",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-existing_forecast does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#312",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_cluster_details does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#313",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#314",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_configurations does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#315",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_hw_supports does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#316",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_user does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#317",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-get_users does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#318",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-main does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#319",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-models does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#320",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-new_cluster_forecast does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#321",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-nodes_detail does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#322",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-pdf_export does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#323",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-sfdc_get_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#324",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-share_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#325",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-unshare_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#326",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-update_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#327",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-workato_export_pdf does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#328",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-workato_get_configuration does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#329",
+      "statusDetail": "Log Group /aws/lambda/QumuloOnPremCalculator-test-antoine-xlsx_export does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#330",
+      "statusDetail": "Log Group /aws/lambda/ThumbnailImageOptimizationFunction does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#331",
+      "statusDetail": "Log Group /aws/lambda/image-optimization-terraform-Format-Function does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#332",
+      "statusDetail": "Log Group /aws/lambda/lambda-ecs-caller-connect does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#333",
+      "statusDetail": "Log Group /aws/lambda/pipedrive-to-partner-central-selling does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#334",
+      "statusDetail": "Log Group /aws/lambda/social-listening-analysis does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#335",
+      "statusDetail": "Log Group /aws/lambda/social-listening-trigger does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#336",
+      "statusDetail": "Log Group /aws/lambda/testMediaTailorAds-AdServer-sJe6NYamZRv5 does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#337",
+      "statusDetail": "Log Group /aws/lambda/testMediaTailorAds2-AdServer-CoDYd7KnYLzL does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#338",
+      "statusDetail": "Log Group /ecs/ does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#339",
+      "statusDetail": "Log Group API-Gateway-Execution-Logs_37c351m9ob/Dev does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#340",
+      "statusDetail": "Log Group API-Gateway-Execution-Logs_47sxd8b5x6/Dev does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#341",
+      "statusDetail": "Log Group API-Gateway-Execution-Logs_rsyd8i3i0f/demo does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#342",
+      "statusDetail": "Log Group ElementalMediaLive does not have AWS KMS keys associated.",
+      "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+      }
+    }
+  ],
+  "cloudwatch_log_group_retention_policy_specific_days_enabled": [
+    {
+      "id": "prowler#345",
+      "statusDetail": "Log Group /aws/lambda/pipedrive-to-partner-central-selling has less than 365 days retention period (30 days).",
+      "riskDetails": "If log groups have a low retention policy of less than specific days, crucial logs and data can be lost.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_retention_policy_specific_days_enabled"
+      }
+    },
+    {
+      "id": "prowler#346",
+      "statusDetail": "Log Group /aws/lambda/social-listening-analysis has less than 365 days retention period (30 days).",
+      "riskDetails": "If log groups have a low retention policy of less than specific days, crucial logs and data can be lost.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_retention_policy_specific_days_enabled"
+      }
+    },
+    {
+      "id": "prowler#347",
+      "statusDetail": "Log Group /aws/lambda/social-listening-trigger has less than 365 days retention period (30 days).",
+      "riskDetails": "If log groups have a low retention policy of less than specific days, crucial logs and data can be lost.",
+      "metadata": {
+        "eventCode": "cloudwatch_log_group_retention_policy_specific_days_enabled"
+      }
+    }
+  ],
+  "dynamodb_tables_kms_cmk_encryption_enabled": [
+    {
+      "id": "prowler#375",
+      "statusDetail": "DynamoDB table genai-social-listening-jules-sociallisteningcachingtableTable is using DEFAULT encryption.",
+      "riskDetails": "All user data stored in Amazon DynamoDB is fully encrypted at rest. This functionality helps reduce the operational burden and complexity involved in protecting sensitive data.",
+      "metadata": {
+        "eventCode": "dynamodb_tables_kms_cmk_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#376",
+      "statusDetail": "DynamoDB table test-antoine-QumuloCalculatorConfigurations is using DEFAULT encryption.",
+      "riskDetails": "All user data stored in Amazon DynamoDB is fully encrypted at rest. This functionality helps reduce the operational burden and complexity involved in protecting sensitive data.",
+      "metadata": {
+        "eventCode": "dynamodb_tables_kms_cmk_encryption_enabled"
+      }
+    },
+    {
+      "id": "prowler#377",
+      "statusDetail": "DynamoDB table test-antoine-QumuloCalculatorCounters is using DEFAULT encryption.",
+      "riskDetails": "All user data stored in Amazon DynamoDB is fully encrypted at rest. This functionality helps reduce the operational burden and complexity involved in protecting sensitive data.",
+      "metadata": {
+        "eventCode": "dynamodb_tables_kms_cmk_encryption_enabled"
+      }
+    }
+  ],
+  "ec2_ebs_snapshots_encrypted": [
+    {
+      "id": "prowler#381",
+      "statusDetail": "EBS Snapshot snap-0154ab8538f767b2f is unencrypted.",
+      "riskDetails": "Data encryption at rest prevents data visibility in the event of its unauthorized access or theft.",
+      "metadata": {
+        "eventCode": "ec2_ebs_snapshots_encrypted"
+      }
+    }
+  ],
+  "ec2_networkacl_allow_ingress_any_port": [
+    {
+      "id": "prowler#382",
+      "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has every port open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_any_port"
+      }
+    },
+    {
+      "id": "prowler#383",
+      "statusDetail": "Network ACL eks-automode-vpc-default has every port open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_any_port"
+      }
+    }
+  ],
+  "ec2_networkacl_allow_ingress_tcp_port_22": [
+    {
+      "id": "prowler#384",
+      "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has SSH port 22 open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_tcp_port_22"
+      }
+    },
+    {
+      "id": "prowler#385",
+      "statusDetail": "Network ACL eks-automode-vpc-default has SSH port 22 open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_tcp_port_22"
+      }
+    }
+  ],
+  "ec2_networkacl_allow_ingress_tcp_port_3389": [
+    {
+      "id": "prowler#386",
+      "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has Microsoft RDP port 3389 open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_tcp_port_3389"
+      }
+    },
+    {
+      "id": "prowler#387",
+      "statusDetail": "Network ACL eks-automode-vpc-default has Microsoft RDP port 3389 open to the Internet.",
+      "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+      "metadata": {
+        "eventCode": "ec2_networkacl_allow_ingress_tcp_port_3389"
+      }
+    }
+  ],
+  "ec2_securitygroup_from_launch_wizard": [
+    {
+      "id": "prowler#388",
+      "statusDetail": "Security group launch-wizard (sg-07f6b9cd34487f7b6) was created using the EC2 Launch Wizard.",
+      "riskDetails": "Security Groups Created on the AWS Console using the EC2 wizard may allow port 22 from 0.0.0.0/0.",
+      "metadata": {
+        "eventCode": "ec2_securitygroup_from_launch_wizard"
+      }
+    }
+  ],
+  "ec2_securitygroup_not_used": [
+    {
+      "id": "prowler#389",
+      "statusDetail": "Security group eks-cluster-sg-eks-automode-1736372498 (sg-01d56f3799e1eb8a7) it is not being used.",
+      "riskDetails": "Having clear definition and scope for Security Groups creates a better administration environment.",
+      "metadata": {
+        "eventCode": "ec2_securitygroup_not_used"
+      }
+    },
+    {
+      "id": "prowler#390",
+      "statusDetail": "Security group launch-wizard (sg-07f6b9cd34487f7b6) it is not being used.",
+      "riskDetails": "Having clear definition and scope for Security Groups creates a better administration environment.",
+      "metadata": {
+        "eventCode": "ec2_securitygroup_not_used"
+      }
+    }
+  ],
+  "ecr_repositories_lifecycle_policy_enabled": [
+    {
+      "id": "prowler#392",
+      "statusDetail": "Repository zero-shot-classifier-on-aws does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    },
+    {
+      "id": "prowler#393",
+      "statusDetail": "Repository sst-asset does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    },
+    {
+      "id": "prowler#394",
+      "statusDetail": "Repository shoppable-on-aws does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    },
+    {
+      "id": "prowler#395",
+      "statusDetail": "Repository faiss-on-aws does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    },
+    {
+      "id": "prowler#396",
+      "statusDetail": "Repository zero-shot-object-on-aws does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    },
+    {
+      "id": "prowler#397",
+      "statusDetail": "Repository sonic-agent does not have a lifecycle policy configured.",
+      "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+      "metadata": {
+        "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+      }
+    }
+  ],
+  "ecr_repositories_scan_images_on_push_enabled": [
+    {
+      "id": "prowler#398",
+      "statusDetail": "ECR repository sst-asset has scan on push disabled.",
+      "riskDetails": "Amazon ECR image scanning helps in identifying software vulnerabilities in your container images. Amazon ECR uses the Common Vulnerabilities and Exposures (CVEs) database from the open-source Clair project and provides a list of scan findings. ",
+      "metadata": {
+        "eventCode": "ecr_repositories_scan_images_on_push_enabled"
+      }
+    },
+    {
+      "id": "prowler#399",
+      "statusDetail": "ECR repository sonic-agent has scan on push disabled.",
+      "riskDetails": "Amazon ECR image scanning helps in identifying software vulnerabilities in your container images. Amazon ECR uses the Common Vulnerabilities and Exposures (CVEs) database from the open-source Clair project and provides a list of scan findings. ",
+      "metadata": {
+        "eventCode": "ecr_repositories_scan_images_on_push_enabled"
+      }
+    }
+  ],
+  "account_security_contact_information_is_registered": [
+    {
+      "id": "prowler#4",
+      "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Alternate Contacts -> Security Section.",
+      "riskDetails": "AWS provides customers with the option of specifying the contact information for accounts security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.",
+      "metadata": {
+        "eventCode": "account_security_contact_information_is_registered"
+      }
+    }
+  ],
+  "guardduty_is_enabled": [
+    {
+      "id": "prowler#409",
+      "statusDetail": "GuardDuty is not enabled.",
+      "riskDetails": "Amazon GuardDuty is a continuous security monitoring service that analyzes and processes several datasources.",
+      "metadata": {
+        "eventCode": "guardduty_is_enabled"
+      }
+    }
+  ],
+  "iam_aws_attached_policy_no_administrative_privileges": [
+    {
+      "id": "prowler#410",
+      "statusDetail": "AWS policy AdministratorAccess is attached and allows '*:*' administrative privileges.",
+      "riskDetails": "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege—that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks instead of allowing full administrative privileges. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions.",
+      "metadata": {
+        "eventCode": "iam_aws_attached_policy_no_administrative_privileges"
+      }
+    }
+  ],
+  "iam_inline_policy_no_administrative_privileges": [
+    {
+      "id": "prowler#446",
+      "statusDetail": "Inline policy delete-lambda attached to role delete-role-lambda allows '*:*' administrative privileges.",
+      "riskDetails": "IAM policies are the means by which privileges are granted to users, groups or roles. It is recommended and considered a standard security advice to grant least privilege—that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks instead of allowing full administrative privileges. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions.",
+      "metadata": {
+        "eventCode": "iam_inline_policy_no_administrative_privileges"
+      }
+    }
+  ],
+  "iam_password_policy_expires_passwords_within_90_days_or_less": [
+    {
+      "id": "prowler#449",
+      "statusDetail": "Password expiration is not set.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+      "metadata": {
+        "eventCode": "iam_password_policy_expires_passwords_within_90_days_or_less"
+      }
+    }
+  ],
+  "iam_password_policy_lowercase": [
+    {
+      "id": "prowler#450",
+      "statusDetail": "IAM password policy does not require at least one lowercase letter.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one lowercase letter.",
+      "metadata": {
+        "eventCode": "iam_password_policy_lowercase"
+      }
+    }
+  ],
+  "iam_password_policy_minimum_length_14": [
+    {
+      "id": "prowler#451",
+      "statusDetail": "IAM password policy does not require minimum length of 14 characters.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require minimum length of 14 or greater.",
+      "metadata": {
+        "eventCode": "iam_password_policy_minimum_length_14"
+      }
+    }
+  ],
+  "iam_password_policy_number": [
+    {
+      "id": "prowler#452",
+      "statusDetail": "IAM password policy does not require at least one number.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one number.",
+      "metadata": {
+        "eventCode": "iam_password_policy_number"
+      }
+    }
+  ],
+  "iam_password_policy_reuse_24": [
+    {
+      "id": "prowler#453",
+      "statusDetail": "IAM password policy reuse prevention is less than 24 or not set.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy prevents at least password reuse of 24 or greater.",
+      "metadata": {
+        "eventCode": "iam_password_policy_reuse_24"
+      }
+    }
+  ],
+  "iam_password_policy_symbol": [
+    {
+      "id": "prowler#454",
+      "statusDetail": "IAM password policy does not require at least one symbol.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one non-alphanumeric character.",
+      "metadata": {
+        "eventCode": "iam_password_policy_symbol"
+      }
+    }
+  ],
+  "iam_password_policy_uppercase": [
+    {
+      "id": "prowler#455",
+      "statusDetail": "IAM password policy does not require at least one uppercase letter.",
+      "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+      "metadata": {
+        "eventCode": "iam_password_policy_uppercase"
+      }
+    }
+  ],
+  "iam_policy_allows_privilege_escalation": [
+    {
+      "id": "prowler#456",
+      "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'iam:PassRole'.",
+      "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+      "metadata": {
+        "eventCode": "iam_policy_allows_privilege_escalation"
+      }
+    },
+    {
+      "id": "prowler#463",
+      "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'iam:PassRole', 'ec2:RunInstances', 'iam:PassRole'.",
+      "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+      "metadata": {
+        "eventCode": "iam_policy_allows_privilege_escalation"
+      }
+    },
+    {
+      "id": "prowler#469",
+      "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'cloudformation:CreateStack', 'iam:PassRole', 'cloudformation:DescribeStacks', 'iam:PassRole'.",
+      "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+      "metadata": {
+        "eventCode": "iam_policy_allows_privilege_escalation"
+      }
+    },
+    {
+      "id": "prowler#479",
+      "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'lambda:CreateFunction', 'iam:PassRole', 'lambda:CreateEventSourceMapping', 'iam:CreateAccessKey', 'iam:AddUserToGroup', 'iam:SetDefaultPolicyVersion', 'iam:AttachUserPolicy', 'iam:PassRole', 'iam:UpdateAssumeRolePolicy', 'iam:PutRolePolicy', 'iam:PutRolePolicy', 'sts:AssumeRole', 'iam:UpdateAssumeRolePolicy', 'sts:AssumeRole', 'iam:PutGroupPolicy', 'iam:AttachRolePolicy', 'sts:AssumeRole', 'iam:PassRole', 'ec2:RunInstances', 'iam:AttachRolePolicy', 'iam:AttachGroupPolicy', 'lambda:CreateFunction', 'iam:PassRole', 'lambda:InvokeFunction', 'iam:UpdateLoginProfile', 'lambda:UpdateFunctionCode', 'iam:Put*', 'iam:PutUserPolicy', 'cloudformation:CreateStack', 'iam:PassRole', 'cloudformation:DescribeStacks', 'iam:CreatePolicyVersion', 'iam:*', 'iam:CreateLoginProfile'.",
+      "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+      "metadata": {
+        "eventCode": "iam_policy_allows_privilege_escalation"
+      }
+    }
+  ],
+  "iam_policy_attached_only_to_group_or_roles": [
+    {
+      "id": "prowler#481",
+      "statusDetail": "User USER_NAME has the policy AmazonS3FullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#482",
+      "statusDetail": "User USER_NAME has the policy AdministratorAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#484",
+      "statusDetail": "User USER_NAME has the policy AmazonBedrockFullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#485",
+      "statusDetail": "User USER_NAME has the policy cas-cam-runtime-policy attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#487",
+      "statusDetail": "User USER_NAME has the policy AmazonKinesisFirehoseFullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#488",
+      "statusDetail": "User USER_NAME has the policy AmazonKinesisFullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#492",
+      "statusDetail": "User USER_NAME has the policy ReadOnlyImageOptimizationBucketUsingFastly attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#494",
+      "statusDetail": "User USER_NAME has the inline policy FirehoseUserPolicy attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#495",
+      "statusDetail": "User USER_NAME has the policy AmazonAthenaFullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#497",
+      "statusDetail": "User USER_NAME has the policy AmazonOpenSearchServiceFullAccess attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#499",
+      "statusDetail": "User USER_NAME has the policy IAMUserChangePassword attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#500",
+      "statusDetail": "User USER_NAME has the policy iconik-policy attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#504",
+      "statusDetail": "User USER_NAME has the policy genai-twelvelabs-assets-access attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    },
+    {
+      "id": "prowler#505",
+      "statusDetail": "User USER_NAME has the policy us-west-2-cas-cam-runtime-policy attached.",
+      "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+      "metadata": {
+        "eventCode": "iam_policy_attached_only_to_group_or_roles"
+      }
+    }
+  ],
+  "account_security_questions_are_registered_in_the_aws_account": [
+    {
+      "id": "prowler#5",
+      "statusDetail": "Login to the AWS Console as root. Choose your account name on the top right of the window -> My Account -> Configure Security Challenge Questions.",
+      "riskDetails": "The AWS support portal allows account owners to establish security questions that can be used to authenticate individuals calling AWS customer service for support. It is recommended that security questions be established. When creating a new AWS account a default super user is automatically created. This account is referred to as the root account. It is recommended that the use of this account be limited and highly controlled. During events in which the root password is no longer accessible or the MFA token associated with root is lost/destroyed it is possible through authentication using secret questions and associated answers to recover root login access.",
+      "metadata": {
+        "eventCode": "account_security_questions_are_registered_in_the_aws_account"
+      }
+    }
+  ],
+  "iam_role_cross_service_confused_deputy_prevention": [
+    {
+      "id": "prowler#515",
+      "statusDetail": "IAM Service Role ROLE_NAME does not prevent against a cross-service confused deputy attack.",
+      "riskDetails": "Allow attackers to gain unauthorized access to resources",
+      "metadata": {
+        "eventCode": "iam_role_cross_service_confused_deputy_prevention"
+      }
+    }
+  ],
+  "apigateway_restapi_authorizers_enabled": [
+    {
+      "id": "prowler#6",
+      "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 does not have authorizers at api level and the following paths and methods are unauthorized: /configuration/{id}/export/pdf -> GET; /new-cluster/forecast -> POST; /cluster/details -> POST; /users -> GET; /configuration/{id}/export/workato/pdf -> GET; /configuration/{id}/unshare/{user_id} -> DELETE; /configuration/{id}/export/csv -> GET; /models -> GET; /nodes_detail -> POST; /configuration/{id}/export/xlsx -> GET; /configurations -> GET; /expansion/forecast -> POST; /existing -> POST; /configuration/{id} -> DELETE; /configuration/{id} -> GET; /configuration/{id} -> PATCH; /configuration/{id}/sfdc -> GET; /cluster_details -> POST; /users/me -> GET; /configuration -> POST; /configuration/{id}/workato -> GET; /configuration/{id}/clone -> GET; /configuration/{id}/share -> POST; / -> POST; /hw_supports -> GET.",
+      "riskDetails": "If no authorizer is enabled anyone can use the service.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_authorizers_enabled"
+      }
+    },
+    {
+      "id": "prowler#7",
+      "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob does not have authorizers at api level and the following paths and methods are unauthorized: /MyADS -> GET.",
+      "riskDetails": "If no authorizer is enabled anyone can use the service.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_authorizers_enabled"
+      }
+    },
+    {
+      "id": "prowler#8",
+      "statusDetail": "API Gateway Mock ADS API ID 47sxd8b5x6 does not have authorizers at api level and the following paths and methods are unauthorized: /MyADS -> GET.",
+      "riskDetails": "If no authorizer is enabled anyone can use the service.",
+      "metadata": {
+        "eventCode": "apigateway_restapi_authorizers_enabled"
+      }
+    }
+  ],
+  "iam_root_hardware_mfa_enabled": [
+    {
+      "id": "prowler#843",
+      "statusDetail": "MFA is not enabled for root account.",
+      "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. For Level 2 it is recommended that the root account be protected with only a hardware MFA.",
+      "metadata": {
+        "eventCode": "iam_root_hardware_mfa_enabled"
+      }
+    }
+  ],
+  "iam_root_mfa_enabled": [
+    {
+      "id": "prowler#844",
+      "statusDetail": "MFA is not enabled for root account.",
+      "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. When virtual MFA is used for root accounts it is recommended that the device used is NOT a personal device but rather a dedicated mobile device (tablet or phone) that is managed to be kept charged and secured independent of any individual personal devices. (non-personal virtual MFA) This lessens the risks of losing access to the MFA due to device loss / trade-in or if the individual owning the device is no longer employed at the company.",
+      "metadata": {
+        "eventCode": "iam_root_mfa_enabled"
+      }
+    }
+  ],
+  "iam_rotate_access_key_90_days": [
+    {
+      "id": "prowler#845",
+      "statusDetail": "User USER_NAME has not rotated access key 1 in over 90 days (156 days).",
+      "riskDetails": "Access keys consist of an access key ID and secret access key which are used to sign programmatic requests that you make to AWS. AWS users need their own access keys to make programmatic calls to AWS from the AWS Command Line Interface (AWS CLI)- Tools for Windows PowerShell- the AWS SDKs- or direct HTTP calls using the APIs for individual AWS services. It is recommended that all access keys be regularly rotated.",
+      "metadata": {
+        "eventCode": "iam_rotate_access_key_90_days"
+      }
+    },
+    {
+      "id": "prowler#854",
+      "statusDetail": "User USER_NAME has not rotated access key 2 in over 90 days (105 days).",
+      "riskDetails": "Access keys consist of an access key ID and secret access key which are used to sign programmatic requests that you make to AWS. AWS users need their own access keys to make programmatic calls to AWS from the AWS Command Line Interface (AWS CLI)- Tools for Windows PowerShell- the AWS SDKs- or direct HTTP calls using the APIs for individual AWS services. It is recommended that all access keys be regularly rotated.",
+      "metadata": {
+        "eventCode": "iam_rotate_access_key_90_days"
+      }
+    }
+  ],
+  "iam_support_role_created": [
+    {
+      "id": "prowler#864",
+      "statusDetail": "AWS Support Access policy is not attached to any role.",
+      "riskDetails": "AWS provides a support center that can be used for incident notification and response, as well as technical support and customer services. Create an IAM Role to allow authorized users to manage incidents with AWS Support.",
+      "metadata": {
+        "eventCode": "iam_support_role_created"
+      }
+    }
+  ],
+  "iam_user_hardware_mfa_enabled": [
+    {
+      "id": "prowler#894",
+      "statusDetail": "User USER_NAME does not have any type of MFA enabled.",
+      "riskDetails": "Hardware MFA is preferred over virtual MFA.",
+      "metadata": {
+        "eventCode": "iam_user_hardware_mfa_enabled"
+      }
+    }
+  ],
+  "iam_user_mfa_enabled_console_access": [
+    {
+      "id": "prowler#917",
+      "statusDetail": "User USER_NAME has Console Password enabled but MFA disabled.",
+      "riskDetails": "Unauthorized access to this critical account if password is not secure or it is disclosed in any way.",
+      "metadata": {
+        "eventCode": "iam_user_mfa_enabled_console_access"
+      }
+    }
+  ],
+  "iam_user_two_active_access_key": [
+    {
+      "id": "prowler#919",
+      "statusDetail": "User USER_NAME has 2 active access keys.",
+      "riskDetails": "Access Keys could be lost or stolen. It creates a critical risk.",
+      "metadata": {
+        "eventCode": "iam_user_two_active_access_key"
+      }
+    }
+  ],
+  "route53_public_hosted_zones_cloudwatch_logging_enabled": [
+    {
+      "id": "prowler#944",
+      "statusDetail": "Route53 Public Hosted Zone Z0536686LVJ0WS6TEKYP has query logging disabled.",
+      "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "metadata": {
+        "eventCode": "route53_public_hosted_zones_cloudwatch_logging_enabled"
+      }
+    },
+    {
+      "id": "prowler#945",
+      "statusDetail": "Route53 Public Hosted Zone Z09989451EJ3MVKGEYVUM has query logging disabled.",
+      "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "metadata": {
+        "eventCode": "route53_public_hosted_zones_cloudwatch_logging_enabled"
+      }
+    },
+    {
+      "id": "prowler#946",
+      "statusDetail": "Route53 Public Hosted Zone Z0407764QLQGJ48SAN61 has query logging disabled.",
+      "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "metadata": {
+        "eventCode": "route53_public_hosted_zones_cloudwatch_logging_enabled"
+      }
+    }
+  ],
+  "s3_account_level_public_access_blocks": [
+    {
+      "id": "prowler#947",
+      "statusDetail": "Block Public Access is not configured for the account AWS_ACCOUNT_ID.",
+      "riskDetails": "Public access policies may be applied to sensitive data buckets.",
+      "metadata": {
+        "eventCode": "s3_account_level_public_access_blocks"
+      }
+    }
+  ],
+  "s3_bucket_acl_prohibited": [
+    {
+      "id": "prowler#948",
+      "statusDetail": "S3 Bucket S3_BUCKET_NAME has bucket ACLs enabled.",
+      "riskDetails": "S3 ACLs are a legacy access control mechanism that predates IAM. IAM and bucket policies are currently the preferred methods.",
+      "metadata": {
+        "eventCode": "s3_bucket_acl_prohibited"
+      }
+    }
+  ]
+}
