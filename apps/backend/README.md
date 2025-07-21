@@ -28,10 +28,11 @@ The results produced by these tools are stored in Amazon S3 and DynamoDB, then a
 
 ### Tests
 
-To run backend tests locally, execute:
+To run backend tests locally, we need to start the local dynamodb container, initialize the tables and then we can execute the tests.
 
 ```shell
 $ docker-compose up -d
+$ npm run test:backend:init
 $ npm run test:backend
 ```
 
@@ -67,7 +68,7 @@ In both cases, a complete analysis takes a long time, depending on the size of t
 ### Local
 
 To perform a local analysis, you don't need to provide any custom roles or policies.
-<br>A default role will be created for you and automatically used if no explicit role is provided.
+<br>A default role will be created for you during the deployment.
 
 ### Remote
 
@@ -76,21 +77,6 @@ To perform a remote analysis, you must provide a custom role with these managed 
 - SecurityAudit
 - job-function/ViewOnlyAccess
 
-And the following inline policy: [Inline Policy](../webui/public/inline-policy.json)
+And the following inline policy: [Inline Policy](../webui/src/assets/inline-policy.json)
 
-Additionally, add the following trust policy to your role:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "ACCOUNT_ID"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-```
+Additionally, add the following [Trust Policy](../webui/src/assets/trust-policy.json) to your role
