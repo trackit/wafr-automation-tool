@@ -53,23 +53,16 @@ export class GetAssessmentAdapter {
             none: question.none,
           })),
         })) ?? [],
-      ...(assessment.graphData && {
-        graphData: assessment.graphData,
-      }),
+      graphData: assessment.graphData,
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,
       questionVersion: assessment.questionVersion,
-      ...(assessment.rawGraphData && {
-        rawGraphData: assessment.rawGraphData,
-      }),
       regions: assessment.regions,
       roleArn: assessment.roleArn,
       step: assessment.step,
       workflows: assessment.workflows,
-      ...(assessment.error && {
-        error: assessment.error,
-      }),
+      error: assessment.error,
     };
   }
 
