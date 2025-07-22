@@ -43,8 +43,8 @@ function AssessmentsList() {
   } = useInfiniteQuery({
     queryKey: ['assessments', search],
     queryFn: ({ pageParam }) =>
-      getAssessments({ limit: 24, search, next_token: pageParam }),
-    getNextPageParam: (lastPage) => lastPage.next_token,
+      getAssessments({ limit: 24, search, nextToken: pageParam }),
+    getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
   });
 
@@ -229,13 +229,13 @@ function AssessmentsList() {
                 <div className="flex flex-col gap-1">
                   <div className="text-sm text-base-content flex flex-row gap-2 items-center">
                     <Server className="w-4 h-4" />
-                    Account: {extractAccountId(assessment.role_arn)}
+                    Account: {extractAccountId(assessment.roleArn)}
                   </div>
                   <div className="text-sm text-base-content flex flex-row gap-2 items-center">
                     <Calendar className="w-4 h-4" />
                     Created:{' '}
-                    {assessment.created_at
-                      ? new Date(assessment.created_at).toLocaleDateString()
+                    {assessment.createdAt
+                      ? new Date(assessment.createdAt).toLocaleDateString()
                       : 'N/A'}
                   </div>
                   <div className="text-sm text-base-content flex flex-row gap-2 items-center">

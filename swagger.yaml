@@ -47,7 +47,7 @@ paths:
           description: 'Search term to filter assessments by name, role ARN, or id'
           schema:
             type: string
-        - name: next_token
+        - name: nextToken
           in: query
           description: Token for pagination.
           schema:
@@ -64,7 +64,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Assessment'
-                  next_token:
+                  nextToken:
                     type: string
                     description: |
                       Token for pagination. If there are more assessments than can be returned in a single response,
@@ -121,7 +121,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  assessment_id:
+                  assessmentId:
                     type: string
                     description: The unique ID of the newly created assessment
         '400':
@@ -381,12 +381,12 @@ paths:
           description: 'Search term to filter assessments by name, role ARN, or id'
           schema:
             type: string
-        - name: show_hidden
+        - name: showHidden
           in: query
           description: 'Show hidden findings'
           schema:
             type: boolean
-        - name: next_token
+        - name: nextToken
           in: query
           description: Token for pagination.
           schema:
@@ -403,7 +403,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Finding'
-                  next_token:
+                  nextToken:
                     type: string
                     description: |
                       Token for pagination. If there are more findings than can be returned in a single response,
@@ -544,7 +544,7 @@ components:
         name:
           type: string
           description: Name or title of the assessment
-        created_by:
+        createdBy:
           type: string
           description: User who created the assessment
         organization:
@@ -557,7 +557,7 @@ components:
           description: |
             List of regions to scan
             If empty, all regions will be scanned
-        role_arn:
+        roleArn:
           type: string
           description: Role ARN associated with the assessment
         workflows:
@@ -565,7 +565,7 @@ components:
           items:
             type: string
           description: Workflows associated with the assessment
-        created_at:
+        createdAt:
           type: string
           description: ISO-formatted date when the assessment was created
         step:
@@ -589,10 +589,10 @@ components:
               description: The assessment pillars including questions and best practices
               items:
                 $ref: '#/components/schemas/Pillar'
-            question_version:
+            questionVersion:
               type: string
               description: The version of questions that were used for the assessment
-            graph_datas:
+            graphData:
               type: object
               description: Processed data from the scanning tools
               additionalProperties: false
@@ -600,7 +600,7 @@ components:
                 regions:
                   type: object
                   description: Regions where findings were found
-                resource_types:
+                resourceTypes:
                   type: object
                   description: Resource types where findings were found
                 severities:
@@ -634,10 +634,10 @@ components:
         severity:
           type: string
           description: 'Severity level of the finding (e.g., Low, Medium, High)'
-        status_code:
+        statusCode:
           type: string
           description: 'The status of the finding (e.g., MANUAL, FAIL)'
-        status_detail:
+        statusDetail:
           type: string
           description: Explanation or additional details about the finding's status
         hidden:
@@ -679,10 +679,10 @@ components:
               description: 'List of resources (URLs, CLI commands) for remediation'
               items:
                 type: string
-        risk_details:
+        riskDetails:
           type: string
           description: Explanation of the risk associated with the finding
-        is_ai_associated:
+        isAIAssociated:
           type: boolean
           description: Tells whether the finding is associated with an AI or manually
     FindingDto:
@@ -721,7 +721,7 @@ components:
           type: boolean
         disabled:
           type: boolean
-        best_practices:
+        bestPractices:
           type: array
           items:
             $ref: '#/components/schemas/BestPractice'

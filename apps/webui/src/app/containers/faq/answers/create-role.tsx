@@ -1,9 +1,9 @@
-import inline_policy_json from '../../../../assets/inline-policy.json';
-import trust_policy_json from '../../../../assets/trust-policy.json';
+import inlinePolicyJSON from '../../../../assets/inline-policy.json';
+import trustPolicyJSON from '../../../../assets/trust-policy.json';
 
 const CreateRoleAnswer = () => {
-  const inline_policy = JSON.stringify(inline_policy_json, null, 2);
-  const trust_policy = JSON.stringify(trust_policy_json, null, 2);
+  const inlinePolicy = JSON.stringify(inlinePolicyJSON, null, 2);
+  const trustPolicy = JSON.stringify(trustPolicyJSON, null, 2);
 
   return (
     <div className="space-y-6">
@@ -23,7 +23,7 @@ const CreateRoleAnswer = () => {
         <li>
           Copy and paste the following policy into the JSON editor:
           <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700">
-            <code>{inline_policy}</code>
+            <code>{inlinePolicy}</code>
           </pre>
         </li>
         <li>
@@ -44,7 +44,7 @@ const CreateRoleAnswer = () => {
             following trust policy:
           </p>
           <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700">
-            <code>{trust_policy}</code>
+            <code>{trustPolicy}</code>
           </pre>
           <p className="text-gray-700">
             Replace <strong>ACCOUNT_ID</strong> with the account ID where the

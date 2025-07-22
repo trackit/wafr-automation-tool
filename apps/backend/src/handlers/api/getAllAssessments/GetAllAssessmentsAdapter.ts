@@ -14,7 +14,7 @@ const GetAllAssessmentsQuerySchema = z
   .object({
     limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
     search: z.string().optional(),
-    next_token: z.string().trim().base64().optional(),
+    nextToken: z.string().trim().base64().optional(),
   })
   .strict() satisfies ZodType<
   operations['getAssessments']['parameters']['query']
@@ -39,12 +39,12 @@ export class GetAllAssessmentsAdapter {
     return assessment.map((assessment) => ({
       id: assessment.id,
       name: assessment.name,
-      created_by: assessment.createdBy,
+      createdBy: assessment.createdBy,
       organization: assessment.organization,
       regions: assessment.regions,
-      role_arn: assessment.roleArn,
+      roleArn: assessment.roleArn,
       workflows: assessment.workflows,
-      created_at: assessment.createdAt.toISOString(),
+      createdAt: assessment.createdAt.toISOString(),
       step: assessment.step,
       ...(assessment.error && {
         error: {
@@ -70,7 +70,7 @@ export class GetAllAssessmentsAdapter {
         ...parsedQuery,
       });
       const convertedAssessments = this.convertToAPIAssessment(assessments);
-      return { assessments: convertedAssessments, next_token: nextToken };
+      return { assessments: convertedAssessments, nextToken };
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request query: ${e.message}`);

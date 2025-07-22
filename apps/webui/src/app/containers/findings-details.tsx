@@ -117,8 +117,8 @@ function FindingItem({
               severity={finding.severity as 'High' | 'Medium' | 'Low'}
             />
           )}
-          {highlightText(finding.status_detail, searchQuery)}
-          {finding.is_ai_associated && <AIBadge className="badge-sm ml-2" />}
+          {highlightText(finding.statusDetail, searchQuery)}
+          {finding.isAIAssociated && <AIBadge className="badge-sm ml-2" />}
         </div>
         {!finding.hidden && (
           <div
@@ -137,9 +137,9 @@ function FindingItem({
           </div>
         )}
       </div>
-      {finding.risk_details && (
+      {finding.riskDetails && (
         <p className="text-sm text-base-content">
-          {highlightText(finding.risk_details, searchQuery)}
+          {highlightText(finding.riskDetails, searchQuery)}
         </p>
       )}
       {finding.resources?.map((resource) => (
@@ -240,7 +240,7 @@ function FindingsDetails({
           showHidden,
           pageParam
         ),
-      getNextPageParam: (lastPage) => lastPage.next_token,
+      getNextPageParam: (lastPage) => lastPage.nextToken,
       initialPageParam: '',
     });
 

@@ -35,9 +35,9 @@ export class GetAllAssessmentsAdapterEventMother {
   }
 
   public withNextToken(
-    nextToken: GetAllAssessmentsQuery['next_token']
+    nextToken: GetAllAssessmentsQuery['nextToken']
   ): GetAllAssessmentsAdapterEventMother {
-    this.data.next_token = nextToken;
+    this.data.nextToken = nextToken;
     return this;
   }
 

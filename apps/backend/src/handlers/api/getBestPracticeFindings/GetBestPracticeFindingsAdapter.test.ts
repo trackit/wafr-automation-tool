@@ -185,8 +185,8 @@ describe('GetBestPracticeFindings adapter', () => {
         expect.objectContaining({
           id: 'scanning-tool#1',
           severity: SeverityType.Medium,
-          status_code: '200',
-          status_detail: 'status detail',
+          statusCode: '200',
+          statusDetail: 'status detail',
           hidden: false,
           resources: [
             {
@@ -200,8 +200,8 @@ describe('GetBestPracticeFindings adapter', () => {
             desc: 'remediation description',
             references: ['ref1'],
           },
-          risk_details: 'risk details',
-          is_ai_associated: false,
+          riskDetails: 'risk details',
+          isAIAssociated: false,
         })
       );
     });

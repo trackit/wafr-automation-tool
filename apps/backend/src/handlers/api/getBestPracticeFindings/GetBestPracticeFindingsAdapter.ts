@@ -22,8 +22,8 @@ const GetBestPracticeFindingsPathArgsSchema = z.object({
 const GetBestPracticeFindingsQueryArgsSchema = z.object({
   limit: z.coerce.number().int().min(1).optional(),
   search: z.string().optional(),
-  show_hidden: z.coerce.boolean().optional(),
-  next_token: z.string().nonempty().base64().optional(),
+  showHidden: z.coerce.boolean().optional(),
+  nextToken: z.string().nonempty().base64().optional(),
 }) satisfies ZodType<
   operations['getBestPracticeFindings']['parameters']['query']
 >;
@@ -47,8 +47,8 @@ export class GetBestPracticeFindingsAdapter {
     return findings.map((finding) => ({
       id: finding.id,
       severity: finding.severity,
-      status_code: finding.statusCode,
-      status_detail: finding.statusDetail,
+      statusCode: finding.statusCode,
+      statusDetail: finding.statusDetail,
       hidden: finding.hidden,
       ...(finding.resources && {
         resources: finding.resources.map((resource) => ({
@@ -64,8 +64,8 @@ export class GetBestPracticeFindingsAdapter {
           references: finding.remediation.references,
         },
       }),
-      risk_details: finding.riskDetails,
-      is_ai_associated: finding.isAIAssociated,
+      riskDetails: finding.riskDetails,
+      isAIAssociated: finding.isAIAssociated,
     }));
   }
 
@@ -89,13 +89,13 @@ export class GetBestPracticeFindingsAdapter {
           user: getUserFromEvent(event),
           ...parsedPathParameters,
           limit: parsedQueryParameters.limit,
-          nextToken: parsedQueryParameters.next_token,
+          nextToken: parsedQueryParameters.nextToken,
           searchTerm: parsedQueryParameters.search,
-          showHidden: parsedQueryParameters.show_hidden,
+          showHidden: parsedQueryParameters.showHidden,
         });
       return {
         items: this.toGetBestPracticeFindingsItemsResponse(findings),
-        next_token: nextToken,
+        nextToken,
       };
     } catch (error) {
       if (error instanceof ZodError) {

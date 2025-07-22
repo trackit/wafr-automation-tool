@@ -55,7 +55,7 @@ export class StartAssessmentAdapter {
         user: getUserFromEvent(event),
         ...parsedBody,
       });
-      return { assessment_id: assessmentId };
+      return { assessmentId };
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request body: ${e.message}`);
