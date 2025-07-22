@@ -58,8 +58,20 @@ describe('StoreFindingsToAssociate UseCase', () => {
     expect(fakeObjectsStorage.objects[key]).toBeDefined();
     const findings = JSON.parse(fakeObjectsStorage.objects[key]);
     expect(findings).toHaveLength(2);
-    expect(findings[0]).toEqual(expect.objectContaining({ id: 'prowler#1' }));
-    expect(findings[1]).toEqual(expect.objectContaining({ id: 'prowler#2' }));
+    expect(findings[0]).toEqual(
+      expect.objectContaining({
+        id: 'prowler#1',
+        isAIAssociated: true,
+        hidden: false,
+      })
+    );
+    expect(findings[1]).toEqual(
+      expect.objectContaining({
+        id: 'prowler#2',
+        isAIAssociated: true,
+        hidden: false,
+      })
+    );
   });
 
   it('should chunk findings if they exceed the maximum size', async () => {

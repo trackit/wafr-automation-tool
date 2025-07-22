@@ -12,8 +12,70 @@ import {
   QuestionMother,
   ScanningTool,
 } from '@backend/models';
+import { tokenFakeObjectsStorage } from '../ObjectsStorage';
 
 describe('FindingToBestPracticesAssociationServiceGenAI', () => {
+  describe('replacePromptVariables', () => {
+    it('should replace variables in the prompt correctly', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const prompt = 'Hello {{name}}, welcome to {{place}}!';
+      const variables = { name: 'Alice', place: 'Wonderland' };
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.replacePromptVariables({
+          prompt,
+          variables,
+        });
+      expect(result).toBe('Hello Alice, welcome to Wonderland!');
+    });
+
+    it('should not replace variables if none are provided', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const prompt = 'Hello, welcome!';
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.replacePromptVariables({
+          prompt,
+          variables: {},
+        });
+      expect(result).toBe(prompt);
+    });
+
+    it('should replace multiple occurrences of the same variable', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const prompt = 'Hello {{name}}, {{name}} is here!';
+      const variables = { name: 'Alice' };
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.replacePromptVariables({
+          prompt,
+          variables,
+        });
+      expect(result).toBe('Hello Alice, Alice is here!');
+    });
+
+    it('should handle objects variables', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const prompt = 'Hello {{obj}}!';
+      const variables = { obj: { name: 'Alice', location: 'Wonderland' } };
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.replacePromptVariables({
+          prompt,
+          variables,
+        });
+      expect(result).toBe('Hello {"name":"Alice","location":"Wonderland"}!');
+    });
+
+    it('should handle arrays variables', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const prompt = 'Hello {{arr}}!';
+      const variables = { arr: ['Alice', 'Bob'] };
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.replacePromptVariables({
+          prompt,
+          variables,
+        });
+      expect(result).toBe('Hello ["Alice","Bob"]!');
+    });
+  });
+
   describe('flattenBestPracticesWithPillarAndQuestionFromPillars', () => {
     it('should flatten best practices with their associated pillar and question', () => {
       const { findingToBestPracticesAssociationServiceGenAI } = setup();
@@ -324,8 +386,14 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
   describe('associateFindingsToBestPractices', () => {
     it('should associate findings to best practices', async () => {
-      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
-        setup();
+      const {
+        aiService,
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.promptKey
+      ] = 'This is a prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -399,8 +467,14 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid JSON AI response', async () => {
-      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
-        setup();
+      const {
+        aiService,
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.promptKey
+      ] = 'This is a prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -453,8 +527,14 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid AI response format', async () => {
-      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
-        setup();
+      const {
+        aiService,
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.promptKey
+      ] = 'This is a prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -511,7 +591,11 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         aiService,
         findingToBestPracticesAssociationServiceGenAI,
         maxRetries,
+        fakeObjectsStorage,
       } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.promptKey
+      ] = 'This is a prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -542,6 +626,23 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ).rejects.toThrowError();
       expect(aiService.converse).toHaveBeenCalledTimes(maxRetries + 1);
     });
+
+    it('should return an empty array if no prompt is found', async () => {
+      const {
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects = {};
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings: [],
+            pillars: [],
+          }
+        );
+      expect(result).toEqual([]);
+    });
   });
 });
 
@@ -558,6 +659,7 @@ const setup = () => {
     maxRetries: inject(
       tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries
     ),
+    fakeObjectsStorage: inject(tokenFakeObjectsStorage),
     findingToBestPracticesAssociationServiceGenAI,
   };
 };
