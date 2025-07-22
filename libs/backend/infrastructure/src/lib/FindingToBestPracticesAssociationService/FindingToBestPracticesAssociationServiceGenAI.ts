@@ -78,7 +78,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
       (updatedPrompt, [key, value]) =>
         updatedPrompt.replace(
           new RegExp(`{{${key}}}`, 'g'), // Replace all occurrences
-          JSON.stringify(value)
+          typeof value === 'string' ? value : JSON.stringify(value)
         ),
       prompt
     );

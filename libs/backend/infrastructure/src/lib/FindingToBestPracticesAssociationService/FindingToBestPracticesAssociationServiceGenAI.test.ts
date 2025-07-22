@@ -25,7 +25,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
           prompt,
           variables,
         });
-      expect(result).toBe('Hello "Alice", welcome to "Wonderland"!');
+      expect(result).toBe('Hello Alice, welcome to Wonderland!');
     });
 
     it('should not replace variables if none are provided', () => {
@@ -48,7 +48,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
           prompt,
           variables,
         });
-      expect(result).toBe('Hello "Alice", "Alice" is here!');
+      expect(result).toBe('Hello Alice, Alice is here!');
     });
 
     it('should handle objects variables', () => {
