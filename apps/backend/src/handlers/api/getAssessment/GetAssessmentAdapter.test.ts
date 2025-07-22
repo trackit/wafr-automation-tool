@@ -188,14 +188,6 @@ describe('GetAssessmentAdapter', () => {
         name: 'assessment name',
         organization: 'test.io',
         questionVersion: '1.0.0',
-        rawGraphData: {
-          prowler: {
-            findings: 2,
-            regions: { 'us-west-2': 2 },
-            resourceTypes: { type: 2 },
-            severities: { [SeverityType.Medium]: 2 },
-          },
-        },
         regions: ['us-west-2'],
         roleArn: 'role-arn',
         step: AssessmentStep.FINISHED,
