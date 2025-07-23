@@ -86,8 +86,18 @@ export default [
               sourceTag: 'type:backend-models',
               onlyDependOnLibsWithTags: ['type:backend-models', 'scope:shared'],
             },
-            { sourceTag: 'type:di-container', onlyDependOnLibsWithTags: [] },
-            { sourceTag: 'type:backend-errors', onlyDependOnLibsWithTags: [] },
+            {
+              sourceTag: 'type:backend-scripts',
+              onlyDependOnLibsWithTags: ['scope:backend-libs', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:di-container',
+              onlyDependOnLibsWithTags: [],
+            },
+            {
+              sourceTag: 'type:backend-errors',
+              onlyDependOnLibsWithTags: [],
+            },
           ],
         },
       ],

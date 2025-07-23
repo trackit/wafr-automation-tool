@@ -3,7 +3,8 @@ import {
   CachePointType,
   ConversationRole,
   ConverseStreamCommand,
-  type ConverseStreamCommandOutput,
+  ConverseStreamCommandOutput,
+  InferenceConfiguration,
 } from '@aws-sdk/client-bedrock-runtime';
 
 import type { AIService, Prompt, TextComponent } from '@backend/ports';
@@ -35,9 +36,10 @@ export class AIServiceBedrock implements AIService {
 
   public async converse(args: {
     prompt: Prompt;
+    inferenceConfig?: InferenceConfiguration;
     prefill?: TextComponent;
   }): Promise<string> {
-    const { prompt, prefill } = args;
+    const { prompt, prefill, inferenceConfig } = args;
 
     const command = new ConverseStreamCommand({
       modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
@@ -57,7 +59,7 @@ export class AIServiceBedrock implements AIService {
           ? [{ role: ConversationRole.ASSISTANT, content: [prefill] }]
           : []),
       ],
-      inferenceConfig: {
+      inferenceConfig: inferenceConfig ?? {
         maxTokens: 4096,
         temperature: 0,
       },

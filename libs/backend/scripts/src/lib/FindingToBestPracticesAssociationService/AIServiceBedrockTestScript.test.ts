@@ -1,12 +1,11 @@
 import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 import {
   RetryErrorType,
-  tokenAssessmentsRepository,
   tokenDynamoDBAssessmentTableName,
   tokenFakeLogger,
   tokenFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
-  tokenPromptArn,
+  tokenLogger,
   tokenQuestionSetService,
   tokenS3Bucket,
 } from '@backend/infrastructure';
@@ -34,6 +33,7 @@ interface TestCaseProcessResult {
     errorType: RetryErrorType;
     message: string;
   }[];
+  promptLengths: number;
 }
 
 interface FailData {
@@ -52,7 +52,6 @@ export class AIServiceBedrockTestScript {
   private readonly mapFindingsToBestPracticesUseCase = inject(
     tokenMapScanFindingsToBestPracticesUseCase
   );
-  private readonly assessmentsRespository = inject(tokenAssessmentsRepository);
 
   private getTestConfigs(): TestCase[] {
     return parseJsonArray(
@@ -85,9 +84,23 @@ export class AIServiceBedrockTestScript {
           scanningTool: ScanningTool.PROWLER,
           findings,
           pillars: questionSet.pillars,
+          inferenceConfig: testCase.aiParameters,
         }
       );
 
+    const promptLengths = fakeLogger.logs
+      .filter((log) => log.level === 'info')
+      .map((log) => {
+        console.log(log.data);
+        if (log.data && typeof log.data === 'object' && 'prompt' in log.data) {
+          return (log.data.prompt as string).length as number;
+        }
+        return 0;
+      });
+    const promptLengthsSum = promptLengths.reduce(
+      (total, current) => total + current,
+      0
+    );
     const retries = fakeLogger.logs
       .filter((log) => log.level === 'error')
       .map((log) => {
@@ -96,6 +109,7 @@ export class AIServiceBedrockTestScript {
           message: log.message,
         };
       });
+
     let success = 0;
     const failed: FailData[] = [];
 
@@ -137,7 +151,7 @@ export class AIServiceBedrockTestScript {
         }
       });
     });
-    return { success, failed, retries };
+    return { success, failed, retries, promptLengths: promptLengthsSum };
   }
 
   private async runTestCase(
@@ -163,8 +177,9 @@ export class AIServiceBedrockTestScript {
         success: total.success + current.success,
         failed: [...total.failed, ...current.failed],
         retries: [...total.retries, ...current.retries],
+        promptLengths: total.promptLengths + current.promptLengths,
       }),
-      { success: 0, failed: [], retries: [] }
+      { success: 0, failed: [], retries: [], promptLengths: 0 }
     );
   }
 
@@ -173,8 +188,8 @@ export class AIServiceBedrockTestScript {
   ): void {
     console.log('\n=== AIServiceBedrockTestScript Report ===');
     console.table(
-      Object.entries(testCaseProcessResults).map(
-        ([_index, { success, failed, retries }]) => {
+      Object.values(testCaseProcessResults).map(
+        ({ success, failed, retries }) => {
           const total = success + failed.length;
           const successRate =
             total > 0 ? `${((success / total) * 100).toFixed(2)}%` : 'N/A';
@@ -190,6 +205,30 @@ export class AIServiceBedrockTestScript {
           };
         }
       )
+    );
+
+    // TODO: Rajouter le nombre de characters pour le testcase
+    // TODO:
+
+    const report = Object.values(testCaseProcessResults).map(
+      ({ success, failed, retries, promptLengths }) => {
+        const total = success + failed.length;
+        const successRate =
+          total > 0 ? `${((success / total) * 100).toFixed(2)}%` : 'N/A';
+        return {
+          total,
+          success,
+          failed,
+          retries,
+          successRate,
+          promptLengths,
+        };
+      }
+    );
+
+    fs.writeFileSync(
+      path.join(__dirname, `report-${new Date().toISOString()}.json`),
+      JSON.stringify(report, null, 2)
     );
   }
 
@@ -213,9 +252,7 @@ export class AIServiceBedrockTestScript {
 describe('AIServiceBedrockTestScript', () => {
   it('should run successfully', async () => {
     reset();
-    register(tokenPromptArn, {
-      useValue: 'arn:aws:bedrock:us-west-2:576872909007:prompt/1R1GA372DB',
-    });
+    register(tokenLogger, { useFactory: () => inject(tokenFakeLogger) });
     register(tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries, {
       useValue: 3,
     });

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z, type ZodType } from 'zod';
+import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 
 import type {
   BestPractice,
@@ -238,9 +239,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
     scanningTool: ScanningTool;
     findings: Finding[];
     pillars: Pillar[];
+    inferenceConfig?: InferenceConfiguration;
   }): Promise<FindingToBestPracticesAssociation[]> {
-    const { scanningTool, findings, pillars } = args;
+    const { scanningTool, findings, pillars, inferenceConfig } = args;
     const prompt = this.fetchPrompt();
+
     if (!prompt) {
       this.logger.warn('Prompt not found, not associating findings.');
       return [];
@@ -266,6 +269,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
             findings: remainingFindings,
           }),
           prefill: { text: '[' }, // Start with an opening bracket for JSON array
+          inferenceConfig,
         });
 
         this.logger.debug('stringifiedAIResponse', {

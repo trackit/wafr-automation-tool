@@ -1,0 +1,1998 @@
+[
+  {
+    "success": 16,
+    "failed": [
+      {
+        "message": "No best practices found for finding prowler#10",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#10",
+              "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage DeployStage does not have client certificate enabled.",
+              "riskDetails": "Possible man in the middle attacks and other similar risks.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_client_certificate_enabled"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#10",
+              "statusDetail": "API Gateway Mock ADS API ID 37c351m9ob in stage DeployStage does not have client certificate enabled.",
+              "riskDetails": "Possible man in the middle attacks and other similar risks.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_client_certificate_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "8",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#100",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#100",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME is not recorded by CloudTrail.",
+              "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+              "metadata": {
+                "eventCode": "awslambda_function_invoke_api_operations_cloudtrail_logging_enabled"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#100",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME is not recorded by CloudTrail.",
+              "riskDetails": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+              "metadata": {
+                "eventCode": "awslambda_function_invoke_api_operations_cloudtrail_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#1014",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#1014",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has MFA Delete disabled.",
+              "riskDetails": "Your security credentials are compromised or unauthorized access is granted.",
+              "metadata": {
+                "eventCode": "s3_bucket_no_mfa_delete"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#1014",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has MFA Delete disabled.",
+              "riskDetails": "Your security credentials are compromised or unauthorized access is granted.",
+              "metadata": {
+                "eventCode": "s3_bucket_no_mfa_delete"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#1046",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#1046",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has versioning disabled.",
+              "riskDetails": "With versioning, you can easily recover from both unintended user actions and application failures.",
+              "metadata": {
+                "eventCode": "s3_bucket_object_versioning"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#1046",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has versioning disabled.",
+              "riskDetails": "With versioning, you can easily recover from both unintended user actions and application failures.",
+              "metadata": {
+                "eventCode": "s3_bucket_object_versioning"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#1058",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#1058",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME does not have a bucket policy, thus it allows HTTP requests.",
+              "riskDetails": "If HTTPS is not enforced on the bucket policy, communication between clients and S3 buckets can use unencrypted HTTP. As a result, sensitive information could be transmitted in clear text over the network or internet.",
+              "metadata": {
+                "eventCode": "s3_bucket_secure_transport_policy"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#1058",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME does not have a bucket policy, thus it allows HTTP requests.",
+              "riskDetails": "If HTTPS is not enforced on the bucket policy, communication between clients and S3 buckets can use unencrypted HTTP. As a result, sensitive information could be transmitted in clear text over the network or internet.",
+              "metadata": {
+                "eventCode": "s3_bucket_secure_transport_policy"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "8",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#1068",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#1068",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has server access logging disabled.",
+              "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+              "metadata": {
+                "eventCode": "s3_bucket_server_access_logging_enabled"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#1068",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has server access logging disabled.",
+              "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+              "metadata": {
+                "eventCode": "s3_bucket_server_access_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#1083",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#1083",
+              "statusDetail": "SecretsManager secret CdnSecret32008E6A-W8kAVoVr93kk has rotation disabled.",
+              "riskDetails": "Rotating secrets minimizes exposure to attacks using stolen secrets.",
+              "metadata": {
+                "eventCode": "secretsmanager_automatic_rotation_enabled"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#1083",
+              "statusDetail": "SecretsManager secret CdnSecret32008E6A-W8kAVoVr93kk has rotation disabled.",
+              "riskDetails": "Rotating secrets minimizes exposure to attacks using stolen secrets.",
+              "metadata": {
+                "eventCode": "secretsmanager_automatic_rotation_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#131",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#131",
+              "statusDetail": "Potential secrets found in Lambda function LAMBDA_FUNCTION_NAME code -> bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161.",
+              "riskDetails": "The use of a hard-coded password increases the possibility of password guessing.  If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+              "metadata": {
+                "eventCode": "awslambda_function_no_secrets_in_code"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#131",
+              "statusDetail": "Potential secrets found in Lambda function LAMBDA_FUNCTION_NAME code -> bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161; bundle.mjs: Hex High Entropy String on line 16462, Secret Keyword on line 16777, Secret Keyword on line 21773, Secret Keyword on line 30161.",
+              "riskDetails": "The use of a hard-coded password increases the possibility of password guessing.  If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+              "metadata": {
+                "eventCode": "awslambda_function_no_secrets_in_code"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#134",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#134",
+              "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable SECRET_NAME.",
+              "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+              "metadata": {
+                "eventCode": "awslambda_function_no_secrets_in_variables"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#134",
+              "statusDetail": "Potential secret found in Lambda function LAMBDA_FUNCTION_NAME variables -> Secret Keyword in variable SECRET_NAME.",
+              "riskDetails": "The use of a hard-coded password increases the possibility of password guessing. If hard-coded passwords are used, it is possible that malicious users gain access through the account in question.",
+              "metadata": {
+                "eventCode": "awslambda_function_no_secrets_in_variables"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "No best practices found for finding prowler#14",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#14",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine has logging disabled.",
+              "riskDetails": "If not enabled, monitoring of service use is not possible. Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_logging_enabled"
+              }
+            },
+            "bestPractices": []
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#14",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine has logging disabled.",
+              "riskDetails": "If not enabled, monitoring of service use is not possible. Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#151",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#151",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a policy resource-based policy with public access.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#151",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a policy resource-based policy with public access.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "5"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#153",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#153",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME URL has a wide CORS configuration.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_url_cors_policy"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#153",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME URL has a wide CORS configuration.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_url_cors_policy"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#155",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#155",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a publicly accessible function URL.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_url_public"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#155",
+              "statusDetail": "Lambda function LAMBDA_FUNCTION_NAME has a publicly accessible function URL.",
+              "riskDetails": "Publicly accessible services could expose sensitive data to bad actors.",
+              "metadata": {
+                "eventCode": "awslambda_function_url_public"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#159",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#159",
+              "statusDetail": "Potential secret found in CloudFormation Stack QumuloOnPremCalculator-test-antoine Outputs -> Hex High Entropy String in Output 26.",
+              "riskDetails": "Secrets hardcoded into CloudFormation outputs can be used by malware and bad actors to gain lateral access to other services.",
+              "metadata": {
+                "eventCode": "cloudformation_stack_outputs_find_secrets"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#159",
+              "statusDetail": "Potential secret found in CloudFormation Stack QumuloOnPremCalculator-test-antoine Outputs -> Hex High Entropy String in Output 26.",
+              "riskDetails": "Secrets hardcoded into CloudFormation outputs can be used by malware and bad actors to gain lateral access to other services.",
+              "metadata": {
+                "eventCode": "cloudformation_stack_outputs_find_secrets"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#17",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#17",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 is internet accessible.",
+              "riskDetails": "If accessible from internet without restrictions opens up attack / abuse surface for any malicious user.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_public"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#17",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 is internet accessible.",
+              "riskDetails": "If accessible from internet without restrictions opens up attack / abuse surface for any malicious user.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_public"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#2",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#2",
+              "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+              "riskDetails": "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question.",
+              "metadata": {
+                "eventCode": "account_maintain_current_contact_details"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "0",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#2",
+              "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+              "riskDetails": "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question.",
+              "metadata": {
+                "eventCode": "account_maintain_current_contact_details"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "4"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "9",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#233",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#233",
+              "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID has logging disabled.",
+              "riskDetails": "If not enabled monitoring of service use is not possible.",
+              "metadata": {
+                "eventCode": "cloudfront_distributions_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#233",
+              "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID has logging disabled.",
+              "riskDetails": "If not enabled monitoring of service use is not possible.",
+              "metadata": {
+                "eventCode": "cloudfront_distributions_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#268",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#268",
+              "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID is not using AWS WAF web ACL.",
+              "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+              "metadata": {
+                "eventCode": "cloudfront_distributions_using_waf"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#268",
+              "statusDetail": "CloudFront Distribution CLOUDFRONT_DIST_ID is not using AWS WAF web ACL.",
+              "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+              "metadata": {
+                "eventCode": "cloudfront_distributions_using_waf"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#28",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#28",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine does not have WAF ACL attached.",
+              "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_waf_acl_attached"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#28",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 in stage test-antoine does not have WAF ACL attached.",
+              "riskDetails": "Potential attacks and / or abuse of service, more even for even for internet reachable services.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_waf_acl_attached"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#284",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#284",
+              "statusDetail": "Multiregion trail aws-controltower-BaselineCloudTrail has encryption disabled.",
+              "riskDetails": "By default, the log files delivered by CloudTrail to your bucket are encrypted by Amazon server-side encryption with Amazon S3-managed encryption keys (SSE-S3). To provide a security layer that is directly manageable, you can instead use server-side encryption with AWS KMS–managed keys (SSE-KMS) for your CloudTrail log files.",
+              "metadata": {
+                "eventCode": "cloudtrail_kms_encryption_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#284",
+              "statusDetail": "Multiregion trail aws-controltower-BaselineCloudTrail has encryption disabled.",
+              "riskDetails": "By default, the log files delivered by CloudTrail to your bucket are encrypted by Amazon server-side encryption with Amazon S3-managed encryption keys (SSE-S3). To provide a security layer that is directly manageable, you can instead use server-side encryption with AWS KMS–managed keys (SSE-KMS) for your CloudTrail log files.",
+              "metadata": {
+                "eventCode": "cloudtrail_kms_encryption_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#285",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#285",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail is delivering logs to bucket aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2 which is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_access_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#285",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail is delivering logs to bucket aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2 which is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Server access logs can assist you in security and access audits, help you learn about your customer base, and understand your Amazon S3 bill.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_access_logging_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#286",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#286",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail bucket (aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2) is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected accounts use or configuration.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_is_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#286",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail bucket (aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2) is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected accounts use or configuration.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_is_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#286",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#286",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail bucket (aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2) is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected accounts use or configuration.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_is_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "0"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#286",
+              "statusDetail": "Trail aws-controltower-BaselineCloudTrail bucket (aws-controltower-logs-AWS_ACCOUNT_ID-us-west-2) is a cross-account bucket or out of Prowler's audit scope, please check it manually.",
+              "riskDetails": "Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected accounts use or configuration.",
+              "metadata": {
+                "eventCode": "cloudtrail_logs_s3_bucket_is_not_publicly_accessible"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#295",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#295",
+              "statusDetail": "Log Group /aws/apigateway/welcome does not have AWS KMS keys associated.",
+              "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+              "metadata": {
+                "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#295",
+              "statusDetail": "Log Group /aws/apigateway/welcome does not have AWS KMS keys associated.",
+              "riskDetails": "Using customer managed KMS to encrypt CloudWatch log group provide additional confidentiality and control over the log data.",
+              "metadata": {
+                "eventCode": "cloudwatch_log_group_kms_encryption_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#345",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#345",
+              "statusDetail": "Log Group /aws/lambda/pipedrive-to-partner-central-selling has less than 365 days retention period (30 days).",
+              "riskDetails": "If log groups have a low retention policy of less than specific days, crucial logs and data can be lost.",
+              "metadata": {
+                "eventCode": "cloudwatch_log_group_retention_policy_specific_days_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "3",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#345",
+              "statusDetail": "Log Group /aws/lambda/pipedrive-to-partner-central-selling has less than 365 days retention period (30 days).",
+              "riskDetails": "If log groups have a low retention policy of less than specific days, crucial logs and data can be lost.",
+              "metadata": {
+                "eventCode": "cloudwatch_log_group_retention_policy_specific_days_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#382",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#382",
+              "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has every port open to the Internet.",
+              "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+              "metadata": {
+                "eventCode": "ec2_networkacl_allow_ingress_any_port"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#382",
+              "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has every port open to the Internet.",
+              "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+              "metadata": {
+                "eventCode": "ec2_networkacl_allow_ingress_any_port"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#386",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#386",
+              "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has Microsoft RDP port 3389 open to the Internet.",
+              "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+              "metadata": {
+                "eventCode": "ec2_networkacl_allow_ingress_tcp_port_3389"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#386",
+              "statusDetail": "Network ACL acl-0a8f18b13c3f807bb has Microsoft RDP port 3389 open to the Internet.",
+              "riskDetails": "Even having a perimeter firewall, having network acls open allows any user or malware with vpc access to scan for well known and sensitive ports and gain access to instance.",
+              "metadata": {
+                "eventCode": "ec2_networkacl_allow_ingress_tcp_port_3389"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#388",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#388",
+              "statusDetail": "Security group launch-wizard (sg-07f6b9cd34487f7b6) was created using the EC2 Launch Wizard.",
+              "riskDetails": "Security Groups Created on the AWS Console using the EC2 wizard may allow port 22 from 0.0.0.0/0.",
+              "metadata": {
+                "eventCode": "ec2_securitygroup_from_launch_wizard"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#388",
+              "statusDetail": "Security group launch-wizard (sg-07f6b9cd34487f7b6) was created using the EC2 Launch Wizard.",
+              "riskDetails": "Security Groups Created on the AWS Console using the EC2 wizard may allow port 22 from 0.0.0.0/0.",
+              "metadata": {
+                "eventCode": "ec2_securitygroup_from_launch_wizard"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#389",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#389",
+              "statusDetail": "Security group eks-cluster-sg-eks-automode-1736372498 (sg-01d56f3799e1eb8a7) it is not being used.",
+              "riskDetails": "Having clear definition and scope for Security Groups creates a better administration environment.",
+              "metadata": {
+                "eventCode": "ec2_securitygroup_not_used"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#389",
+              "statusDetail": "Security group eks-cluster-sg-eks-automode-1736372498 (sg-01d56f3799e1eb8a7) it is not being used.",
+              "riskDetails": "Having clear definition and scope for Security Groups creates a better administration environment.",
+              "metadata": {
+                "eventCode": "ec2_securitygroup_not_used"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#392",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#392",
+              "statusDetail": "Repository zero-shot-classifier-on-aws does not have a lifecycle policy configured.",
+              "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+              "metadata": {
+                "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "4",
+                "questionId": "3",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#392",
+              "statusDetail": "Repository zero-shot-classifier-on-aws does not have a lifecycle policy configured.",
+              "riskDetails": "Amazon ECR repositories run the risk of retaining huge volumes of images, increasing unnecessary cost.",
+              "metadata": {
+                "eventCode": "ecr_repositories_lifecycle_policy_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#398",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#398",
+              "statusDetail": "ECR repository sst-asset has scan on push disabled.",
+              "riskDetails": "Amazon ECR image scanning helps in identifying software vulnerabilities in your container images. Amazon ECR uses the Common Vulnerabilities and Exposures (CVEs) database from the open-source Clair project and provides a list of scan findings. ",
+              "metadata": {
+                "eventCode": "ecr_repositories_scan_images_on_push_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "5",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#398",
+              "statusDetail": "ECR repository sst-asset has scan on push disabled.",
+              "riskDetails": "Amazon ECR image scanning helps in identifying software vulnerabilities in your container images. Amazon ECR uses the Common Vulnerabilities and Exposures (CVEs) database from the open-source Clair project and provides a list of scan findings. ",
+              "metadata": {
+                "eventCode": "ecr_repositories_scan_images_on_push_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "10",
+                "bestPracticeId": "4"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#4",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#4",
+              "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Alternate Contacts -> Security Section.",
+              "riskDetails": "AWS provides customers with the option of specifying the contact information for accounts security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.",
+              "metadata": {
+                "eventCode": "account_security_contact_information_is_registered"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "0",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#4",
+              "statusDetail": "Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Alternate Contacts -> Security Section.",
+              "riskDetails": "AWS provides customers with the option of specifying the contact information for accounts security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.",
+              "metadata": {
+                "eventCode": "account_security_contact_information_is_registered"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "4"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "9",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#409",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#409",
+              "statusDetail": "GuardDuty is not enabled.",
+              "riskDetails": "Amazon GuardDuty is a continuous security monitoring service that analyzes and processes several datasources.",
+              "metadata": {
+                "eventCode": "guardduty_is_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "0",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#409",
+              "statusDetail": "GuardDuty is not enabled.",
+              "riskDetails": "Amazon GuardDuty is a continuous security monitoring service that analyzes and processes several datasources.",
+              "metadata": {
+                "eventCode": "guardduty_is_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#410",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#410",
+              "statusDetail": "AWS policy AdministratorAccess is attached and allows '*:*' administrative privileges.",
+              "riskDetails": "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege—that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks instead of allowing full administrative privileges. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions.",
+              "metadata": {
+                "eventCode": "iam_aws_attached_policy_no_administrative_privileges"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#410",
+              "statusDetail": "AWS policy AdministratorAccess is attached and allows '*:*' administrative privileges.",
+              "riskDetails": "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege—that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks instead of allowing full administrative privileges. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions.",
+              "metadata": {
+                "eventCode": "iam_aws_attached_policy_no_administrative_privileges"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#449",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#449",
+              "statusDetail": "Password expiration is not set.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_expires_passwords_within_90_days_or_less"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#449",
+              "statusDetail": "Password expiration is not set.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_expires_passwords_within_90_days_or_less"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#450",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#450",
+              "statusDetail": "IAM password policy does not require at least one lowercase letter.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one lowercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_lowercase"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#450",
+              "statusDetail": "IAM password policy does not require at least one lowercase letter.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one lowercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_lowercase"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#451",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#451",
+              "statusDetail": "IAM password policy does not require minimum length of 14 characters.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require minimum length of 14 or greater.",
+              "metadata": {
+                "eventCode": "iam_password_policy_minimum_length_14"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#451",
+              "statusDetail": "IAM password policy does not require minimum length of 14 characters.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require minimum length of 14 or greater.",
+              "metadata": {
+                "eventCode": "iam_password_policy_minimum_length_14"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#452",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#452",
+              "statusDetail": "IAM password policy does not require at least one number.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one number.",
+              "metadata": {
+                "eventCode": "iam_password_policy_number"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#452",
+              "statusDetail": "IAM password policy does not require at least one number.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one number.",
+              "metadata": {
+                "eventCode": "iam_password_policy_number"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#453",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#453",
+              "statusDetail": "IAM password policy reuse prevention is less than 24 or not set.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy prevents at least password reuse of 24 or greater.",
+              "metadata": {
+                "eventCode": "iam_password_policy_reuse_24"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#453",
+              "statusDetail": "IAM password policy reuse prevention is less than 24 or not set.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy prevents at least password reuse of 24 or greater.",
+              "metadata": {
+                "eventCode": "iam_password_policy_reuse_24"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#454",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#454",
+              "statusDetail": "IAM password policy does not require at least one symbol.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one non-alphanumeric character.",
+              "metadata": {
+                "eventCode": "iam_password_policy_symbol"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#454",
+              "statusDetail": "IAM password policy does not require at least one symbol.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one non-alphanumeric character.",
+              "metadata": {
+                "eventCode": "iam_password_policy_symbol"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#455",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#455",
+              "statusDetail": "IAM password policy does not require at least one uppercase letter.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_uppercase"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#455",
+              "statusDetail": "IAM password policy does not require at least one uppercase letter.",
+              "riskDetails": "Password policies are used to enforce password complexity requirements. IAM password policies can be used to ensure password are comprised of different character sets. It is recommended that the password policy require at least one uppercase letter.",
+              "metadata": {
+                "eventCode": "iam_password_policy_uppercase"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 6 not found in mapping for finding prowler#456",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#456",
+              "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'iam:PassRole'.",
+              "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+              "metadata": {
+                "eventCode": "iam_policy_allows_privilege_escalation"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "6"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#456",
+              "statusDetail": "Custom Policy POLICY_ARN allows privilege escalation using the following actions: 'iam:PassRole'.",
+              "riskDetails": "Users with some IAM permissions are allowed to elevate their privileges up to administrator rights.",
+              "metadata": {
+                "eventCode": "iam_policy_allows_privilege_escalation"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "5"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#481",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#481",
+              "statusDetail": "User USER_NAME has the policy AmazonS3FullAccess attached.",
+              "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+              "metadata": {
+                "eventCode": "iam_policy_attached_only_to_group_or_roles"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#481",
+              "statusDetail": "User USER_NAME has the policy AmazonS3FullAccess attached.",
+              "riskDetails": "By default IAM users, groups, and roles have no access to AWS resources. IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended that IAM policies be applied directly to groups and roles but not users. Assigning privileges at the group or role level reduces the complexity of access management as the number of users grow. Reducing access management complexity may in-turn reduce opportunity for a principal to inadvertently receive or retain excessive privileges.",
+              "metadata": {
+                "eventCode": "iam_policy_attached_only_to_group_or_roles"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "5"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#5",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#5",
+              "statusDetail": "Login to the AWS Console as root. Choose your account name on the top right of the window -> My Account -> Configure Security Challenge Questions.",
+              "riskDetails": "The AWS support portal allows account owners to establish security questions that can be used to authenticate individuals calling AWS customer service for support. It is recommended that security questions be established. When creating a new AWS account a default super user is automatically created. This account is referred to as the root account. It is recommended that the use of this account be limited and highly controlled. During events in which the root password is no longer accessible or the MFA token associated with root is lost/destroyed it is possible through authentication using secret questions and associated answers to recover root login access.",
+              "metadata": {
+                "eventCode": "account_security_questions_are_registered_in_the_aws_account"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "0",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#5",
+              "statusDetail": "Login to the AWS Console as root. Choose your account name on the top right of the window -> My Account -> Configure Security Challenge Questions.",
+              "riskDetails": "The AWS support portal allows account owners to establish security questions that can be used to authenticate individuals calling AWS customer service for support. It is recommended that security questions be established. When creating a new AWS account a default super user is automatically created. This account is referred to as the root account. It is recommended that the use of this account be limited and highly controlled. During events in which the root password is no longer accessible or the MFA token associated with root is lost/destroyed it is possible through authentication using secret questions and associated answers to recover root login access.",
+              "metadata": {
+                "eventCode": "account_security_questions_are_registered_in_the_aws_account"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "4"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "9",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 7 not found in mapping for finding prowler#515",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#515",
+              "statusDetail": "IAM Service Role ROLE_NAME does not prevent against a cross-service confused deputy attack.",
+              "riskDetails": "Allow attackers to gain unauthorized access to resources",
+              "metadata": {
+                "eventCode": "iam_role_cross_service_confused_deputy_prevention"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "7"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#515",
+              "statusDetail": "IAM Service Role ROLE_NAME does not prevent against a cross-service confused deputy attack.",
+              "riskDetails": "Allow attackers to gain unauthorized access to resources",
+              "metadata": {
+                "eventCode": "iam_role_cross_service_confused_deputy_prevention"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "3"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 1 not found in mapping for finding prowler#6",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#6",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 does not have authorizers at api level and the following paths and methods are unauthorized: /configuration/{id}/export/pdf -> GET; /new-cluster/forecast -> POST; /cluster/details -> POST; /users -> GET; /configuration/{id}/export/workato/pdf -> GET; /configuration/{id}/unshare/{user_id} -> DELETE; /configuration/{id}/export/csv -> GET; /models -> GET; /nodes_detail -> POST; /configuration/{id}/export/xlsx -> GET; /configurations -> GET; /expansion/forecast -> POST; /existing -> POST; /configuration/{id} -> DELETE; /configuration/{id} -> GET; /configuration/{id} -> PATCH; /configuration/{id}/sfdc -> GET; /cluster_details -> POST; /users/me -> GET; /configuration -> POST; /configuration/{id}/workato -> GET; /configuration/{id}/clone -> GET; /configuration/{id}/share -> POST; / -> POST; /hw_supports -> GET.",
+              "riskDetails": "If no authorizer is enabled anyone can use the service.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_authorizers_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "8",
+                "bestPracticeId": "1"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#6",
+              "statusDetail": "API Gateway test-antoine-QumuloOnPremCalculator ID 150aeiv4a7 does not have authorizers at api level and the following paths and methods are unauthorized: /configuration/{id}/export/pdf -> GET; /new-cluster/forecast -> POST; /cluster/details -> POST; /users -> GET; /configuration/{id}/export/workato/pdf -> GET; /configuration/{id}/unshare/{user_id} -> DELETE; /configuration/{id}/export/csv -> GET; /models -> GET; /nodes_detail -> POST; /configuration/{id}/export/xlsx -> GET; /configurations -> GET; /expansion/forecast -> POST; /existing -> POST; /configuration/{id} -> DELETE; /configuration/{id} -> GET; /configuration/{id} -> PATCH; /configuration/{id}/sfdc -> GET; /cluster_details -> POST; /users/me -> GET; /configuration -> POST; /configuration/{id}/workato -> GET; /configuration/{id}/clone -> GET; /configuration/{id}/share -> POST; / -> POST; /hw_supports -> GET.",
+              "riskDetails": "If no authorizer is enabled anyone can use the service.",
+              "metadata": {
+                "eventCode": "apigateway_restapi_authorizers_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "1"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#843",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#843",
+              "statusDetail": "MFA is not enabled for root account.",
+              "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. For Level 2 it is recommended that the root account be protected with only a hardware MFA.",
+              "metadata": {
+                "eventCode": "iam_root_hardware_mfa_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#843",
+              "statusDetail": "MFA is not enabled for root account.",
+              "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. For Level 2 it is recommended that the root account be protected with only a hardware MFA.",
+              "metadata": {
+                "eventCode": "iam_root_hardware_mfa_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "0",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 0 not found in mapping for finding prowler#844",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#844",
+              "statusDetail": "MFA is not enabled for root account.",
+              "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. When virtual MFA is used for root accounts it is recommended that the device used is NOT a personal device but rather a dedicated mobile device (tablet or phone) that is managed to be kept charged and secured independent of any individual personal devices. (non-personal virtual MFA) This lessens the risks of losing access to the MFA due to device loss / trade-in or if the individual owning the device is no longer employed at the company.",
+              "metadata": {
+                "eventCode": "iam_root_mfa_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "1",
+                "bestPracticeId": "0"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#844",
+              "statusDetail": "MFA is not enabled for root account.",
+              "riskDetails": "The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. When virtual MFA is used for root accounts it is recommended that the device used is NOT a personal device but rather a dedicated mobile device (tablet or phone) that is managed to be kept charged and secured independent of any individual personal devices. (non-personal virtual MFA) This lessens the risks of losing access to the MFA due to device loss / trade-in or if the individual owning the device is no longer employed at the company.",
+              "metadata": {
+                "eventCode": "iam_root_mfa_enabled"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "0",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 4 not found in mapping for finding prowler#864",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#864",
+              "statusDetail": "AWS Support Access policy is not attached to any role.",
+              "riskDetails": "AWS provides a support center that can be used for incident notification and response, as well as technical support and customer services. Create an IAM Role to allow authorized users to manage incidents with AWS Support.",
+              "metadata": {
+                "eventCode": "iam_support_role_created"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "4"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#864",
+              "statusDetail": "AWS Support Access policy is not attached to any role.",
+              "riskDetails": "AWS provides a support center that can be used for incident notification and response, as well as technical support and customer services. Create an IAM Role to allow authorized users to manage incidents with AWS Support.",
+              "metadata": {
+                "eventCode": "iam_support_role_created"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "9",
+                "bestPracticeId": "0"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#947",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#947",
+              "statusDetail": "Block Public Access is not configured for the account AWS_ACCOUNT_ID.",
+              "riskDetails": "Public access policies may be applied to sensitive data buckets.",
+              "metadata": {
+                "eventCode": "s3_account_level_public_access_blocks"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#947",
+              "statusDetail": "Block Public Access is not configured for the account AWS_ACCOUNT_ID.",
+              "riskDetails": "Public access policies may be applied to sensitive data buckets.",
+              "metadata": {
+                "eventCode": "s3_account_level_public_access_blocks"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              },
+              {
+                "pillarId": "1",
+                "questionId": "2",
+                "bestPracticeId": "8"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "message": "Best practice 3 not found in mapping for finding prowler#948",
+        "data": {
+          "aiFinding": {
+            "finding": {
+              "id": "prowler#948",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has bucket ACLs enabled.",
+              "riskDetails": "S3 ACLs are a legacy access control mechanism that predates IAM. IAM and bucket policies are currently the preferred methods.",
+              "metadata": {
+                "eventCode": "s3_bucket_acl_prohibited"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "7",
+                "bestPracticeId": "3"
+              }
+            ]
+          },
+          "correctFinding": {
+            "scanFinding": {
+              "id": "prowler#948",
+              "statusDetail": "S3 Bucket S3_BUCKET_NAME has bucket ACLs enabled.",
+              "riskDetails": "S3 ACLs are a legacy access control mechanism that predates IAM. IAM and bucket policies are currently the preferred methods.",
+              "metadata": {
+                "eventCode": "s3_bucket_acl_prohibited"
+              }
+            },
+            "bestPractices": [
+              {
+                "pillarId": "1",
+                "questionId": "4",
+                "bestPracticeId": "1"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "retries": [],
+    "successRate": "23.88%"
+  }
+]

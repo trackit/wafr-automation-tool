@@ -1,3 +1,5 @@
+import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+
 export interface TextComponent {
   text: string;
 }
@@ -10,5 +12,9 @@ export type PromptComponent = TextComponent | CachePointComponent;
 export type Prompt = PromptComponent[];
 
 export interface AIService {
-  converse(args: { prompt: Prompt; prefill?: TextComponent }): Promise<string>;
+  converse(args: {
+    prompt: Prompt;
+    inferenceConfig?: InferenceConfiguration;
+    prefill?: TextComponent;
+  }): Promise<string>;
 }

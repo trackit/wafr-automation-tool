@@ -1,4 +1,5 @@
-import { type Finding, type Pillar, type ScanningTool } from '@backend/models';
+import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+import { Finding, Pillar, ScanningTool } from '@backend/models';
 
 export interface FindingToBestPracticesAssociation {
   finding: Finding;
@@ -14,5 +15,6 @@ export interface FindingToBestPracticesAssociationService {
     scanningTool: ScanningTool;
     findings: Finding[];
     pillars: Pillar[];
+    inferenceConfig?: InferenceConfiguration;
   }): Promise<FindingToBestPracticesAssociation[]>;
 }
