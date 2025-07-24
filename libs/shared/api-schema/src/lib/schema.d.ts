@@ -619,7 +619,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The region to export the assessment to. */
+                    region: string;
+                };
+            };
+        };
         responses: {
             /** @description The assessment has been successfully exported */
             200: {

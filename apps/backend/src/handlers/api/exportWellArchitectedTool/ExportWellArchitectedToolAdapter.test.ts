@@ -12,9 +12,7 @@ describe('exportWellArchitectedTool adapter', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
-        .build();
+      const event = ExportWellArchitectedToolAdapterEventMother.basic().build();
 
       await expect(adapter.handle(event)).resolves.not.toThrow();
     });
@@ -27,6 +25,26 @@ describe('exportWellArchitectedTool adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should throw a bad request error with invalid json body', async () => {
+      const { adapter } = setup();
+
+      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should throw a bad request error with invalid body', async () => {
+      const { adapter } = setup();
+
+      const event = APIGatewayProxyEventMother.basic()
+        .withBody(JSON.stringify({ invalid: 'body' }))
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
   });
 
   describe('useCase and return value', () => {
@@ -35,6 +53,7 @@ describe('exportWellArchitectedTool adapter', () => {
 
       const event = ExportWellArchitectedToolAdapterEventMother.basic()
         .withAssessmentId('assessment-id')
+        .withRegion('us-west-2')
         .withUser(
           UserMother.basic()
             .withId('user-id')
@@ -47,6 +66,7 @@ describe('exportWellArchitectedTool adapter', () => {
 
       expect(useCase.exportAssessment).toHaveBeenCalledWith({
         assessmentId: 'assessment-id',
+        region: 'us-west-2',
         user: expect.objectContaining({
           organizationDomain: 'test.io',
         }),

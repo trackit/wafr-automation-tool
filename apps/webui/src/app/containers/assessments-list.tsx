@@ -5,13 +5,11 @@ import {
 } from '@tanstack/react-query';
 import {
   deleteAssessment,
-  exportToAWS,
   getAssessments,
   rescanAssessment,
 } from '@webui/api-client';
 import { ConfirmationModal, StatusBadge } from '@webui/ui';
 import {
-  ArrowRightFromLine,
   Calendar,
   Computer,
   Earth,
@@ -21,10 +19,10 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
+import ExportToAWSDialog from './export-to-aws-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
 
 function AssessmentsList() {
@@ -77,28 +75,6 @@ function AssessmentsList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
       refetch();
-    },
-  });
-
-  const exportToAWSMutation = useMutation({
-    mutationFn: (id: string) => exportToAWS({ assessmentId: id }),
-    onMutate: () => {
-      enqueueSnackbar({
-        message: 'Exporting to AWS...',
-        variant: 'info',
-      });
-    },
-    onSuccess: () => {
-      enqueueSnackbar({
-        message: 'Assessment sent successfully to AWS Console',
-        variant: 'success',
-      });
-    },
-    onError: () => {
-      enqueueSnackbar({
-        message: 'Failed to send data. Please try again later',
-        variant: 'error',
-      });
     },
   });
 
@@ -197,17 +173,9 @@ function AssessmentsList() {
                           </button>
                         </li>
                         <li>
-                          <button
-                            className="flex flex-row gap-2 w-full text-left"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              exportToAWSMutation.mutate(assessment.id ?? '');
-                            }}
-                          >
-                            <ArrowRightFromLine className="w-4 h-4" /> Export to
-                            AWS
-                          </button>
+                          <ExportToAWSDialog
+                            assessmentId={assessment.id ?? ''}
+                          />
                         </li>
                         <li className="m-1"></li>
                         <li>

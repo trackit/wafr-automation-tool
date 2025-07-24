@@ -9,9 +9,11 @@ import {
   PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
+  WellArchitectedClientConfig,
   WorkloadEnvironment,
   WorkloadSummary,
 } from '@aws-sdk/client-wellarchitected';
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -28,13 +30,42 @@ import { tokenLogger } from '../Logger';
 export const WAFRLens = 'wellarchitected';
 
 export class WellArchitectedToolService implements WellArchitectedToolPort {
-  private readonly client = inject(tokenWellArchitectedClient);
+  private readonly stsClient = inject(tokenSTSClient);
   private readonly logger = inject(tokenLogger);
+  private readonly wellArchitectedClientConstructor = inject(
+    tokenWellArchitectedClientConstructor
+  );
+
+  public async createWellArchitectedClient(
+    roleArn: string,
+    region: string
+  ): Promise<WellArchitectedClient> {
+    const credentials = await this.stsClient.send(
+      new AssumeRoleCommand({
+        RoleArn: roleArn,
+        RoleSessionName: 'WAFR-Automation-Tool',
+      })
+    );
+    if (!credentials.Credentials) {
+      throw new Error('Failed to assume role');
+    }
+    return this.wellArchitectedClientConstructor({
+      credentials: {
+        accessKeyId: credentials.Credentials.AccessKeyId!,
+        secretAccessKey: credentials.Credentials.SecretAccessKey!,
+        sessionToken: credentials.Credentials.SessionToken!,
+      },
+      region,
+    });
+  }
 
   private async getWorkloadSummary(
+    wellArchitectedClient: WellArchitectedClient,
     workloadName: string
   ): Promise<WorkloadSummary | null> {
-    const workloads = await this.client.send(new ListWorkloadsCommand());
+    const workloads = await wellArchitectedClient.send(
+      new ListWorkloadsCommand()
+    );
     const workloadSummaries = workloads.WorkloadSummaries ?? [];
     return (
       workloadSummaries.find(
@@ -44,13 +75,17 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   }
 
   public async createWorkload(
+    wellArchitectedClient: WellArchitectedClient,
     assessment: Assessment,
     user: User
   ): Promise<string> {
     const workloadName = `wafr-${assessment.name.replace(' ', '-')}-${
       assessment.id
     }`;
-    const workload = await this.getWorkloadSummary(workloadName);
+    const workload = await this.getWorkloadSummary(
+      wellArchitectedClient,
+      workloadName
+    );
     if (workload && workload.WorkloadId) {
       return workload.WorkloadId;
     }
@@ -68,7 +103,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         Name: assessment.name,
       },
     });
-    const response = await this.client.send(command);
+    const response = await wellArchitectedClient.send(command);
     if (response.$metadata.httpStatusCode !== 200 || !response.WorkloadId) {
       throw new Error(
         `Failed to create workload: ${response.$metadata.httpStatusCode}`
@@ -77,12 +112,15 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     return response.WorkloadId;
   }
 
-  public async getWorkloadLensReview(workloadId: string): Promise<LensReview> {
+  public async getWorkloadLensReview(
+    wellArchitectedClient: WellArchitectedClient,
+    workloadId: string
+  ): Promise<LensReview> {
     const command = new GetLensReviewCommand({
       WorkloadId: workloadId,
       LensAlias: WAFRLens,
     });
-    const response = await this.client.send(command);
+    const response = await wellArchitectedClient.send(command);
     if (response.$metadata.httpStatusCode !== 200 || !response.LensReview) {
       throw new Error(
         `Failed to get workload lens review: ${response.$metadata.httpStatusCode}`
@@ -92,6 +130,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   }
 
   public async listWorkloadPillarAnswers(
+    wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
     pillarId: string
   ): Promise<AnswerSummary[]> {
@@ -101,7 +140,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       PillarId: pillarId,
       MaxResults: 50,
     });
-    const response = await this.client.send(command);
+    const response = await wellArchitectedClient.send(command);
     if (
       response.$metadata.httpStatusCode !== 200 ||
       !response.AnswerSummaries
@@ -114,6 +153,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   }
 
   public async updateWorkloadAnswer(
+    wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
     questionId: string,
     selectedChoices: string[],
@@ -126,7 +166,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       SelectedChoices: selectedChoices,
       IsApplicable: questionData.none ? false : true,
     });
-    const response = await this.client.send(command);
+    const response = await wellArchitectedClient.send(command);
     if (response.$metadata.httpStatusCode !== 200) {
       throw new Error(
         `Failed to update workload answer: ${response.$metadata.httpStatusCode}`
@@ -178,6 +218,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   }
 
   public async exportAnswerList(
+    wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
     pillarAnswerList: AnswerSummary[],
     pillarQuestionList: Question[]
@@ -206,6 +247,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         answerQuestionData
       );
       await this.updateWorkloadAnswer(
+        wellArchitectedClient,
         workloadId,
         answerQuestionId,
         answerSelectedChoiceList,
@@ -215,6 +257,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   }
 
   public async exportPillarList(
+    wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
     assessmentPillarList: Pillar[],
     workloadPillarList: PillarReviewSummary[]
@@ -241,11 +284,13 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         continue;
       }
       const pillarAnswerList = await this.listWorkloadPillarAnswers(
+        wellArchitectedClient,
         workloadId,
         pillarId
       );
       const pillarQuestionList = pillarData.questions;
       await this.exportAnswerList(
+        wellArchitectedClient,
         workloadId,
         pillarAnswerList,
         pillarQuestionList
@@ -253,15 +298,30 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     }
   }
 
-  public async exportAssessment(
-    assessment: Assessment,
-    user: User
-  ): Promise<void> {
+  public async exportAssessment(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    user: User;
+  }): Promise<void> {
+    const { roleArn, assessment, region, user } = args;
+    const wellArchitectedClient = await this.createWellArchitectedClient(
+      roleArn,
+      region
+    );
     const assessmentPillarList = assessment.pillars ?? [];
-    const workloadId = await this.createWorkload(assessment, user);
-    const workloadLensRevieww = await this.getWorkloadLensReview(workloadId);
+    const workloadId = await this.createWorkload(
+      wellArchitectedClient,
+      assessment,
+      user
+    );
+    const workloadLensRevieww = await this.getWorkloadLensReview(
+      wellArchitectedClient,
+      workloadId
+    );
     const workloadPillarList = workloadLensRevieww.PillarReviewSummaries ?? [];
     await this.exportPillarList(
+      wellArchitectedClient,
       workloadId,
       assessmentPillarList,
       workloadPillarList
@@ -274,7 +334,15 @@ export const tokenWellArchitectedToolService =
     useClass: WellArchitectedToolService,
   });
 
-export const tokenWellArchitectedClient =
-  createInjectionToken<WellArchitectedClient>('WellArchitectedClient', {
-    useClass: WellArchitectedClient,
-  });
+export const tokenWellArchitectedClientConstructor = createInjectionToken<
+  WellArchitectedClient['constructor']
+>('WellArchitectedClientConstructor', {
+  useFactory: () => {
+    return (...args: [] | [WellArchitectedClientConfig]) =>
+      new WellArchitectedClient(...args);
+  },
+});
+
+export const tokenSTSClient = createInjectionToken<STSClient>('STSClient', {
+  useClass: STSClient,
+});

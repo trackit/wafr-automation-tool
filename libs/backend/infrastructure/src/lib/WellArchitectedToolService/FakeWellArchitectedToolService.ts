@@ -4,10 +4,12 @@ import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
-  public async exportAssessment(
-    _assessment: Assessment,
-    _user: User
-  ): Promise<void> {
+  public async exportAssessment(_args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    user: User;
+  }): Promise<void> {
     // No-op for fake implementation
   }
 }

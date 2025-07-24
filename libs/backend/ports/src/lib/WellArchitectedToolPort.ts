@@ -1,5 +1,10 @@
 import { Assessment, User } from '@backend/models';
 
 export interface WellArchitectedToolPort {
-  exportAssessment(args: Assessment, user: User): Promise<void>;
+  exportAssessment(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    user: User;
+  }): Promise<void>;
 }
