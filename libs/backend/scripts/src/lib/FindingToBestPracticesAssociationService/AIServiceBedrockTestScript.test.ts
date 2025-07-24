@@ -89,13 +89,18 @@ export class AIServiceBedrockTestScript {
       );
 
     const promptLengths = fakeLogger.logs
-      .filter((log) => log.level === 'info')
+      .filter(
+        (log) =>
+          log.level === 'info' &&
+          log.data &&
+          typeof log.data === 'object' &&
+          'prompt' in log.data
+      )
       .map((log) => {
-        console.log(log.data);
         if (log.data && typeof log.data === 'object' && 'prompt' in log.data) {
           return (log.data.prompt as string).length as number;
         }
-        return 0;
+        throw new Error('Unexpected log format');
       });
     const promptLengthsSum = promptLengths.reduce(
       (total, current) => total + current,
@@ -109,6 +114,7 @@ export class AIServiceBedrockTestScript {
           message: log.message,
         };
       });
+    fakeLogger.logs = [];
 
     let success = 0;
     const failed: FailData[] = [];
@@ -206,9 +212,6 @@ export class AIServiceBedrockTestScript {
         }
       )
     );
-
-    // TODO: Rajouter le nombre de characters pour le testcase
-    // TODO:
 
     const report = Object.values(testCaseProcessResults).map(
       ({ success, failed, retries, promptLengths }) => {
