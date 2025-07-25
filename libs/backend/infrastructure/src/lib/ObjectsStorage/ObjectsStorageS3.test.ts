@@ -27,8 +27,9 @@ describe('ObjectsStorage Infrastructure', () => {
         Body: stringToStream('object-content') as any,
       });
 
-      const result = await objectsStorage.get('assessment-id');
-      expect(result).toBe('object-content');
+      await expect(objectsStorage.get('assessment-id')).resolves.toBe(
+        'object-content'
+      );
     });
 
     it('should return null if object does not exist', async () => {
