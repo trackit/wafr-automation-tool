@@ -39,7 +39,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
         error instanceof S3ServiceException &&
         error.$metadata?.httpStatusCode === 404
       ) {
-        this.logger.info(`Object not found on S3 (key="${key}")`);
+        this.logger.warn(`Object not found on S3 (key="${key}")`);
         return null;
       }
       this.logger.error(`Failed to get object: ${error}`, key);
