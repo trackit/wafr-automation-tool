@@ -12,6 +12,10 @@
   - [Deployment](#deployment)
     - [Environment Variables](#environment-variables)
     - [Deployment Command](#deployment-command)
+    - [Post deployment](#post-deployment)
+        - [Create assessment export role](#create-assessment-export-role)
+        - [Create organization](#create-organization)
+        - [Create a custom mapping](#create-a-custom-mapping)
   - [Usage](#usage)
     - [Requirements](#requirements)
     - [Local](#local)
@@ -56,6 +60,57 @@ Deploy the backend using [SAM CLI](https://docs.aws.amazon.com/serverless-applic
 ```shell
 $ npm run deploy:backend
 ```
+
+### Post deployment
+
+#### Create assessment export role
+
+##### Local
+
+The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-AssessmentExportRole."
+
+##### Remote
+
+In order to export assessments on an other account, you must create a new role in the target account with the following managed policy:
+
+- WellArchitectedConsoleFullAccess
+
+And the following [Trust Policy](../webui/src/assets/trust-policy.json) with the ACCOUNT_ID of the account where the tool was deployed.
+
+#### Create organization
+
+You must create a new organization in your DynamoDB table named 'wafr-automation-tool-${STAGE}-organization'. Here is the template:
+
+| Key                       | Type   | Value                                                                                                         |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| `PK`                      | String | Email domain of the organization                                                                              |
+| `domain`                  | String | Email domain of the organization                                                                              |
+| `assessmentExportRoleArn` | String | Arn of the role that will be used to export. [Create assessment export role.](#create-assessment-export-role) |
+
+#### Create a custom mapping
+
+By default, no mapping will be used and each association will be defined by the AI model. However, you can change this by creating your own mapping, which will allow you to define your own associations and ensure that the findings are associated with the best practices you want. Please note that only Prolwer findings can be associated using this method.
+
+To create a custom mapping, you must create a new file named `scan-findings-to-best-practices-mapping.json` in the S3 bucket named `wafr-automation-tool-${STAGE}`. In this file, we associate an event code with several best practices. Here is the template:
+
+```json
+{
+  "EVENT_CODE": [
+    {
+      "pillar": "PILLAR_ID",
+      "question": "QUESTION_ID",
+      "bestPractice": "BEST_PRACTICE_ID"
+    }
+  ]
+}
+```
+
+| Key                | Type   | Value                                                                                                                                                                               |
+| ------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EVENT_CODE`       | String | Event code of the finding.<br>To list all event codes, install [Prowler CLI](https://github.com/toniblyx/prowler#prowler-cli) and run `prowler aws --list-checks` in your terminal. |
+| `PILLAR_ID`        | String | Pillar Primary ID for the question. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                          |
+| `QUESTION_ID`      | String | Question Primary ID for the best practice. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                   |
+| `BEST_PRACTICE_ID` | String | Best practice Primary ID. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                                    |
 
 ## Usage
 
