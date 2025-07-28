@@ -23,7 +23,6 @@ describe('ObjectsStorage Infrastructure', () => {
 
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream('object-content') as any,
       });
 
