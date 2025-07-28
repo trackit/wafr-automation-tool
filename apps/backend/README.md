@@ -89,7 +89,7 @@ You must create a new organization in your DynamoDB table named 'wafr-automation
 
 #### Create a custom mapping
 
-By default, no mapping will be used and each association will be defined by the AI model. However, you can change this by creating your own mapping, which will allow you to define your own associations and ensure that the findings are associated with the best practices you want. Please note that only Prolwer findings can be associated using this method.
+By default, no mapping will be used and each association will be defined by the AI model. However, you can change this by creating your own mapping, which will allow you to define your own associations and ensure that the findings are associated with the best practices you want. Please note that only Prowler findings can be associated using this method.
 
 To create a custom mapping, you must create a new file named `scan-findings-to-best-practices-mapping.json` in the S3 bucket named `wafr-automation-tool-${STAGE}`. In this file, we associate an event code with several best practices. Here is the template:
 

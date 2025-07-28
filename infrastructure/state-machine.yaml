@@ -83,7 +83,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !Ref AWS::AccountId
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
   PrepareFindingsAssociationsLogGroup:
