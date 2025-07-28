@@ -1,11 +1,13 @@
 import {
+  DeleteObjectCommand,
   DeleteObjectsCommand,
-  PutObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
-  DeleteObjectCommand,
+  PutObjectCommand,
+  S3ServiceException,
 } from '@aws-sdk/client-s3';
 import { inject, reset } from '@shared/di-container';
+import { stringToStream } from '@shared/utils';
 import { mockClient } from 'aws-sdk-client-mock';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
@@ -13,7 +15,6 @@ import {
   tokenClientS3,
   tokenS3Bucket,
 } from './ObjectsStorageS3';
-import { stringToStream } from '@shared/utils';
 
 describe('ObjectsStorage Infrastructure', () => {
   describe('get', () => {
@@ -25,27 +26,37 @@ describe('ObjectsStorage Infrastructure', () => {
         Body: stringToStream('object-content') as any,
       });
 
-      const result = await objectsStorage.get('assessment-id');
-      expect(result).toBe('object-content');
+      await expect(objectsStorage.get('assessment-id')).resolves.toBe(
+        'object-content'
+      );
     });
 
     it('should return null if object does not exist', async () => {
       const { objectsStorage, s3ClientMock } = setup();
 
-      s3ClientMock.on(GetObjectCommand).resolves({
-        $metadata: { httpStatusCode: 404 },
-      });
+      s3ClientMock.on(GetObjectCommand).rejects(
+        new S3ServiceException({
+          name: 'NoSuchKey',
+          $fault: 'client',
+          $metadata: { httpStatusCode: 404 },
+        })
+      );
 
-      const result = await objectsStorage.get('non-existent-assessment-id');
-      expect(result).toBeNull();
+      await expect(
+        objectsStorage.get('non-existent-assessment-id')
+      ).resolves.toBeNull();
     });
 
     it('should throw an error if get object fails', async () => {
       const { objectsStorage, s3ClientMock } = setup();
 
-      s3ClientMock.on(GetObjectCommand).resolves({
-        $metadata: { httpStatusCode: 500 },
-      });
+      s3ClientMock.on(GetObjectCommand).rejects(
+        new S3ServiceException({
+          name: 'InternalError',
+          $fault: 'server',
+          $metadata: { httpStatusCode: 500 },
+        })
+      );
 
       await expect(objectsStorage.get('assessment-id')).rejects.toThrow(Error);
     });
