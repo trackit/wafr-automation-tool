@@ -39,6 +39,11 @@ export class MarketplaceService implements MarketplacePort {
   }): Promise<boolean> {
     const { organization } = args;
 
+    if (!organization.accountId) {
+      throw new InfrastructureError({
+        message: 'Account ID is missing in organization',
+      });
+    }
     const command = new GetEntitlementsCommand({
       ProductCode: this.monthlySubscriptionProductCode,
       Filter: {
