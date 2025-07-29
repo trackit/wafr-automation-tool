@@ -27,8 +27,8 @@ export class GetBestPracticeFindingsAdapterEventMother {
       {
         limit: undefined,
         search: undefined,
-        show_hidden: undefined,
-        next_token: undefined,
+        showHidden: undefined,
+        nextToken: undefined,
       },
       {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
@@ -60,18 +60,18 @@ export class GetBestPracticeFindingsAdapterEventMother {
   public withShowHidden(
     showHidden: NonNullable<
       operations['getBestPracticeFindings']['parameters']['query']
-    >['show_hidden']
+    >['showHidden']
   ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.show_hidden = showHidden;
+    this.queryParameters.showHidden = showHidden;
     return this;
   }
 
   public withNextToken(
     nextToken: NonNullable<
       operations['getBestPracticeFindings']['parameters']['query']
-    >['next_token']
+    >['nextToken']
   ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.next_token = nextToken;
+    this.queryParameters.nextToken = nextToken;
     return this;
   }
 

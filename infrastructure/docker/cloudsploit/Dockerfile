@@ -1,5 +1,6 @@
 FROM node:22-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/trackit/wafr-automation-tool
 WORKDIR /app
 
 RUN apk add --no-cache git bash aws-cli

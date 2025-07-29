@@ -100,7 +100,7 @@ export function AssessmentDetails() {
         if (pillar.id === pillarId) {
           for (const question of pillar.questions || []) {
             if (question.id === questionId) {
-              for (const practice of question.best_practices || []) {
+              for (const practice of question.bestPractices || []) {
                 if (practice.id === bestPracticeId) {
                   practice.checked = checked;
                   updated = true;
@@ -122,7 +122,7 @@ export function AssessmentDetails() {
         selectedPillar?.id === pillarId &&
         activeQuestion?.id === questionId
       ) {
-        const updatedBestPractices = activeQuestion.best_practices?.map(
+        const updatedBestPractices = activeQuestion.bestPractices?.map(
           (practice) =>
             practice.id === bestPracticeId
               ? { ...practice, status: checked }
@@ -130,7 +130,7 @@ export function AssessmentDetails() {
         );
         setActiveQuestion({
           ...activeQuestion,
-          best_practices: updatedBestPractices,
+          bestPractices: updatedBestPractices,
         });
       }
 
@@ -613,14 +613,14 @@ export function AssessmentDetails() {
     for (const question of questions) {
       if (question.disabled) continue;
       // Check if the question has any high severity best practices
-      const hasHighSeverityPractices = question.best_practices?.some(
+      const hasHighSeverityPractices = question.bestPractices?.some(
         (bestPractice) => bestPractice.risk === 'High'
       );
 
       if (hasHighSeverityPractices) {
         // Check if all high severity best practices in this question have checked true
         const allHighSeverityPracticesComplete =
-          question.best_practices?.every(
+          question.bestPractices?.every(
             (bestPractice) =>
               bestPractice.risk !== 'High' || bestPractice.checked === true
           ) ?? false;
@@ -660,8 +660,8 @@ export function AssessmentDetails() {
     : false;
 
   const tableData = useMemo(() => {
-    if (!activeQuestion?.best_practices) return [];
-    const res = activeQuestion.best_practices.map((practice) => ({
+    if (!activeQuestion?.bestPractices) return [];
+    const res = activeQuestion.bestPractices.map((practice) => ({
       ...practice,
       name: practice.id || '',
     }));
@@ -674,7 +674,7 @@ export function AssessmentDetails() {
       name: 'resolve',
     });
     return res;
-  }, [activeQuestion?.best_practices, activeQuestion?.none]);
+  }, [activeQuestion?.bestPractices, activeQuestion?.none]);
 
   const tabs = useMemo(() => {
     if (!data?.pillars) return [];
@@ -866,13 +866,13 @@ export function AssessmentDetails() {
                     active: activeQuestionIndex === index,
                     onClick: () => setActiveQuestionIndex(index),
                     completed:
-                      latestQuestion.best_practices?.every(
+                      latestQuestion.bestPractices?.every(
                         (bestPractice) =>
                           bestPractice.risk !== 'High' ||
                           bestPractice.checked === true
                       ) ?? false,
                     started:
-                      latestQuestion.best_practices?.some(
+                      latestQuestion.bestPractices?.some(
                         (bestPractice) => bestPractice.checked
                       ) ?? false,
                     error: latestQuestion.none,

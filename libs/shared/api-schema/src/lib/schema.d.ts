@@ -196,7 +196,7 @@ export interface components {
             /** @description Name or title of the assessment */
             name?: string;
             /** @description User who created the assessment */
-            created_by?: string;
+            createdBy?: string;
             /** @description Organization associated with the assessment */
             organization?: string;
             /** @description List of regions to scan
@@ -204,11 +204,11 @@ export interface components {
              *      */
             regions?: string[];
             /** @description Role ARN associated with the assessment */
-            role_arn?: string;
+            roleArn?: string;
             /** @description Workflows associated with the assessment */
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
-            created_at?: string;
+            createdAt?: string;
             /**
              * @description Current step in the assessment process
              * @enum {string}
@@ -220,13 +220,13 @@ export interface components {
             /** @description The assessment pillars including questions and best practices */
             pillars?: components["schemas"]["Pillar"][];
             /** @description The version of questions that were used for the assessment */
-            question_version?: string;
+            questionVersion?: string;
             /** @description Processed data from the scanning tools */
-            graph_datas?: {
+            graphData?: {
                 /** @description Regions where findings were found */
                 regions?: Record<string, unknown>;
                 /** @description Resource types where findings were found */
-                resource_types?: Record<string, unknown>;
+                resourceTypes?: Record<string, unknown>;
                 /** @description Severity levels where findings were found */
                 severities?: Record<string, unknown>;
                 /** @description Total number of findings */
@@ -248,9 +248,9 @@ export interface components {
             /** @description Severity level of the finding (e.g., Low, Medium, High) */
             severity?: string;
             /** @description The status of the finding (e.g., MANUAL, FAIL) */
-            status_code?: string;
+            statusCode?: string;
             /** @description Explanation or additional details about the finding's status */
-            status_detail?: string;
+            statusDetail?: string;
             /** @description Whether the finding is hidden or not */
             hidden?: boolean;
             /** @description List of resources related to the finding */
@@ -272,9 +272,9 @@ export interface components {
                 references?: string[];
             };
             /** @description Explanation of the risk associated with the finding */
-            risk_details?: string;
+            riskDetails?: string;
             /** @description Tells whether the finding is associated with an AI or manually */
-            is_ai_associated?: boolean;
+            isAIAssociated?: boolean;
         };
         FindingDto: {
             hidden?: boolean;
@@ -293,7 +293,7 @@ export interface components {
             label?: string;
             none?: boolean;
             disabled?: boolean;
-            best_practices?: components["schemas"]["BestPractice"][];
+            bestPractices?: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
             none?: boolean;
@@ -333,7 +333,7 @@ export interface operations {
                 /** @description Search term to filter assessments by name, role ARN, or id */
                 search?: string;
                 /** @description Token for pagination. */
-                next_token?: string;
+                nextToken?: string;
             };
             header?: never;
             path?: never;
@@ -352,7 +352,7 @@ export interface operations {
                         /** @description Token for pagination. If there are more assessments than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
                          *      */
-                        next_token?: string;
+                        nextToken?: string;
                     };
                 };
             };
@@ -408,7 +408,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description The unique ID of the newly created assessment */
-                        assessment_id?: string;
+                        assessmentId?: string;
                     };
                 };
             };
@@ -764,9 +764,9 @@ export interface operations {
                 /** @description Search term to filter assessments by name, role ARN, or id */
                 search?: string;
                 /** @description Show hidden findings */
-                show_hidden?: boolean;
+                showHidden?: boolean;
                 /** @description Token for pagination. */
-                next_token?: string;
+                nextToken?: string;
             };
             header?: never;
             path: {
@@ -794,7 +794,7 @@ export interface operations {
                         /** @description Token for pagination. If there are more findings than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
                          *      */
-                        next_token?: string;
+                        nextToken?: string;
                     };
                 };
             };

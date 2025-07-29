@@ -3,7 +3,6 @@ import { Finding, ScanFinding, ScanningTool } from '@backend/models';
 import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
-  tokenQuestionSetService,
 } from '@backend/infrastructure';
 import { assertIsDefined, chunk } from '@shared/utils';
 import { NotFoundError } from '../Errors';
@@ -75,7 +74,7 @@ export class StoreFindingsToAssociateUseCaseImpl
     }
     const findings = scanFindings.map<Finding>((scanFinding) => ({
       ...scanFinding,
-      isAiAssociated: true,
+      isAIAssociated: true,
       hidden: false,
       bestPractices: '',
     }));

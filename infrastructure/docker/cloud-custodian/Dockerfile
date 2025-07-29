@@ -1,4 +1,6 @@
 FROM cloudcustodian/c7n:0.9.42.0
+
+LABEL org.opencontainers.image.source=https://github.com/trackit/wafr-automation-tool
 USER root
 RUN apt update -y && apt install curl unzip -y
 

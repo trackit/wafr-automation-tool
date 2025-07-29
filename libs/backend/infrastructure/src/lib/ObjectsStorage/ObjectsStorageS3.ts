@@ -5,6 +5,7 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
+  S3ServiceException,
 } from '@aws-sdk/client-s3';
 
 import { ObjectsStorage } from '@backend/ports';
@@ -32,16 +33,15 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     });
     try {
       const response = await this.client.send(command);
-      if (
-        !response.$metadata.httpStatusCode ||
-        ![200, 404].includes(response.$metadata.httpStatusCode)
-      ) {
-        throw new Error(
-          `Failed to get object: ${response.$metadata.httpStatusCode}`
-        );
-      }
       return response.Body ? streamToString(response.Body as Readable) : null;
-    } catch (error) {
+    } catch (error: unknown) {
+      if (
+        error instanceof S3ServiceException &&
+        error.$metadata?.httpStatusCode === 404
+      ) {
+        this.logger.warn(`Object not found on S3 (key="${key}")`);
+        return null;
+      }
       this.logger.error(`Failed to get object: ${error}`, key);
       throw error;
     }

@@ -31,19 +31,24 @@ export class AIServiceBedrock implements AIService {
     return result;
   }
 
-  public async converse(args: {
-    promptArn: string;
-    promptVariables: Record<string, unknown>;
-  }): Promise<string> {
+  public async converse(args: { prompt: string }): Promise<string> {
+    const { prompt } = args;
     const command = new ConverseStreamCommand({
-      modelId: args.promptArn,
-      promptVariables: Object.entries(args.promptVariables).reduce(
-        (promptVariables, [key, value]) => ({
-          ...promptVariables,
-          [key]: { text: JSON.stringify(value) },
-        }),
-        {}
-      ),
+      modelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      inferenceConfig: {
+        maxTokens: 4096,
+        temperature: 0,
+      },
     });
     try {
       const response = await this.client.send(command);
@@ -52,10 +57,10 @@ export class AIServiceBedrock implements AIService {
           `Failed to converse: ${response.$metadata.httpStatusCode}`
         );
       }
-      this.logger.info(`Converse#${args.promptArn}`, args.promptVariables);
+      this.logger.info('Converse', { prompt });
       return await this.collectStreamedText(response);
     } catch (error) {
-      this.logger.error(`Failed to converse: ${error}`, args.promptVariables);
+      this.logger.error(`Failed to converse: ${error}`, { prompt });
       throw error;
     }
   }

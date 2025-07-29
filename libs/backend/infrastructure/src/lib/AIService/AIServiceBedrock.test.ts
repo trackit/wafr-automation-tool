@@ -42,17 +42,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({
-          promptArn:
-            'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: {
-            var1: {
-              subVar1: 'value1',
-              subVar2: 'value2',
-            },
-            var2: 'value2',
-          },
-        })
+        aiServiceBedrock.converse({ prompt: 'Hello world' })
       ).resolves.toEqual('Hello world');
 
       const converseStreamCalls = bedrockRuntimeClientMock.commandCalls(
@@ -60,15 +50,20 @@ describe('AIService Infrastructure', () => {
       );
       expect(converseStreamCalls).toHaveLength(1);
       const converseExecutionCall = converseStreamCalls[0];
-      expect(converseExecutionCall.args[0].input).toEqual({
-        modelId: 'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-        promptVariables: {
-          var1: {
-            text: JSON.stringify({ subVar1: 'value1', subVar2: 'value2' }),
-          },
-          var2: { text: JSON.stringify('value2') },
-        },
-      });
+      expect(converseExecutionCall.args[0].input).toEqual(
+        expect.objectContaining({
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  text: 'Hello world',
+                },
+              ],
+            },
+          ],
+        })
+      );
     });
 
     it('should throw an exception if the converse stream fails', async () => {
@@ -84,11 +79,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({
-          promptArn:
-            'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: { var1: 'value1' },
-        })
+        aiServiceBedrock.converse({ prompt: 'Hello world' })
       ).rejects.toThrow(Error);
     });
 
@@ -101,11 +92,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({
-          promptArn:
-            'arn:aws:bedrock:us-east-1:123456789012:prompt/test-prompt',
-          promptVariables: { var1: 'value1' },
-        })
+        aiServiceBedrock.converse({ prompt: 'Hello world' })
       ).rejects.toThrow(Error);
     });
   });

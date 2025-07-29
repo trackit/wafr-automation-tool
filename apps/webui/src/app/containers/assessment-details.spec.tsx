@@ -26,7 +26,7 @@ const mockAssessment = {
         {
           id: 'question-1',
           label: 'Test Question 1',
-          best_practices: [
+          bestPractices: [
             {
               id: 'practice-1',
               label: 'Test Practice 1',
@@ -46,7 +46,7 @@ const mockAssessment = {
         {
           id: 'question-2',
           label: 'Test Question 2',
-          best_practices: [
+          bestPractices: [
             {
               id: 'practice-3',
               label: 'Test Practice 3',
@@ -201,9 +201,9 @@ describe('AssessmentDetails', () => {
           questions: [
             {
               ...mockAssessment.pillars[0].questions[0],
-              best_practices: [
+              bestPractices: [
                 {
-                  ...mockAssessment.pillars[0].questions[0].best_practices[0],
+                  ...mockAssessment.pillars[0].questions[0].bestPractices[0],
                   results: [{ id: 'result-1', details: 'Test result' }],
                 },
               ],
@@ -243,7 +243,7 @@ describe('AssessmentDetails', () => {
   //             {
   //               id: 'question-3',
   //               label: 'Test Question 3',
-  //               best_practices: [],
+  //               bestPractices: [],
   //             },
   //           ],
   //         },

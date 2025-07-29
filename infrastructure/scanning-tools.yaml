@@ -269,7 +269,7 @@ Resources:
       TaskRoleArn: !GetAtt CloudCustodianTaskRole.Arn
       ContainerDefinitions:
         - Name: cloud-custodian-container
-          Image: 576872909007.dkr.ecr.us-west-2.amazonaws.com/wafr-automation-tool:latest
+          Image: ghcr.io/trackit/wafr-automation-tool/cloud-custodian:0.9.42.0
           Essential: true
           Cpu: 1024
           Memory: 4096
@@ -331,7 +331,7 @@ Resources:
       TaskRoleArn: !GetAtt CloudSploitTaskRole.Arn
       ContainerDefinitions:
         - Name: cloudsploit-container
-          Image: '576872909007.dkr.ecr.us-west-2.amazonaws.com/wafr-automation-tool/cloudsploit@sha256:14ef2534a6c0920c5efb5944eb82b1154b31af769e48886cb4d6d580c024263c'
+          Image: ghcr.io/trackit/wafr-automation-tool/cloudsploit:3.9.0
           Essential: true
           Cpu: 1024
           Memory: 4096

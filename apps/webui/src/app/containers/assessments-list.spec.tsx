@@ -53,18 +53,18 @@ describe('AssessmentsList', () => {
         id: '1',
         name: 'Test Assessment 1',
         step: 'FINISHED',
-        role_arn: 'arn:aws:iam::123456789012:role/test-role',
-        created_at: '2024-01-01T00:00:00Z',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        createdAt: '2024-01-01T00:00:00Z',
       },
       {
         id: '2',
         name: 'Test Assessment 2',
         step: 'SCANNING_STARTED',
-        role_arn: 'arn:aws:iam::098765432109:role/test-role',
-        created_at: '2024-01-02T00:00:00Z',
+        roleArn: 'arn:aws:iam::098765432109:role/test-role',
+        createdAt: '2024-01-02T00:00:00Z',
       },
     ],
-    next_token: null,
+    nextToken: null,
   };
 
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('AssessmentsList', () => {
   it('shows "No assessments found" when there are no assessments', async () => {
     (getAssessments as any).mockResolvedValue({
       assessments: [],
-      next_token: null,
+      nextToken: null,
     });
 
     render(<AssessmentsList />, { wrapper: createWrapper() });
@@ -189,7 +189,7 @@ describe('AssessmentsList', () => {
   it('shows load more button when there are more pages', async () => {
     (getAssessments as any).mockResolvedValue({
       ...mockAssessments,
-      next_token: 'next-page-token',
+      nextToken: 'next-page-token',
     });
 
     render(<AssessmentsList />, { wrapper: createWrapper() });
@@ -206,17 +206,17 @@ describe('AssessmentsList', () => {
           id: '3',
           name: 'Test Assessment 3',
           step: 'FINISHED',
-          role_arn: 'arn:aws:iam::111111111111:role/test-role',
-          created_at: '2024-01-03T00:00:00Z',
+          roleArn: 'arn:aws:iam::111111111111:role/test-role',
+          createdAt: '2024-01-03T00:00:00Z',
         },
       ],
-      next_token: null,
+      nextToken: null,
     };
 
     (getAssessments as any)
       .mockResolvedValueOnce({
         ...mockAssessments,
-        next_token: 'next-page-token',
+        nextToken: 'next-page-token',
       })
       .mockResolvedValueOnce(nextPageAssessments);
 

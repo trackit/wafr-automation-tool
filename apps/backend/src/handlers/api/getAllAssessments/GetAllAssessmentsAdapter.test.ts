@@ -74,7 +74,7 @@ describe('getAllAssessments adapter', () => {
       expect(useCase.getAllAssessments).toHaveBeenCalledWith({
         limit: 10,
         search: 'test',
-        next_token: 'test',
+        nextToken: 'test',
         user: expect.objectContaining({
           organizationDomain: 'test.io',
         }),
@@ -101,12 +101,12 @@ describe('getAllAssessments adapter', () => {
       expect(apiAssessment?.[0]).toEqual({
         id: assessment.id,
         name: assessment.name,
-        created_by: assessment.createdBy,
+        createdBy: assessment.createdBy,
         organization: assessment.organization,
         regions: assessment.regions,
-        role_arn: assessment.roleArn,
+        roleArn: assessment.roleArn,
         workflows: assessment.workflows,
-        created_at: assessment.createdAt.toISOString(),
+        createdAt: assessment.createdAt.toISOString(),
         step: assessment.step,
         error: assessment.error,
       });

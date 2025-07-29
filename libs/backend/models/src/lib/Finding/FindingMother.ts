@@ -44,8 +44,8 @@ export class FindingMother {
     return this;
   }
 
-  public withIsAIAssociated(isAiAssociated: boolean): FindingMother {
-    this.data.isAIAssociated = isAiAssociated;
+  public withIsAIAssociated(isAIAssociated: boolean): FindingMother {
+    this.data.isAIAssociated = isAIAssociated;
     return this;
   }
 
