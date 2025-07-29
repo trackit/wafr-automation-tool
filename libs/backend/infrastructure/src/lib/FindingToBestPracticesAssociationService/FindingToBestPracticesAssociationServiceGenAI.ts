@@ -2,6 +2,7 @@ import { z, ZodType } from 'zod';
 import {
   FindingToBestPracticesAssociationService,
   FindingToBestPracticesAssociation,
+  Prompt,
 } from '@backend/ports';
 import { inject, createInjectionToken } from '@shared/di-container';
 import { tokenAIService } from '../AIService';
@@ -46,27 +47,48 @@ export class FindingToBestPracticesAssociationServiceGenAI
     tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries
   );
   private readonly objectsStorage = inject(tokenObjectsStorage);
-  static readonly promptKey =
-    'findings-to-best-practices-association-prompt.txt';
+
+  static readonly staticPromptKey = 'claude-several-findings-static.txt';
+  static readonly dynamicPromptKey = 'claude-several-findings-dynamic.txt';
 
   public async fetchPrompt(args: {
     scanningTool: ScanningTool;
     pillars: Pillar[];
     findings: Finding[];
-  }): Promise<string | null> {
-    const { scanningTool, pillars, findings } = args;
-    const prompt = await this.objectsStorage.get(
-      FindingToBestPracticesAssociationServiceGenAI.promptKey
-    );
-    if (!prompt) return null;
-    return this.replacePromptVariables({
-      prompt,
-      variables: {
-        scanningToolTitle: scanningTool,
-        questionSet: this.formatQuestionSet(pillars),
-        scanningToolFindings: this.formatScanningToolFindings(findings),
+  }): Promise<Prompt | null> {
+    const { pillars, findings } = args;
+    const [staticPrompt, dynamicPromptKey] = await Promise.all([
+      this.objectsStorage.get(
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
+      ),
+      this.objectsStorage.get(
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ),
+    ]);
+    if (!staticPrompt || !dynamicPromptKey) {
+      return null;
+    }
+    return [
+      {
+        text: this.replacePromptVariables({
+          prompt: staticPrompt,
+          variables: {
+            bestPractices: this.formatQuestionSet(pillars),
+          },
+        }),
       },
-    });
+      {
+        cachePoint: true,
+      },
+      {
+        text: this.replacePromptVariables({
+          prompt: dynamicPromptKey,
+          variables: {
+            findings: this.formatScanningToolFindings(findings),
+          },
+        }),
+      },
+    ];
   }
 
   public replacePromptVariables(args: {

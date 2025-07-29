@@ -392,8 +392,11 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         fakeObjectsStorage,
       } = setup();
       fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.promptKey
-      ] = 'This is a prompt.';
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
+      ] = 'This is a prompt.\n';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -473,8 +476,11 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         fakeObjectsStorage,
       } = setup();
       fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.promptKey
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
       ] = 'This is a prompt.';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -533,8 +539,11 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         fakeObjectsStorage,
       } = setup();
       fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.promptKey
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
       ] = 'This is a prompt.';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -594,8 +603,11 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         fakeObjectsStorage,
       } = setup();
       fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.promptKey
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
       ] = 'This is a prompt.';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')

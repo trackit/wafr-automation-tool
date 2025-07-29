@@ -1,10 +1,11 @@
 import {
   BedrockRuntimeClient,
+  CachePointType,
   ConverseStreamCommand,
   ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIService } from '@backend/ports';
+import type { AIService, PromptComponent } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
@@ -31,18 +32,22 @@ export class AIServiceBedrock implements AIService {
     return result;
   }
 
-  public async converse(args: { prompt: string }): Promise<string> {
+  public async converse(args: { prompt: PromptComponent[] }): Promise<string> {
     const { prompt } = args;
+
     const command = new ConverseStreamCommand({
       modelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              text: prompt,
-            },
-          ],
+          content: prompt.map((component) => {
+            if ('text' in component) {
+              return { text: component.text };
+            } else if ('cachePoint' in component) {
+              return { cachePoint: { type: CachePointType.DEFAULT } };
+            }
+            throw new Error('Invalid prompt component type');
+          }),
         },
       ],
       inferenceConfig: {
@@ -52,6 +57,7 @@ export class AIServiceBedrock implements AIService {
     });
     try {
       const response = await this.client.send(command);
+
       if (response.$metadata.httpStatusCode !== 200 || !response.stream) {
         throw new Error(
           `Failed to converse: ${response.$metadata.httpStatusCode}`
