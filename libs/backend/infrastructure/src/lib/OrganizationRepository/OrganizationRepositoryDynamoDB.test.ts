@@ -60,7 +60,7 @@ describe('OrganizationRepositoryDynamoDB', () => {
 
       expect(fetchedOrganization).toBeUndefined();
     });
-    it('should throw an error if organization is not conform', async () => {
+    it('should throw a ZodError if organization is invalid', async () => {
       const { repository } = setup();
 
       const client = inject(tokenDynamoDBDocument);
