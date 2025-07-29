@@ -250,6 +250,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleArn
+                - region
+              properties:
+                region:
+                  type: string
+                  description: The region to export the assessment to.
       responses:
         '200':
           description: The assessment has been successfully exported

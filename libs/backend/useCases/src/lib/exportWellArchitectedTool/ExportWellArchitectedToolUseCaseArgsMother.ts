@@ -12,6 +12,7 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
     return new ExportWellArchitectedToolUseCaseArgsMother({
       user: UserMother.basic().build(),
       assessmentId: 'assessment-id',
+      region: 'us-west-2',
     });
   }
 
@@ -24,6 +25,13 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
 
   public withUser(user: User): ExportWellArchitectedToolUseCaseArgsMother {
     this.data.user = user;
+    return this;
+  }
+
+  public withRegion(
+    region: string
+  ): ExportWellArchitectedToolUseCaseArgsMother {
+    this.data.region = region;
     return this;
   }
 

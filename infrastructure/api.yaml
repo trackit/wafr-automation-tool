@@ -414,6 +414,15 @@ Resources:
               Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
+                - dynamodb:GetItem
+              Resource: !Ref OrganizationTableArn
+            - Effect: Allow
+              Action:
+                - sts:AssumeRole
+              Resource:
+                - arn:aws:iam::*:role/*
+            - Effect: Allow
+              Action:
                 - wellarchitected:CreateWorkload
                 - wellarchitected:GetLensReview
                 - wellarchitected:TagResource

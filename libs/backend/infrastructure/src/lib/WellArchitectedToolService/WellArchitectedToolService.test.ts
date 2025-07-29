@@ -1,6 +1,6 @@
 import { mockClient } from 'aws-sdk-client-mock';
 
-import { inject, reset } from '@shared/di-container';
+import { inject, register, reset } from '@shared/di-container';
 
 import {
   AnswerSummary,
@@ -11,6 +11,7 @@ import {
   ListWorkloadsCommand,
   PillarReviewSummary,
   UpdateAnswerCommand,
+  WellArchitectedClient,
 } from '@aws-sdk/client-wellarchitected';
 import {
   AssessmentMother,
@@ -21,15 +22,71 @@ import {
 } from '@backend/models';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
-  tokenWellArchitectedClient,
+  tokenSTSClient,
+  tokenWellArchitectedClientConstructor,
   WAFRLens,
   WellArchitectedToolService,
 } from './WellArchitectedToolService';
+import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 
 describe('wellArchitectedTool Infrastructure', () => {
+  describe('createWellArchitectedClient', () => {
+    it('should create a new Well Architected client', async () => {
+      const { wellArchitectedToolService, stsClientMock } = setup();
+
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const region = 'us-west-2';
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+
+      const client =
+        await wellArchitectedToolService.createWellArchitectedClient(
+          roleArn,
+          region
+        );
+
+      expect(client).instanceOf(WellArchitectedClient);
+
+      expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
+      expect(
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+      ).toEqual(
+        expect.objectContaining({
+          RoleArn: roleArn,
+          RoleSessionName: 'WAFR-Automation-Tool',
+        })
+      );
+    });
+
+    it('should throw an error if the STS credentials are missing', async () => {
+      const { wellArchitectedToolService, stsClientMock } = setup();
+
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const region = 'us-west-2';
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: undefined,
+      });
+
+      await expect(
+        wellArchitectedToolService.createWellArchitectedClient(roleArn, region)
+      ).rejects.toThrow(Error);
+    });
+  });
   describe('createWorkload', () => {
     it('should create a new workload if it does not exist', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('assessment-id')
@@ -49,12 +106,20 @@ describe('wellArchitectedTool Infrastructure', () => {
       });
 
       await expect(
-        wellArchitectedToolService.createWorkload(assessment, user)
+        wellArchitectedToolService.createWorkload(
+          wellArchitectedClient,
+          assessment,
+          user
+        )
       ).resolves.toEqual('workload-id');
     });
 
     it('should throw an error if the workload creation fails', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('assessment-id')
@@ -74,12 +139,20 @@ describe('wellArchitectedTool Infrastructure', () => {
       });
 
       await expect(
-        wellArchitectedToolService.createWorkload(assessment, user)
+        wellArchitectedToolService.createWorkload(
+          wellArchitectedClient,
+          assessment,
+          user
+        )
       ).rejects.toThrow(Error);
     });
 
     it('should get the existing workload if it exists', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('assessment-id')
@@ -103,13 +176,21 @@ describe('wellArchitectedTool Infrastructure', () => {
       });
 
       await expect(
-        wellArchitectedToolService.createWorkload(assessment, user)
+        wellArchitectedToolService.createWorkload(
+          wellArchitectedClient,
+          assessment,
+          user
+        )
       ).resolves.toEqual('workload-id');
     });
   });
   describe('getWorkloadLensReview', () => {
     it('should get lens review of the workload', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
         LensReview: {
@@ -119,7 +200,10 @@ describe('wellArchitectedTool Infrastructure', () => {
       });
 
       await expect(
-        wellArchitectedToolService.getWorkloadLensReview('workload-id')
+        wellArchitectedToolService.getWorkloadLensReview(
+          wellArchitectedClient,
+          'workload-id'
+        )
       ).resolves.toEqual(
         expect.objectContaining({ PillarReviewSummaries: [] })
       );
@@ -136,14 +220,21 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the workload lens review fails', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
         $metadata: { httpStatusCode: 500 },
       });
 
       await expect(
-        wellArchitectedToolService.getWorkloadLensReview('workload-id')
+        wellArchitectedToolService.getWorkloadLensReview(
+          wellArchitectedClient,
+          'workload-id'
+        )
       ).rejects.toThrow(Error);
 
       const lensReviewCalls =
@@ -159,7 +250,11 @@ describe('wellArchitectedTool Infrastructure', () => {
   });
   describe('listWorkloadPillarAnswers', () => {
     it('should list pillar answers of the workload', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       const anwerSummary: AnswerSummary = {
         PillarId: 'pillar-id',
@@ -180,6 +275,7 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       await expect(
         wellArchitectedToolService.listWorkloadPillarAnswers(
+          wellArchitectedClient,
           'workload-id',
           'pillar-id'
         )
@@ -198,7 +294,11 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the list pillar answers fails', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       wellArchitectedClientMock.on(ListAnswersCommand).resolves({
         $metadata: { httpStatusCode: 500 },
@@ -206,6 +306,7 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       await expect(
         wellArchitectedToolService.listWorkloadPillarAnswers(
+          wellArchitectedClient,
           'workload-id',
           'pillar-id'
         )
@@ -225,7 +326,11 @@ describe('wellArchitectedTool Infrastructure', () => {
   });
   describe('updateWorkloadAnswer', () => {
     it('should update answer of the workload', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
         $metadata: { httpStatusCode: 200 },
@@ -235,6 +340,7 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       await expect(
         wellArchitectedToolService.updateWorkloadAnswer(
+          wellArchitectedClient,
           'workload-id',
           'question-id',
           [],
@@ -257,7 +363,11 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the update answer fails', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
         $metadata: { httpStatusCode: 500 },
@@ -267,6 +377,7 @@ describe('wellArchitectedTool Infrastructure', () => {
 
       await expect(
         wellArchitectedToolService.updateWorkloadAnswer(
+          wellArchitectedClient,
           'workload-id',
           'question-id',
           [],
@@ -290,7 +401,11 @@ describe('wellArchitectedTool Infrastructure', () => {
   });
   describe('exportAssessment', () => {
     it('should export the assessment to well architected tool', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        stsClientMock,
+        wellArchitectedClientMock,
+      } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('assessment-id')
@@ -320,6 +435,15 @@ describe('wellArchitectedTool Infrastructure', () => {
         .build();
 
       const user = UserMother.basic().build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
 
       wellArchitectedClientMock.on(ListWorkloadsCommand).resolvesOnce({
         WorkloadSummaries: [
@@ -363,7 +487,25 @@ describe('wellArchitectedTool Infrastructure', () => {
         $metadata: { httpStatusCode: 200 },
       });
 
-      await wellArchitectedToolService.exportAssessment(assessment, user);
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const region = 'us-west-2';
+
+      await wellArchitectedToolService.exportAssessment({
+        roleArn,
+        assessment,
+        region,
+        user,
+      });
+
+      expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
+      expect(
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+      ).toEqual(
+        expect.objectContaining({
+          RoleArn: 'arn:aws:iam::123456789012:role/test-role',
+          RoleSessionName: 'WAFR-Automation-Tool',
+        })
+      );
 
       const listWorkloadsCalls =
         wellArchitectedClientMock.commandCalls(ListWorkloadsCommand);
@@ -402,11 +544,12 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the pillar id or name are missing', async () => {
-      const { wellArchitectedToolService } = setup();
+      const { wellArchitectedToolService, wellArchitectedClient } = setup();
 
       const workflowPillar: PillarReviewSummary = {};
       await expect(
         wellArchitectedToolService.exportPillarList(
+          wellArchitectedClient,
           'workload-id',
           [],
           [workflowPillar]
@@ -415,7 +558,7 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the pillar data is missing', async () => {
-      const { wellArchitectedToolService } = setup();
+      const { wellArchitectedToolService, wellArchitectedClient } = setup();
 
       const workflowPillar: PillarReviewSummary = {
         PillarId: 'pillar-id',
@@ -423,6 +566,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       };
       await expect(
         wellArchitectedToolService.exportPillarList(
+          wellArchitectedClient,
           'workload-id',
           [],
           [workflowPillar]
@@ -431,7 +575,11 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should continue if the pillar data is disabled', async () => {
-      const { wellArchitectedToolService, wellArchitectedClientMock } = setup();
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClient,
+        wellArchitectedClientMock,
+      } = setup();
 
       const assessmentPillarList = [
         PillarMother.basic()
@@ -447,6 +595,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       };
 
       await wellArchitectedToolService.exportPillarList(
+        wellArchitectedClient,
         'workload-id',
         assessmentPillarList,
         [workflowPillar]
@@ -458,11 +607,12 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the answer id, name or choiceList are missing', async () => {
-      const { wellArchitectedToolService } = setup();
+      const { wellArchitectedToolService, wellArchitectedClient } = setup();
 
       const answerSummary: AnswerSummary = {};
       await expect(
         wellArchitectedToolService.exportAnswerList(
+          wellArchitectedClient,
           'workload-id',
           [answerSummary],
           []
@@ -471,7 +621,7 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
 
     it('should throw an error if the answer question data is missing', async () => {
-      const { wellArchitectedToolService } = setup();
+      const { wellArchitectedToolService, wellArchitectedClient } = setup();
 
       const answerSummary: AnswerSummary = {
         QuestionId: 'question-id',
@@ -480,6 +630,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       };
       await expect(
         wellArchitectedToolService.exportAnswerList(
+          wellArchitectedClient,
           'workload-id',
           [answerSummary],
           []
@@ -567,12 +718,21 @@ describe('wellArchitectedTool Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const wellArchitectedClient = new WellArchitectedClient();
+  register(tokenWellArchitectedClientConstructor, {
+    useFactory: () => {
+      return () => wellArchitectedClient;
+    },
+  });
+
   const wellArchitectedToolService = new WellArchitectedToolService();
-  const wellArchitectedClientMock = mockClient(
-    inject(tokenWellArchitectedClient)
-  );
+  const wellArchitectedClientMock = mockClient(wellArchitectedClient);
+  const stsClientMock = mockClient(inject(tokenSTSClient));
   return {
     wellArchitectedToolService,
+    stsClientMock,
+    wellArchitectedClient,
     wellArchitectedClientMock,
   };
 };

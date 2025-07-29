@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenLogger,
+  tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
 import { AssessmentStep, User } from '@backend/models';
@@ -9,6 +10,7 @@ import { ConflictError, NoContentError, NotFoundError } from '../Errors';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
+  region: string;
   user: User;
 };
 
@@ -24,6 +26,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     tokenWellArchitectedToolService
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly organizationRepository = inject(tokenOrganizationRepository);
 
   public async exportAssessment(
     args: ExportWellArchitectedToolUseCaseArgs
@@ -47,10 +50,20 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Assessment with id ${assessment.id} has no findings`
       );
     }
-    await this.wellArchitectedToolService.exportAssessment(
+    const organization = await this.organizationRepository.get({
+      organizationDomain: args.user.organizationDomain,
+    });
+    if (!organization) {
+      throw new NotFoundError(
+        `Organization with domain ${args.user.organizationDomain} not found`
+      );
+    }
+    await this.wellArchitectedToolService.exportAssessment({
+      roleArn: organization.assessmentExportRoleArn,
       assessment,
-      args.user
-    );
+      region: args.region,
+      user: args.user,
+    });
     this.logger.info(
       `Export for assessment ${assessment.id} to the Well Architected Tool finished`
     );

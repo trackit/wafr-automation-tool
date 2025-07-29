@@ -8,6 +8,7 @@ import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { parseJsonObject } from '@shared/utils';
 
 const ExportWellArchitectedToolPathSchema = z.object({
   assessmentId: z.string(),
@@ -15,8 +16,21 @@ const ExportWellArchitectedToolPathSchema = z.object({
   operations['exportWellArchitectedTool']['parameters']['path']
 >;
 
+const ExportWellArchitectedArgsSchema = z.object({
+  region: z.string(),
+}) satisfies ZodType<
+  operations['exportWellArchitectedTool']['requestBody']['content']['application/json']
+>;
+
 export class ExportWellArchitectedToolAdapter {
   private readonly useCase = inject(tokenExportWellArchitectedToolUseCase);
+
+  private parseBody(
+    body?: string
+  ): operations['exportWellArchitectedTool']['requestBody']['content']['application/json'] {
+    const parsedBody = parseJsonObject(body);
+    return ExportWellArchitectedArgsSchema.parse(parsedBody);
+  }
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -29,13 +43,19 @@ export class ExportWellArchitectedToolAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters } = event;
+    const { pathParameters, body } = event;
+    if (!body) {
+      throw new BadRequestError('Request body is required');
+    }
+
     try {
       const parsedPath =
         ExportWellArchitectedToolPathSchema.parse(pathParameters);
+      const parsedBody = this.parseBody(body);
       await this.useCase.exportAssessment({
         user: getUserFromEvent(event),
         ...parsedPath,
+        ...parsedBody,
       });
     } catch (e) {
       if (e instanceof ZodError) {

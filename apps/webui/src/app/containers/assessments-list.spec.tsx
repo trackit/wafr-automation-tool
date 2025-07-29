@@ -1,16 +1,16 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@testing-library/jest-dom';
 import {
+  act,
+  fireEvent,
   render,
   screen,
-  fireEvent,
   waitFor,
-  act,
 } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import '@testing-library/jest-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, useNavigate } from 'react-router';
+import { deleteAssessment, getAssessments } from '@webui/api-client';
+import { MemoryRouter } from 'react-router';
+import { describe, expect, it, vi } from 'vitest';
 import AssessmentsList from './assessments-list';
-import { getAssessments, deleteAssessment } from '@webui/api-client';
 
 // Mock the API calls
 vi.mock('@webui/api-client', () => ({
