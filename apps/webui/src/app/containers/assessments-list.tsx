@@ -109,7 +109,7 @@ function AssessmentsList() {
   return (
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
       <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
-        <h2 className="mt-0 mb-0">Assessments</h2>
+        <h2 className="mt-0 mb-0 font-medium text-2xl">Assessments</h2>
         <NewAssessmentDialog />
       </div>
       <div className="flex flex-row gap-4">
