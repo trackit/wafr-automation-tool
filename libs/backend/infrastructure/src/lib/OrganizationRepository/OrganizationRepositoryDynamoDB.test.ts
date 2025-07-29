@@ -1,7 +1,10 @@
 import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
-import { tokenDynamoDBClient } from '../config/dynamodb/config';
+import {
+  tokenDynamoDBClient,
+  tokenDynamoDBDocument,
+} from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   OrganizationRepositoryDynamoDB,
@@ -55,6 +58,25 @@ describe('OrganizationRepositoryDynamoDB', () => {
       });
 
       expect(fetchedOrganization).toBeUndefined();
+    });
+    it('should throw an error if organization is not conform', async () => {
+      const { repository } = setup();
+
+      const client = inject(tokenDynamoDBDocument);
+      const tableName = inject(tokenDynamoDBOrganizationTableName);
+      await client.put({
+        TableName: tableName,
+        Item: {
+          PK: 'test.io',
+          NOT_A_VALID_FIELD: 'test',
+        },
+      });
+
+      await expect(
+        repository.get({
+          organizationDomain: 'test.io',
+        })
+      ).rejects.toThrowError();
     });
   });
 });

@@ -22,7 +22,7 @@ export class OrganizationMother {
     return this;
   }
 
-  public withAccountId(accountId: string): OrganizationMother {
+  public withAccountId(accountId: string | undefined): OrganizationMother {
     this.data.accountId = accountId;
     return this;
   }
