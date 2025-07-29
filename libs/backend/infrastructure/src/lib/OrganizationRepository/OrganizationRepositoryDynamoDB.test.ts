@@ -1,6 +1,7 @@
 import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
+import { ZodError } from 'zod';
 import {
   tokenDynamoDBClient,
   tokenDynamoDBDocument,
@@ -76,7 +77,7 @@ describe('OrganizationRepositoryDynamoDB', () => {
         repository.get({
           organizationDomain: 'test.io',
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ZodError);
     });
   });
 });
