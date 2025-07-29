@@ -46,12 +46,14 @@ function NewAssessmentDialog() {
 
   return (
     <>
-      <button
-        className="btn btn-primary btn-sm text-sm h-8 min-h-8"
-        onClick={() => setOpen(true)}
-      >
-        New Assessment
-      </button>
+      <div className="not-prose">
+        <button
+          className="btn btn-primary btn-sm border-none rounded-lg font-semibold"
+          onClick={() => setOpen(true)}
+        >
+          New Assessment
+        </button>
+      </div>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
