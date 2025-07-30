@@ -244,7 +244,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
       }
     } while (maxRetries-- > 0);
     throw new Error(
-      `Failed to associate findings to best practices after ${maxRetries} retries`
+      `Failed to associate findings to best practices after ${this.maxRetries} retries`
     );
   }
 }
