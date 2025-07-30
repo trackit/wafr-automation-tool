@@ -110,20 +110,21 @@ function AssessmentsList() {
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
       <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
         <h2 className="mt-0 mb-0 font-medium text-2xl">Assessments</h2>
-        <NewAssessmentDialog />
+        <div className="flex flex-row gap-4">
+          <label className="input input-sm rounded-lg w-full max-w-xs">
+            <Search className="w-4 h-4" />
+            <input
+              type="search"
+              className="grow"
+              placeholder="Search "
+              defaultValue={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          <NewAssessmentDialog />
+        </div>
       </div>
-      <div className="flex flex-row gap-4">
-        <label className="input w-full">
-          <Search className="w-4 h-4" />
-          <input
-            type="search"
-            className="grow"
-            placeholder="Search an assessment"
-            defaultValue={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </label>
-      </div>
+      <div className="flex flex-row gap-4"></div>
       <div
         className="grid gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
         style={{

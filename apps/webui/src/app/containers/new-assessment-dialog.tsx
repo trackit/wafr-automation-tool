@@ -48,7 +48,7 @@ function NewAssessmentDialog() {
     <>
       <div className="not-prose">
         <button
-          className="btn btn-primary btn-sm border-none rounded-lg font-semibold"
+          className="btn btn-primary btn-sm border-none rounded-lg font-semibold min-w-[140px]"
           onClick={() => setOpen(true)}
         >
           New Assessment
