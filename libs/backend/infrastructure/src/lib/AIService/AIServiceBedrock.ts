@@ -1,11 +1,12 @@
 import {
   BedrockRuntimeClient,
   CachePointType,
+  ConversationRole,
   ConverseStreamCommand,
   ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIService, PromptComponent } from '@backend/ports';
+import type { AIService, Prompt, TextComponent } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
@@ -32,14 +33,17 @@ export class AIServiceBedrock implements AIService {
     return result;
   }
 
-  public async converse(args: { prompt: PromptComponent[] }): Promise<string> {
-    const { prompt } = args;
+  public async converse(args: {
+    prompt: Prompt;
+    prefill?: TextComponent;
+  }): Promise<string> {
+    const { prompt, prefill } = args;
 
     const command = new ConverseStreamCommand({
       modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
       messages: [
         {
-          role: 'user',
+          role: ConversationRole.USER,
           content: prompt.map((component) => {
             if ('text' in component) {
               return { text: component.text };
@@ -49,6 +53,9 @@ export class AIServiceBedrock implements AIService {
             throw new Error('Invalid prompt component type');
           }),
         },
+        ...(prefill
+          ? [{ role: ConversationRole.ASSISTANT, content: [prefill] }]
+          : []),
       ],
       inferenceConfig: {
         maxTokens: 4096,
