@@ -168,21 +168,21 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       expect(result).toEqual([
         {
-          id: 0,
+          id: 'pillar-1#question-1#bp1',
           pillarLabel: 'Pillar 1',
           questionLabel: 'Question 1',
           bestPracticeLabel: 'Best Practice 1',
           bestPracticeDescription: 'best practice description 1',
         },
         {
-          id: 1,
+          id: 'pillar-1#question-1#bp2',
           pillarLabel: 'Pillar 1',
           questionLabel: 'Question 1',
           bestPracticeLabel: 'Best Practice 2',
           bestPracticeDescription: 'best practice description 2',
         },
         {
-          id: 2,
+          id: 'pillar-1#question-2#bp3',
           pillarLabel: 'Pillar 1',
           questionLabel: 'Question 2',
           bestPracticeLabel: 'Best Practice 3',
@@ -215,12 +215,12 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       expect(result).toEqual([
         {
-          id: 1,
+          id: 'prowler#1',
           riskDetails: 'risk details 1',
           statusDetail: 'status detail 1',
         },
         {
-          id: 2,
+          id: 'prowler#2',
           riskDetails: 'risk details 2',
           statusDetail: 'status detail 2',
         },
@@ -257,7 +257,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       expect(result).toEqual([
         {
-          id: 3,
+          id: 'prowler#3',
           riskDetails: 'Unknown',
           statusDetail: 'Unknown',
         },
@@ -266,7 +266,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
   });
 
   describe('formatAIAssociations', () => {
-    it('should format the AI associations correctly', () => {
+    it('should separate successful and failed associations', () => {
       const { findingToBestPracticesAssociationServiceGenAI } = setup();
       const pillars = [
         PillarMother.basic()
@@ -278,60 +278,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
                 BestPracticeMother.basic()
                   .withId('bp1')
                   .withLabel('Best Practice 1')
-                  .build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const findings = [
-        FindingMother.basic()
-          .withId('prowler#1')
-          .withRiskDetails('risk details 1')
-          .withStatusDetail('status detail 1')
-          .build(),
-      ];
-      const bestPracticeIdToFindingIdsAssociations = [
-        {
-          id: 0,
-          start: 1,
-          end: 1,
-        },
-      ];
-
-      const result =
-        findingToBestPracticesAssociationServiceGenAI.formatAIAssociations({
-          bestPracticeIdToFindingIdsAssociations,
-          findings,
-          pillars,
-        });
-
-      expect(result).toEqual([
-        {
-          finding: findings[0],
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'bp1',
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('should handle cases where no best practices are associated with findings', () => {
-      const { findingToBestPracticesAssociationServiceGenAI } = setup();
-      const pillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic()
-                  .withId('bp1')
-                  .withLabel('Best Practice 1')
+                  .withDescription('best practice description 1')
                   .build(),
               ])
               .build(),
@@ -350,37 +297,121 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
           .withStatusDetail('status detail 2')
           .build(),
       ];
-      const bestPracticeIdToFindingIdsAssociations = [
+      const findingIdToBestPracticeIdAssociations = [
         {
-          id: 0,
-          start: 2,
-          end: 2,
+          findingId: 'prowler#1',
+          bestPracticeId: 'pillar-1#question-1#bp1',
+        },
+        {
+          findingId: 'prowler#2',
+          bestPracticeId: 'pillar-1#question-1#nonexistent-bp', // This should fail
         },
       ];
 
       const result =
         findingToBestPracticesAssociationServiceGenAI.formatAIAssociations({
-          bestPracticeIdToFindingIdsAssociations,
+          findingIdToBestPracticeIdAssociations,
           findings,
           pillars,
         });
 
-      expect(result).toEqual([
+      expect(result.successful).toHaveLength(1);
+      expect(result.successful[0]).toEqual({
+        finding: findings[0],
+        bestPractices: [
+          {
+            pillarId: 'pillar-1',
+            questionId: 'question-1',
+            bestPracticeId: 'bp1',
+          },
+        ],
+      });
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0]).toEqual(findings[1]);
+    });
+
+    it('should return all successful when no failures occur', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const pillars = [
+        PillarMother.basic()
+          .withId('pillar-1')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-1')
+              .withBestPractices([
+                BestPracticeMother.basic()
+                  .withId('bp1')
+                  .withLabel('Best Practice 1')
+                  .withDescription('best practice description 1')
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build(),
+      ];
+      const findings = [FindingMother.basic().withId('prowler#1').build()];
+      const findingIdToBestPracticeIdAssociations = [
         {
-          finding: findings[0],
-          bestPractices: [],
+          findingId: 'prowler#1',
+          bestPracticeId: 'pillar-1#question-1#bp1',
+        },
+      ];
+
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.formatAIAssociations({
+          findingIdToBestPracticeIdAssociations,
+          findings,
+          pillars,
+        });
+
+      expect(result.successful).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+    });
+
+    it('should return all failed when all associations fail', () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      const pillars = [
+        PillarMother.basic()
+          .withId('pillar-1')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-1')
+              .withBestPractices([
+                BestPracticeMother.basic()
+                  .withId('bp1')
+                  .withLabel('Best Practice 1')
+                  .withDescription('best practice description 1')
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build(),
+      ];
+      const findings = [
+        FindingMother.basic().withId('prowler#1').build(),
+        FindingMother.basic().withId('prowler#2').build(),
+      ];
+      const findingIdToBestPracticeIdAssociations = [
+        {
+          findingId: 'prowler#1',
+          bestPracticeId: 'pillar-1#question-1#nonexistent-bp1',
         },
         {
-          finding: findings[1],
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'bp1',
-            },
-          ],
+          findingId: 'prowler#2',
+          bestPracticeId: 'pillar-1#question-1#nonexistent-bp2',
         },
-      ]);
+      ];
+
+      const result =
+        findingToBestPracticesAssociationServiceGenAI.formatAIAssociations({
+          findingIdToBestPracticeIdAssociations,
+          findings,
+          pillars,
+        });
+
+      expect(result.successful).toHaveLength(0);
+      expect(result.failed).toHaveLength(2);
+      expect(result.failed).toEqual(findings);
     });
   });
 
@@ -433,9 +464,15 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ];
       vi.spyOn(aiService, 'converse').mockResolvedValue(
         JSON.stringify([
-          { id: 0, start: 1, end: 1 },
-          { id: 1, start: 2, end: 2 },
-        ])
+          {
+            findingId: 'prowler#1',
+            bestPracticeId: 'pillar-1#question-1#bp1',
+          },
+          {
+            findingId: 'prowler#2',
+            bestPracticeId: 'pillar-1#question-1#bp2',
+          },
+        ]).slice(1) // Skip first bracket because of prefill
       );
       const result =
         await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
@@ -507,7 +544,14 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ];
       vi.spyOn(aiService, 'converse')
         .mockResolvedValueOnce('Invalid json format')
-        .mockResolvedValueOnce(JSON.stringify([{ id: 0, start: 1, end: 1 }]));
+        .mockResolvedValueOnce(
+          JSON.stringify([
+            {
+              findingId: 'prowler#1',
+              bestPracticeId: 'pillar-1#question-1#bp1',
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        );
 
       const result =
         await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
@@ -569,8 +613,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
           .build(),
       ];
       vi.spyOn(aiService, 'converse')
-        .mockResolvedValueOnce(JSON.stringify([{ invalid: 0, format: 1 }]))
-        .mockResolvedValueOnce(JSON.stringify([{ id: 0, start: 1, end: 1 }]));
+        .mockResolvedValueOnce(
+          JSON.stringify([{ invalid: 0, format: 1 }]).slice(1) // Skip first bracket because of prefill
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify([
+            {
+              findingId: 'prowler#1',
+              bestPracticeId: 'pillar-1#question-1#bp1',
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        );
 
       const result =
         await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
@@ -595,7 +648,213 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ]);
     });
 
-    it('should throw an error if max retries are exceeded', async () => {
+    it('should return an empty array if no prompt is found', async () => {
+      const {
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects = {};
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings: [],
+            pillars: [],
+          }
+        );
+      expect(result).toEqual([]);
+    });
+
+    it('should retry only failed findings and preserve successful ones', async () => {
+      const {
+        aiService,
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
+      ] = 'This is a prompt.\n';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
+      const pillars = [
+        PillarMother.basic()
+          .withId('pillar-1')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-1')
+              .withBestPractices([
+                BestPracticeMother.basic()
+                  .withId('bp1')
+                  .withLabel('Best Practice 1')
+                  .withDescription('best practice description 1')
+                  .build(),
+                BestPracticeMother.basic()
+                  .withId('bp2')
+                  .withLabel('Best Practice 2')
+                  .withDescription('best practice description 2')
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build(),
+      ];
+      const findings = [
+        FindingMother.basic()
+          .withId('prowler#1')
+          .withRiskDetails('risk details 1')
+          .withStatusDetail('status detail 1')
+          .build(),
+        FindingMother.basic()
+          .withId('prowler#2')
+          .withRiskDetails('risk details 2')
+          .withStatusDetail('status detail 2')
+          .build(),
+      ];
+
+      // First call: returns associations with one invalid best practice
+      // Second call: returns valid association for the failed finding
+      vi.spyOn(aiService, 'converse')
+        .mockResolvedValueOnce(
+          JSON.stringify([
+            {
+              findingId: 'prowler#1',
+              bestPracticeId: 'pillar-1#question-1#bp1', // valid
+            },
+            {
+              findingId: 'prowler#2',
+              bestPracticeId: 'pillar-1#question-1#invalid-bp', // invalid - will cause retry
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify([
+            {
+              findingId: 'prowler#2',
+              bestPracticeId: 'pillar-1#question-1#bp2', // valid on retry
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        );
+
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings,
+            pillars,
+          }
+        );
+
+      expect(aiService.converse).toHaveBeenCalledTimes(2);
+
+      // Should include both findings in final result
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        {
+          finding: findings[0],
+          bestPractices: [
+            {
+              pillarId: 'pillar-1',
+              questionId: 'question-1',
+              bestPracticeId: 'bp1',
+            },
+          ],
+        },
+        {
+          finding: findings[1],
+          bestPractices: [
+            {
+              pillarId: 'pillar-1',
+              questionId: 'question-1',
+              bestPracticeId: 'bp2',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should return partial results when some findings continue to fail after max retries', async () => {
+      const {
+        aiService,
+        findingToBestPracticesAssociationServiceGenAI,
+        fakeObjectsStorage,
+      } = setup();
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
+      ] = 'This is a prompt.';
+      fakeObjectsStorage.objects[
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+      ] = 'This is the dynamic part of the prompt.';
+      const pillars = [
+        PillarMother.basic()
+          .withId('pillar-1')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-1')
+              .withBestPractices([
+                BestPracticeMother.basic()
+                  .withId('bp1')
+                  .withLabel('Best Practice 1')
+                  .withDescription('best practice description 1')
+                  .build(),
+              ])
+              .build(),
+          ])
+          .build(),
+      ];
+      const findings = [
+        FindingMother.basic().withId('prowler#1').build(),
+        FindingMother.basic().withId('prowler#2').build(),
+      ];
+
+      // First call succeeds for prowler#1, fails for prowler#2
+      // Subsequent calls all fail for prowler#2
+      vi.spyOn(aiService, 'converse')
+        .mockResolvedValueOnce(
+          JSON.stringify([
+            {
+              findingId: 'prowler#1',
+              bestPracticeId: 'pillar-1#question-1#bp1',
+            },
+            {
+              findingId: 'prowler#2',
+              bestPracticeId: 'pillar-1#question-1#invalid-bp',
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        )
+        .mockResolvedValue(
+          JSON.stringify([
+            {
+              findingId: 'prowler#2',
+              bestPracticeId: 'pillar-1#question-1#invalid-bp',
+            },
+          ]).slice(1) // Skip first bracket because of prefill
+        );
+
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings,
+            pillars,
+          }
+        );
+
+      // Should return only the successful finding
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        finding: findings[0],
+        bestPractices: [
+          {
+            pillarId: 'pillar-1',
+            questionId: 'question-1',
+            bestPracticeId: 'bp1',
+          },
+        ],
+      });
+    });
+
+    it('should throw an error if no findings successfully associated after max retries', async () => {
       const {
         aiService,
         findingToBestPracticesAssociationServiceGenAI,
@@ -627,6 +886,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ];
       const findings = [FindingMother.basic().withId('prowler#1').build()];
       vi.spyOn(aiService, 'converse').mockResolvedValue('Invalid response');
+
       await expect(
         findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
           {
@@ -636,24 +896,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
           }
         )
       ).rejects.toThrowError();
-      expect(aiService.converse).toHaveBeenCalledTimes(maxRetries + 1);
-    });
-
-    it('should return an empty array if no prompt is found', async () => {
-      const {
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects = {};
-      const result =
-        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
-          {
-            scanningTool: ScanningTool.PROWLER,
-            findings: [],
-            pillars: [],
-          }
-        );
-      expect(result).toEqual([]);
+      expect(aiService.converse).toHaveBeenCalledTimes(maxRetries);
     });
   });
 });

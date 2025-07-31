@@ -17,25 +17,20 @@ import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';
 import { tokenLogger } from '../Logger';
 import { tokenObjectsStorage } from '../ObjectsStorage';
 
-interface BestPracticeIdToFindingIdsAssociation {
-  id: number;
-  start: number;
-  end: number;
+interface FindingIdToBestPracticeIdAssociation {
+  findingId: string;
+  bestPracticeId: string; // "pillarId#questionId#bestPracticeId"
 }
 
-// This schema defines the structure of the classification results
-// id is the best practice index
-// start and end are the ids range boundaries of the findings that match this best practice.
-const BestPracticeIdToFindingIdsAssociationsSchema = z.array(
+const FindingIdToBestPracticeIdAssociationsSchema = z.array(
   z.object({
-    id: z.number(),
-    start: z.number(),
-    end: z.number(),
+    findingId: z.string(),
+    bestPracticeId: z.string(),
   })
-) satisfies ZodType<BestPracticeIdToFindingIdsAssociation[]>;
+) satisfies ZodType<FindingIdToBestPracticeIdAssociation[]>;
 
-type BestPracticeIdToFindingIdsAssociations = z.infer<
-  typeof BestPracticeIdToFindingIdsAssociationsSchema
+type FindingIdToBestPracticeIdAssociations = z.infer<
+  typeof FindingIdToBestPracticeIdAssociationsSchema
 >;
 
 export class FindingToBestPracticesAssociationServiceGenAI
@@ -48,16 +43,14 @@ export class FindingToBestPracticesAssociationServiceGenAI
   );
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
-  static readonly staticPromptKey = 'claude-several-findings-static.txt';
-  static readonly dynamicPromptKey = 'claude-several-findings-dynamic.txt';
+  static readonly staticPromptKey = 'static-prompt.txt';
+  static readonly dynamicPromptKey = 'dynamic-prompt.txt';
 
-  public async fetchPrompt(args: {
-    scanningTool: ScanningTool;
-    pillars: Pillar[];
-    findings: Finding[];
-  }): Promise<Prompt | null> {
-    const { pillars, findings } = args;
-    const [staticPrompt, dynamicPromptKey] = await Promise.all([
+  public async fetchPrompt(): Promise<{
+    staticPrompt: string;
+    dynamicPrompt: string;
+  } | null> {
+    const [staticPrompt, dynamicPrompt] = await Promise.all([
       this.objectsStorage.get(
         FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
       ),
@@ -65,29 +58,38 @@ export class FindingToBestPracticesAssociationServiceGenAI
         FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
       ),
     ]);
-    if (!staticPrompt || !dynamicPromptKey) {
+    if (!staticPrompt || !dynamicPrompt) {
       return null;
     }
+    return {
+      staticPrompt,
+      dynamicPrompt,
+    };
+  }
+
+  public formatPrompt(args: {
+    staticPrompt: string;
+    dynamicPrompt: string;
+    pillars: Pillar[];
+    findings: Finding[];
+  }): Prompt {
+    const { staticPrompt, dynamicPrompt, pillars, findings } = args;
+    const formattedStaticPrompt = this.replacePromptVariables({
+      prompt: staticPrompt,
+      variables: {
+        bestPractices: this.formatQuestionSet(pillars),
+      },
+    });
+    const formattedDynamicPrompt = this.replacePromptVariables({
+      prompt: dynamicPrompt,
+      variables: {
+        findings: this.formatScanningToolFindings(findings),
+      },
+    });
     return [
-      {
-        text: this.replacePromptVariables({
-          prompt: staticPrompt,
-          variables: {
-            bestPractices: this.formatQuestionSet(pillars),
-          },
-        }),
-      },
-      {
-        cachePoint: true,
-      },
-      {
-        text: this.replacePromptVariables({
-          prompt: dynamicPromptKey,
-          variables: {
-            findings: this.formatScanningToolFindings(findings),
-          },
-        }),
-      },
+      { text: formattedStaticPrompt },
+      { cachePoint: true },
+      { text: formattedDynamicPrompt },
     ];
   }
 
@@ -121,7 +123,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
   }
 
   public formatQuestionSet(pillars: Pillar[]): {
-    id: number;
+    id: string;
     pillarLabel: string;
     questionLabel: string;
     bestPracticeLabel: string;
@@ -130,8 +132,8 @@ export class FindingToBestPracticesAssociationServiceGenAI
     const flattenedBestPractices =
       this.flattenBestPracticesWithPillarAndQuestionFromPillars(pillars);
     return flattenedBestPractices.map(
-      ({ pillar, question, ...bestPractice }, index) => ({
-        id: index,
+      ({ pillar, question, ...bestPractice }) => ({
+        id: `${pillar.id}#${question.id}#${bestPractice.id}`,
         pillarLabel: pillar.label,
         questionLabel: question.label,
         bestPracticeLabel: bestPractice.label,
@@ -141,18 +143,17 @@ export class FindingToBestPracticesAssociationServiceGenAI
   }
 
   public formatScanningToolFindings(findings: Finding[]): {
-    id: number;
+    id: string;
     riskDetails: string | 'Unknown';
     statusDetail: string | 'Unknown';
   }[] {
     return findings.map((finding) => {
       // Finding id is expected to be in the format "tool#12345"
-      const findingNumericId = Number(finding.id.split('#')?.[1]);
-      if (isNaN(findingNumericId)) {
-        throw new Error(`Invalid finding id format ${finding.id}`);
+      if (!/^[a-zA-Z]+#[0-9]+$/.test(finding.id)) {
+        throw new Error(`Invalid finding id format: ${finding.id}`);
       }
       return {
-        id: findingNumericId,
+        id: finding.id,
         riskDetails: finding.riskDetails ?? 'Unknown',
         statusDetail: finding.statusDetail ?? 'Unknown',
       };
@@ -160,45 +161,58 @@ export class FindingToBestPracticesAssociationServiceGenAI
   }
 
   public formatAIAssociations(args: {
-    bestPracticeIdToFindingIdsAssociations: BestPracticeIdToFindingIdsAssociations;
+    findingIdToBestPracticeIdAssociations: FindingIdToBestPracticeIdAssociations;
     findings: Finding[];
     pillars: Pillar[];
-  }): FindingToBestPracticesAssociation[] {
-    const { bestPracticeIdToFindingIdsAssociations, findings, pillars } = args;
+  }): {
+    successful: FindingToBestPracticesAssociation[];
+    failed: Finding[];
+  } {
+    const { findingIdToBestPracticeIdAssociations, findings, pillars } = args;
     const flattenedBestPractices =
       this.flattenBestPracticesWithPillarAndQuestionFromPillars(pillars);
-    return findings.map((finding) => {
-      const findingNumericId = Number(finding.id.split('#')?.[1]);
-      if (isNaN(findingNumericId)) {
-        throw new Error(`Invalid finding id format ${finding.id}`);
-      }
-      const findingBestPracticeIndexes = bestPracticeIdToFindingIdsAssociations
-        .filter(
-          (classification) =>
-            findingNumericId >= classification.start &&
-            findingNumericId <= classification.end
-        )
-        .map((classification) => classification.id);
-      const findingBestPractices = findingBestPracticeIndexes
-        .map((bestPracticeIdx) => {
-          const bestPractice = flattenedBestPractices[bestPracticeIdx];
-          if (!bestPractice) {
-            throw new Error(
-              'Best practice not found for index: ' + bestPracticeIdx
+    const successful: FindingToBestPracticesAssociation[] = [];
+    const failed: Finding[] = [];
+
+    for (const finding of findings) {
+      try {
+        const findingBestPractices = findingIdToBestPracticeIdAssociations
+          .filter((association) => association.findingId === finding.id)
+          .map((association) => {
+            const [pillarId, questionId, bestPracticeId] =
+              association.bestPracticeId.split('#');
+            const existingBestPractice = flattenedBestPractices.find(
+              (bp) =>
+                bp.id === bestPracticeId &&
+                bp.pillar.id === pillarId &&
+                bp.question.id === questionId
             );
-          }
-          return {
-            pillarId: bestPractice.pillar.id,
-            questionId: bestPractice.question.id,
-            bestPracticeId: bestPractice.id,
-          };
-        })
-        .filter((bp): bp is NonNullable<typeof bp> => bp !== null);
-      return {
-        finding,
-        bestPractices: findingBestPractices,
-      };
-    });
+            if (!existingBestPractice) {
+              throw new Error(
+                `Best practice not found for association: ${association.findingId}-${association.bestPracticeId}`
+              );
+            }
+            return {
+              pillarId,
+              questionId,
+              bestPracticeId,
+            };
+          });
+        successful.push({
+          finding,
+          bestPractices: findingBestPractices,
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to process finding ${finding.id}: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
+        );
+        failed.push(finding);
+      }
+    }
+
+    return { successful, failed };
   }
 
   public async associateFindingsToBestPractices(args: {
@@ -207,31 +221,59 @@ export class FindingToBestPracticesAssociationServiceGenAI
     pillars: Pillar[];
   }): Promise<FindingToBestPracticesAssociation[]> {
     const { scanningTool, findings, pillars } = args;
-    const prompt = await this.fetchPrompt({
-      scanningTool,
-      pillars,
-      findings,
-    });
+    const prompt = await this.fetchPrompt();
     if (!prompt) {
       this.logger.warn('Prompt not found, not associating findings.');
       return [];
     }
-    let maxRetries = this.maxRetries;
     this.logger.info(
       `Associating findings to best practices for scanning tool: ${scanningTool}`,
       { findings }
     );
-    do {
-      const stringifiedAIResponse = await this.aiService.converse({ prompt });
+
+    const successfulAssociations: FindingToBestPracticesAssociation[] = [];
+    let remainingFindings = [...findings];
+    for (
+      let maxRetries = this.maxRetries;
+      remainingFindings.length > 0 && maxRetries > 0;
+      maxRetries--
+    ) {
       try {
-        const aiResponse = parseJsonArray(stringifiedAIResponse);
-        const bestPracticeIdToFindingIdsAssociations =
-          BestPracticeIdToFindingIdsAssociationsSchema.parse(aiResponse);
-        return this.formatAIAssociations({
-          bestPracticeIdToFindingIdsAssociations,
-          findings,
+        const stringifiedAIResponse = await this.aiService.converse({
+          prompt: this.formatPrompt({
+            staticPrompt: prompt.staticPrompt,
+            dynamicPrompt: prompt.dynamicPrompt,
+            pillars,
+            findings: remainingFindings,
+          }),
+          prefill: { text: '[' }, // Start with an opening bracket for JSON array
+        });
+
+        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim()); // Add opening bracket for JSON array according to prefill
+        const findingIdToBestPracticeIdAssociations =
+          FindingIdToBestPracticeIdAssociationsSchema.parse(aiResponse);
+
+        const { successful, failed } = this.formatAIAssociations({
+          findingIdToBestPracticeIdAssociations,
+          findings: remainingFindings,
           pillars,
         });
+
+        successfulAssociations.push(...successful);
+        remainingFindings = failed;
+
+        if (failed.length === 0) {
+          // All findings processed successfully
+          break;
+        } else {
+          this.logger.info(
+            `Successfully processed ${successful.length} findings, ${failed.length} remaining. Retrying failed findings.`,
+            {
+              successfulIds: successful.map((a) => a.finding.id),
+              failedIds: failed.map((f) => f.id),
+            }
+          );
+        }
       } catch (error) {
         if (error instanceof JSONParseError) {
           this.logger.error(`Failed to parse AI response: ${error.message}.`);
@@ -240,12 +282,25 @@ export class FindingToBestPracticesAssociationServiceGenAI
         } else if (error instanceof Error) {
           this.logger.error(`AI error: ${error.message}`);
         }
-        continue; // Retry with a new AI call
       }
-    } while (maxRetries-- > 0);
-    throw new Error(
-      `Failed to associate findings to best practices after ${this.maxRetries} retries`
+    }
+
+    if (successfulAssociations.length === 0) {
+      throw new Error(
+        `Failed to associate all findings to best practices after ${this.maxRetries} retries`
+      );
+    } else if (remainingFindings.length > 0) {
+      this.logger.warn(
+        `Failed to associate ${remainingFindings.length} findings to best practices after ${this.maxRetries} retries`,
+        { failedFindingIds: remainingFindings.map((f) => f.id) }
+      );
+    }
+
+    this.logger.info(
+      `Successfully associated ${successfulAssociations.length} out of ${findings.length} findings to best practices`
     );
+
+    return successfulAssociations;
   }
 }
 
