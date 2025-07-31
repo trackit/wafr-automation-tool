@@ -53,7 +53,7 @@ Parameters:
     Default: 3
   AIFindingsAssociationChunkSize:
     Type: Number
-    Default: 400
+    Default: 10
 
 Globals:
   Function:
