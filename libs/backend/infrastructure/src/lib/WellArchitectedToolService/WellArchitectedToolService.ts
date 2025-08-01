@@ -315,11 +315,11 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment,
       user
     );
-    const workloadLensRevieww = await this.getWorkloadLensReview(
+    const workloadLensReview = await this.getWorkloadLensReview(
       wellArchitectedClient,
       workloadId
     );
-    const workloadPillarList = workloadLensRevieww.PillarReviewSummaries ?? [];
+    const workloadPillarList = workloadLensReview.PillarReviewSummaries ?? [];
     await this.exportPillarList(
       wellArchitectedClient,
       workloadId,
