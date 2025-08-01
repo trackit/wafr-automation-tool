@@ -129,7 +129,7 @@ In both cases, a complete analysis takes a long time, depending on the size of t
 
 ### Requirements
 
-- Claude 3.7 enabled on your AWS account
+- Claude 4 enabled on your AWS account
 
 ### Local
 
