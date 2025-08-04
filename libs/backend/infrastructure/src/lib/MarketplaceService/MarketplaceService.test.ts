@@ -101,18 +101,8 @@ describe('MarketplaceService', () => {
 
       expect(hasMonthlySubscription).toBe(false);
     });
-    it('should throw an error if the organization has no account ID', async () => {
-      const { marketplaceService, marketplaceEntitlementServiceClient } =
-        setup();
-
-      marketplaceEntitlementServiceClient.on(GetEntitlementsCommand).resolves({
-        Entitlements: [
-          {
-            ExpirationDate: new Date(Date.now() + 1000),
-          },
-        ],
-        $metadata: { httpStatusCode: 200 },
-      });
+    it('should return false if the organization has no account ID', async () => {
+      const { marketplaceService } = setup();
 
       await expect(
         marketplaceService.hasMonthlySubscription({
@@ -120,7 +110,7 @@ describe('MarketplaceService', () => {
             .withAccountId(undefined)
             .build(),
         })
-      ).rejects.toThrowError();
+      ).resolves.toBe(false);
     });
   });
 
@@ -160,6 +150,17 @@ describe('MarketplaceService', () => {
         });
 
       expect(hasUnitBasedSubscription).toBe(false);
+    });
+    it('should return false if the organization has no unit-based agreement ID', async () => {
+      const { marketplaceService } = setup();
+
+      await expect(
+        marketplaceService.hasUnitBasedSubscription({
+          organization: OrganizationMother.basic()
+            .withUnitBasedAgreementId(undefined)
+            .build(),
+        })
+      ).resolves.toBe(false);
     });
   });
 
