@@ -12,6 +12,8 @@ import {
   PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
+  CreateMilestoneCommand,
+  WorkloadEnvironment,
 } from '@aws-sdk/client-wellarchitected';
 import {
   AssessmentMother,
@@ -28,6 +30,7 @@ import {
   WellArchitectedToolService,
 } from './WellArchitectedToolService';
 import { AssumeRoleCommand } from '@aws-sdk/client-sts';
+import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 
 describe('wellArchitectedTool Infrastructure', () => {
   describe('createWellArchitectedClient', () => {
@@ -80,6 +83,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       ).rejects.toThrow(Error);
     });
   });
+
   describe('createWorkload', () => {
     it('should create a new workload if it does not exist', async () => {
       const {
@@ -184,6 +188,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       ).resolves.toEqual('workload-id');
     });
   });
+
   describe('getWorkloadLensReview', () => {
     it('should get lens review of the workload', async () => {
       const {
@@ -248,6 +253,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       );
     });
   });
+
   describe('listWorkloadPillarAnswers', () => {
     it('should list pillar answers of the workload', async () => {
       const {
@@ -324,6 +330,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       );
     });
   });
+
   describe('updateWorkloadAnswer', () => {
     it('should update answer of the workload', async () => {
       const {
@@ -399,6 +406,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       );
     });
   });
+
   describe('exportAssessment', () => {
     it('should export the assessment to well architected tool', async () => {
       const {
@@ -713,6 +721,333 @@ describe('wellArchitectedTool Infrastructure', () => {
       expect(selectedChoiceList).toEqual([]);
     });
   });
+
+  describe('createMilestone', () => {
+    it('should create a workload if none exists for the assessment', async () => {
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClientMock,
+        stsClientMock,
+        fakeAssessmentsRepository,
+      } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withName('assessment-name')
+        .withRegions(['us-west-2'])
+        .build();
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        assessment;
+      const user = UserMother.basic().build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+      wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
+        WorkloadSummaries: [],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
+        WorkloadId: 'workload-id',
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
+        LensReview: {
+          PillarReviewSummaries: [],
+        },
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(ListAnswersCommand).resolves({
+        AnswerSummaries: [],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateMilestoneCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      await wellArchitectedToolService.createMilestone({
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        assessment,
+        region: 'us-west-2',
+        name: 'Milestone Name',
+        user,
+      });
+      const createWorkloadCalls = wellArchitectedClientMock.commandCalls(
+        CreateWorkloadCommand
+      );
+      expect(createWorkloadCalls.length).toBe(1);
+      expect(createWorkloadCalls[0].args[0].input).toEqual(
+        expect.objectContaining({
+          WorkloadName: 'wafr-assessment-name-assessment-id',
+          Environment: WorkloadEnvironment.PRODUCTION,
+          AwsRegions: assessment.regions,
+        })
+      );
+    });
+
+    it('should export the assessment pillars', async () => {
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClientMock,
+        stsClientMock,
+        fakeAssessmentsRepository,
+      } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withName('assessment-name')
+        .withRegions(['us-west-2'])
+        .withPillars([
+          PillarMother.basic()
+            .withPrimaryId('pillar-id')
+            .withLabel('Pillar 1')
+            .withDisabled(false)
+            .withQuestions([
+              QuestionMother.basic()
+                .withPrimaryId('question-id')
+                .withLabel('Question 1')
+                .withDisabled(false)
+                .withNone(false)
+                .withBestPractices([
+                  BestPracticeMother.basic()
+                    .withPrimaryId('best-practice-id')
+                    .withLabel('Best Practice 1')
+                    .withChecked(true)
+                    .build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        assessment;
+      const user = UserMother.basic().build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+      wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
+        WorkloadSummaries: [
+          {
+            WorkloadId: 'workload-id',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
+        WorkloadId: 'workload-id',
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
+        LensReview: {
+          PillarReviewSummaries: [
+            {
+              PillarId: 'pillar-id',
+              PillarName: 'Pillar 1',
+            },
+          ],
+        },
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(ListAnswersCommand).resolves({
+        AnswerSummaries: [
+          {
+            QuestionId: 'question-id',
+            QuestionTitle: 'Question 1',
+            Choices: [
+              {
+                ChoiceId: 'best-practice-id',
+                Title: 'Best Practice 1',
+              },
+            ],
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateMilestoneCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      await wellArchitectedToolService.createMilestone({
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        assessment,
+        region: 'us-west-2',
+        name: 'Milestone Name',
+        user,
+      });
+
+      const updateAnswerCalls =
+        wellArchitectedClientMock.commandCalls(UpdateAnswerCommand);
+      expect(updateAnswerCalls.length).toBe(1);
+      expect(updateAnswerCalls[0].args[0].input).toEqual(
+        expect.objectContaining({
+          WorkloadId: 'workload-id',
+          LensAlias: WAFRLens,
+          QuestionId: 'question-id',
+          SelectedChoices: ['best-practice-id'],
+          IsApplicable: true,
+        })
+      );
+    });
+
+    it('should create a new milestone for the assessment', async () => {
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClientMock,
+        stsClientMock,
+        fakeAssessmentsRepository,
+      } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withName('assessment-name')
+        .build();
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        assessment;
+      const user = UserMother.basic().build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+      wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
+        WorkloadSummaries: [
+          {
+            WorkloadId: 'workload-id',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
+        WorkloadId: 'workload-id',
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
+        LensReview: {
+          PillarReviewSummaries: [],
+        },
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(ListAnswersCommand).resolves({
+        AnswerSummaries: [],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateMilestoneCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      await wellArchitectedToolService.createMilestone({
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        assessment,
+        region: 'us-west-2',
+        name: 'Milestone Name',
+        user,
+      });
+
+      const createMilestoneCalls = wellArchitectedClientMock.commandCalls(
+        CreateMilestoneCommand
+      );
+      expect(createMilestoneCalls.length).toBe(1);
+      expect(createMilestoneCalls[0].args[0].input).toEqual(
+        expect.objectContaining({
+          WorkloadId: 'workload-id',
+          MilestoneName: 'Milestone Name',
+        })
+      );
+    });
+
+    it('should throw an error if the milestone creation fails', async () => {
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClientMock,
+        stsClientMock,
+        fakeAssessmentsRepository,
+      } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withName('assessment-name')
+        .build();
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        assessment;
+      const user = UserMother.basic().build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+      wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
+        WorkloadSummaries: [
+          {
+            WorkloadId: 'workload-id',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
+        WorkloadId: 'workload-id',
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
+        LensReview: {
+          PillarReviewSummaries: [],
+        },
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(ListAnswersCommand).resolves({
+        AnswerSummaries: [],
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(UpdateAnswerCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+      wellArchitectedClientMock.on(CreateMilestoneCommand).resolves({
+        $metadata: { httpStatusCode: 500 },
+      });
+
+      await expect(
+        wellArchitectedToolService.createMilestone({
+          roleArn: 'arn:aws:iam::123456789012:role/test-role',
+          assessment,
+          region: 'us-west-2',
+          name: 'Milestone Name',
+          user,
+        })
+      ).rejects.toThrow(Error);
+    });
+  });
 });
 
 const setup = () => {
@@ -734,5 +1069,6 @@ const setup = () => {
     stsClientMock,
     wellArchitectedClient,
     wellArchitectedClientMock,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };
