@@ -70,6 +70,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/exports/create-milestone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a milestone for the assessment
+         * @description Creates a milestone for the assessment.
+         *
+         */
+        post: operations["createMilestone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/exports/well-architected-tool": {
         parameters: {
             query?: never;
@@ -587,6 +608,57 @@ export interface operations {
                 content?: never;
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to create a milestone for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The region to create the milestone in. */
+                    region: string;
+                    /** @description The name of the milestone to create. */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The milestone has been successfully created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization or email of the user */
             400: {
                 headers: {
                     [name: string]: unknown;
