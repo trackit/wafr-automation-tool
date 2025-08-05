@@ -4,9 +4,10 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { AssessmentStep, User } from '@backend/models';
+import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import { NotFoundError } from '../Errors';
+import { assertAssessmentIsReadyForExport } from '../../services/exports';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
@@ -40,16 +41,7 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
-      throw new ConflictError(
-        `Assessment with id ${assessment.id} is not finished`
-      );
-    }
-    if (assessment.pillars.length === 0) {
-      throw new NoContentError(
-        `Assessment with id ${assessment.id} has no findings`
-      );
-    }
+    assertAssessmentIsReadyForExport(assessment);
     const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
