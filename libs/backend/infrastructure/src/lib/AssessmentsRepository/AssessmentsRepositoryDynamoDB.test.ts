@@ -5,6 +5,7 @@ import {
   AssessmentMother,
   AssessmentStep,
   BestPracticeMother,
+  FindingCommentMother,
   FindingMother,
   PillarMother,
   QuestionMother,
@@ -1107,6 +1108,210 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(fetchedFinding1).toBeUndefined();
       expect(fetchedFinding2).toEqual(finding2);
+    });
+  });
+
+  describe('addFindingComment', () => {
+    it('should add a comment to a finding', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const finding = FindingMother.basic()
+        .withId('scanningTool#12345')
+        .withComments({})
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      const comment = FindingCommentMother.basic().withId('comment-id').build();
+      await repository.addFindingComment({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+        comment,
+      });
+
+      const findingWithComment = await repository.getFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+      });
+
+      expect(findingWithComment).toEqual(
+        expect.objectContaining({
+          comments: {
+            'comment-id': comment,
+          },
+        })
+      );
+    });
+
+    it('should throw a FindingNotFoundError if finding does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const comment = FindingCommentMother.basic().withId('comment-id').build();
+      await expect(
+        repository.addFindingComment({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          findingId: 'scanningTool#12345',
+          comment,
+        })
+      ).rejects.toThrow(FindingNotFoundError);
+    });
+
+    it('should handle backward compatibility by creating an empty comments object if finding has no comments field', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const finding = FindingMother.basic()
+        .withId('scanningTool#12345')
+        .withComments(undefined)
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      const comment = FindingCommentMother.basic().withId('comment-id').build();
+      await repository.addFindingComment({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+        comment,
+      });
+
+      const findingWithComment = await repository.getFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+      });
+
+      expect(findingWithComment).toEqual(
+        expect.objectContaining({
+          comments: {
+            'comment-id': comment,
+          },
+        })
+      );
+    });
+  });
+
+  describe('updateFindingComment', () => {
+    it('should update a comment in a finding', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const finding = FindingMother.basic()
+        .withId('scanningTool#12345')
+        .withComments({
+          'comment-id': FindingCommentMother.basic()
+            .withId('comment-id')
+            .withText('old-comment-text')
+            .build(),
+        })
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      await repository.updateFindingComment({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+        commentId: 'comment-id',
+        commentBody: {
+          text: 'new-comment-text',
+        },
+      });
+
+      const findingWithComment = await repository.getFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+      });
+
+      expect(findingWithComment).toEqual(
+        expect.objectContaining({
+          comments: {
+            'comment-id': expect.objectContaining({
+              text: 'new-comment-text',
+            }),
+          },
+        })
+      );
+    });
+  });
+
+  describe('deleteFindingComment', () => {
+    it('should delete a comment from a finding', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const finding = FindingMother.basic()
+        .withId('scanningTool#12345')
+        .withComments({
+          'comment-id': FindingCommentMother.basic()
+            .withId('comment-id')
+            .build(),
+        })
+        .build();
+      await repository.saveFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+      });
+
+      await repository.deleteFindingComment({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        finding,
+        commentId: 'comment-id',
+      });
+
+      const findingWithComment = await repository.getFinding({
+        assessmentId: 'assessment1',
+        organization: 'organization1',
+        findingId: finding.id,
+      });
+
+      expect(findingWithComment).toEqual(
+        expect.objectContaining({
+          comments: {},
+        })
+      );
     });
   });
 

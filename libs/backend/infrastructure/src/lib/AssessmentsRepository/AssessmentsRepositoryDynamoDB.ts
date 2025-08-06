@@ -7,6 +7,8 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  FindingComment,
+  FindingCommentBody,
   Pillar,
   PillarBody,
   Question,
@@ -184,6 +186,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       severity: finding.severity,
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
+      comments: finding.comments,
     };
   }
 
@@ -269,6 +272,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       severity: finding.severity,
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
+      comments: finding.comments,
     };
   }
 
@@ -525,6 +529,63 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const result = await this.client.get(params);
     const dynamoFinding = result.Item as DynamoDBFinding | undefined;
     return this.fromDynamoDBFindingItem(dynamoFinding);
+  }
+
+  public async addFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    comment: FindingComment;
+  }) {
+    const { assessmentId, organization, findingId, comment } = args;
+    const finding = await this.getFinding({
+      assessmentId,
+      organization,
+      findingId,
+    });
+    if (!finding) {
+      this.logger.error(
+        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
+
+    // Backward compatibility: if finding has no comments field, create an empty object
+    if (!finding.comments) {
+      await this.updateFinding({
+        assessmentId,
+        organization,
+        findingId,
+        findingBody: {
+          comments: {},
+        },
+      });
+    }
+
+    const params: UpdateCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getFindingPK({ assessmentId, organization }),
+        SK: findingId,
+      },
+      ...this.buildUpdateExpression({
+        data: { [`${comment.id}`]: comment },
+        UpdateExpressionPath: 'comments',
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to add comment to finding: ${error}`, params);
+      throw error;
+    }
   }
 
   public assertBestPracticeExists(args: {
@@ -856,6 +917,36 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     }
   }
 
+  public async deleteFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    finding: Finding;
+    commentId: string;
+  }): Promise<void> {
+    const { assessmentId, organization, finding, commentId } = args;
+
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getFindingPK({ assessmentId, organization }),
+        SK: finding.id,
+      },
+      UpdateExpression: `REMOVE comments.#commentId`,
+      ExpressionAttributeNames: {
+        '#commentId': commentId,
+      },
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Finding comment deleted: ${finding.id} for assessment: ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to delete finding comment: ${error}`, params);
+      throw error;
+    }
+  }
+
   private buildUpdateExpression(args: {
     data: Record<string, unknown>;
     UpdateExpressionPath?: string;
@@ -881,8 +972,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       args.UpdateExpressionPath += '.';
     }
     for (const [key, value] of Object.entries(data)) {
-      const attributeName = `#${key.replace('-', '_')}`;
-      const attributeValue = `:${key.replace('-', '_')}`;
+      const attributeName = `#${key.replace(/-/g, '_')}`;
+      const attributeValue = `:${key.replace(/-/g, '_')}`;
       updateExpressions.push(
         `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
       );
@@ -983,6 +1074,44 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
     } catch (error) {
       this.logger.error(`Failed to update finding: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    finding: Finding;
+    commentId: string;
+    commentBody: FindingCommentBody;
+  }) {
+    const { assessmentId, organization, finding, commentId, commentBody } =
+      args;
+
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getFindingPK({
+          assessmentId,
+          organization,
+        }),
+        SK: finding.id,
+      },
+      ...this.buildUpdateExpression({
+        data: commentBody as Record<string, unknown>,
+        UpdateExpressionPath: 'comments.#commentId',
+        DefaultExpressionAttributeNames: {
+          '#commentId': commentId,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `Comment ${commentId} in finding ${finding.id} for assessment ${assessmentId} updated successfully`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update comment: ${error}`, params);
       throw error;
     }
   }

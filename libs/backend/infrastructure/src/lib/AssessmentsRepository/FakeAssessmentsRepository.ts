@@ -5,6 +5,8 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  FindingComment,
+  FindingCommentBody,
   PillarBody,
   QuestionBody,
   ScanningTool,
@@ -166,6 +168,52 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     return this.assessmentFindings[key]?.find(
       (finding) => finding.id === findingId
     );
+  }
+
+  public async addFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    comment: FindingComment;
+  }): Promise<void> {
+    const { assessmentId, findingId, organization, comment } = args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (finding) {
+      if (!finding.comments) {
+        finding.comments = {};
+      }
+      finding.comments[comment.id] = comment;
+    }
+  }
+
+  public async deleteFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    finding: Finding;
+    commentId: string;
+  }): Promise<void> {
+    const { finding, commentId } = args;
+    delete finding.comments?.[commentId];
+  }
+
+  public async updateFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    finding: Finding;
+    commentId: string;
+    commentBody: FindingCommentBody;
+  }): Promise<void> {
+    const { finding, commentId, commentBody } = args;
+    if (!finding.comments) {
+      finding.comments = {};
+    }
+    finding.comments[commentId] = {
+      ...finding.comments[commentId],
+      ...commentBody,
+    };
   }
 
   public async updateBestPractice(args: {
