@@ -1,21 +1,16 @@
 const ReportBugAnswer = () => (
   <div className="space-y-6">
     <p>
-      If you encounter a bug or issue with WAFR Automation, you can report it
-      directly on GitHub by opening an issue in the project repository.
-    </p>
-    <p>
-      To submit a bug, visit the{' '}
+      If you encounter a bug or issue with WAFR Automation, we're here to help!
+      <br />
+      Please send us an email through our contact page:{' '}
       <a
-        href="https://github.com/trackit/wafr-automation-tool/issues"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="https://trackit.io/contact_us/"
         className="text-blue-600 hover:underline"
       >
-        issues page
-      </a>{' '}
-      and provide as much detail as possible to help us resolve the problem
-      quickly.
+        contact us
+      </a>
+      .
     </p>
   </div>
 );

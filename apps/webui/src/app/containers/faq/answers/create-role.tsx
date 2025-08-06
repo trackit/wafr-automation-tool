@@ -1,15 +1,13 @@
 import inlinePolicyJSON from '../../../../assets/inline-policy.json';
-import trustPolicyJSON from '../../../../assets/trust-policy.json';
 
 const CreateRoleAnswer = () => {
   const inlinePolicy = JSON.stringify(inlinePolicyJSON, null, 2);
-  const trustPolicy = JSON.stringify(trustPolicyJSON, null, 2);
 
   return (
     <div className="space-y-6">
       <p>
-        First, you need to create a policy that grants the tool access to your
-        AWS account:
+        To get started, you'll need to create a policy that grants the tool
+        access to the AWS account where you want to perform assessments:
       </p>
       <ul className="list-disc pl-6 text-gray-700 space-y-2">
         <li>
@@ -28,10 +26,12 @@ const CreateRoleAnswer = () => {
         </li>
         <li>
           Add a <strong>"Name"</strong> and <strong>"Description"</strong> to
-          the policy. It will be used to add the policy to the role.
+          the policy.
+          <br />
+          This will be used to associate the policy with the role.
         </li>
       </ul>
-      <p>Create the remote role in AWS by following these steps:</p>
+      <p>Next, create the remote role in AWS by following these steps:</p>
       <ul className="list-decimal pl-6 text-gray-700 space-y-2">
         <li>
           Navigate to the <strong>IAM Dashboard</strong> and select{' '}
@@ -39,22 +39,19 @@ const CreateRoleAnswer = () => {
         </li>
         <li className="space-y-2">
           <p>
-            Click on <strong>"Create role"</strong> and choose{' '}
-            <strong>"Remote access"</strong> for remote access with the
-            following trust policy:
+            Click on <strong>"Create role"</strong>, then select{' '}
+            <strong>"AWS account"</strong> and choose
+            <strong>"Another AWS account"</strong>.
           </p>
-          <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700">
-            <code>{trustPolicy}</code>
-          </pre>
-          <p className="text-gray-700">
-            Replace <strong>ACCOUNT_ID</strong> with the account ID where the
-            tool is deployed.
+          <p>
+            Enter the following Account ID:
+            <strong> 394125495069</strong>.
           </p>
         </li>
         <li className="space-y-2">
           <p>
-            Add your <strong>previously created policy</strong> to the role and
-            the following policies:
+            Add your <strong>previously created policy</strong> to the role
+            along with the following policies:
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
             <li>
@@ -65,11 +62,11 @@ const CreateRoleAnswer = () => {
             </li>
           </ul>
         </li>
-        <li>Complete the setup by naming the role.</li>
+        <li>Finish the setup by naming the role.</li>
       </ul>
       <p>
-        Once created, you can use the role ARN to perform an assessment on this
-        specific AWS account.
+        Once the role is created, you can use the role ARN to perform
+        assessments on this specific AWS account within the SaaS platform.
       </p>
     </div>
   );
