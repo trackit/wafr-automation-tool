@@ -1,16 +1,16 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@testing-library/jest-dom';
 import {
-  act,
-  fireEvent,
   render,
   screen,
+  fireEvent,
   waitFor,
+  act,
 } from '@testing-library/react';
-import { deleteAssessment, getAssessments } from '@webui/api-client';
+import { describe, it, expect, vi } from 'vitest';
+import '@testing-library/jest-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
 import AssessmentsList from './assessments-list';
+import { getAssessments, deleteAssessment } from '@webui/api-client';
 
 // Mock the API calls
 vi.mock('@webui/api-client', () => ({
@@ -104,7 +104,7 @@ describe('AssessmentsList', () => {
   it('handles search input', async () => {
     render(<AssessmentsList />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText('Search an assessment');
+    const searchInput = screen.getByPlaceholderText('Search');
     fireEvent.change(searchInput, { target: { value: 'test' } });
 
     await waitFor(() => {
