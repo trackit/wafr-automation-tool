@@ -131,6 +131,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
           .map((bp) => `${bp.pillarId}#${bp.questionId}#${bp.bestPracticeId}`)
           .join(', '),
         hidden: false,
+        comments: {},
       })
     );
     await Promise.all(

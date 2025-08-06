@@ -77,6 +77,7 @@ export class StoreFindingsToAssociateUseCaseImpl
       isAIAssociated: true,
       hidden: false,
       bestPractices: '',
+      comments: {},
     }));
     const findingsChunks = chunk(findings, this.chunkSize);
     const findingsChunksURIs = await this.storeFindingsChunks({
