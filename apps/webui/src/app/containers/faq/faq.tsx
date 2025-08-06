@@ -6,14 +6,12 @@ import AssessmentStagesAnswer from './answers/assessment-stages';
 import AssessmentTimeAnswer from './answers/assessment-time';
 import BestPracticesAnswer from './answers/best-practice';
 import CollectedInformationAnswer from './answers/collected-information';
-import ContributeProjectAnswer from './answers/contribute-project';
 import CreateRoleAnswer from './answers/create-role';
 import HowDoesWAFRAutomationWorkAnswer from './answers/how-does-wafr-automation-tool-work';
 import PrimaryGoalAnswer from './answers/primary-goal';
 import ReportBugAnswer from './answers/report-bug';
 import RescanAssessmentAnswer from './answers/rescan-assessment';
 import ShareAssessmentAnswer from './answers/share-assessment';
-import SourceCodeAnswer from './answers/source-code';
 import WhatIsWAFRAutomationToolAnswer from './answers/what-is-wafr-automation-tool';
 import FAQCollapse from './faq-collapse';
 
@@ -68,14 +66,14 @@ export function FAQ() {
       question: 'How does the rescan of an assessment work?',
       answer: <RescanAssessmentAnswer />,
     },
-    {
-      question: 'Where can I find the source code for WAFR Automation?',
-      answer: <SourceCodeAnswer />,
-    },
-    {
-      question: 'Can I contribute to the open-source project?',
-      answer: <ContributeProjectAnswer />,
-    },
+    // {
+    //   question: 'Where can I find the source code for WAFR Automation?',
+    //   answer: <SourceCodeAnswer />,
+    // },
+    // {
+    //   question: 'Can I contribute to the open-source project?',
+    //   answer: <ContributeProjectAnswer />,
+    // },
     {
       question: 'Where can I report a bug?',
       answer: <ReportBugAnswer />,
