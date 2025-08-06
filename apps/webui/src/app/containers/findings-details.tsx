@@ -427,6 +427,13 @@ function FindingsDetails({
             </div>
           ))}
         </div>
+        {!hasNextPage && !isFetchingNextPage && (
+          <div className="flex flex-col gap-2 px-8 py-4">
+            <p className="text-sm text-base-content/80 text-center">
+              You've reached the end.
+            </p>
+          </div>
+        )}
         {sortedFindings.length === 0 && (
           <div className="flex flex-col gap-2 px-8 py-4">
             {isLoading ? (

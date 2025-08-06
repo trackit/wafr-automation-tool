@@ -85,24 +85,30 @@ function AssessmentsList() {
   return (
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
       <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
-        <h2 className="mt-0 mb-0">Assessments</h2>
-        <NewAssessmentDialog />
+        <h2 className="mt-0 mb-0 font-medium text-2xl">Assessments</h2>
+        <div className="flex flex-row gap-4">
+          <label className="input input-sm rounded-lg w-full max-w-xs">
+            <Search className="w-4 h-4" />
+            <input
+              type="search"
+              className="grow"
+              placeholder="Search "
+              defaultValue={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          <NewAssessmentDialog />
+        </div>
       </div>
-      <div className="flex flex-row gap-4">
-        <label className="input w-full">
-          <Search className="w-4 h-4" />
-          <input
-            type="search"
-            className="grow"
-            placeholder="Search an assessment"
-            defaultValue={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </label>
-      </div>
-      <div className="flex gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 flex-wrap ">
+      <div className="flex flex-row gap-4"></div>
+      <div
+        className="grid gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
+        style={{
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        }}
+      >
         {isLoading ? (
-          <div className="flex flex-row gap-2 justify-center items-center w-full h-full">
+          <div className="flex flex-row gap-2 justify-center items-center w-full h-full col-span-full">
             <div
               className="loading loading-ring text-primary w-8 h-8"
               role="status"
@@ -111,7 +117,7 @@ function AssessmentsList() {
         ) : null}
         {data?.pages.length === 0 ||
         data?.pages?.[0]?.assessments?.length === 0 ? (
-          <div className="text-center text-base-content/80">
+          <div className="text-center text-base-content/80 col-span-full">
             No assessments found
           </div>
         ) : null}
@@ -120,19 +126,15 @@ function AssessmentsList() {
             <div
               className={`
                 border border-neutral-content rounded-lg p-4
-                w-full
-                sm:w-[calc(50%-0.5rem)]
-                md:w-[calc(33.333%-0.667rem)]
-                lg:w-[calc(33.333%-0.667rem)]
-                xl:w-[calc(25%-0.75rem)]
                 hover:shadow-md hover:shadow-primary/20 hover:bg-primary/4
                 transition-all duration-300
                 cursor-pointer
+                w-full h-full
               `}
               key={`${assessment.id}-${Math.random()}`}
               onClick={() => navigate(`/assessments/${assessment.id}`)}
             >
-              <div className="flex flex-col gap-2 justify-between h-full">
+              <div className="flex flex-col gap-2 justify-between h-full w-full">
                 <div className="flex flex-row justify-between items-start mb-2 gap-1">
                   <div className="lg:text-lg md:text-base text-sm font-semibold text-primary">
                     {assessment.name}
