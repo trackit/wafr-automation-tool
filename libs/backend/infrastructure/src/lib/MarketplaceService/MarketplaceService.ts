@@ -40,9 +40,8 @@ export class MarketplaceService implements MarketplacePort {
     const { organization } = args;
 
     if (!organization.accountId) {
-      throw new InfrastructureError({
-        message: 'Account ID is missing in organization',
-      });
+      this.logger.warn('Account ID is missing in organization');
+      return false;
     }
     const command = new GetEntitlementsCommand({
       ProductCode: this.monthlySubscriptionProductCode,
@@ -75,6 +74,11 @@ export class MarketplaceService implements MarketplacePort {
     organization: Organization;
   }): Promise<boolean> {
     const { organization } = args;
+
+    if (!organization.unitBasedAgreementId) {
+      this.logger.warn('Unit-based agreement ID is missing in organization');
+      return false;
+    }
 
     const cmd = new DescribeAgreementCommand({
       agreementId: organization.unitBasedAgreementId,

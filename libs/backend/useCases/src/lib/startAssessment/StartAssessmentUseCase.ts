@@ -87,7 +87,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
 
     if (!(await this.canStartAssessment(args))) {
       throw new ForbiddenError(
-        'Organization does not have an active subscription'
+        'Organization does not have an active subscription or free assessments left'
       );
     }
     await this.stateMachine.startAssessment({

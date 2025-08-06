@@ -35,7 +35,7 @@ export class OrganizationMother {
   }
 
   public withUnitBasedAgreementId(
-    unitBasedAgreementId: string
+    unitBasedAgreementId: string | undefined
   ): OrganizationMother {
     this.data.unitBasedAgreementId = unitBasedAgreementId;
     return this;
