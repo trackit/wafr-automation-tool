@@ -1,7 +1,8 @@
 import {
-  type FindingMetadata,
+  FindingComment,
   SeverityType,
   type Finding,
+  type FindingMetadata,
   type FindingRemediation,
   type FindingResource,
 } from './Finding';
@@ -26,6 +27,7 @@ export class FindingMother {
       },
       resources: [],
       severity: SeverityType.Medium,
+      comments: {},
     });
   }
 
@@ -81,6 +83,13 @@ export class FindingMother {
 
   public withStatusDetail(statusDetail?: string): FindingMother {
     this.data.statusDetail = statusDetail;
+    return this;
+  }
+
+  public withComments(
+    comments: Record<string, FindingComment> | undefined
+  ): FindingMother {
+    this.data.comments = comments;
     return this;
   }
 
