@@ -69,7 +69,7 @@ export interface AssessmentsRepository {
   deleteFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
   }): Promise<void>;
   update(args: {
@@ -108,7 +108,7 @@ export interface AssessmentsRepository {
   updateFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
   }): Promise<void>;

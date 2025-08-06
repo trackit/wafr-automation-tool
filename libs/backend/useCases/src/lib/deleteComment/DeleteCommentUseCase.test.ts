@@ -118,7 +118,8 @@ describe('DeleteCommentUseCase', () => {
       'assessment-id#test.io'
     ].find((finding) => finding.id === 'scanning-tool#12345');
     expect(finding).toBeDefined();
-    expect(finding?.comments['comment-id']).toBeUndefined();
+    expect(finding?.comments).toBeDefined();
+    expect(finding?.comments?.['comment-id']).toBeUndefined();
   });
 });
 

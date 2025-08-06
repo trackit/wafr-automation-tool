@@ -920,10 +920,26 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   public async deleteFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
   }): Promise<void> {
-    const { assessmentId, organization, finding, commentId } = args;
+    const { assessmentId, organization, findingId, commentId } = args;
+
+    const finding = await this.getFinding({
+      assessmentId,
+      organization,
+      findingId,
+    });
+    if (!finding) {
+      this.logger.error(
+        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
 
     const params = {
       TableName: this.tableName,
@@ -1081,12 +1097,28 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   public async updateFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
   }) {
-    const { assessmentId, organization, finding, commentId, commentBody } =
+    const { assessmentId, organization, findingId, commentId, commentBody } =
       args;
+
+    const finding = await this.getFinding({
+      assessmentId,
+      organization,
+      findingId,
+    });
+    if (!finding) {
+      this.logger.error(
+        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
 
     const params = {
       TableName: this.tableName,
@@ -1095,7 +1127,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           assessmentId,
           organization,
         }),
-        SK: finding.id,
+        SK: findingId,
       },
       ...this.buildUpdateExpression({
         data: commentBody as Record<string, unknown>,
@@ -1108,7 +1140,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     try {
       await this.client.update(params);
       this.logger.info(
-        `Comment ${commentId} in finding ${finding.id} for assessment ${assessmentId} updated successfully`
+        `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
       );
     } catch (error) {
       this.logger.error(`Failed to update comment: ${error}`, params);

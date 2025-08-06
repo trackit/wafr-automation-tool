@@ -122,8 +122,8 @@ describe('UpdateCommentUseCase', () => {
       'assessment-id#test.io'
     ].find((finding) => finding.id === 'scanning-tool#12345');
     expect(finding).toBeDefined();
-    expect(finding?.comments['comment-id']).toBeDefined();
-    expect(finding?.comments['comment-id']?.text).toBe('new-comment-text');
+    expect(finding?.comments?.['comment-id']).toBeDefined();
+    expect(finding?.comments?.['comment-id']?.text).toBe('new-comment-text');
   });
 });
 

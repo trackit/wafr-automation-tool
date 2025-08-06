@@ -1245,7 +1245,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.updateFindingComment({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        finding,
+        findingId: finding.id,
         commentId: 'comment-id',
         commentBody: {
           text: 'new-comment-text',
@@ -1267,6 +1267,28 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           },
         })
       );
+    });
+
+    it('should throw a FindingNotFoundError if finding does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateFindingComment({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          findingId: 'scanningTool#12345',
+          commentId: 'comment-id',
+          commentBody: {
+            text: 'new-comment-text',
+          },
+        })
+      ).rejects.toThrow(FindingNotFoundError);
     });
   });
 
@@ -1297,7 +1319,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.deleteFindingComment({
         assessmentId: 'assessment1',
         organization: 'organization1',
-        finding,
+        findingId: finding.id,
         commentId: 'comment-id',
       });
 
@@ -1312,6 +1334,24 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           comments: {},
         })
       );
+    });
+    it('should throw a FindingNotFoundError if finding does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment1')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.deleteFindingComment({
+          assessmentId: 'assessment1',
+          organization: 'organization1',
+          findingId: 'scanningTool#12345',
+          commentId: 'comment-id',
+        })
+      ).rejects.toThrow(FindingNotFoundError);
     });
   });
 

@@ -59,8 +59,8 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       .updateFindingComment({
         assessmentId,
         organization: user.organizationDomain,
+        findingId,
         commentId,
-        finding,
         commentBody,
       })
       .catch((error) => {

@@ -58,7 +58,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
       .deleteFindingComment({
         assessmentId,
         organization: user.organizationDomain,
-        finding,
+        findingId,
         commentId,
       })
       .catch((error) => {

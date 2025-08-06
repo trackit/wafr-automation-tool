@@ -192,21 +192,44 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async deleteFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
   }): Promise<void> {
-    const { finding, commentId } = args;
+    const { assessmentId, organization, findingId, commentId } = args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
     delete finding.comments?.[commentId];
   }
 
   public async updateFindingComment(args: {
     assessmentId: string;
     organization: string;
-    finding: Finding;
+    findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
   }): Promise<void> {
-    const { finding, commentId, commentBody } = args;
+    const { assessmentId, organization, findingId, commentId, commentBody } =
+      args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
     if (!finding.comments) {
       finding.comments = {};
     }
