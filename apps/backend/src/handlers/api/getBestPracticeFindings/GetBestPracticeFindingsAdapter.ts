@@ -66,6 +66,7 @@ export class GetBestPracticeFindingsAdapter {
       }),
       riskDetails: finding.riskDetails,
       isAIAssociated: finding.isAIAssociated,
+      comments: finding.comments,
     }));
   }
 
