@@ -585,6 +585,125 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/findings/{findingId}/comments':
+    post:
+      operationId: addComment
+      tags:
+        - Findings
+      summary: Add a comment to a specific finding
+      description: |
+        Adds a comment to a specific finding.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Text of the comment
+      responses:
+        '200':
+          description: The comment has been successfully added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment or finding could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}':
+    put:
+      operationId: updateComment
+      tags:
+        - Findings
+      summary: Update the details of a specific comment
+      description: |
+        Updates the details of a specific comment.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: The unique ID of the comment to retrieve
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentDto'
+      responses:
+        '200':
+          description: The comment has been successfully updated
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment, finding, or comment could not be found
+        '500':
+          description: Internal server error.
+    delete:
+      operationId: deleteComment
+      tags:
+        - Findings
+      summary: Delete a specific comment
+      description: |
+        Deletes a specific comment.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: The unique ID of the comment to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The comment has been successfully deleted
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
 components:
   schemas:
     Assessment:
@@ -737,11 +856,50 @@ components:
         isAIAssociated:
           type: boolean
           description: Tells whether the finding is associated with an AI or manually
+        comments:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Comment'
     FindingDto:
       type: object
       properties:
         hidden:
           type: boolean
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+    Comment:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - author
+        - text
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the comment
+        author:
+          type: string
+          description: User who created the comment
+        text:
+          type: string
+          description: Text of the comment
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO-formatted date when the comment was created
+    CommentDto:
+      type: object
+      additionalProperties: false
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Text of the comment
     Pillar:
       type: object
       additionalProperties: false
