@@ -1,10 +1,12 @@
 import {
   BedrockRuntimeClient,
+  CachePointType,
+  ConversationRole,
   ConverseStreamCommand,
   ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIService } from '@backend/ports';
+import type { AIService, Prompt, TextComponent } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
@@ -31,19 +33,29 @@ export class AIServiceBedrock implements AIService {
     return result;
   }
 
-  public async converse(args: { prompt: string }): Promise<string> {
-    const { prompt } = args;
+  public async converse(args: {
+    prompt: Prompt;
+    prefill?: TextComponent;
+  }): Promise<string> {
+    const { prompt, prefill } = args;
+
     const command = new ConverseStreamCommand({
-      modelId: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+      modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
       messages: [
         {
-          role: 'user',
-          content: [
-            {
-              text: prompt,
-            },
-          ],
+          role: ConversationRole.USER,
+          content: prompt.map((component) => {
+            if ('text' in component) {
+              return { text: component.text };
+            } else if ('cachePoint' in component) {
+              return { cachePoint: { type: CachePointType.DEFAULT } };
+            }
+            throw new Error('Invalid prompt component type');
+          }),
         },
+        ...(prefill
+          ? [{ role: ConversationRole.ASSISTANT, content: [prefill] }]
+          : []),
       ],
       inferenceConfig: {
         maxTokens: 4096,
@@ -52,6 +64,7 @@ export class AIServiceBedrock implements AIService {
     });
     try {
       const response = await this.client.send(command);
+
       if (response.$metadata.httpStatusCode !== 200 || !response.stream) {
         throw new Error(
           `Failed to converse: ${response.$metadata.httpStatusCode}`

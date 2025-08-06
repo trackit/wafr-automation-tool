@@ -14,12 +14,15 @@
     - [Deployment Command](#deployment-command)
     - [Post deployment](#post-deployment)
       - [Create assessment export role](#create-assessment-export-role)
+        - [Local](#local)
+        - [Remote](#remote)
       - [Create organization](#create-organization)
       - [Create a custom mapping](#create-a-custom-mapping)
+      - [Create your prompt](#create-your-prompt)
   - [Usage](#usage)
     - [Requirements](#requirements)
-    - [Local](#local)
-    - [Remote](#remote)
+    - [Local](#local-1)
+    - [Remote](#remote-1)
 
 ## Overview
 
@@ -112,13 +115,21 @@ To create a custom mapping, you must create a new file named `scan-findings-to-b
 | `QUESTION_ID`      | String | Question Primary ID for the best practice. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                   |
 | `BEST_PRACTICE_ID` | String | Best practice Primary ID. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                                    |
 
+#### Create your prompt
+
+By default there is no AI model. You need to specify the prompt if you want AI associations to be done.
+The prompt is composed of 2 files, one static and one dynamic. The static part is used to cache what's not going to change through the different AI calls, it contains the best practices list, and the dynamic will contain the findings that we want to associate.
+
+You must create the files `static-prompt.txt` and `dynamic-prompt.txt` in the S3 bucket named `wafr-automation-tool-${STAGE}`.
+In order for them to be recognized by the system, you must include variables, namely `bestPractices` for the static part and `findings` for the dynamic part. The variables are enclosed by two curly brackets, for instance: `{{bestPractices}}` and `{{findings}}`
+
 ## Usage
 
 In both cases, a complete analysis takes a long time, depending on the size of the account.
 
 ### Requirements
 
-- Claude 3.7 enabled on your AWS account
+- Claude 4 enabled on your AWS account
 
 ### Local
 
