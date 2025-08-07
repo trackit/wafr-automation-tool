@@ -58,6 +58,14 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Organization with domain ${args.user.organizationDomain} not found`
       );
     }
+    if (!organization.assessmentExportRoleArn) {
+      this.logger.error(
+        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
+      );
+      throw new NotFoundError(
+        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
+      );
+    }
     await this.wellArchitectedToolService.exportAssessment({
       roleArn: organization.assessmentExportRoleArn,
       assessment,

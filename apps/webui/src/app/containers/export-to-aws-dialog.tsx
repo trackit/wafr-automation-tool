@@ -36,11 +36,18 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
         variant: 'success',
       });
     },
-    onError: () => {
-      enqueueSnackbar({
-        message: 'Failed to send data. Please try again later',
-        variant: 'error',
-      });
+    onError: (e) => {
+      if (e.name === 'NotFoundError') {
+        enqueueSnackbar({
+          message: 'No export role found to export to AWS, please contact support',
+          variant: 'error',
+        });
+      } else {
+        enqueueSnackbar({
+          message: 'Failed to export to AWS, please contact support',
+          variant: 'error',
+        });
+      }
     },
   });
 
