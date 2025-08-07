@@ -31,6 +31,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
+import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = components['schemas']['Question'];
@@ -822,8 +823,12 @@ export function AssessmentDetails() {
                   <RefreshCw className="w-4 h-4" /> Rescan
                 </button>
               </li>
+              <li className="m-1"></li>
               <li>
                 <ExportToAWSDialog assessmentId={id ?? ''} />
+              </li>
+              <li>
+                <CreateAWSMilestoneDialog assessmentId={id ?? ''} />
               </li>
             </ul>
           </div>
