@@ -463,6 +463,35 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  CreateMilestoneLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CreateMilestoneFunction}
+      RetentionInDays: !Ref LogRetentionInDays
+  CreateMilestoneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/createMilestone
+      Tags:
+        Name: CreateMilestoneFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        CreateMilestone:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/create-milestone
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   UpdatePillarLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
