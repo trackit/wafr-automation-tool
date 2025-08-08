@@ -427,7 +427,7 @@ function FindingsDetails({
             </div>
           ))}
         </div>
-        {!hasNextPage && !isFetchingNextPage && (
+        {!hasNextPage && !isFetchingNextPage && !isLoading && (
           <div className="flex flex-col gap-2 px-8 py-4">
             <p className="text-sm text-base-content/80 text-center">
               You've reached the end.
