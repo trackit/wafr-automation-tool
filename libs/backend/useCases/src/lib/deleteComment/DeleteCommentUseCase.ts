@@ -1,4 +1,5 @@
 import {
+  FindingNotFoundError,
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
@@ -62,6 +63,9 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
         commentId,
       })
       .catch((error) => {
+        if (error instanceof FindingNotFoundError) {
+          throw new NotFoundError(error.message);
+        }
         throw error;
       });
   }
