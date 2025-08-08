@@ -39,7 +39,8 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
     onError: (e) => {
       if (e.name === 'NotFoundError') {
         enqueueSnackbar({
-          message: 'No export role found to export to AWS, please contact support',
+          message:
+            'No export role found to export to AWS, please contact support',
           variant: 'error',
         });
       } else {
