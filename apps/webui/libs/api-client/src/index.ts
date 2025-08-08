@@ -1,3 +1,4 @@
+export * from './lib/client';
 export * from './lib/deleteAssessment';
 export * from './lib/exportToAWS';
 export * from './lib/getAssessment';

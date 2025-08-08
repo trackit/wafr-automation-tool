@@ -1,8 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
-import { exportToAWS } from '@webui/api-client';
+import { ApiError, exportToAWS } from '@webui/api-client';
 import { ExportToAWS } from '@webui/forms';
 import { Modal } from '@webui/ui';
-import { ApiError } from 'apps/webui/libs/api-client/src/lib/client';
 import { ArrowRightFromLine } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
