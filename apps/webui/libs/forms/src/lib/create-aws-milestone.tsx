@@ -4,11 +4,14 @@ import { z } from 'zod';
 import { awsRegions, Region } from './regions';
 
 type CreateAWSMilestoneProps = {
-  onSubmit: (data: { region: Region, name: string }) => void;
+  onSubmit: (data: { region: Region; name: string }) => void;
   disabled?: boolean;
 };
 
-export function CreateAWSMilestone({ onSubmit, disabled = false }: CreateAWSMilestoneProps) {
+export function CreateAWSMilestone({
+  onSubmit,
+  disabled = false,
+}: CreateAWSMilestoneProps) {
   const formSchema = z.object({
     region: z.enum(awsRegions),
     name: z.string().min(1, 'Name is required'),
@@ -64,9 +67,7 @@ export function CreateAWSMilestone({ onSubmit, disabled = false }: CreateAWSMile
             {...register('name')}
           />
           {errors.name && (
-            <p className="fieldset-label text-error">
-              {errors.name?.message}
-            </p>
+            <p className="fieldset-label text-error">{errors.name?.message}</p>
           )}
         </fieldset>
       </div>

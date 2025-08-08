@@ -10,10 +10,16 @@ type CreateAWSMilestoneDialogProps = {
   assessmentId: string;
 };
 
-export default function CreateAWSMilestoneDialog({ assessmentId }: CreateAWSMilestoneDialogProps) {
+export default function CreateAWSMilestoneDialog({
+  assessmentId,
+}: CreateAWSMilestoneDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: { assessmentId: string; region: string; name: string }) => {
+    mutationFn: async (data: {
+      assessmentId: string;
+      region: string;
+      name: string;
+    }) => {
       await createAWSMilestone(
         {
           assessmentId: data.assessmentId,
@@ -45,7 +51,7 @@ export default function CreateAWSMilestoneDialog({ assessmentId }: CreateAWSMile
     },
   });
 
-  const onSubmit = (data: { region: string, name: string }) => {
+  const onSubmit = (data: { region: string; name: string }) => {
     mutate({
       assessmentId,
       region: data.region,
