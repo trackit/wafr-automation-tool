@@ -603,7 +603,7 @@ paths:
         - name: findingId
           in: path
           required: true
-          description: The unique ID of the finding to retrieve
+          description: The unique ID of the finding to add a comment to
           schema:
             type: string
       requestBody:
@@ -649,13 +649,13 @@ paths:
         - name: findingId
           in: path
           required: true
-          description: The unique ID of the finding to retrieve
+          description: The unique ID of the finding to which the comment belongs
           schema:
             type: string
         - name: commentId
           in: path
           required: true
-          description: The unique ID of the comment to retrieve
+          description: The unique ID of the comment to update
           schema:
             type: string
       requestBody:
@@ -690,13 +690,13 @@ paths:
         - name: findingId
           in: path
           required: true
-          description: The unique ID of the finding to retrieve
+          description: The unique ID of the finding to which the comment belongs
           schema:
             type: string
         - name: commentId
           in: path
           required: true
-          description: The unique ID of the comment to retrieve
+          description: The unique ID of the comment to delete
           schema:
             type: string
       responses:
