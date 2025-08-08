@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { exportToAWS } from '@webui/api-client';
 import { ExportToAWS } from '@webui/forms';
 import { Modal } from '@webui/ui';
+import { ApiError } from 'apps/webui/libs/api-client/src/lib/client';
 import { ArrowRightFromLine } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
@@ -36,8 +37,8 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
         variant: 'success',
       });
     },
-    onError: (e) => {
-      if (e.name === 'NotFoundError') {
+    onError: (e: ApiError) => {
+      if (e.statusCode === 404) {
         enqueueSnackbar({
           message:
             'No export role found to export to AWS, please contact support',
