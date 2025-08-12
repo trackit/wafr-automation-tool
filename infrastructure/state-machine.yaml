@@ -27,15 +27,11 @@ Parameters:
     Type: String
   ProwlerTaskDefinition:
     Type: String
-  ProwlerTaskRole:
+  ScanTaskRole:
     Type: String
   CloudCustodianTaskDefinition:
     Type: String
-  CloudCustodianTaskRole:
-    Type: String
   CloudSploitTaskDefinition:
-    Type: String
-  CloudSploitTaskRole:
     Type: String
   Subnet:
     Type: String
@@ -327,9 +323,7 @@ Resources:
               Action: iam:PassRole
               Resource:
                 - !Ref ECSExecutionRole
-                - !Ref ProwlerTaskRole
-                - !Ref CloudCustodianTaskRole
-                - !Ref CloudSploitTaskRole
+                - !Ref ScanTaskRole
         - Statement:
             - Effect: Allow
               Action:
