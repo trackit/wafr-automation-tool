@@ -7,6 +7,8 @@ const ReportBugAnswer = () => (
       <a
         href="https://trackit.io/contact_us/"
         className="text-blue-600 hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         contact us
       </a>

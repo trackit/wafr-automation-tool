@@ -26,6 +26,9 @@
       },
       "defaultConfiguration": "development"
     },
+    "build": {
+      "defaultConfiguration": "development"
+    },
     "deploy": {
       "dependsOn": ["build"],
       "command": "sh scripts/frontend/deploy.sh"
