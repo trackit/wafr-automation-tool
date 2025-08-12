@@ -44,6 +44,20 @@ describe('addComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
+  it('should return 404 if finding does not exist', async () => {
+    const { adapter } = setup();
+
+    const event = APIGatewayProxyEventMother.basic()
+      .withPathParameters({
+        assessmentId: 'assessment-id',
+        findingId: 'finding-id',
+      })
+      .withBody(JSON.stringify({ text: 'comment-text' }))
+      .build();
+
+    const response = await adapter.handle(event);
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 const setup = () => {

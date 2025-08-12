@@ -8,6 +8,7 @@ import {
   FindingNotFoundError,
   tokenAssessmentsRepository,
   tokenIdGenerator,
+  tokenLogger,
 } from '@backend/infrastructure';
 import { FindingComment } from '@backend/models';
 import { NotFoundError } from '@backend/useCases';
@@ -30,6 +31,7 @@ const AddCommentArgsSchema = z.object({
 export class AddCommentAdapter {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly idGenerator = inject(tokenIdGenerator);
+  private readonly logger = inject(tokenLogger);
 
   private parseBody(
     body?: string
@@ -73,17 +75,32 @@ export class AddCommentAdapter {
       const user = getUserFromEvent(event);
       const parsedPath = AddCommentPathSchema.parse(pathParameters);
       const parsedBody = this.parseBody(body);
+      const assessmentId = parsedPath.assessmentId;
+      const findingId = decodeURIComponent(parsedPath.findingId);
       const comment: FindingComment = {
         id: this.idGenerator.generate(),
         author: user.email,
         text: parsedBody.text,
         createdAt: new Date(),
       };
+      const finding = await this.assessmentsRepository.getFinding({
+        assessmentId,
+        organization: user.organizationDomain,
+        findingId,
+      });
+      if (!finding) {
+        this.logger.error(
+          `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${user.organizationDomain}`
+        );
+        throw new NotFoundError(
+          `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${user.organizationDomain}`
+        );
+      }
       await this.assessmentsRepository
         .addFindingComment({
-          assessmentId: parsedPath.assessmentId,
+          assessmentId,
           organization: user.organizationDomain,
-          findingId: decodeURIComponent(parsedPath.findingId),
+          findingId,
           comment,
         })
         .catch((error) => {
