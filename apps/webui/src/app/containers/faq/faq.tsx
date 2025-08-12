@@ -6,11 +6,12 @@ import AssessmentStagesAnswer from './answers/assessment-stages';
 import AssessmentTimeAnswer from './answers/assessment-time';
 import BestPracticesAnswer from './answers/best-practice';
 import CollectedInformationAnswer from './answers/collected-information';
-import CreateRoleAnswer from './answers/create-role';
+import ExportRoleAnswer from './answers/export-role';
 import HowDoesWAFRAutomationWorkAnswer from './answers/how-does-wafr-automation-tool-work';
 import PrimaryGoalAnswer from './answers/primary-goal';
 import ReportBugAnswer from './answers/report-bug';
 import RescanAssessmentAnswer from './answers/rescan-assessment';
+import ScanRoleAnswer from './answers/scan-role';
 import ShareAssessmentAnswer from './answers/share-assessment';
 import WhatIsWAFRAutomationToolAnswer from './answers/what-is-wafr-automation-tool';
 import FAQCollapse from './faq-collapse';
@@ -47,8 +48,12 @@ export function FAQ() {
       answer: <HowDoesWAFRAutomationWorkAnswer />,
     },
     {
-      question: 'How do you create a remote role?',
-      answer: <CreateRoleAnswer />,
+      question: 'How do you create a scan role?',
+      answer: <ScanRoleAnswer />,
+    },
+    {
+      question: 'How do you create an export role?',
+      answer: <ExportRoleAnswer />,
     },
     {
       question: 'How long does an assessment last?',
