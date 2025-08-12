@@ -12,7 +12,7 @@ export class FindingCommentMother {
       id: 'comment-id',
       author: 'author-id',
       text: 'comment-text',
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     });
   }
 
@@ -32,7 +32,7 @@ export class FindingCommentMother {
   }
 
   public withCreatedAt(createdAt: Date): FindingCommentMother {
-    this.data.createdAt = createdAt.toISOString();
+    this.data.createdAt = createdAt;
     return this;
   }
 

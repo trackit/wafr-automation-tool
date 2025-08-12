@@ -47,7 +47,7 @@ export interface FindingComment {
   id: string;
   author: string;
   text: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export interface FindingCommentBody {

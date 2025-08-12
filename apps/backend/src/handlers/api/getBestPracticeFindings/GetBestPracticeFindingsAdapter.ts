@@ -40,7 +40,7 @@ export class GetBestPracticeFindingsAdapter {
       statusCode: 200,
     });
   }
-
+  
   private toGetBestPracticeFindingsItemsResponse(
     findings: Finding[]
   ): operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items'] {
@@ -66,7 +66,17 @@ export class GetBestPracticeFindingsAdapter {
       }),
       riskDetails: finding.riskDetails,
       isAIAssociated: finding.isAIAssociated,
-      comments: finding.comments,
+      comments: finding.comments
+        ? Object.fromEntries(
+            Object.entries(finding.comments).map(([key, comment]) => [
+              key,
+              {
+                ...comment,
+                createdAt: comment.createdAt.toISOString(),
+              },
+            ])
+          )
+        : undefined,
     }));
   }
 

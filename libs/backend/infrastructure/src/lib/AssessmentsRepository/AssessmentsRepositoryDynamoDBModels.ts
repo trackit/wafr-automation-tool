@@ -1,6 +1,5 @@
 import {
   AssessmentStep,
-  FindingComment,
   FindingMetadata,
   FindingRemediation,
   FindingResource,
@@ -57,7 +56,7 @@ export interface DynamoDBFinding {
   hidden: boolean;
   id: string;
   isAIAssociated: boolean;
-  comments?: Record<string, FindingComment>;
+  comments?: Record<string, DynamoDBFindingComment>;
   metadata: FindingMetadata;
   remediation?: FindingRemediation;
   resources?: FindingResource[];
@@ -65,6 +64,13 @@ export interface DynamoDBFinding {
   severity?: SeverityType;
   statusCode?: string;
   statusDetail?: string;
+}
+
+export interface DynamoDBFindingComment {
+  id: string;
+  author: string;
+  text: string;
+  createdAt: string;
 }
 
 export interface DynamoDBPillar {

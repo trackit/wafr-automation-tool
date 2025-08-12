@@ -35,6 +35,7 @@ import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import {
   DynamoDBAssessment,
   DynamoDBFinding,
+  DynamoDBFindingComment,
   DynamoDBPillar,
   DynamoDBQuestion,
 } from './AssessmentsRepositoryDynamoDBModels';
@@ -186,7 +187,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       severity: finding.severity,
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
-      comments: finding.comments,
+      comments: finding.comments
+        ? Object.fromEntries(
+            Object.entries(finding.comments).map(([key, comment]) => [
+              key,
+              this.toDynamoDBFindingComment(comment),
+            ])
+          )
+        : undefined,
     };
   }
 
@@ -272,7 +280,36 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       severity: finding.severity,
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
-      comments: finding.comments,
+      comments: finding.comments
+        ? Object.fromEntries(
+            Object.entries(finding.comments).map(([key, comment]) => [
+              key,
+              this.fromDynamoDBFindingComment(comment),
+            ])
+          )
+        : undefined,
+    };
+  }
+
+  private toDynamoDBFindingComment(
+    comment: FindingComment
+  ): DynamoDBFindingComment {
+    return {
+      id: comment.id,
+      author: comment.author,
+      text: comment.text,
+      createdAt: comment.createdAt.toISOString(),
+    };
+  }
+
+  private fromDynamoDBFindingComment(
+    comment: DynamoDBFindingComment
+  ): FindingComment {
+    return {
+      id: comment.id,
+      author: comment.author,
+      text: comment.text,
+      createdAt: new Date(comment.createdAt),
     };
   }
 
@@ -573,7 +610,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: findingId,
       },
       ...this.buildUpdateExpression({
-        data: { [`${comment.id}`]: comment },
+        data: { [`${comment.id}`]: this.toDynamoDBFindingComment(comment) },
         UpdateExpressionPath: 'comments',
       }),
     };
