@@ -62,7 +62,7 @@ export class ExportWellArchitectedToolUseCaseImpl
       this.logger.error(
         `No assessment export role ARN found for organization ${args.user.organizationDomain}`
       );
-      throw new NotFoundError(
+      throw new ConflictError(
         `No assessment export role ARN found for organization ${args.user.organizationDomain}`
       );
     }
