@@ -4,7 +4,7 @@
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "ACCOUNT_ID"
+        "AWS": "arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-export-assessment"
       },
       "Action": "sts:AssumeRole"
     }
