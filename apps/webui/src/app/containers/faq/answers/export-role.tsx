@@ -23,12 +23,12 @@ const ExportRoleAnswer = () => {
         </p>
         <p>
           <a
-            href="https://s3.amazonaws.com/example-bucket/wafr-export-role-template.yaml"
+            href="https://wafr-automation-tool-templates.s3.us-west-2.amazonaws.com/export-role.yaml"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
           >
-            Click here to launch the CloudFormation stack
+            Click here to download the CloudFormation template
           </a>
         </p>
       </div>
