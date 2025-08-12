@@ -25,7 +25,7 @@ const ScanRoleAnswer = () => {
           </p>
           <p>
             <a
-              href="https://wafr-automation-tool-templates.s3.us-west-2.amazonaws.com/scan-role.yaml"
+              href="https://app.wafr.trackit.io/cloudformation-templates/scan-role.yaml"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"

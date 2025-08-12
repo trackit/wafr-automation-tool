@@ -23,7 +23,7 @@ const ExportRoleAnswer = () => {
         </p>
         <p>
           <a
-            href="https://wafr-automation-tool-templates.s3.us-west-2.amazonaws.com/export-role.yaml"
+            href="https://app.wafr.trackit.io/cloudformation-templates/export-role.yaml"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
