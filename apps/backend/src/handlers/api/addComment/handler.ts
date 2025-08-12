@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { AddCommentAdapter } from './AddComment';
+import { AddCommentAdapter } from './AddCommentAdapter';
 
 const adapter = new AddCommentAdapter();
 

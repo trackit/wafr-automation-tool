@@ -48,6 +48,17 @@ export class AddCommentAdapter {
     });
   }
 
+  private toAddCommentResponse(
+    comment: FindingComment
+  ): operations['addComment']['responses'][200]['content']['application/json'] {
+    return {
+      id: comment.id,
+      author: comment.author,
+      text: comment.text,
+      createdAt: comment.createdAt.toISOString(),
+    };
+  }
+
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<
@@ -66,7 +77,7 @@ export class AddCommentAdapter {
         id: this.idGenerator.generate(),
         author: user.email,
         text: parsedBody.text,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
       await this.assessmentsRepository
         .addFindingComment({
@@ -81,7 +92,7 @@ export class AddCommentAdapter {
           }
           throw error;
         });
-      return comment;
+      return this.toAddCommentResponse(comment);
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request query: ${e.message}`);

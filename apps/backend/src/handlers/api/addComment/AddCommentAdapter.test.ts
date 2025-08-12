@@ -2,8 +2,8 @@ import { registerTestInfrastructure } from '@backend/infrastructure';
 import { reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
-import { AddCommentAdapter } from './AddComment';
-import { AddCommentAdapterEventMother } from './AddCommentEventMother';
+import { AddCommentAdapter } from './AddCommentAdapter';
+import { AddCommentAdapterEventMother } from './AddCommentAdapterEventMother';
 
 describe('addComment adapter', () => {
   describe('args validation', () => {
