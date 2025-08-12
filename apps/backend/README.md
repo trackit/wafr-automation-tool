@@ -150,5 +150,5 @@ And the following inline policy: [Inline Policy](../webui/src/assets/inline-poli
 
 Additionally, add the following [Trust Policy](../webui/src/assets/trust-policy-scan.json) to your role and replace:
 
-- `ACCOUNT_ID` with the AWS account ID where the tool is deployed
-- `ENV` with the stage name (e.g., `prod`, `staging`)
+- `<ACCOUNT_ID>` with the AWS account ID where the tool is deployed
+- `<ENV>` with the stage name (e.g., `prod`, `staging`)
