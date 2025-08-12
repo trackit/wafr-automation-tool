@@ -100,4 +100,5 @@ Resources:
         - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
 Outputs:
   ScanningRoleArn:
+    Description: Scanning Role Arn
     Value: !GetAtt ScanningRole.Arn

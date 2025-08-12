@@ -1,12 +1,24 @@
-AssessmentExportRole:
-  Type: AWS::IAM::Role
-  Properties:
-    AssumeRolePolicyDocument:
-      Version: '2012-10-17'
-      Statement:
-        - Effect: Allow
-          Principal:
-            AWS: XXXXXXXXXXXX
-          Action: sts:AssumeRole
-    ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  WAFR Automation Tool
+
+  Role for exporting assessments
+
+Resources:
+  AssessmentExportRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::XXXXXXXXXXXX:role/wafr-automation-tool-XXXX-export-assessment'
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
+Outputs:
+  AssessmentExportRole:
+    Description: Assessment Export Role
+    Value: !GetAtt AssessmentExportRole.Arn

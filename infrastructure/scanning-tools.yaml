@@ -16,7 +16,7 @@ Parameters:
     Default: 14
 
 Resources:
-  DefaultAssessmentRole:
+  DefaultScanRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -299,9 +299,6 @@ Resources:
               && cloudsploit-scan --json=output.json --console=none --ignore-ok)
               && aws s3 cp output.json s3://$S3_BUCKET/assessments/$ASSESSMENT_ID/scans/cloudsploit/output.json
 Outputs:
-  DefaultAssessmentRole:
-    Description: Default Assessment Role
-    Value: !GetAtt DefaultAssessmentRole.Arn
   ECSCluster:
     Description: ECS Cluster
     Value: !Ref ECSCluster

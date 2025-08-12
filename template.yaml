@@ -51,12 +51,12 @@ Resources:
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
-        DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        ParentStackName: !Ref AWS::StackName
   Network:
     Type: AWS::Serverless::Application
     Properties:
