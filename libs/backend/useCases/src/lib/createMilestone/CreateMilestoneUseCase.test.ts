@@ -37,6 +37,7 @@ describe('CreateMilestone UseCase', () => {
 
     const organization = OrganizationMother.basic()
       .withDomain('test.io')
+      .withAssessmentExportRoleArn('export-role-arn')
       .build();
 
     fakeOrganizationRepository.organizations['test.io'] = organization;
@@ -68,7 +69,10 @@ describe('CreateMilestone UseCase', () => {
         .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
 
     const input = CreateMilestoneUseCaseArgsMother.basic().build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(
@@ -80,7 +84,10 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeOrganizationRepository } = setup();
 
     fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
 
     const input = CreateMilestoneUseCaseArgsMother.basic().build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(NotFoundError);
@@ -98,7 +105,10 @@ describe('CreateMilestone UseCase', () => {
         .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -119,7 +129,10 @@ describe('CreateMilestone UseCase', () => {
         .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -144,6 +157,31 @@ describe('CreateMilestone UseCase', () => {
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(NotFoundError);
+  });
+
+  it('should throw a ConflictError if the organization does not have an export role ARN', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
+      setup();
+
+    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withStep(AssessmentStep.FINISHED)
+        .withPillars([PillarMother.basic().build()])
+        .build();
+
+    fakeOrganizationRepository.organizations['test.io'] =
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn(undefined)
+        .build();
+
+    const input = CreateMilestoneUseCaseArgsMother.basic()
+      .withAssessmentId('assessment-id')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .build();
+    await expect(useCase.createMilestone(input)).rejects.toThrow(ConflictError);
   });
 });
 

@@ -28,7 +28,7 @@ export class OrganizationMother {
   }
 
   public withAssessmentExportRoleArn(
-    assessmentExportRoleArn: string
+    assessmentExportRoleArn: string | undefined
   ): OrganizationMother {
     this.data.assessmentExportRoleArn = assessmentExportRoleArn;
     return this;

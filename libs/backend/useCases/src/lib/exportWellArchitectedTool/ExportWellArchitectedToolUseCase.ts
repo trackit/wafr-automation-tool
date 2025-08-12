@@ -6,7 +6,7 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+import { ConflictError, NotFoundError } from '../Errors';
 import { assertAssessmentIsReadyForExport } from '../../services/exports';
 
 export type ExportWellArchitectedToolUseCaseArgs = {

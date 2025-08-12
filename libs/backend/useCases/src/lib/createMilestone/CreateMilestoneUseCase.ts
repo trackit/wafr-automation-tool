@@ -6,7 +6,7 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+import { ConflictError, NotFoundError } from '../Errors';
 import { assertAssessmentIsReadyForExport } from '../../services/exports';
 
 export interface CreateMilestoneUseCaseArgs {
@@ -47,6 +47,13 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
     if (!organization) {
       throw new NotFoundError(
         `Organization with domain ${args.user.organizationDomain} not found`
+      );
+    } else if (!organization.assessmentExportRoleArn) {
+      this.logger.error(
+        `No assessment export role ARN found for organization ${organization.domain}`
+      );
+      throw new ConflictError(
+        `No assessment export role ARN found for organization ${organization.domain}`
       );
     }
     await this.wellArchitectedToolService.createMilestone({

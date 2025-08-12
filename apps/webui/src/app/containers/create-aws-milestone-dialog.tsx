@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { createAWSMilestone } from '@webui/api-client';
+import { ApiError, createAWSMilestone } from '@webui/api-client';
 import { CreateAWSMilestone as CreateAWSMilestoneForm } from '@webui/forms';
 import { Modal } from '@webui/ui';
 import { Milestone } from 'lucide-react';
@@ -43,11 +43,19 @@ export default function CreateAWSMilestoneDialog({
         variant: 'success',
       });
     },
-    onError: () => {
-      enqueueSnackbar({
-        message: 'Failed to create milestone, please contact support',
-        variant: 'error',
-      });
+    onError: (e: ApiError) => {
+      if (e.statusCode === 409) {
+        enqueueSnackbar({
+          message:
+            'No export role found to create AWS milestone, please contact support',
+          variant: 'error',
+        });
+      } else {
+        enqueueSnackbar({
+          message: 'Failed to create milestone, please contact support',
+          variant: 'error',
+        });
+      }
     },
   });
 
