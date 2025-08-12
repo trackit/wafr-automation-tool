@@ -1174,7 +1174,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).rejects.toThrow(FindingNotFoundError);
     });
 
-    it('should handle backward compatibility by creating an empty comments object if finding has no comments field', async () => {
+    it('should handle backward compatibility if finding has no comments field', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
