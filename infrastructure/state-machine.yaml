@@ -27,15 +27,11 @@ Parameters:
     Type: String
   ProwlerTaskDefinition:
     Type: String
-  ProwlerTaskRole:
+  ScanTaskRole:
     Type: String
   CloudCustodianTaskDefinition:
     Type: String
-  CloudCustodianTaskRole:
-    Type: String
   CloudSploitTaskDefinition:
-    Type: String
-  CloudSploitTaskRole:
     Type: String
   Subnet:
     Type: String
@@ -74,18 +70,6 @@ Globals:
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
 
 Resources:
-  AssessmentExportRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Ref AWS::AccountId
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
   PrepareFindingsAssociationsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -327,9 +311,7 @@ Resources:
               Action: iam:PassRole
               Resource:
                 - !Ref ECSExecutionRole
-                - !Ref ProwlerTaskRole
-                - !Ref CloudCustodianTaskRole
-                - !Ref CloudSploitTaskRole
+                - !Ref ScanTaskRole
         - Statement:
             - Effect: Allow
               Action:

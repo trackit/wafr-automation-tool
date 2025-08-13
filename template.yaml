@@ -51,12 +51,12 @@ Resources:
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
-        DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        ParentStackName: !Ref AWS::StackName
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -100,11 +100,9 @@ Resources:
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
         ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition
-        ProwlerTaskRole: !GetAtt ScanningTools.Outputs.ProwlerTaskRole
+        ScanTaskRole: !GetAtt ScanningTools.Outputs.ScanTaskRole
         CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
-        CloudCustodianTaskRole: !GetAtt ScanningTools.Outputs.CloudCustodianTaskRole
         CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
-        CloudSploitTaskRole: !GetAtt ScanningTools.Outputs.CloudSploitTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
         LogRetentionInDays: !Ref LogRetentionInDays

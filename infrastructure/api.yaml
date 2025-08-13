@@ -7,13 +7,13 @@ Parameters:
     Type: String
   Project:
     Type: String
+  ParentStackName:
+    Type: String
   StateMachineArn:
     Type: String
   StateMachineName:
     Type: String
   DynamoDBArn:
-    Type: String
-  DefaultAssessmentRole:
     Type: String
   InitialUserEmail:
     Type: String
@@ -390,51 +390,62 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
+  DefaultExportRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt ExportAssessmentRole.Arn
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
   ExportAssessmentWellArchitectedToolLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${ExportAssessmentWellArchitectedToolFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+  ExportAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ParentStackName}-export-assessment'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BedrockPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:Query
+                Resource: !Ref DynamoDBArn
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !Ref OrganizationTableArn
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - arn:aws:iam::*:role/*
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../apps/backend/src/handlers/api/exportWellArchitectedTool
       Tags:
         Name: ExportAssessmentWellArchitectedToolFunction
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:DeleteItem
-                - dynamodb:GetItem
-                - dynamodb:BatchWriteItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource: !Ref OrganizationTableArn
-            - Effect: Allow
-              Action:
-                - sts:AssumeRole
-              Resource:
-                - arn:aws:iam::*:role/*
-            - Effect: Allow
-              Action:
-                - wellarchitected:CreateWorkload
-                - wellarchitected:GetLensReview
-                - wellarchitected:TagResource
-                - wellarchitected:ListAnswers
-                - wellarchitected:UpdateAnswer
-              Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:workload/*'
-            - Effect: Allow
-              Action:
-                - wellarchitected:ListWorkloads
-              Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:*'
+      Role: !GetAtt ExportAssessmentRole.Arn
       Events:
         ExportAssessmentWellArchitectedTool:
           Type: Api

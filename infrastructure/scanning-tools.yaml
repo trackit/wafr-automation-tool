@@ -16,7 +16,7 @@ Parameters:
     Default: 14
 
 Resources:
-  DefaultAssessmentRole:
+  DefaultScanRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -24,15 +24,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !GetAtt ProwlerTaskRole.Arn
-            Action: 'sts:AssumeRole'
-          - Effect: Allow
-            Principal:
-              AWS: !GetAtt CloudCustodianTaskRole.Arn
-            Action: 'sts:AssumeRole'
-          - Effect: Allow
-            Principal:
-              AWS: !GetAtt CloudSploitTaskRole.Arn
+              AWS: !GetAtt ScanTaskRole.Arn
             Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: ECSTaskPolicy
@@ -156,9 +148,10 @@ Resources:
     Properties:
       LogGroupName: !Sub '/ecs/${ParentStackName}-logs'
       RetentionInDays: !Ref LogRetentionInDays
-  ProwlerTaskRole:
+  ScanTaskRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub '${ParentStackName}-scan-task'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -173,6 +166,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - s3:GetObject
+                  - s3:HeadObject
                   - s3:PutObject
                 Resource:
                   - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
@@ -190,7 +185,7 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
-      TaskRoleArn: !GetAtt ProwlerTaskRole.Arn
+      TaskRoleArn: !GetAtt ScanTaskRole.Arn
       ContainerDefinitions:
         - Name: prowler-container
           Image: 'toniblyx/prowler:5.1.5'
@@ -230,32 +225,6 @@ Resources:
               $REGIONS
               --status
               FAIL MANUAL
-  CloudCustodianTaskRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: ECSTaskPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:HeadObject
-                  - s3:PutObject
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
-              - Effect: Allow
-                Action:
-                  - sts:AssumeRole
-                Resource: '*'
   CloudCustodianTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -266,7 +235,7 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
-      TaskRoleArn: !GetAtt CloudCustodianTaskRole.Arn
+      TaskRoleArn: !GetAtt ScanTaskRole.Arn
       ContainerDefinitions:
         - Name: cloud-custodian-container
           Image: ghcr.io/trackit/wafr-automation-tool/cloud-custodian:0.9.42.0
@@ -293,31 +262,6 @@ Resources:
               && (eval "$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name "cloud-custodian-session" --query 'Credentials.{AWS_ACCESS_KEY_ID:AccessKeyId,AWS_SECRET_ACCESS_KEY:SecretAccessKey,AWS_SESSION_TOKEN:SessionToken}' --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1 "\nexport AWS_SECRET_ACCESS_KEY="$2 "\nexport AWS_SESSION_TOKEN="$3}')"
               && custodian run --output-dir /tmp/cloud-custodian /tmp/policies.yml $REGIONS)
               && aws s3 cp /tmp/cloud-custodian/ s3://$S3_BUCKET/assessments/$ASSESSMENT_ID/scans/cloud-custodian/ --recursive
-  CloudSploitTaskRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: ECSTaskPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
-              - Effect: Allow
-                Action:
-                  - sts:AssumeRole
-                Resource: '*'
   CloudSploitTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -328,7 +272,7 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
-      TaskRoleArn: !GetAtt CloudSploitTaskRole.Arn
+      TaskRoleArn: !GetAtt ScanTaskRole.Arn
       ContainerDefinitions:
         - Name: cloudsploit-container
           Image: ghcr.io/trackit/wafr-automation-tool/cloudsploit:3.9.0
@@ -355,9 +299,6 @@ Resources:
               && cloudsploit-scan --json=output.json --console=none --ignore-ok)
               && aws s3 cp output.json s3://$S3_BUCKET/assessments/$ASSESSMENT_ID/scans/cloudsploit/output.json
 Outputs:
-  DefaultAssessmentRole:
-    Description: Default Assessment Role
-    Value: !GetAtt DefaultAssessmentRole.Arn
   ECSCluster:
     Description: ECS Cluster
     Value: !Ref ECSCluster
@@ -367,18 +308,12 @@ Outputs:
   ProwlerTaskDefinition:
     Description: Prowler Task Definition
     Value: !Ref ProwlerTaskDefinition
-  ProwlerTaskRole:
-    Description: Prowler Task Role
-    Value: !GetAtt ProwlerTaskRole.Arn
+  ScanTaskRole:
+    Description: Scan Task Role
+    Value: !GetAtt ScanTaskRole.Arn
   CloudCustodianTaskDefinition:
     Description: Cloud Custodian Task Definition
     Value: !Ref CloudCustodianTaskDefinition
-  CloudCustodianTaskRole:
-    Description: Cloud Custodian Task Role
-    Value: !GetAtt CloudCustodianTaskRole.Arn
   CloudSploitTaskDefinition:
     Description: Cloud Sploit Task Definition
     Value: !Ref CloudSploitTaskDefinition
-  CloudSploitTaskRole:
-    Description: Cloud Sploit Task Role
-    Value: !GetAtt CloudSploitTaskRole.Arn

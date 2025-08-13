@@ -78,7 +78,10 @@ In order to export assessments on an other account, you must create a new role i
 
 - WellArchitectedConsoleFullAccess
 
-And the following [Trust Policy](../webui/src/assets/trust-policy.json) with the ACCOUNT_ID of the account where the tool was deployed.
+And with the following [Trust Policy](../webui/src/assets/trust-policy-scan.json), where you need to replace:
+
+- `<ACCOUNT_ID>` with the AWS account ID where the tool is deployed
+- `<ENV>` with the stage name (e.g., `prod`, `staging`)
 
 #### Create organization
 
@@ -145,4 +148,7 @@ To perform a remote analysis, you must provide a custom role with these managed 
 
 And the following inline policy: [Inline Policy](../webui/src/assets/inline-policy.json)
 
-Additionally, add the following [Trust Policy](../webui/src/assets/trust-policy.json) to your role
+Additionally, add the following [Trust Policy](../webui/src/assets/trust-policy-scan.json) to your role and replace:
+
+- `<ACCOUNT_ID>` with the AWS account ID where the tool is deployed
+- `<ENV>` with the stage name (e.g., `prod`, `staging`)
