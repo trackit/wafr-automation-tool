@@ -37,7 +37,7 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
       });
     },
     onError: (e: ApiError) => {
-      if (e.statusCode === 404) {
+      if (e.statusCode === 409) {
         enqueueSnackbar({
           message:
             'No export role found to export to AWS, please contact support',
