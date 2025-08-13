@@ -2,7 +2,7 @@ export interface Finding extends ScanFinding {
   hidden: boolean;
   isAIAssociated: boolean;
   bestPractices: string;
-  comments?: Record<string, FindingComment>;
+  comments?: FindingComment[];
 }
 
 export interface ScanFinding {
@@ -56,5 +56,5 @@ export interface FindingCommentBody {
 
 export interface FindingBody {
   hidden?: boolean;
-  comments?: Record<string, FindingComment>;
+  comments?: FindingComment[];
 }

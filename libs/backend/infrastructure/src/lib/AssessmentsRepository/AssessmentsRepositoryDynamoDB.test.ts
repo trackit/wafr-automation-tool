@@ -1123,7 +1123,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding = FindingMother.basic()
         .withId('scanningTool#12345')
-        .withComments({})
+        .withComments([])
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
@@ -1147,9 +1147,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(findingWithComment).toEqual(
         expect.objectContaining({
-          comments: {
-            'comment-id': comment,
-          },
+          comments: [comment],
         })
       );
     });
@@ -1209,9 +1207,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(findingWithComment).toEqual(
         expect.objectContaining({
-          comments: {
-            'comment-id': comment,
-          },
+          comments: [comment],
         })
       );
     });
@@ -1229,12 +1225,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding = FindingMother.basic()
         .withId('scanningTool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
+        .withComments([
+          FindingCommentMother.basic()
             .withId('comment-id')
             .withText('old-comment-text')
             .build(),
-        })
+        ])
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
@@ -1260,11 +1256,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(findingWithComment).toEqual(
         expect.objectContaining({
-          comments: {
-            'comment-id': expect.objectContaining({
+          comments: [
+            expect.objectContaining({
+              id: 'comment-id',
               text: 'new-comment-text',
             }),
-          },
+          ],
         })
       );
     });
@@ -1304,11 +1301,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const finding = FindingMother.basic()
         .withId('scanningTool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
-            .withId('comment-id')
-            .build(),
-        })
+        .withComments([
+          FindingCommentMother.basic().withId('comment-id').build(),
+        ])
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
@@ -1331,7 +1326,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       expect(findingWithComment).toEqual(
         expect.objectContaining({
-          comments: {},
+          comments: [],
         })
       );
     });

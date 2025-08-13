@@ -27,7 +27,7 @@ export class FindingMother {
       },
       resources: [],
       severity: SeverityType.Medium,
-      comments: {},
+      comments: [],
     });
   }
 
@@ -86,9 +86,7 @@ export class FindingMother {
     return this;
   }
 
-  public withComments(
-    comments: Record<string, FindingComment> | undefined
-  ): FindingMother {
+  public withComments(comments: FindingComment[] | undefined): FindingMother {
     this.data.comments = comments;
     return this;
   }

@@ -131,10 +131,6 @@ function FindingItem({
     return { urls, nonUrls };
   }, [finding.remediation?.references]);
 
-  useEffect(() => {
-    console.log(finding.comments);
-  }, [finding.comments]);
-
   return (
     <div className="w-full px-8 py-8 border-b border-base-content/30">
       <div className="flex flex-row gap-2 items-start justify-between">
@@ -180,9 +176,9 @@ function FindingItem({
             >
               <NotebookPen className="w-4 h-4 " />
             </button>
-            {finding.comments && Object.keys(finding.comments).length > 0 && (
+            {finding.comments && finding.comments.length > 0 && (
               <span className="indicator-item badge badge-xs badge-primary w-4 h-4 -mt-1">
-                {Object.keys(finding.comments).length}
+                {finding.comments.length}
               </span>
             )}
           </div>
@@ -469,9 +465,9 @@ function FindingsDetails({
     onSuccess: (comment: components['schemas']['Comment']) => {
       if (!showCommentsFor) return;
       if (!showCommentsFor.comments) {
-        showCommentsFor.comments = {};
+        showCommentsFor.comments = [];
       }
-      showCommentsFor.comments[comment.id] = comment;
+      showCommentsFor.comments.push(comment);
     },
   });
 
@@ -482,7 +478,9 @@ function FindingsDetails({
       text: string;
     }) => {
       const { findingId, commentId, text } = args;
-      const comment = showCommentsFor?.comments?.[commentId];
+      const comment = showCommentsFor?.comments?.find(
+        (c) => c.id === commentId
+      );
       if (comment && comment.text !== text) {
         await updateComment({
           assessmentId,
@@ -538,7 +536,11 @@ function FindingsDetails({
         });
       },
       onSuccess: (commentId: string) => {
-        delete showCommentsFor?.comments?.[commentId];
+        if (showCommentsFor?.comments) {
+          showCommentsFor.comments = showCommentsFor.comments.filter(
+            (c) => c.id !== commentId
+          );
+        }
       },
     });
 

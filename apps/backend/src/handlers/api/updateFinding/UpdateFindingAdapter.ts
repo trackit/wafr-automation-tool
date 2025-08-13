@@ -1,14 +1,22 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodError, ZodType, ZodTypeDef } from 'zod';
 
 import { tokenUpdateFindingUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { JSONParseError, parseJsonObject } from '@shared/utils';
 
+import { FindingComment } from '@backend/models';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+
+type UpdateFindingBodyIn =
+  operations['updateFinding']['requestBody']['content']['application/json'];
+
+type UpdateFindingBodyOut = Omit<UpdateFindingBodyIn, 'comments'> & {
+  comments?: FindingComment[];
+};
 
 const updateFindingPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -17,16 +25,22 @@ const updateFindingPathParametersSchema = z.object({
 
 const updateFindingBodySchema = z.object({
   hidden: z.boolean().optional(),
-}) satisfies ZodType<
-  operations['updateFinding']['requestBody']['content']['application/json']
->;
+  comments: z
+    .array(
+      z.object({
+        id: z.string(),
+        author: z.string(),
+        text: z.string(),
+        createdAt: z.string().pipe(z.coerce.date()),
+      })
+    )
+    .optional(),
+}) satisfies ZodType<UpdateFindingBodyOut, ZodTypeDef, UpdateFindingBodyIn>;
 
 export class UpdateFindingAdapter {
   private readonly useCase = inject(tokenUpdateFindingUseCase);
 
-  private parseBody(
-    body: string
-  ): operations['updateFinding']['requestBody']['content']['application/json'] {
+  private parseBody(body: string): UpdateFindingBodyOut {
     const parsedBody = parseJsonObject(body);
     return updateFindingBodySchema.parse(parsedBody);
   }

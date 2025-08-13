@@ -857,8 +857,8 @@ components:
           type: boolean
           description: Tells whether the finding is associated with an AI or manually
         comments:
-          type: object
-          additionalProperties:
+          type: array
+          items:
             $ref: '#/components/schemas/Comment'
     FindingDto:
       type: object

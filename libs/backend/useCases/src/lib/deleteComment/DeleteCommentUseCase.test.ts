@@ -34,9 +34,7 @@ describe('DeleteCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic().build(),
-        })
+        .withComments([FindingCommentMother.basic().build()])
         .build(),
     ];
 
@@ -61,12 +59,12 @@ describe('DeleteCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
+        .withComments([
+          FindingCommentMother.basic()
             .withAuthor('user@example.io')
             .withId('comment-id')
             .build(),
-        })
+        ])
         .build(),
     ];
 
@@ -91,12 +89,12 @@ describe('DeleteCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
+        .withComments([
+          FindingCommentMother.basic()
             .withAuthor('user@test.io')
             .withId('comment-id')
             .build(),
-        })
+        ])
         .build(),
     ];
 
@@ -119,7 +117,9 @@ describe('DeleteCommentUseCase', () => {
     ].find((finding) => finding.id === 'scanning-tool#12345');
     expect(finding).toBeDefined();
     expect(finding?.comments).toBeDefined();
-    expect(finding?.comments?.['comment-id']).toBeUndefined();
+    expect(
+      finding?.comments?.find((c) => c.id === 'comment-id')
+    ).toBeUndefined();
   });
 });
 

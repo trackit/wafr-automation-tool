@@ -343,9 +343,7 @@ export interface components {
             riskDetails?: string;
             /** @description Tells whether the finding is associated with an AI or manually */
             isAIAssociated?: boolean;
-            comments?: {
-                [key: string]: components["schemas"]["Comment"];
-            };
+            comments?: components["schemas"]["Comment"][];
         };
         FindingDto: {
             hidden?: boolean;
@@ -1121,7 +1119,7 @@ export interface operations {
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
-                /** @description The unique ID of the finding to retrieve */
+                /** @description The unique ID of the finding to add a comment to */
                 findingId: string;
             };
             cookie?: never;
@@ -1174,9 +1172,9 @@ export interface operations {
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
-                /** @description The unique ID of the finding to retrieve */
+                /** @description The unique ID of the finding to which the comment belongs */
                 findingId: string;
-                /** @description The unique ID of the comment to retrieve */
+                /** @description The unique ID of the comment to update */
                 commentId: string;
             };
             cookie?: never;
@@ -1224,9 +1222,9 @@ export interface operations {
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
-                /** @description The unique ID of the finding to retrieve */
+                /** @description The unique ID of the finding to which the comment belongs */
                 findingId: string;
-                /** @description The unique ID of the comment to retrieve */
+                /** @description The unique ID of the comment to delete */
                 commentId: string;
             };
             cookie?: never;

@@ -61,12 +61,13 @@ describe('UpdateCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
+        .withComments([
+
+        FindingCommentMother.basic()
             .withAuthor('user@example.io')
             .withId('comment-id')
             .build(),
-        })
+    ])
         .build(),
     ];
 
@@ -91,13 +92,13 @@ describe('UpdateCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic()
+        .withComments([
+          FindingCommentMother.basic()
             .withAuthor('user@test.io')
             .withId('comment-id')
             .withText('old-comment-text')
             .build(),
-        })
+        ])
         .build(),
     ];
 
@@ -122,8 +123,9 @@ describe('UpdateCommentUseCase', () => {
       'assessment-id#test.io'
     ].find((finding) => finding.id === 'scanning-tool#12345');
     expect(finding).toBeDefined();
-    expect(finding?.comments?.['comment-id']).toBeDefined();
-    expect(finding?.comments?.['comment-id']?.text).toBe('new-comment-text');
+    const comment = finding?.comments?.find((c) => c.id === 'comment-id');
+    expect(comment).toBeDefined();
+    expect(comment?.text).toBe('new-comment-text');
   });
 });
 

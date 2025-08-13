@@ -1,5 +1,9 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
-import { FindingMother, SeverityType } from '@backend/models';
+import {
+  FindingCommentMother,
+  FindingMother,
+  SeverityType,
+} from '@backend/models';
 import {
   NotFoundError,
   tokenGetBestPracticeFindingsUseCase,
@@ -173,6 +177,7 @@ describe('GetBestPracticeFindings adapter', () => {
           .withSeverity(SeverityType.Medium)
           .withStatusCode('200')
           .withStatusDetail('status detail')
+          .withComments([FindingCommentMother.basic().build()])
           .build(),
       ];
 
@@ -202,6 +207,7 @@ describe('GetBestPracticeFindings adapter', () => {
           },
           riskDetails: 'risk details',
           isAIAssociated: false,
+          comments: [FindingCommentMother.basic().build()],
         })
       );
     });

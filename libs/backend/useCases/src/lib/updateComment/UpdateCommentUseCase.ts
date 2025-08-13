@@ -40,7 +40,8 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       );
     }
 
-    if (!finding.comments || !(commentId in finding.comments)) {
+    const comment = finding.comments?.find((c) => c.id === commentId);
+    if (!comment) {
       this.logger.error(
         `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${user.organizationDomain}`
       );
@@ -49,7 +50,6 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       );
     }
 
-    const comment = finding.comments[commentId];
     if (comment.author !== user.email) {
       throw new ForbiddenError(
         `User ${user.email} is not allowed to update comment ${commentId} for finding ${findingId}`

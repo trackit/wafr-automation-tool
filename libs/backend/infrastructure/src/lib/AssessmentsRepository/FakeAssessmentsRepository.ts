@@ -183,9 +183,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     );
     if (finding) {
       if (!finding.comments) {
-        finding.comments = {};
+        finding.comments = [];
       }
-      finding.comments[comment.id] = comment;
+      finding.comments.push(comment);
     }
   }
 
@@ -207,7 +207,9 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         findingId,
       });
     }
-    delete finding.comments?.[commentId];
+    finding.comments = finding.comments?.filter(
+      (comment) => comment.id !== commentId
+    );
   }
 
   public async updateFindingComment(args: {
@@ -231,12 +233,15 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       });
     }
     if (!finding.comments) {
-      finding.comments = {};
+      finding.comments = [];
     }
-    finding.comments[commentId] = {
-      ...finding.comments[commentId],
-      ...commentBody,
-    };
+    const comment = finding.comments.find(
+      (comment) => comment.id === commentId
+    );
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+    Object.assign(comment, commentBody);
   }
 
   public async updateBestPractice(args: {

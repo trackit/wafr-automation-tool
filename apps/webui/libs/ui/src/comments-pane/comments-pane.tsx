@@ -64,7 +64,8 @@ export function CommentsPane({
 
   const handleEdit = (commentId: string) => {
     setEditingComment(commentId);
-    setEditText(finding.comments?.[commentId]?.text ?? '');
+    const comment = finding.comments?.find((c) => c.id === commentId);
+    setEditText(comment?.text ?? '');
   };
 
   const handleSaveEdit = (commentId: string) => {
@@ -90,7 +91,7 @@ export function CommentsPane({
         className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 mb-4 pr-1"
         ref={listRef}
       >
-        {Object.values(finding.comments ?? {}).map((c) => {
+        {finding.comments?.map((c) => {
           const username = usernameFromEmail(c.author);
           return (
             <div key={c.id} className="flex space-x-2">

@@ -1,5 +1,4 @@
 import {
-  AssessmentNotFoundError,
   EmptyUpdateBodyError,
   FindingNotFoundError,
   tokenAssessmentsRepository,

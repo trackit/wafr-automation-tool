@@ -187,14 +187,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       severity: finding.severity,
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
-      comments: finding.comments
-        ? Object.fromEntries(
-            Object.entries(finding.comments).map(([key, comment]) => [
-              key,
-              this.toDynamoDBFindingComment(comment),
-            ])
-          )
-        : undefined,
+      ...(finding.comments && {
+        comments: Object.fromEntries(
+          finding.comments.map((comment) => [
+            comment.id,
+            this.toDynamoDBFindingComment(comment),
+          ])
+        ),
+      }),
     };
   }
 
@@ -281,11 +281,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       statusCode: finding.statusCode,
       statusDetail: finding.statusDetail,
       comments: finding.comments
-        ? Object.fromEntries(
-            Object.entries(finding.comments).map(([key, comment]) => [
-              key,
-              this.fromDynamoDBFindingComment(comment),
-            ])
+        ? Object.values(finding.comments).map((comment) =>
+            this.fromDynamoDBFindingComment(comment)
           )
         : undefined,
     };
@@ -598,7 +595,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         organization,
         findingId,
         findingBody: {
-          comments: {},
+          comments: [],
         },
       });
     }
@@ -1117,7 +1114,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         SK: findingId,
       },
       ...this.buildUpdateExpression({
-        data: findingBody as Record<string, unknown>,
+        data: {
+          ...findingBody,
+          ...(findingBody.comments && {
+            comments: Object.fromEntries(
+              findingBody.comments.map((comment) => [
+                comment.id,
+                this.toDynamoDBFindingComment(comment),
+              ])
+            ),
+          }),
+        },
       }),
     };
     try {

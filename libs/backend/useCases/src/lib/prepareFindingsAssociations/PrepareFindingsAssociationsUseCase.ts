@@ -11,13 +11,13 @@ import {
   SeverityType,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+import { NotFoundError } from '../Errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import {
   ScanFindingsBestPracticesMapping,
   tokenMapScanFindingsToBestPracticesUseCase,
 } from '../mapScanFindingsToBestPractices';
 import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociate';
-import { NotFoundError } from '../Errors';
 
 export interface PrepareFindingsAssociationsUseCaseArgs {
   assessmentId: string;
@@ -131,7 +131,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
           .map((bp) => `${bp.pillarId}#${bp.questionId}#${bp.bestPracticeId}`)
           .join(', '),
         hidden: false,
-        comments: {},
+        comments: [],
       })
     );
     await Promise.all(

@@ -66,6 +66,11 @@ export interface DynamoDBFinding {
   statusDetail?: string;
 }
 
+export interface DynamoDBFindingBody {
+  hidden?: boolean;
+  comments?: Record<string, DynamoDBFindingComment>;
+}
+
 export interface DynamoDBFindingComment {
   id: string;
   author: string;
