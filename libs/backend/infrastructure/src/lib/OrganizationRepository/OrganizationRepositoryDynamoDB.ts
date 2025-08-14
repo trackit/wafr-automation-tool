@@ -9,7 +9,7 @@ import { tokenLogger } from '../Logger';
 const OrganizationSchema = z.object({
   domain: z.string(),
   accountId: z.string().optional(),
-  assessmentExportRoleArn: z.string(),
+  assessmentExportRoleArn: z.string().optional(),
   unitBasedAgreementId: z.string().optional(),
   freeAssessmentsLeft: z.number().optional(),
 }) as z.ZodType<Organization>;

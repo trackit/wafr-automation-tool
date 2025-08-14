@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { exportToAWS } from '@webui/api-client';
+import { ApiError, exportToAWS } from '@webui/api-client';
 import { ExportToAWS } from '@webui/forms';
 import { Modal } from '@webui/ui';
 import { ArrowRightFromLine } from 'lucide-react';
@@ -36,11 +36,19 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
         variant: 'success',
       });
     },
-    onError: () => {
-      enqueueSnackbar({
-        message: 'Failed to send data. Please try again later',
-        variant: 'error',
-      });
+    onError: (e: ApiError) => {
+      if (e.statusCode === 409) {
+        enqueueSnackbar({
+          message:
+            'No export role found to export to AWS, please contact support',
+          variant: 'error',
+        });
+      } else {
+        enqueueSnackbar({
+          message: 'Failed to export to AWS, please contact support',
+          variant: 'error',
+        });
+      }
     },
   });
 
