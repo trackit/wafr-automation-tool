@@ -22,11 +22,6 @@ function formatDate(iso: string) {
   );
 }
 
-function usernameFromEmail(email?: string) {
-  if (!email) return 'Unknown';
-  return email.replace(/@.*$/, '');
-}
-
 export function CommentsPane({
   finding,
   maxHeight,
@@ -92,15 +87,14 @@ export function CommentsPane({
         ref={listRef}
       >
         {finding.comments?.map((c) => {
-          const username = usernameFromEmail(c.author);
           return (
             <div key={c.id} className="flex space-x-2">
               <div className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                {username.charAt(0).toUpperCase() ?? '?'}
+                {c.authorName.charAt(0).toUpperCase() ?? '?'}
               </div>
               <div className="flex-1 bg-gray-100 rounded-lg p-2 flex flex-col">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span className="break-words">{username}</span>
+                  <span className="break-words">{c.authorName}</span>
                   <div className="flex items-center space-x-2">
                     {editingComment === c.id ? (
                       <button

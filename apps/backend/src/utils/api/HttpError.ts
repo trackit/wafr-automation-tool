@@ -38,3 +38,13 @@ export class ForbiddenError extends HttpError {
     });
   }
 }
+
+export class NotFoundError extends HttpError {
+  public constructor(description?: string) {
+    super({
+      code: 404,
+      message: 'Not Found',
+      description,
+    });
+  }
+}

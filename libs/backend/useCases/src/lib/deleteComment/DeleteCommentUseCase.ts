@@ -49,7 +49,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
       );
     }
 
-    if (comment.author !== user.email) {
+    if (comment.authorId !== user.id) {
       throw new ForbiddenError(
         `User ${user.email} is not allowed to delete comment ${commentId} for finding ${findingId}`
       );

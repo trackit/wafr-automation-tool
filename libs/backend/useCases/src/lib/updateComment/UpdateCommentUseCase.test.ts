@@ -34,9 +34,7 @@ describe('UpdateCommentUseCase', () => {
     fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
       FindingMother.basic()
         .withId('scanning-tool#12345')
-        .withComments({
-          'comment-id': FindingCommentMother.basic().build(),
-        })
+        .withComments([FindingCommentMother.basic().build()])
         .build(),
     ];
 
@@ -62,12 +60,11 @@ describe('UpdateCommentUseCase', () => {
       FindingMother.basic()
         .withId('scanning-tool#12345')
         .withComments([
-
-        FindingCommentMother.basic()
-            .withAuthor('user@example.io')
+          FindingCommentMother.basic()
+            .withAuthorId('other-user-id')
             .withId('comment-id')
             .build(),
-    ])
+        ])
         .build(),
     ];
 
@@ -77,8 +74,8 @@ describe('UpdateCommentUseCase', () => {
       .withCommentId('comment-id')
       .withUser(
         UserMother.basic()
+          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
           .withOrganizationDomain('test.io')
-          .withEmail('user@test.io')
           .build()
       )
       .build();
@@ -94,7 +91,7 @@ describe('UpdateCommentUseCase', () => {
         .withId('scanning-tool#12345')
         .withComments([
           FindingCommentMother.basic()
-            .withAuthor('user@test.io')
+            .withAuthorId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
             .withId('comment-id')
             .withText('old-comment-text')
             .build(),
@@ -111,8 +108,8 @@ describe('UpdateCommentUseCase', () => {
       })
       .withUser(
         UserMother.basic()
+          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
           .withOrganizationDomain('test.io')
-          .withEmail('user@test.io')
           .build()
       )
       .build();

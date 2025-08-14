@@ -874,16 +874,20 @@ components:
       additionalProperties: false
       required:
         - id
-        - author
+        - authorId
+        - authorName
         - text
         - createdAt
       properties:
         id:
           type: string
           description: Unique identifier of the comment
-        author:
+        authorId:
           type: string
-          description: User who created the comment
+          description: Id of the user who created the comment
+        authorName:
+          type: string
+          description: Name of the user who created the comment
         text:
           type: string
           description: Text of the comment

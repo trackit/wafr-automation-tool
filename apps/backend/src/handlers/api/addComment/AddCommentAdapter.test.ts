@@ -1,6 +1,10 @@
-import { registerTestInfrastructure } from '@backend/infrastructure';
-import { reset } from '@shared/di-container';
+import {
+  registerTestInfrastructure,
+  tokenAssessmentsRepository,
+} from '@backend/infrastructure';
+import { inject, reset } from '@shared/di-container';
 
+import { FindingMother } from '@backend/models';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { AddCommentAdapter } from './AddCommentAdapter';
 import { AddCommentAdapterEventMother } from './AddCommentAdapterEventMother';
@@ -44,6 +48,46 @@ describe('addComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
+  it('should add a comment', async () => {
+    const { adapter, assessmentsRepository, date } = setup();
+
+    assessmentsRepository.saveFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      finding: FindingMother.basic()
+        .withId('finding-id')
+        .withComments([])
+        .build(),
+    });
+
+    const event = APIGatewayProxyEventMother.basic()
+      .withPathParameters({
+        assessmentId: 'assessment-id',
+        findingId: 'finding-id',
+      })
+      .withBody(JSON.stringify({ text: 'comment-text' }))
+      .build();
+
+    const response = await adapter.handle(event);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe(
+      JSON.stringify({
+        id: 'fake-id-0',
+        authorId: 'user-id',
+        authorName: 'user-id',
+        text: 'comment-text',
+        createdAt: date.toISOString(),
+      })
+    );
+
+    const updatedFinding = await assessmentsRepository.getFinding({
+      assessmentId: 'assessment-id',
+      organization: 'test.io',
+      findingId: 'finding-id',
+    });
+    expect(updatedFinding?.comments?.length).toBe(1);
+    expect(updatedFinding?.comments?.[0].text).toBe('comment-text');
+  });
   it('should return 404 if finding does not exist', async () => {
     const { adapter } = setup();
 
@@ -63,6 +107,9 @@ describe('addComment adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+  const date = new Date();
+  vitest.setSystemTime(date);
   const adapter = new AddCommentAdapter();
-  return { adapter };
+  const assessmentsRepository = inject(tokenAssessmentsRepository);
+  return { adapter, assessmentsRepository, date };
 };

@@ -27,12 +27,16 @@ const updateFindingBodySchema = z.object({
   hidden: z.boolean().optional(),
   comments: z
     .array(
-      z.object({
-        id: z.string(),
-        author: z.string(),
-        text: z.string(),
-        createdAt: z.string().pipe(z.coerce.date()),
-      })
+      z
+        .object({
+          id: z.string(),
+          authorId: z.string(),
+          authorName: z.string(),
+          text: z.string(),
+          createdAt: z.string().pipe(z.coerce.date()),
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .transform(({ authorName, ...rest }) => rest)
     )
     .optional(),
 }) satisfies ZodType<UpdateFindingBodyOut, ZodTypeDef, UpdateFindingBodyIn>;

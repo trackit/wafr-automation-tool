@@ -293,7 +293,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): DynamoDBFindingComment {
     return {
       id: comment.id,
-      author: comment.author,
+      authorId: comment.authorId,
       text: comment.text,
       createdAt: comment.createdAt.toISOString(),
     };
@@ -304,7 +304,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): FindingComment {
     return {
       id: comment.id,
-      author: comment.author,
+      authorId: comment.authorId,
       text: comment.text,
       createdAt: new Date(comment.createdAt),
     };

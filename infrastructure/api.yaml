@@ -584,6 +584,10 @@ Resources:
                 - dynamodb:GetItem
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - cognito-idp:ListUsers
+              Resource: !Sub 'arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPool}'
       Events:
         GetBestPracticeFindings:
           Type: Api
@@ -591,6 +595,9 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref UserPool
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -600,7 +607,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
   UpdateBestPracticeLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -698,6 +704,9 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}/comments
             Method: POST
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref UserPool
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

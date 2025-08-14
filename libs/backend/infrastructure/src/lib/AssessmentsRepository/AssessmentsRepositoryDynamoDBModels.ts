@@ -73,7 +73,7 @@ export interface DynamoDBFindingBody {
 
 export interface DynamoDBFindingComment {
   id: string;
-  author: string;
+  authorId: string;
   text: string;
   createdAt: string;
 }

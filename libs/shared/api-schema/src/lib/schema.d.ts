@@ -352,8 +352,10 @@ export interface components {
         Comment: {
             /** @description Unique identifier of the comment */
             id: string;
-            /** @description User who created the comment */
-            author: string;
+            /** @description Id of the user who created the comment */
+            authorId: string;
+            /** @description Name of the user who created the comment */
+            authorName: string;
             /** @description Text of the comment */
             text: string;
             /**

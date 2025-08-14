@@ -10,7 +10,7 @@ import {
   tokenIdGenerator,
   tokenLogger,
 } from '@backend/infrastructure';
-import { FindingComment } from '@backend/models';
+import { FindingComment, User } from '@backend/models';
 import { NotFoundError } from '@backend/useCases';
 import { parseJsonObject } from '@shared/utils';
 import { BadRequestError } from '../../../utils/api/HttpError';
@@ -40,6 +40,11 @@ export class AddCommentAdapter {
     return AddCommentArgsSchema.parse(parsedBody);
   }
 
+  private usernameFromEmail(email?: string) {
+    if (!email) return 'Unknown';
+    return email.replace(/@.*$/, '');
+  }
+
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {
@@ -51,11 +56,13 @@ export class AddCommentAdapter {
   }
 
   private toAddCommentResponse(
+    user: User,
     comment: FindingComment
   ): operations['addComment']['responses'][200]['content']['application/json'] {
     return {
       id: comment.id,
-      author: comment.author,
+      authorId: comment.authorId,
+      authorName: this.usernameFromEmail(user.email),
       text: comment.text,
       createdAt: comment.createdAt.toISOString(),
     };
@@ -79,7 +86,7 @@ export class AddCommentAdapter {
       const findingId = decodeURIComponent(parsedPath.findingId);
       const comment: FindingComment = {
         id: this.idGenerator.generate(),
-        author: user.email,
+        authorId: user.id,
         text: parsedBody.text,
         createdAt: new Date(),
       };
@@ -109,7 +116,7 @@ export class AddCommentAdapter {
           }
           throw error;
         });
-      return this.toAddCommentResponse(comment);
+      return this.toAddCommentResponse(user, comment);
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request query: ${e.message}`);

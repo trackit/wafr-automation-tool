@@ -10,7 +10,7 @@ export class FindingCommentMother {
   public static basic(): FindingCommentMother {
     return new FindingCommentMother({
       id: 'comment-id',
-      author: 'author-id',
+      authorId: 'author-id',
       text: 'comment-text',
       createdAt: new Date(),
     });
@@ -21,8 +21,8 @@ export class FindingCommentMother {
     return this;
   }
 
-  public withAuthor(author: string): FindingCommentMother {
-    this.data.author = author;
+  public withAuthorId(authorId: string): FindingCommentMother {
+    this.data.authorId = authorId;
     return this;
   }
 

@@ -61,7 +61,7 @@ describe('DeleteCommentUseCase', () => {
         .withId('scanning-tool#12345')
         .withComments([
           FindingCommentMother.basic()
-            .withAuthor('user@example.io')
+            .withAuthorId('other-user-id')
             .withId('comment-id')
             .build(),
         ])
@@ -74,8 +74,8 @@ describe('DeleteCommentUseCase', () => {
       .withCommentId('comment-id')
       .withUser(
         UserMother.basic()
+          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
           .withOrganizationDomain('test.io')
-          .withEmail('user@test.io')
           .build()
       )
       .build();
@@ -91,7 +91,7 @@ describe('DeleteCommentUseCase', () => {
         .withId('scanning-tool#12345')
         .withComments([
           FindingCommentMother.basic()
-            .withAuthor('user@test.io')
+            .withAuthorId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
             .withId('comment-id')
             .build(),
         ])
@@ -104,8 +104,8 @@ describe('DeleteCommentUseCase', () => {
       .withCommentId('comment-id')
       .withUser(
         UserMother.basic()
+          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
           .withOrganizationDomain('test.io')
-          .withEmail('user@test.io')
           .build()
       )
       .build();

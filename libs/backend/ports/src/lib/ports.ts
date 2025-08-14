@@ -1,6 +1,7 @@
 export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
+export * from './CognitoPort';
 export * from './FeatureTogglePort';
 export * from './FindingToBestPracticesAssociationService';
 export * from './IdGenerator';

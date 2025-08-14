@@ -154,6 +154,9 @@ describe('GetBestPracticeFindings adapter', () => {
 
     it('should return formatted findings', async () => {
       const { adapter, useCase } = setup();
+      const comment = FindingCommentMother.basic()
+        .withAuthorId('user-id')
+        .build();
       const findings = [
         FindingMother.basic()
           .withId('scanning-tool#1')
@@ -177,7 +180,7 @@ describe('GetBestPracticeFindings adapter', () => {
           .withSeverity(SeverityType.Medium)
           .withStatusCode('200')
           .withStatusDetail('status detail')
-          .withComments([FindingCommentMother.basic().build()])
+          .withComments([comment])
           .build(),
       ];
 
@@ -207,7 +210,13 @@ describe('GetBestPracticeFindings adapter', () => {
           },
           riskDetails: 'risk details',
           isAIAssociated: false,
-          comments: [FindingCommentMother.basic().build()],
+          comments: [
+            {
+              ...comment,
+              createdAt: comment.createdAt.toISOString(),
+              authorName: 'test-user',
+            },
+          ],
         })
       );
     });

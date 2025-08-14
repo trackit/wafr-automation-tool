@@ -31,6 +31,7 @@
   "dependencies": {
     "@aws-amplify/ui-react": "^6.11.1",
     "@aws-sdk/client-bedrock-runtime": "^3.830.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.865.0",
     "@aws-sdk/client-dynamodb": "^3.817.0",
     "@aws-sdk/client-marketplace-agreement": "^3.840.0",
     "@aws-sdk/client-marketplace-entitlement-service": "^3.840.0",

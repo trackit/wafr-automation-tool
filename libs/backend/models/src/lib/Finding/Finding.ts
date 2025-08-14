@@ -45,7 +45,7 @@ export enum SeverityType {
 
 export interface FindingComment {
   id: string;
-  author: string;
+  authorId: string;
   text: string;
   createdAt: Date;
 }

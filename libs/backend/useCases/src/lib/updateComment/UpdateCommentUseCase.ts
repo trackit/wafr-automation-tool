@@ -50,7 +50,7 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       );
     }
 
-    if (comment.author !== user.email) {
+    if (comment.authorId !== user.id) {
       throw new ForbiddenError(
         `User ${user.email} is not allowed to update comment ${commentId} for finding ${findingId}`
       );

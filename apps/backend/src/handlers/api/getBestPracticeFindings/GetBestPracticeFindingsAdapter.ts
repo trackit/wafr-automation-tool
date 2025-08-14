@@ -1,12 +1,16 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
+import {
+  tokenCognitoService,
+  UserNotFoundError,
+} from '@backend/infrastructure';
 import type { Finding } from '@backend/models';
 import { tokenGetBestPracticeFindingsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { BadRequestError, NotFoundError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
@@ -30,6 +34,7 @@ const GetBestPracticeFindingsQueryArgsSchema = z.object({
 
 export class GetBestPracticeFindingsAdapter {
   private readonly useCase = inject(tokenGetBestPracticeFindingsUseCase);
+  private readonly cognitoService = inject(tokenCognitoService);
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -41,38 +46,64 @@ export class GetBestPracticeFindingsAdapter {
     });
   }
 
-  private toGetBestPracticeFindingsItemsResponse(
+  private usernameFromEmail(email?: string) {
+    if (!email) return 'Unknown';
+    return email.replace(/@.*$/, '');
+  }
+
+  private async toGetBestPracticeFindingsItemsResponse(
     findings: Finding[]
-  ): operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items'] {
-    return findings.map((finding) => ({
-      id: finding.id,
-      severity: finding.severity,
-      statusCode: finding.statusCode,
-      statusDetail: finding.statusDetail,
-      hidden: finding.hidden,
-      ...(finding.resources && {
-        resources: finding.resources.map((resource) => ({
-          uid: resource.uid,
-          name: resource.name,
-          type: resource.type,
-          region: resource.region,
-        })),
-      }),
-      ...(finding.remediation && {
-        remediation: {
-          desc: finding.remediation.desc,
-          references: finding.remediation.references,
-        },
-      }),
-      riskDetails: finding.riskDetails,
-      isAIAssociated: finding.isAIAssociated,
-      ...(finding.comments && {
-        comments: finding.comments.map((comment) => ({
-          ...comment,
-          createdAt: comment.createdAt.toISOString(),
-        })),
-      }),
-    }));
+  ): Promise<
+    operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items']
+  > {
+    const usersId: string[] = [];
+
+    findings.forEach((finding) => {
+      finding.comments?.forEach((comment) => {
+        if (!usersId.includes(comment.authorId)) {
+          usersId.push(comment.authorId);
+        }
+      });
+    });
+
+    const users = await Promise.all(
+      usersId.map((userId) => this.cognitoService.getUserById({ userId }))
+    );
+
+    return Promise.resolve(
+      findings.map((finding) => ({
+        id: finding.id,
+        severity: finding.severity,
+        statusCode: finding.statusCode,
+        statusDetail: finding.statusDetail,
+        hidden: finding.hidden,
+        ...(finding.resources && {
+          resources: finding.resources.map((resource) => ({
+            uid: resource.uid,
+            name: resource.name,
+            type: resource.type,
+            region: resource.region,
+          })),
+        }),
+        ...(finding.remediation && {
+          remediation: {
+            desc: finding.remediation.desc,
+            references: finding.remediation.references,
+          },
+        }),
+        riskDetails: finding.riskDetails,
+        isAIAssociated: finding.isAIAssociated,
+        ...(finding.comments && {
+          comments: finding.comments.map((comment) => ({
+            ...comment,
+            createdAt: comment.createdAt.toISOString(),
+            authorName: this.usernameFromEmail(
+              users.find((user) => user.id === comment.authorId)?.email
+            ),
+          })),
+        }),
+      }))
+    );
   }
 
   private async processRequest(
@@ -100,12 +131,14 @@ export class GetBestPracticeFindingsAdapter {
           showHidden: parsedQueryParameters.showHidden,
         });
       return {
-        items: this.toGetBestPracticeFindingsItemsResponse(findings),
+        items: await this.toGetBestPracticeFindingsItemsResponse(findings),
         nextToken,
       };
     } catch (error) {
       if (error instanceof ZodError) {
         throw new BadRequestError(`Invalid parameters: ${error.message}`);
+      } else if (error instanceof UserNotFoundError) {
+        throw new NotFoundError(error.message);
       }
       throw error;
     }
