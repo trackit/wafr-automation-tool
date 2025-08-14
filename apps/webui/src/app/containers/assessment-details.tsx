@@ -34,6 +34,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
+import AssessmentOverview from './assessment-overview';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
@@ -48,7 +49,9 @@ export function AssessmentDetails() {
   const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
-  const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
+  const [selectedPillar, setSelectedPillar] = useState<Pillar | null>({
+    id: 'overview',
+  });
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
@@ -461,13 +464,6 @@ export function AssessmentDetails() {
     }
   }, [pillars, selectedPillar?.id, activeQuestion?.id]);
 
-  // Set the first pillar as selected ONLY on initial load
-  useEffect(() => {
-    if (pillars && pillars.length > 0 && selectedPillarIndex === 0) {
-      setSelectedPillar(pillars[0]);
-    }
-  }, [pillars, selectedPillarIndex]);
-
   // Set question from the selected indices
   useEffect(() => {
     if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
@@ -721,7 +717,7 @@ export function AssessmentDetails() {
 
   const tabs = useMemo(() => {
     if (!pillars) return [];
-    return pillars.map((pillar, index) => ({
+    const mappedPillars = pillars.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
           ? `${calculateCompletedQuestions(pillar.questions)}/${
@@ -776,6 +772,14 @@ export function AssessmentDetails() {
         </div>
       ) : undefined,
     }));
+    const overview: {
+      label: string;
+      id: string;
+    } = {
+      label: 'Overview',
+      id: 'overview',
+    };
+    return [overview, ...mappedPillars];
   }, [pillars, handleDisabledPillar, isMilestone]);
 
   const timelineSteps = useMemo(() => {
@@ -913,11 +917,21 @@ export function AssessmentDetails() {
         activeTab={selectedPillar?.id || ''}
         onChange={(tabId) => {
           const index = pillars?.findIndex((p) => p.id === tabId) ?? 0;
-          setSelectedPillarIndex(index);
-          setSelectedPillar(pillars?.[index] || null);
-          setActiveQuestionIndex(0);
+          if (index === -1) {
+            // For extra tabs like overview and future ones
+            setSelectedPillar({
+              id: tabId,
+            });
+          } else {
+            setSelectedPillar(pillars?.[index] || null);
+            setActiveQuestionIndex(0);
+          }
         }}
       />
+      {selectedPillar?.id === 'overview' && (
+        <AssessmentOverview assessment={data ?? null} />
+      )}
+
       <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
         {selectedPillar?.disabled && (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
