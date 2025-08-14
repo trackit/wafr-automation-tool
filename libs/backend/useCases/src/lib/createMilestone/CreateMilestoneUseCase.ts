@@ -9,19 +9,18 @@ import { createInjectionToken, inject } from '@shared/di-container';
 import { ConflictError, NotFoundError } from '../Errors';
 import { assertAssessmentIsReadyForExport } from '../../services/exports';
 
-export type ExportWellArchitectedToolUseCaseArgs = {
+export interface CreateMilestoneUseCaseArgs {
   assessmentId: string;
-  region: string;
   user: User;
-};
-
-export interface ExportWellArchitectedToolUseCase {
-  exportAssessment(args: ExportWellArchitectedToolUseCaseArgs): Promise<void>;
+  region: string;
+  name: string;
 }
 
-export class ExportWellArchitectedToolUseCaseImpl
-  implements ExportWellArchitectedToolUseCase
-{
+export interface CreateMilestoneUseCase {
+  createMilestone(args: CreateMilestoneUseCaseArgs): Promise<void>;
+}
+
+export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
   private readonly logger = inject(tokenLogger);
   private readonly wellArchitectedToolService = inject(
     tokenWellArchitectedToolService
@@ -29,8 +28,8 @@ export class ExportWellArchitectedToolUseCaseImpl
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
 
-  public async exportAssessment(
-    args: ExportWellArchitectedToolUseCaseArgs
+  public async createMilestone(
+    args: CreateMilestoneUseCaseArgs
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -49,31 +48,28 @@ export class ExportWellArchitectedToolUseCaseImpl
       throw new NotFoundError(
         `Organization with domain ${args.user.organizationDomain} not found`
       );
-    }
-    if (!organization.assessmentExportRoleArn) {
+    } else if (!organization.assessmentExportRoleArn) {
       this.logger.error(
-        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
+        `No assessment export role ARN found for organization ${organization.domain}`
       );
       throw new ConflictError(
-        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
+        `No assessment export role ARN found for organization ${organization.domain}`
       );
     }
-    await this.wellArchitectedToolService.exportAssessment({
+    await this.wellArchitectedToolService.createMilestone({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       region: args.region,
+      name: args.name,
       user: args.user,
     });
     this.logger.info(
-      `Export for assessment ${assessment.id} to the Well Architected Tool finished`
+      `Create Milestone for assessment ${assessment.id} to the Well Architected Tool finished`
     );
   }
 }
 
-export const tokenExportWellArchitectedToolUseCase =
-  createInjectionToken<ExportWellArchitectedToolUseCase>(
-    'ExportWellArchitectedToolUseCase',
-    {
-      useClass: ExportWellArchitectedToolUseCaseImpl,
-    }
-  );
+export const tokenCreateMilestoneUseCase =
+  createInjectionToken<CreateMilestoneUseCase>('CreateMilestoneUseCase', {
+    useClass: CreateMilestoneUseCaseImpl,
+  });

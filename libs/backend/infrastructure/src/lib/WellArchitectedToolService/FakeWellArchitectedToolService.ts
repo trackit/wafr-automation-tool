@@ -9,6 +9,16 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     user: User;
+  }): Promise<string> {
+    // No-op for fake implementation
+    return '';
+  }
+
+  public async createMilestone(_args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    user: User;
   }): Promise<void> {
     // No-op for fake implementation
   }

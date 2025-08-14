@@ -1,4 +1,5 @@
 export * from './cleanup';
+export * from './createMilestone';
 export * from './computeGraphData';
 export * from './deleteAssessment';
 export * from './Errors';

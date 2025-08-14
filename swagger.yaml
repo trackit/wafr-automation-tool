@@ -235,6 +235,46 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/exports/create-milestone':
+    post:
+      operationId: createMilestone
+      tags:
+        - Exports
+      summary: Create a milestone for the assessment
+      description: |
+        Creates a milestone for the assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to create a milestone for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - region
+                - name
+              properties:
+                region:
+                  type: string
+                  description: The region to create the milestone in.
+                name:
+                  type: string
+                  description: The name of the milestone to create.
+      responses:
+        '200':
+          description: The milestone has been successfully created
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization or email of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
   '/assessments/{assessmentId}/exports/well-architected-tool':
     post:
       operationId: exportWellArchitectedTool
@@ -257,7 +297,6 @@ paths:
             schema:
               type: object
               required:
-                - roleArn
                 - region
               properties:
                 region:

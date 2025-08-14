@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
+import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -174,8 +175,14 @@ function AssessmentsList() {
                             <RefreshCw className="w-4 h-4" /> Rescan
                           </button>
                         </li>
+                        <li className="m-1"></li>
                         <li>
                           <ExportToAWSDialog
+                            assessmentId={assessment.id ?? ''}
+                          />
+                        </li>
+                        <li>
+                          <CreateAWSMilestoneDialog
                             assessmentId={assessment.id ?? ''}
                           />
                         </li>

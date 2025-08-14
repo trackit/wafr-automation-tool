@@ -12,6 +12,7 @@ import {
   WellArchitectedClientConfig,
   WorkloadEnvironment,
   WorkloadSummary,
+  CreateMilestoneCommand,
 } from '@aws-sdk/client-wellarchitected';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 
@@ -303,7 +304,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     user: User;
-  }): Promise<void> {
+  }): Promise<string> {
     const { roleArn, assessment, region, user } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
@@ -315,16 +316,46 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment,
       user
     );
-    const workloadLensRevieww = await this.getWorkloadLensReview(
+    const workloadLensReview = await this.getWorkloadLensReview(
       wellArchitectedClient,
       workloadId
     );
-    const workloadPillarList = workloadLensRevieww.PillarReviewSummaries ?? [];
+    const workloadPillarList = workloadLensReview.PillarReviewSummaries ?? [];
     await this.exportPillarList(
       wellArchitectedClient,
       workloadId,
       assessmentPillarList,
       workloadPillarList
+    );
+    return workloadId;
+  }
+
+  public async createMilestone(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    name: string;
+    user: User;
+  }): Promise<void> {
+    const { roleArn, assessment, region, name } = args;
+    const wellArchitectedClient = await this.createWellArchitectedClient(
+      roleArn,
+      region
+    );
+    const workloadId = await this.exportAssessment(args);
+    const res = await wellArchitectedClient.send(
+      new CreateMilestoneCommand({
+        WorkloadId: workloadId,
+        MilestoneName: name,
+      })
+    );
+    if (res.$metadata.httpStatusCode !== 200) {
+      throw new Error(
+        `Failed to create milestone: ${res.$metadata.httpStatusCode}`
+      );
+    }
+    this.logger.info(
+      `Created milestone for assessment ${assessment.name} with workload ID ${workloadId}`
     );
   }
 }
