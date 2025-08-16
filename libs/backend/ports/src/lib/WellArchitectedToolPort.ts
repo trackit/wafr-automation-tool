@@ -1,4 +1,4 @@
-import { Assessment, User } from '@backend/models';
+import type { Assessment, Milestone, Pillar, User } from '@backend/models';
 
 export interface WellArchitectedToolPort {
   exportAssessment(args: {
@@ -14,4 +14,15 @@ export interface WellArchitectedToolPort {
     name: string;
     user: User;
   }): Promise<void>;
+  getMilestonePillars(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    milestoneId: number;
+  }): Promise<Pillar[]>;
+  getMilestones(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+  }): Promise<Milestone[]>;
 }
