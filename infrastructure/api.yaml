@@ -494,6 +494,64 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GetMilestonesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetMilestonesFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetMilestonesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getMilestones
+      Tags:
+        Name: GetMilestonesFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        GetMilestones:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/milestones
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetMilestonePillarsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetMilestonePillarsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetMilestonePillarsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getMilestonePillars
+      Tags:
+        Name: GetMilestonePillarsFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        GetMilestonePillars:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/milestones/{milestoneId}/pillars
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   UpdatePillarLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
