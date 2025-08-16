@@ -1,6 +1,7 @@
 export * from './Assessment';
 export * from './BestPractice';
 export * from './Finding';
+export * from './Milestone';
 export * from './Organization';
 export * from './Pillar';
 export * from './Question';
