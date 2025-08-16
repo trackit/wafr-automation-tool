@@ -70,6 +70,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve all milestones for a specific assessment
+         * @description Fetches all milestones associated with a specific assessment.
+         *
+         */
+        get: operations["getMilestones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/milestones/{milestoneId}/pillars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve all pillars for a specific milestone
+         * @description Fetches all pillars associated with a specific milestone.
+         *
+         */
+        get: operations["getMilestonePillars"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/exports/create-milestone": {
         parameters: {
             query?: never;
@@ -404,6 +446,12 @@ export interface components {
         BestPracticeDto: {
             checked?: boolean;
         };
+        /** Milestone */
+        Milestone: {
+            id?: number;
+            name?: string;
+            createdAt?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -675,6 +723,114 @@ export interface operations {
                 content?: never;
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMilestones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The region to filter milestones by. */
+                    region: string;
+                };
+            };
+        };
+        responses: {
+            /** @description A list of milestones related to the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items?: components["schemas"]["Milestone"][];
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMilestonePillars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+                /** @description The unique ID of the milestone to retrieve pillars for */
+                milestoneId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The region to filter milestones by. */
+                    region: string;
+                };
+            };
+        };
+        responses: {
+            /** @description A list of pillars related to the specified milestone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items?: components["schemas"]["Pillar"][];
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
             400: {
                 headers: {
                     [name: string]: unknown;
