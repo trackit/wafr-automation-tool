@@ -7,7 +7,9 @@ import { operations } from '@shared/api-schema';
 
 export class GetMilestonePillarsAdapterEventMother {
   private pathParameters: operations['getMilestonePillars']['parameters']['path'];
-  private body: operations['getMilestonePillars']['requestBody']['content']['application/json'];
+  private queryStringParameters: NonNullable<
+    operations['getMilestonePillars']['parameters']['query']
+  >;
   private user: Pick<User, 'id' | 'email'> = {
     id: 'user-id',
     email: 'user-id@test.io',
@@ -15,10 +17,12 @@ export class GetMilestonePillarsAdapterEventMother {
 
   private constructor(
     pathParameters: operations['getMilestonePillars']['parameters']['path'],
-    body: operations['getMilestonePillars']['requestBody']['content']['application/json']
+    queryStringParameters: NonNullable<
+      operations['getMilestonePillars']['parameters']['query']
+    >
   ) {
     this.pathParameters = pathParameters;
-    this.body = body;
+    this.queryStringParameters = queryStringParameters;
   }
 
   public static basic(): GetMilestonePillarsAdapterEventMother {
@@ -27,9 +31,7 @@ export class GetMilestonePillarsAdapterEventMother {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         milestoneId: '1',
       },
-      {
-        region: 'us-west-2',
-      }
+      {}
     );
   }
 
@@ -54,8 +56,8 @@ export class GetMilestonePillarsAdapterEventMother {
     return this;
   }
 
-  public withRegion(region: string): GetMilestonePillarsAdapterEventMother {
-    this.body.region = region;
+  public withRegion(region?: string): GetMilestonePillarsAdapterEventMother {
+    this.queryStringParameters.region = region;
     return this;
   }
 
@@ -67,10 +69,19 @@ export class GetMilestonePillarsAdapterEventMother {
   }
 
   public build(): APIGatewayProxyEvent {
+    const queryStringParameters = Object.entries(
+      this.queryStringParameters
+    ).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value === undefined ? undefined : String(value),
+      }),
+      {}
+    );
     return APIGatewayProxyEventMother.basic()
       .withUserClaims({ sub: this.user.id, email: this.user.email })
       .withPathParameters(this.pathParameters)
-      .withBody(JSON.stringify(this.body))
+      .withQueryStringParameters(queryStringParameters)
       .build();
   }
 }

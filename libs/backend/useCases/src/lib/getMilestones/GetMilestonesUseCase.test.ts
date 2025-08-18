@@ -117,6 +117,32 @@ describe('GetMilestonesUseCase', () => {
       })
     ).rejects.toThrow(NotFoundError);
   });
+
+  it('should throw ConflictError if assessment export region is not set', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
+      setup();
+
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withExportRegion(undefined)
+      .build();
+
+    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
+
+    fakeOrganizationRepository.organizations['test.io'] =
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
+
+    await expect(
+      useCase.getMilestones({
+        assessmentId: 'assessment-id',
+        organizationDomain: 'test.io',
+      })
+    ).rejects.toThrow(ConflictError);
+  });
 });
 
 const setup = () => {

@@ -12,7 +12,6 @@ export class GetMilestonePillarsUseCaseArgsMother {
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       milestoneId: 1,
       organizationDomain: 'test.io',
-      region: 'us-west-2',
     });
   }
 
@@ -30,7 +29,7 @@ export class GetMilestonePillarsUseCaseArgsMother {
     return this;
   }
 
-  public withRegion(region: string): GetMilestonePillarsUseCaseArgsMother {
+  public withRegion(region?: string): GetMilestonePillarsUseCaseArgsMother {
     this.data.region = region;
     return this;
   }

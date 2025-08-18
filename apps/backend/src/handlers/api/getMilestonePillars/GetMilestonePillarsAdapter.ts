@@ -8,7 +8,6 @@ import { operations } from '@shared/api-schema';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 import { tokenGetMilestonePillarsUseCase } from '@backend/useCases';
 
 const GetMilestonePillarsPathSchema = z.object({
@@ -16,21 +15,12 @@ const GetMilestonePillarsPathSchema = z.object({
   milestoneId: z.string(),
 }) satisfies ZodType<operations['getMilestonePillars']['parameters']['path']>;
 
-const GetMilestonePillarsBodySchema = z.object({
-  region: z.string(),
-}) satisfies ZodType<
-  operations['getMilestonePillars']['requestBody']['content']['application/json']
->;
+const GetMilestonePillarsQuerySchema = z.object({
+  region: z.string().optional(),
+}) satisfies ZodType<operations['getMilestonePillars']['parameters']['query']>;
 
 export class GetMilestonePillarsAdapter {
   private readonly useCase = inject(tokenGetMilestonePillarsUseCase);
-
-  private parseBody(
-    body?: string
-  ): operations['getMilestonePillars']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return GetMilestonePillarsBodySchema.parse(parsedBody);
-  }
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -44,7 +34,7 @@ export class GetMilestonePillarsAdapter {
 
   private toGetMilestonePillarsResponse(
     pillars: Pillar[]
-  ): operations['getMilestonePillars']['responses']['200']['content']['application/json']['items'] {
+  ): operations['getMilestonePillars']['responses']['200']['content']['application/json'] {
     return pillars.map((pillar) => ({
       ...pillar,
       questions: pillar.questions.map((question) => ({
@@ -60,18 +50,15 @@ export class GetMilestonePillarsAdapter {
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<
-    operations['getMilestonePillars']['responses']['200']['content']['application/json']['items']
+    operations['getMilestonePillars']['responses']['200']['content']['application/json']
   > {
-    const { pathParameters, body } = event;
-
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
-
+    const { pathParameters, queryStringParameters } = event;
     try {
       const { assessmentId, milestoneId } =
         GetMilestonePillarsPathSchema.parse(pathParameters);
-      const { region } = this.parseBody(body);
+      const { region } = GetMilestonePillarsQuerySchema.parse(
+        queryStringParameters
+      );
       const milestoneIdNumber = Number(milestoneId);
       if (isNaN(milestoneIdNumber)) {
         throw new BadRequestError('Invalid milestoneId');
@@ -89,8 +76,6 @@ export class GetMilestonePillarsAdapter {
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request parameters: ${e.message}`);
-      } else if (e instanceof JSONParseError) {
-        throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);
       }
       throw e;
     }

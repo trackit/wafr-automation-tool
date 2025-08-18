@@ -1,20 +1,19 @@
 import {
   MilestoneNotFoundError,
   tokenAssessmentsRepository,
-  tokenLogger,
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
 import type { Pillar } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+import { ConflictError, NotFoundError } from '../Errors';
 import { assertOrganizationHasExportRole } from '../../services';
 
 export interface GetMilestonePillarsUseCaseArgs {
   assessmentId: string;
   organizationDomain: string;
   milestoneId: number;
-  region: string;
+  region?: string;
 }
 
 export interface GetMilestonePillarsUseCase {
@@ -29,7 +28,6 @@ export class GetMilestonePillarsUseCaseImpl
   );
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
-  private readonly logger = inject(tokenLogger);
 
   public async getMilestonePillars(
     args: GetMilestonePillarsUseCaseArgs
@@ -53,12 +51,18 @@ export class GetMilestonePillarsUseCaseImpl
         `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
       );
     }
+    const milestonesRegion = region ?? assessment.exportRegion;
+    if (!milestonesRegion) {
+      throw new ConflictError(
+        `Assessment with id ${assessmentId} has no export region set`
+      );
+    }
     assertOrganizationHasExportRole(organization);
     return await this.wellArchitectedToolService
       .getMilestonePillars({
         roleArn: organization.assessmentExportRoleArn,
         assessment,
-        region,
+        region: milestonesRegion,
         milestoneId,
       })
       .catch((error) => {

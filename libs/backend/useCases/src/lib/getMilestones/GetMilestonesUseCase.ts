@@ -1,18 +1,17 @@
 import {
   tokenAssessmentsRepository,
-  tokenLogger,
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
 import type { Milestone } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+import { ConflictError, NotFoundError } from '../Errors';
 import { assertOrganizationHasExportRole } from '../../services';
 
 export interface GetMilestonesUseCaseArgs {
   assessmentId: string;
   organizationDomain: string;
-  region: string;
+  region?: string;
 }
 
 export interface GetMilestonesUseCase {
@@ -25,7 +24,6 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
   );
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
-  private readonly logger = inject(tokenLogger);
 
   public async getMilestones(
     args: GetMilestonesUseCaseArgs
@@ -49,11 +47,17 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
         `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
       );
     }
+    const milestonesRegion = region ?? assessment.exportRegion;
+    if (!milestonesRegion) {
+      throw new ConflictError(
+        `Assessment with id ${assessmentId} has no export region set`
+      );
+    }
     assertOrganizationHasExportRole(organization);
     return this.wellArchitectedToolService.getMilestones({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
-      region,
+      region: milestonesRegion,
     });
   }
 }

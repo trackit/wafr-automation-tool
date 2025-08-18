@@ -40,33 +40,6 @@ describe('GetMilestonesAdapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
-
-    it('should return a 400 without body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        })
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should return a 400 with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        })
-        .withBody(JSON.stringify({ invalid: 'body' }))
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
   });
 
   describe('getMilestones', () => {

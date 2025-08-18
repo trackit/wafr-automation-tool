@@ -171,6 +171,33 @@ describe('GetMilestonePillarsUseCase', () => {
       })
     ).rejects.toThrow(NotFoundError);
   });
+
+  it('should throw ConflictError if assessment has no export region set', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
+      setup();
+
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withExportRegion(undefined)
+      .build();
+
+    const organization = OrganizationMother.basic()
+      .withDomain('test.io')
+      .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
+      .build();
+
+    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
+    fakeOrganizationRepository.organizations['test.io'] = organization;
+
+    await expect(
+      useCase.getMilestonePillars({
+        assessmentId: 'assessment-id',
+        organizationDomain: 'test.io',
+        milestoneId: 1,
+      })
+    ).rejects.toThrow(ConflictError);
+  });
 });
 
 const setup = () => {

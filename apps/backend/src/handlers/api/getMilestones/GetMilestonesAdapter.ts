@@ -7,28 +7,18 @@ import { operations } from '@shared/api-schema';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 import { tokenGetMilestonesUseCase } from '@backend/useCases';
 
 const GetMilestonesPathSchema = z.object({
   assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['getMilestones']['parameters']['path']>;
 
-const GetMilestonesBodySchema = z.object({
-  region: z.string(),
-}) satisfies ZodType<
-  operations['getMilestones']['requestBody']['content']['application/json']
->;
+const GetMilestonesQuerySchema = z.object({
+  region: z.string().optional(),
+}) satisfies ZodType<operations['getMilestones']['parameters']['query']>;
 
 export class GetMilestonesAdapter {
   private readonly useCase = inject(tokenGetMilestonesUseCase);
-
-  private parseBody(
-    body?: string
-  ): operations['getMilestones']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return GetMilestonesBodySchema.parse(parsedBody);
-  }
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -43,17 +33,12 @@ export class GetMilestonesAdapter {
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<
-    operations['getMilestones']['responses']['200']['content']['application/json']['items']
+    operations['getMilestones']['responses']['200']['content']['application/json']
   > {
-    const { pathParameters, body } = event;
-
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
-
+    const { pathParameters, queryStringParameters } = event;
     try {
       const { assessmentId } = GetMilestonesPathSchema.parse(pathParameters);
-      const { region } = this.parseBody(body);
+      const { region } = GetMilestonesQuerySchema.parse(queryStringParameters);
 
       const user = getUserFromEvent(event);
       const milestones = await this.useCase.getMilestones({
@@ -68,8 +53,6 @@ export class GetMilestonesAdapter {
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request parameters: ${e.message}`);
-      } else if (e instanceof JSONParseError) {
-        throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);
       }
       throw e;
     }

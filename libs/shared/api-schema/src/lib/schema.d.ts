@@ -749,7 +749,10 @@ export interface operations {
     };
     getMilestones: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+            };
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to retrieve milestones for */
@@ -757,14 +760,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The region to filter milestones by. */
-                    region: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description A list of milestones related to the specified assessment */
             200: {
@@ -772,9 +768,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        items?: components["schemas"]["Milestone"][];
-                    };
+                    "application/json": components["schemas"]["Milestone"][];
                 };
             };
             /** @description An issue occurred while trying to retrieve the organization of the user */
@@ -802,7 +796,10 @@ export interface operations {
     };
     getMilestonePillars: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+            };
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to retrieve milestones for */
@@ -812,14 +809,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The region to filter milestones by. */
-                    region: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description A list of pillars related to the specified milestone */
             200: {
@@ -827,9 +817,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        items?: components["schemas"]["Pillar"][];
-                    };
+                    "application/json": components["schemas"]["Pillar"][];
                 };
             };
             /** @description An issue occurred while trying to retrieve the organization of the user */
