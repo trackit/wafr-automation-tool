@@ -431,6 +431,7 @@ Resources:
                   - dynamodb:GetItem
                   - dynamodb:BatchWriteItem
                   - dynamodb:Query
+                  - dynamodb:UpdateItem
                 Resource: !Ref DynamoDBArn
               - Effect: Allow
                 Action:

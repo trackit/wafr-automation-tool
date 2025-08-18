@@ -6,7 +6,8 @@ import {
 } from '@backend/infrastructure';
 import type { Milestone } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { ConflictError, NotFoundError } from '../Errors';
+import { NotFoundError } from '../Errors';
+import { assertOrganizationHasExportRole } from '../../services';
 
 export interface GetMilestonesUseCaseArgs {
   assessmentId: string;
@@ -43,18 +44,12 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
       throw new NotFoundError(
         `Organization with domain ${organizationDomain} not found`
       );
-    } else if (!organization.assessmentExportRoleArn) {
-      this.logger.error(
-        `No assessment export role ARN found for organization ${organization.domain}`
-      );
-      throw new ConflictError(
-        `No assessment export role ARN found for organization ${organization.domain}`
-      );
     } else if (!assessment) {
       throw new NotFoundError(
         `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
       );
     }
+    assertOrganizationHasExportRole(organization);
     return this.wellArchitectedToolService.getMilestones({
       roleArn: organization.assessmentExportRoleArn,
       assessment,

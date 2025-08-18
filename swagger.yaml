@@ -387,13 +387,10 @@ paths:
           schema:
             type: string
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - region
               properties:
                 region:
                   type: string
@@ -824,6 +821,9 @@ components:
           description: |
             List of regions to scan
             If empty, all regions will be scanned
+        exportRegion:
+          type: string
+          description: Region where the assessment is exported
         roleArn:
           type: string
           description: Role ARN associated with the assessment

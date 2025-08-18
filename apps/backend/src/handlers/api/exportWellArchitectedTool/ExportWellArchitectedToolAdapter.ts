@@ -17,9 +17,11 @@ const ExportWellArchitectedToolPathSchema = z.object({
 >;
 
 const ExportWellArchitectedArgsSchema = z.object({
-  region: z.string(),
+  region: z.string().optional(),
 }) satisfies ZodType<
-  operations['exportWellArchitectedTool']['requestBody']['content']['application/json']
+  NonNullable<
+    operations['exportWellArchitectedTool']['requestBody']
+  >['content']['application/json']
 >;
 
 export class ExportWellArchitectedToolAdapter {
@@ -27,7 +29,9 @@ export class ExportWellArchitectedToolAdapter {
 
   private parseBody(
     body?: string
-  ): operations['exportWellArchitectedTool']['requestBody']['content']['application/json'] {
+  ): NonNullable<
+    operations['exportWellArchitectedTool']['requestBody']
+  >['content']['application/json'] {
     const parsedBody = parseJsonObject(body);
     return ExportWellArchitectedArgsSchema.parse(parsedBody);
   }
@@ -44,14 +48,10 @@ export class ExportWellArchitectedToolAdapter {
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
     const { pathParameters, body } = event;
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
-
     try {
       const parsedPath =
         ExportWellArchitectedToolPathSchema.parse(pathParameters);
-      const parsedBody = this.parseBody(body);
+      const parsedBody = this.parseBody(body ?? undefined);
       await this.useCase.exportAssessment({
         user: getUserFromEvent(event),
         ...parsedPath,

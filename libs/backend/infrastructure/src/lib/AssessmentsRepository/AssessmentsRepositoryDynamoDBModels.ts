@@ -21,6 +21,7 @@ export interface DynamoDBAssessment {
   questionVersion?: string;
   rawGraphData: Partial<Record<ScanningTool, DynamoDBAssessmentGraphData>>;
   regions: string[];
+  exportRegion?: string;
   roleArn: string;
   step: AssessmentStep;
   workflows: string[];

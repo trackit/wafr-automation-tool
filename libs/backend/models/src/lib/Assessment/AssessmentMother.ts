@@ -95,6 +95,11 @@ export class AssessmentMother {
     return this;
   }
 
+  public withExportRegion(exportRegion?: string): AssessmentMother {
+    this.data.exportRegion = exportRegion;
+    return this;
+  }
+
   public withRoleArn(roleArn: string): AssessmentMother {
     this.data.roleArn = roleArn;
     return this;

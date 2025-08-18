@@ -313,6 +313,8 @@ export interface components {
              *     If empty, all regions will be scanned
              *      */
             regions?: string[];
+            /** @description Region where the assessment is exported */
+            exportRegion?: string;
             /** @description Role ARN associated with the assessment */
             roleArn?: string;
             /** @description Workflows associated with the assessment */
@@ -914,11 +916,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": {
                     /** @description The region to export the assessment to. */
-                    region: string;
+                    region?: string;
                 };
             };
         };

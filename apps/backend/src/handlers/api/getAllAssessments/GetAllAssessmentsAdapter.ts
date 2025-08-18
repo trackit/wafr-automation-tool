@@ -42,6 +42,7 @@ export class GetAllAssessmentsAdapter {
       createdBy: assessment.createdBy,
       organization: assessment.organization,
       regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
       createdAt: assessment.createdAt.toISOString(),
