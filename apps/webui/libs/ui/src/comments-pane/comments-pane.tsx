@@ -6,6 +6,7 @@ interface CommentsPaneProps {
   finding: components['schemas']['Finding'];
   maxHeight: number;
   minHeight: number;
+  isUpdateCommentPending: boolean;
   isDeleteCommentPending: boolean;
   onCancel: () => void;
   onAdded: (text: string) => void;
@@ -26,6 +27,7 @@ export function CommentsPane({
   finding,
   maxHeight,
   minHeight,
+  isUpdateCommentPending,
   isDeleteCommentPending,
   onCancel,
   onAdded,
@@ -38,6 +40,17 @@ export function CommentsPane({
   const [height, setHeight] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const paneRef = useRef<HTMLDivElement>(null);
+  const editRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (editingComment && editRef.current) {
+      const el = editRef.current;
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+      el.scrollIntoView({ block: 'nearest' });
+    }
+  }, [editingComment]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -104,21 +117,28 @@ export function CommentsPane({
                         Save
                       </button>
                     ) : (
-                      <Pen
-                        className="w-4 h-4 text-gray-500 cursor-pointer"
+                      <button
                         onClick={() => handleEdit(c.id)}
-                      />
+                        disabled={isUpdateCommentPending}
+                        className="text-gray-500 cursor-pointer"
+                      >
+                        <Pen className="w-4 h-4" />
+                      </button>
                     )}
-                    <Trash
-                      className="w-4 h-4 text-gray-500 cursor-pointer"
+                    <button
                       onClick={() => handleDelete(c.id)}
-                    />
+                      disabled={isDeleteCommentPending}
+                      className="text-gray-500 cursor-pointer"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
                 {editingComment === c.id ? (
                   <textarea
+                    ref={editRef}
                     rows={1}
-                    className="w-full h-full bg-transparent border-none p-0 m-0 text-sm leading-snug text-base-content resize-none overflow-hidden focus:outline-none"
+                    className="w-full h-full bg-transparent border-none p-0 m-0 leading-snug text-base-content resize-none overflow-hidden focus:outline-none"
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
                     onInput={(e) => {
@@ -148,13 +168,30 @@ export function CommentsPane({
         })}
       </div>
       <div>
-        <input
-          type="text"
-          className="input input-bordered rounded-full w-full"
+        <textarea
+          rows={1}
+          className="textarea textarea-bordered rounded-xl w-full resize-none leading-snug py-1"
           placeholder="Comment"
           value={text}
+          style={{ minHeight: '2rem', overflowY: 'hidden' }}
           onChange={(e) => setText(e.target.value)}
+          onInput={(e) => {
+            const ta = e.currentTarget;
+            ta.style.height = 'auto';
+            const lineHeight = 20;
+            const maxRows = 10;
+            const maxHeight = lineHeight * maxRows;
+
+            if (ta.scrollHeight > maxHeight) {
+              ta.style.height = maxHeight + 'px';
+              ta.style.overflowY = 'auto';
+            } else {
+              ta.style.height = ta.scrollHeight + 'px';
+              ta.style.overflowY = 'hidden';
+            }
+          }}
         />
+
         <div className="mt-2 flex justify-end space-x-4">
           <button
             type="button"

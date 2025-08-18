@@ -471,51 +471,52 @@ function FindingsDetails({
     },
   });
 
-  const { mutate: mutateUpdateComment } = useMutation({
-    mutationFn: async (args: {
-      findingId: string;
-      commentId: string;
-      text: string;
-    }) => {
-      const { findingId, commentId, text } = args;
-      const comment = showCommentsFor?.comments?.find(
-        (c) => c.id === commentId
-      );
-      if (comment && comment.text !== text) {
-        await updateComment({
-          assessmentId,
-          findingId,
-          commentId,
-          commentDto: {
+  const { mutate: mutateUpdateComment, isPending: isUpdateCommentPending } =
+    useMutation({
+      mutationFn: async (args: {
+        findingId: string;
+        commentId: string;
+        text: string;
+      }) => {
+        const { findingId, commentId, text } = args;
+        const comment = showCommentsFor?.comments?.find(
+          (c) => c.id === commentId
+        );
+        if (comment && comment.text !== text) {
+          await updateComment({
+            assessmentId,
+            findingId,
+            commentId,
+            commentDto: {
+              text,
+            },
+          });
+          return {
             text,
-          },
-        });
+            comment,
+          };
+        }
         return {
           text,
-          comment,
+          comment: null,
         };
-      }
-      return {
-        text,
-        comment: null,
-      };
-    },
-    onError: (err) => {
-      console.error(err);
-      enqueueSnackbar({
-        message: 'Failed to update comment. Please try again later',
-        variant: 'error',
-      });
-    },
-    onSuccess: (args: {
-      text: string;
-      comment: components['schemas']['Comment'] | null;
-    }) => {
-      const { text, comment } = args;
-      if (!comment) return;
-      comment.text = text;
-    },
-  });
+      },
+      onError: (err) => {
+        console.error(err);
+        enqueueSnackbar({
+          message: 'Failed to update comment. Please try again later',
+          variant: 'error',
+        });
+      },
+      onSuccess: (args: {
+        text: string;
+        comment: components['schemas']['Comment'] | null;
+      }) => {
+        const { text, comment } = args;
+        if (!comment) return;
+        comment.text = text;
+      },
+    });
 
   const { mutate: mutateDeleteComment, isPending: isDeleteCommentPending } =
     useMutation({
@@ -712,6 +713,7 @@ function FindingsDetails({
               finding={showCommentsFor}
               maxHeight={commentPos.maxHeight}
               minHeight={commentPos.minHeight}
+              isUpdateCommentPending={isUpdateCommentPending}
               isDeleteCommentPending={isDeleteCommentPending}
               onAdded={(text: string) =>
                 mutateComment({
