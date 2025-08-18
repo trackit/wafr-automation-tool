@@ -15,7 +15,7 @@ import {
 export interface CreateMilestoneUseCaseArgs {
   assessmentId: string;
   user: User;
-  region: string;
+  region?: string;
   name: string;
 }
 
@@ -43,7 +43,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    assertAssessmentIsReadyForExport(assessment);
+    assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
@@ -56,7 +56,8 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
     await this.wellArchitectedToolService.createMilestone({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
-      region: args.region,
+      // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      region: (args.region ?? assessment.exportRegion)!,
       name: args.name,
       user: args.user,
     });

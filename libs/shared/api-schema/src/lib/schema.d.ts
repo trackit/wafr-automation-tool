@@ -869,7 +869,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @description The region to create the milestone in. */
-                    region: string;
+                    region?: string;
                     /** @description The name of the milestone to create. */
                     name: string;
                 };
