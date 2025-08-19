@@ -894,7 +894,7 @@ components:
         createdAt:
           type: string
           format: date-time
-          description: ISO-formatted date when the comment was created
+          description: ISO-formatted date of when the comment was created
     CommentDto:
       type: object
       additionalProperties: false
