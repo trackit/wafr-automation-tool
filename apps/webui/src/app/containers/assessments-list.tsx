@@ -130,7 +130,7 @@ function AssessmentsList() {
                 hover:shadow-md hover:shadow-primary/20 hover:bg-primary/4
                 transition-all duration-300
                 cursor-pointer
-                w-full h-full max-w-1/3
+                w-full h-full
               `}
               key={`${assessment.id}-${Math.random()}`}
               onClick={() => navigate(`/assessments/${assessment.id}`)}
