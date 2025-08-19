@@ -62,7 +62,7 @@ export class AddCommentAdapter {
     return {
       id: comment.id,
       authorId: comment.authorId,
-      authorName: this.usernameFromEmail(user.email),
+      authorEmail: user.email,
       text: comment.text,
       createdAt: comment.createdAt.toISOString(),
     };

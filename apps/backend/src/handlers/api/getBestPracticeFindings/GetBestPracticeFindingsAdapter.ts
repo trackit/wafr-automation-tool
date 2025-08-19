@@ -56,54 +56,48 @@ export class GetBestPracticeFindingsAdapter {
   ): Promise<
     operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items']
   > {
-    const usersId: string[] = [];
-
-    findings.forEach((finding) => {
-      finding.comments?.forEach((comment) => {
-        if (!usersId.includes(comment.authorId)) {
-          usersId.push(comment.authorId);
-        }
-      });
-    });
+    const usersId = Array.from(
+      new Set(
+        findings.flatMap((f) => (f.comments ?? []).map((c) => c.authorId))
+      )
+    );
 
     const users = await Promise.all(
       usersId.map((userId) => this.cognitoService.getUserById({ userId }))
     );
 
-    return Promise.resolve(
-      findings.map((finding) => ({
-        id: finding.id,
-        severity: finding.severity,
-        statusCode: finding.statusCode,
-        statusDetail: finding.statusDetail,
-        hidden: finding.hidden,
-        ...(finding.resources && {
-          resources: finding.resources.map((resource) => ({
-            uid: resource.uid,
-            name: resource.name,
-            type: resource.type,
-            region: resource.region,
-          })),
-        }),
-        ...(finding.remediation && {
-          remediation: {
-            desc: finding.remediation.desc,
-            references: finding.remediation.references,
-          },
-        }),
-        riskDetails: finding.riskDetails,
-        isAIAssociated: finding.isAIAssociated,
-        ...(finding.comments && {
-          comments: finding.comments.map((comment) => ({
-            ...comment,
-            createdAt: comment.createdAt.toISOString(),
-            authorName: this.usernameFromEmail(
-              users.find((user) => user.id === comment.authorId)?.email
-            ),
-          })),
-        }),
-      }))
-    );
+    return findings.map((finding) => ({
+      id: finding.id,
+      severity: finding.severity,
+      statusCode: finding.statusCode,
+      statusDetail: finding.statusDetail,
+      hidden: finding.hidden,
+      ...(finding.resources && {
+        resources: finding.resources.map((resource) => ({
+          uid: resource.uid,
+          name: resource.name,
+          type: resource.type,
+          region: resource.region,
+        })),
+      }),
+      ...(finding.remediation && {
+        remediation: {
+          desc: finding.remediation.desc,
+          references: finding.remediation.references,
+        },
+      }),
+      riskDetails: finding.riskDetails,
+      isAIAssociated: finding.isAIAssociated,
+      ...(finding.comments && {
+        comments: finding.comments.map((comment) => ({
+          ...comment,
+          createdAt: comment.createdAt.toISOString(),
+          authorEmail: this.usernameFromEmail(
+            users.find((user) => user.id === comment.authorId)?.email
+          ),
+        })),
+      }),
+    }));
   }
 
   private async processRequest(

@@ -74,7 +74,7 @@ describe('addComment adapter', () => {
       JSON.stringify({
         id: 'fake-id-0',
         authorId: 'user-id',
-        authorName: 'user-id',
+        authorEmail: 'user-id',
         text: 'comment-text',
         createdAt: date.toISOString(),
       })

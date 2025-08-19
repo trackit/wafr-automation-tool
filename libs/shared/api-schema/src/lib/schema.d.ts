@@ -347,20 +347,19 @@ export interface components {
         };
         FindingDto: {
             hidden?: boolean;
-            comments?: components["schemas"]["Comment"][];
         };
         Comment: {
             /** @description Unique identifier of the comment */
             id: string;
             /** @description Id of the user who created the comment */
             authorId: string;
-            /** @description Name of the user who created the comment */
-            authorName: string;
+            /** @description Email of the user who created the comment */
+            authorEmail: string;
             /** @description Text of the comment */
             text: string;
             /**
              * Format: date-time
-             * @description ISO-formatted date when the comment was created
+             * @description ISO-formatted date of when the comment was created
              */
             createdAt: string;
         };

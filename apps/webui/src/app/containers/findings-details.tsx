@@ -348,21 +348,18 @@ function FindingsDetails({
     mutationFn: ({
       findingId,
       hidden,
-      comments,
     }: {
       findingId: string;
       hidden?: boolean;
-      comments?: components['schemas']['Comment'][];
     }) =>
       updateFinding({
         assessmentId,
         findingId,
         findingDto: {
           ...(hidden ? { hidden } : {}),
-          ...(comments ? { comments } : {}),
         },
       }),
-    onMutate: async ({ findingId, hidden, comments }) => {
+    onMutate: async ({ findingId, hidden }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: [
@@ -401,7 +398,6 @@ function FindingsDetails({
             ? {
                 ...finding,
                 hidden: hidden ?? finding.hidden,
-                comments: comments ?? finding.comments,
               }
             : finding
         );

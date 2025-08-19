@@ -1,22 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType, ZodTypeDef } from 'zod';
+import { z, ZodError, ZodType } from 'zod';
 
 import { tokenUpdateFindingUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { JSONParseError, parseJsonObject } from '@shared/utils';
 
-import { FindingComment } from '@backend/models';
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-
-type UpdateFindingBodyIn =
-  operations['updateFinding']['requestBody']['content']['application/json'];
-
-type UpdateFindingBodyOut = Omit<UpdateFindingBodyIn, 'comments'> & {
-  comments?: FindingComment[];
-};
 
 const updateFindingPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -25,26 +17,16 @@ const updateFindingPathParametersSchema = z.object({
 
 const updateFindingBodySchema = z.object({
   hidden: z.boolean().optional(),
-  comments: z
-    .array(
-      z
-        .object({
-          id: z.string(),
-          authorId: z.string(),
-          authorName: z.string(),
-          text: z.string(),
-          createdAt: z.string().pipe(z.coerce.date()),
-        })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .transform(({ authorName, ...rest }) => rest)
-    )
-    .optional(),
-}) satisfies ZodType<UpdateFindingBodyOut, ZodTypeDef, UpdateFindingBodyIn>;
+}) satisfies ZodType<
+  operations['updateFinding']['requestBody']['content']['application/json']
+>;
 
 export class UpdateFindingAdapter {
   private readonly useCase = inject(tokenUpdateFindingUseCase);
 
-  private parseBody(body: string): UpdateFindingBodyOut {
+  private parseBody(
+    body: string
+  ): operations['updateFinding']['requestBody']['content']['application/json'] {
     const parsedBody = parseJsonObject(body);
     return updateFindingBodySchema.parse(parsedBody);
   }

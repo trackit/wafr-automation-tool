@@ -865,17 +865,13 @@ components:
       properties:
         hidden:
           type: boolean
-        comments:
-          type: array
-          items:
-            $ref: '#/components/schemas/Comment'
     Comment:
       type: object
       additionalProperties: false
       required:
         - id
         - authorId
-        - authorName
+        - authorEmail
         - text
         - createdAt
       properties:
@@ -885,9 +881,9 @@ components:
         authorId:
           type: string
           description: Id of the user who created the comment
-        authorName:
+        authorEmail:
           type: string
-          description: Name of the user who created the comment
+          description: Email of the user who created the comment
         text:
           type: string
           description: Text of the comment
