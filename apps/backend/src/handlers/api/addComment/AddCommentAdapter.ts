@@ -40,11 +40,6 @@ export class AddCommentAdapter {
     return AddCommentArgsSchema.parse(parsedBody);
   }
 
-  private usernameFromEmail(email?: string) {
-    if (!email) return 'Unknown';
-    return email.replace(/@.*$/, '');
-  }
-
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {

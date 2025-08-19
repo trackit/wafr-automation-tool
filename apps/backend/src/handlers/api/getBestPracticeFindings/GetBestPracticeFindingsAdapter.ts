@@ -46,11 +46,6 @@ export class GetBestPracticeFindingsAdapter {
     });
   }
 
-  private usernameFromEmail(email?: string) {
-    if (!email) return 'Unknown';
-    return email.replace(/@.*$/, '');
-  }
-
   private async toGetBestPracticeFindingsItemsResponse(
     findings: Finding[]
   ): Promise<
@@ -92,9 +87,9 @@ export class GetBestPracticeFindingsAdapter {
         comments: finding.comments.map((comment) => ({
           ...comment,
           createdAt: comment.createdAt.toISOString(),
-          authorEmail: this.usernameFromEmail(
-            users.find((user) => user.id === comment.authorId)?.email
-          ),
+          authorEmail:
+            users.find((user) => user.id === comment.authorId)?.email ??
+            'Undefined',
         })),
       }),
     }));
