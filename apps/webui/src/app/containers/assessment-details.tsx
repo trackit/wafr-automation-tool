@@ -32,6 +32,7 @@ import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = components['schemas']['Question'];
@@ -830,6 +831,9 @@ export function AssessmentDetails() {
               </li>
               <li>
                 <CreateAWSMilestoneDialog assessmentId={id ?? ''} disabled={!data?.exportRegion} />
+              </li>
+              <li>
+                <ListAWSMilestonesDialog assessmentId={id ?? ''} disabled={!data?.exportRegion} />
               </li>
             </ul>
           </div>
