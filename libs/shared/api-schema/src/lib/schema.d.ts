@@ -412,20 +412,20 @@ export interface components {
             text: string;
         };
         Pillar: {
-            id?: string;
-            label?: string;
-            disabled?: boolean;
-            questions?: components["schemas"]["Question"][];
+            id: string;
+            label: string;
+            disabled: boolean;
+            questions: components["schemas"]["Question"][];
         };
         PillarDto: {
             disabled?: boolean;
         };
         Question: {
-            id?: string;
-            label?: string;
-            none?: boolean;
-            disabled?: boolean;
-            bestPractices?: components["schemas"]["BestPractice"][];
+            id: string;
+            label: string;
+            none: boolean;
+            disabled: boolean;
+            bestPractices: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
             none?: boolean;
@@ -433,13 +433,13 @@ export interface components {
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
-            id?: string;
-            label?: string;
+            id: string;
+            label: string;
             /** @enum {string} */
-            risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
-            description?: string;
-            checked?: boolean;
-            results?: string[];
+            risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
+            description: string;
+            checked: boolean;
+            results: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
@@ -450,9 +450,9 @@ export interface components {
         };
         /** Milestone */
         Milestone: {
-            id?: number;
-            name?: string;
-            createdAt?: string;
+            id: number;
+            name: string;
+            createdAt: string;
         };
     };
     responses: never;

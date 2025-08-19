@@ -8,12 +8,14 @@ import { useState } from 'react';
 
 type ExportToAWSDialogProps = {
   assessmentId: string;
+  askForRegion?: boolean;
+  onSuccess?: () => void;
 };
 
-function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
+function ExportToAWSDialog({ assessmentId, askForRegion, onSuccess }: ExportToAWSDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: { assessmentId: string; region: string }) => {
+    mutationFn: async (data: { assessmentId: string; region?: string }) => {
       await exportToAWS(
         {
           assessmentId: data.assessmentId,
@@ -35,6 +37,9 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
         message: 'Assessment sent successfully to AWS Console',
         variant: 'success',
       });
+      if (onSuccess) {
+        onSuccess();
+      }
     },
     onError: (e: ApiError) => {
       if (e.statusCode === 409) {
@@ -66,7 +71,11 @@ function ExportToAWSDialog({ assessmentId }: ExportToAWSDialogProps) {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setOpen(true);
+          if (askForRegion) {
+            setOpen(true);
+          } else {
+            mutate({ assessmentId });
+          }
         }}
       >
         <ArrowRightFromLine className="w-4 h-4" /> Export to AWS

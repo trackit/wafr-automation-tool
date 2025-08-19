@@ -669,9 +669,10 @@ export function AssessmentDetails() {
     res.push({
       id: 'resolve',
       label: 'None of the above',
-      risk: undefined,
+      risk: 'Unknown',
       checked: activeQuestion?.none || false,
-      results: undefined,
+      results: [],
+      description: '',
       name: 'resolve',
     });
     return res;
@@ -825,10 +826,10 @@ export function AssessmentDetails() {
               </li>
               <li className="m-1"></li>
               <li>
-                <ExportToAWSDialog assessmentId={id ?? ''} />
+                <ExportToAWSDialog assessmentId={id ?? ''} askForRegion={!data?.exportRegion} />
               </li>
               <li>
-                <CreateAWSMilestoneDialog assessmentId={id ?? ''} />
+                <CreateAWSMilestoneDialog assessmentId={id ?? ''} disabled={!data?.exportRegion} />
               </li>
             </ul>
           </div>

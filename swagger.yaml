@@ -979,6 +979,11 @@ components:
     Pillar:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - label
+        - disabled
+        - questions
       properties:
         id:
           type: string
@@ -998,6 +1003,12 @@ components:
     Question:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - label
+        - none
+        - disabled
+        - bestPractices
       properties:
         id:
           type: string
@@ -1022,6 +1033,13 @@ components:
       type: object
       description: A best practice related to a question and pillar in the assessment
       additionalProperties: false
+      required:
+        - id
+        - label
+        - risk
+        - description
+        - checked
+        - results
       properties:
         id:
           type: string
@@ -1064,6 +1082,10 @@ components:
     Milestone:
       title: Milestone
       type: object
+      required:
+        - id
+        - name
+        - createdAt
       properties:
         id:
           type: integer

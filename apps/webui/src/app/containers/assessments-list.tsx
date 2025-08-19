@@ -195,11 +195,14 @@ function AssessmentsList() {
                         <li>
                           <ExportToAWSDialog
                             assessmentId={assessment.id ?? ''}
+                            askForRegion={!assessment.exportRegion}
+                            onSuccess={refetch}
                           />
                         </li>
                         <li>
                           <CreateAWSMilestoneDialog
                             assessmentId={assessment.id ?? ''}
+                            disabled={!assessment.exportRegion}
                           />
                         </li>
                         <li className="m-1"></li>
