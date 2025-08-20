@@ -19,7 +19,7 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 import ExportToAWSDialog from './export-to-aws-dialog';
@@ -31,6 +31,18 @@ function AssessmentsList() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useDebounceValue('', 500);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   const [idToRescan, setIdToRescan] = useState<string | null>(null);
   const {
     data,
@@ -105,7 +117,11 @@ function AssessmentsList() {
       <div
         className="grid gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
         style={{
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: `repeat(auto-fit, minmax(300px, ${
+            data?.pages?.[0]?.assessments?.length === 1 && isLargeScreen
+              ? '50%'
+              : '1fr'
+          }))`,
         }}
       >
         {isLoading ? (
