@@ -4,6 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import {
   deleteAssessment,
   getAssessment,
+  getMilestonePillars,
   rescanAssessment,
   updatePillar,
   updateQuestion,
@@ -51,14 +52,30 @@ export function AssessmentDetails() {
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
   const [bestPracticeDescription, setBestPracticeDescription] =
     useState<BestPractice | null>(null);
-  const { id } = useParams();
+  const { id, milestoneId } = useParams();
   const [progress, setProgress] = useState<number>(0);
+  
+  const isMilestone = Boolean(milestoneId);
 
-  const { data, isLoading, refetch } = useQuery({
+  const assessmentQuery = useQuery({
     queryKey: ['assessment', id],
     queryFn: () => (id ? getAssessment(id) : null),
-    refetchInterval: 15000,
+    refetchInterval: isMilestone ? false : 15000, // Don't auto-refetch for milestones
   });
+
+  const milestonePillarsQuery = useQuery({
+    queryKey: ['milestone-pillars', id, milestoneId],
+    queryFn: () => {
+      if (!id || !milestoneId) return null;
+      return getMilestonePillars({ assessmentId: id, milestoneId });
+    },
+    enabled: isMilestone, // Only fetch milestone data when in milestone mode
+  });
+
+  const assessmentData = assessmentQuery.data;
+  const isLoading = isMilestone ? milestonePillarsQuery.isLoading || assessmentQuery.isLoading : assessmentQuery.isLoading;
+  const refetch = assessmentQuery.refetch;
+  const pillars = isMilestone ? milestonePillarsQuery.data : assessmentData?.pillars;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -76,6 +93,8 @@ export function AssessmentDetails() {
     }) =>
       updateStatus(assessmentId, pillarId, questionId, bestPracticeId, checked),
     onMutate: async ({ pillarId, questionId, bestPracticeId, checked }) => {
+      if (isMilestone) return { previousData: null };
+      
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
@@ -162,9 +181,11 @@ export function AssessmentDetails() {
       }
     },
     onSettled: () => {
-      console.log('Mutation settled, refetching data');
-      // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      if (!isMilestone) {
+        console.log('Mutation settled, refetching data');
+        // Always refetch after error or success to ensure data is in sync with server
+        queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      }
     },
   });
 
@@ -371,6 +392,7 @@ export function AssessmentDetails() {
 
   const handleNoneQuestion = useCallback(
     (questionId: string, none: boolean) => {
+      if (isMilestone) return;
       updateQuestionMutation.mutate({
         assessmentId: id || '',
         pillarId: selectedPillar?.id || '',
@@ -378,11 +400,12 @@ export function AssessmentDetails() {
         none,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation]
+    [id, selectedPillar?.id, updateQuestionMutation, isMilestone]
   );
 
   const handleDisabledQuestion = useCallback(
     (questionId: string, disabled: boolean) => {
+      if (isMilestone) return;
       updateQuestionMutation.mutate({
         assessmentId: id || '',
         pillarId: selectedPillar?.id || '',
@@ -390,18 +413,19 @@ export function AssessmentDetails() {
         disabled,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation]
+    [id, selectedPillar?.id, updateQuestionMutation, isMilestone]
   );
 
   const handleDisabledPillar = useCallback(
     (pillarId: string, disabled: boolean) => {
+      if (isMilestone) return;
       updatePillarMutation.mutate({
         assessmentId: id || '',
         pillarId,
         disabled,
       });
     },
-    [id, updatePillarMutation]
+    [id, updatePillarMutation, isMilestone]
   );
 
   // Add effect to update active question when pillar changes
@@ -417,8 +441,8 @@ export function AssessmentDetails() {
 
   // Add effect to sync active question with cache
   useEffect(() => {
-    if (data?.pillars && selectedPillar?.id && activeQuestion?.id) {
-      const pillar = data.pillars.find((p) => p.id === selectedPillar.id);
+    if (pillars && selectedPillar?.id && activeQuestion?.id) {
+      const pillar = pillars.find((p) => p.id === selectedPillar.id);
       if (pillar) {
         const question = pillar.questions?.find(
           (q) => q.id === activeQuestion.id
@@ -428,14 +452,14 @@ export function AssessmentDetails() {
         }
       }
     }
-  }, [data, selectedPillar?.id, activeQuestion?.id]);
+  }, [pillars, selectedPillar?.id, activeQuestion?.id]);
 
   // Set the first pillar as selected ONLY on initial load
   useEffect(() => {
-    if (data?.pillars && data.pillars.length > 0 && selectedPillarIndex === 0) {
-      setSelectedPillar(data.pillars[0]);
+    if (pillars && pillars.length > 0 && selectedPillarIndex === 0) {
+      setSelectedPillar(pillars[0]);
     }
-  }, [data?.pillars, selectedPillarIndex]);
+  }, [pillars, selectedPillarIndex]);
 
   // Set question from the selected indices
   useEffect(() => {
@@ -452,7 +476,7 @@ export function AssessmentDetails() {
 
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, checked: boolean) => {
-      if (!id || !selectedPillar?.id || !activeQuestion?.id) return;
+      if (!id || !selectedPillar?.id || !activeQuestion?.id || isMilestone) return;
 
       updateStatusMutation.mutate({
         assessmentId: id,
@@ -462,7 +486,7 @@ export function AssessmentDetails() {
         checked,
       });
     },
-    [id, selectedPillar?.id, activeQuestion?.id, updateStatusMutation]
+    [id, selectedPillar?.id, activeQuestion?.id, updateStatusMutation, isMilestone]
   );
 
   const columnHelper = createColumnHelper<TableRow>();
@@ -484,7 +508,8 @@ export function AssessmentDetails() {
                   : info.row.original.checked || false
               }
               disabled={
-                activeQuestion?.none && info.row.original.id !== 'resolve'
+                isMilestone ||
+                (activeQuestion?.none && info.row.original.id !== 'resolve')
               }
               onChange={(e) => {
                 if (info.row.original.id === 'resolve') {
@@ -604,6 +629,7 @@ export function AssessmentDetails() {
       activeQuestion?.none,
       handleNoneQuestion,
       activeQuestion?.id,
+      isMilestone,
     ]
   );
 
@@ -639,15 +665,15 @@ export function AssessmentDetails() {
   };
 
   useEffect(() => {
-    if (!data?.pillars) return;
-    const completedQuestions = data.pillars.reduce((acc, pillar) => {
+    if (!pillars) return;
+    const completedQuestions = pillars.reduce((acc, pillar) => {
       return acc + calculateCompletedQuestions(pillar.questions || []);
     }, 0);
-    const totalQuestions = data.pillars.reduce((acc, pillar) => {
+    const totalQuestions = pillars.reduce((acc, pillar) => {
       return acc + (pillar.questions?.filter((q) => !q.disabled).length || 0);
     }, 0);
     setProgress(Math.round((completedQuestions / totalQuestions) * 100));
-  }, [data?.pillars]);
+  }, [pillars]);
 
   const handleNextQuestion = () => {
     if (!selectedPillar?.questions) return;
@@ -680,8 +706,8 @@ export function AssessmentDetails() {
   }, [activeQuestion?.bestPractices, activeQuestion?.none]);
 
   const tabs = useMemo(() => {
-    if (!data?.pillars) return [];
-    return data.pillars.map((pillar, index) => ({
+    if (!pillars) return [];
+    return pillars.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
           ? `${calculateCompletedQuestions(pillar.questions)}/${
@@ -691,7 +717,7 @@ export function AssessmentDetails() {
       }`,
       id: pillar.id || `pillar-${index}`,
       disabled: pillar.disabled,
-      action: (
+      action: !isMilestone ? (
         <div
           className="dropdown dropdown-end"
           onClick={(e) => {
@@ -734,34 +760,34 @@ export function AssessmentDetails() {
             </li>
           </ul>
         </div>
-      ),
+      ) : undefined,
     }));
-  }, [data?.pillars, handleDisabledPillar]);
+  }, [pillars, handleDisabledPillar, isMilestone]);
 
   const timelineSteps = useMemo(() => {
     return [
       {
         text: 'Scanning your account',
-        loading: data?.step === 'SCANNING_STARTED',
-        completed: data?.step !== 'SCANNING_STARTED',
+        loading: assessmentData?.step === 'SCANNING_STARTED',
+        completed: assessmentData?.step !== 'SCANNING_STARTED',
       },
       {
         text: 'Preparing prompts',
-        loading: data?.step === 'PREPARING_ASSOCIATIONS',
+        loading: assessmentData?.step === 'PREPARING_ASSOCIATIONS',
         completed:
-          data?.step !== 'PREPARING_ASSOCIATIONS' &&
-          data?.step !== 'SCANNING_STARTED',
+          assessmentData?.step !== 'PREPARING_ASSOCIATIONS' &&
+          assessmentData?.step !== 'SCANNING_STARTED',
       },
       {
         text: 'Invoking LLMs',
-        loading: data?.step === 'ASSOCIATING_FINDINGS',
+        loading: assessmentData?.step === 'ASSOCIATING_FINDINGS',
         completed:
-          data?.step !== 'ASSOCIATING_FINDINGS' &&
-          data?.step !== 'PREPARING_ASSOCIATIONS' &&
-          data?.step !== 'SCANNING_STARTED',
+          assessmentData?.step !== 'ASSOCIATING_FINDINGS' &&
+          assessmentData?.step !== 'PREPARING_ASSOCIATIONS' &&
+          assessmentData?.step !== 'SCANNING_STARTED',
       },
     ];
-  }, [data?.step]);
+  }, [assessmentData?.step]);
 
   if (isLoading)
     return (
@@ -775,77 +801,81 @@ export function AssessmentDetails() {
 
   const details = (
     <>
-      <div
-        className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
-        data-tip={`${progress}% completed`}
-      >
-        <progress
-          className={`progress w-full rounded-none h-1 ${
-            progress === 100 ? 'progress-success' : 'progress-primary'
-          }`}
-          value={progress}
-          max="100"
-        ></progress>
-      </div>
+      {!isMilestone && (
+        <div
+          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
+          data-tip={`${progress}% completed`}
+        >
+          <progress
+            className={`progress w-full rounded-none h-1 ${
+              progress === 100 ? 'progress-success' : 'progress-primary'
+            }`}
+            value={progress}
+            max="100"
+          ></progress>
+        </div>
+      )}
 
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
-          <h2 className="mt-0 mb-0">Assessment {data?.name} </h2>
+          <h2 className="mt-0 mb-0">Assessment {assessmentData?.name} {isMilestone ? `- Milestone ${milestoneId}` : ''}</h2>
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <StatusBadge status={data?.step || undefined} />
-          <div
-            className="dropdown dropdown-end"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
+          {!isMilestone && <StatusBadge status={assessmentData?.step || undefined} />}
+          {!isMilestone && (
             <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-xs p-1"
+              className="dropdown dropdown-end"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
             >
-              <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-xs p-1"
+              >
+                <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+              </div>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <button
+                    className="flex flex-row gap-2 w-full text-left"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowRescanModal(true);
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4" /> Rescan
+                  </button>
+                </li>
+                <li className="m-1"></li>
+                <li>
+                  <ExportToAWSDialog assessmentId={id ?? ''} askForRegion={!assessmentData?.exportRegion} />
+                </li>
+                <li>
+                  <CreateAWSMilestoneDialog assessmentId={id ?? ''} disabled={!assessmentData?.exportRegion} />
+                </li>
+                <li>
+                  <ListAWSMilestonesDialog assessmentId={id ?? ''} disabled={!assessmentData?.exportRegion} />
+                </li>
+              </ul>
             </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-            >
-              <li>
-                <button
-                  className="flex flex-row gap-2 w-full text-left"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowRescanModal(true);
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4" /> Rescan
-                </button>
-              </li>
-              <li className="m-1"></li>
-              <li>
-                <ExportToAWSDialog assessmentId={id ?? ''} askForRegion={!data?.exportRegion} />
-              </li>
-              <li>
-                <CreateAWSMilestoneDialog assessmentId={id ?? ''} disabled={!data?.exportRegion} />
-              </li>
-              <li>
-                <ListAWSMilestonesDialog assessmentId={id ?? ''} disabled={!data?.exportRegion} />
-              </li>
-            </ul>
-          </div>
+          )}
         </div>
       </div>
       <Tabs
         tabs={tabs}
         activeTab={selectedPillar?.id || ''}
         onChange={(tabId) => {
-          const index = data?.pillars?.findIndex((p) => p.id === tabId) ?? 0;
+          const index = pillars?.findIndex((p) => p.id === tabId) ?? 0;
           setSelectedPillarIndex(index);
-          setSelectedPillar(data?.pillars?.[index] || null);
+          setSelectedPillar(pillars?.[index] || null);
           setActiveQuestionIndex(0);
         }}
       />
@@ -865,7 +895,7 @@ export function AssessmentDetails() {
                 .map((question, index) => {
                   // Find the latest question data from the cache
                   const latestQuestion =
-                    data?.pillars
+                    pillars
                       ?.find((p) => p.id === selectedPillar?.id)
                       ?.questions?.find((q) => q.id === question.id) ||
                     question;
@@ -905,7 +935,7 @@ export function AssessmentDetails() {
                   <span className="font-light">{activeQuestion?.label}</span>
                 </h3>
                 <div>
-                  {!isLastQuestion && (
+                  {!isLastQuestion && !isMilestone && (
                     <div
                       tabIndex={0}
                       role="button"
@@ -919,53 +949,55 @@ export function AssessmentDetails() {
                       <ChevronRight className="w-4 h-4 text-base-content/80" />
                     </div>
                   )}
-                  <div
-                    className="dropdown dropdown-end"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
+                  {!isMilestone && (
                     <div
-                      tabIndex={0}
-                      role="button"
-                      className="btn btn-ghost btn-xs p-1"
+                      className="dropdown dropdown-end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                     >
-                      <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                      <div
+                        tabIndex={0}
+                        role="button"
+                        className="btn btn-ghost btn-xs p-1"
+                      >
+                        <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                      </div>
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                      >
+                        <li>
+                          <button
+                            className={`flex flex-row gap-2 w-full text-left ${
+                              activeQuestion?.disabled
+                                ? 'text-base-content'
+                                : 'text-error'
+                            }`}
+                            onClick={() => {
+                              handleDisabledQuestion(
+                                activeQuestion?.id || '',
+                                !activeQuestion?.disabled
+                              );
+                            }}
+                          >
+                            {activeQuestion?.disabled ? (
+                              <>
+                                <CircleCheck className="w-4 h-4" /> Enable this
+                                question
+                              </>
+                            ) : (
+                              <>
+                                <CircleMinus className="w-4 h-4" /> Disable this
+                                question
+                              </>
+                            )}
+                          </button>
+                        </li>
+                      </ul>
                     </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-                    >
-                      <li>
-                        <button
-                          className={`flex flex-row gap-2 w-full text-left ${
-                            activeQuestion?.disabled
-                              ? 'text-base-content'
-                              : 'text-error'
-                          }`}
-                          onClick={() => {
-                            handleDisabledQuestion(
-                              activeQuestion?.id || '',
-                              !activeQuestion?.disabled
-                            );
-                          }}
-                        >
-                          {activeQuestion?.disabled ? (
-                            <>
-                              <CircleCheck className="w-4 h-4" /> Enable this
-                              question
-                            </>
-                          ) : (
-                            <>
-                              <CircleMinus className="w-4 h-4" /> Disable this
-                              question
-                            </>
-                          )}
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
+                  )}
                 </div>
               </div>
               {activeQuestion?.disabled && (
@@ -1028,17 +1060,17 @@ export function AssessmentDetails() {
           <li>
             <Link to="/">Home</Link>
           </li>
-          <li>Assessment {data?.name}</li>
+          <li>Assessment {assessmentData?.name}{isMilestone ? ` - Milestone ${milestoneId}` : ''}</li>
         </ul>
       </div>
 
-      {data?.step === 'SCANNING_STARTED' ||
-      data?.step === 'PREPARING_ASSOCIATIONS' ||
-      data?.step === 'ASSOCIATING_FINDINGS'
+      {!isMilestone && (assessmentData?.step === 'SCANNING_STARTED' ||
+      assessmentData?.step === 'PREPARING_ASSOCIATIONS' ||
+      assessmentData?.step === 'ASSOCIATING_FINDINGS')
         ? loading
         : null}
-      {data?.step === 'FINISHED' ? details : null}
-      {data?.step === 'ERRORED' ? <ErrorPage {...data} /> : null}
+      {(isMilestone || assessmentData?.step === 'FINISHED') ? details : null}
+      {!isMilestone && assessmentData?.step === 'ERRORED' ? <ErrorPage {...assessmentData} /> : null}
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">

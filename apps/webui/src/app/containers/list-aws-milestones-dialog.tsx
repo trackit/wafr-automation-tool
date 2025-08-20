@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMilestones } from '@webui/api-client';
 import { Modal } from '@webui/ui';
-import { Clock, List } from 'lucide-react';
+import { Clock, List, ExternalLink } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router';
 
 type ListAWSMilestonesDialogProps = {
   assessmentId: string;
@@ -14,6 +15,7 @@ export default function ListAWSMilestonesDialog({
   disabled = false,
 }: ListAWSMilestonesDialogProps) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   
   const { data: milestones, isLoading, error } = useQuery({
     queryKey: ['milestones', assessmentId],
@@ -28,6 +30,11 @@ export default function ListAWSMilestonesDialog({
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [milestones]);
+
+  const handleMilestoneClick = (milestoneId: number) => {
+    navigate(`/assessments/${assessmentId}/milestones/${milestoneId}`);
+    setOpen(false); // Close the dialog after navigation
+  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -64,6 +71,9 @@ export default function ListAWSMilestonesDialog({
         <div className="flex flex-col">
           <div className="px-6 py-4 border-b border-neutral-content">
             <h2 className="text-2xl font-bold">AWS Milestones</h2>
+            <p className="text-sm text-base-content/70 mt-1">
+              Click on a milestone to view its snapshot
+            </p>
           </div>
           
           <div className="flex-1 overflow-y-auto max-h-[70vh] px-6 py-4">
@@ -87,27 +97,35 @@ export default function ListAWSMilestonesDialog({
               sortedMilestones && sortedMilestones.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {sortedMilestones.map((milestone, index) => (
-                    <div
+                    <button
                       key={milestone.id}
-                      className="border border-neutral-content rounded-lg p-4 hover:bg-base-200 transition-colors"
+                      className="
+                        border border-neutral-content rounded-lg p-4
+                        hover:shadow-md hover:shadow-primary/20 hover:bg-primary/4 transition-all duration-300 cursor-pointer
+                        text-left w-full group
+                      "
+                      onClick={() => handleMilestoneClick(milestone.id)}
                     >
                       <div className="flex flex-col gap-2">
-                        <div className="flex flex-row gap-2 items-center">
-                          <div className="font-semibold text-primary">
-                            {milestone.name}
+                        <div className="flex flex-row gap-2 items-center justify-between">
+                          <div className="flex flex-row gap-2 items-center">
+                            <div className="font-semibold text-primary">
+                              {milestone.name}
+                            </div>
+                            {index === 0 && (
+                              <span className="badge badge-primary badge-sm">
+                                Latest
+                              </span>
+                            )}
                           </div>
-                          {index === 0 && (
-                            <span className="badge badge-primary badge-sm">
-                              Latest
-                            </span>
-                          )}
+                          <ExternalLink className="w-4 h-4 text-base-content/50 group-hover:text-primary transition-colors" />
                         </div>
                         <div className="flex flex-row gap-2 items-center text-sm text-base-content/70">
                           <Clock className="w-4 h-4" />
                           Created: {formatDate(milestone.createdAt)}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
