@@ -12,10 +12,10 @@ import {
   PillarMother,
 } from '@backend/models';
 import { ConflictError, NotFoundError } from '../Errors';
-import { GetMilestonePillarsUseCaseImpl } from './GetMilestonePillarsUseCase';
+import { GetMilestoneUseCaseImpl } from './GetMilestoneUseCase';
 
-describe('GetMilestonePillarsUseCase', () => {
-  it('should return milestone pillars for a valid milestone', async () => {
+describe('GetMilestoneUseCase', () => {
+  it('should return milestone for a valid milestone', async () => {
     const {
       useCase,
       fakeAssessmentsRepository,
@@ -41,22 +41,27 @@ describe('GetMilestonePillarsUseCase', () => {
       PillarMother.basic().withId('pillar-2').withLabel('Pillar 2').build(),
     ];
 
-    vi.spyOn(
-      fakeWellArchitectedToolService,
-      'getMilestonePillars'
-    ).mockResolvedValue(expectedPillars);
+    vi.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockResolvedValue({
+      id: 1,
+      name: 'Milestone 1',
+      createdAt: new Date('2023-01-01T00:00:00Z'),
+      pillars: expectedPillars,
+    });
 
-    const result = await useCase.getMilestonePillars({
+    const result = await useCase.getMilestone({
       assessmentId: 'assessment-id',
       organizationDomain: 'test.io',
       milestoneId: 1,
       region: 'us-east-1',
     });
 
-    expect(result).toEqual(expectedPillars);
-    expect(
-      fakeWellArchitectedToolService.getMilestonePillars
-    ).toHaveBeenCalledWith({
+    expect(result).toEqual({
+      id: 1,
+      name: 'Milestone 1',
+      createdAt: new Date('2023-01-01T00:00:00Z'),
+      pillars: expectedPillars,
+    });
+    expect(fakeWellArchitectedToolService.getMilestone).toHaveBeenCalledWith({
       roleArn: 'arn:aws:iam::123456789012:role/export-role',
       assessment,
       region: 'us-east-1',
@@ -75,7 +80,7 @@ describe('GetMilestonePillarsUseCase', () => {
     fakeOrganizationRepository.organizations['test.io'] = organization;
 
     await expect(
-      useCase.getMilestonePillars({
+      useCase.getMilestone({
         assessmentId: 'non-existent-assessment',
         organizationDomain: 'test.io',
         milestoneId: 1,
@@ -102,7 +107,7 @@ describe('GetMilestonePillarsUseCase', () => {
     fakeOrganizationRepository.organizations['test.io'] = organization;
 
     await expect(
-      useCase.getMilestonePillars({
+      useCase.getMilestone({
         assessmentId: 'assessment-id',
         organizationDomain: 'test.io',
         milestoneId: 1,
@@ -122,7 +127,7 @@ describe('GetMilestonePillarsUseCase', () => {
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
 
     await expect(
-      useCase.getMilestonePillars({
+      useCase.getMilestone({
         assessmentId: 'assessment-id',
         organizationDomain: 'test.io',
         milestoneId: 1,
@@ -152,10 +157,7 @@ describe('GetMilestonePillarsUseCase', () => {
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
     fakeOrganizationRepository.organizations['test.io'] = organization;
 
-    vi.spyOn(
-      fakeWellArchitectedToolService,
-      'getMilestonePillars'
-    ).mockRejectedValue(
+    vi.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockRejectedValue(
       new MilestoneNotFoundError({
         assessmentId: 'assessment-id',
         milestoneId: 999,
@@ -163,7 +165,7 @@ describe('GetMilestonePillarsUseCase', () => {
     );
 
     await expect(
-      useCase.getMilestonePillars({
+      useCase.getMilestone({
         assessmentId: 'assessment-id',
         organizationDomain: 'test.io',
         milestoneId: 999,
@@ -191,7 +193,7 @@ describe('GetMilestonePillarsUseCase', () => {
     fakeOrganizationRepository.organizations['test.io'] = organization;
 
     await expect(
-      useCase.getMilestonePillars({
+      useCase.getMilestone({
         assessmentId: 'assessment-id',
         organizationDomain: 'test.io',
         milestoneId: 1,
@@ -204,7 +206,7 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
   return {
-    useCase: new GetMilestonePillarsUseCaseImpl(),
+    useCase: new GetMilestoneUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeWellArchitectedToolService: inject(tokenFakeWellArchitectedToolService),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),

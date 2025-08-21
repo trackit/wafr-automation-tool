@@ -8,7 +8,7 @@ export * from './lib/getAssessment';
 export * from './lib/getAssessments';
 export * from './lib/getFindings';
 export * from './lib/getMilestones';
-export * from './lib/getMilestonePillars';
+export * from './lib/getMilestone';
 export * from './lib/postAssessment';
 export * from './lib/rescanAssessment';
 export * from './lib/updateComment';

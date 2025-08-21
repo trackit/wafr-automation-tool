@@ -29,6 +29,7 @@ import {
   Assessment,
   BestPractice,
   Milestone,
+  MilestoneSummary,
   Pillar,
   Question,
   User,
@@ -503,12 +504,12 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     );
   }
 
-  public async getMilestonePillars(args: {
+  public async getMilestone(args: {
     roleArn: string;
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Pillar[]> {
+  }): Promise<Milestone> {
     const { roleArn, assessment, region, milestoneId } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
@@ -532,15 +533,23 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
         milestoneId,
       });
     }
+    if (!milestone.RecordedAt || !milestone.MilestoneName) {
+      throw new Error(`Milestone#${milestoneId} is missing required fields`);
+    }
     const milestoneWorkloadId = milestone.Workload.WorkloadId;
     if (!milestoneWorkloadId) {
       throw new Error(`Milestone#${milestoneId} has no WorkloadId`);
     }
-    return this.getPillarsFromMilestone({
-      wellArchitectedClient,
-      milestoneWorkloadId,
-      milestoneId,
-    });
+    return {
+      id: milestone.MilestoneNumber,
+      name: milestone.MilestoneName,
+      createdAt: milestone.RecordedAt,
+      pillars: await this.getPillarsFromMilestone({
+        wellArchitectedClient,
+        milestoneWorkloadId,
+        milestoneId,
+      }),
+    };
   }
 
   public async listAWSMilestones(
@@ -569,7 +578,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     roleArn: string;
     assessment: Assessment;
     region: string;
-  }): Promise<Milestone[]> {
+  }): Promise<MilestoneSummary[]> {
     const { roleArn, assessment, region } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
@@ -584,7 +593,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       throw new Error(`Workload not found for assessment: ${assessment.name}`);
     }
 
-    const milestones: Milestone[] = [];
+    const milestones: MilestoneSummary[] = [];
     let nextToken: string | undefined;
     do {
       const { awsMilestones, nextToken: newNextToken } =

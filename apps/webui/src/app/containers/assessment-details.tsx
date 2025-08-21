@@ -4,7 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import {
   deleteAssessment,
   getAssessment,
-  getMilestonePillars,
+  getMilestone,
   rescanAssessment,
   updatePillar,
   updateQuestion,
@@ -63,19 +63,20 @@ export function AssessmentDetails() {
     refetchInterval: isMilestone ? false : 15000, // Don't auto-refetch for milestones
   });
 
-  const milestonePillarsQuery = useQuery({
-    queryKey: ['milestone-pillars', id, milestoneId],
+  const milestoneQuery = useQuery({
+    queryKey: ['milestone', id, milestoneId],
     queryFn: () => {
       if (!id || !milestoneId) return null;
-      return getMilestonePillars({ assessmentId: id, milestoneId });
+      return getMilestone({ assessmentId: id, milestoneId });
     },
     enabled: isMilestone, // Only fetch milestone data when in milestone mode
   });
 
   const assessmentData = assessmentQuery.data;
-  const isLoading = isMilestone ? milestonePillarsQuery.isLoading || assessmentQuery.isLoading : assessmentQuery.isLoading;
+  const milestoneData = milestoneQuery.data;
+  const isLoading = isMilestone ? milestoneQuery.isLoading || assessmentQuery.isLoading : assessmentQuery.isLoading;
   const refetch = assessmentQuery.refetch;
-  const pillars = isMilestone ? milestonePillarsQuery.data : assessmentData?.pillars;
+  const pillars = isMilestone ? milestoneData?.pillars : assessmentData?.pillars;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -818,7 +819,12 @@ export function AssessmentDetails() {
 
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
-          <h2 className="mt-0 mb-0">Assessment {assessmentData?.name} {isMilestone ? `- Milestone ${milestoneId}` : ''}</h2>
+          <h2 className="mt-0 mb-0">Assessment {assessmentData?.name}</h2>
+          { isMilestone && (
+            <h3 className="text-base-content/50 text-sm">
+              Milestone {milestoneData?.name}
+            </h3>
+          )}
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">

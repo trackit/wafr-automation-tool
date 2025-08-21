@@ -1,26 +1,26 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
-import type { Pillar } from '@backend/models';
+import type { Milestone } from '@backend/models';
 import { inject } from '@shared/di-container';
 import { operations } from '@shared/api-schema';
 
 import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { tokenGetMilestonePillarsUseCase } from '@backend/useCases';
+import { tokenGetMilestoneUseCase } from '@backend/useCases';
 
-const GetMilestonePillarsPathSchema = z.object({
+const GetMilestonePathSchema = z.object({
   assessmentId: z.string().uuid(),
   milestoneId: z.string(),
-}) satisfies ZodType<operations['getMilestonePillars']['parameters']['path']>;
+}) satisfies ZodType<operations['getMilestone']['parameters']['path']>;
 
-const GetMilestonePillarsQuerySchema = z.object({
+const GetMilestoneQuerySchema = z.object({
   region: z.string().optional(),
-}) satisfies ZodType<operations['getMilestonePillars']['parameters']['query']>;
+}) satisfies ZodType<operations['getMilestone']['parameters']['query']>;
 
-export class GetMilestonePillarsAdapter {
-  private readonly useCase = inject(tokenGetMilestonePillarsUseCase);
+export class GetMilestoneAdapter {
+  private readonly useCase = inject(tokenGetMilestoneUseCase);
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -32,32 +32,36 @@ export class GetMilestonePillarsAdapter {
     });
   }
 
-  private toGetMilestonePillarsResponse(
-    pillars: Pillar[]
-  ): operations['getMilestonePillars']['responses']['200']['content']['application/json'] {
-    return pillars.map((pillar) => ({
-      ...pillar,
-      questions: pillar.questions.map((question) => ({
-        ...question,
-        bestPractices: question.bestPractices.map((bestPractice) => ({
-          ...bestPractice,
-          results: [...bestPractice.results],
+  private toGetMilestoneResponse(
+    milestone: Milestone
+  ): operations['getMilestone']['responses']['200']['content']['application/json'] {
+    return {
+      ...milestone,
+      createdAt: milestone.createdAt.toISOString(),
+      pillars: milestone.pillars.map((pillar) => ({
+        ...pillar,
+        questions: pillar.questions.map((question) => ({
+          ...question,
+          bestPractices: question.bestPractices.map((bestPractice) => ({
+            ...bestPractice,
+            results: [...bestPractice.results],
+          })),
         })),
       })),
-    }));
+    };
   }
 
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<
-    operations['getMilestonePillars']['responses']['200']['content']['application/json']
+    operations['getMilestone']['responses']['200']['content']['application/json']
   > {
     const { pathParameters, queryStringParameters } = event;
     try {
       const { assessmentId, milestoneId } =
-        GetMilestonePillarsPathSchema.parse(pathParameters);
-      const { region } = GetMilestonePillarsQuerySchema.parse(
-        queryStringParameters
+        GetMilestonePathSchema.parse(pathParameters);
+      const { region } = GetMilestoneQuerySchema.parse(
+        queryStringParameters ?? {}
       );
       const milestoneIdNumber = Number(milestoneId);
       if (isNaN(milestoneIdNumber)) {
@@ -65,14 +69,13 @@ export class GetMilestonePillarsAdapter {
       }
 
       const user = getUserFromEvent(event);
-      const pillars = await this.useCase.getMilestonePillars({
+      const milestone = await this.useCase.getMilestone({
         organizationDomain: user.organizationDomain,
         assessmentId,
         milestoneId: milestoneIdNumber,
         region,
       });
-
-      return this.toGetMilestonePillarsResponse(pillars);
+      return this.toGetMilestoneResponse(milestone);
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request parameters: ${e.message}`);

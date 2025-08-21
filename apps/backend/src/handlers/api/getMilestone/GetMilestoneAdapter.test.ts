@@ -1,17 +1,17 @@
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
-import { GetMilestonePillarsAdapter } from './GetMilestonePillarsAdapter';
-import { GetMilestonePillarsAdapterEventMother } from './GetMilestonePillarsAdapterEventMother';
+import { GetMilestoneAdapter } from './GetMilestoneAdapter';
+import { GetMilestoneAdapterEventMother } from './GetMilestoneAdapterEventMother';
 import { registerTestInfrastructure } from '@backend/infrastructure';
-import { tokenGetMilestonePillarsUseCase } from '@backend/useCases';
+import { tokenGetMilestoneUseCase } from '@backend/useCases';
 
-describe('GetMilestonePillarsAdapter', () => {
+describe('GetMilestoneAdapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = GetMilestonePillarsAdapterEventMother.basic().build();
+      const event = GetMilestoneAdapterEventMother.basic().build();
       const response = await adapter.handle(event);
 
       expect(response.statusCode).toBe(200);
@@ -60,11 +60,11 @@ describe('GetMilestonePillarsAdapter', () => {
     });
   });
 
-  describe('getMilestonePillars', () => {
+  describe('getMilestone', () => {
     it('should call the use case with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
-      const event = GetMilestonePillarsAdapterEventMother.basic()
+      const event = GetMilestoneAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withMilestoneId(2)
         .withRegion('eu-west-1')
@@ -76,7 +76,7 @@ describe('GetMilestonePillarsAdapter', () => {
 
       await adapter.handle(event);
 
-      expect(useCase.getMilestonePillars).toHaveBeenCalledWith({
+      expect(useCase.getMilestone).toHaveBeenCalledWith({
         organizationDomain: 'test.io',
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         milestoneId: 2,
@@ -89,9 +89,16 @@ describe('GetMilestonePillarsAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const useCase = { getMilestonePillars: vitest.fn() };
-  useCase.getMilestonePillars.mockResolvedValueOnce(Promise.resolve([]));
-  register(tokenGetMilestonePillarsUseCase, { useValue: useCase });
-  const adapter = new GetMilestonePillarsAdapter();
+  const useCase = { getMilestone: vitest.fn() };
+  useCase.getMilestone.mockResolvedValueOnce(
+    Promise.resolve({
+      id: 1,
+      name: 'Milestone 1',
+      createdAt: new Date('2023-01-01T00:00:00Z'),
+      pillars: [],
+    })
+  );
+  register(tokenGetMilestoneUseCase, { useValue: useCase });
+  const adapter = new GetMilestoneAdapter();
   return { adapter, useCase };
 };

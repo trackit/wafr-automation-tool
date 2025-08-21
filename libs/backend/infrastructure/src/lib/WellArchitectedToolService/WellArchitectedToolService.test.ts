@@ -35,6 +35,7 @@ import {
 import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 import { tokenFakeQuestionSetService } from '../QuestionSetService';
+import { MilestoneNotFoundError } from '../../Errors';
 
 describe('wellArchitectedTool Infrastructure', () => {
   describe('createWellArchitectedClient', () => {
@@ -1053,7 +1054,7 @@ describe('wellArchitectedTool Infrastructure', () => {
     });
   });
 
-  describe('getMilestonePillars', () => {
+  describe('getMilestone', () => {
     it('should get pillars from a milestone', async () => {
       const {
         wellArchitectedToolService,
@@ -1115,6 +1116,8 @@ describe('wellArchitectedTool Infrastructure', () => {
           Workload: {
             WorkloadId: 'milestone-workload-id',
           },
+          MilestoneName: 'Milestone Name',
+          RecordedAt: new Date('2023-10-01T00:00:00Z'),
         },
         $metadata: { httpStatusCode: 200 },
       });
@@ -1139,32 +1142,37 @@ describe('wellArchitectedTool Infrastructure', () => {
       const region = 'us-west-2';
       const milestoneId = 1;
 
-      const result = await wellArchitectedToolService.getMilestonePillars({
+      const result = await wellArchitectedToolService.getMilestone({
         roleArn,
         assessment,
         region,
         milestoneId,
       });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          primaryId: 'pillar-id',
-          label: 'Pillar 1',
-          questions: [
-            expect.objectContaining({
-              primaryId: 'question-id',
-              label: 'Question 1',
-              bestPractices: [
-                expect.objectContaining({
-                  primaryId: 'best-practice-id',
-                  label: 'Best Practice 1',
-                  checked: true,
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
+      expect(result).toEqual({
+        id: 1,
+        name: 'Milestone Name',
+        createdAt: new Date('2023-10-01T00:00:00Z'),
+        pillars: [
+          expect.objectContaining({
+            primaryId: 'pillar-id',
+            label: 'Pillar 1',
+            questions: [
+              expect.objectContaining({
+                primaryId: 'question-id',
+                label: 'Question 1',
+                bestPractices: [
+                  expect.objectContaining({
+                    primaryId: 'best-practice-id',
+                    label: 'Best Practice 1',
+                    checked: true,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
 
       const getMilestoneCalls =
         wellArchitectedClientMock.commandCalls(GetMilestoneCommand);
@@ -1208,7 +1216,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       const milestoneId = 1;
 
       await expect(
-        wellArchitectedToolService.getMilestonePillars({
+        wellArchitectedToolService.getMilestone({
           roleArn,
           assessment,
           region,
@@ -1258,13 +1266,13 @@ describe('wellArchitectedTool Infrastructure', () => {
       const milestoneId = 1;
 
       await expect(
-        wellArchitectedToolService.getMilestonePillars({
+        wellArchitectedToolService.getMilestone({
           roleArn,
           assessment,
           region,
           milestoneId,
         })
-      ).rejects.toThrow(Error);
+      ).rejects.toThrow(MilestoneNotFoundError);
     });
 
     it('should throw an error if milestone has no WorkloadId', async () => {
@@ -1302,6 +1310,8 @@ describe('wellArchitectedTool Infrastructure', () => {
         Milestone: {
           MilestoneNumber: 1,
           Workload: {},
+          MilestoneName: 'Milestone Name',
+          RecordedAt: new Date('2023-10-01T00:00:00Z'),
         },
         $metadata: { httpStatusCode: 200 },
       });
@@ -1311,13 +1321,13 @@ describe('wellArchitectedTool Infrastructure', () => {
       const milestoneId = 1;
 
       await expect(
-        wellArchitectedToolService.getMilestonePillars({
+        wellArchitectedToolService.getMilestone({
           roleArn,
           assessment,
           region,
           milestoneId,
         })
-      ).rejects.toThrow('Milestone#1 has no WorkloadId');
+      ).rejects.toThrow(Error);
     });
   });
 

@@ -9,7 +9,7 @@ export * from './exportWellArchitectedTool';
 export * from './getAllAssessments';
 export * from './getAssessment';
 export * from './getBestPracticeFindings';
-export * from './getMilestonePillars';
+export * from './getMilestone';
 export * from './getMilestones';
 export * from './getScannedFindings';
 export * from './mapScanFindingsToBestPractices';

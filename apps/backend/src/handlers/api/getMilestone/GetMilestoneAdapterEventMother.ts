@@ -5,10 +5,10 @@ import type { User } from '@backend/models';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { operations } from '@shared/api-schema';
 
-export class GetMilestonePillarsAdapterEventMother {
-  private pathParameters: operations['getMilestonePillars']['parameters']['path'];
+export class GetMilestoneAdapterEventMother {
+  private pathParameters: operations['getMilestone']['parameters']['path'];
   private queryStringParameters: NonNullable<
-    operations['getMilestonePillars']['parameters']['query']
+    operations['getMilestone']['parameters']['query']
   >;
   private user: Pick<User, 'id' | 'email'> = {
     id: 'user-id',
@@ -16,17 +16,17 @@ export class GetMilestonePillarsAdapterEventMother {
   };
 
   private constructor(
-    pathParameters: operations['getMilestonePillars']['parameters']['path'],
+    pathParameters: operations['getMilestone']['parameters']['path'],
     queryStringParameters: NonNullable<
-      operations['getMilestonePillars']['parameters']['query']
+      operations['getMilestone']['parameters']['query']
     >
   ) {
     this.pathParameters = pathParameters;
     this.queryStringParameters = queryStringParameters;
   }
 
-  public static basic(): GetMilestonePillarsAdapterEventMother {
-    return new GetMilestonePillarsAdapterEventMother(
+  public static basic(): GetMilestoneAdapterEventMother {
+    return new GetMilestoneAdapterEventMother(
       {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         milestoneId: '1',
@@ -37,33 +37,33 @@ export class GetMilestonePillarsAdapterEventMother {
 
   public withAssessmentId(
     assessmentId: string
-  ): GetMilestonePillarsAdapterEventMother {
+  ): GetMilestoneAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withMilestoneId(
     milestoneId: string | number
-  ): GetMilestonePillarsAdapterEventMother {
+  ): GetMilestoneAdapterEventMother {
     this.pathParameters.milestoneId = milestoneId.toString();
     return this;
   }
 
   public withOrganization(
     organization: string
-  ): GetMilestonePillarsAdapterEventMother {
+  ): GetMilestoneAdapterEventMother {
     this.user.email = `${this.user.id}@${organization}`;
     return this;
   }
 
-  public withRegion(region?: string): GetMilestonePillarsAdapterEventMother {
+  public withRegion(region?: string): GetMilestoneAdapterEventMother {
     this.queryStringParameters.region = region;
     return this;
   }
 
   public withUser(
     user: Pick<User, 'id' | 'email'>
-  ): GetMilestonePillarsAdapterEventMother {
+  ): GetMilestoneAdapterEventMother {
     this.user = user;
     return this;
   }

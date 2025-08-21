@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { GetMilestonePillarsAdapter } from './GetMilestonePillarsAdapter';
+import { GetMilestoneAdapter } from './GetMilestoneAdapter';
 
-const adapter = new GetMilestonePillarsAdapter();
+const adapter = new GetMilestoneAdapter();
 
 export const main = async (
   event: APIGatewayProxyEvent

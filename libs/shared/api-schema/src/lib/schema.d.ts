@@ -91,7 +91,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/milestones/{milestoneId}/pillars": {
+    "/assessments/{assessmentId}/milestones/{milestoneId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -99,11 +99,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Retrieve all pillars for a specific milestone
-         * @description Fetches all pillars associated with a specific milestone.
+         * Retrieve a specific milestone
+         * @description Fetches all details associated with a specific milestone.
          *
          */
-        get: operations["getMilestonePillars"];
+        get: operations["getMilestone"];
         put?: never;
         post?: never;
         delete?: never;
@@ -452,6 +452,15 @@ export interface components {
         Milestone: {
             id: number;
             name: string;
+            /** Format: date-time */
+            createdAt: string;
+            pillars: components["schemas"]["Pillar"][];
+        };
+        /** MilestoneSummary */
+        MilestoneSummary: {
+            id: number;
+            name: string;
+            /** Format: date-time */
             createdAt: string;
         };
     };
@@ -768,7 +777,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Milestone"][];
+                    "application/json": components["schemas"]["MilestoneSummary"][];
                 };
             };
             /** @description An issue occurred while trying to retrieve the organization of the user */
@@ -794,7 +803,7 @@ export interface operations {
             };
         };
     };
-    getMilestonePillars: {
+    getMilestone: {
         parameters: {
             query?: {
                 /** @description The region to filter milestones by. */
@@ -817,7 +826,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Pillar"][];
+                    "application/json": components["schemas"]["Milestone"];
                 };
             };
             /** @description An issue occurred while trying to retrieve the organization of the user */

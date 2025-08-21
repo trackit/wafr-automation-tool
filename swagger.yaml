@@ -264,21 +264,21 @@ paths:
                 type: array
                 required: true
                 items:
-                  $ref: '#/components/schemas/Milestone'
+                  $ref: '#/components/schemas/MilestoneSummary'
         '400':
           description: An issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/milestones/{milestoneId}/pillars':
+  '/assessments/{assessmentId}/milestones/{milestoneId}':
     get:
-      operationId: getMilestonePillars
+      operationId: getMilestone
       tags:
         - Assessments
-      summary: Retrieve all pillars for a specific milestone
+      summary: Retrieve a specific milestone
       description: |
-        Fetches all pillars associated with a specific milestone.
+        Fetches all details associated with a specific milestone.
       parameters:
         - name: assessmentId
           in: path
@@ -303,10 +303,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                required: true
-                items:
-                  $ref: '#/components/schemas/Pillar'
+                $ref: '#/components/schemas/Milestone'
         '400':
           description: An issue occurred while trying to retrieve the organization of the user
         '404':
@@ -1086,6 +1083,7 @@ components:
         - id
         - name
         - createdAt
+        - pillars
       properties:
         id:
           type: integer
@@ -1093,3 +1091,23 @@ components:
           type: string
         createdAt:
           type: string
+          format: date-time
+        pillars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pillar'
+    MilestoneSummary:
+      title: MilestoneSummary
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

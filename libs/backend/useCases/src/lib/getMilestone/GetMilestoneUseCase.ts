@@ -4,34 +4,30 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import type { Pillar } from '@backend/models';
+import type { Milestone } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { ConflictError, NotFoundError } from '../Errors';
 import { assertOrganizationHasExportRole } from '../../services';
 
-export interface GetMilestonePillarsUseCaseArgs {
+export interface GetMilestoneUseCaseArgs {
   assessmentId: string;
   organizationDomain: string;
   milestoneId: number;
   region?: string;
 }
 
-export interface GetMilestonePillarsUseCase {
-  getMilestonePillars(args: GetMilestonePillarsUseCaseArgs): Promise<Pillar[]>;
+export interface GetMilestoneUseCase {
+  getMilestone(args: GetMilestoneUseCaseArgs): Promise<Milestone>;
 }
 
-export class GetMilestonePillarsUseCaseImpl
-  implements GetMilestonePillarsUseCase
-{
+export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
   private readonly wellArchitectedToolService = inject(
     tokenWellArchitectedToolService
   );
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
-  public async getMilestonePillars(
-    args: GetMilestonePillarsUseCaseArgs
-  ): Promise<Pillar[]> {
+  public async getMilestone(args: GetMilestoneUseCaseArgs): Promise<Milestone> {
     const { organizationDomain, assessmentId, region, milestoneId } = args;
     const [organization, assessment] = await Promise.all([
       this.organizationRepository.get({
@@ -59,7 +55,7 @@ export class GetMilestonePillarsUseCaseImpl
     }
     assertOrganizationHasExportRole(organization);
     return await this.wellArchitectedToolService
-      .getMilestonePillars({
+      .getMilestone({
         roleArn: organization.assessmentExportRoleArn,
         assessment,
         region: milestonesRegion,
@@ -76,10 +72,7 @@ export class GetMilestonePillarsUseCaseImpl
   }
 }
 
-export const tokenGetMilestonePillarsUseCase =
-  createInjectionToken<GetMilestonePillarsUseCase>(
-    'GetMilestonePillarsUseCase',
-    {
-      useClass: GetMilestonePillarsUseCaseImpl,
-    }
-  );
+export const tokenGetMilestoneUseCase =
+  createInjectionToken<GetMilestoneUseCase>('GetMilestoneUseCase', {
+    useClass: GetMilestoneUseCaseImpl,
+  });

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Assessment, Milestone, Pillar, User } from '@backend/models';
+import { Assessment, Milestone, MilestoneSummary, User } from '@backend/models';
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
@@ -23,21 +23,21 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     // No-op for fake implementation
   }
 
-  public async getMilestonePillars(_args: {
+  public async getMilestone(_args: {
     roleArn: string;
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Pillar[]> {
+  }): Promise<Milestone> {
     // No-op for fake implementation
-    return [];
+    return {} as Milestone;
   }
 
   public async getMilestones(_args: {
     roleArn: string;
     assessment: Assessment;
     region: string;
-  }): Promise<Milestone[]> {
+  }): Promise<MilestoneSummary[]> {
     // No-op for fake implementation
     return [];
   }

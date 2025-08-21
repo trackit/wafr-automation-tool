@@ -3,7 +3,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import type { Milestone } from '@backend/models';
+import type { MilestoneSummary } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { ConflictError, NotFoundError } from '../Errors';
 import { assertOrganizationHasExportRole } from '../../services';
@@ -15,7 +15,7 @@ export interface GetMilestonesUseCaseArgs {
 }
 
 export interface GetMilestonesUseCase {
-  getMilestones(args: GetMilestonesUseCaseArgs): Promise<Milestone[]>;
+  getMilestones(args: GetMilestonesUseCaseArgs): Promise<MilestoneSummary[]>;
 }
 
 export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
@@ -27,7 +27,7 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
 
   public async getMilestones(
     args: GetMilestonesUseCaseArgs
-  ): Promise<Milestone[]> {
+  ): Promise<MilestoneSummary[]> {
     const { organizationDomain, assessmentId, region } = args;
     const [organization, assessment] = await Promise.all([
       this.organizationRepository.get({

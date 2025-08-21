@@ -524,24 +524,24 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  GetMilestonePillarsLogGroup:
+  GetMilestoneLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${GetMilestonePillarsFunction}'
+      LogGroupName: !Sub '/aws/lambda/${GetMilestoneFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  GetMilestonePillarsFunction:
+  GetMilestoneFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../apps/backend/src/handlers/api/getMilestonePillars
+      CodeUri: ../apps/backend/src/handlers/api/getMilestone
       Tags:
-        Name: GetMilestonePillarsFunction
+        Name: GetMilestoneFunction
       Role: !GetAtt ExportAssessmentRole.Arn
       Events:
-        GetMilestonePillars:
+        GetMilestone:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/milestones/{milestoneId}/pillars
+            Path: /assessments/{assessmentId}/milestones/{milestoneId}
             Method: GET
     Metadata:
       BuildMethod: esbuild
