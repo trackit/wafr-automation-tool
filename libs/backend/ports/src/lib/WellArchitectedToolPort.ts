@@ -29,5 +29,10 @@ export interface WellArchitectedToolPort {
     roleArn: string;
     assessment: Assessment;
     region: string;
-  }): Promise<MilestoneSummary[]>;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }>;
 }

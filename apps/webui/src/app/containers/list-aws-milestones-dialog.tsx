@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getMilestones } from '@webui/api-client';
 import { Modal } from '@webui/ui';
 import { Clock, List, ExternalLink } from 'lucide-react';
@@ -17,15 +17,29 @@ export default function ListAWSMilestonesDialog({
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   
-  const { data: milestones, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['milestones', assessmentId],
-    queryFn: () => getMilestones({ assessmentId }),
+    queryFn: ({ pageParam }) =>
+      getMilestones({ assessmentId }, { limit: 10, nextToken: pageParam }),
+    getNextPageParam: (lastPage) => lastPage.nextToken,
+    initialPageParam: '',
     enabled: open, // Only fetch when dialog is open
   });
 
+  const milestones = useMemo(() => {
+    return data?.pages.flatMap((page) => page.milestones) || [];
+  }, [data]);
+
   const sortedMilestones = useMemo(() => {
-    if (!milestones) return [];
-    
+    if (!milestones.length) return [];
+
     return milestones.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
@@ -133,6 +147,22 @@ export default function ListAWSMilestonesDialog({
                   No milestones found for this assessment.
                 </div>
               )
+            )}
+            
+            {!isLoading && hasNextPage && (
+              <div className="flex flex-row gap-4 justify-center mt-4">
+                <button
+                  className="btn btn-accent btn-soft text-sm"
+                  onClick={() => fetchNextPage()}
+                  disabled={!hasNextPage || isFetchingNextPage}
+                >
+                  {isFetchingNextPage
+                    ? 'Loading more...'
+                    : hasNextPage
+                    ? 'Load More'
+                    : 'Nothing more to load'}
+                </button>
+              </div>
             )}
           </div>
         </div>

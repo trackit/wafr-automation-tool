@@ -57,7 +57,52 @@ describe('GetMilestonesAdapter', () => {
         organizationDomain: 'test.io',
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         region: 'eu-west-1',
+        limit: undefined,
+        nextToken: undefined,
       });
+    });
+
+    it('should call the use case with pagination parameters', async () => {
+      const { adapter, useCase } = setup();
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withRegion('eu-west-1')
+        .withLimit(10)
+        .withNextToken('dGVzdC10b2tlbg==') // base64 encoded 'test-token'
+        .withUser({ id: 'user-id', email: 'user-id@test.io' })
+        .build();
+
+      await adapter.handle(event);
+
+      expect(useCase.getMilestones).toHaveBeenCalledWith({
+        organizationDomain: 'test.io',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        region: 'eu-west-1',
+        limit: 10,
+        nextToken: 'dGVzdC10b2tlbg==',
+      });
+    });
+
+    it('should return a 400 with invalid limit', async () => {
+      const { adapter } = setup();
+
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withLimit(-1)
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid nextToken', async () => {
+      const { adapter } = setup();
+
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withNextToken('NOT_BASE64')
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
     });
   });
 });
@@ -66,7 +111,9 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
   const useCase = { getMilestones: vi.fn() };
-  useCase.getMilestones.mockResolvedValueOnce(Promise.resolve([]));
+  useCase.getMilestones.mockResolvedValueOnce(
+    Promise.resolve({ milestones: [], nextToken: undefined })
+  );
   register(tokenGetMilestonesUseCase, { useValue: useCase });
   const adapter = new GetMilestonesAdapter();
   return { adapter, useCase };

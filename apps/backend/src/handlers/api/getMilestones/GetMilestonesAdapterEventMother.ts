@@ -51,6 +51,16 @@ export class GetMilestonesAdapterEventMother {
     return this;
   }
 
+  public withLimit(limit?: number): GetMilestonesAdapterEventMother {
+    this.queryStringParameters.limit = limit;
+    return this;
+  }
+
+  public withNextToken(nextToken?: string): GetMilestonesAdapterEventMother {
+    this.queryStringParameters.nextToken = nextToken;
+    return this;
+  }
+
   public withUser(
     user: Pick<User, 'id' | 'email'>
   ): GetMilestonesAdapterEventMother {

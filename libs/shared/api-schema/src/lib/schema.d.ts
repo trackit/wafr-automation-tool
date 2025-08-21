@@ -761,6 +761,10 @@ export interface operations {
             query?: {
                 /** @description The region to filter milestones by. */
                 region?: string;
+                /** @description Maximum number of milestones to return */
+                limit?: number;
+                /** @description Token for pagination. */
+                nextToken?: string;
             };
             header?: never;
             path: {
@@ -777,7 +781,13 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MilestoneSummary"][];
+                    "application/json": {
+                        milestones: components["schemas"]["MilestoneSummary"][];
+                        /** @description Token for pagination. If there are more milestones than can be returned in a single response,
+                         *     this token will allow you to retrieve the next set of results.
+                         *      */
+                        nextToken?: string;
+                    };
                 };
             };
             /** @description An issue occurred while trying to retrieve the organization of the user */

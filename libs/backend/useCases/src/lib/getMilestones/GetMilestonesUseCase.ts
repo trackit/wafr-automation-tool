@@ -12,10 +12,15 @@ export interface GetMilestonesUseCaseArgs {
   assessmentId: string;
   organizationDomain: string;
   region?: string;
+  limit?: number;
+  nextToken?: string;
 }
 
 export interface GetMilestonesUseCase {
-  getMilestones(args: GetMilestonesUseCaseArgs): Promise<MilestoneSummary[]>;
+  getMilestones(args: GetMilestonesUseCaseArgs): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }>;
 }
 
 export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
@@ -27,8 +32,11 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
 
   public async getMilestones(
     args: GetMilestonesUseCaseArgs
-  ): Promise<MilestoneSummary[]> {
-    const { organizationDomain, assessmentId, region } = args;
+  ): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }> {
+    const { organizationDomain, assessmentId, region, limit, nextToken } = args;
     const [organization, assessment] = await Promise.all([
       this.organizationRepository.get({
         organizationDomain,
@@ -58,6 +66,8 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       region: milestonesRegion,
+      limit,
+      nextToken,
     });
   }
 }

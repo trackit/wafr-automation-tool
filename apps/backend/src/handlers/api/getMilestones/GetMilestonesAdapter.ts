@@ -15,6 +15,8 @@ const GetMilestonesPathSchema = z.object({
 
 const GetMilestonesQuerySchema = z.object({
   region: z.string().optional(),
+  limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
+  nextToken: z.string().trim().base64().optional(),
 }) satisfies ZodType<operations['getMilestones']['parameters']['query']>;
 
 export class GetMilestonesAdapter {
@@ -38,18 +40,26 @@ export class GetMilestonesAdapter {
     const { pathParameters, queryStringParameters } = event;
     try {
       const { assessmentId } = GetMilestonesPathSchema.parse(pathParameters);
-      const { region } = GetMilestonesQuerySchema.parse(queryStringParameters);
+      const { region, limit, nextToken } = GetMilestonesQuerySchema.parse(
+        queryStringParameters
+      );
 
       const user = getUserFromEvent(event);
-      const milestones = await this.useCase.getMilestones({
-        organizationDomain: user.organizationDomain,
-        assessmentId,
-        region,
-      });
-      return milestones.map((milestone) => ({
-        ...milestone,
-        createdAt: milestone.createdAt.toISOString(),
-      }));
+      const { milestones, nextToken: responseNextToken } =
+        await this.useCase.getMilestones({
+          organizationDomain: user.organizationDomain,
+          assessmentId,
+          region,
+          limit,
+          nextToken,
+        });
+      return {
+        milestones: milestones.map((milestone) => ({
+          ...milestone,
+          createdAt: milestone.createdAt.toISOString(),
+        })),
+        nextToken: responseNextToken,
+      };
     } catch (e) {
       if (e instanceof ZodError) {
         throw new BadRequestError(`Invalid request parameters: ${e.message}`);

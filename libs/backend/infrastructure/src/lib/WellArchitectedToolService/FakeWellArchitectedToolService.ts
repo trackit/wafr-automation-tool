@@ -37,9 +37,14 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     roleArn: string;
     assessment: Assessment;
     region: string;
-  }): Promise<MilestoneSummary[]> {
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }> {
     // No-op for fake implementation
-    return [];
+    return { milestones: [] };
   }
 }
 

@@ -554,10 +554,16 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
 
   public async listAWSMilestones(
     wellarchitectedClient: WellArchitectedClient,
-    workloadId: string
+    workloadId: string,
+    options?: {
+      maxResults?: number;
+      nextToken?: string;
+    }
   ): Promise<{ awsMilestones: AWSMilestone[]; nextToken?: string }> {
     const command = new ListMilestonesCommand({
       WorkloadId: workloadId,
+      MaxResults: options?.maxResults,
+      NextToken: options?.nextToken,
     });
     const response = await wellarchitectedClient.send(command);
     if (
@@ -578,8 +584,13 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     roleArn: string;
     assessment: Assessment;
     region: string;
-  }): Promise<MilestoneSummary[]> {
-    const { roleArn, assessment, region } = args;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }> {
+    const { roleArn, assessment, region, limit, nextToken } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
       region
@@ -593,33 +604,39 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       throw new Error(`Workload not found for assessment: ${assessment.name}`);
     }
 
-    const milestones: MilestoneSummary[] = [];
-    let nextToken: string | undefined;
-    do {
-      const { awsMilestones, nextToken: newNextToken } =
-        await this.listAWSMilestones(
-          wellArchitectedClient,
-          assessmentWorkload.WorkloadId
-        );
-      for (const milestoneSummary of awsMilestones) {
-        if (
-          !milestoneSummary.MilestoneNumber ||
-          !milestoneSummary.MilestoneName ||
-          !milestoneSummary.RecordedAt
-        ) {
-          throw new Error(
-            `Milestone#${milestoneSummary.MilestoneNumber} has no id, name or createdAt`
-          );
+    // Paginated request
+    const { awsMilestones, nextToken: responseNextToken } =
+      await this.listAWSMilestones(
+        wellArchitectedClient,
+        assessmentWorkload.WorkloadId,
+        {
+          maxResults: limit,
+          nextToken,
         }
-        milestones.push({
-          id: milestoneSummary.MilestoneNumber,
-          name: milestoneSummary.MilestoneName,
-          createdAt: milestoneSummary.RecordedAt,
-        });
+      );
+
+    const milestones: MilestoneSummary[] = [];
+    for (const milestoneSummary of awsMilestones) {
+      if (
+        !milestoneSummary.MilestoneNumber ||
+        !milestoneSummary.MilestoneName ||
+        !milestoneSummary.RecordedAt
+      ) {
+        throw new Error(
+          `Milestone#${milestoneSummary.MilestoneNumber} has no id, name or createdAt`
+        );
       }
-      nextToken = newNextToken;
-    } while (nextToken);
-    return milestones;
+      milestones.push({
+        id: milestoneSummary.MilestoneNumber,
+        name: milestoneSummary.MilestoneName,
+        createdAt: milestoneSummary.RecordedAt,
+      });
+    }
+
+    return {
+      milestones,
+      nextToken: responseNextToken,
+    };
   }
 }
 

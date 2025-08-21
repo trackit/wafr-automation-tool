@@ -255,16 +255,36 @@ paths:
           description: The region to filter milestones by.
           schema: 
             type: string
+        - name: limit
+          in: query
+          description: Maximum number of milestones to return
+          schema:
+            type: integer
+            default: 10
+        - name: nextToken
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of milestones related to the specified assessment
           content:
             application/json:
               schema:
-                type: array
-                required: true
-                items:
-                  $ref: '#/components/schemas/MilestoneSummary'
+                type: object
+                required:
+                  - milestones
+                properties:
+                  milestones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MilestoneSummary'
+                  nextToken:
+                    type: string
+                    description: |
+                      Token for pagination. If there are more milestones than can be returned in a single response,
+                      this token will allow you to retrieve the next set of results.
         '400':
           description: An issue occurred while trying to retrieve the organization of the user
         '404':

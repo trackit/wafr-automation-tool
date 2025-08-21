@@ -1387,23 +1387,27 @@ describe('wellArchitectedTool Infrastructure', () => {
         roleArn,
         assessment,
         region,
+        limit: 10,
       });
 
-      expect(result).toEqual([
-        {
-          id: 1,
-          name: 'Milestone 1',
-          createdAt: recordedAt,
-        },
-        {
-          id: 2,
-          name: 'Milestone 2',
-          createdAt: recordedAt,
-        },
-      ]);
+      expect(result).toEqual({
+        milestones: [
+          {
+            id: 1,
+            name: 'Milestone 1',
+            createdAt: recordedAt,
+          },
+          {
+            id: 2,
+            name: 'Milestone 2',
+            createdAt: recordedAt,
+          },
+        ],
+        nextToken: undefined,
+      });
     });
 
-    it('should handle pagination when listing milestones', async () => {
+    it('should handle pagination when listing milestones without nextToken', async () => {
       const {
         wellArchitectedToolService,
         wellArchitectedClientMock,
@@ -1435,29 +1439,17 @@ describe('wellArchitectedTool Infrastructure', () => {
       });
 
       const recordedAt = new Date('2023-01-01T00:00:00.000Z');
-      wellArchitectedClientMock
-        .on(ListMilestonesCommand)
-        .resolvesOnce({
-          MilestoneSummaries: [
-            {
-              MilestoneNumber: 1,
-              MilestoneName: 'Milestone 1',
-              RecordedAt: recordedAt,
-            },
-          ],
-          NextToken: 'next-token',
-          $metadata: { httpStatusCode: 200 },
-        })
-        .resolvesOnce({
-          MilestoneSummaries: [
-            {
-              MilestoneNumber: 2,
-              MilestoneName: 'Milestone 2',
-              RecordedAt: recordedAt,
-            },
-          ],
-          $metadata: { httpStatusCode: 200 },
-        });
+      wellArchitectedClientMock.on(ListMilestonesCommand).resolves({
+        MilestoneSummaries: [
+          {
+            MilestoneNumber: 1,
+            MilestoneName: 'Milestone 1',
+            RecordedAt: recordedAt,
+          },
+        ],
+        NextToken: 'next-token',
+        $metadata: { httpStatusCode: 200 },
+      });
 
       const roleArn = 'arn:aws:iam::123456789012:role/test-role';
       const region = 'us-west-2';
@@ -1466,25 +1458,101 @@ describe('wellArchitectedTool Infrastructure', () => {
         roleArn,
         assessment,
         region,
+        limit: 1,
       });
 
-      expect(result).toEqual([
-        {
-          id: 1,
-          name: 'Milestone 1',
-          createdAt: recordedAt,
-        },
-        {
-          id: 2,
-          name: 'Milestone 2',
-          createdAt: recordedAt,
-        },
-      ]);
+      expect(result).toEqual({
+        milestones: [
+          {
+            id: 1,
+            name: 'Milestone 1',
+            createdAt: recordedAt,
+          },
+        ],
+        nextToken: 'next-token',
+      });
 
       const listMilestonesCalls = wellArchitectedClientMock.commandCalls(
         ListMilestonesCommand
       );
-      expect(listMilestonesCalls.length).toBe(2);
+      expect(listMilestonesCalls.length).toBe(1);
+    });
+
+    it('should handle pagination when listing milestones with nextToken', async () => {
+      const {
+        wellArchitectedToolService,
+        wellArchitectedClientMock,
+        stsClientMock,
+      } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withName('assessment-name')
+        .build();
+
+      stsClientMock.on(AssumeRoleCommand).resolves({
+        Credentials: {
+          AccessKeyId: 'access-key-id',
+          SecretAccessKey: 'secret-access-key',
+          SessionToken: 'session-token',
+          Expiration: new Date(),
+        },
+      });
+
+      wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
+        WorkloadSummaries: [
+          {
+            WorkloadId: 'workload-id',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      const recordedAt = new Date('2023-01-01T00:00:00.000Z');
+      wellArchitectedClientMock.on(ListMilestonesCommand).resolves({
+        MilestoneSummaries: [
+          {
+            MilestoneNumber: 1,
+            MilestoneName: 'Milestone 1',
+            RecordedAt: recordedAt,
+          },
+          {
+            MilestoneNumber: 2,
+            MilestoneName: 'Milestone 2',
+            RecordedAt: recordedAt,
+          },
+        ],
+        NextToken: undefined,
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const region = 'us-west-2';
+
+      const result = await wellArchitectedToolService.getMilestones({
+        roleArn,
+        assessment,
+        region,
+        limit: 1,
+        nextToken: 'next-token',
+      });
+
+      expect(result).toEqual({
+        milestones: [
+          {
+            id: 1,
+            name: 'Milestone 1',
+            createdAt: recordedAt,
+          },
+          {
+            id: 2,
+            name: 'Milestone 2',
+            createdAt: recordedAt,
+          },
+        ],
+        nextToken: undefined,
+      });
     });
 
     it('should throw an error if workload is not found', async () => {
