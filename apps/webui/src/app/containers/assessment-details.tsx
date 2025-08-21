@@ -1063,10 +1063,17 @@ export function AssessmentDetails() {
     <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
       <div className="breadcrumbs text-sm shrink-0">
         <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>Assessment {assessmentData?.name}{isMilestone ? ` - Milestone ${milestoneId}` : ''}</li>
+          {[
+            { label: 'Home', to: '/' },
+            { label: `Assessment ${assessmentData?.name}`, to: `/assessments/${assessmentData?.id}` },
+            ...(isMilestone ? [{ label: `Milestone ${milestoneData?.name}`, to: `/assessments/${assessmentData?.id}/milestones/${milestoneData?.id}` }] : []),
+          ].map((item, index, array) => (
+            <li key={index}>
+              {index !== array.length - 1
+                ? <Link to={item.to}>{item.label}</Link>
+                : item.label}
+            </li>
+          ))}
         </ul>
       </div>
 
