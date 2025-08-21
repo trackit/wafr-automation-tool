@@ -9,13 +9,15 @@ export function getMilestones(
 > {
   const { assessmentId } = pathParams;
   const { region, limit = 10, nextToken } = queryParams;
-  
+
   const params = new URLSearchParams();
   if (region) params.set('region', region);
   if (limit) params.set('limit', limit.toString());
   if (nextToken) params.set('nextToken', nextToken);
 
-  return apiClient.get(`/assessments/${assessmentId}/milestones?${params.toString()}`);
+  return apiClient.get(
+    `/assessments/${assessmentId}/milestones?${params.toString()}`
+  );
 }
 
 export default getMilestones;

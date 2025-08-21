@@ -30,9 +30,7 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
-  public async getMilestones(
-    args: GetMilestonesUseCaseArgs
-  ): Promise<{
+  public async getMilestones(args: GetMilestonesUseCaseArgs): Promise<{
     milestones: MilestoneSummary[];
     nextToken?: string;
   }> {

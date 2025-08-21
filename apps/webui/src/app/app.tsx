@@ -13,7 +13,10 @@ export function App() {
           <Route path="/" element={<AssessmentsList />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/assessments/:id" element={<AssessmentDetails />} />
-          <Route path="/assessments/:id/milestones/:milestoneId" element={<AssessmentDetails />} />
+          <Route
+            path="/assessments/:id/milestones/:milestoneId"
+            element={<AssessmentDetails />}
+          />
         </Routes>
       </div>
     </div>

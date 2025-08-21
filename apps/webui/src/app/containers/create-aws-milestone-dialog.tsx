@@ -17,10 +17,7 @@ export default function CreateAWSMilestoneDialog({
 }: CreateAWSMilestoneDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: {
-      assessmentId: string;
-      name: string;
-    }) => {
+    mutationFn: async (data: { assessmentId: string; name: string }) => {
       await createAWSMilestone(
         {
           assessmentId: data.assessmentId,
@@ -70,9 +67,7 @@ export default function CreateAWSMilestoneDialog({
     <>
       <button
         className={`flex flex-row gap-2 w-full text-left ${
-          disabled 
-            ? 'text-gray-400 cursor-not-allowed opacity-50' 
-            : ''
+          disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
         }`}
         onClick={(e) => {
           e.preventDefault();

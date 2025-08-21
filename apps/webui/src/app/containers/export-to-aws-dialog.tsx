@@ -12,7 +12,11 @@ type ExportToAWSDialogProps = {
   onSuccess?: () => void;
 };
 
-function ExportToAWSDialog({ assessmentId, askForRegion, onSuccess }: ExportToAWSDialogProps) {
+function ExportToAWSDialog({
+  assessmentId,
+  askForRegion,
+  onSuccess,
+}: ExportToAWSDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: { assessmentId: string; region?: string }) => {

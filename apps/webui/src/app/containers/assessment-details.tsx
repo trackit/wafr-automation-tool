@@ -54,7 +54,7 @@ export function AssessmentDetails() {
     useState<BestPractice | null>(null);
   const { id, milestoneId } = useParams();
   const [progress, setProgress] = useState<number>(0);
-  
+
   const isMilestone = Boolean(milestoneId);
 
   const assessmentQuery = useQuery({
@@ -74,9 +74,13 @@ export function AssessmentDetails() {
 
   const assessmentData = assessmentQuery.data;
   const milestoneData = milestoneQuery.data;
-  const isLoading = isMilestone ? milestoneQuery.isLoading || assessmentQuery.isLoading : assessmentQuery.isLoading;
+  const isLoading = isMilestone
+    ? milestoneQuery.isLoading || assessmentQuery.isLoading
+    : assessmentQuery.isLoading;
   const refetch = assessmentQuery.refetch;
-  const pillars = isMilestone ? milestoneData?.pillars : assessmentData?.pillars;
+  const pillars = isMilestone
+    ? milestoneData?.pillars
+    : assessmentData?.pillars;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -95,7 +99,7 @@ export function AssessmentDetails() {
       updateStatus(assessmentId, pillarId, questionId, bestPracticeId, checked),
     onMutate: async ({ pillarId, questionId, bestPracticeId, checked }) => {
       if (isMilestone) return { previousData: null };
-      
+
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['assessment', id],
@@ -477,7 +481,8 @@ export function AssessmentDetails() {
 
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, checked: boolean) => {
-      if (!id || !selectedPillar?.id || !activeQuestion?.id || isMilestone) return;
+      if (!id || !selectedPillar?.id || !activeQuestion?.id || isMilestone)
+        return;
 
       updateStatusMutation.mutate({
         assessmentId: id,
@@ -487,7 +492,13 @@ export function AssessmentDetails() {
         checked,
       });
     },
-    [id, selectedPillar?.id, activeQuestion?.id, updateStatusMutation, isMilestone]
+    [
+      id,
+      selectedPillar?.id,
+      activeQuestion?.id,
+      updateStatusMutation,
+      isMilestone,
+    ]
   );
 
   const columnHelper = createColumnHelper<TableRow>();
@@ -820,7 +831,7 @@ export function AssessmentDetails() {
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
           <h2 className="mt-0 mb-0">Assessment {assessmentData?.name}</h2>
-          { isMilestone && (
+          {isMilestone && (
             <h3 className="text-base-content/50 text-sm">
               Milestone {milestoneData?.name}
             </h3>
@@ -828,7 +839,9 @@ export function AssessmentDetails() {
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          {!isMilestone && <StatusBadge status={assessmentData?.step || undefined} />}
+          {!isMilestone && (
+            <StatusBadge status={assessmentData?.step || undefined} />
+          )}
           {!isMilestone && (
             <div
               className="dropdown dropdown-end"
@@ -862,13 +875,22 @@ export function AssessmentDetails() {
                 </li>
                 <li className="m-1"></li>
                 <li>
-                  <ExportToAWSDialog assessmentId={id ?? ''} askForRegion={!assessmentData?.exportRegion} />
+                  <ExportToAWSDialog
+                    assessmentId={id ?? ''}
+                    askForRegion={!assessmentData?.exportRegion}
+                  />
                 </li>
                 <li>
-                  <CreateAWSMilestoneDialog assessmentId={id ?? ''} disabled={!assessmentData?.exportRegion} />
+                  <CreateAWSMilestoneDialog
+                    assessmentId={id ?? ''}
+                    disabled={!assessmentData?.exportRegion}
+                  />
                 </li>
                 <li>
-                  <ListAWSMilestonesDialog assessmentId={id ?? ''} disabled={!assessmentData?.exportRegion} />
+                  <ListAWSMilestonesDialog
+                    assessmentId={id ?? ''}
+                    disabled={!assessmentData?.exportRegion}
+                  />
                 </li>
               </ul>
             </div>
@@ -1065,25 +1087,40 @@ export function AssessmentDetails() {
         <ul>
           {[
             { label: 'Home', to: '/' },
-            { label: `Assessment ${assessmentData?.name}`, to: `/assessments/${assessmentData?.id}` },
-            ...(isMilestone ? [{ label: `Milestone ${milestoneData?.name}`, to: `/assessments/${assessmentData?.id}/milestones/${milestoneData?.id}` }] : []),
+            {
+              label: `Assessment ${assessmentData?.name}`,
+              to: `/assessments/${assessmentData?.id}`,
+            },
+            ...(isMilestone
+              ? [
+                  {
+                    label: `Milestone ${milestoneData?.name}`,
+                    to: `/assessments/${assessmentData?.id}/milestones/${milestoneData?.id}`,
+                  },
+                ]
+              : []),
           ].map((item, index, array) => (
             <li key={index}>
-              {index !== array.length - 1
-                ? <Link to={item.to}>{item.label}</Link>
-                : item.label}
+              {index !== array.length - 1 ? (
+                <Link to={item.to}>{item.label}</Link>
+              ) : (
+                item.label
+              )}
             </li>
           ))}
         </ul>
       </div>
 
-      {!isMilestone && (assessmentData?.step === 'SCANNING_STARTED' ||
-      assessmentData?.step === 'PREPARING_ASSOCIATIONS' ||
-      assessmentData?.step === 'ASSOCIATING_FINDINGS')
+      {!isMilestone &&
+      (assessmentData?.step === 'SCANNING_STARTED' ||
+        assessmentData?.step === 'PREPARING_ASSOCIATIONS' ||
+        assessmentData?.step === 'ASSOCIATING_FINDINGS')
         ? loading
         : null}
-      {(isMilestone || assessmentData?.step === 'FINISHED') ? details : null}
-      {!isMilestone && assessmentData?.step === 'ERRORED' ? <ErrorPage {...assessmentData} /> : null}
+      {isMilestone || assessmentData?.step === 'FINISHED' ? details : null}
+      {!isMilestone && assessmentData?.step === 'ERRORED' ? (
+        <ErrorPage {...assessmentData} />
+      ) : null}
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">

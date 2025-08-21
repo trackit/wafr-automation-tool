@@ -16,7 +16,7 @@ export default function ListAWSMilestonesDialog({
 }: ListAWSMilestonesDialogProps) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   const {
     data,
     isLoading,
@@ -62,9 +62,7 @@ export default function ListAWSMilestonesDialog({
     <>
       <button
         className={`flex flex-row gap-2 w-full text-left ${
-          disabled 
-            ? 'text-gray-400 cursor-not-allowed opacity-50' 
-            : ''
+          disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
         }`}
         onClick={(e) => {
           e.preventDefault();
@@ -89,7 +87,7 @@ export default function ListAWSMilestonesDialog({
               Click on a milestone to view its snapshot
             </p>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto max-h-[70vh] px-6 py-4">
             {isLoading && (
               <div className="flex flex-row gap-2 justify-center items-center w-full py-8">
@@ -107,8 +105,9 @@ export default function ListAWSMilestonesDialog({
               </div>
             )}
 
-            {milestones && !isLoading && (
-              sortedMilestones && sortedMilestones.length > 0 ? (
+            {milestones &&
+              !isLoading &&
+              (sortedMilestones && sortedMilestones.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {sortedMilestones.map((milestone, index) => (
                     <button
@@ -146,9 +145,8 @@ export default function ListAWSMilestonesDialog({
                 <div className="text-center text-base-content/70 py-8">
                   No milestones found for this assessment.
                 </div>
-              )
-            )}
-            
+              ))}
+
             {!isLoading && hasNextPage && (
               <div className="flex flex-row gap-4 justify-center mt-4">
                 <button
