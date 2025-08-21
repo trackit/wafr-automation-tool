@@ -462,8 +462,15 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
           );
         }
         const selectedBestPracticePrimaryIds = answer.SelectedChoices;
+        const noneChoiceId = answer.Choices?.find(
+          (choice) => choice.Title === 'None of these'
+        )?.ChoiceId;
+        const noneSelected =
+          !!noneChoiceId &&
+          selectedBestPracticePrimaryIds.includes(noneChoiceId);
         return {
           ...question,
+          none: noneSelected,
           bestPractices: question.bestPractices.map<BestPractice>(
             (bestPractice) => {
               const isSelected = selectedBestPracticePrimaryIds.includes(
@@ -471,7 +478,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
               );
               return {
                 ...bestPractice,
-                checked: isSelected,
+                checked: !noneSelected && isSelected,
               };
             }
           ),
