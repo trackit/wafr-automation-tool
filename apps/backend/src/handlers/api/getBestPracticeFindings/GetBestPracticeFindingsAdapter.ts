@@ -87,9 +87,8 @@ export class GetBestPracticeFindingsAdapter {
         comments: finding.comments.map((comment) => ({
           ...comment,
           createdAt: comment.createdAt.toISOString(),
-          authorEmail:
-            users.find((user) => user.id === comment.authorId)?.email ??
-            'Undefined',
+          authorEmail: users.find((user) => user.id === comment.authorId)
+            ?.email,
         })),
       }),
     }));

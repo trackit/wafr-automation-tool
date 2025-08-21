@@ -354,7 +354,7 @@ export interface components {
             /** @description Id of the user who created the comment */
             authorId: string;
             /** @description Email of the user who created the comment */
-            authorEmail: string;
+            authorEmail?: string;
             /** @description Text of the comment */
             text: string;
             /**

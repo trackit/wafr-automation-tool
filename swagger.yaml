@@ -871,7 +871,6 @@ components:
       required:
         - id
         - authorId
-        - authorEmail
         - text
         - createdAt
       properties:
