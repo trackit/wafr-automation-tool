@@ -214,7 +214,7 @@ describe('GetBestPracticeFindings adapter', () => {
             {
               ...comment,
               createdAt: comment.createdAt.toISOString(),
-              authorEmail: 'test-user',
+              authorEmail: 'test-user@test.io',
             },
           ],
         })
