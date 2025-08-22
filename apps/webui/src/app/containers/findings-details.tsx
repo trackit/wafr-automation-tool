@@ -164,7 +164,11 @@ function FindingItem({
                   commentBtnRefs.current[finding.id] = el;
                 }
               }}
-              className="comment-btn tooltip tooltip-left btn btn-xs btn-primary btn-outline mt-[-0.5em]"
+              className={`comment-btn tooltip tooltip-left btn btn-xs ${
+                showCommentsFor?.id === finding.id
+                  ? 'btn-primary'
+                  : 'btn-primary btn-outline'
+              } mt-[-0.5em]`}
               data-tip="Comments"
               onClick={(e) => {
                 if (showCommentsFor?.id === finding.id) {
