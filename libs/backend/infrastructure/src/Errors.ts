@@ -90,6 +90,15 @@ export class BestPracticeNotFoundError extends InfrastructureError {
   }
 }
 
+export class UserNotFoundError extends InfrastructureError {
+  public constructor(args: { userId: string }) {
+    super({
+      message: `User with id ${args.userId} not found`,
+      name: 'UserNotFoundError',
+    });
+  }
+}
+
 export class EmptyUpdateBodyError extends InfrastructureError {
   public constructor(description?: string) {
     super({

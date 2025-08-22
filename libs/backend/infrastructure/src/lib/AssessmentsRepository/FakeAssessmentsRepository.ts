@@ -5,6 +5,8 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  FindingComment,
+  FindingCommentBody,
   PillarBody,
   QuestionBody,
   ScanningTool,
@@ -166,6 +168,80 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     return this.assessmentFindings[key]?.find(
       (finding) => finding.id === findingId
     );
+  }
+
+  public async addFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    comment: FindingComment;
+  }): Promise<void> {
+    const { assessmentId, findingId, organization, comment } = args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (finding) {
+      if (!finding.comments) {
+        finding.comments = [];
+      }
+      finding.comments.push(comment);
+    }
+  }
+
+  public async deleteFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    commentId: string;
+  }): Promise<void> {
+    const { assessmentId, organization, findingId, commentId } = args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
+    finding.comments = finding.comments?.filter(
+      (comment) => comment.id !== commentId
+    );
+  }
+
+  public async updateFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    commentId: string;
+    commentBody: FindingCommentBody;
+  }): Promise<void> {
+    const { assessmentId, organization, findingId, commentId, commentBody } =
+      args;
+    const key = `${assessmentId}#${organization}`;
+    const finding = this.assessmentFindings[key]?.find(
+      (finding) => finding.id === findingId
+    );
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organization,
+        findingId,
+      });
+    }
+    if (!finding.comments) {
+      finding.comments = [];
+    }
+    const comment = finding.comments.find(
+      (comment) => comment.id === commentId
+    );
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+    Object.assign(comment, commentBody);
   }
 
   public async updateBestPractice(args: {

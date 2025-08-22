@@ -207,6 +207,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/findings/{findingId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a comment to a specific finding
+         * @description Adds a comment to a specific finding.
+         *
+         */
+        post: operations["addComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the details of a specific comment
+         * @description Updates the details of a specific comment.
+         *
+         */
+        put: operations["updateComment"];
+        post?: never;
+        /**
+         * Delete a specific comment
+         * @description Deletes a specific comment.
+         *
+         */
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -296,9 +343,29 @@ export interface components {
             riskDetails?: string;
             /** @description Tells whether the finding is associated with an AI or manually */
             isAIAssociated?: boolean;
+            comments?: components["schemas"]["Comment"][];
         };
         FindingDto: {
             hidden?: boolean;
+        };
+        Comment: {
+            /** @description Unique identifier of the comment */
+            id: string;
+            /** @description Id of the user who created the comment */
+            authorId: string;
+            /** @description Email of the user who created the comment */
+            authorEmail?: string;
+            /** @description Text of the comment */
+            text: string;
+            /**
+             * Format: date-time
+             * @description ISO-formatted date of when the comment was created
+             */
+            createdAt: string;
+        };
+        CommentDto: {
+            /** @description Text of the comment */
+            text: string;
         };
         Pillar: {
             id?: string;
@@ -1039,6 +1106,141 @@ export interface operations {
             };
             /** @description Internal server error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    addComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to add a comment to */
+                findingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Text of the comment */
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The comment has been successfully added */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment or finding could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to which the comment belongs */
+                findingId: string;
+                /** @description The unique ID of the comment to update */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentDto"];
+            };
+        };
+        responses: {
+            /** @description The comment has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment, finding, or comment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to which the comment belongs */
+                findingId: string;
+                /** @description The unique ID of the comment to delete */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The comment has been successfully deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

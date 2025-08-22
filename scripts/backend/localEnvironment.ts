@@ -7,4 +7,5 @@ export const env = {
   NODE_ENV: 'test',
   UNIT_BASED_PRICING_PRODUCT_CODE: 'unit-based-product-code',
   MONTHLY_SUBSCRIPTION_PRODUCT_CODE: 'monthly-subscription-product-code',
+  COGNITO_USER_POOL_ID: 'COGNITO_USER_POOL_ID',
 };

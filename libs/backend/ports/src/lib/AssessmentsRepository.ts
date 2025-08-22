@@ -5,6 +5,8 @@ import type {
   BestPracticeBody,
   Finding,
   FindingBody,
+  FindingComment,
+  FindingCommentBody,
   PillarBody,
   QuestionBody,
   ScanningTool,
@@ -53,10 +55,22 @@ export interface AssessmentsRepository {
     findingId: string;
     organization: string;
   }): Promise<Finding | undefined>;
+  addFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    comment: FindingComment;
+  }): Promise<void>;
   delete(args: { assessmentId: string; organization: string }): Promise<void>;
   deleteFindings(args: {
     assessmentId: string;
     organization: string;
+  }): Promise<void>;
+  deleteFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    commentId: string;
   }): Promise<void>;
   update(args: {
     assessmentId: string;
@@ -90,6 +104,13 @@ export interface AssessmentsRepository {
     organization: string;
     findingId: string;
     findingBody: FindingBody;
+  }): Promise<void>;
+  updateFindingComment(args: {
+    assessmentId: string;
+    organization: string;
+    findingId: string;
+    commentId: string;
+    commentBody: FindingCommentBody;
   }): Promise<void>;
   updateQuestion(args: {
     assessmentId: string;

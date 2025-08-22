@@ -1,12 +1,12 @@
-import { createInjectionToken, inject } from '@shared/di-container';
-import { Finding, ScanFinding, ScanningTool } from '@backend/models';
 import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
 } from '@backend/infrastructure';
+import { Finding, ScanFinding, ScanningTool } from '@backend/models';
+import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
-import { NotFoundError } from '../Errors';
 import z from 'zod';
+import { NotFoundError } from '../Errors';
 
 export interface StoreFindingsToAssociateUseCaseArgs {
   assessmentId: string;
@@ -77,6 +77,7 @@ export class StoreFindingsToAssociateUseCaseImpl
       isAIAssociated: true,
       hidden: false,
       bestPractices: '',
+      comments: [],
     }));
     const findingsChunks = chunk(findings, this.chunkSize);
     const findingsChunksURIs = await this.storeFindingsChunks({

@@ -1,4 +1,5 @@
 export * from './best-practices-table/best-practice-table';
+export * from './comments-pane/comments-pane';
 export * from './confirmation-modal/confirmation-modal';
 export * from './modal/modal';
 export * from './status-badge/status-badge';

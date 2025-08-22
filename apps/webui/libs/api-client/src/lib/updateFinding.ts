@@ -1,22 +1,20 @@
-import { operations } from '@shared/api-schema';
+import { components, operations } from '@shared/api-schema';
 import { apiClient } from './client';
 
-export const hideFinding = async ({
+export const updateFinding = async ({
   assessmentId,
   findingId,
-  hide,
+  findingDto,
 }: {
   assessmentId: string;
   findingId: string;
-  hide: boolean;
+  findingDto: components['schemas']['FindingDto'];
 }) => {
   const encodedFindingId = encodeURIComponent(findingId);
 
   return apiClient.put<
     operations['updateFinding']['responses']['200']['content']
-  >(`/assessments/${assessmentId}/findings/${encodedFindingId}`, {
-    hidden: hide,
-  });
+  >(`/assessments/${assessmentId}/findings/${encodedFindingId}`, findingDto);
 };
 
-export default hideFinding;
+export default updateFinding;

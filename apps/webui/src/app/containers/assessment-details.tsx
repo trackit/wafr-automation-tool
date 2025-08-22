@@ -1044,19 +1044,13 @@ export function AssessmentDetails() {
         </div>
       )}
       {bestPractice && (
-        <Modal
-          open={true}
-          onClose={() => setBestPractice(null)}
-          className="w-full max-w-6xl"
-          notCentered
-        >
-          <FindingsDetails
-            assessmentId={id}
-            pillarId={selectedPillar?.id || ''}
-            questionId={activeQuestion?.id || ''}
-            bestPractice={bestPractice}
-          />
-        </Modal>
+        <FindingsDetails
+          assessmentId={id}
+          pillarId={selectedPillar?.id || ''}
+          questionId={activeQuestion?.id || ''}
+          bestPractice={bestPractice}
+          setBestPractice={setBestPractice}
+        />
       )}
       {bestPracticeDescription && (
         <Modal
