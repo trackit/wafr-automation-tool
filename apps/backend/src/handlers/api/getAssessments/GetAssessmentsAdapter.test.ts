@@ -1,17 +1,17 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { AssessmentMother, UserMother } from '@backend/models';
-import { tokenGetAllAssessmentsUseCase } from '@backend/useCases';
+import { tokenGetAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { GetAllAssessmentsAdapter } from './GetAllAssessmentsAdapter';
-import { GetAllAssessmentsAdapterEventMother } from './GetAllAssessmentsAdapterEventMother';
+import { GetAssessmentsAdapter } from './GetAssessmentsAdapter';
+import { GetAssessmentsAdapterEventMother } from './GetAssessmentsAdapterEventMother';
 
-describe('getAllAssessments adapter', () => {
+describe('getAssessments adapter', () => {
   describe('query parameters validation', () => {
     it('should validate parameters', async () => {
       const { adapter } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic()
+      const event = GetAssessmentsAdapterEventMother.basic()
         .withLimit(10)
         .withSearch('test')
         .withNextToken('dGVzdCBiYXNlNjQ=')
@@ -24,7 +24,7 @@ describe('getAllAssessments adapter', () => {
     it('should return a 400 if the limit is negative', async () => {
       const { adapter } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic()
+      const event = GetAssessmentsAdapterEventMother.basic()
         .withLimit(-1)
         .build();
 
@@ -35,7 +35,7 @@ describe('getAllAssessments adapter', () => {
     it('should return a 400 if the next token is not in base64', async () => {
       const { adapter } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic()
+      const event = GetAssessmentsAdapterEventMother.basic()
         .withNextToken('NOT_BASE64')
         .build();
 
@@ -46,7 +46,7 @@ describe('getAllAssessments adapter', () => {
     it('should pass without query parameters', async () => {
       const { adapter } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic().build();
+      const event = GetAssessmentsAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
@@ -57,7 +57,7 @@ describe('getAllAssessments adapter', () => {
     it('should call useCase with query parameters and organization', async () => {
       const { adapter, useCase } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic()
+      const event = GetAssessmentsAdapterEventMother.basic()
         .withLimit(10)
         .withSearch('test')
         .withNextToken('test')
@@ -71,7 +71,7 @@ describe('getAllAssessments adapter', () => {
 
       await adapter.handle(event);
 
-      expect(useCase.getAllAssessments).toHaveBeenCalledWith({
+      expect(useCase.getAssessments).toHaveBeenCalledWith({
         limit: 10,
         search: 'test',
         nextToken: 'test',
@@ -84,7 +84,7 @@ describe('getAllAssessments adapter', () => {
     it('should return a 200 status code', async () => {
       const { adapter } = setup();
 
-      const event = GetAllAssessmentsAdapterEventMother.basic().build();
+      const event = GetAssessmentsAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
@@ -117,13 +117,13 @@ describe('getAllAssessments adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const useCase = { getAllAssessments: vitest.fn() };
-  useCase.getAllAssessments.mockResolvedValueOnce(
+  const useCase = { getAssessments: vitest.fn() };
+  useCase.getAssessments.mockResolvedValueOnce(
     Promise.resolve({
       assessments: [],
     })
   );
-  register(tokenGetAllAssessmentsUseCase, { useValue: useCase });
-  const adapter = new GetAllAssessmentsAdapter();
+  register(tokenGetAssessmentsUseCase, { useValue: useCase });
+  const adapter = new GetAssessmentsAdapter();
   return { useCase, adapter };
 };

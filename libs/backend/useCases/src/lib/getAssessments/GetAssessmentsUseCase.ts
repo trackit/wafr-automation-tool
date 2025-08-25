@@ -6,24 +6,24 @@ import { Assessment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { InvalidParametersError } from '../Errors';
 
-export type GetAllAssessmentsUseCaseArgs = {
+export type GetAssessmentsUseCaseArgs = {
   user: User;
   limit?: number;
   search?: string;
   nextToken?: string;
 };
 
-export interface GetAllAssessmentsUseCase {
-  getAllAssessments(
-    args: GetAllAssessmentsUseCaseArgs
+export interface GetAssessmentsUseCase {
+  getAssessments(
+    args: GetAssessmentsUseCaseArgs
   ): Promise<{ assessments: Assessment[]; nextToken?: string }>;
 }
 
-export class GetAllAssessmentsUseCaseImpl implements GetAllAssessmentsUseCase {
+export class GetAssessmentsUseCaseImpl implements GetAssessmentsUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
-  public async getAllAssessments(
-    args: GetAllAssessmentsUseCaseArgs
+  public async getAssessments(
+    args: GetAssessmentsUseCaseArgs
   ): Promise<{ assessments: Assessment[]; nextToken?: string }> {
     const { user, ...remaining } = args;
     try {
@@ -41,7 +41,7 @@ export class GetAllAssessmentsUseCaseImpl implements GetAllAssessmentsUseCase {
   }
 }
 
-export const tokenGetAllAssessmentsUseCase =
-  createInjectionToken<GetAllAssessmentsUseCase>('GetAllAssessmentsUseCase', {
-    useClass: GetAllAssessmentsUseCaseImpl,
+export const tokenGetAssessmentsUseCase =
+  createInjectionToken<GetAssessmentsUseCase>('GetAssessmentsUseCase', {
+    useClass: GetAssessmentsUseCaseImpl,
   });

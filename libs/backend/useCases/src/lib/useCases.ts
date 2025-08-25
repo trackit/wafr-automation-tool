@@ -6,7 +6,7 @@ export * from './deleteAssessment';
 export * from './deleteComment';
 export * from './Errors';
 export * from './exportWellArchitectedTool';
-export * from './getAllAssessments';
+export * from './getAssessments';
 export * from './getAssessment';
 export * from './getBestPracticeFindings';
 export * from './getMilestone';
