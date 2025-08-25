@@ -4,9 +4,7 @@ import { apiClient } from './client';
 export function getMilestones(
   pathParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['path'],
   queryParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['query'] = {}
-): Promise<
-  paths['/assessments/{assessmentId}/milestones']['get']['responses']['200']['content']['application/json']
-> {
+) {
   const { assessmentId } = pathParams;
   const { region, limit = 10, nextToken } = queryParams;
 
@@ -15,9 +13,9 @@ export function getMilestones(
   if (limit) params.set('limit', limit.toString());
   if (nextToken) params.set('nextToken', nextToken);
 
-  return apiClient.get(
-    `/assessments/${assessmentId}/milestones?${params.toString()}`
-  );
+  return apiClient.get<
+    paths['/assessments/{assessmentId}/milestones']['get']['responses']['200']['content']['application/json']
+  >(`/assessments/${assessmentId}/milestones?${params.toString()}`);
 }
 
 export default getMilestones;
