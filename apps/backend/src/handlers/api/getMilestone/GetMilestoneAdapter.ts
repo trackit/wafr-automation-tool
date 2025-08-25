@@ -37,6 +37,7 @@ export class GetMilestoneAdapter {
   ): operations['getMilestone']['responses']['200']['content']['application/json'] {
     return {
       ...milestone,
+      // createdAt date needs to be stringified
       createdAt: milestone.createdAt.toISOString(),
       pillars: milestone.pillars.map((pillar) => ({
         ...pillar,
@@ -44,6 +45,7 @@ export class GetMilestoneAdapter {
           ...question,
           bestPractices: question.bestPractices.map((bestPractice) => ({
             ...bestPractice,
+            // results need to be transformed from Set to Array
             results: [...bestPractice.results],
           })),
         })),
