@@ -69,14 +69,11 @@ export class GetMilestoneAdapterEventMother {
   }
 
   public build(): APIGatewayProxyEvent {
-    const queryStringParameters = Object.entries(
-      this.queryStringParameters
-    ).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value === undefined ? undefined : String(value),
-      }),
-      {}
+    const queryStringParameters = Object.fromEntries(
+      Object.entries(this.queryStringParameters).map(([key, value]) => [
+        key,
+        value === undefined ? undefined : String(value),
+      ])
     );
     return APIGatewayProxyEventMother.basic()
       .withUserClaims({ sub: this.user.id, email: this.user.email })
