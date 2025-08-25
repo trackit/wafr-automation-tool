@@ -56,12 +56,14 @@ export class GetAssessmentsAdapterEventMother {
   }
 
   public build(): APIGatewayProxyEvent {
-    const qs = Object.entries(this.data).reduce((acc, [key, value]) => {
-      acc[key] = String(value);
-      return acc;
-    }, {} as APIGatewayProxyEventQueryStringParameters);
+    const queryStringParameters = Object.fromEntries(
+      Object.entries(this.data).map(([key, value]) => [
+        key,
+        value === undefined ? undefined : String(value),
+      ])
+    );
     return APIGatewayProxyEventMother.basic()
-      .withQueryStringParameters(qs)
+      .withQueryStringParameters(queryStringParameters)
       .withUserClaims({
         sub: this.user.id,
         email: this.user.email,
