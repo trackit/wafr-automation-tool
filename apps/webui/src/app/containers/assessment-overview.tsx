@@ -190,7 +190,7 @@ function AssessmentOverview({
       <div className="flex flex-row gap-6">
         <div className="card flex-1 bg-base-200 border rounded-lg p-4 space-y-2">
           <h2 className="card-title">Overview</h2>
-          {/* <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1">
             <div className="text-md text-base-content flex flex-row gap-2 items-center">
               <Server className="w-5 h-5" />
               Account: {extractAccountId(assessment.roleArn)}
@@ -219,12 +219,12 @@ function AssessmentOverview({
               <Search className="w-5 h-5" />
               Findings: {assessment.graphData?.findings ?? 0}
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
-      <div className="flex flex-row gap-6"></div>
-      <div className="flex flex-[1] gap-6">
-        <div className="card flex-1 bg-base-200 border rounded-lg p-4">
+      <div className="flex flex-col md:flex-row gap-6"></div>
+      <div className="flex flex-[1] flex-col md:flex-row gap-6">
+        <div className="card flex-1 bg-base-200 border rounded-lg p-4 min-h-[300px]">
           <div className="flex flex-col h-full">
             <div className="">
               <h2 className="card-title">Findings by Region</h2>
@@ -279,9 +279,9 @@ function AssessmentOverview({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={90}
+                    outerRadius={80}
                     innerRadius={60}
-                    paddingAngle={0}
+                    paddingAngle={5}
                     dataKey="value"
                   >
                     {assessmentRegions
@@ -299,7 +299,7 @@ function AssessmentOverview({
             </div>
           </div>
         </div>
-        <div className="card flex-1 bg-base-200 border rounded-lg p-4">
+        <div className="card flex-1 bg-base-200 border rounded-lg p-4 min-h-[300px]">
           <div className="flex flex-col h-full">
             <div className="">
               <h2 className="card-title">Findings Grouped by Severity</h2>
@@ -355,9 +355,9 @@ function AssessmentOverview({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={90}
+                    outerRadius={80}
                     innerRadius={60}
-                    paddingAngle={0}
+                    paddingAngle={5}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -383,9 +383,11 @@ function AssessmentOverview({
               data={filteredResourceTypes}
               dataKey="value"
               aspectRatio={4 / 3}
+              fill={getThemeColors().primary}
+              stroke={'#fff'}
             >
               {filteredResourceTypes.map((entry, index) => (
-                <Cell key={entry.name} fill={entry.color} />
+                <Cell key={entry.name} />
               ))}
               <Tooltip
                 content={({ payload }) => {
@@ -405,6 +407,9 @@ function AssessmentOverview({
           </ResponsiveContainer>
           {/* Legend for resource types */}
           <div className="mt-4">
+            <p className="text-sm text-base-content/50 mb-2">
+              Click to toggle resource type visibility
+            </p>
             <div className="flex flex-row flex-wrap w-full gap-2">
               {assessmentResourceTypes.map((item, index) => {
                 const isEnabled = enabledResourceTypes.has(item.name);
