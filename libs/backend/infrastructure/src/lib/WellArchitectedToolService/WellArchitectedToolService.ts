@@ -36,7 +36,7 @@ import {
 } from '@backend/models';
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
-import { MilestoneNotFoundError } from '../../Errors';
+import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 
 export const WAFRLens = 'wellarchitected';
 
@@ -527,7 +527,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment
     );
     if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
-      throw new Error(`Workload not found for assessment: ${assessment.name}`);
+      throw new WorkloadNotFoundError(assessment.id);
     }
     const milestone = await this.getAWSMilestone(
       wellArchitectedClient,
@@ -608,7 +608,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment
     );
     if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
-      throw new Error(`Workload not found for assessment: ${assessment.name}`);
+      throw new WorkloadNotFoundError(assessment.id);
     }
 
     // Paginated request

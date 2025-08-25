@@ -117,3 +117,12 @@ export class MilestoneNotFoundError extends InfrastructureError {
     });
   }
 }
+
+export class WorkloadNotFoundError extends InfrastructureError {
+  public constructor(assessmentId: string) {
+    super({
+      message: `Workload not found for assessment ${assessmentId}`,
+      name: 'WorkloadNotFoundError',
+    });
+  }
+}
