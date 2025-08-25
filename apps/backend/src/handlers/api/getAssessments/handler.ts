@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { GetAllAssessmentsAdapter } from './GetAssessmentsAdapter';
+import { GetAssessmentsAdapter } from './GetAssessmentsAdapter';
 
-const adapter = new GetAllAssessmentsAdapter();
+const adapter = new GetAssessmentsAdapter();
 
 export const main = async (
   event: APIGatewayProxyEvent
