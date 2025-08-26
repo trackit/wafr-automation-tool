@@ -1108,7 +1108,7 @@ export function AssessmentDetails() {
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative ">
+    <div className="container px-4 py-8 pt-2 overflow-auto flex-1 flex flex-col relative ">
       <div className="breadcrumbs text-sm shrink-0">
         <ul>
           {[

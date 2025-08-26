@@ -295,27 +295,27 @@ function AssessmentOverview({
 
   if (!assessment) return null;
   return (
-    <div className="flex flex-col w-full p-6 space-y-6">
+    <div className="flex flex-col w-full py-6 space-y-6">
       <div className="flex flex-row gap-6 flex-wrap md:flex-nowrap w-full">
         <div className="card bg-white border rounded-md p-4 space-y-2 w-full md:w-1/2">
           <h2 className="card-title">Overview</h2>
           <div className="flex flex-col gap-1">
-            <div className="text-md text-base-content flex flex-row gap-2 items-center">
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Server className="w-5 h-5" />
               Account: {extractAccountId(assessment.roleArn)}
             </div>
-            <div className="text-md text-base-content flex flex-row gap-2 items-center">
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Calendar className="w-5 h-5" />
               Created:{' '}
               {assessment.createdAt
                 ? new Date(assessment.createdAt).toLocaleDateString()
                 : 'N/A'}
             </div>
-            <div className="text-md text-base-content flex flex-row gap-2 items-center">
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Earth className="w-5 h-5" />
               {assessment.regions?.join(', ') || 'Global'}
             </div>
-            <div className="text-md text-base-content flex flex-row gap-2 items-center">
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Computer className="w-5 h-5" />
               Workflow:{' '}
               {Array.isArray(assessment.workflows)
