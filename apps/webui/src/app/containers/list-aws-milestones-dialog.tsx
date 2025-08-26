@@ -3,7 +3,6 @@ import { getMilestones } from '@webui/api-client';
 import { Modal } from '@webui/ui';
 import { Clock, List, ExternalLink } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router';
 
 type ListAWSMilestonesDialogProps = {
   assessmentId: string;
@@ -15,7 +14,6 @@ export default function ListAWSMilestonesDialog({
   disabled = false,
 }: ListAWSMilestonesDialogProps) {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   const {
     data,
@@ -46,7 +44,7 @@ export default function ListAWSMilestonesDialog({
   }, [milestones]);
 
   const handleMilestoneClick = (milestoneId: number) => {
-    navigate(`/assessments/${assessmentId}/milestones/${milestoneId}`);
+    window.open(`/assessments/${assessmentId}/milestones/${milestoneId}`, '_blank');
     setOpen(false); // Close the dialog after navigation
   };
 

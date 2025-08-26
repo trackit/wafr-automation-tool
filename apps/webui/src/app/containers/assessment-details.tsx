@@ -20,11 +20,13 @@ import {
   VerticalMenu,
 } from '@webui/ui';
 import {
+  ArrowLeft,
   ChevronRight,
   CircleCheck,
   CircleMinus,
   EllipsisVertical,
   InfoIcon,
+  Milestone,
   RefreshCw,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -831,70 +833,85 @@ export function AssessmentDetails() {
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
           <h2 className="mt-0 mb-0">Assessment {assessmentData?.name}</h2>
-          {isMilestone && (
+          {/* {isMilestone && (
             <h3 className="text-base-content/50 text-sm">
+              <Milestone className="w-4 h-4" />
               Milestone {milestoneData?.name}
             </h3>
-          )}
+          )} */}
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          {!isMilestone && (
+          {isMilestone ? (
+            <span className="badge font-bold badge-soft badge-info">
+              <Milestone className="w-4 h-4" />
+              Milestone {milestoneData?.name}
+            </span>
+          ) : (
             <StatusBadge status={assessmentData?.step || undefined} />
           )}
-          {!isMilestone && (
+          <div
+            className="dropdown dropdown-end"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
             <div
-              className="dropdown dropdown-end"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost btn-xs p-1"
             >
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-xs p-1"
-              >
-                <EllipsisVertical className="w-4 h-4 text-base-content/80" />
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
-              >
-                <li>
-                  <button
-                    className="flex flex-row gap-2 w-full text-left"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setShowRescanModal(true);
-                    }}
-                  >
-                    <RefreshCw className="w-4 h-4" /> Rescan
-                  </button>
-                </li>
-                <li className="m-1"></li>
-                <li>
-                  <ExportToAWSDialog
-                    assessmentId={id ?? ''}
-                    askForRegion={!assessmentData?.exportRegion}
-                  />
-                </li>
-                <li>
-                  <CreateAWSMilestoneDialog
-                    assessmentId={id ?? ''}
-                    disabled={!assessmentData?.exportRegion}
-                  />
-                </li>
-                <li>
-                  <ListAWSMilestonesDialog
-                    assessmentId={id ?? ''}
-                    disabled={!assessmentData?.exportRegion}
-                  />
-                </li>
-              </ul>
+              <EllipsisVertical className="w-4 h-4 text-base-content/80" />
             </div>
-          )}
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-100 rounded-box z-50 w-60 p-2 shadow-sm"
+            >
+              {isMilestone ? (
+                <li>
+                  <Link to={`/assessments/${id}`}>
+                    <ArrowLeft className="w-4 h-4" /> Back to the current
+                    version
+                  </Link>
+                </li>
+              ) : (
+                <>
+                  <li>
+                    <button
+                      className="flex flex-row gap-2 w-full text-left"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowRescanModal(true);
+                      }}
+                    >
+                      <RefreshCw className="w-4 h-4" /> Rescan
+                    </button>
+                  </li>
+                  <li className="m-1"></li>
+                  <li>
+                    <ExportToAWSDialog
+                      assessmentId={id ?? ''}
+                      askForRegion={!assessmentData?.exportRegion}
+                    />
+                  </li>
+                  <li>
+                    <CreateAWSMilestoneDialog
+                      assessmentId={id ?? ''}
+                      disabled={!assessmentData?.exportRegion}
+                    />
+                  </li>
+                  <li>
+                    <ListAWSMilestonesDialog
+                      assessmentId={id ?? ''}
+                      disabled={!assessmentData?.exportRegion}
+                    />
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
         </div>
       </div>
       <Tabs
