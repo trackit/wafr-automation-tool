@@ -821,7 +821,7 @@ export function AssessmentDetails() {
     <>
       {!isMilestone && (
         <div
-          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
+          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
           data-tip={`${progress}% completed`}
         >
           <progress
