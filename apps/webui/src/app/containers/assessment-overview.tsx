@@ -14,6 +14,11 @@ import {
   ResponsiveContainer,
   Tooltip,
   Treemap,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from 'recharts';
 import {
   getChartColorByIndex,
@@ -559,14 +564,54 @@ function AssessmentOverview({
 
       <div className="flex-[2] card bg-white border rounded-lg p-4 mb-10">
         <h2 className="card-title mb-4">Findings by Resource Type</h2>
+
+        {/* Bar Chart */}
+        <div className="mb-6">
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart
+              data={filteredResourceTypes}
+              margin={{ top: 0, right: 0, left: 0, bottom: 55 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip
+                content={({ payload }) => {
+                  if (payload && payload.length > 0) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                        <p className="font-medium">{data.name}</p>
+                        <p className="text-sm">Count: {data.value}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar
+                dataKey="value"
+                fill={getThemeColors().primary}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
         <div className="flex-1 min-h-0">
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={200}>
             <Treemap
               data={filteredResourceTypes}
               dataKey="value"
               aspectRatio={4 / 3}
               fill={lightenColor(getThemeColors().primary, 20)}
-              stroke={'#fff'}
+              stroke={'white'}
             >
               {filteredResourceTypes.map((entry, index) => (
                 <Cell key={entry.name} />
