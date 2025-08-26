@@ -199,17 +199,17 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  GetAllAssessmentsLogGroup:
+  GetAssessmentsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${GetAllAssessmentsFunction}'
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentsFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  GetAllAssessmentsFunction:
+  GetAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../apps/backend/src/handlers/api/getAllAssessments
+      CodeUri: ../apps/backend/src/handlers/api/getAssessments
       Tags:
-        Name: GetAllAssessmentsFunction
+        Name: GetAssessmentsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -219,7 +219,7 @@ Resources:
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        GetAllAssessments:
+        GetAssessments:
           Type: Api
           Properties:
             RestApiId: !Ref Api
