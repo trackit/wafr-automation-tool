@@ -44,7 +44,10 @@ export default function ListAWSMilestonesDialog({
   }, [milestones]);
 
   const handleMilestoneClick = (milestoneId: number) => {
-    window.open(`/assessments/${assessmentId}/milestones/${milestoneId}`, '_blank');
+    window.open(
+      `/assessments/${assessmentId}/milestones/${milestoneId}`,
+      '_blank'
+    );
     setOpen(false); // Close the dialog after navigation
   };
 
