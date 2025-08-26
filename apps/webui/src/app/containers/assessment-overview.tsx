@@ -6,6 +6,11 @@ import {
   Legend,
   Pie,
   PieChart,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
   ResponsiveContainer,
   Tooltip,
   Treemap,
@@ -93,11 +98,15 @@ function AssessmentOverview({
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
     new Set()
   );
+  const [pillarCompletionData, setPillarCompletionData] = useState<
+    Array<{ pillar: string; completion: number }>
+  >([]);
 
   console.log(assessment);
   console.log(assessmentRegions);
   console.log(assessmentSeverities);
   console.log(assessmentResourceTypes);
+  console.log(pillarCompletionData);
 
   useMemo(() => {
     if (assessment?.graphData?.regions) {
@@ -139,6 +148,105 @@ function AssessmentOverview({
       assessmentSeverities.reduce((sum, item) => sum + item.value, 0)
     );
   }, [assessmentSeverities]);
+
+  // Calculate pillar completion percentages
+  useMemo(() => {
+    if (assessment?.pillars) {
+      const pillarData = assessment.pillars
+        .filter((pillar) => !pillar.disabled) // Only include enabled pillars
+        .map((pillar) => {
+          const questions = pillar.questions || [];
+          const totalQuestions = questions.filter((q) => !q.disabled).length;
+
+          if (totalQuestions === 0) {
+            return {
+              pillar: pillar.label || pillar.id || 'Unknown',
+              completion: 100,
+            };
+          }
+
+          let completedQuestions = 0;
+
+          for (const question of questions) {
+            if (question.disabled) continue;
+
+            // Check if the question has any high severity best practices
+            const hasHighSeverityPractices = question.bestPractices?.some(
+              (bestPractice) => bestPractice.risk === 'High'
+            );
+
+            if (hasHighSeverityPractices) {
+              // Check if all high severity best practices in this question have checked true
+              const allHighSeverityPracticesComplete =
+                question.bestPractices?.every(
+                  (bestPractice) =>
+                    bestPractice.risk !== 'High' ||
+                    bestPractice.checked === true
+                ) ?? false;
+
+              if (allHighSeverityPracticesComplete) {
+                completedQuestions++;
+              }
+            } else {
+              completedQuestions++;
+            }
+          }
+
+          const completionPercentage = Math.round(
+            (completedQuestions / totalQuestions) * 100
+          );
+          return {
+            pillar: pillar.label || pillar.id || 'Unknown',
+            completion: completionPercentage,
+          };
+        });
+
+      setPillarCompletionData(pillarData);
+    }
+  }, [assessment?.pillars]);
+
+  // Calculate overall completion percentage
+  const overallCompletion = useMemo(() => {
+    if (!assessment?.pillars) return 0;
+
+    let completedQuestions = 0;
+    let totalQuestions = 0;
+
+    for (const pillar of assessment.pillars) {
+      if (pillar.disabled) continue;
+
+      const questions = pillar.questions || [];
+      for (const question of questions) {
+        if (question.disabled) continue;
+
+        totalQuestions++;
+
+        // Check if the question has any high severity best practices
+        const hasHighSeverityPractices = question.bestPractices?.some(
+          (bestPractice) => bestPractice.risk === 'High'
+        );
+
+        if (hasHighSeverityPractices) {
+          // Check if all high severity best practices in this question have checked true
+          const allHighSeverityPracticesComplete =
+            question.bestPractices?.every(
+              (bestPractice) =>
+                bestPractice.risk !== 'High' || bestPractice.checked === true
+            ) ?? false;
+
+          if (allHighSeverityPracticesComplete) {
+            completedQuestions++;
+          }
+        } else {
+          completedQuestions++;
+        }
+      }
+    }
+
+    return totalQuestions > 0
+      ? Math.round((completedQuestions / totalQuestions) * 100)
+      : 0;
+  }, [assessment?.pillars]);
 
   // Get severity-specific colors for the pie chart
   const getSeverityColor = (severity: string): string => {
@@ -186,9 +294,9 @@ function AssessmentOverview({
 
   if (!assessment) return null;
   return (
-    <div className="flex flex-col w-full h-full p-6 space-y-6 overflow-none">
-      <div className="flex flex-row gap-6">
-        <div className="card flex-1 bg-base-200 border rounded-lg p-4 space-y-2">
+    <div className="flex flex-col w-full p-6 space-y-6">
+      <div className="flex flex-row gap-6 flex-wrap md:flex-nowrap w-full">
+        <div className="card bg-white border rounded-md p-4 space-y-2 w-full md:w-1/2">
           <h2 className="card-title">Overview</h2>
           <div className="flex flex-col gap-1">
             <div className="text-md text-base-content flex flex-row gap-2 items-center">
@@ -215,16 +323,88 @@ function AssessmentOverview({
                   : '-'
                 : assessment.workflows || '-'}
             </div>
-            <div className="text-md text-base-content flex flex-row gap-2 items-center">
-              <Search className="w-5 h-5" />
-              Findings: {assessment.graphData?.findings ?? 0}
+          </div>
+        </div>
+        <div className="flex gap-6 w-full md:w-1/2">
+          {/* Findings Panel */}
+          <div className="card bg-white border rounded-lg p-4 w-1/2 flex flex-col">
+            <h2 className="card-title text-center">Findings</h2>
+            <div className="text-center flex-1 flex flex-col justify-center items-center">
+              <div className="text-5xl font-bold text-primary font-light tracking-tighter">
+                {assessment.graphData?.findings ?? 0}
+              </div>
+              <div className="text-sm text-base-content/70 mt-1">
+                Total Issues Found
+              </div>
+            </div>
+          </div>
+
+          {/* Completion Panel */}
+          <div className="card bg-white border rounded-lg p-4 w-1/2 flex flex-col">
+            <h2 className="card-title text-center">Completion</h2>
+            <div className="text-center flex-1 flex flex-col justify-center items-center">
+              <div className="text-5xl font-bold text-success font-light tracking-tighter">
+                {overallCompletion}%
+              </div>
+              <div className="text-sm text-base-content/70 mt-1">
+                Overall Progress
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row gap-6"></div>
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px]">
+          <div className="flex flex-col h-full">
+            <div className="">
+              <h2 className="card-title">Pillar Completion</h2>
+            </div>
+            <div className="flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={pillarCompletionData}>
+                  <PolarGrid />
+                  <PolarAngleAxis
+                    dataKey="pillar"
+                    tick={{ fontSize: 13 }}
+                    tickLine={false}
+                  />
+                  <PolarRadiusAxis
+                    angle={90}
+                    domain={[0, 100]}
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                  />
+                  <Radar
+                    name="Completion %"
+                    dataKey="completion"
+                    stroke={getThemeColors().primary}
+                    fill={getThemeColors().primary}
+                    fillOpacity={0.3}
+                  />
+                  <Tooltip
+                    content={({ payload }) => {
+                      if (payload && payload.length > 0) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                            <p className="font-medium">{data.pillar}</p>
+                            <p className="text-sm">
+                              Completion: {data.completion}%
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="flex flex-[1] flex-col md:flex-row gap-6">
-        <div className="card flex-1 bg-base-200 border rounded-lg p-4 min-h-[300px]">
+        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px] md:w-1/2 w-full">
           <div className="flex flex-col h-full">
             <div className="">
               <h2 className="card-title">Findings by Region</h2>
@@ -299,7 +479,7 @@ function AssessmentOverview({
             </div>
           </div>
         </div>
-        <div className="card flex-1 bg-base-200 border rounded-lg p-4 min-h-[300px]">
+        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px] md:w-1/2 w-full">
           <div className="flex flex-col h-full">
             <div className="">
               <h2 className="card-title">Findings Grouped by Severity</h2>
@@ -375,8 +555,9 @@ function AssessmentOverview({
           </div>
         </div>
       </div>
-      <div className="flex-[2] card bg-base-200 border rounded-lg p-4 min-h-0 space-y-2">
-        <h2 className="card-title">Findings by Resource Type</h2>
+
+      <div className="flex-[2] card bg-white border rounded-lg p-4 mb-10">
+        <h2 className="card-title mb-4">Findings by Resource Type</h2>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height={300}>
             <Treemap

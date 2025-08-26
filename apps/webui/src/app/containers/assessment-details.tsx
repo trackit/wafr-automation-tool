@@ -928,7 +928,8 @@ export function AssessmentDetails() {
           }
         }}
       />
-      {selectedPillar?.id === 'overview' && (
+
+      {selectedPillar?.id === 'overview' ? (
         <AssessmentOverview assessment={data ?? null} />
       )}
 
@@ -940,7 +941,7 @@ export function AssessmentDetails() {
             </h3>
           </div>
         )}
-        {!selectedPillar?.disabled && (
+        {!selectedPillar?.disabled && selectedPillar?.questions && (
           <>
             <VerticalMenu
               items={(selectedPillar?.questions || [])
@@ -953,26 +954,26 @@ export function AssessmentDetails() {
                       ?.questions?.find((q) => q.id === question.id) ||
                     question;
 
-                  return {
-                    text: question.label || '',
-                    id: question.id || `question-${index}`,
-                    active: activeQuestionIndex === index,
-                    onClick: () => setActiveQuestionIndex(index),
-                    completed:
-                      latestQuestion.bestPractices?.every(
-                        (bestPractice) =>
-                          bestPractice.risk !== 'High' ||
-                          bestPractice.checked === true
-                      ) ?? false,
-                    started:
-                      latestQuestion.bestPractices?.some(
-                        (bestPractice) => bestPractice.checked
-                      ) ?? false,
-                    error: latestQuestion.none,
-                    disabled: latestQuestion.disabled,
-                  };
-                })}
-            />
+                    return {
+                      text: question.label || '',
+                      id: question.id || `question-${index}`,
+                      active: activeQuestionIndex === index,
+                      onClick: () => setActiveQuestionIndex(index),
+                      completed:
+                        latestQuestion.bestPractices?.every(
+                          (bestPractice) =>
+                            bestPractice.risk !== 'High' ||
+                            bestPractice.checked === true
+                        ) ?? false,
+                      started:
+                        latestQuestion.bestPractices?.some(
+                          (bestPractice) => bestPractice.checked
+                        ) ?? false,
+                      error: latestQuestion.none,
+                      disabled: latestQuestion.disabled,
+                    };
+                  })}
+              />
 
             <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
               <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
@@ -1107,7 +1108,7 @@ export function AssessmentDetails() {
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
+    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative ">
       <div className="breadcrumbs text-sm shrink-0">
         <ul>
           {[
