@@ -19,6 +19,7 @@ import {
   getChartColorByIndex,
   getThemeColors,
   darkenColor,
+  lightenColor,
 } from '../../lib/theme-colors';
 
 const extractAccountId = (roleArn: string | undefined) => {
@@ -564,7 +565,7 @@ function AssessmentOverview({
               data={filteredResourceTypes}
               dataKey="value"
               aspectRatio={4 / 3}
-              fill={getThemeColors().primary}
+              fill={lightenColor(getThemeColors().primary, 20)}
               stroke={'#fff'}
             >
               {filteredResourceTypes.map((entry, index) => (

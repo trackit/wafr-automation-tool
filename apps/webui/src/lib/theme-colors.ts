@@ -92,7 +92,7 @@ const rgbToHex = (r: number, g: number, b: number): string => {
 /**
  * Lighten a color by a percentage
  */
-const lightenColor = (color: string, percent: number): string => {
+export const lightenColor = (color: string, percent: number): string => {
   const [r, g, b] = hexToRgb(color);
   const factor = 1 + percent / 100;
   return rgbToHex(
