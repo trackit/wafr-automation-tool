@@ -6,12 +6,15 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { ConflictError, NotFoundError } from '../Errors';
-import { assertAssessmentIsReadyForExport } from '../../services/exports';
+import { NotFoundError } from '../Errors';
+import {
+  assertAssessmentIsReadyForExport,
+  assertOrganizationHasExportRole,
+} from '../../services/exports';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
-  region: string;
+  region?: string;
   user: User;
 };
 
@@ -41,7 +44,7 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    assertAssessmentIsReadyForExport(assessment);
+    assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
@@ -50,20 +53,24 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Organization with domain ${args.user.organizationDomain} not found`
       );
     }
-    if (!organization.assessmentExportRoleArn) {
-      this.logger.error(
-        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
-      );
-      throw new ConflictError(
-        `No assessment export role ARN found for organization ${args.user.organizationDomain}`
-      );
-    }
+    assertOrganizationHasExportRole(organization);
     await this.wellArchitectedToolService.exportAssessment({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
-      region: args.region,
+      // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      region: (args.region ?? assessment.exportRegion)!,
       user: args.user,
     });
+    if (!assessment.exportRegion) {
+      await this.assessmentsRepository.update({
+        assessmentId: assessment.id,
+        organization: args.user.organizationDomain,
+        assessmentBody: { exportRegion: args.region },
+      });
+      this.logger.info(
+        `Export region for assessment ${assessment.id} updated to ${args.region}`
+      );
+    }
     this.logger.info(
       `Export for assessment ${assessment.id} to the Well Architected Tool finished`
     );

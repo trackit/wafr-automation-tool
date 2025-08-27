@@ -9,14 +9,14 @@ import { register, reset } from '@shared/di-container';
 import { AssessmentMother } from '@backend/models';
 import { InvalidParametersError } from '../Errors';
 import {
-  GetAllAssessmentsUseCaseArgs,
-  GetAllAssessmentsUseCaseImpl,
-} from './GetAllAssessmentsUseCase';
-import { GetAllAssessmentsUseCaseArgsMother } from './GetAllAssessmentsUseCaseArgsMother';
+  GetAssessmentsUseCaseArgs,
+  GetAssessmentsUseCaseImpl,
+} from './GetAssessmentsUseCase';
+import { GetAssessmentsUseCaseArgsMother } from './GetAssessmentsUseCaseArgsMother';
 
 vitest.useFakeTimers();
 
-describe('getAllAssessments UseCase', () => {
+describe('getAssessments UseCase', () => {
   it('should return all assessments', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
@@ -27,9 +27,9 @@ describe('getAllAssessments UseCase', () => {
 
     await fakeAssessmentsRepository.save(assessment);
 
-    const input: GetAllAssessmentsUseCaseArgs =
-      GetAllAssessmentsUseCaseArgsMother.basic().build();
-    const response = await useCase.getAllAssessments(input);
+    const input: GetAssessmentsUseCaseArgs =
+      GetAssessmentsUseCaseArgsMother.basic().build();
+    const response = await useCase.getAssessments(input);
 
     expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({ organization: 'test.io' })
@@ -42,9 +42,9 @@ describe('getAllAssessments UseCase', () => {
   it('should return an empty list if no assessments', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const input: GetAllAssessmentsUseCaseArgs =
-      GetAllAssessmentsUseCaseArgsMother.basic().build();
-    await useCase.getAllAssessments(input);
+    const input: GetAssessmentsUseCaseArgs =
+      GetAssessmentsUseCaseArgsMother.basic().build();
+    await useCase.getAssessments(input);
 
     expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({ organization: 'test.io' })
@@ -54,11 +54,9 @@ describe('getAllAssessments UseCase', () => {
   it('should throw if next token is invalid', async () => {
     const { useCase } = setup();
 
-    const input: GetAllAssessmentsUseCaseArgs =
-      GetAllAssessmentsUseCaseArgsMother.basic()
-        .withNextToken('dGVzdA==')
-        .build();
-    await expect(useCase.getAllAssessments(input)).rejects.toThrow(
+    const input: GetAssessmentsUseCaseArgs =
+      GetAssessmentsUseCaseArgsMother.basic().withNextToken('dGVzdA==').build();
+    await expect(useCase.getAssessments(input)).rejects.toThrow(
       InvalidParametersError
     );
   });
@@ -74,7 +72,7 @@ const setup = () => {
   });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
 
-  const useCase = new GetAllAssessmentsUseCaseImpl();
+  const useCase = new GetAssessmentsUseCaseImpl();
 
   return {
     useCase,

@@ -70,6 +70,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve all milestones for a specific assessment
+         * @description Fetches all milestones associated with a specific assessment.
+         *
+         */
+        get: operations["getMilestones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/milestones/{milestoneId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve a specific milestone
+         * @description Fetches all details associated with a specific milestone.
+         *
+         */
+        get: operations["getMilestone"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/exports/create-milestone": {
         parameters: {
             query?: never;
@@ -271,6 +313,8 @@ export interface components {
              *     If empty, all regions will be scanned
              *      */
             regions?: string[];
+            /** @description Region where the assessment is exported */
+            exportRegion?: string;
             /** @description Role ARN associated with the assessment */
             roleArn?: string;
             /** @description Workflows associated with the assessment */
@@ -368,20 +412,20 @@ export interface components {
             text: string;
         };
         Pillar: {
-            id?: string;
-            label?: string;
-            disabled?: boolean;
-            questions?: components["schemas"]["Question"][];
+            id: string;
+            label: string;
+            disabled: boolean;
+            questions: components["schemas"]["Question"][];
         };
         PillarDto: {
             disabled?: boolean;
         };
         Question: {
-            id?: string;
-            label?: string;
-            none?: boolean;
-            disabled?: boolean;
-            bestPractices?: components["schemas"]["BestPractice"][];
+            id: string;
+            label: string;
+            none: boolean;
+            disabled: boolean;
+            bestPractices: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
             none?: boolean;
@@ -389,13 +433,13 @@ export interface components {
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
-            id?: string;
-            label?: string;
+            id: string;
+            label: string;
             /** @enum {string} */
-            risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
-            description?: string;
-            checked?: boolean;
-            results?: string[];
+            risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
+            description: string;
+            checked: boolean;
+            results: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
@@ -403,6 +447,21 @@ export interface components {
         };
         BestPracticeDto: {
             checked?: boolean;
+        };
+        /** Milestone */
+        Milestone: {
+            id: number;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
+            pillars: components["schemas"]["Pillar"][];
+        };
+        /** MilestoneSummary */
+        MilestoneSummary: {
+            id: number;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
         };
     };
     responses: never;
@@ -697,6 +756,112 @@ export interface operations {
             };
         };
     };
+    getMilestones: {
+        parameters: {
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+                /** @description Maximum number of milestones to return */
+                limit?: number;
+                /** @description Token for pagination. */
+                nextToken?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of milestones related to the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        milestones: components["schemas"]["MilestoneSummary"][];
+                        /** @description Token for pagination. If there are more milestones than can be returned in a single response,
+                         *     this token will allow you to retrieve the next set of results.
+                         *      */
+                        nextToken?: string;
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMilestone: {
+        parameters: {
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+                /** @description The unique ID of the milestone to retrieve pillars for */
+                milestoneId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of pillars related to the specified milestone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Milestone"];
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     createMilestone: {
         parameters: {
             query?: never;
@@ -711,7 +876,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @description The region to create the milestone in. */
-                    region: string;
+                    region?: string;
                     /** @description The name of the milestone to create. */
                     name: string;
                 };
@@ -758,11 +923,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": {
                     /** @description The region to export the assessment to. */
-                    region: string;
+                    region?: string;
                 };
             };
         };

@@ -1,10 +1,13 @@
 import {
   AnswerSummary,
+  Answer,
   Choice,
   CreateWorkloadCommand,
   GetLensReviewCommand,
+  GetMilestoneCommand,
   LensReview,
   ListAnswersCommand,
+  ListMilestonesCommand,
   ListWorkloadsCommand,
   PillarReviewSummary,
   UpdateAnswerCommand,
@@ -13,6 +16,9 @@ import {
   WorkloadEnvironment,
   WorkloadSummary,
   CreateMilestoneCommand,
+  Milestone as AWSMilestone,
+  WellArchitectedServiceException,
+  GetAnswerCommand,
 } from '@aws-sdk/client-wellarchitected';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 
@@ -22,11 +28,15 @@ import { createInjectionToken, inject } from '@shared/di-container';
 import {
   Assessment,
   BestPractice,
+  Milestone,
+  MilestoneSummary,
   Pillar,
   Question,
   User,
 } from '@backend/models';
 import { tokenLogger } from '../Logger';
+import { tokenQuestionSetService } from '../QuestionSetService';
+import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 
 export const WAFRLens = 'wellarchitected';
 
@@ -36,6 +46,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   private readonly wellArchitectedClientConstructor = inject(
     tokenWellArchitectedClientConstructor
   );
+  private readonly questionSetService = inject(tokenQuestionSetService);
 
   public async createWellArchitectedClient(
     roleArn: string,
@@ -75,23 +86,37 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     );
   }
 
+  private getWorkloadName(assessment: Assessment): string {
+    return `wafr-${assessment.name.replace(' ', '-')}-${assessment.id}`;
+  }
+
+  public async getWorkload(
+    wellArchitectedClient: WellArchitectedClient,
+    assessment: Assessment
+  ): Promise<WorkloadSummary | null> {
+    const workloadName = this.getWorkloadName(assessment);
+    const workload = await this.getWorkloadSummary(
+      wellArchitectedClient,
+      workloadName
+    );
+    if (!workload || !workload.WorkloadId) {
+      this.logger.warn(`Workload not found for assessment: ${assessment.name}`);
+      return null;
+    }
+    return workload;
+  }
+
   public async createWorkload(
     wellArchitectedClient: WellArchitectedClient,
     assessment: Assessment,
     user: User
   ): Promise<string> {
-    const workloadName = `wafr-${assessment.name.replace(' ', '-')}-${
-      assessment.id
-    }`;
-    const workload = await this.getWorkloadSummary(
-      wellArchitectedClient,
-      workloadName
-    );
+    const workload = await this.getWorkload(wellArchitectedClient, assessment);
     if (workload && workload.WorkloadId) {
       return workload.WorkloadId;
     }
     const command = new CreateWorkloadCommand({
-      WorkloadName: workloadName,
+      WorkloadName: this.getWorkloadName(assessment),
       Description: `WAFR Automation Tool Assessment: ${assessment.name}`,
       Environment: WorkloadEnvironment.PRODUCTION,
       Lenses: [WAFRLens],
@@ -116,7 +141,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
   public async getWorkloadLensReview(
     wellArchitectedClient: WellArchitectedClient,
     workloadId: string
-  ): Promise<LensReview> {
+  ): Promise<LensReview | undefined> {
     const command = new GetLensReviewCommand({
       WorkloadId: workloadId,
       LensAlias: WAFRLens,
@@ -153,6 +178,31 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     return response.AnswerSummaries;
   }
 
+  public async getWorkloadQuestionAnswer(
+    wellArchitectedClient: WellArchitectedClient,
+    workloadId: string,
+    questionId: string,
+    milestoneId?: number
+  ): Promise<Answer | undefined> {
+    const command = new GetAnswerCommand({
+      WorkloadId: workloadId,
+      LensAlias: WAFRLens,
+      QuestionId: questionId,
+      MilestoneNumber: milestoneId,
+    });
+    const response = await wellArchitectedClient.send(command);
+    if (
+      response.$metadata.httpStatusCode !== 200 ||
+      !response.Answer ||
+      !response.Answer.Choices
+    ) {
+      throw new Error(
+        `Failed to get workload question answer: ${response.$metadata.httpStatusCode}`
+      );
+    }
+    return response.Answer;
+  }
+
   public async updateWorkloadAnswer(
     wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
@@ -176,10 +226,10 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     this.logger.info(`Updated Workload answer for ${questionId}`);
   }
 
-  public async getSelectedBestPracticeList(
+  public getSelectedBestPracticeList(
     answerChoiceList: Choice[],
     questionBestPracticeList: BestPractice[]
-  ): Promise<string[]> {
+  ): string[] {
     return answerChoiceList
       .map(({ ChoiceId: id, Title: title }) => {
         if (!id || !title) {
@@ -199,10 +249,10 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       .map((item) => item.id);
   }
 
-  public async getAnswerSelectedChoiceList(
+  public getAnswerSelectedChoiceList(
     answerChoiceList: Choice[],
     answerQuestionData: Question
-  ): Promise<string[]> {
+  ): string[] {
     const noneChoiceId = answerChoiceList.find(
       (choice) => choice.Title === 'None of these'
     )?.ChoiceId;
@@ -212,7 +262,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     const filteredChoices = noneChoiceId
       ? answerChoiceList.filter((choice) => choice.ChoiceId !== noneChoiceId)
       : answerChoiceList;
-    return await this.getSelectedBestPracticeList(
+    return this.getSelectedBestPracticeList(
       filteredChoices,
       answerQuestionData.bestPractices
     );
@@ -320,7 +370,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       wellArchitectedClient,
       workloadId
     );
-    const workloadPillarList = workloadLensReview.PillarReviewSummaries ?? [];
+    const workloadPillarList = workloadLensReview?.PillarReviewSummaries ?? [];
     await this.exportPillarList(
       wellArchitectedClient,
       workloadId,
@@ -357,6 +407,243 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     this.logger.info(
       `Created milestone for assessment ${assessment.name} with workload ID ${workloadId}`
     );
+  }
+
+  public async getAWSMilestone(
+    wellArchitectedClient: WellArchitectedClient,
+    workloadId: string,
+    milestoneNumber: number
+  ): Promise<AWSMilestone> {
+    const command = new GetMilestoneCommand({
+      WorkloadId: workloadId,
+      MilestoneNumber: milestoneNumber,
+    });
+    const response = await wellArchitectedClient
+      .send(command)
+      .catch((error) => {
+        if (
+          error instanceof WellArchitectedServiceException &&
+          error.$metadata?.httpStatusCode === 404
+        ) {
+          throw new MilestoneNotFoundError({
+            assessmentId: workloadId,
+            milestoneId: milestoneNumber,
+          });
+        }
+        throw error;
+      });
+    if (response.$metadata.httpStatusCode !== 200 || !response.Milestone) {
+      throw new Error(
+        `Failed to get milestone ${milestoneNumber} for workload ${workloadId}: ${response.$metadata.httpStatusCode}`
+      );
+    }
+    return response.Milestone;
+  }
+
+  private async getPillarQuestionsFromMilestonePillar(args: {
+    wellArchitectedClient: WellArchitectedClient;
+    pillar: Pillar;
+    workloadId: string;
+    milestoneId: number;
+  }): Promise<Question[]> {
+    const { wellArchitectedClient, pillar, workloadId, milestoneId } = args;
+    return Promise.all(
+      pillar.questions.map<Promise<Question>>(async (question) => {
+        const questionPrimaryId = question.primaryId;
+        const answer = await this.getWorkloadQuestionAnswer(
+          wellArchitectedClient,
+          workloadId,
+          questionPrimaryId,
+          milestoneId
+        );
+        if (!answer || answer.SelectedChoices === undefined) {
+          throw new Error(
+            `Answer for question ${questionPrimaryId} not found in Milestone#${milestoneId}`
+          );
+        }
+        const selectedBestPracticePrimaryIds = answer.SelectedChoices;
+        const noneChoiceId = answer.Choices?.find(
+          (choice) => choice.Title === 'None of these'
+        )?.ChoiceId;
+        const noneSelected =
+          !!noneChoiceId &&
+          selectedBestPracticePrimaryIds.includes(noneChoiceId);
+        return {
+          ...question,
+          none: noneSelected,
+          bestPractices: question.bestPractices.map<BestPractice>(
+            (bestPractice) => {
+              const isSelected = selectedBestPracticePrimaryIds.includes(
+                bestPractice.primaryId
+              );
+              return {
+                ...bestPractice,
+                checked: !noneSelected && isSelected,
+              };
+            }
+          ),
+        };
+      })
+    );
+  }
+
+  private async getPillarsFromMilestone(args: {
+    wellArchitectedClient: WellArchitectedClient;
+    milestoneWorkloadId: string;
+    milestoneId: number;
+  }): Promise<Pillar[]> {
+    const { wellArchitectedClient, milestoneWorkloadId, milestoneId } = args;
+    const { pillars } = this.questionSetService.get();
+    return Promise.all(
+      pillars.map<Promise<Pillar>>(async (pillar) => {
+        const milestonePillarQuestions =
+          await this.getPillarQuestionsFromMilestonePillar({
+            wellArchitectedClient,
+            pillar,
+            workloadId: milestoneWorkloadId,
+            milestoneId,
+          });
+        return {
+          ...pillar,
+          questions: milestonePillarQuestions,
+        };
+      })
+    );
+  }
+
+  public async getMilestone(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    milestoneId: number;
+  }): Promise<Milestone> {
+    const { roleArn, assessment, region, milestoneId } = args;
+    const wellArchitectedClient = await this.createWellArchitectedClient(
+      roleArn,
+      region
+    );
+    const assessmentWorkload = await this.getWorkload(
+      wellArchitectedClient,
+      assessment
+    );
+    if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
+      throw new WorkloadNotFoundError(assessment.id);
+    }
+    const milestone = await this.getAWSMilestone(
+      wellArchitectedClient,
+      assessmentWorkload.WorkloadId,
+      milestoneId
+    );
+    if (!milestone.MilestoneNumber || !milestone.Workload) {
+      throw new MilestoneNotFoundError({
+        assessmentId: assessment.id,
+        milestoneId,
+      });
+    }
+    if (!milestone.RecordedAt || !milestone.MilestoneName) {
+      throw new Error(`Milestone#${milestoneId} is missing required fields`);
+    }
+    const milestoneWorkloadId = milestone.Workload.WorkloadId;
+    if (!milestoneWorkloadId) {
+      throw new Error(`Milestone#${milestoneId} has no WorkloadId`);
+    }
+    return {
+      id: milestone.MilestoneNumber,
+      name: milestone.MilestoneName,
+      createdAt: milestone.RecordedAt,
+      pillars: await this.getPillarsFromMilestone({
+        wellArchitectedClient,
+        milestoneWorkloadId,
+        milestoneId,
+      }),
+    };
+  }
+
+  public async listAWSMilestones(
+    wellarchitectedClient: WellArchitectedClient,
+    workloadId: string,
+    options?: {
+      maxResults?: number;
+      nextToken?: string;
+    }
+  ): Promise<{ awsMilestones: AWSMilestone[]; nextToken?: string }> {
+    const command = new ListMilestonesCommand({
+      WorkloadId: workloadId,
+      MaxResults: options?.maxResults,
+      NextToken: options?.nextToken,
+    });
+    const response = await wellarchitectedClient.send(command);
+    if (
+      response.$metadata.httpStatusCode !== 200 ||
+      !response.MilestoneSummaries
+    ) {
+      throw new Error(
+        `Failed to list milestones for workload ${workloadId}: ${response.$metadata.httpStatusCode}`
+      );
+    }
+    return {
+      awsMilestones: response.MilestoneSummaries,
+      nextToken: response.NextToken,
+    };
+  }
+
+  public async getMilestones(args: {
+    roleArn: string;
+    assessment: Assessment;
+    region: string;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    milestones: MilestoneSummary[];
+    nextToken?: string;
+  }> {
+    const { roleArn, assessment, region, limit, nextToken } = args;
+    const wellArchitectedClient = await this.createWellArchitectedClient(
+      roleArn,
+      region
+    );
+
+    const assessmentWorkload = await this.getWorkload(
+      wellArchitectedClient,
+      assessment
+    );
+    if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
+      throw new WorkloadNotFoundError(assessment.id);
+    }
+
+    // Paginated request
+    const { awsMilestones, nextToken: responseNextToken } =
+      await this.listAWSMilestones(
+        wellArchitectedClient,
+        assessmentWorkload.WorkloadId,
+        {
+          maxResults: limit,
+          nextToken,
+        }
+      );
+
+    const milestones: MilestoneSummary[] = [];
+    for (const milestoneSummary of awsMilestones) {
+      if (
+        !milestoneSummary.MilestoneNumber ||
+        !milestoneSummary.MilestoneName ||
+        !milestoneSummary.RecordedAt
+      ) {
+        throw new Error(
+          `Milestone#${milestoneSummary.MilestoneNumber} has no id, name or createdAt`
+        );
+      }
+      milestones.push({
+        id: milestoneSummary.MilestoneNumber,
+        name: milestoneSummary.MilestoneName,
+        createdAt: milestoneSummary.RecordedAt,
+      });
+    }
+
+    return {
+      milestones,
+      nextToken: responseNextToken,
+    };
   }
 }
 

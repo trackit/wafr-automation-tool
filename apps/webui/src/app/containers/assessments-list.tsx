@@ -25,6 +25,7 @@ import { useDebounceValue } from 'usehooks-ts';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -195,11 +196,20 @@ function AssessmentsList() {
                         <li>
                           <ExportToAWSDialog
                             assessmentId={assessment.id ?? ''}
+                            askForRegion={!assessment.exportRegion}
+                            onSuccess={refetch}
                           />
                         </li>
                         <li>
                           <CreateAWSMilestoneDialog
                             assessmentId={assessment.id ?? ''}
+                            disabled={!assessment.exportRegion}
+                          />
+                        </li>
+                        <li>
+                          <ListAWSMilestonesDialog
+                            assessmentId={assessment.id ?? ''}
+                            disabled={!assessment.exportRegion}
                           />
                         </li>
                         <li className="m-1"></li>

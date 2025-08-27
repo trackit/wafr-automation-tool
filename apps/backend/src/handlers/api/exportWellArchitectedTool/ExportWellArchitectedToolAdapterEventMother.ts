@@ -10,7 +10,9 @@ type ExportWellArchitectedToolParameters = NonNullable<
 >;
 
 type ExportWellArchitectedToolBody = NonNullable<
-  operations['exportWellArchitectedTool']['requestBody']['content']['application/json']
+  NonNullable<
+    operations['exportWellArchitectedTool']['requestBody']
+  >['content']['application/json']
 >;
 
 export class ExportWellArchitectedToolAdapterEventMother {
@@ -55,7 +57,7 @@ export class ExportWellArchitectedToolAdapterEventMother {
   }
 
   public withRegion(
-    region: ExportWellArchitectedToolBody['region']
+    region?: string
   ): ExportWellArchitectedToolAdapterEventMother {
     this.body.region = region;
     return this;

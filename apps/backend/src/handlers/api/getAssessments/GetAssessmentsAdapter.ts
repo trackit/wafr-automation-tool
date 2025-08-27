@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
-import { tokenGetAllAssessmentsUseCase } from '@backend/useCases';
+import { tokenGetAssessmentsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
@@ -10,7 +10,7 @@ import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
-const GetAllAssessmentsQuerySchema = z
+const GetAssessmentsQuerySchema = z
   .object({
     limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
     search: z.string().optional(),
@@ -20,8 +20,8 @@ const GetAllAssessmentsQuerySchema = z
   operations['getAssessments']['parameters']['query']
 >;
 
-export class GetAllAssessmentsAdapter {
-  private readonly useCase = inject(tokenGetAllAssessmentsUseCase);
+export class GetAssessmentsAdapter {
+  private readonly useCase = inject(tokenGetAssessmentsUseCase);
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -42,6 +42,7 @@ export class GetAllAssessmentsAdapter {
       createdBy: assessment.createdBy,
       organization: assessment.organization,
       regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
       createdAt: assessment.createdAt.toISOString(),
@@ -62,10 +63,10 @@ export class GetAllAssessmentsAdapter {
   > {
     const { queryStringParameters } = event;
     try {
-      const parsedQuery = GetAllAssessmentsQuerySchema.parse(
+      const parsedQuery = GetAssessmentsQuerySchema.parse(
         queryStringParameters
       );
-      const { assessments, nextToken } = await this.useCase.getAllAssessments({
+      const { assessments, nextToken } = await this.useCase.getAssessments({
         user: getUserFromEvent(event),
         ...parsedQuery,
       });

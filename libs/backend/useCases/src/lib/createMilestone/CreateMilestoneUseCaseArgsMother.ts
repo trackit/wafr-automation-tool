@@ -12,7 +12,6 @@ export class CreateMilestoneUseCaseArgsMother {
     return new CreateMilestoneUseCaseArgsMother({
       user: UserMother.basic().build(),
       assessmentId: 'assessment-id',
-      region: 'us-west-2',
       name: 'Milestone Name',
     });
   }
@@ -29,7 +28,7 @@ export class CreateMilestoneUseCaseArgsMother {
     return this;
   }
 
-  public withRegion(region: string): CreateMilestoneUseCaseArgsMother {
+  public withRegion(region?: string): CreateMilestoneUseCaseArgsMother {
     this.data.region = region;
     return this;
   }

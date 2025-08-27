@@ -8,24 +8,21 @@ import { useState } from 'react';
 
 type CreateAWSMilestoneDialogProps = {
   assessmentId: string;
+  disabled: boolean;
 };
 
 export default function CreateAWSMilestoneDialog({
   assessmentId,
+  disabled,
 }: CreateAWSMilestoneDialogProps) {
   const [open, setOpen] = useState(false);
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: {
-      assessmentId: string;
-      region: string;
-      name: string;
-    }) => {
+    mutationFn: async (data: { assessmentId: string; name: string }) => {
       await createAWSMilestone(
         {
           assessmentId: data.assessmentId,
         },
         {
-          region: data.region,
           name: data.name,
         }
       );
@@ -59,10 +56,9 @@ export default function CreateAWSMilestoneDialog({
     },
   });
 
-  const onSubmit = (data: { region: string; name: string }) => {
+  const onSubmit = (data: { name: string }) => {
     mutate({
       assessmentId,
-      region: data.region,
       name: data.name,
     });
   };
@@ -70,12 +66,15 @@ export default function CreateAWSMilestoneDialog({
   return (
     <>
       <button
-        className="flex flex-row gap-2 w-full text-left"
+        className={`flex flex-row gap-2 w-full text-left ${
+          disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
+        }`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           setOpen(true);
         }}
+        disabled={disabled}
       >
         <Milestone className="w-4 h-4" /> Create AWS Milestone
       </button>

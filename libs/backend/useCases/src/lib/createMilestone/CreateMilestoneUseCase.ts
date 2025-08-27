@@ -6,13 +6,16 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { ConflictError, NotFoundError } from '../Errors';
-import { assertAssessmentIsReadyForExport } from '../../services/exports';
+import { NotFoundError } from '../Errors';
+import {
+  assertAssessmentIsReadyForExport,
+  assertOrganizationHasExportRole,
+} from '../../services/exports';
 
 export interface CreateMilestoneUseCaseArgs {
   assessmentId: string;
   user: User;
-  region: string;
+  region?: string;
   name: string;
 }
 
@@ -40,7 +43,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    assertAssessmentIsReadyForExport(assessment);
+    assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
@@ -48,18 +51,13 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
       throw new NotFoundError(
         `Organization with domain ${args.user.organizationDomain} not found`
       );
-    } else if (!organization.assessmentExportRoleArn) {
-      this.logger.error(
-        `No assessment export role ARN found for organization ${organization.domain}`
-      );
-      throw new ConflictError(
-        `No assessment export role ARN found for organization ${organization.domain}`
-      );
     }
+    assertOrganizationHasExportRole(organization);
     await this.wellArchitectedToolService.createMilestone({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
-      region: args.region,
+      // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      region: (args.region ?? assessment.exportRegion)!,
       name: args.name,
       user: args.user,
     });

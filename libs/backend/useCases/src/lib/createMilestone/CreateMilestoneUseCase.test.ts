@@ -31,6 +31,7 @@ describe('CreateMilestone UseCase', () => {
       .withOrganization('test.io')
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
+      .withExportRegion('us-west-2')
       .build();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
@@ -51,7 +52,7 @@ describe('CreateMilestone UseCase', () => {
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       user: input.user,
-      region: input.region,
+      region: assessment.exportRegion,
       name: input.name,
     });
   });
@@ -150,6 +151,7 @@ describe('CreateMilestone UseCase', () => {
         .withOrganization('test.io')
         .withStep(AssessmentStep.FINISHED)
         .withPillars([PillarMother.basic().build()])
+        .withExportRegion('us-west-2')
         .build();
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
@@ -181,6 +183,29 @@ describe('CreateMilestone UseCase', () => {
       .withAssessmentId('assessment-id')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
+    await expect(useCase.createMilestone(input)).rejects.toThrow(ConflictError);
+  });
+
+  it('should throw a ConflictError if the assessment export region is not set', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
+      setup();
+
+    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+      AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withStep(AssessmentStep.FINISHED)
+        .withPillars([PillarMother.basic().build()])
+        .withExportRegion(undefined)
+        .build();
+
+    fakeOrganizationRepository.organizations['test.io'] =
+      OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAssessmentExportRoleArn('export-role-arn')
+        .build();
+
+    const input = CreateMilestoneUseCaseArgsMother.basic().build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(ConflictError);
   });
 });
