@@ -833,12 +833,6 @@ export function AssessmentDetails() {
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
           <h2 className="mt-0 mb-0">Assessment {assessmentData?.name}</h2>
-          {/* {isMilestone && (
-            <h3 className="text-base-content/50 text-sm">
-              <Milestone className="w-4 h-4" />
-              Milestone {milestoneData?.name}
-            </h3>
-          )} */}
           <div className="text-sm text-base-content/50 font-bold"></div>
         </div>
         <div className="flex flex-row gap-2 items-center">
