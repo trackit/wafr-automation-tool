@@ -359,8 +359,162 @@ function AssessmentOverview({
           </div>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px]">
+
+      <div className="flex flex-[1] flex-col md:flex-row gap-6 lg:flex-nowrap flex-wrap">
+        <div className="flex gap-6 w-full lg:w-1/2">
+          <div className="card bg-white border rounded-lg p-4 min-h-[300px] w-1/2 w-full">
+            <div className="flex flex-col h-full">
+              <div className="">
+                <h2 className="card-title">Findings by Region</h2>
+              </div>
+              <div className="flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Legend
+                      wrapperStyle={{ fontSize: '12px' }}
+                      verticalAlign="top"
+                      align="center"
+                      content={({ payload }) => (
+                        <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
+                          {payload?.map((entry, index) => {
+                            const item = assessmentRegions[index];
+                            const percentage =
+                              totalRegionsCount > 0
+                                ? (
+                                    ((item?.value || 0) / totalRegionsCount) *
+                                    100
+                                  ).toFixed(1)
+                                : '0.0';
+
+                            return (
+                              <div
+                                key={`legend-${index}`}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 10,
+                                    height: 10,
+                                    backgroundColor: entry.color,
+                                    borderRadius: 2,
+                                  }}
+                                />
+                                <span style={{ fontSize: '12px' }}>
+                                  {entry.value} ({percentage}%)
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                    <Pie
+                      data={assessmentRegions || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      innerRadius={60}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {assessmentRegions
+                        ? assessmentRegions.map((item, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={getChartColorByIndex(index)}
+                            />
+                          ))
+                        : []}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+          <div className="card  bg-white border rounded-lg p-4 min-h-[300px] w-1/2 w-full">
+            <div className="flex flex-col h-full">
+              <div className="">
+                <h2 className="card-title">Findings by Severity</h2>
+              </div>
+              <div className="flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Legend
+                      verticalAlign="top"
+                      align="center"
+                      wrapperStyle={{ fontSize: '12px' }}
+                      content={({ payload }) => (
+                        <div className="flex flex-row flex-wrap w-full overflow-y-auto">
+                          {payload?.map((entry, index) => {
+                            const item = assessmentSeverities[index];
+                            const percentage =
+                              totalSeveritiesCount > 0
+                                ? (
+                                    ((item?.value || 0) /
+                                      totalSeveritiesCount) *
+                                    100
+                                  ).toFixed(1)
+                                : '0.0';
+
+                            return (
+                              <div
+                                key={`legend-${index}`}
+                                style={{
+                                  width: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 10,
+                                    height: 10,
+                                    backgroundColor: entry.color,
+                                    borderRadius: 2,
+                                  }}
+                                />
+                                <span style={{ fontSize: '12px' }}>
+                                  {entry.value} ({percentage}%)
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                    <Pie
+                      data={assessmentSeverities}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      innerRadius={60}
+                      paddingAngle={5}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {assessmentSeverities.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={getSeverityColor(entry.name)}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="card bg-white border rounded-lg p-4 min-h-[300px] lg:w-1/2 w-full">
           <div className="flex flex-col h-full">
             <div className="">
               <h2 className="card-title">Pillar Completion</h2>
@@ -404,158 +558,6 @@ function AssessmentOverview({
                     }}
                   />
                 </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-[1] flex-col md:flex-row gap-6">
-        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px] md:w-1/2 w-full">
-          <div className="flex flex-col h-full">
-            <div className="">
-              <h2 className="card-title">Findings by Region</h2>
-            </div>
-            <div className="flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Legend
-                    wrapperStyle={{ fontSize: '12px' }}
-                    verticalAlign="top"
-                    align="center"
-                    content={({ payload }) => (
-                      <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
-                        {payload?.map((entry, index) => {
-                          const item = assessmentRegions[index];
-                          const percentage =
-                            totalRegionsCount > 0
-                              ? (
-                                  ((item?.value || 0) / totalRegionsCount) *
-                                  100
-                                ).toFixed(1)
-                              : '0.0';
-
-                          return (
-                            <div
-                              key={`legend-${index}`}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: 10,
-                                  height: 10,
-                                  backgroundColor: entry.color,
-                                  borderRadius: 2,
-                                }}
-                              />
-                              <span style={{ fontSize: '12px' }}>
-                                {entry.value} ({percentage}%)
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  />
-                  <Pie
-                    data={assessmentRegions || []}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    innerRadius={60}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {assessmentRegions
-                      ? assessmentRegions.map((item, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={getChartColorByIndex(index)}
-                          />
-                        ))
-                      : []}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-        <div className="card flex-1 bg-white border rounded-lg p-4 min-h-[300px] md:w-1/2 w-full">
-          <div className="flex flex-col h-full">
-            <div className="">
-              <h2 className="card-title">Findings Grouped by Severity</h2>
-            </div>
-            <div className="flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Legend
-                    verticalAlign="top"
-                    align="center"
-                    wrapperStyle={{ fontSize: '12px' }}
-                    content={({ payload }) => (
-                      <div className="flex flex-row flex-wrap w-full overflow-y-auto">
-                        {payload?.map((entry, index) => {
-                          const item = assessmentSeverities[index];
-                          const percentage =
-                            totalSeveritiesCount > 0
-                              ? (
-                                  ((item?.value || 0) / totalSeveritiesCount) *
-                                  100
-                                ).toFixed(1)
-                              : '0.0';
-
-                          return (
-                            <div
-                              key={`legend-${index}`}
-                              style={{
-                                width: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: 10,
-                                  height: 10,
-                                  backgroundColor: entry.color,
-                                  borderRadius: 2,
-                                }}
-                              />
-                              <span style={{ fontSize: '12px' }}>
-                                {entry.value} ({percentage}%)
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  />
-                  <Pie
-                    data={assessmentSeverities}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    innerRadius={60}
-                    paddingAngle={5}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {assessmentSeverities.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={getSeverityColor(entry.name)}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
