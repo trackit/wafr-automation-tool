@@ -107,6 +107,7 @@ function AssessmentOverview({
   const [pillarCompletionData, setPillarCompletionData] = useState<
     Array<{ pillar: string; completion: number }>
   >([]);
+  const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
 
   console.log(assessment);
   console.log(assessmentRegions);
@@ -565,116 +566,134 @@ function AssessmentOverview({
       </div>
 
       <div className="flex-[2] card bg-white border rounded-lg p-4 mb-10">
-        <h2 className="card-title mb-4">Findings by Resource Type</h2>
-
-        {/* Bar Chart */}
-        <div className="mb-6">
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={filteredResourceTypes}
-              margin={{ top: 0, right: 0, left: 0, bottom: 55 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                tick={{ fontSize: 12 }}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="card-title">Findings by Resource Type</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-base-content/70">Bar Chart</span>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="toggle toggle-xs"
+                checked={chartType === 'treemap'}
+                onChange={() =>
+                  setChartType((prev) => (prev === 'bar' ? 'treemap' : 'bar'))
+                }
               />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                content={({ payload }) => {
-                  if (payload && payload.length > 0) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
-                        <p className="font-medium">{data.name}</p>
-                        <p className="text-sm">Count: {data.value}</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar
-                dataKey="value"
-                fill={getThemeColors().primary}
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+            </label>
+            <span className="text-sm text-base-content/70">Treemap</span>
+          </div>
         </div>
 
-        <div className="flex-1 min-h-0">
-          <ResponsiveContainer width="100%" height={200}>
-            <Treemap
-              data={filteredResourceTypes}
-              dataKey="value"
-              aspectRatio={4 / 3}
-              fill={lightenColor(getThemeColors().primary, 20)}
-              stroke={'white'}
-            >
-              {filteredResourceTypes.map((entry, index) => (
-                <Cell key={entry.name} />
-              ))}
-              <Tooltip
-                content={({ payload }) => {
-                  if (payload && payload.length > 0) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
-                        <p className="font-medium">{data.name}</p>
-                        <p className="text-sm">Count: {data.value}</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </Treemap>
-          </ResponsiveContainer>
-          {/* Legend for resource types */}
-          <div className="mt-4">
-            <p className="text-sm text-base-content/50 mb-2">
-              Click to toggle resource type visibility
-            </p>
-            <div className="flex flex-row flex-wrap w-full gap-2">
-              {assessmentResourceTypes.map((item, index) => {
-                const isEnabled = enabledResourceTypes.has(item.name);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => toggleResourceType(item.name)}
-                    className={`flex items-center gap-2 border rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-                      isEnabled
-                        ? 'bg-base-100 border-base-300'
-                        : 'bg-base-200 border-base-200 opacity-50'
-                    }`}
-                    title={`Click to ${isEnabled ? 'hide' : 'show'} ${
-                      item.name
+        {/* Bar Chart */}
+        {chartType === 'bar' && (
+          <div className="mb-6">
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart
+                data={filteredResourceTypes}
+                margin={{ top: 0, right: 0, left: 0, bottom: 55 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip
+                  content={({ payload }) => {
+                    if (payload && payload.length > 0) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                          <p className="font-medium">{data.name}</p>
+                          <p className="text-sm">Count: {data.value}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  fill={getThemeColors().primary}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {chartType === 'treemap' && (
+          <div className="mb-6">
+            <ResponsiveContainer width="100%" height={350}>
+              <Treemap
+                data={filteredResourceTypes}
+                dataKey="value"
+                aspectRatio={4 / 3}
+                fill={lightenColor(getThemeColors().primary, 20)}
+                stroke={'white'}
+              >
+                {filteredResourceTypes.map((entry, index) => (
+                  <Cell key={entry.name} />
+                ))}
+                <Tooltip
+                  content={({ payload }) => {
+                    if (payload && payload.length > 0) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                          <p className="font-medium">{data.name}</p>
+                          <p className="text-sm">Count: {data.value}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </Treemap>
+            </ResponsiveContainer>
+          </div>
+        )}
+        {/* Legend for resource types */}
+        <div className="mt-4">
+          <p className="text-sm text-base-content/50 mb-2">
+            Click to toggle resource type visibility
+          </p>
+          <div className="flex flex-row flex-wrap w-full gap-2">
+            {assessmentResourceTypes.map((item, index) => {
+              const isEnabled = enabledResourceTypes.has(item.name);
+              return (
+                <button
+                  key={index}
+                  onClick={() => toggleResourceType(item.name)}
+                  className={`flex items-center gap-2 border rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
+                    isEnabled
+                      ? 'bg-base-100 border-base-300'
+                      : 'bg-base-200 border-base-200 opacity-50'
+                  }`}
+                  title={`Click to ${isEnabled ? 'hide' : 'show'} ${item.name}`}
+                >
+                  <span
+                    className={`text-sm font-medium ${
+                      isEnabled ? 'text-base-content' : 'text-base-content/50'
                     }`}
                   >
-                    <span
-                      className={`text-sm font-medium ${
-                        isEnabled ? 'text-base-content' : 'text-base-content/50'
-                      }`}
-                    >
-                      {item.name}
-                    </span>
-                    <span
-                      className={`text-sm ${
-                        isEnabled
-                          ? 'text-base-content/70'
-                          : 'text-base-content/30'
-                      }`}
-                    >
-                      ({item.value})
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                    {item.name}
+                  </span>
+                  <span
+                    className={`text-sm ${
+                      isEnabled
+                        ? 'text-base-content/70'
+                        : 'text-base-content/30'
+                    }`}
+                  >
+                    ({item.value})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
