@@ -1,6 +1,19 @@
-import { components } from '@shared/api-schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
+import {
+  ArrowRightFromLine,
+  ChevronRight,
+  CircleCheck,
+  CircleMinus,
+  EllipsisVertical,
+  InfoIcon,
+  RefreshCw,
+} from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
+
+import { components } from '@shared/api-schema';
 import {
   deleteAssessment,
   exportToAWS,
@@ -19,20 +32,10 @@ import {
   Timeline,
   VerticalMenu,
 } from '@webui/ui';
-import {
-  ArrowRightFromLine,
-  ChevronRight,
-  CircleCheck,
-  CircleMinus,
-  EllipsisVertical,
-  InfoIcon,
-  RefreshCw,
-} from 'lucide-react';
-import { enqueueSnackbar } from 'notistack';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+
 import ErrorPage from './error-page';
 import FindingsDetails from './findings-details';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = components['schemas']['Question'];
@@ -857,6 +860,9 @@ export function AssessmentDetails() {
                 >
                   <ArrowRightFromLine className="w-4 h-4" /> Export to AWS
                 </button>
+              </li>
+              <li>
+                <PDFExportsDialog assessmentId={id!} />
               </li>
             </ul>
           </div>

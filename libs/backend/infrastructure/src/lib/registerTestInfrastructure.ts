@@ -23,6 +23,7 @@ import {
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
+import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
   tokenFakeMarketplaceService,
@@ -45,6 +46,7 @@ import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
 } from './WellArchitectedToolService';
+import { tokenFakePDFService, tokenPDFService } from './PDFService';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
@@ -60,6 +62,12 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenAIService, {
     useFactory: () => inject(tokenFakeAIService),
+  });
+  register(tokenLambdaService, {
+    useFactory: () => inject(tokenFakeLambdaService),
+  });
+  register(tokenPDFService, {
+    useFactory: () => inject(tokenFakePDFService),
   });
   register(tokenQuestionSetService, {
     useFactory: () => inject(tokenFakeQuestionSetService),

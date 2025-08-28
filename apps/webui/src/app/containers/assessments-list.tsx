@@ -1,16 +1,4 @@
 import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
-import {
-  deleteAssessment,
-  exportToAWS,
-  getAssessments,
-  rescanAssessment,
-} from '@webui/api-client';
-import { ConfirmationModal, StatusBadge } from '@webui/ui';
-import {
   ArrowRightFromLine,
   Calendar,
   Computer,
@@ -25,7 +13,22 @@ import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
+
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  deleteAssessment,
+  exportToAWS,
+  getAssessments,
+  rescanAssessment,
+} from '@webui/api-client';
+import { ConfirmationModal, StatusBadge } from '@webui/ui';
+
 import NewAssessmentDialog from './new-assessment-dialog';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -208,6 +211,9 @@ function AssessmentsList() {
                             <ArrowRightFromLine className="w-4 h-4" /> Export to
                             AWS
                           </button>
+                        </li>
+                        <li>
+                          <PDFExportsDialog assessmentId={assessment.id!} />
                         </li>
                         <li className="m-1"></li>
                         <li>

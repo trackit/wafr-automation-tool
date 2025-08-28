@@ -1,6 +1,8 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExports,
+  AssessmentFileExport,
   AssessmentGraphData,
   BestPracticeBody,
   Finding,
@@ -8,6 +10,7 @@ import type {
   PillarBody,
   QuestionBody,
   ScanningTool,
+  AssessmentFileExportType,
 } from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
@@ -48,6 +51,10 @@ export interface AssessmentsRepository {
     findings: Finding[];
     nextToken?: string;
   }>;
+  getAssessmentFindings(args: {
+    assessmentId: string;
+    organization: string;
+  }): Promise<Finding[]>;
   getFinding(args: {
     assessmentId: string;
     findingId: string;
@@ -103,5 +110,17 @@ export interface AssessmentsRepository {
     organization: string;
     scanningTool: ScanningTool;
     graphData: AssessmentGraphData;
+  }): Promise<void>;
+  updateFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void>;
+  deleteFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
   }): Promise<void>;
 }

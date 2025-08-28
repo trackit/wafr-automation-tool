@@ -18,6 +18,7 @@ export interface Assessment {
   step: AssessmentStep;
   workflows: string[];
   error?: AssessmentError;
+  fileExports?: AssessmentFileExports;
 }
 
 export interface AssessmentGraphData {
@@ -48,4 +49,29 @@ export interface AssessmentBody {
   rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
   pillars?: Pillar[];
   questionVersion?: string;
+  fileExports?: AssessmentFileExports;
+}
+
+export enum AssessmentFileExportType {
+  PDF = 'pdf',
+}
+
+export type AssessmentFileExports = Partial<
+  Record<AssessmentFileExportType, AssessmentFileExport[]>
+>;
+
+export enum AssessmentFileExportStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  ERRORED = 'ERRORED',
+}
+
+export interface AssessmentFileExport {
+  id: string;
+  status: AssessmentFileExportStatus;
+  error?: string;
+  versionName: string;
+  objectKey?: string;
+  createdAt: Date;
 }

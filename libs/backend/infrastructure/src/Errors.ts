@@ -1,3 +1,5 @@
+import { AssessmentFileExports } from '@backend/models';
+
 export class InfrastructureError extends Error {
   public readonly description?: string;
 
@@ -86,6 +88,24 @@ export class BestPracticeNotFoundError extends InfrastructureError {
     super({
       message: `Best Practice with id ${args.bestPracticeId} not found for assessment ${args.assessmentId} in organization ${args.organization} and pillar ${args.pillarId} and question ${args.questionId}`,
       name: 'BestPracticeNotFoundError',
+    });
+  }
+}
+
+export class FileExportNotFoundError extends InfrastructureError {
+  public constructor(args: {
+    assessmentId: string;
+    organization: string;
+    type: keyof AssessmentFileExports;
+    id: string;
+  }) {
+    super({
+      message: `${args.type.toUpperCase()} file export with id ${
+        args.id
+      } not found for assessment ${args.assessmentId} in organization ${
+        args.organization
+      }`,
+      name: 'FileExportNotFoundError',
     });
   }
 }

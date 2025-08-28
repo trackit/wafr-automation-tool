@@ -1,6 +1,7 @@
 import type { Pillar } from '../Pillar';
 import type { ScanningTool } from '../ScanningTool';
 import {
+  AssessmentFileExports,
   AssessmentStep,
   type Assessment,
   type AssessmentGraphData,
@@ -107,6 +108,11 @@ export class AssessmentMother {
 
   public withWorkflows(workflows: string[]): AssessmentMother {
     this.data.workflows = workflows;
+    return this;
+  }
+
+  public withFileExports(fileExports: AssessmentFileExports): AssessmentMother {
+    this.data.fileExports = fileExports;
     return this;
   }
 
