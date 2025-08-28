@@ -178,7 +178,7 @@ Resources:
       BackupPlanId: !Ref BackupPlan
       BackupSelection:
         IamRoleArn: !GetAtt BackupRole.Arn
-        SelectionName: !Sub select-ddb-${AWS::StackName}
+        SelectionName: !Sub ${AWS::StackName}-select-ddb
         Resources:
           - !GetAtt DynamoDB.Arn
   OrganizationTable:
