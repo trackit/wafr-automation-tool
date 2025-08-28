@@ -31,6 +31,7 @@ describe('exportPDF UseCase', () => {
       Buffer.from(pdfContent)
     );
 
+    const versionName = 'version-name';
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('test.io')
@@ -41,7 +42,7 @@ describe('exportPDF UseCase', () => {
           {
             id: 'file-export-id',
             status: AssessmentFileExportStatus.NOT_STARTED,
-            versionName: 'version-name',
+            versionName,
             createdAt: new Date(),
           },
         ],
@@ -53,9 +54,10 @@ describe('exportPDF UseCase', () => {
     const input = ExportPDFUseCaseArgsMother.basic().build();
     await expect(useCase.exportPDF(input)).resolves.toBeUndefined();
 
-    expect(fakePDFService.exportAssessment).toHaveBeenCalledExactlyOnceWith(
-      assessment
-    );
+    expect(fakePDFService.exportAssessment).toHaveBeenCalledExactlyOnceWith({
+      assessment,
+      versionName,
+    });
 
     const updatedAssessment =
       fakeAssessmentsRepository.assessments['assessment-id#test.io'];
