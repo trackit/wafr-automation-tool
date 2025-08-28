@@ -1,9 +1,10 @@
 import { Font, renderToBuffer } from '@react-pdf/renderer';
 
-import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import { Assessment, SeverityType } from '@backend/models';
 import type { PDFServicePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
+
+import { tokenAssessmentsRepository } from '../AssessmentsRepository';
 import { tokenLogger } from '../Logger';
 import { AssessmentDocument } from './components/AssessmentDocument';
 

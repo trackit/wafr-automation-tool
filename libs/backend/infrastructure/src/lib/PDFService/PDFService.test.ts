@@ -2,10 +2,6 @@ import { Document } from '@react-pdf/renderer';
 import React from 'react';
 
 import {
-  tokenFakeAssessmentsRepository,
-  tokenPDFAssessmentDocument,
-} from '@backend/infrastructure';
-import {
   AssessmentMother,
   BestPracticeMother,
   FindingMother,
@@ -14,8 +10,13 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
+import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import { PDFService, tokenPDFRenderToBuffer } from './PDFService';
+import {
+  PDFService,
+  tokenPDFAssessmentDocument,
+  tokenPDFRenderToBuffer,
+} from './PDFService';
 
 describe('PDFService Infrastructure', () => {
   describe('exportAssessment', () => {

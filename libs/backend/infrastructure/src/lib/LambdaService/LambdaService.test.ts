@@ -4,12 +4,9 @@ import {
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 
-import {
-  LambdaService,
-  registerTestInfrastructure,
-  tokenLambdaClient,
-} from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { LambdaService, tokenLambdaClient } from './LambdaService';
 
 describe('LambdaService', () => {
   describe('invokeLambda', () => {
