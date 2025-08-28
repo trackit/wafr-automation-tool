@@ -31,11 +31,13 @@ Parameters:
   AIFindingsAssociationChunkSize:
     Type: Number
     Default: 10
+
 Conditions:
   CreateBackups:
     Fn::Equals:
       - !Ref Debug
       - 'false'
+
 Resources:
   Api:
     Type: AWS::Serverless::Application
