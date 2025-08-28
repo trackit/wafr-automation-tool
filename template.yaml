@@ -156,7 +156,7 @@ Resources:
     Condition: CreateBackups
     Type: AWS::Backup::BackupVault
     Properties:
-      BackupVaultName: !Sub ddb-vault-${AWS::StackName}
+      BackupVaultName: !Sub ${AWS::StackName}-ddb-vault
   BackupPlan:
     Condition: CreateBackups
     Type: AWS::Backup::BackupPlan
