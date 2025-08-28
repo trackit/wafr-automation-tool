@@ -58,7 +58,9 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     base = base.replace(/\s+/g, '-');
 
     // Remove control characters
+    // eslint-disable-next-line no-control-regex
     base = base.replace(/[\x00-\x1F\x7F]/g, '');
+    // eslint-disable-next-line no-control-regex
     ext = ext.replace(/[\x00-\x1F\x7F]/g, '');
 
     // Keep only safe characters: letters, digits, dot, underscore, hyphen
