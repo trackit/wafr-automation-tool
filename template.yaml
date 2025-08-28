@@ -162,7 +162,7 @@ Resources:
     Type: AWS::Backup::BackupPlan
     Properties:
       BackupPlan:
-        BackupPlanName: !Sub ddb-plan-${AWS::StackName}
+        BackupPlanName: !Sub ${AWS::StackName}-ddb-plan
         BackupPlanRule:
           - RuleName: daily-ddb
             TargetBackupVault: !Ref BackupVault
