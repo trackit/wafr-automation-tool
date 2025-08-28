@@ -6,9 +6,24 @@ import {
 } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useDebounce } from '@uidotdev/usehooks';
-import { getFindings, hideFinding } from '@webui/api-client';
-import { Earth, FileCheck, Info, Search, Server } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  addComment,
+  deleteComment,
+  getFindings,
+  updateComment,
+  updateFinding,
+} from '@webui/api-client';
+import { CommentsPane, Modal } from '@webui/ui';
+import {
+  Earth,
+  FileCheck,
+  Info,
+  NotebookPen,
+  Search,
+  Server,
+} from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -85,10 +100,19 @@ function FindingItem({
   finding,
   searchQuery,
   onHide,
+  showCommentsFor,
+  onComment,
+  commentBtnRefs,
 }: {
   finding: components['schemas']['Finding'];
   searchQuery: string;
   onHide: (findingId: string, hidden: boolean) => void;
+  showCommentsFor: components['schemas']['Finding'] | null;
+  onComment: (
+    finding: components['schemas']['Finding'] | null,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  commentBtnRefs: RefObject<{ [id: string]: HTMLButtonElement | null }>;
 }) {
   const remediations = useMemo(() => {
     const isUrl = (str: string) => {
@@ -109,8 +133,8 @@ function FindingItem({
 
   return (
     <div className="w-full px-8 py-8 border-b border-base-content/30">
-      <div className="flex flex-row gap-2 items-start">
-        <div className="text-md font-bold mb-2">
+      <div className="flex flex-row gap-2 items-start justify-between">
+        <div className="text-md font-bold mb-2 max-w-[90%]">
           {finding.severity && (
             <SeverityBadge
               className="badge-sm mr-2"
@@ -120,13 +144,11 @@ function FindingItem({
           {highlightText(finding.statusDetail, searchQuery)}
           {finding.isAIAssociated && <AIBadge className="badge-sm ml-2" />}
         </div>
-        {!finding.hidden && (
-          <div
-            className="tooltip ml-auto tooltip-left"
-            data-tip="Force resolve"
-          >
+        <div className="flex flex-row gap-2 justify-between">
+          {!finding.hidden && (
             <button
-              className="btn btn-xs btn-primary btn-outline mt-[-0.5em]"
+              className="tooltip tooltip-left btn btn-xs btn-primary btn-outline mt-[-0.5em]"
+              data-tip="Force resolve"
               onClick={() => {
                 onHide(finding.id || '', !finding.hidden);
                 finding.hidden = !finding.hidden;
@@ -134,8 +156,37 @@ function FindingItem({
             >
               <FileCheck className="w-4 h-4 " />
             </button>
+          )}
+          <div className="indicator">
+            <button
+              ref={(el) => {
+                if (el && finding.id) {
+                  commentBtnRefs.current[finding.id] = el;
+                }
+              }}
+              className={`comment-btn tooltip tooltip-left btn btn-xs ${
+                showCommentsFor?.id === finding.id
+                  ? 'btn-primary'
+                  : 'btn-primary btn-outline'
+              } mt-[-0.5em]`}
+              data-tip="Comments"
+              onClick={(e) => {
+                if (showCommentsFor?.id === finding.id) {
+                  onComment(null, e);
+                } else {
+                  onComment(finding, e);
+                }
+              }}
+            >
+              <NotebookPen className="w-4 h-4 " />
+            </button>
+            {finding.comments && finding.comments.length > 0 && (
+              <span className="indicator-item badge badge-xs badge-primary w-4 h-4 -mt-1">
+                {finding.comments.length}
+              </span>
+            )}
           </div>
-        )}
+        </div>
       </div>
       {finding.riskDetails && (
         <p className="text-sm text-base-content">
@@ -212,11 +263,51 @@ function FindingsDetails({
   bestPractice,
   pillarId,
   questionId,
-}: FindingsDetailsProps) {
+  setBestPractice,
+}: FindingsDetailsProps & {
+  setBestPractice: (
+    bestPractice: components['schemas']['BestPractice'] | null
+  ) => void;
+}) {
   const queryClient = useQueryClient();
   const [showHidden, setShowHidden] = useState(false);
+  const [showCommentsFor, setShowCommentsFor] = useState<
+    components['schemas']['Finding'] | null
+  >(null);
+  const [commentPos, setCommentPos] = useState<{
+    y: number;
+    maxHeight: number;
+    minHeight: number;
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
+
+  function handleCommentClick(
+    e: React.MouseEvent<HTMLButtonElement>,
+    finding: components['schemas']['Finding'] | null
+  ) {
+    if (!containerRef.current) return;
+    if (!finding) {
+      setShowCommentsFor(null);
+      setCommentPos(null);
+    }
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const btnRect = e.currentTarget.getBoundingClientRect();
+
+    const y = btnRect.top - containerRect.top + btnRect.height / 2;
+
+    const maxHeight = window.innerHeight - btnRect.bottom;
+
+    const cardEl = e.currentTarget.closest('.w-full');
+    const cardHeight = cardEl
+      ? (cardEl as HTMLElement).getBoundingClientRect().height
+      : 150;
+
+    setCommentPos({ y, maxHeight, minHeight: cardHeight });
+    setShowCommentsFor(finding);
+  }
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -263,12 +354,14 @@ function FindingsDetails({
       hidden,
     }: {
       findingId: string;
-      hidden: boolean;
+      hidden?: boolean;
     }) =>
-      hideFinding({
+      updateFinding({
         assessmentId,
         findingId,
-        hide: hidden,
+        findingDto: {
+          ...(hidden ? { hidden } : {}),
+        },
       }),
     onMutate: async ({ findingId, hidden }) => {
       // Cancel any outgoing refetches
@@ -303,8 +396,14 @@ function FindingsDetails({
       // Update the finding's hidden status
       if (newData.results) {
         const findings = newData.results as components['schemas']['Finding'][];
+
         const updatedFindings = findings.map((finding) =>
-          finding.id === findingId ? { ...finding, hidden } : finding
+          finding.id === findingId
+            ? {
+                ...finding,
+                hidden: hidden ?? finding.hidden,
+              }
+            : finding
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type
@@ -346,6 +445,106 @@ function FindingsDetails({
     },
   });
 
+  const { mutate: mutateComment } = useMutation({
+    mutationFn: async (args: { findingId: string; text: string }) => {
+      const { findingId, text } = args;
+      const response = await addComment({
+        assessmentId,
+        findingId,
+        text,
+      });
+      return response;
+    },
+    onError: (err) => {
+      console.error(err);
+      enqueueSnackbar({
+        message: 'Failed to add comment. Please try again later',
+        variant: 'error',
+      });
+    },
+    onSuccess: (comment: components['schemas']['Comment']) => {
+      if (!showCommentsFor) return;
+      if (!showCommentsFor.comments) {
+        showCommentsFor.comments = [];
+      }
+      showCommentsFor.comments.push(comment);
+    },
+  });
+
+  const { mutate: mutateUpdateComment, isPending: isUpdateCommentPending } =
+    useMutation({
+      mutationFn: async (args: {
+        findingId: string;
+        commentId: string;
+        text: string;
+      }) => {
+        const { findingId, commentId, text } = args;
+        const comment = showCommentsFor?.comments?.find(
+          (c) => c.id === commentId
+        );
+        if (comment && comment.text !== text) {
+          await updateComment({
+            assessmentId,
+            findingId,
+            commentId,
+            commentDto: {
+              text,
+            },
+          });
+          return {
+            text,
+            comment,
+          };
+        }
+        return {
+          text,
+          comment: null,
+        };
+      },
+      onError: (err) => {
+        console.error(err);
+        enqueueSnackbar({
+          message: 'Failed to update comment. Please try again later',
+          variant: 'error',
+        });
+      },
+      onSuccess: (args: {
+        text: string;
+        comment: components['schemas']['Comment'] | null;
+      }) => {
+        const { text, comment } = args;
+        if (!comment) return;
+        comment.text = text;
+      },
+    });
+
+  const { mutate: mutateDeleteComment, isPending: isDeleteCommentPending } =
+    useMutation({
+      mutationFn: async (args: { findingId: string; commentId: string }) => {
+        const { findingId, commentId } = args;
+        await deleteComment({
+          assessmentId,
+          findingId,
+          commentId,
+        });
+        return commentId;
+      },
+      onError: (err) => {
+        console.error(err);
+        enqueueSnackbar({
+          message: 'Failed to update comment. Please try again later',
+          variant: 'error',
+        });
+      },
+      onSuccess: (commentId: string) => {
+        if (showCommentsFor?.comments) {
+          showCommentsFor.comments = showCommentsFor.comments.filter(
+            (c) => c.id !== commentId
+          );
+        }
+      },
+    });
+
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
     count: sortedFindings.length,
@@ -371,77 +570,179 @@ function FindingsDetails({
     sortedFindings.length,
   ]);
 
+  useEffect(() => {
+    if (!showCommentsFor || !parentRef.current || !containerRef.current) return;
+
+    const scrollEl = parentRef.current;
+
+    const onScroll = () => {
+      if (!showCommentsFor || !showCommentsFor.id) return;
+
+      const btn = commentBtnRefs.current[showCommentsFor.id];
+      const btnRect = btn?.getBoundingClientRect();
+      const containerRect = containerRef.current?.getBoundingClientRect();
+
+      if (!containerRect || !btnRect) return;
+
+      const availableBelow = window.innerHeight - btnRect.bottom;
+
+      let y;
+      if (btnRect.top === 0) {
+        y = -window.innerHeight;
+      } else {
+        y = btnRect.top - containerRect.top + btnRect.height / 2;
+      }
+
+      setCommentPos((prev) =>
+        prev
+          ? { y, maxHeight: availableBelow, minHeight: prev.minHeight }
+          : prev
+      );
+    };
+
+    scrollEl.addEventListener('scroll', onScroll);
+    return () => scrollEl.removeEventListener('scroll', onScroll);
+  }, [showCommentsFor]);
+
   return (
-    <div className="flex flex-col h-[95vh]">
-      <div className="flex flex-col gap-2 px-8 py-4 border-b border-base-content/30">
-        <div className="flex flex-row gap-2 items-center">
-          <h3 className="text-lg font-bold">{bestPractice.label}</h3>
-          <label className="fieldset-label text-sm ml-auto text-base-content">
-            <input
-              type="checkbox"
-              defaultChecked={false}
-              className="toggle toggle-xs"
-              onChange={() => setShowHidden(!showHidden)}
-            />
-            Show resolved
-          </label>
-          {bestPractice.risk && <SeverityBadge severity={bestPractice.risk} />}
-        </div>
-        <label className="input w-full flex flex-row gap-2 items-center">
-          <Search className="h-[1em] opacity-50" />
-          <input
-            type="search"
-            className="grow"
-            placeholder="Search findings..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </label>
-      </div>
-      <div ref={parentRef} className="flex-1 overflow-auto">
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {virtualItems.map((virtualRow) => (
+    <Modal
+      open={true}
+      onClose={() => setBestPractice(null)}
+      className={`w-full ${
+        showCommentsFor ? 'mr-[25vw] max-w-6xl' : 'max-w-6xl'
+      }`}
+      notCentered
+    >
+      <div
+        ref={containerRef}
+        className="relative h-[95vh] flex overflow-visible"
+      >
+        <div className="flex-1 flex flex-col h-[95vh]">
+          <div className="flex flex-col gap-2 px-8 py-4 border-b border-base-content/30">
+            <div className="flex flex-row gap-2 items-center">
+              <h3 className="text-lg font-bold">{bestPractice.label}</h3>
+              <label className="fieldset-label text-sm ml-auto text-base-content">
+                <input
+                  type="checkbox"
+                  defaultChecked={false}
+                  className="toggle toggle-xs"
+                  onChange={() => setShowHidden(!showHidden)}
+                />
+                Show resolved
+              </label>
+              {bestPractice.risk && (
+                <SeverityBadge severity={bestPractice.risk} />
+              )}
+            </div>
+            <label className="input w-full flex flex-row gap-2 items-center">
+              <Search className="h-[1em] opacity-50" />
+              <input
+                type="search"
+                className="grow"
+                placeholder="Search findings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </label>
+          </div>
+          <div ref={parentRef} className="flex-1 overflow-auto">
             <div
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              ref={rowVirtualizer.measureElement}
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
+                height: `${rowVirtualizer.getTotalSize()}px`,
                 width: '100%',
-                transform: `translateY(${virtualRow.start}px)`,
+                position: 'relative',
               }}
             >
-              <FindingItem
-                finding={sortedFindings[virtualRow.index]}
-                searchQuery={searchQuery}
-                onHide={(findingId, hidden) => mutate({ findingId, hidden })}
-              />
+              {virtualItems.map((virtualRow) => (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <FindingItem
+                    finding={sortedFindings[virtualRow.index]}
+                    searchQuery={searchQuery}
+                    onHide={(findingId, hidden) =>
+                      mutate({ findingId, hidden })
+                    }
+                    showCommentsFor={showCommentsFor}
+                    onComment={(f, e) => handleCommentClick(e, f)}
+                    commentBtnRefs={commentBtnRefs}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        {sortedFindings.length === 0 && (
-          <div className="flex flex-col gap-2 px-8 py-4">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full py-8">
-                <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+            {!hasNextPage && !isFetchingNextPage && !isLoading && (
+              <div className="flex flex-col gap-2 px-8 py-4">
+                <p className="text-sm text-base-content/80 text-center">
+                  You've reached the end.
+                </p>
               </div>
-            ) : (
-              <p className="text-sm text-base-content/80">
-                No findings found for "{searchQuery}"
-              </p>
             )}
+            {sortedFindings.length === 0 && (
+              <div className="flex flex-col gap-2 px-8 py-4">
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full py-8">
+                    <div className="w-16 h-16 loading loading-ring loading-lg text-primary"></div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-base-content/80">
+                    No findings found for "{searchQuery}"
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        {showCommentsFor && commentPos && (
+          <div
+            className="absolute w-[25vw] bg-base-100 rounded-lg shadow-lg border border-base-content/30 overflow-auto z-50 left-full ml-2 -mt-6"
+            style={{
+              top: commentPos.y,
+            }}
+          >
+            <CommentsPane
+              key={showCommentsFor.id}
+              finding={showCommentsFor}
+              maxHeight={commentPos.maxHeight}
+              minHeight={commentPos.minHeight}
+              isUpdateCommentPending={isUpdateCommentPending}
+              isDeleteCommentPending={isDeleteCommentPending}
+              onAdded={(text: string) =>
+                mutateComment({
+                  findingId: showCommentsFor.id ?? '',
+                  text,
+                })
+              }
+              onUpdate={(commentId, text) =>
+                mutateUpdateComment({
+                  findingId: showCommentsFor.id ?? '',
+                  commentId,
+                  text,
+                })
+              }
+              onDelete={(commentId) =>
+                mutateDeleteComment({
+                  findingId: showCommentsFor.id ?? '',
+                  commentId,
+                })
+              }
+              onCancel={() => {
+                setCommentPos(null);
+                setShowCommentsFor(null);
+              }}
+            />
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

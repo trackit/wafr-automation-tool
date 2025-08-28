@@ -2,6 +2,7 @@ export interface Finding extends ScanFinding {
   hidden: boolean;
   isAIAssociated: boolean;
   bestPractices: string;
+  comments?: FindingComment[];
 }
 
 export interface ScanFinding {
@@ -42,6 +43,18 @@ export enum SeverityType {
   Other = 'Other',
 }
 
+export interface FindingComment {
+  id: string;
+  authorId: string;
+  text: string;
+  createdAt: Date;
+}
+
+export interface FindingCommentBody {
+  text?: string;
+}
+
 export interface FindingBody {
   hidden?: boolean;
+  comments?: FindingComment[];
 }

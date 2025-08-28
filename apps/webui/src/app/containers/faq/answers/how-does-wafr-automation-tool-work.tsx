@@ -3,16 +3,18 @@ const HowDoesWAFRAutomationWorkAnswer = () => (
     <div className="w-4/5 space-y-2">
       <div>
         <p>
-          WAFR Automation is built on a serverless architecture using AWS
-          services like Lambda, API Gateway, and ECS Fargate. It automates the
-          process of assessing your AWS environment by running security and
-          compliance checks with tools like Prowler.
+          WAFR Automation is a fully managed SaaS solution built on a serverless
+          architecture using AWS services like Lambda, API Gateway, and ECS
+          Fargate. It automates the process of assessing your AWS environment by
+          running security and compliance checks with advanced tools like
+          Prowler.
         </p>
         <p>
-          The findings are mapped to AWS best practices and presented on an
-          interactive dashboard. The tool scales automatically, ensuring
-          efficiency and providing actionable insights that can be tracked and
-          implemented with ease.
+          The results are mapped to AWS best practices and are presented on an
+          interactive, easy-to-use dashboard. WAFR Automation scales
+          automatically to meet the demands of your environment, ensuring
+          optimal performance and providing actionable insights that you can
+          track, analyze, and implement seamlessly.
         </p>
       </div>
       <img
@@ -24,29 +26,35 @@ const HowDoesWAFRAutomationWorkAnswer = () => (
     <div className="border-l border-gray-300 pl-4">
       <h3 className="text-2xl font-semibold text-gray-800">Architecture</h3>
       <p className="mt-2 text-lg text-gray-700">
-        The WAFR Automation Tool uses a serverless architecture built on AWS
-        services:
+        The WAFR Automation Tool leverages a serverless architecture, hosted and
+        managed on AWS services:
       </p>
       <ul className="list-disc pl-6 text-gray-700 space-y-2 mt-2">
         <li>
           <strong>AWS Serverless Application Model (SAM):</strong> Built using
-          AWS SAM for efficient management of serverless applications.
+          AWS SAM to ensure efficient management and deployment of serverless
+          applications.
         </li>
         <li>
-          <strong>Serverless Functions:</strong> Runs as a collection of
-          serverless functions that automatically assess AWS accounts.
+          <strong>Serverless Functions:</strong> Runs as a set of fully managed
+          serverless functions, which automatically assess AWS accounts with no
+          need for user intervention.
         </li>
         <li>
           <strong>Automated Checks:</strong> Performs automated checks against
-          Well-Architected Framework principles.
+          Well-Architected Framework principles to ensure your AWS environment
+          meets best practices.
         </li>
         <li>
-          <strong>Scalability:</strong> Scales automatically based on demand,
-          ensuring efficient use of resources.
+          <strong>Scalability:</strong> Automatically scales according to the
+          size of your AWS environment, ensuring that resources are allocated as
+          needed for optimal performance.
         </li>
         <li>
-          <strong>Cost Model:</strong> Operates with a pay-per-use cost model,
-          ensuring cost efficiency.
+          <strong>Subscription-Based:</strong> WAFR Automation operates on a
+          subscription model, providing you with continuous access to the tool
+          and its updates, ensuring that your environment is always secure and
+          compliant.
         </li>
       </ul>
     </div>

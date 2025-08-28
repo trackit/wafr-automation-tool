@@ -77,6 +77,17 @@ describe('MarketplaceService', () => {
 
       expect(hasMonthlySubscription).toBe(false);
     });
+    it('should return false if the organization has no account ID', async () => {
+      const { marketplaceService } = setup();
+
+      await expect(
+        marketplaceService.hasMonthlySubscription({
+          organization: OrganizationMother.basic()
+            .withAccountId(undefined)
+            .build(),
+        })
+      ).resolves.toBe(false);
+    });
   });
 
   describe('hasUnitBasedSubscription', () => {
@@ -115,6 +126,17 @@ describe('MarketplaceService', () => {
         });
 
       expect(hasUnitBasedSubscription).toBe(false);
+    });
+    it('should return false if the organization has no unit-based agreement ID', async () => {
+      const { marketplaceService } = setup();
+
+      await expect(
+        marketplaceService.hasUnitBasedSubscription({
+          organization: OrganizationMother.basic()
+            .withUnitBasedAgreementId(undefined)
+            .build(),
+        })
+      ).resolves.toBe(false);
     });
   });
 

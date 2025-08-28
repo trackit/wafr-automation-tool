@@ -9,27 +9,43 @@ type ExportWellArchitectedToolParameters = NonNullable<
   operations['exportWellArchitectedTool']['parameters']['path']
 >;
 
+type ExportWellArchitectedToolBody = NonNullable<
+  NonNullable<
+    operations['exportWellArchitectedTool']['requestBody']
+  >['content']['application/json']
+>;
+
 export class ExportWellArchitectedToolAdapterEventMother {
-  private data: ExportWellArchitectedToolParameters;
+  private pathParameters: ExportWellArchitectedToolParameters;
+  private body: ExportWellArchitectedToolBody;
   private user: Pick<User, 'id' | 'email'> = {
     id: 'user-id',
     email: 'user-id@test.io',
   };
 
-  private constructor(data: ExportWellArchitectedToolParameters) {
-    this.data = data;
+  private constructor(
+    params: ExportWellArchitectedToolParameters,
+    body: ExportWellArchitectedToolBody
+  ) {
+    this.pathParameters = params;
+    this.body = body;
   }
 
   public static basic(): ExportWellArchitectedToolAdapterEventMother {
-    return new ExportWellArchitectedToolAdapterEventMother({
-      assessmentId: 'assessment-id',
-    });
+    return new ExportWellArchitectedToolAdapterEventMother(
+      {
+        assessmentId: 'assessment-id',
+      },
+      {
+        region: 'us-west-2',
+      }
+    );
   }
 
   public withAssessmentId(
     assessmentId: ExportWellArchitectedToolParameters['assessmentId']
   ): ExportWellArchitectedToolAdapterEventMother {
-    this.data.assessmentId = assessmentId;
+    this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
@@ -40,9 +56,17 @@ export class ExportWellArchitectedToolAdapterEventMother {
     return this;
   }
 
+  public withRegion(
+    region?: string
+  ): ExportWellArchitectedToolAdapterEventMother {
+    this.body.region = region;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withPathParameters(this.data)
+      .withPathParameters(this.pathParameters)
+      .withBody(JSON.stringify(this.body))
       .withUserClaims({
         sub: this.user.id,
         email: this.user.email,

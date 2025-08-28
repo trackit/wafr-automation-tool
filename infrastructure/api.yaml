@@ -7,6 +7,8 @@ Parameters:
     Type: String
   Project:
     Type: String
+  ParentStackName:
+    Type: String
   StateMachineArn:
     Type: String
   StateMachineName:
@@ -201,17 +203,17 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  GetAllAssessmentsLogGroup:
+  GetAssessmentsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${GetAllAssessmentsFunction}'
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentsFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  GetAllAssessmentsFunction:
+  GetAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../apps/backend/src/handlers/api/getAllAssessments
+      CodeUri: ../apps/backend/src/handlers/api/getAssessments
       Tags:
-        Name: GetAllAssessmentsFunction
+        Name: GetAssessmentsFunction
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -221,7 +223,7 @@ Resources:
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
       Events:
-        GetAllAssessments:
+        GetAssessments:
           Type: Api
           Properties:
             RestApiId: !Ref Api
@@ -392,42 +394,65 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
+  DefaultExportRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt ExportAssessmentRole.Arn
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
   ExportAssessmentWellArchitectedToolLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${ExportAssessmentWellArchitectedToolFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+  ExportAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ParentStackName}-export-assessment'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: BedrockPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource: !Ref DynamoDBArn
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !Ref OrganizationTableArn
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - arn:aws:iam::*:role/*
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ../apps/backend/src/handlers/api/exportWellArchitectedTool
       Tags:
         Name: ExportAssessmentWellArchitectedToolFunction
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:DeleteItem
-                - dynamodb:GetItem
-                - dynamodb:BatchWriteItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
-            - Effect: Allow
-              Action:
-                - wellarchitected:CreateWorkload
-                - wellarchitected:GetLensReview
-                - wellarchitected:TagResource
-                - wellarchitected:ListAnswers
-                - wellarchitected:UpdateAnswer
-              Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:workload/*'
-            - Effect: Allow
-              Action:
-                - wellarchitected:ListWorkloads
-              Resource:
-                - !Sub 'arn:aws:wellarchitected:${AWS::Region}:${AWS::AccountId}:*'
+      Role: !GetAtt ExportAssessmentRole.Arn
       Events:
         ExportAssessmentWellArchitectedTool:
           Type: Api
@@ -511,11 +536,40 @@ Resources:
         Variables:
           PDF_EXPORT_LAMBDA_ARN: !GetAtt ExportAssessmentToPDFFunction.Arn
       Events:
-        ExportAssessmentToPDF:
+        StartPDFExport:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/pdf
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  CreateMilestoneLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CreateMilestoneFunction}
+      RetentionInDays: !Ref LogRetentionInDays
+  CreateMilestoneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/createMilestone
+      Tags:
+        Name: CreateMilestoneFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        CreateMilestone:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/create-milestone
             Method: POST
     Metadata:
       BuildMethod: esbuild
@@ -551,6 +605,35 @@ Resources:
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/pdf
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetMilestonesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetMilestonesFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetMilestonesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getMilestones
+      Tags:
+        Name: GetMilestonesFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        GetMilestones:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/milestones
             Method: GET
     Metadata:
       BuildMethod: esbuild
@@ -598,6 +681,35 @@ Resources:
           Properties:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/pdf/{fileExportId}/url
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetMilestoneLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetMilestoneFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetMilestoneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getMilestone
+      Tags:
+        Name: GetMilestoneFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Events:
+        GetMilestone:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/milestones/{milestoneId}
             Method: GET
     Metadata:
       BuildMethod: esbuild
@@ -742,6 +854,10 @@ Resources:
                 - dynamodb:GetItem
                 - dynamodb:Query
               Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - cognito-idp:ListUsers
+              Resource: !Sub 'arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPool}'
       Events:
         GetBestPracticeFindings:
           Type: Api
@@ -749,6 +865,9 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref UserPool
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -758,7 +877,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
   UpdateBestPracticeLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -830,7 +948,114 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
+  AddCommentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AddCommentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  AddCommentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/addComment
+      Tags:
+        Name: AddCommentFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        AddComment:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/findings/{findingId}/comments
+            Method: POST
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref UserPool
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  UpdateCommentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateCommentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  UpdateCommentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/updateComment
+      Tags:
+        Name: UpdateCommentFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        UpdateComment:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
+            Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  DeleteCommentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeleteCommentFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  DeleteCommentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/deleteComment
+      Tags:
+        Name: DeleteCommentFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        DeleteComment:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
+            Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
 Outputs:
   ApiEndpoint:
     Description: API Endpoint

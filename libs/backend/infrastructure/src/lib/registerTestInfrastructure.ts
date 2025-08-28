@@ -10,6 +10,7 @@ import {
   tokenFakeAssessmentsStateMachine,
   tokenStateMachineArn,
 } from './AssessmentsStateMachine';
+import { tokenCognitoService, tokenFakeCognitoService } from './CognitoService';
 import {
   testDynamoDbConfig,
   tokenDynamoDBConfig,
@@ -89,5 +90,8 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenFeatureToggleRepository, {
     useFactory: () => inject(tokenFakeFeatureToggleRepository),
+  });
+  register(tokenCognitoService, {
+    useFactory: () => inject(tokenFakeCognitoService),
   });
 };

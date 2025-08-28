@@ -70,6 +70,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve all milestones for a specific assessment
+         * @description Fetches all milestones associated with a specific assessment.
+         *
+         */
+        get: operations["getMilestones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/milestones/{milestoneId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve a specific milestone
+         * @description Fetches all details associated with a specific milestone.
+         *
+         */
+        get: operations["getMilestone"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/exports/create-milestone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a milestone for the assessment
+         * @description Creates a milestone for the assessment.
+         *
+         */
+        post: operations["createMilestone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/exports/well-architected-tool": {
         parameters: {
             query?: never;
@@ -254,6 +317,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/findings/{findingId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a comment to a specific finding
+         * @description Adds a comment to a specific finding.
+         *
+         */
+        post: operations["addComment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update the details of a specific comment
+         * @description Updates the details of a specific comment.
+         *
+         */
+        put: operations["updateComment"];
+        post?: never;
+        /**
+         * Delete a specific comment
+         * @description Deletes a specific comment.
+         *
+         */
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -271,6 +381,8 @@ export interface components {
              *     If empty, all regions will be scanned
              *      */
             regions?: string[];
+            /** @description Region where the assessment is exported */
+            exportRegion?: string;
             /** @description Role ARN associated with the assessment */
             roleArn?: string;
             /** @description Workflows associated with the assessment */
@@ -343,25 +455,45 @@ export interface components {
             riskDetails?: string;
             /** @description Tells whether the finding is associated with an AI or manually */
             isAIAssociated?: boolean;
+            comments?: components["schemas"]["Comment"][];
         };
         FindingDto: {
             hidden?: boolean;
         };
+        Comment: {
+            /** @description Unique identifier of the comment */
+            id: string;
+            /** @description Id of the user who created the comment */
+            authorId: string;
+            /** @description Email of the user who created the comment */
+            authorEmail?: string;
+            /** @description Text of the comment */
+            text: string;
+            /**
+             * Format: date-time
+             * @description ISO-formatted date of when the comment was created
+             */
+            createdAt: string;
+        };
+        CommentDto: {
+            /** @description Text of the comment */
+            text: string;
+        };
         Pillar: {
-            id?: string;
-            label?: string;
-            disabled?: boolean;
-            questions?: components["schemas"]["Question"][];
+            id: string;
+            label: string;
+            disabled: boolean;
+            questions: components["schemas"]["Question"][];
         };
         PillarDto: {
             disabled?: boolean;
         };
         Question: {
-            id?: string;
-            label?: string;
-            none?: boolean;
-            disabled?: boolean;
-            bestPractices?: components["schemas"]["BestPractice"][];
+            id: string;
+            label: string;
+            none: boolean;
+            disabled: boolean;
+            bestPractices: components["schemas"]["BestPractice"][];
         };
         QuestionDto: {
             none?: boolean;
@@ -369,13 +501,13 @@ export interface components {
         };
         /** @description A best practice related to a question and pillar in the assessment */
         BestPractice: {
-            id?: string;
-            label?: string;
+            id: string;
+            label: string;
             /** @enum {string} */
-            risk?: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
-            description?: string;
-            checked?: boolean;
-            results?: string[];
+            risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
+            description: string;
+            checked: boolean;
+            results: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {
@@ -383,6 +515,21 @@ export interface components {
         };
         BestPracticeDto: {
             checked?: boolean;
+        };
+        /** Milestone */
+        Milestone: {
+            id: number;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
+            pillars: components["schemas"]["Pillar"][];
+        };
+        /** MilestoneSummary */
+        MilestoneSummary: {
+            id: number;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         /** @description A file export related to an assessment */
         FileExport: {
@@ -686,6 +833,163 @@ export interface operations {
             };
         };
     };
+    getMilestones: {
+        parameters: {
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+                /** @description Maximum number of milestones to return */
+                limit?: number;
+                /** @description Token for pagination. */
+                nextToken?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of milestones related to the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        milestones: components["schemas"]["MilestoneSummary"][];
+                        /** @description Token for pagination. If there are more milestones than can be returned in a single response,
+                         *     this token will allow you to retrieve the next set of results.
+                         *      */
+                        nextToken?: string;
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getMilestone: {
+        parameters: {
+            query?: {
+                /** @description The region to filter milestones by. */
+                region?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+                /** @description The unique ID of the milestone to retrieve pillars for */
+                milestoneId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of pillars related to the specified milestone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Milestone"];
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to create a milestone for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The region to create the milestone in. */
+                    region?: string;
+                    /** @description The name of the milestone to create. */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The milestone has been successfully created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization or email of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     exportWellArchitectedTool: {
         parameters: {
             query?: never;
@@ -696,7 +1000,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The region to export the assessment to. */
+                    region?: string;
+                };
+            };
+        };
         responses: {
             /** @description The assessment has been successfully exported */
             200: {
@@ -1223,6 +1534,141 @@ export interface operations {
             };
             /** @description Internal server error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    addComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to add a comment to */
+                findingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Text of the comment */
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The comment has been successfully added */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment or finding could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to which the comment belongs */
+                findingId: string;
+                /** @description The unique ID of the comment to update */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentDto"];
+            };
+        };
+        responses: {
+            /** @description The comment has been successfully updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment, finding, or comment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ID of the assessment to which the finding belongs */
+                assessmentId: string;
+                /** @description The unique ID of the finding to which the comment belongs */
+                findingId: string;
+                /** @description The unique ID of the comment to delete */
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The comment has been successfully deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -30,7 +30,7 @@ Parameters:
     Default: 3
   AIFindingsAssociationChunkSize:
     Type: Number
-    Default: 400
+    Default: 10
 
 Resources:
   Api:
@@ -58,6 +58,7 @@ Resources:
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        ParentStackName: !Ref AWS::StackName
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -101,11 +102,9 @@ Resources:
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
         ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition
-        ProwlerTaskRole: !GetAtt ScanningTools.Outputs.ProwlerTaskRole
+        ScanTaskRole: !GetAtt ScanningTools.Outputs.ScanTaskRole
         CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
-        CloudCustodianTaskRole: !GetAtt ScanningTools.Outputs.CloudCustodianTaskRole
         CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
-        CloudSploitTaskRole: !GetAtt ScanningTools.Outputs.CloudSploitTaskRole
         Subnet: !GetAtt Network.Outputs.Subnet
         SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
         LogRetentionInDays: !Ref LogRetentionInDays

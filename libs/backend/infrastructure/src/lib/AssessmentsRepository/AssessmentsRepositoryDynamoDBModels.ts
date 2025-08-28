@@ -23,6 +23,7 @@ export interface DynamoDBAssessment {
   questionVersion?: string;
   rawGraphData: Partial<Record<ScanningTool, DynamoDBAssessmentGraphData>>;
   regions: string[];
+  exportRegion?: string;
   roleArn: string;
   step: AssessmentStep;
   workflows: string[];
@@ -59,6 +60,7 @@ export interface DynamoDBFinding {
   hidden: boolean;
   id: string;
   isAIAssociated: boolean;
+  comments?: Record<string, DynamoDBFindingComment>;
   metadata: FindingMetadata;
   remediation?: FindingRemediation;
   resources?: FindingResource[];
@@ -66,6 +68,18 @@ export interface DynamoDBFinding {
   severity?: SeverityType;
   statusCode?: string;
   statusDetail?: string;
+}
+
+export interface DynamoDBFindingBody {
+  hidden?: boolean;
+  comments?: Record<string, DynamoDBFindingComment>;
+}
+
+export interface DynamoDBFindingComment {
+  id: string;
+  authorId: string;
+  text: string;
+  createdAt: string;
 }
 
 export interface DynamoDBPillar {

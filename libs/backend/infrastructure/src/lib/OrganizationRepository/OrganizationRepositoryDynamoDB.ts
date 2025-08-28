@@ -2,8 +2,17 @@ import { Organization } from '@backend/models';
 import { OrganizationRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
+import z from 'zod';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
+
+const OrganizationSchema = z.object({
+  domain: z.string(),
+  accountId: z.string().optional(),
+  assessmentExportRoleArn: z.string().optional(),
+  unitBasedAgreementId: z.string().optional(),
+  freeAssessmentsLeft: z.number().optional(),
+}) as z.ZodType<Organization>;
 
 export type DynamoDBOrganization = Organization & { PK: string };
 
@@ -50,7 +59,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { PK, ...organization } = dynamoOrganization;
-    return organization;
+    return OrganizationSchema.parse(organization);
   }
 }
 

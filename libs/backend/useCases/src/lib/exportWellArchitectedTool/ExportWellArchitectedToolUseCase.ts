@@ -1,14 +1,20 @@
 import {
   tokenAssessmentsRepository,
   tokenLogger,
+  tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { AssessmentStep, User } from '@backend/models';
+import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import { NotFoundError } from '../Errors';
+import {
+  assertAssessmentIsReadyForExport,
+  assertOrganizationHasExportRole,
+} from '../../services/exports';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
+  region?: string;
   user: User;
 };
 
@@ -24,6 +30,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     tokenWellArchitectedToolService
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly organizationRepository = inject(tokenOrganizationRepository);
 
   public async exportAssessment(
     args: ExportWellArchitectedToolUseCaseArgs
@@ -37,20 +44,33 @@ export class ExportWellArchitectedToolUseCaseImpl
         `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
       );
     }
-    if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
-      throw new ConflictError(
-        `Assessment with id ${assessment.id} is not finished`
+    assertAssessmentIsReadyForExport(assessment, args.region);
+    const organization = await this.organizationRepository.get({
+      organizationDomain: args.user.organizationDomain,
+    });
+    if (!organization) {
+      throw new NotFoundError(
+        `Organization with domain ${args.user.organizationDomain} not found`
       );
     }
-    if (assessment.pillars.length === 0) {
-      throw new NoContentError(
-        `Assessment with id ${assessment.id} has no findings`
-      );
-    }
-    await this.wellArchitectedToolService.exportAssessment(
+    assertOrganizationHasExportRole(organization);
+    await this.wellArchitectedToolService.exportAssessment({
+      roleArn: organization.assessmentExportRoleArn,
       assessment,
-      args.user
-    );
+      // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      region: (args.region ?? assessment.exportRegion)!,
+      user: args.user,
+    });
+    if (!assessment.exportRegion) {
+      await this.assessmentsRepository.update({
+        assessmentId: assessment.id,
+        organization: args.user.organizationDomain,
+        assessmentBody: { exportRegion: args.region },
+      });
+      this.logger.info(
+        `Export region for assessment ${assessment.id} updated to ${args.region}`
+      );
+    }
     this.logger.info(
       `Export for assessment ${assessment.id} to the Well Architected Tool finished`
     );

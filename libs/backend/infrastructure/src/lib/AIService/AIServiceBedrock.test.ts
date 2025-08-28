@@ -42,7 +42,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: 'Hello world' })
+        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
       ).resolves.toEqual('Hello world');
 
       const converseStreamCalls = bedrockRuntimeClientMock.commandCalls(
@@ -79,7 +79,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: 'Hello world' })
+        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
       ).rejects.toThrow(Error);
     });
 
@@ -92,7 +92,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: 'Hello world' })
+        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
       ).rejects.toThrow(Error);
     });
   });

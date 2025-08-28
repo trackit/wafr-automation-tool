@@ -39,6 +39,10 @@ export class MarketplaceService implements MarketplacePort {
   }): Promise<boolean> {
     const { organization } = args;
 
+    if (!organization.accountId) {
+      this.logger.warn('Account ID is missing in organization');
+      return false;
+    }
     const command = new GetEntitlementsCommand({
       ProductCode: this.monthlySubscriptionProductCode,
       Filter: {
@@ -70,6 +74,11 @@ export class MarketplaceService implements MarketplacePort {
     organization: Organization;
   }): Promise<boolean> {
     const { organization } = args;
+
+    if (!organization.unitBasedAgreementId) {
+      this.logger.warn('Unit-based agreement ID is missing in organization');
+      return false;
+    }
 
     const cmd = new DescribeAgreementCommand({
       agreementId: organization.unitBasedAgreementId,

@@ -29,7 +29,9 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
           }}
         >
           <span
-            className={tab.disabled ? 'line-through text-base-content/30' : ''}
+            className={`${
+              tab.disabled ? 'line-through text-base-content/20' : ''
+            } ${tab.id === activeTab ? 'text-primary' : 'text-base-content'}`}
           >
             {tab.label}
           </span>

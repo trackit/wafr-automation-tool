@@ -27,6 +27,13 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
     return this;
   }
 
+  public withRegion(
+    region?: string
+  ): ExportWellArchitectedToolUseCaseArgsMother {
+    this.data.region = region;
+    return this;
+  }
+
   public build(): ExportWellArchitectedToolUseCaseArgs {
     return this.data;
   }

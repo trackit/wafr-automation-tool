@@ -111,12 +111,11 @@ export class GetBestPracticeFindingsAdapterEventMother {
   }
 
   public build(): APIGatewayProxyEvent {
-    const queryStringParameters = Object.entries(this.queryParameters).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value === undefined ? undefined : String(value),
-      }),
-      {}
+    const queryStringParameters = Object.fromEntries(
+      Object.entries(this.queryParameters).map(([key, value]) => [
+        key,
+        value === undefined ? undefined : String(value),
+      ])
     );
     return APIGatewayProxyEventMother.basic()
       .withPathParameters(this.pathParameters)

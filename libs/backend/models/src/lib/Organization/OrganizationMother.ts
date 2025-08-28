@@ -11,6 +11,7 @@ export class OrganizationMother {
     return new OrganizationMother({
       domain: 'domain',
       accountId: 'accountId',
+      assessmentExportRoleArn: 'assessmentExportRoleArn',
       unitBasedAgreementId: 'unitBasedAgreementId',
       freeAssessmentsLeft: 0,
     });
@@ -21,13 +22,20 @@ export class OrganizationMother {
     return this;
   }
 
-  public withAccountId(accountId: string): OrganizationMother {
+  public withAccountId(accountId: string | undefined): OrganizationMother {
     this.data.accountId = accountId;
     return this;
   }
 
+  public withAssessmentExportRoleArn(
+    assessmentExportRoleArn: string | undefined
+  ): OrganizationMother {
+    this.data.assessmentExportRoleArn = assessmentExportRoleArn;
+    return this;
+  }
+
   public withUnitBasedAgreementId(
-    unitBasedAgreementId: string
+    unitBasedAgreementId: string | undefined
   ): OrganizationMother {
     this.data.unitBasedAgreementId = unitBasedAgreementId;
     return this;

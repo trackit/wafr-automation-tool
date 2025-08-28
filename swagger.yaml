@@ -235,6 +235,140 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/milestones':
+    get:
+      operationId: getMilestones
+      tags:
+        - Assessments
+      summary: Retrieve all milestones for a specific assessment
+      description: |
+        Fetches all milestones associated with a specific assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to retrieve milestones for
+          required: true
+          schema:
+            type: string
+        - name: region
+          in: query
+          description: The region to filter milestones by.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of milestones to return
+          schema:
+            type: integer
+            default: 10
+        - name: nextToken
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of milestones related to the specified assessment
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - milestones
+                properties:
+                  milestones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MilestoneSummary'
+                  nextToken:
+                    type: string
+                    description: |
+                      Token for pagination. If there are more milestones than can be returned in a single response,
+                      this token will allow you to retrieve the next set of results.
+        '400':
+          description: An issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/milestones/{milestoneId}':
+    get:
+      operationId: getMilestone
+      tags:
+        - Assessments
+      summary: Retrieve a specific milestone
+      description: |
+        Fetches all details associated with a specific milestone.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to retrieve milestones for
+          required: true
+          schema:
+            type: string
+        - name: milestoneId
+          in: path
+          description: The unique ID of the milestone to retrieve pillars for
+          required: true
+          schema:
+            type: string
+        - name: region
+          in: query
+          description: The region to filter milestones by.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of pillars related to the specified milestone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Milestone'
+        '400':
+          description: An issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/exports/create-milestone':
+    post:
+      operationId: createMilestone
+      tags:
+        - Exports
+      summary: Create a milestone for the assessment
+      description: |
+        Creates a milestone for the assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to create a milestone for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                region:
+                  type: string
+                  description: The region to create the milestone in.
+                name:
+                  type: string
+                  description: The name of the milestone to create.
+      responses:
+        '200':
+          description: The milestone has been successfully created
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization or email of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
   '/assessments/{assessmentId}/exports/well-architected-tool':
     post:
       operationId: exportWellArchitectedTool
@@ -250,6 +384,15 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                region:
+                  type: string
+                  description: The region to export the assessment to.
       responses:
         '200':
           description: The assessment has been successfully exported
@@ -668,6 +811,125 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/findings/{findingId}/comments':
+    post:
+      operationId: addComment
+      tags:
+        - Findings
+      summary: Add a comment to a specific finding
+      description: |
+        Adds a comment to a specific finding.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to add a comment to
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Text of the comment
+      responses:
+        '200':
+          description: The comment has been successfully added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment or finding could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}':
+    put:
+      operationId: updateComment
+      tags:
+        - Findings
+      summary: Update the details of a specific comment
+      description: |
+        Updates the details of a specific comment.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to which the comment belongs
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: The unique ID of the comment to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentDto'
+      responses:
+        '200':
+          description: The comment has been successfully updated
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment, finding, or comment could not be found
+        '500':
+          description: Internal server error.
+    delete:
+      operationId: deleteComment
+      tags:
+        - Findings
+      summary: Delete a specific comment
+      description: |
+        Deletes a specific comment.
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: findingId
+          in: path
+          required: true
+          description: The unique ID of the finding to which the comment belongs
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: The unique ID of the comment to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The comment has been successfully deleted
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
 components:
   schemas:
     Assessment:
@@ -692,6 +954,9 @@ components:
           description: |
             List of regions to scan
             If empty, all regions will be scanned
+        exportRegion:
+          type: string
+          description: Region where the assessment is exported
         roleArn:
           type: string
           description: Role ARN associated with the assessment
@@ -820,14 +1085,57 @@ components:
         isAIAssociated:
           type: boolean
           description: Tells whether the finding is associated with an AI or manually
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
     FindingDto:
       type: object
       properties:
         hidden:
           type: boolean
+    Comment:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - authorId
+        - text
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the comment
+        authorId:
+          type: string
+          description: Id of the user who created the comment
+        authorEmail:
+          type: string
+          description: Email of the user who created the comment
+        text:
+          type: string
+          description: Text of the comment
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO-formatted date of when the comment was created
+    CommentDto:
+      type: object
+      additionalProperties: false
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Text of the comment
     Pillar:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - label
+        - disabled
+        - questions
       properties:
         id:
           type: string
@@ -847,6 +1155,12 @@ components:
     Question:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - label
+        - none
+        - disabled
+        - bestPractices
       properties:
         id:
           type: string
@@ -871,6 +1185,13 @@ components:
       type: object
       description: A best practice related to a question and pillar in the assessment
       additionalProperties: false
+      required:
+        - id
+        - label
+        - risk
+        - description
+        - checked
+        - results
       properties:
         id:
           type: string
@@ -910,6 +1231,41 @@ components:
       properties:
         checked:
           type: boolean
+    Milestone:
+      title: Milestone
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - pillars
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        pillars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pillar'
+    MilestoneSummary:
+      title: MilestoneSummary
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
     FileExport:
       type: object
       description: A file export related to an assessment

@@ -8,7 +8,7 @@ import {
 import { describe, it, expect, vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, useNavigate } from 'react-router';
+import { MemoryRouter } from 'react-router';
 import AssessmentsList from './assessments-list';
 import { getAssessments, deleteAssessment } from '@webui/api-client';
 
@@ -104,7 +104,7 @@ describe('AssessmentsList', () => {
   it('handles search input', async () => {
     render(<AssessmentsList />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText('Search an assessment');
+    const searchInput = screen.getByPlaceholderText('Search');
     fireEvent.change(searchInput, { target: { value: 'test' } });
 
     await waitFor(() => {

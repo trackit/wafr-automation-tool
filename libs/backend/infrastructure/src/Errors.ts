@@ -110,12 +110,39 @@ export class FileExportNotFoundError extends InfrastructureError {
   }
 }
 
+export class UserNotFoundError extends InfrastructureError {
+  public constructor(args: { userId: string }) {
+    super({
+      message: `User with id ${args.userId} not found`,
+      name: 'UserNotFoundError',
+    });
+  }
+}
+
 export class EmptyUpdateBodyError extends InfrastructureError {
   public constructor(description?: string) {
     super({
       message: 'Empty update body',
       name: 'EmptyUpdateBodyError',
       description,
+    });
+  }
+}
+
+export class MilestoneNotFoundError extends InfrastructureError {
+  public constructor(args: { assessmentId: string; milestoneId: number }) {
+    super({
+      message: `Milestone with id ${args.milestoneId} not found for assessment ${args.assessmentId}`,
+      name: 'MilestoneNotFoundError',
+    });
+  }
+}
+
+export class WorkloadNotFoundError extends InfrastructureError {
+  public constructor(assessmentId: string) {
+    super({
+      message: `Workload not found for assessment ${assessmentId}`,
+      name: 'WorkloadNotFoundError',
     });
   }
 }
