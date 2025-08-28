@@ -3,6 +3,7 @@ import {
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
 import {
+  AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
@@ -22,21 +23,21 @@ describe('listPDFExports UseCase', () => {
       fakeAssessmentsRepository,
     } = setup();
 
-    const fileExport = {
-      id: 'file-export-id',
-      status: AssessmentFileExportStatus.COMPLETED,
-      versionName: 'version-name',
-      objectKey: 'object-key',
-      createdAt: new Date(),
-    };
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [fileExport],
-        })
-        .build();
+    const fileExport = AssessmentFileExportMother.basic()
+      .withId('file-export-id')
+      .withStatus(AssessmentFileExportStatus.COMPLETED)
+      .withVersionName('version-name')
+      .withObjectKey('object-key')
+      .withCreatedAt(new Date())
+      .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withFileExports({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      })
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ListPDFExportsUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')

@@ -4,14 +4,15 @@ import {
   tokenFakeObjectsStorage,
   tokenFakePDFService,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
 import {
+  AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
   AssessmentStep,
   PillarMother,
 } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
 
 import { ConflictError, NoContentError, NotFoundError } from '../Errors';
 import { ExportPDFUseCaseImpl } from './ExportPDFUseCase';
@@ -39,17 +40,16 @@ describe('exportPDF UseCase', () => {
       .withPillars([PillarMother.basic().build()])
       .withFileExports({
         [AssessmentFileExportType.PDF]: [
-          {
-            id: 'file-export-id',
-            status: AssessmentFileExportStatus.NOT_STARTED,
-            versionName,
-            createdAt: new Date(),
-          },
+          AssessmentFileExportMother.basic()
+            .withId('file-export-id')
+            .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+            .withVersionName(versionName)
+            .withCreatedAt(new Date())
+            .build(),
         ],
       })
       .build();
-
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportPDFUseCaseArgsMother.basic().build();
     await expect(useCase.exportPDF(input)).resolves.toBeUndefined();
@@ -59,13 +59,17 @@ describe('exportPDF UseCase', () => {
       versionName,
     });
 
-    const updatedAssessment =
-      fakeAssessmentsRepository.assessments['assessment-id#test.io'];
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organization: assessment.organization,
+    });
     const objectKey =
-      updatedAssessment.fileExports?.[AssessmentFileExportType.PDF]?.[0]
+      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]?.[0]
         .objectKey;
     expect(objectKey).toBeDefined();
-    expect(fakeObjectsStorage.objects[objectKey!]).toBe(pdfContent);
+
+    const updatedObject = await fakeObjectsStorage.get(objectKey!);
+    expect(updatedObject).toBe(pdfContent);
   });
 
   it('should throw a NotFoundError if the assessment does not exist', async () => {
@@ -78,12 +82,12 @@ describe('exportPDF UseCase', () => {
   it('should throw a ConflictError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withPillars(undefined)
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withPillars(undefined)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportPDFUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -95,12 +99,12 @@ describe('exportPDF UseCase', () => {
   it('should throw a ConflictError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportPDFUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -112,13 +116,13 @@ describe('exportPDF UseCase', () => {
   it('should throw a NoContentError if the assessment findings are empty', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([])
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportPDFUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')

@@ -4,6 +4,7 @@ import {
   tokenFakeObjectsStorage,
 } from '@backend/infrastructure';
 import {
+  AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
@@ -22,26 +23,26 @@ describe('deletePDFExport UseCase', () => {
     const { useCase, fakeObjectsStorage, fakeAssessmentsRepository } = setup();
 
     const objectKey = 'object-key';
-    fakeObjectsStorage.objects[objectKey] = 'object-value';
+    await fakeObjectsStorage.put({ key: objectKey, body: 'object-value' });
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([PillarMother.basic().build()])
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            {
-              id: 'file-export-id',
-              status: AssessmentFileExportStatus.COMPLETED,
-              versionName: 'version-name',
-              objectKey: 'object-key',
-              createdAt: new Date(),
-            },
-          ],
-        })
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([PillarMother.basic().build()])
+      .withFileExports({
+        [AssessmentFileExportType.PDF]: [
+          AssessmentFileExportMother.basic()
+            .withId('file-export-id')
+            .withStatus(AssessmentFileExportStatus.COMPLETED)
+            .withVersionName('version-name')
+            .withObjectKey('object-key')
+            .withCreatedAt(new Date())
+            .build(),
+        ],
+      })
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeletePDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -50,11 +51,16 @@ describe('deletePDFExport UseCase', () => {
       .build();
     await expect(useCase.deletePDFExport(input)).resolves.toBeUndefined();
 
-    expect(fakeObjectsStorage.objects[objectKey]).toBeUndefined();
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organization: assessment.organization,
+    });
     expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
-        .fileExports?.[AssessmentFileExportType.PDF]
+      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]
     ).toStrictEqual([]);
+
+    const updatedObject = await fakeObjectsStorage.get(objectKey);
+    expect(updatedObject).toBeNull();
   });
 
   it('should throw a NotFoundError if the assessment does not exist', async () => {
@@ -67,14 +73,14 @@ describe('deletePDFExport UseCase', () => {
   it('should throw a NotFoundError if the file export does not exist on the assessment', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [],
-        })
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withFileExports({
+        [AssessmentFileExportType.PDF]: [],
+      })
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeletePDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -87,21 +93,21 @@ describe('deletePDFExport UseCase', () => {
   it('should throw a ConflictError if the file export is in progress', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            {
-              id: 'file-export-id',
-              status: AssessmentFileExportStatus.IN_PROGRESS,
-              versionName: 'version-name',
-              createdAt: new Date(),
-            },
-          ],
-        })
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withFileExports({
+        [AssessmentFileExportType.PDF]: [
+          AssessmentFileExportMother.basic()
+            .withId('file-export-id')
+            .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
+            .withVersionName('version-name')
+            .withCreatedAt(new Date())
+            .build(),
+        ],
+      })
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeletePDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -115,24 +121,23 @@ describe('deletePDFExport UseCase', () => {
     const { useCase, fakeObjectsStorage, fakeAssessmentsRepository } = setup();
 
     const objectKey = 'object-key';
-    fakeObjectsStorage.objects[objectKey] = 'object-value';
+    await fakeObjectsStorage.put({ key: objectKey, body: 'object-value' });
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            {
-              id: 'file-export-id',
-              status: AssessmentFileExportStatus.COMPLETED,
-              versionName: 'version-name',
-              createdAt: new Date(),
-            },
-          ],
-        })
-
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withFileExports({
+        [AssessmentFileExportType.PDF]: [
+          AssessmentFileExportMother.basic()
+            .withId('file-export-id')
+            .withStatus(AssessmentFileExportStatus.COMPLETED)
+            .withVersionName('version-name')
+            .withCreatedAt(new Date())
+            .build(),
+        ],
+      })
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeletePDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -141,7 +146,9 @@ describe('deletePDFExport UseCase', () => {
       .build();
 
     await expect(useCase.deletePDFExport(input)).resolves.toBeUndefined();
-    expect(fakeObjectsStorage.objects[objectKey]).toBeDefined();
+
+    const updatedObject = await fakeObjectsStorage.get(objectKey);
+    expect(updatedObject).not.toBeNull();
   });
 });
 

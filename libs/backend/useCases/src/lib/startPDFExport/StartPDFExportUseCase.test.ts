@@ -4,6 +4,7 @@ import {
   tokenFakeLambdaService,
 } from '@backend/infrastructure';
 import {
+  AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
@@ -47,17 +48,21 @@ describe('startPDFExport UseCase', () => {
       .build();
     await expect(useCase.startPDFExport(input)).resolves.toBeUndefined();
 
-    expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
-    ).toMatchObject({
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organization: assessment.organization,
+    });
+
+    const fileExportId = 'fake-id-0';
+    expect(updatedAssessment).toMatchObject({
       fileExports: {
         [AssessmentFileExportType.PDF]: [
-          {
-            id: 'fake-id-0',
-            status: AssessmentFileExportStatus.NOT_STARTED,
-            versionName: 'version-name',
-            createdAt: date,
-          },
+          AssessmentFileExportMother.basic()
+            .withId(fileExportId)
+            .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+            .withVersionName('version-name')
+            .withCreatedAt(date)
+            .build(),
         ],
       },
     });
@@ -68,7 +73,7 @@ describe('startPDFExport UseCase', () => {
         payload: JSON.stringify({
           assessmentId: 'assessment-id',
           organizationDomain: 'test.io',
-          fileExportId: 'fake-id-0',
+          fileExportId: fileExportId,
         }),
       }
     );
@@ -84,13 +89,13 @@ describe('startPDFExport UseCase', () => {
   it('should throw a ConflictError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars(undefined)
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars(undefined)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -101,13 +106,13 @@ describe('startPDFExport UseCase', () => {
   it('should throw a ConflictError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
-        .withPillars([PillarMother.basic().build()])
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .withPillars([PillarMother.basic().build()])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -118,13 +123,13 @@ describe('startPDFExport UseCase', () => {
   it('should throw a NoContentError if the assessment findings are empty', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([])
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withId('assessment-id')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic().build();
     await expect(useCase.startPDFExport(input)).rejects.toThrow(NoContentError);

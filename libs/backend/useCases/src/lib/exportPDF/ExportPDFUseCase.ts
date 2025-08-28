@@ -113,7 +113,7 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     }
 
     assessmentExport.status = AssessmentFileExportStatus.IN_PROGRESS;
-    this.assessmentsRepository.updateFileExport({
+    await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
       organization: assessment.organization,
       type: AssessmentFileExportType.PDF,

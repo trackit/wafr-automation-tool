@@ -5,7 +5,7 @@ import {
   tokenLogger,
 } from '@backend/infrastructure';
 import {
-  AssessmentFileExport,
+  AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentStep,
@@ -82,18 +82,18 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       );
     }
 
-    const assessmentExport: AssessmentFileExport = {
-      id: this.idGenerator.generate(),
-      status: AssessmentFileExportStatus.NOT_STARTED,
-      versionName,
-      createdAt: new Date(),
-    };
+    const fileExport = AssessmentFileExportMother.basic()
+      .withId(this.idGenerator.generate())
+      .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+      .withVersionName(versionName)
+      .withCreatedAt(new Date())
+      .build();
 
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
       organization: assessment.organization,
       type: AssessmentFileExportType.PDF,
-      data: assessmentExport,
+      data: fileExport,
     });
 
     await this.lambdaService.asyncInvokeLambda({
@@ -101,7 +101,7 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       payload: JSON.stringify({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        fileExportId: assessmentExport.id,
+        fileExportId: fileExport.id,
       }),
     });
     this.logger.info(`PDF file export for assessment ${assessment.id} started`);
