@@ -50,15 +50,13 @@ export class ApiClient {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     url: string,
-    data?: unknown,
-    responseType: 'json' | 'blob' = 'json'
+    data?: unknown
   ) {
     try {
       const response = await this.axiosInstance({
         method,
         url,
         data,
-        responseType,
       });
       return response.data as T;
     } catch (error) {
@@ -72,28 +70,20 @@ export class ApiClient {
     }
   }
 
-  async get<T>(url: string, responseType: 'json' | 'blob' = 'json') {
-    return this.request<T>('get', url, undefined, responseType);
+  async get<T>(url: string) {
+    return this.request<T>('get', url);
   }
 
-  async post<T>(
-    url: string,
-    data: unknown,
-    responseType: 'json' | 'blob' = 'json'
-  ) {
-    return this.request<T>('post', url, data, responseType);
+  async post<T>(url: string, data: unknown) {
+    return this.request<T>('post', url, data);
   }
 
-  async put<T>(
-    url: string,
-    data: unknown,
-    responseType: 'json' | 'blob' = 'json'
-  ) {
-    return this.request<T>('put', url, data, responseType);
+  async put<T>(url: string, data: unknown) {
+    return this.request<T>('put', url, data);
   }
 
-  async delete<T>(url: string, responseType: 'json' | 'blob' = 'json') {
-    return this.request<T>('delete', url, undefined, responseType);
+  async delete<T>(url: string) {
+    return this.request<T>('delete', url);
   }
 }
 
