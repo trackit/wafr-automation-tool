@@ -3,11 +3,7 @@ import {
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
 import {
-  AssessmentMother,
-  BestPracticeMother,
   FindingMother,
-  PillarMother,
-  QuestionMother,
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
