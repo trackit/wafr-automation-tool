@@ -35,7 +35,16 @@ import {
   formatRegions,
 } from '../../lib/assessment-utils';
 
-const SEVERITIES = ['Critical', 'High', 'Medium', 'Low'];
+const SEVERITIES = [
+  'Fatal',
+  'Critical',
+  'High',
+  'Medium',
+  'Low',
+  'Informational',
+  'Unknown',
+  'Other',
+];
 
 function AssessmentOverview({
   assessment,
