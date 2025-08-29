@@ -5,11 +5,9 @@ export function startPDFExport(
   {
     assessmentId,
   }: paths['/assessments/{assessmentId}/exports/pdf']['post']['parameters']['path'],
-  versionName: string
+  body: paths['/assessments/{assessmentId}/exports/pdf']['post']['requestBody']['content']['application/json']
 ) {
-  return apiClient.post(`/assessments/${assessmentId}/exports/pdf`, {
-    versionName,
-  });
+  return apiClient.post(`/assessments/${assessmentId}/exports/pdf`, body);
 }
 
 export default startPDFExport;

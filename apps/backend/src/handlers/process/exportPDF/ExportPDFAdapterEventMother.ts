@@ -2,7 +2,7 @@ import z from 'zod';
 
 import { ExportPDFSchema } from './ExportPDFAdapter';
 
-type ExportPDFParameters = NonNullable<z.infer<typeof ExportPDFSchema>>;
+type ExportPDFParameters = z.infer<typeof ExportPDFSchema>;
 
 export class ExportPDFAdapterEventMother {
   private params: ExportPDFParameters;

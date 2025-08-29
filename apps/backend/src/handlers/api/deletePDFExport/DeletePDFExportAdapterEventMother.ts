@@ -5,9 +5,8 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type DeletePDFExportParameters = NonNullable<
-  operations['deletePDFExport']['parameters']['path']
->;
+type DeletePDFExportParameters =
+  operations['deletePDFExport']['parameters']['path'];
 
 export class DeletePDFExportAdapterEventMother {
   private pathParameters: DeletePDFExportParameters;

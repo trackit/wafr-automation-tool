@@ -26,21 +26,23 @@ describe('exportPDF adapter', () => {
     });
   });
 
-  it('should call useCase with correct parameters', async () => {
-    const { adapter, useCase } = setup();
+  describe('useCase and return value', () => {
+    it('should call useCase with correct parameters', async () => {
+      const { adapter, useCase } = setup();
 
-    const event = ExportPDFAdapterEventMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganizationDomain('test.io')
-      .withFileExportId('file-export-id')
-      .build();
+      const event = ExportPDFAdapterEventMother.basic()
+        .withAssessmentId('assessment-id')
+        .withOrganizationDomain('test.io')
+        .withFileExportId('file-export-id')
+        .build();
 
-    await adapter.handle(event);
+      await adapter.handle(event);
 
-    expect(useCase.exportPDF).toHaveBeenCalledWith({
-      assessmentId: 'assessment-id',
-      organizationDomain: 'test.io',
-      fileExportId: 'file-export-id',
+      expect(useCase.exportPDF).toHaveBeenCalledWith({
+        assessmentId: 'assessment-id',
+        organizationDomain: 'test.io',
+        fileExportId: 'file-export-id',
+      });
     });
   });
 });

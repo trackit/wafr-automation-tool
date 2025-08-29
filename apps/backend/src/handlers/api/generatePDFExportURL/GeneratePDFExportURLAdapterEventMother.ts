@@ -5,9 +5,8 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type GeneratePDFExportURLParameters = NonNullable<
-  operations['generatePDFExportURL']['parameters']['path']
->;
+type GeneratePDFExportURLParameters =
+  operations['generatePDFExportURL']['parameters']['path'];
 
 export class GeneratePDFExportURLAdapterEventMother {
   private pathParameters: GeneratePDFExportURLParameters;

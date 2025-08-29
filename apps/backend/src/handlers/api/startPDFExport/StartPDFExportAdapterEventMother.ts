@@ -5,13 +5,10 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type StartPDFExportParameters = NonNullable<
-  operations['exportToPDF']['parameters']['path']
->;
+type StartPDFExportParameters = operations['exportToPDF']['parameters']['path'];
 
-type StartPDFExportBody = NonNullable<
-  operations['exportToPDF']['requestBody']['content']['application/json']
->;
+type StartPDFExportBody =
+  operations['exportToPDF']['requestBody']['content']['application/json'];
 
 export class StartPDFExportAdapterEventMother {
   private pathParameters: StartPDFExportParameters;

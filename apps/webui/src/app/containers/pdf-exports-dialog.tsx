@@ -81,13 +81,10 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
           null
         );
         const majorVersion = highestVersionName?.match(/(\d+)\.\d+/)?.[1];
-        if (majorVersion) {
-          return startPDFExport(
-            { assessmentId },
-            `${parseInt(majorVersion) + 1}.0`
-          );
-        }
-        return startPDFExport({ assessmentId }, '1.0');
+        const versionName = majorVersion
+          ? `${parseInt(majorVersion) + 1}.0`
+          : '1.0';
+        return startPDFExport({ assessmentId }, { versionName });
       },
       onMutate: () => {
         enqueueSnackbar({
