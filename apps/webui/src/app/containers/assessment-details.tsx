@@ -505,6 +505,23 @@ export function AssessmentDetails() {
     }
   }, [selectedPillar, activeQuestionIndex]);
 
+  // Auto-select first pillar when viewing a milestone, overview is not shown
+  useEffect(() => {
+    if (
+      isMilestone &&
+      pillars &&
+      pillars.length > 0 &&
+      selectedPillar?.id === 'overview'
+    ) {
+      const firstPillar = pillars[0];
+      setSelectedPillar(firstPillar);
+      setActiveQuestionIndex(0);
+      if (firstPillar.questions && firstPillar.questions.length > 0) {
+        setActiveQuestion(firstPillar.questions[0]);
+      }
+    }
+  }, [isMilestone, pillars, selectedPillar?.id]);
+
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, checked: boolean) => {
       if (!id || !selectedPillar?.id || !activeQuestion?.id || isMilestone)
