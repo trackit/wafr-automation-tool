@@ -1,6 +1,7 @@
 import { User } from '@backend/models';
 import { CognitoPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
+
 import { UserNotFoundError } from '../../Errors';
 
 export class FakeCognitoService implements CognitoPort {

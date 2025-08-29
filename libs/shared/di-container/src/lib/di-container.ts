@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 
-export { DIToken, createInjectionToken } from './DIToken';
-export { inject } from './inject';
-export { reset } from './reset';
-export { register } from './register';
+export { createInjectionToken,DIToken } from './DIToken';
 export { FactoryFunction } from './FactoryFunction';
+export { inject } from './inject';
 export {
-  FactoryProvider,
-  ValueProvider,
   ClassProvider,
+  FactoryProvider,
   Provider,
+  ValueProvider,
 } from './Provider';
+export { register } from './register';
+export { reset } from './reset';

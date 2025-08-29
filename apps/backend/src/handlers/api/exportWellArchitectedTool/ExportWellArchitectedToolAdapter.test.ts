@@ -1,7 +1,7 @@
-import { register, reset } from '@shared/di-container';
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
 import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { ExportWellArchitectedToolAdapter } from './ExportWellArchitectedToolAdapter';

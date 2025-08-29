@@ -1,13 +1,14 @@
 import {
   tokenAssessmentsRepository,
+  tokenFindingToBestPracticesAssociationService,
   tokenLogger,
   tokenQuestionSetService,
-  tokenFindingToBestPracticesAssociationService,
 } from '@backend/infrastructure';
-import { createInjectionToken, inject } from '@shared/di-container';
 import type { Finding, ScanningTool } from '@backend/models';
-import { NotFoundError } from '../Errors';
 import { FindingToBestPracticesAssociation } from '@backend/ports';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { NotFoundError } from '../Errors';
 
 export type AssociateFindingsToBestPracticesUseCaseArgs = {
   assessmentId: string;

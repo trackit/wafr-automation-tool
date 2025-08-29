@@ -1,4 +1,5 @@
 import { container, instanceCachingFactory, Lifecycle } from 'tsyringe';
+
 import { DIToken } from './DIToken';
 import {
   isClassProvider,

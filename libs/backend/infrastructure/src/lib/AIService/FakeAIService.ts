@@ -1,4 +1,5 @@
 import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+
 import type { AIService, Prompt, TextComponent } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 

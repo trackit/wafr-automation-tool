@@ -4,8 +4,9 @@ import {
   tokenFakeOrganizationRepository,
   tokenFakeWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
 import { AssessmentMother, OrganizationMother } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
+
 import { ConflictError, NotFoundError } from '../Errors';
 import { GetMilestonesUseCaseImpl } from './GetMilestonesUseCase';
 

@@ -6,11 +6,12 @@ import {
 } from '@backend/infrastructure';
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { NotFoundError } from '../Errors';
+
 import {
   assertAssessmentIsReadyForExport,
   assertOrganizationHasExportRole,
 } from '../../services/exports';
+import { NotFoundError } from '../Errors';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;

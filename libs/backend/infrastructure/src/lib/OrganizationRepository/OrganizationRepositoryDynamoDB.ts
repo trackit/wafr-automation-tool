@@ -1,8 +1,10 @@
+import z from 'zod';
+
 import { Organization } from '@backend/models';
 import { OrganizationRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
-import z from 'zod';
+
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 

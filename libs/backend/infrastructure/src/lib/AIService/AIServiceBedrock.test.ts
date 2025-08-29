@@ -1,11 +1,11 @@
-import { mockClient } from 'aws-sdk-client-mock';
-
-import { inject, reset } from '@shared/di-container';
-
 import {
   ConverseStreamCommand,
   ConverseStreamOutput,
 } from '@aws-sdk/client-bedrock-runtime';
+import { mockClient } from 'aws-sdk-client-mock';
+
+import { inject, reset } from '@shared/di-container';
+
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   AIServiceBedrock,

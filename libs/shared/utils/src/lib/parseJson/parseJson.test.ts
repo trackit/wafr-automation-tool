@@ -1,4 +1,4 @@
-import { parseJsonObject, parseJsonArray, JSONParseError } from './parseJson';
+import { JSONParseError,parseJsonArray, parseJsonObject } from './parseJson';
 
 describe('parseJsonObject', () => {
   it('should parse valid JSON strings', () => {

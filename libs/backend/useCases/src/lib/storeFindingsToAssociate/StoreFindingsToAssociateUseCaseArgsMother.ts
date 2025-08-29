@@ -1,4 +1,5 @@
 import { ScanFinding, ScanningTool } from '@backend/models';
+
 import type { StoreFindingsToAssociateUseCaseArgs } from './StoreFindingsToAssociateUseCase';
 
 export class StoreFindingsToAssociateUseCaseArgsMother {

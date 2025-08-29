@@ -1,3 +1,5 @@
+import z from 'zod';
+
 import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
@@ -5,7 +7,7 @@ import {
 import { Finding, ScanFinding, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
-import z from 'zod';
+
 import { NotFoundError } from '../Errors';
 
 export interface StoreFindingsToAssociateUseCaseArgs {

@@ -1,5 +1,5 @@
 import { getCurrentUser, signOut } from 'aws-amplify/auth';
-import { CircleHelp, LogOut, ChevronDown } from 'lucide-react';
+import { ChevronDown,CircleHelp, LogOut } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 

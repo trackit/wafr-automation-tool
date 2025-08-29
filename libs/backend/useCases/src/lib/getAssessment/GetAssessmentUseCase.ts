@@ -1,6 +1,7 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { Assessment } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { NotFoundError } from '../Errors';
 
 export type GetAssessmentUseCaseArgs = {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { tokenPrepareFindingsAssociationsUseCase } from '@backend/useCases';
 import { ScanningTool } from '@backend/models';
+import { tokenPrepareFindingsAssociationsUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 const PrepareFindingsAssociationsInputSchema = z.object({

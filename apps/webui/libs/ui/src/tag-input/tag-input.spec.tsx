@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+
 import TagInput from './tag-input';
 
 describe('TagInput', () => {

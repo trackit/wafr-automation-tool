@@ -1,6 +1,8 @@
 import { ListUsersCommand } from '@aws-sdk/client-cognito-identity-provider';
-import { inject, reset } from '@shared/di-container';
 import { mockClient } from 'aws-sdk-client-mock';
+
+import { inject, reset } from '@shared/di-container';
+
 import { InfrastructureError, UserNotFoundError } from '../../Errors';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { CognitoService, tokenCognitoClient } from './CognitoService';

@@ -4,6 +4,7 @@ import {
 } from '@backend/infrastructure';
 import { AssessmentGraphDataMother } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { NotFoundError } from '../Errors';
 
 export type ComputeGraphDataUseCaseArgs = {

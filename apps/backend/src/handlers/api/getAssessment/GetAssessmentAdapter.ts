@@ -6,9 +6,9 @@ import { tokenGetAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const GetAssessmentArgsSchema = z.object({
   assessmentId: z.string(),

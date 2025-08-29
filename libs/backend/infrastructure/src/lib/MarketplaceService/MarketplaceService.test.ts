@@ -2,9 +2,11 @@ import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { DescribeAgreementCommand } from '@aws-sdk/client-marketplace-agreement';
 import { GetEntitlementsCommand } from '@aws-sdk/client-marketplace-entitlement-service';
 import { BatchMeterUsageCommand } from '@aws-sdk/client-marketplace-metering';
+import { mockClient } from 'aws-sdk-client-mock';
+
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
-import { mockClient } from 'aws-sdk-client-mock';
+
 import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';

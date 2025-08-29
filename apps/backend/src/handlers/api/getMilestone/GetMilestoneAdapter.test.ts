@@ -1,10 +1,10 @@
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { tokenGetMilestoneUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { GetMilestoneAdapter } from './GetMilestoneAdapter';
 import { GetMilestoneAdapterEventMother } from './GetMilestoneAdapterEventMother';
-import { registerTestInfrastructure } from '@backend/infrastructure';
-import { tokenGetMilestoneUseCase } from '@backend/useCases';
 
 describe('GetMilestoneAdapter', () => {
   describe('args validation', () => {

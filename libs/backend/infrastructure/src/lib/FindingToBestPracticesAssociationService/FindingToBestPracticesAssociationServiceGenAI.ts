@@ -1,11 +1,5 @@
 import { z, ZodType } from 'zod';
-import {
-  FindingToBestPracticesAssociationService,
-  FindingToBestPracticesAssociation,
-  Prompt,
-} from '@backend/ports';
-import { inject, createInjectionToken } from '@shared/di-container';
-import { tokenAIService } from '../AIService';
+
 import type {
   BestPractice,
   Finding,
@@ -13,7 +7,15 @@ import type {
   Question,
   ScanningTool,
 } from '@backend/models';
+import {
+  FindingToBestPracticesAssociation,
+  FindingToBestPracticesAssociationService,
+  Prompt,
+} from '@backend/ports';
+import { createInjectionToken,inject } from '@shared/di-container';
 import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';
+
+import { tokenAIService } from '../AIService';
 import { tokenLogger } from '../Logger';
 import { tokenObjectsStorage } from '../ObjectsStorage';
 

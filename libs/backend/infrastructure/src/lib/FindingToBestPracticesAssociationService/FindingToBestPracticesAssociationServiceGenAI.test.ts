@@ -1,10 +1,3 @@
-import { inject, register, reset } from '@shared/di-container';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import {
-  FindingToBestPracticesAssociationServiceGenAI,
-  tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
-} from './FindingToBestPracticesAssociationServiceGenAI';
-import { tokenAIService } from '../AIService';
 import {
   BestPracticeMother,
   FindingMother,
@@ -12,7 +5,15 @@ import {
   QuestionMother,
   ScanningTool,
 } from '@backend/models';
+import { inject, register, reset } from '@shared/di-container';
+
+import { tokenAIService } from '../AIService';
 import { tokenFakeObjectsStorage } from '../ObjectsStorage';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import {
+  FindingToBestPracticesAssociationServiceGenAI,
+  tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
+} from './FindingToBestPracticesAssociationServiceGenAI';
 
 describe('FindingToBestPracticesAssociationServiceGenAI', () => {
   describe('replacePromptVariables', () => {

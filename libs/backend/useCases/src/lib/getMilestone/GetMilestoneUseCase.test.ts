@@ -5,12 +5,13 @@ import {
   tokenFakeOrganizationRepository,
   tokenFakeWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
 import {
   AssessmentMother,
   OrganizationMother,
   PillarMother,
 } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
+
 import { ConflictError, NotFoundError } from '../Errors';
 import { GetMilestoneUseCaseImpl } from './GetMilestoneUseCase';
 

@@ -1,14 +1,14 @@
 import {
+  EmptyUpdateBodyError,
+  registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
+} from '@backend/infrastructure';
+import {
   AssessmentMother,
   PillarMother,
   QuestionMother,
   UserMother,
 } from '@backend/models';
-import {
-  EmptyUpdateBodyError,
-  registerTestInfrastructure,
-  tokenFakeAssessmentsRepository,
-} from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
 
 import { NoContentError, NotFoundError } from '../Errors';

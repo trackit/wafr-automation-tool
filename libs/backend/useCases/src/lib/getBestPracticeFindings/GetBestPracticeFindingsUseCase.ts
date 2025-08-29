@@ -5,6 +5,7 @@ import {
 } from '@backend/infrastructure';
 import type { Finding, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { InvalidParametersError, NotFoundError } from '../Errors';
 
 export interface GetBestPracticeFindingsUseCaseArgs {

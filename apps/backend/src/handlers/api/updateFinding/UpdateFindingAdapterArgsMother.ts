@@ -1,7 +1,7 @@
+import { APIGatewayProxyEvent } from 'aws-lambda';
+
 import type { User } from '@backend/models';
 import type { operations } from '@shared/api-schema';
-
-import { APIGatewayProxyEvent } from 'aws-lambda';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 

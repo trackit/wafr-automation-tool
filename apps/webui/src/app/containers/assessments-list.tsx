@@ -4,12 +4,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import {
-  deleteAssessment,
-  getAssessments,
-  rescanAssessment,
-} from '@webui/api-client';
-import { ConfirmationModal, StatusBadge } from '@webui/ui';
-import {
   Calendar,
   Computer,
   Earth,
@@ -19,13 +13,21 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
-import ExportToAWSDialog from './export-to-aws-dialog';
-import NewAssessmentDialog from './new-assessment-dialog';
+
+import {
+  deleteAssessment,
+  getAssessments,
+  rescanAssessment,
+} from '@webui/api-client';
+import { ConfirmationModal, StatusBadge } from '@webui/ui';
+
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import ExportToAWSDialog from './export-to-aws-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
+import NewAssessmentDialog from './new-assessment-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();

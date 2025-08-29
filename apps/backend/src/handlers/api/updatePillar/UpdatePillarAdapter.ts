@@ -1,14 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
+import { tokenUpdatePillarUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-
-import { tokenUpdatePillarUseCase } from '@backend/useCases';
 import { JSONParseError, parseJsonObject } from '@shared/utils';
-import { BadRequestError } from '../../../utils/api/HttpError';
+
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const UpdatePillarPathSchema = z.object({
   assessmentId: z.string(),

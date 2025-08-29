@@ -1,6 +1,7 @@
-import { Modal } from '@webui/ui';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
+
+import { Modal } from '@webui/ui';
 
 export function WorkflowHintDialog() {
   const [showWorkflowHint, setShowWorkflowHint] = useState<boolean>(false);

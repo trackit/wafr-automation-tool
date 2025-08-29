@@ -1,4 +1,5 @@
 import type { User } from '@backend/models';
+
 import type { UpdateQuestionUseCaseArgs } from './UpdateQuestionUseCase';
 
 export class UpdateQuestionUseCaseArgsMother {

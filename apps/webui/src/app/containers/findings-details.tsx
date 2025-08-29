@@ -1,4 +1,3 @@
-import { components } from '@shared/api-schema';
 import {
   useInfiniteQuery,
   useMutation,
@@ -6,14 +5,6 @@ import {
 } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useDebounce } from '@uidotdev/usehooks';
-import {
-  addComment,
-  deleteComment,
-  getFindings,
-  updateComment,
-  updateFinding,
-} from '@webui/api-client';
-import { CommentsPane, Modal } from '@webui/ui';
 import {
   Earth,
   FileCheck,
@@ -24,6 +15,16 @@ import {
 } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+
+import { components } from '@shared/api-schema';
+import {
+  addComment,
+  deleteComment,
+  getFindings,
+  updateComment,
+  updateFinding,
+} from '@webui/api-client';
+import { CommentsPane, Modal } from '@webui/ui';
 
 interface FindingsDetailsProps {
   assessmentId: string;

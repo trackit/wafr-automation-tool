@@ -1,29 +1,26 @@
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import {
-  AnswerSummary,
   Answer,
+  AnswerSummary,
   Choice,
+  CreateMilestoneCommand,
   CreateWorkloadCommand,
+  GetAnswerCommand,
   GetLensReviewCommand,
   GetMilestoneCommand,
   LensReview,
   ListAnswersCommand,
   ListMilestonesCommand,
   ListWorkloadsCommand,
+  Milestone as AWSMilestone,
   PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
   WellArchitectedClientConfig,
+  WellArchitectedServiceException,
   WorkloadEnvironment,
   WorkloadSummary,
-  CreateMilestoneCommand,
-  Milestone as AWSMilestone,
-  WellArchitectedServiceException,
-  GetAnswerCommand,
 } from '@aws-sdk/client-wellarchitected';
-import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
-
-import type { WellArchitectedToolPort } from '@backend/ports';
-import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
   Assessment,
@@ -34,9 +31,12 @@ import {
   Question,
   User,
 } from '@backend/models';
+import type { WellArchitectedToolPort } from '@backend/ports';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
-import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 
 export const WAFRLens = 'wellarchitected';
 

@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import ThemeSwitcher, { THEME_KEYS } from './theme-switcher';
-import { useDarkMode } from 'usehooks-ts';
 import '@testing-library/jest-dom';
+
+import { fireEvent,render, screen } from '@testing-library/react';
+import { useDarkMode } from 'usehooks-ts';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
+
+import ThemeSwitcher, { THEME_KEYS } from './theme-switcher';
 
 // Mock the entire usehooks-ts module
 vi.mock('usehooks-ts', () => ({

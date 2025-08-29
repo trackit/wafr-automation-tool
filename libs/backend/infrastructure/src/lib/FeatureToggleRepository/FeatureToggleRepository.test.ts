@@ -1,4 +1,5 @@
 import { register, reset } from '@shared/di-container';
+
 import {
   tokenMonthlySubscriptionProductCode,
   tokenUnitBasedProductCode,

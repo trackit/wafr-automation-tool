@@ -1,4 +1,8 @@
 import {
+  registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
+} from '@backend/infrastructure';
+import {
   AssessmentMother,
   BestPracticeMother,
   FindingMother,
@@ -6,10 +10,6 @@ import {
   QuestionMother,
   UserMother,
 } from '@backend/models';
-import {
-  registerTestInfrastructure,
-  tokenFakeAssessmentsRepository,
-} from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
 
 import { NotFoundError } from '../Errors';

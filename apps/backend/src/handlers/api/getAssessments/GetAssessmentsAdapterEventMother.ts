@@ -1,6 +1,5 @@
 import type {
   APIGatewayProxyEvent,
-  APIGatewayProxyEventQueryStringParameters,
 } from 'aws-lambda';
 
 import type { User } from '@backend/models';

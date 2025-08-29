@@ -1,4 +1,5 @@
 import { User } from '@backend/models';
+
 import type { GetAssessmentsUseCaseArgs } from './GetAssessmentsUseCase';
 
 export class GetAssessmentsUseCaseArgsMother {

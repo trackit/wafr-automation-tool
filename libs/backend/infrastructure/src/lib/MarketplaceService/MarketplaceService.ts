@@ -11,9 +11,11 @@ import {
   BatchMeterUsageCommand,
   MarketplaceMeteringClient,
 } from '@aws-sdk/client-marketplace-metering';
+
 import { Organization } from '@backend/models';
 import type { MarketplacePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { InfrastructureError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 

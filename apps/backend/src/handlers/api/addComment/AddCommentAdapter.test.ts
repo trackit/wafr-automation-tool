@@ -2,9 +2,9 @@ import {
   registerTestInfrastructure,
   tokenAssessmentsRepository,
 } from '@backend/infrastructure';
+import { FindingMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { FindingMother } from '@backend/models';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { AddCommentAdapter } from './AddCommentAdapter';
 import { AddCommentAdapterEventMother } from './AddCommentAdapterEventMother';

@@ -1,4 +1,5 @@
 import type { FindingCommentBody, User } from '@backend/models';
+
 import type { UpdateCommentUseCaseArgs } from './UpdateCommentUseCase';
 
 export class UpdateCommentUseCaseArgsMother {

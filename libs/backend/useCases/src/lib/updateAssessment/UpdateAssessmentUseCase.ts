@@ -6,6 +6,7 @@ import {
 } from '@backend/infrastructure';
 import type { AssessmentBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdateAssessmentUseCaseArgs = {

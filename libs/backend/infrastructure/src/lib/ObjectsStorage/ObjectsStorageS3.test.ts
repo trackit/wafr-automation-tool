@@ -6,9 +6,11 @@ import {
   PutObjectCommand,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
+
 import { inject, reset } from '@shared/di-container';
 import { stringToStream } from '@shared/utils';
-import { mockClient } from 'aws-sdk-client-mock';
+
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   ObjectsStorageS3,

@@ -1,4 +1,5 @@
 import { type Finding, ScanningTool } from '@backend/models';
+
 import type { AssociateFindingsToBestPracticesUseCaseArgs } from './AssociateFindingsToBestPracticesUseCase';
 
 export class AssociateFindingsToBestPracticesUseCaseArgsMother {

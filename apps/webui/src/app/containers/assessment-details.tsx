@@ -1,6 +1,19 @@
-import { components } from '@shared/api-schema';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createColumnHelper } from '@tanstack/react-table';
+import {
+  ArrowLeft,
+  ChevronRight,
+  CircleCheck,
+  CircleMinus,
+  EllipsisVertical,
+  InfoIcon,
+  Milestone,
+  RefreshCw,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
+
+import { components } from '@shared/api-schema';
 import {
   deleteAssessment,
   getAssessment,
@@ -19,27 +32,16 @@ import {
   Timeline,
   VerticalMenu,
 } from '@webui/ui';
-import {
-  ArrowLeft,
-  ChevronRight,
-  CircleCheck,
-  CircleMinus,
-  EllipsisVertical,
-  InfoIcon,
-  Milestone,
-  RefreshCw,
-} from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
-import ErrorPage from './error-page';
-import ExportToAWSDialog from './export-to-aws-dialog';
-import FindingsDetails from './findings-details';
-import AssessmentOverview from './assessment-overview';
+
 import {
   calculateCompletedQuestionsCount,
   calculateOverallCompletion,
 } from '../../lib/assessment-utils';
+import AssessmentOverview from './assessment-overview';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import ErrorPage from './error-page';
+import ExportToAWSDialog from './export-to-aws-dialog';
+import FindingsDetails from './findings-details';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
