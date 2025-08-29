@@ -146,6 +146,11 @@ function AssessmentOverview({
     const colors = getThemeColors();
     return (severity: string): string => {
       switch (severity.toLowerCase()) {
+        case 'informational':
+          return lightenColor(colors.info, 50);
+        case 'unknown':
+        case 'other':
+          return lightenColor(colors.neutral, 50);
         case 'low':
           return colors.info;
         case 'medium':
@@ -155,6 +160,8 @@ function AssessmentOverview({
         case 'critical':
           // Darker version of error color
           return darkenColor(colors.error, 30);
+        case 'fatal':
+          return darkenColor(colors.error, 50);
         default:
           return colors.neutral;
       }
