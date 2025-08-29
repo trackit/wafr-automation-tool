@@ -14,10 +14,11 @@ describe('startPDFExport adapter', () => {
 
       const event = StartPDFExportAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -26,7 +27,7 @@ describe('startPDFExport adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid json body', async () => {
+    it('should return a 400 status code with an invalid json body', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().withBody('{').build();
@@ -35,7 +36,7 @@ describe('startPDFExport adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid body', async () => {
+    it('should return a 400 status code with an invalid body', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic()

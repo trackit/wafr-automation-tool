@@ -5,10 +5,13 @@ import { tokenListPDFExportsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
-import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { AssessmentFileExport } from '@backend/models';
+import {
+  MissingRequestPathError,
+  RequestParsingFailedError,
+} from '../../../utils/api/HttpError';
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const ListPDFExportsPathSchema = z.object({
   assessmentId: z.string(),
@@ -45,7 +48,7 @@ export class ListPDFExportsAdapter {
   > {
     const { pathParameters } = event;
     if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
+      throw new MissingRequestPathError();
     }
 
     try {
@@ -57,7 +60,7 @@ export class ListPDFExportsAdapter {
       return this.toAPIResponse(pdfExports);
     } catch (e) {
       if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
+        throw new RequestParsingFailedError(e);
       }
       throw e;
     }

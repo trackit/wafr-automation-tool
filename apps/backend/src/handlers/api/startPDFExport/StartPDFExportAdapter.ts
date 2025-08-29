@@ -1,14 +1,18 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
+import { tokenStartPDFExportUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { tokenStartPDFExportUseCase } from '@backend/useCases';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseJsonObject } from '@shared/utils';
+import {
+  MissingRequestBodyError,
+  MissingRequestPathError,
+  RequestParsingFailedError,
+} from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { parseJsonObject } from '@shared/utils';
 
 const StartPDFExportPathSchema = z.object({
   assessmentId: z.string(),
@@ -43,10 +47,10 @@ export class StartPDFExportAdapter {
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
     const { pathParameters, body } = event;
     if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
+      throw new MissingRequestPathError();
     }
     if (!body) {
-      throw new BadRequestError('Missing request body');
+      throw new MissingRequestBodyError();
     }
 
     try {
@@ -59,7 +63,7 @@ export class StartPDFExportAdapter {
       });
     } catch (e) {
       if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
+        throw new RequestParsingFailedError(e);
       }
       throw e;
     }

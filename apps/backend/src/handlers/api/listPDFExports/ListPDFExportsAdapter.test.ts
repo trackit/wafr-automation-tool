@@ -14,10 +14,10 @@ describe('listPDFExports adapter', () => {
 
       const event = ListPDFExportsAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      expect(adapter.handle(event)).not.toBe(400);
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();

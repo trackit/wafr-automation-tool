@@ -5,7 +5,10 @@ import { tokenDeletePDFExportUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
+import {
+  MissingRequestPathError,
+  RequestParsingFailedError,
+} from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
@@ -30,7 +33,7 @@ export class DeletePDFExportAdapter {
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
     const { pathParameters } = event;
     if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
+      throw new MissingRequestPathError();
     }
 
     try {
@@ -41,7 +44,7 @@ export class DeletePDFExportAdapter {
       });
     } catch (e) {
       if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
+        throw new RequestParsingFailedError(e);
       }
       throw e;
     }
