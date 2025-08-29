@@ -1,6 +1,6 @@
 import { components } from '@shared/api-schema';
 import { Calendar, Computer, Earth, Search, Server } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import {
   Cell,
   Legend,
@@ -34,54 +34,6 @@ const extractAccountId = (roleArn: string | undefined) => {
 };
 
 const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-  index,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  index: number;
-}) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  if (percent < 0.1) return null;
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-    >
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
-};
-
-function formatRegion(raw: string): string {
-  return raw
-    .split('-')
-    .map((part) =>
-      // Si c'est un code court (ex. "us", "eu"), on met tout en MAJ
-      part.length <= 2
-        ? part.toUpperCase()
-        : // sinon on ne met que la première lettre en MAJ
-          part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-    )
-    .join(' ');
-}
 
 const SEVERITIES = ['Critical', 'High', 'Medium', 'Low'];
 
@@ -90,126 +42,143 @@ function AssessmentOverview({
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
 }) {
-  const [totalRegionsCount, setTotalRegionsCount] = useState<number>(0);
-  const [assessmentRegions, setAssessmentRegions] = useState<
-    Array<{ name: string; value: number }>
-  >([]);
-  const [assessmentSeverities, setAssessmentSeverities] = useState<
-    Array<{ name: string; value: number }>
-  >([]);
-  const [totalSeveritiesCount, setTotalSeveritiesCount] = useState<number>(0);
-  const [assessmentResourceTypes, setAssessmentResourceTypes] = useState<
-    Array<{ name: string; value: number; color: string }>
-  >([]);
+  const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
     new Set()
   );
-  const [pillarCompletionData, setPillarCompletionData] = useState<
-    Array<{ pillar: string; completion: number }>
-  >([]);
-  const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
 
-  console.log(assessment);
-  console.log(assessmentRegions);
-  console.log(assessmentSeverities);
-  console.log(assessmentResourceTypes);
-  console.log(pillarCompletionData);
+  // Consolidated useMemo for all data processing
+  const processedData = useMemo(() => {
+    if (!assessment?.graphData) return null;
 
-  useMemo(() => {
-    if (assessment?.graphData?.regions) {
-      setAssessmentRegions(
-        Object.entries(assessment.graphData.regions)
+    const { graphData } = assessment;
+
+    // Process regions data
+    const regions = graphData.regions
+      ? Object.entries(graphData.regions)
           .sort((a, b) => (b[1] as number) - (a[1] as number))
           .map(([name, value]) => ({ name, value: value as number }))
-      );
-    }
-    if (assessment?.graphData?.severities) {
-      setAssessmentSeverities(
-        Object.entries(assessment.graphData.severities)
+      : [];
+
+    // Process severities data
+    const severities = graphData.severities
+      ? Object.entries(graphData.severities)
           .sort((a, b) => SEVERITIES.indexOf(a[0]) - SEVERITIES.indexOf(b[0]))
           .map(([name, value]) => ({ name, value: value as number }))
-      );
-    }
-    if (assessment?.graphData?.resourceTypes) {
-      const resourceTypes = Object.entries(assessment.graphData.resourceTypes)
-        .sort((a, b) => (b[1] as number) - (a[1] as number))
-        .map(([name, value], index) => ({
-          name,
-          value: value as number,
-          color: getChartColorByIndex(index),
-        }));
-      setAssessmentResourceTypes(resourceTypes);
-      // Initialize all resource types as enabled
-      setEnabledResourceTypes(new Set(resourceTypes.map((rt) => rt.name)));
-    }
+      : [];
+
+    // Process resource types data
+    const resourceTypes = graphData.resourceTypes
+      ? Object.entries(graphData.resourceTypes)
+          .sort((a, b) => (b[1] as number) - (a[1] as number))
+          .map(([name, value], index) => ({
+            name,
+            value: value as number,
+            color: getChartColorByIndex(index),
+          }))
+      : [];
+
+    return {
+      regions,
+      severities,
+      resourceTypes,
+      totalRegionsCount: regions.reduce((sum, item) => sum + item.value, 0),
+      totalSeveritiesCount: severities.reduce(
+        (sum, item) => sum + item.value,
+        0
+      ),
+    };
   }, [assessment?.graphData]);
 
-  useMemo(() => {
-    setTotalRegionsCount(
-      assessmentRegions.reduce((sum, item) => sum + item.value, 0)
-    );
-  }, [assessmentRegions]);
+  // Extract processed data
+  const assessmentRegions = useMemo(
+    () => processedData?.regions || [],
+    [processedData?.regions]
+  );
+  const assessmentSeverities = useMemo(
+    () => processedData?.severities || [],
+    [processedData?.severities]
+  );
+  const assessmentResourceTypes = useMemo(
+    () => processedData?.resourceTypes || [],
+    [processedData?.resourceTypes]
+  );
+  const totalRegionsCount = useMemo(
+    () => processedData?.totalRegionsCount || 0,
+    [processedData?.totalRegionsCount]
+  );
+  const totalSeveritiesCount = useMemo(
+    () => processedData?.totalSeveritiesCount || 0,
+    [processedData?.totalSeveritiesCount]
+  );
 
+  // Initialize enabled resource types when resource types change
   useMemo(() => {
-    setTotalSeveritiesCount(
-      assessmentSeverities.reduce((sum, item) => sum + item.value, 0)
+    if (assessmentResourceTypes.length > 0) {
+      setEnabledResourceTypes(
+        new Set(assessmentResourceTypes.map((rt) => rt.name))
+      );
+    }
+  }, [assessmentResourceTypes]);
+
+  // Get filtered resource types for charts
+  const filteredResourceTypes = useMemo(() => {
+    return assessmentResourceTypes.filter((rt) =>
+      enabledResourceTypes.has(rt.name)
     );
-  }, [assessmentSeverities]);
+  }, [assessmentResourceTypes, enabledResourceTypes]);
 
   // Calculate pillar completion percentages
-  useMemo(() => {
-    if (assessment?.pillars) {
-      const pillarData = assessment.pillars
-        .filter((pillar) => !pillar.disabled) // Only include enabled pillars
-        .map((pillar) => {
-          const questions = pillar.questions || [];
-          const totalQuestions = questions.filter((q) => !q.disabled).length;
+  const pillarCompletionData = useMemo(() => {
+    if (!assessment?.pillars) return [];
 
-          if (totalQuestions === 0) {
-            return {
-              pillar: pillar.label || pillar.id || 'Unknown',
-              completion: 100,
-            };
-          }
+    return assessment.pillars
+      .filter((pillar) => !pillar.disabled) // Only include enabled pillars
+      .map((pillar) => {
+        const questions = pillar.questions || [];
+        const totalQuestions = questions.filter((q) => !q.disabled).length;
 
-          let completedQuestions = 0;
-
-          for (const question of questions) {
-            if (question.disabled) continue;
-
-            // Check if the question has any high severity best practices
-            const hasHighSeverityPractices = question.bestPractices?.some(
-              (bestPractice) => bestPractice.risk === 'High'
-            );
-
-            if (hasHighSeverityPractices) {
-              // Check if all high severity best practices in this question have checked true
-              const allHighSeverityPracticesComplete =
-                question.bestPractices?.every(
-                  (bestPractice) =>
-                    bestPractice.risk !== 'High' ||
-                    bestPractice.checked === true
-                ) ?? false;
-
-              if (allHighSeverityPracticesComplete) {
-                completedQuestions++;
-              }
-            } else {
-              completedQuestions++;
-            }
-          }
-
-          const completionPercentage = Math.round(
-            (completedQuestions / totalQuestions) * 100
-          );
+        if (totalQuestions === 0) {
           return {
             pillar: pillar.label || pillar.id || 'Unknown',
-            completion: completionPercentage,
+            completion: 100,
           };
-        });
+        }
 
-      setPillarCompletionData(pillarData);
-    }
+        let completedQuestions = 0;
+
+        for (const question of questions) {
+          if (question.disabled) continue;
+
+          // Check if the question has any high severity best practices
+          const hasHighSeverityPractices = question.bestPractices?.some(
+            (bestPractice) => bestPractice.risk === 'High'
+          );
+
+          if (hasHighSeverityPractices) {
+            // Check if all high severity best practices in this question have checked true
+            const allHighSeverityPracticesComplete =
+              question.bestPractices?.every(
+                (bestPractice) =>
+                  bestPractice.risk !== 'High' || bestPractice.checked === true
+              ) ?? false;
+
+            if (allHighSeverityPracticesComplete) {
+              completedQuestions++;
+            }
+          } else {
+            completedQuestions++;
+          }
+        }
+
+        const completionPercentage = Math.round(
+          (completedQuestions / totalQuestions) * 100
+        );
+        return {
+          pillar: pillar.label || pillar.id || 'Unknown',
+          completion: completionPercentage,
+        };
+      });
   }, [assessment?.pillars]);
 
   // Calculate overall completion percentage
@@ -256,31 +225,27 @@ function AssessmentOverview({
   }, [assessment?.pillars]);
 
   // Get severity-specific colors for the pie chart
-  const getSeverityColor = (severity: string): string => {
+  const getSeverityColor = useMemo(() => {
     const colors = getThemeColors();
-
-    switch (severity.toLowerCase()) {
-      case 'low':
-        return colors.info;
-      case 'medium':
-        return colors.warning;
-      case 'high':
-        return colors.error;
-      case 'critical':
-        // Darker version of error color
-        return darkenColor(colors.error, 30);
-      default:
-        return colors.neutral;
-    }
-  };
-
-  // Get colors for resource types in the treemap
-  const getResourceTypeColor = (index: number): string => {
-    return getChartColorByIndex(index);
-  };
+    return (severity: string): string => {
+      switch (severity.toLowerCase()) {
+        case 'low':
+          return colors.info;
+        case 'medium':
+          return colors.warning;
+        case 'high':
+          return colors.error;
+        case 'critical':
+          // Darker version of error color
+          return darkenColor(colors.error, 30);
+        default:
+          return colors.neutral;
+      }
+    };
+  }, []);
 
   // Toggle resource type visibility
-  const toggleResourceType = (resourceTypeName: string) => {
+  const toggleResourceType = useCallback((resourceTypeName: string) => {
     setEnabledResourceTypes((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(resourceTypeName)) {
@@ -290,14 +255,7 @@ function AssessmentOverview({
       }
       return newSet;
     });
-  };
-
-  // Filter resource types based on enabled state
-  const filteredResourceTypes = useMemo(() => {
-    return assessmentResourceTypes.filter((rt) =>
-      enabledResourceTypes.has(rt.name)
-    );
-  }, [assessmentResourceTypes, enabledResourceTypes]);
+  }, []);
 
   if (!assessment) return null;
   return (
