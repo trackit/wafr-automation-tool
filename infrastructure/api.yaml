@@ -17,8 +17,6 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
-  DefaultAssessmentRole:
-    Type: String
   InitialUserEmail:
     Type: String
   LogRetentionInDays:

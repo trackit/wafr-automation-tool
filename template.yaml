@@ -52,7 +52,6 @@ Resources:
           ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
-        DefaultAssessmentRole: !GetAtt ScanningTools.Outputs.DefaultAssessmentRole
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
