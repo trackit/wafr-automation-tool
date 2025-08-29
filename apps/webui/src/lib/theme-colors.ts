@@ -129,19 +129,6 @@ export const getChartColors = (): string[] => {
     lightenColor(colors.primary, 80),
     darkenColor(colors.primary, 40),
     darkenColor(colors.primary, 80),
-
-    // Secondary variations
-    // colors.secondary,
-    // lightenColor(colors.secondary, 20),
-    // lightenColor(colors.secondary, 40),
-    // darkenColor(colors.secondary, 20),
-    // darkenColor(colors.secondary, 40),
-
-    // // Additional variations for more data series
-    // lightenColor(colors.primary, 60),
-    // lightenColor(colors.secondary, 60),
-    // darkenColor(colors.primary, 60),
-    // darkenColor(colors.secondary, 60),
   ];
 };
 
