@@ -1,4 +1,7 @@
 import nx from '@nx/eslint-plugin';
+import pluginImport from 'eslint-plugin-import';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default [
   ...nx.configs['flat/base'],
@@ -9,6 +12,11 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+      import: pluginImport,
+      'unused-imports': unusedImports,
+    },
     rules: {
       '@nx/enforce-module-boundaries': [
         'error',
@@ -80,6 +88,19 @@ export default [
           ],
         },
       ],
+      'simple-import-sort/imports': ['error', {
+        groups: [
+          ['^\\u0000'],
+          ['^node:', '^(?!@(?:backend|webui|shared)(?:/|$))@?\\w'],
+          ['^(?:@backend|@webui|@shared)(?:/|$)'],
+          ['^\\.'],
+        ],
+      }],
+      'simple-import-sort/exports': 'error',
+      'import/no-duplicates': 'error',
+      'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],
+      'import/order': 'off',
+      'unused-imports/no-unused-imports': 'error',
     },
   },
   {
