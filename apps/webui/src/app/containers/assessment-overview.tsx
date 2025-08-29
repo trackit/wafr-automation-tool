@@ -1,5 +1,5 @@
 import { components } from '@shared/api-schema';
-import { Calendar, Computer, Earth, Search, Server } from 'lucide-react';
+import { Calendar, Computer, Earth, Server } from 'lucide-react';
 import { useMemo, useState, useCallback } from 'react';
 import {
   Cell,
@@ -26,14 +26,14 @@ import {
   darkenColor,
   lightenColor,
 } from '../../lib/theme-colors';
-
-const extractAccountId = (roleArn: string | undefined) => {
-  if (!roleArn) return '';
-  const match = roleArn.match(/arn:aws:iam::(\d+):/);
-  return match ? match[1] : '';
-};
-
-const RADIAN = Math.PI / 180;
+import {
+  calculatePillarCompletion,
+  calculateOverallCompletion,
+  extractAccountId,
+  formatWorkflowInfo,
+  formatDate,
+  formatRegions,
+} from '../../lib/assessment-utils';
 
 const SEVERITIES = ['Critical', 'High', 'Medium', 'Low'];
 
@@ -91,26 +91,13 @@ function AssessmentOverview({
   }, [assessment?.graphData]);
 
   // Extract processed data
-  const assessmentRegions = useMemo(
-    () => processedData?.regions || [],
-    [processedData?.regions]
-  );
-  const assessmentSeverities = useMemo(
-    () => processedData?.severities || [],
-    [processedData?.severities]
-  );
-  const assessmentResourceTypes = useMemo(
-    () => processedData?.resourceTypes || [],
-    [processedData?.resourceTypes]
-  );
-  const totalRegionsCount = useMemo(
-    () => processedData?.totalRegionsCount || 0,
-    [processedData?.totalRegionsCount]
-  );
-  const totalSeveritiesCount = useMemo(
-    () => processedData?.totalSeveritiesCount || 0,
-    [processedData?.totalSeveritiesCount]
-  );
+  const {
+    regions: assessmentRegions = [],
+    severities: assessmentSeverities = [],
+    resourceTypes: assessmentResourceTypes = [],
+    totalRegionsCount = 0,
+    totalSeveritiesCount = 0,
+  } = processedData || {};
 
   // Initialize enabled resource types when resource types change
   useMemo(() => {
@@ -134,95 +121,16 @@ function AssessmentOverview({
 
     return assessment.pillars
       .filter((pillar) => !pillar.disabled) // Only include enabled pillars
-      .map((pillar) => {
-        const questions = pillar.questions || [];
-        const totalQuestions = questions.filter((q) => !q.disabled).length;
-
-        if (totalQuestions === 0) {
-          return {
-            pillar: pillar.label || pillar.id || 'Unknown',
-            completion: 100,
-          };
-        }
-
-        let completedQuestions = 0;
-
-        for (const question of questions) {
-          if (question.disabled) continue;
-
-          // Check if the question has any high severity best practices
-          const hasHighSeverityPractices = question.bestPractices?.some(
-            (bestPractice) => bestPractice.risk === 'High'
-          );
-
-          if (hasHighSeverityPractices) {
-            // Check if all high severity best practices in this question have checked true
-            const allHighSeverityPracticesComplete =
-              question.bestPractices?.every(
-                (bestPractice) =>
-                  bestPractice.risk !== 'High' || bestPractice.checked === true
-              ) ?? false;
-
-            if (allHighSeverityPracticesComplete) {
-              completedQuestions++;
-            }
-          } else {
-            completedQuestions++;
-          }
-        }
-
-        const completionPercentage = Math.round(
-          (completedQuestions / totalQuestions) * 100
-        );
-        return {
-          pillar: pillar.label || pillar.id || 'Unknown',
-          completion: completionPercentage,
-        };
-      });
+      .map((pillar) => ({
+        pillar: pillar.label || pillar.id || 'Unknown',
+        completion: calculatePillarCompletion(pillar),
+      }));
   }, [assessment?.pillars]);
 
   // Calculate overall completion percentage
   const overallCompletion = useMemo(() => {
-    if (!assessment?.pillars) return 0;
-
-    let completedQuestions = 0;
-    let totalQuestions = 0;
-
-    for (const pillar of assessment.pillars) {
-      if (pillar.disabled) continue;
-
-      const questions = pillar.questions || [];
-      for (const question of questions) {
-        if (question.disabled) continue;
-
-        totalQuestions++;
-
-        // Check if the question has any high severity best practices
-        const hasHighSeverityPractices = question.bestPractices?.some(
-          (bestPractice) => bestPractice.risk === 'High'
-        );
-
-        if (hasHighSeverityPractices) {
-          // Check if all high severity best practices in this question have checked true
-          const allHighSeverityPracticesComplete =
-            question.bestPractices?.every(
-              (bestPractice) =>
-                bestPractice.risk !== 'High' || bestPractice.checked === true
-            ) ?? false;
-
-          if (allHighSeverityPracticesComplete) {
-            completedQuestions++;
-          }
-        } else {
-          completedQuestions++;
-        }
-      }
-    }
-
-    return totalQuestions > 0
-      ? Math.round((completedQuestions / totalQuestions) * 100)
-      : 0;
-  }, [assessment?.pillars]);
+    return calculateOverallCompletion(assessment);
+  }, [assessment]);
 
   // Get severity-specific colors for the pie chart
   const getSeverityColor = useMemo(() => {
@@ -270,23 +178,15 @@ function AssessmentOverview({
             </div>
             <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Calendar className="w-5 h-5" />
-              Created:{' '}
-              {assessment.createdAt
-                ? new Date(assessment.createdAt).toLocaleDateString()
-                : 'N/A'}
+              Created: {formatDate(assessment.createdAt)}
             </div>
             <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Earth className="w-5 h-5" />
-              {assessment.regions?.join(', ') || 'Global'}
+              {formatRegions(assessment.regions)}
             </div>
             <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Computer className="w-5 h-5" />
-              Workflow:{' '}
-              {Array.isArray(assessment.workflows)
-                ? assessment.workflows.length
-                  ? assessment.workflows.join(', ')
-                  : '-'
-                : assessment.workflows || '-'}
+              Workflow: {formatWorkflowInfo(assessment.workflows)}
             </div>
           </div>
         </div>
@@ -593,7 +493,7 @@ function AssessmentOverview({
                 fill={lightenColor(getThemeColors().primary, 20)}
                 stroke={'white'}
               >
-                {filteredResourceTypes.map((entry, index) => (
+                {filteredResourceTypes.map((entry) => (
                   <Cell key={entry.name} />
                 ))}
                 <Tooltip

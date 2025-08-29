@@ -35,6 +35,10 @@ import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
 import AssessmentOverview from './assessment-overview';
+import {
+  calculateCompletedQuestionsCount,
+  calculateOverallCompletion,
+} from '../../lib/assessment-utils';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
@@ -48,7 +52,6 @@ export function AssessmentDetails() {
   const navigate = useNavigate();
   const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-  const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>({
     id: 'overview',
   });
@@ -643,47 +646,10 @@ export function AssessmentDetails() {
     ]
   );
 
-  // Helper function to calculate completed questions count
-  const calculateCompletedQuestions = (questions: Question[]) => {
-    let completedCount = 0;
-
-    // Iterate through each question in the pillar
-    for (const question of questions) {
-      if (question.disabled) continue;
-      // Check if the question has any high severity best practices
-      const hasHighSeverityPractices = question.bestPractices?.some(
-        (bestPractice) => bestPractice.risk === 'High'
-      );
-
-      if (hasHighSeverityPractices) {
-        // Check if all high severity best practices in this question have checked true
-        const allHighSeverityPracticesComplete =
-          question.bestPractices?.every(
-            (bestPractice) =>
-              bestPractice.risk !== 'High' || bestPractice.checked === true
-          ) ?? false;
-
-        if (allHighSeverityPracticesComplete) {
-          completedCount++;
-        }
-      } else {
-        completedCount++;
-      }
-    }
-
-    return completedCount;
-  };
-
   useEffect(() => {
     if (!pillars) return;
-    const completedQuestions = pillars.reduce((acc, pillar) => {
-      return acc + calculateCompletedQuestions(pillar.questions || []);
-    }, 0);
-    const totalQuestions = pillars.reduce((acc, pillar) => {
-      return acc + (pillar.questions?.filter((q) => !q.disabled).length || 0);
-    }, 0);
-    setProgress(Math.round((completedQuestions / totalQuestions) * 100));
-  }, [pillars]);
+    setProgress(calculateOverallCompletion(data));
+  }, [data]);
 
   const handleNextQuestion = () => {
     if (!selectedPillar?.questions) return;
@@ -720,7 +686,7 @@ export function AssessmentDetails() {
     const mappedPillars = pillars.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
-          ? `${calculateCompletedQuestions(pillar.questions)}/${
+          ? `${calculateCompletedQuestionsCount(pillar.questions)}/${
               pillar.questions.filter((q) => !q.disabled).length
             }`
           : ''
