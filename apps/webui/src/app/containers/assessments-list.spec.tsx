@@ -11,7 +11,7 @@ import {
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
-import { deleteAssessment,getAssessments } from '@webui/api-client';
+import { deleteAssessment, getAssessments } from '@webui/api-client';
 
 import AssessmentsList from './assessments-list';
 

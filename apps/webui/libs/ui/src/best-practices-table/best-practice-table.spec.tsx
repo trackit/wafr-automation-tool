@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 
 import { Row } from '@tanstack/react-table';
-import {render, screen } from '@testing-library/react';
-import { describe, expect,it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
 import BestPracticeTable from './best-practice-table';
 

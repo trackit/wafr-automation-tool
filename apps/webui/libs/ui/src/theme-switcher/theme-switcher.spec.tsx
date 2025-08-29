@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent,render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useDarkMode } from 'usehooks-ts';
-import { beforeEach,describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ThemeSwitcher, { THEME_KEYS } from './theme-switcher';
 

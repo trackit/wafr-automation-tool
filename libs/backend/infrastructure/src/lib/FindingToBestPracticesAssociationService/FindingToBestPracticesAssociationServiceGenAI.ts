@@ -12,7 +12,7 @@ import {
   FindingToBestPracticesAssociationService,
   Prompt,
 } from '@backend/ports';
-import { createInjectionToken,inject } from '@shared/di-container';
+import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';
 
 import { tokenAIService } from '../AIService';

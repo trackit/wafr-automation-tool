@@ -13,7 +13,7 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 

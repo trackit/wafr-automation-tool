@@ -88,14 +88,17 @@ export default [
           ],
         },
       ],
-      'simple-import-sort/imports': ['error', {
-        groups: [
-          ['^\\u0000'],
-          ['^node:', '^(?!@(?:backend|webui|shared)(?:/|$))@?\\w'],
-          ['^(?:@backend|@webui|@shared)(?:/|$)'],
-          ['^\\.'],
-        ],
-      }],
+      'simple-import-sort/imports': [
+        'error',
+        {
+          groups: [
+            ['^\\u0000'],
+            ['^node:', '^(?!@(?:backend|webui|shared)(?:/|$))@?\\w'],
+            ['^(?:@backend|@webui|@shared)(?:/|$)'],
+            ['^\\.'],
+          ],
+        },
+      ],
       'simple-import-sort/exports': 'error',
       'import/no-duplicates': 'error',
       'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],

@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Clock, ExternalLink,List } from 'lucide-react';
-import { useMemo,useState } from 'react';
+import { Clock, ExternalLink, List } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { getMilestones } from '@webui/api-client';
 import { Modal } from '@webui/ui';
