@@ -13,23 +13,12 @@ type AssessmentContent = components['schemas']['AssessmentContent'];
 export function isQuestionCompleted(question: Question): boolean {
   if (question.disabled) return false;
 
-  // Check if the question has any high severity best practices
-  const hasHighSeverityPractices = question.bestPractices?.some(
-    (bestPractice) => bestPractice.risk === 'High'
+  const highSeverityPractices =
+    question.bestPractices?.filter((bp) => bp.risk === 'High') ?? [];
+  return (
+    highSeverityPractices.length === 0 ||
+    highSeverityPractices.every((bp) => bp.checked === true)
   );
-
-  if (hasHighSeverityPractices) {
-    // Check if all high severity best practices in this question have checked true
-    return (
-      question.bestPractices?.every(
-        (bestPractice) =>
-          bestPractice.risk !== 'High' || bestPractice.checked === true
-      ) ?? false
-    );
-  } else {
-    // If no high severity practices, question is complete
-    return true;
-  }
 }
 
 /**
