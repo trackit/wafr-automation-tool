@@ -94,7 +94,7 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
       },
       onError: (e: Error) => {
         enqueueSnackbar({
-          message: 'Failed to start PDF export. Please try again later',
+          message: 'Failed to start PDF export. Please contact support',
           variant: 'error',
         });
         console.error('Error starting PDF export:', e);
@@ -126,7 +126,7 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
     },
     onError: (e: Error) => {
       enqueueSnackbar({
-        message: 'Failed to download PDF export. Please try again later',
+        message: 'Failed to download PDF export. Please contact support',
         variant: 'error',
       });
       console.error('Error downloading PDF export', e);
@@ -151,7 +151,7 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
     },
     onError: (e: Error) => {
       enqueueSnackbar({
-        message: 'Failed to delete PDF export. Please try again later',
+        message: 'Failed to delete PDF export. Please contact support',
         variant: 'error',
       });
       console.error('Error deleting PDF export', e);

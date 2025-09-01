@@ -427,18 +427,18 @@ paths:
                 items:
                   $ref: '#/components/schemas/FileExport'
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization
+          description: Invalid request path parameters
         '404':
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
     post:
-      operationId: exportToPDF
+      operationId: startPDFExport
       tags:
         - Exports
-      summary: Export the assessment to a PDF file
+      summary: Starts a PDF export for the specified assessment
       description: |
-        Exports the assessment to a PDF file.
+        Starts a PDF export for the specified assessment.
       parameters:
         - name: assessmentId
           in: path
@@ -457,12 +457,12 @@ paths:
               properties:
                 versionName:
                   type: string
-                  description: The version name of the PDF file
+                  description: The version name of the PDF export
       responses:
         '200':
-          description: The assessment has been successfully exported
+          description: The PDF export has been started successfully
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization
+          description: Invalid request parameters
         '404':
           description: The specified assessment could not be found
         '500':
@@ -502,7 +502,7 @@ paths:
                     type: string
                     description: The URL of the PDF export
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization
+          description: Invalid request path parameters
         '404':
           description: The specified assessment could not be found
         '500':
@@ -532,7 +532,7 @@ paths:
         '200':
           description: The PDF export has been successfully deleted
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization
+          description: Invalid request path parameters
         '404':
           description: The specified assessment could not be found
         '500':

@@ -169,11 +169,11 @@ export interface paths {
         get: operations["listPDFExports"];
         put?: never;
         /**
-         * Export the assessment to a PDF file
-         * @description Exports the assessment to a PDF file.
+         * Starts a PDF export for the specified assessment
+         * @description Starts a PDF export for the specified assessment.
          *
          */
-        post: operations["exportToPDF"];
+        post: operations["startPDFExport"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1060,7 +1060,7 @@ export interface operations {
                     "application/json": components["schemas"]["FileExport"][];
                 };
             };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization */
+            /** @description Invalid request path parameters */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1083,7 +1083,7 @@ export interface operations {
             };
         };
     };
-    exportToPDF: {
+    startPDFExport: {
         parameters: {
             query?: never;
             header?: never;
@@ -1096,20 +1096,20 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The version name of the PDF file */
+                    /** @description The version name of the PDF export */
                     versionName: string;
                 };
             };
         };
         responses: {
-            /** @description The assessment has been successfully exported */
+            /** @description The PDF export has been started successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization */
+            /** @description Invalid request parameters */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1158,7 +1158,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization */
+            /** @description Invalid request path parameters */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1202,7 +1202,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization */
+            /** @description Invalid request path parameters */
             400: {
                 headers: {
                     [name: string]: unknown;

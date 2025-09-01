@@ -1,8 +1,8 @@
 import type {
   Assessment,
   AssessmentBody,
-  AssessmentFileExports,
   AssessmentFileExport,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPracticeBody,
   Finding,
@@ -12,7 +12,6 @@ import type {
   PillarBody,
   QuestionBody,
   ScanningTool,
-  AssessmentFileExportType,
 } from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
