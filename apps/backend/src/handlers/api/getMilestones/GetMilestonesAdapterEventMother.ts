@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 import type { User } from '@backend/models';
+import { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
-import { operations } from '@shared/api-schema';
 
 export class GetMilestonesAdapterEventMother {
   private pathParameters: operations['getMilestones']['parameters']['path'];

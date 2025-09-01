@@ -11,6 +11,7 @@ import {
   SeverityType,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { NotFoundError } from '../Errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import {

@@ -10,12 +10,12 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
+import { NotFoundError } from '../Errors';
 import {
   StoreFindingsToAssociateUseCaseImpl,
   tokenStoreFindingsToAssociateUseCaseChunkSize,
 } from './StoreFindingsToAssociateUseCase';
 import { StoreFindingsToAssociateUseCaseArgsMother } from './StoreFindingsToAssociateUseCaseArgsMother';
-import { NotFoundError } from '../Errors';
 
 describe('StoreFindingsToAssociate UseCase', () => {
   it('should throw an NotFoundError if assessment does not exist', async () => {

@@ -1,4 +1,5 @@
 import { User, UserMother } from '@backend/models';
+
 import type { ExportWellArchitectedToolUseCaseArgs } from './ExportWellArchitectedToolUseCase';
 
 export class ExportWellArchitectedToolUseCaseArgsMother {

@@ -1,4 +1,5 @@
 import type { User } from '@backend/models';
+
 import type { DeleteCommentUseCaseArgs } from './DeleteCommentUseCase';
 
 export class DeleteCommentUseCaseArgsMother {

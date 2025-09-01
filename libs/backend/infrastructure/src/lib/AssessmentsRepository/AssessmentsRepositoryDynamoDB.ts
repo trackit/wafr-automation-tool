@@ -1,4 +1,5 @@
 import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
+
 import type {
   Assessment,
   AssessmentBody,
@@ -21,6 +22,7 @@ import {
 } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
+
 import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
@@ -30,8 +32,8 @@ import {
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
-import { tokenLogger } from '../Logger';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
+import { tokenLogger } from '../Logger';
 import {
   DynamoDBAssessment,
   DynamoDBFinding,

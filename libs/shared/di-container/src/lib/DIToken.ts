@@ -1,4 +1,5 @@
 import { InjectionToken } from 'tsyringe';
+
 import { Provider } from './Provider';
 
 export class DIToken<T> {

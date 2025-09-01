@@ -4,10 +4,6 @@ import {
   tokenFindingToBestPracticesAssociationService,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
-
-import { AssociateFindingsToBestPracticesUseCaseImpl } from './AssociateFindingsToBestPracticesUseCase';
-import { AssociateFindingsToBestPracticesUseCaseArgsMother } from './AssociateFindingsToBestPracticesUseCaseArgsMother';
 import {
   AssessmentMother,
   BestPracticeMother,
@@ -16,7 +12,11 @@ import {
   QuestionMother,
   ScanningTool,
 } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
+
 import { NotFoundError } from '../Errors';
+import { AssociateFindingsToBestPracticesUseCaseImpl } from './AssociateFindingsToBestPracticesUseCase';
+import { AssociateFindingsToBestPracticesUseCaseArgsMother } from './AssociateFindingsToBestPracticesUseCaseArgsMother';
 
 describe('AssociateFindingsToBestPracticesUseCase', () => {
   it('should throw an NotFoundError if assessment does not exist', async () => {

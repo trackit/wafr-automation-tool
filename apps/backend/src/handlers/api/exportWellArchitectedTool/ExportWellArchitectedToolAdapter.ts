@@ -1,14 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
+import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
+import { parseJsonObject } from '@shared/utils';
 
-import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
-import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { parseJsonObject } from '@shared/utils';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const ExportWellArchitectedToolPathSchema = z.object({
   assessmentId: z.string(),

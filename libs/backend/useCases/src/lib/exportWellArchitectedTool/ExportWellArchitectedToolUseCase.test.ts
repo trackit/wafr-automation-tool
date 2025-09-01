@@ -4,8 +4,6 @@ import {
   tokenFakeOrganizationRepository,
   tokenFakeWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
-
 import {
   AssessmentMother,
   AssessmentStep,
@@ -13,6 +11,8 @@ import {
   PillarMother,
   UserMother,
 } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
+
 import { ConflictError, NoContentError, NotFoundError } from '../Errors';
 import { ExportWellArchitectedToolUseCaseImpl } from './ExportWellArchitectedToolUseCase';
 import { ExportWellArchitectedToolUseCaseArgsMother } from './ExportWellArchitectedToolUseCaseArgsMother';

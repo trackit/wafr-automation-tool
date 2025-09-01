@@ -1,5 +1,6 @@
-import { CircleCheck, CircleMinus } from 'lucide-react';
 import './timeline.css';
+
+import { CircleCheck, CircleMinus } from 'lucide-react';
 
 export type TimelineStep = {
   text: string;

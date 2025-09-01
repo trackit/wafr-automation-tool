@@ -1,14 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
+import { Assessment } from '@backend/models';
 import { tokenGetAssessmentsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
-import { Assessment } from '@backend/models';
-import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const GetAssessmentsQuerySchema = z
   .object({

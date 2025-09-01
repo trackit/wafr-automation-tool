@@ -1,4 +1,5 @@
 import type { User } from '@backend/models';
+
 import type { GetBestPracticeFindingsUseCaseArgs } from './GetBestPracticeFindingsUseCase';
 
 export class GetBestPracticeFindingsUseCaseArgsMother {

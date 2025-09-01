@@ -1,9 +1,9 @@
 import {
   type FindingMetadata,
-  SeverityType,
-  type ScanFinding,
   type FindingRemediation,
   type FindingResource,
+  type ScanFinding,
+  SeverityType,
 } from './Finding';
 
 export class ScanFindingMother {

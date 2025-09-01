@@ -1,8 +1,9 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { Clock, ExternalLink, List } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
 import { getMilestones } from '@webui/api-client';
 import { Modal } from '@webui/ui';
-import { Clock, List, ExternalLink } from 'lucide-react';
-import { useState, useMemo } from 'react';
 
 type ListAWSMilestonesDialogProps = {
   assessmentId: string;

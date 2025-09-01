@@ -1,10 +1,10 @@
 import {
-  FindingComment,
-  SeverityType,
   type Finding,
+  FindingComment,
   type FindingMetadata,
   type FindingRemediation,
   type FindingResource,
+  SeverityType,
 } from './Finding';
 
 export class FindingMother {

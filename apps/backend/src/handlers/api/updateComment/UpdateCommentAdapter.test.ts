@@ -2,6 +2,7 @@ import { registerTestInfrastructure } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
 import { tokenUpdateCommentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
+
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { UpdateCommentAdapter } from './UpdateCommentAdapter';
 import { UpdateCommentAdapterEventMother } from './UpdateCommentAdapterEventMother';

@@ -1,10 +1,11 @@
 import {
-  tokenAssessmentsStateMachine,
   tokenAssessmentsRepository,
+  tokenAssessmentsStateMachine,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
+
 import { NotFoundError } from '../Errors';
 
 export type DeleteAssessmentUseCaseArgs = {

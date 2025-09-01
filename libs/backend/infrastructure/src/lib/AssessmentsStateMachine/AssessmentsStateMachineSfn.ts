@@ -4,12 +4,12 @@ import {
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 
-import { inject, createInjectionToken } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
 import type {
   AssessmentsStateMachine,
   AssessmentsStateMachineStartAssessmentArgs,
 } from '@backend/ports';
+import { createInjectionToken, inject } from '@shared/di-container';
+import { assertIsDefined } from '@shared/utils';
 
 import { tokenLogger } from '../Logger';
 

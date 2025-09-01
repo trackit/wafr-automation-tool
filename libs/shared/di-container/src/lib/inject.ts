@@ -1,4 +1,5 @@
 import { container } from 'tsyringe';
+
 import { DIToken } from './DIToken';
 import { register } from './register';
 

@@ -6,9 +6,9 @@ import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 import { JSONParseError, parseJsonObject } from '@shared/utils';
 
-import { BadRequestError } from '../../../utils/api/HttpError';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const StartAssessmentArgsSchema = z.object({
   name: z.string(),

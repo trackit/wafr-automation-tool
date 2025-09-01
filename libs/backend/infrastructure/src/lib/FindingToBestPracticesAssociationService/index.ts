@@ -1,2 +1,2 @@
-export * from './FindingToBestPracticesAssociationServiceGenAI';
 export * from './FakeFindingToBestPracticesAssociationService';
+export * from './FindingToBestPracticesAssociationServiceGenAI';

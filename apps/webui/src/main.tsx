@@ -4,9 +4,9 @@ import { SnackbarProvider } from 'notistack';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import App from './app/app';
 
 import { amplifyConfig } from './amplify.config';
+import App from './app/app';
 import { Auth } from './app/auth';
 
 Amplify.configure(amplifyConfig);

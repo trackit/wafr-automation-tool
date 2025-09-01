@@ -1,13 +1,15 @@
-import {
-  CUSTODIAN_FILE_NAME,
-  PrepareCustodianUseCaseImpl,
-} from './PrepareCustodianUseCase';
+import { vi } from 'vitest';
+
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
 } from '@backend/infrastructure';
 import { inject, reset } from '@shared/di-container';
-import { vi } from 'vitest';
+
+import {
+  CUSTODIAN_FILE_NAME,
+  PrepareCustodianUseCaseImpl,
+} from './PrepareCustodianUseCase';
 
 describe('Prepare custodian use case', () => {
   it('should put the policies file', async () => {

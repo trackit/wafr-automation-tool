@@ -10,7 +10,8 @@ import {
 
 import { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { assertIsDefined, streamToString, type Readable } from '@shared/utils';
+import { assertIsDefined, type Readable, streamToString } from '@shared/utils';
+
 import { tokenLogger } from '../Logger';
 
 export class ObjectsStorageS3 implements ObjectsStorage {

@@ -10,6 +10,7 @@ import {
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
+
 import { NoContentError, NotFoundError } from '../Errors';
 import { UpdateBestPracticeUseCaseImpl } from './UpdateBestPracticeUseCase';
 import { UpdateBestPracticeUseCaseArgsMother } from './UpdateBestPracticeUseCaseArgsMother';
