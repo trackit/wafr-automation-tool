@@ -1,4 +1,5 @@
 import { ScanningTool } from '@backend/models';
+
 import type { PrepareFindingsAssociationsUseCaseArgs } from './PrepareFindingsAssociationsUseCase';
 
 export class PrepareFindingsAssociationsUseCaseArgsMother {

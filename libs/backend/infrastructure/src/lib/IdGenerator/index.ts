@@ -1,2 +1,2 @@
-export * from './IdGeneratorCrypto';
 export * from './FakeIdGenerator';
+export * from './IdGeneratorCrypto';

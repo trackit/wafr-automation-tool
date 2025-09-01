@@ -1,13 +1,13 @@
-import { tokenAssociateFindingsToBestPracticesUseCase } from '@backend/useCases';
-import { inject, register, reset } from '@shared/di-container';
-
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
 } from '@backend/infrastructure';
-import { AssociateFindingsChunkToBestPracticesAdapterEventMother } from './AssociateFindingsChunkToBestPracticesAdapterEventMother';
-import { AssociateFindingsChunkToBestPracticesAdapter } from './AssociateFindingsChunkToBestPracticesAdapter';
 import { FindingMother, ScanningTool } from '@backend/models';
+import { tokenAssociateFindingsToBestPracticesUseCase } from '@backend/useCases';
+import { inject, register, reset } from '@shared/di-container';
+
+import { AssociateFindingsChunkToBestPracticesAdapter } from './AssociateFindingsChunkToBestPracticesAdapter';
+import { AssociateFindingsChunkToBestPracticesAdapterEventMother } from './AssociateFindingsChunkToBestPracticesAdapterEventMother';
 
 describe('AssociateFindingsToBestPractices adapter', () => {
   describe('args validation', () => {

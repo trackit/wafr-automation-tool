@@ -1,4 +1,5 @@
 import { ScanningTool } from '@backend/models';
+
 import { GetScannedFindingsArgs } from './GetScannedFindingsUseCase';
 
 export class GetScannedFindingsUseCaseArgsMother {

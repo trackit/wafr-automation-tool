@@ -1,29 +1,27 @@
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import {
-  AnswerSummary,
   Answer,
+  AnswerSummary,
   Choice,
+  CreateMilestoneCommand,
   CreateWorkloadCommand,
+  GetAnswerCommand,
   GetLensReviewCommand,
   GetMilestoneCommand,
   LensReview,
   ListAnswersCommand,
   ListMilestonesCommand,
   ListWorkloadsCommand,
+  ListWorkloadsCommandOutput,
+  Milestone as AWSMilestone,
   PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
   WellArchitectedClientConfig,
+  WellArchitectedServiceException,
   WorkloadEnvironment,
   WorkloadSummary,
-  CreateMilestoneCommand,
-  Milestone as AWSMilestone,
-  WellArchitectedServiceException,
-  GetAnswerCommand,
 } from '@aws-sdk/client-wellarchitected';
-import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
-
-import type { WellArchitectedToolPort } from '@backend/ports';
-import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
   Assessment,
@@ -34,9 +32,12 @@ import {
   Question,
   User,
 } from '@backend/models';
+import type { WellArchitectedToolPort } from '@backend/ports';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
-import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 
 export const WAFRLens = 'wellarchitected';
 
@@ -75,15 +76,22 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     wellArchitectedClient: WellArchitectedClient,
     workloadName: string
   ): Promise<WorkloadSummary | null> {
-    const workloads = await wellArchitectedClient.send(
-      new ListWorkloadsCommand()
-    );
-    const workloadSummaries = workloads.WorkloadSummaries ?? [];
-    return (
-      workloadSummaries.find(
+    let workloadNextToken = undefined;
+    do {
+      const workloads: ListWorkloadsCommandOutput =
+        await wellArchitectedClient.send(
+          new ListWorkloadsCommand({
+            NextToken: workloadNextToken,
+          })
+        );
+      workloadNextToken = workloads.NextToken;
+      const workloadSummaries = workloads.WorkloadSummaries ?? [];
+      const workloadSummary = workloadSummaries.find(
         (workload) => workload.WorkloadName === workloadName
-      ) || null
-    );
+      );
+      if (workloadSummary) return workloadSummary;
+    } while (workloadNextToken);
+    return null;
   }
 
   private getWorkloadName(assessment: Assessment): string {

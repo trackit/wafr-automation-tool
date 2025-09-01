@@ -3,9 +3,6 @@ import {
   tokenFakeAssessmentsRepository,
   tokenFakeQuestionSetService,
 } from '@backend/infrastructure';
-import { inject, register, reset } from '@shared/di-container';
-
-import { PrepareFindingsAssociationsUseCaseArgsMother } from './PrepareFindingsAssociationsUseCaseArgsMother';
 import {
   AssessmentGraphDataMother,
   AssessmentMother,
@@ -17,11 +14,14 @@ import {
   ScanningTool,
   SeverityType,
 } from '@backend/models';
-import { PrepareFindingsAssociationsUseCaseImpl } from './PrepareFindingsAssociationsUseCase';
+import { inject, register, reset } from '@shared/di-container';
+
+import { NotFoundError } from '../Errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import { tokenMapScanFindingsToBestPracticesUseCase } from '../mapScanFindingsToBestPractices';
 import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociate';
-import { NotFoundError } from '../Errors';
+import { PrepareFindingsAssociationsUseCaseImpl } from './PrepareFindingsAssociationsUseCase';
+import { PrepareFindingsAssociationsUseCaseArgsMother } from './PrepareFindingsAssociationsUseCaseArgsMother';
 
 describe('PrepareFindingsAssociations Use Case', () => {
   it('should throw an error if assessment is not found', async () => {

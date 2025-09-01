@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TagsInput } from '@webui/ui';
 import { Computer, Earth, KeyRound, Pen, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import WorkflowHintDialog from './workflow-hint-dialog';
+
+import { TagsInput } from '@webui/ui';
+
 import { awsRegions, Region } from './regions';
+import WorkflowHintDialog from './workflow-hint-dialog';
 
 type NewAssessmentProps = {
   onSubmit: (data: {

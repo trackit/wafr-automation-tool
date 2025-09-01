@@ -9,6 +9,7 @@ import {
   ServerError,
 } from '@backend/useCases';
 import { inject } from '@shared/di-container';
+
 import { HttpError } from './HttpError';
 
 const buildResponse = (

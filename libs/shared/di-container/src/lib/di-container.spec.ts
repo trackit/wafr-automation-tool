@@ -1,8 +1,9 @@
 import 'reflect-metadata';
-import { register } from './register';
-import { inject } from './inject';
-import { reset } from './reset';
+
 import { createInjectionToken } from './DIToken';
+import { inject } from './inject';
+import { register } from './register';
+import { reset } from './reset';
 
 type NumberGetter = {
   getNumber: () => number;

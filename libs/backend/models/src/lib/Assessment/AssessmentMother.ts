@@ -1,10 +1,10 @@
 import type { Pillar } from '../Pillar';
 import type { ScanningTool } from '../ScanningTool';
 import {
-  AssessmentFileExports,
-  AssessmentStep,
   type Assessment,
+  type AssessmentFileExports,
   type AssessmentGraphData,
+  AssessmentStep,
 } from './Assessment';
 
 export class AssessmentMother {

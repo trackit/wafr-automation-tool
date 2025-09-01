@@ -1,7 +1,4 @@
-import type {
-  APIGatewayProxyEvent,
-  APIGatewayProxyEventQueryStringParameters,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 import type { User } from '@backend/models';
 import type { operations } from '@shared/api-schema';

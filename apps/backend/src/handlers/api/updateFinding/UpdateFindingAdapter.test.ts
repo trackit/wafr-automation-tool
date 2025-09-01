@@ -6,8 +6,8 @@ import {
 } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { UpdateFindingAdapter } from './UpdateFindingAdapter';
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import { UpdateFindingAdapter } from './UpdateFindingAdapter';
 import { UpdateFindingAdapterArgsMother } from './UpdateFindingAdapterArgsMother';
 
 describe('UpdateFindingAdapter', () => {

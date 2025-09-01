@@ -1,4 +1,5 @@
 import { ScanningTool } from '@backend/models';
+
 import type { PrepareFindingsAssociationsInput } from './PrepareFindingsAssociationsAdapter';
 
 export class PrepareFindingsAssociationsAdapterInputMother {

@@ -4,16 +4,16 @@ import {
 } from '@aws-sdk/client-sfn';
 import { mockClient } from 'aws-sdk-client-mock';
 
-import { inject, reset } from '@shared/di-container';
 import type { AssessmentsStateMachineStartAssessmentArgs } from '@backend/ports';
+import { inject, reset } from '@shared/di-container';
 
+import { IdGeneratorCrypto } from '../IdGenerator/IdGeneratorCrypto';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   AssessmentsStateMachineSfn,
   tokenClientSfn,
   tokenStateMachineArn,
 } from './AssessmentsStateMachineSfn';
-import { IdGeneratorCrypto } from '../IdGenerator/IdGeneratorCrypto';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
 
 describe('AssessmentsStateMachine Infrastructure', () => {
   describe('startAssessment', () => {

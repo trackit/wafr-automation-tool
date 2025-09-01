@@ -1,2 +1,2 @@
-export * from './LoggerConsole';
 export * from './FakeLogger';
+export * from './LoggerConsole';

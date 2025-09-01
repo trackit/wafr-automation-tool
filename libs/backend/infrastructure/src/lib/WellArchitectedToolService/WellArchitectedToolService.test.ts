@@ -1,11 +1,10 @@
-import { mockClient } from 'aws-sdk-client-mock';
-
-import { inject, register, reset } from '@shared/di-container';
-
+import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import {
   AnswerSummary,
   Choice,
+  CreateMilestoneCommand,
   CreateWorkloadCommand,
+  GetAnswerCommand,
   GetLensReviewCommand,
   GetMilestoneCommand,
   ListAnswersCommand,
@@ -14,10 +13,10 @@ import {
   PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
-  CreateMilestoneCommand,
   WorkloadEnvironment,
-  GetAnswerCommand,
 } from '@aws-sdk/client-wellarchitected';
+import { mockClient } from 'aws-sdk-client-mock';
+
 import {
   AssessmentMother,
   BestPracticeMother,
@@ -25,6 +24,11 @@ import {
   QuestionMother,
   UserMother,
 } from '@backend/models';
+import { inject, register, reset } from '@shared/di-container';
+
+import { MilestoneNotFoundError } from '../../Errors';
+import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
+import { tokenFakeQuestionSetService } from '../QuestionSetService';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   tokenSTSClient,
@@ -32,10 +36,6 @@ import {
   WAFRLens,
   WellArchitectedToolService,
 } from './WellArchitectedToolService';
-import { AssumeRoleCommand } from '@aws-sdk/client-sts';
-import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
-import { tokenFakeQuestionSetService } from '../QuestionSetService';
-import { MilestoneNotFoundError } from '../../Errors';
 
 describe('wellArchitectedTool Infrastructure', () => {
   describe('createWellArchitectedClient', () => {

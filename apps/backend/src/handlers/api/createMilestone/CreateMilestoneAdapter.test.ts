@@ -1,7 +1,7 @@
-import { register, reset } from '@shared/di-container';
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
 import { tokenCreateMilestoneUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { CreateMilestoneAdapter } from './CreateMilestoneAdapter';

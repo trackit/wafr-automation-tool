@@ -1,2 +1,2 @@
-export * from './UpdateBestPracticeUseCaseArgsMother';
 export * from './UpdateBestPracticeUseCase';
+export * from './UpdateBestPracticeUseCaseArgsMother';

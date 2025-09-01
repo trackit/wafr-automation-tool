@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClientConfig } from '@aws-sdk/client-dynamodb/dist-types/DynamoDBClient';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
 import { createInjectionToken, inject } from '@shared/di-container';
 

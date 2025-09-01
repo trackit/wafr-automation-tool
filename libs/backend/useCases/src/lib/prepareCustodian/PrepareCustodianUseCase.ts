@@ -1,7 +1,7 @@
-import { createInjectionToken, inject } from '@shared/di-container';
-import { tokenObjectsStorage, tokenS3Bucket } from '@backend/infrastructure';
-
 import { readFileSync } from 'fs';
+
+import { tokenObjectsStorage, tokenS3Bucket } from '@backend/infrastructure';
+import { createInjectionToken, inject } from '@shared/di-container';
 
 export interface PrepareCustodianUseCase {
   prepareCustodian(): Promise<string>;

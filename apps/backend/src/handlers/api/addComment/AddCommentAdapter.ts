@@ -1,9 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
-import type { operations } from '@shared/api-schema';
-import { inject } from '@shared/di-container';
-
 import {
   FindingNotFoundError,
   tokenAssessmentsRepository,
@@ -12,10 +9,13 @@ import {
 } from '@backend/infrastructure';
 import { FindingComment, User } from '@backend/models';
 import { NotFoundError } from '@backend/useCases';
+import type { operations } from '@shared/api-schema';
+import { inject } from '@shared/di-container';
 import { parseJsonObject } from '@shared/utils';
-import { BadRequestError } from '../../../utils/api/HttpError';
+
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { BadRequestError } from '../../../utils/api/HttpError';
 
 const AddCommentPathSchema = z.object({
   assessmentId: z.string(),

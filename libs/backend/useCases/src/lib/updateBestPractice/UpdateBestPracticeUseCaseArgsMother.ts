@@ -1,4 +1,5 @@
 import type { BestPracticeBody, User } from '@backend/models';
+
 import type { UpdateBestPracticeUseCaseArgs } from './UpdateBestPracticeUseCase';
 
 export class UpdateBestPracticeUseCaseArgsMother {

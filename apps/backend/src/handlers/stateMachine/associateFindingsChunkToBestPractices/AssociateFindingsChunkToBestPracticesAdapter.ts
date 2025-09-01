@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
+import { tokenObjectsStorage } from '@backend/infrastructure';
+import { Finding, ScanningTool } from '@backend/models';
 import { tokenAssociateFindingsToBestPracticesUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
-import { Finding, ScanningTool } from '@backend/models';
-import { tokenObjectsStorage } from '@backend/infrastructure';
 import { parseJsonArray } from '@shared/utils';
 
 export const AssociateFindingsChunkToBestPracticesInputSchema = z.object({

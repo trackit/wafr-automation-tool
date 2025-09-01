@@ -1,4 +1,5 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
+import { ScanningTool } from '@backend/models';
 import { tokenPrepareFindingsAssociationsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
@@ -7,7 +8,6 @@ import {
   PrepareFindingsAssociationsInput,
 } from './PrepareFindingsAssociationsAdapter';
 import { PrepareFindingsAssociationsAdapterInputMother } from './PrepareFindingsAssociationsAdapterInputMother';
-import { ScanningTool } from '@backend/models';
 
 describe('PrepareFindingsAssociationsAdapter', () => {
   describe('args validation', () => {

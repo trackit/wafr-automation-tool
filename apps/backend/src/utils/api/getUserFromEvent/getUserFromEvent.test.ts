@@ -1,6 +1,5 @@
-import { BadRequestError } from '../HttpError';
-
 import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
+import { BadRequestError } from '../HttpError';
 import { getUserFromEvent } from './getUserFromEvent';
 
 describe('getUserFromEvent', () => {

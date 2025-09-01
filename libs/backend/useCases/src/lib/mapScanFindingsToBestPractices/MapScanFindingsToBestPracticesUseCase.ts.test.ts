@@ -2,16 +2,16 @@ import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
 } from '@backend/infrastructure';
-import { inject, reset } from '@shared/di-container';
-
-import { MapScanFindingsToBestPracticesUseCaseImpl } from './MapScanFindingsToBestPracticesUseCase';
-import { MapScanFindingsToBestPracticesUseCaseArgsMother } from './MapScanFindingsToBestPracticesUseCaseArgsMother';
 import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
   ScanFindingMother,
 } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
+
+import { MapScanFindingsToBestPracticesUseCaseImpl } from './MapScanFindingsToBestPracticesUseCase';
+import { MapScanFindingsToBestPracticesUseCaseArgsMother } from './MapScanFindingsToBestPracticesUseCaseArgsMother';
 
 describe('MapScanFindingsToBestPractices UseCase', () => {
   it('should return empty best practices arrays if no mapping exists', async () => {

@@ -1,4 +1,5 @@
 import type { PillarBody, User } from '@backend/models';
+
 import type { UpdatePillarUseCaseArgs } from './UpdatePillarUseCase';
 
 export class UpdatePillarUseCaseArgsMother {

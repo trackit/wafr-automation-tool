@@ -4,9 +4,9 @@ import {
   tokenAssessmentsRepository,
   tokenIdGenerator,
 } from '@backend/infrastructure';
+import { AssessmentMother } from '@backend/models';
 import { register, reset } from '@shared/di-container';
 
-import { AssessmentMother } from '@backend/models';
 import { InvalidParametersError } from '../Errors';
 import {
   GetAssessmentsUseCaseArgs,

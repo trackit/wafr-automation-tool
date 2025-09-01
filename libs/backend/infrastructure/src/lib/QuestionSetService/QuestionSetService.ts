@@ -1,6 +1,7 @@
 import { Pillar, Question, QuestionSet, SeverityType } from '@backend/models';
 import { QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
+
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import question from '../../../../../../scripts/questions/questions_05072025.json';
 

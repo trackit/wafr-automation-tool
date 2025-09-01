@@ -1,10 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiError, createAWSMilestone } from '@webui/api-client';
-import { CreateAWSMilestone as CreateAWSMilestoneForm } from '@webui/forms';
-import { Modal } from '@webui/ui';
 import { Milestone } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
+
+import { ApiError, createAWSMilestone } from '@webui/api-client';
+import { CreateAWSMilestone as CreateAWSMilestoneForm } from '@webui/forms';
+import { Modal } from '@webui/ui';
 
 type CreateAWSMilestoneDialogProps = {
   assessmentId: string;

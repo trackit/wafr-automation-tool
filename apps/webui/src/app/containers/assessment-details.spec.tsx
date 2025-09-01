@@ -1,11 +1,20 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { getAssessment, updateStatus } from '@webui/api-client';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
+import { getAssessment, updateStatus } from '@webui/api-client';
+
 import AssessmentDetails from './assessment-details';
+
+// Mock ResizeObserver for Recharts components
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
 
 // Mock API calls
 vi.mock('@webui/api-client', () => ({
@@ -59,6 +68,53 @@ const mockAssessment = {
       ],
     },
   ],
+  graphData: {
+    resourceTypes: {
+      AwsLambdaFunction: 124,
+      AwsCloudFrontDistribution: 106,
+      AwsKinesisStream: 2,
+      AwsLogsLogGroup: 3,
+      AwsEcsCluster: 1,
+      AwsEcsTaskDefinition: 2,
+      AwsCloudFormationStack: 9,
+      AwsIamUser: 77,
+      AwsApiGatewayStage: 5,
+      AwsCloudTrailTrail: 7,
+      AwsApiGatewayRestApi: 22,
+      AwsCognitoUserPool: 7,
+      AwsEc2SecurityGroup: 3,
+      AwsIamPolicy: 92,
+      AwsSecretsManagerSecret: 5,
+      AWSCloudFrontDistribution: 16,
+      AwsIamAccessKey: 19,
+      AwsRoute53HostedZone: 3,
+      AwsS3AccountPublicAccessBlock: 1,
+      AwsEc2Vpc: 1,
+      AwsCloudWatchAlarm: 2,
+      AwsDynamoDbTable: 11,
+      AwsS3Bucket: 135,
+      AwsAccount: 1,
+      AwsBackupBackupVault: 1,
+      AwsWafv2WebAcl: 4,
+      AwsEc2NetworkAcl: 6,
+      AwsEcrRepository: 14,
+      AwsGuardDutyDetector: 1,
+      AwsIamRole: 346,
+      Other: 75,
+    },
+    regions: {
+      'us-east-1': 621,
+      'us-west-1': 684,
+      'us-west-2': 4,
+    },
+    findings: 1309,
+    severities: {
+      High: 441,
+      Critical: 26,
+      Low: 232,
+      Medium: 402,
+    },
+  },
 };
 
 // Wrapper component to provide necessary context
@@ -102,12 +158,45 @@ describe('AssessmentDetails', () => {
       expect(
         screen.getByRole('heading', { name: /Assessment Test Assessment/i })
       ).toBeInTheDocument();
+    });
+
+    // Click on the Security pillar tab to access questions
+    const securityTab = screen.getByRole('tab', { name: /Security.*/i });
+    await fireEvent.click(securityTab);
+
+    await waitFor(() => {
       // Look for the question text in the vertical menu
       const menuItems = screen.getAllByRole('menuitem', {
         name: /Test Question 1/i,
       });
       expect(menuItems[0]).toBeInTheDocument();
       expect(screen.getByText('Test Practice 1')).toBeInTheDocument();
+    });
+  });
+
+  it('shows overview tab by default and allows switching to pillar tabs', async () => {
+    render(<AssessmentDetails />, { wrapper });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+      ).toBeInTheDocument();
+    });
+
+    // Verify that the overview tab exists and is visible
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i });
+    expect(overviewTab).toBeInTheDocument();
+
+    // Verify that the Security pillar tab exists
+    const securityTab = screen.getByRole('tab', { name: /Security.*/i });
+    expect(securityTab).toBeInTheDocument();
+
+    // Click on the Security pillar tab
+    await fireEvent.click(securityTab);
+
+    // Verify that we can now see questions
+    await waitFor(() => {
+      expect(screen.getAllByText('Test Question 1')).toHaveLength(2); // One in menu, one in header
     });
   });
 
@@ -149,6 +238,16 @@ describe('AssessmentDetails', () => {
     });
 
     render(<AssessmentDetails />, { wrapper });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+      ).toBeInTheDocument();
+    });
+
+    // Click on the Security pillar tab to access questions
+    const securityTab = screen.getByRole('tab', { name: /Security.*/i });
+    await fireEvent.click(securityTab);
 
     await waitFor(() => {
       expect(screen.getByText('Test Practice 1')).toBeInTheDocument();
@@ -218,6 +317,16 @@ describe('AssessmentDetails', () => {
     );
 
     render(<AssessmentDetails />, { wrapper });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+      ).toBeInTheDocument();
+    });
+
+    // Click on the Security pillar tab to access questions
+    const securityTab = screen.getByRole('tab', { name: /Security.*/i });
+    await fireEvent.click(securityTab);
 
     await waitFor(() => {
       expect(screen.getByText('1')).toBeInTheDocument();

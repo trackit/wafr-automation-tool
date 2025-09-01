@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { ScanFinding, SeverityType } from '@backend/models';
 import { parseJsonArray } from '@shared/utils';
+
 import { ScanProvider } from './ScanProvider';
 
 const ProwlerFindingSchema = z.object({

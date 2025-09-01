@@ -32,6 +32,12 @@ Parameters:
     Type: Number
     Default: 10
 
+Conditions:
+  CreateBackups:
+    Fn::Equals:
+      - !Ref Debug
+      - 'false'
+
 Resources:
   Api:
     Type: AWS::Serverless::Application
@@ -135,6 +141,49 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       DeletionProtectionEnabled: true
+  BackupRole:
+    Condition: CreateBackups
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: backup.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
+  BackupVault:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: !Sub ${AWS::StackName}-ddb-vault
+  BackupPlan:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupPlan
+    Properties:
+      BackupPlan:
+        BackupPlanName: !Sub ${AWS::StackName}-ddb-plan
+        BackupPlanRule:
+          - RuleName: daily-ddb
+            TargetBackupVault: !Ref BackupVault
+            ScheduleExpression: cron(0 1 * * ? *)
+            StartWindowMinutes: 60
+            CompletionWindowMinutes: 180
+            Lifecycle:
+              DeleteAfterDays: 15
+  BackupSelection:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref BackupPlan
+      BackupSelection:
+        IamRoleArn: !GetAtt BackupRole.Arn
+        SelectionName: !Sub ${AWS::StackName}-select-ddb
+        Resources:
+          - !GetAtt DynamoDB.Arn
   OrganizationTable:
     Type: AWS::DynamoDB::Table
     Properties:

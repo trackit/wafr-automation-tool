@@ -6,9 +6,9 @@ import {
 import { AssessmentMother, ScanningTool, SeverityType } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
+import { NotFoundError } from '../Errors';
 import { GetScannedFindingsUseCaseImpl } from './GetScannedFindingsUseCase';
 import { GetScannedFindingsUseCaseArgsMother } from './GetScannedFindingsUseCaseArgsMother';
-import { NotFoundError } from '../Errors';
 
 describe('GetScannedFindings UseCase', () => {
   it('should throw a NotFoundError if assessment does not exist', async () => {
