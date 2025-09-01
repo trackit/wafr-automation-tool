@@ -34,6 +34,11 @@ import { Link, useNavigate, useParams } from 'react-router';
 import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
+import AssessmentOverview from './assessment-overview';
+import {
+  calculateCompletedQuestionsCount,
+  calculateOverallCompletion,
+} from '../../lib/assessment-utils';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 
@@ -42,13 +47,24 @@ type Question = components['schemas']['Question'];
 type Pillar = components['schemas']['Pillar'];
 type TableRow = BestPractice & { name: string };
 
+type PillarOrOverview = Pillar | { id: string; type: 'overview' };
+
+// Type guard to check if selectedPillar is a full Pillar
+function isFullPillar(pillar: PillarOrOverview | null): pillar is Pillar {
+  return pillar !== null && 'questions' in pillar;
+}
+
 export function AssessmentDetails() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showRescanModal, setShowRescanModal] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-  const [selectedPillarIndex, setSelectedPillarIndex] = useState<number>(0);
-  const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null);
+  const [selectedPillar, setSelectedPillar] = useState<PillarOrOverview | null>(
+    {
+      id: 'overview',
+      type: 'overview',
+    }
+  );
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
@@ -59,7 +75,9 @@ export function AssessmentDetails() {
 
   const isMilestone = Boolean(milestoneId);
 
-  const assessmentQuery = useQuery({
+  const assessmentQuery = useQuery<
+    components['schemas']['AssessmentContent'] | null
+  >({
     queryKey: ['assessment', id],
     queryFn: () => (id ? getAssessment(id) : null),
     refetchInterval: isMilestone ? false : 15000, // Don't auto-refetch for milestones
@@ -437,7 +455,11 @@ export function AssessmentDetails() {
 
   // Add effect to update active question when pillar changes
   useEffect(() => {
-    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
+    if (
+      isFullPillar(selectedPillar) &&
+      selectedPillar.questions &&
+      selectedPillar.questions.length > 0
+    ) {
       // If current question is not in the new pillar, reset to first question
       if (!selectedPillar.questions.find((q) => q.id === activeQuestion?.id)) {
         setActiveQuestionIndex(0);
@@ -448,7 +470,12 @@ export function AssessmentDetails() {
 
   // Add effect to sync active question with cache
   useEffect(() => {
-    if (pillars && selectedPillar?.id && activeQuestion?.id) {
+    if (
+      pillars &&
+      selectedPillar?.id &&
+      activeQuestion?.id &&
+      isFullPillar(selectedPillar)
+    ) {
       const pillar = pillars.find((p) => p.id === selectedPillar.id);
       if (pillar) {
         const question = pillar.questions?.find(
@@ -461,16 +488,13 @@ export function AssessmentDetails() {
     }
   }, [pillars, selectedPillar?.id, activeQuestion?.id]);
 
-  // Set the first pillar as selected ONLY on initial load
-  useEffect(() => {
-    if (pillars && pillars.length > 0 && selectedPillarIndex === 0) {
-      setSelectedPillar(pillars[0]);
-    }
-  }, [pillars, selectedPillarIndex]);
-
   // Set question from the selected indices
   useEffect(() => {
-    if (selectedPillar?.questions && selectedPillar.questions.length > 0) {
+    if (
+      isFullPillar(selectedPillar) &&
+      selectedPillar.questions &&
+      selectedPillar.questions.length > 0
+    ) {
       // Set initial question index if not already set or if it's out of bounds
       if (activeQuestionIndex >= selectedPillar.questions.length) {
         setActiveQuestionIndex(0);
@@ -480,6 +504,23 @@ export function AssessmentDetails() {
       setActiveQuestion(selectedPillar.questions[activeQuestionIndex]);
     }
   }, [selectedPillar, activeQuestionIndex]);
+
+  // Auto-select first pillar when viewing a milestone, overview is not shown
+  useEffect(() => {
+    if (
+      isMilestone &&
+      pillars &&
+      pillars.length > 0 &&
+      selectedPillar?.id === 'overview'
+    ) {
+      const firstPillar = pillars[0];
+      setSelectedPillar(firstPillar);
+      setActiveQuestionIndex(0);
+      if (firstPillar.questions && firstPillar.questions.length > 0) {
+        setActiveQuestion(firstPillar.questions[0]);
+      }
+    }
+  }, [isMilestone, pillars, selectedPillar?.id]);
 
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, checked: boolean) => {
@@ -647,59 +688,23 @@ export function AssessmentDetails() {
     ]
   );
 
-  // Helper function to calculate completed questions count
-  const calculateCompletedQuestions = (questions: Question[]) => {
-    let completedCount = 0;
-
-    // Iterate through each question in the pillar
-    for (const question of questions) {
-      if (question.disabled) continue;
-      // Check if the question has any high severity best practices
-      const hasHighSeverityPractices = question.bestPractices?.some(
-        (bestPractice) => bestPractice.risk === 'High'
-      );
-
-      if (hasHighSeverityPractices) {
-        // Check if all high severity best practices in this question have checked true
-        const allHighSeverityPracticesComplete =
-          question.bestPractices?.every(
-            (bestPractice) =>
-              bestPractice.risk !== 'High' || bestPractice.checked === true
-          ) ?? false;
-
-        if (allHighSeverityPracticesComplete) {
-          completedCount++;
-        }
-      } else {
-        completedCount++;
-      }
-    }
-
-    return completedCount;
-  };
-
   useEffect(() => {
     if (!pillars) return;
-    const completedQuestions = pillars.reduce((acc, pillar) => {
-      return acc + calculateCompletedQuestions(pillar.questions || []);
-    }, 0);
-    const totalQuestions = pillars.reduce((acc, pillar) => {
-      return acc + (pillar.questions?.filter((q) => !q.disabled).length || 0);
-    }, 0);
-    setProgress(Math.round((completedQuestions / totalQuestions) * 100));
-  }, [pillars]);
+    setProgress(calculateOverallCompletion(assessmentData ?? null));
+  }, [assessmentData]);
 
   const handleNextQuestion = () => {
-    if (!selectedPillar?.questions) return;
+    if (!isFullPillar(selectedPillar) || !selectedPillar.questions) return;
     const questions = selectedPillar.questions;
     if (activeQuestionIndex < questions.length - 1) {
       setActiveQuestionIndex(activeQuestionIndex + 1);
     }
   };
 
-  const isLastQuestion = selectedPillar?.questions
-    ? activeQuestionIndex === selectedPillar.questions.length - 1
-    : false;
+  const isLastQuestion =
+    isFullPillar(selectedPillar) && selectedPillar.questions
+      ? activeQuestionIndex === selectedPillar.questions.length - 1
+      : false;
 
   const tableData = useMemo(() => {
     if (!activeQuestion?.bestPractices) return [];
@@ -721,10 +726,10 @@ export function AssessmentDetails() {
 
   const tabs = useMemo(() => {
     if (!pillars) return [];
-    return pillars.map((pillar, index) => ({
+    const mappedPillars = pillars.map((pillar, index) => ({
       label: `${pillar.label} ${
         pillar.questions
-          ? `${calculateCompletedQuestions(pillar.questions)}/${
+          ? `${calculateCompletedQuestionsCount(pillar.questions)}/${
               pillar.questions.filter((q) => !q.disabled).length
             }`
           : ''
@@ -776,6 +781,14 @@ export function AssessmentDetails() {
         </div>
       ) : undefined,
     }));
+    const overview: {
+      label: string;
+      id: string;
+    } = {
+      label: 'Overview',
+      id: 'overview',
+    };
+    return isMilestone ? [...mappedPillars] : [overview, ...mappedPillars];
   }, [pillars, handleDisabledPillar, isMilestone]);
 
   const timelineSteps = useMemo(() => {
@@ -817,7 +830,7 @@ export function AssessmentDetails() {
     <>
       {!isMilestone && (
         <div
-          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom"
+          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
           data-tip={`${progress}% completed`}
         >
           <progress
@@ -913,153 +926,167 @@ export function AssessmentDetails() {
         activeTab={selectedPillar?.id || ''}
         onChange={(tabId) => {
           const index = pillars?.findIndex((p) => p.id === tabId) ?? 0;
-          setSelectedPillarIndex(index);
-          setSelectedPillar(pillars?.[index] || null);
-          setActiveQuestionIndex(0);
+          if (index === -1) {
+            // For extra tabs like overview and future ones
+            setSelectedPillar({
+              id: tabId,
+              type: 'overview',
+            });
+          } else {
+            setSelectedPillar(pillars?.[index] || null);
+            setActiveQuestionIndex(0);
+          }
         }}
       />
+
+      {selectedPillar?.id === 'overview' && !isMilestone && assessmentData ? (
+        <AssessmentOverview assessment={assessmentData} />
+      ) : null}
+
       <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
-        {selectedPillar?.disabled && (
+        {isFullPillar(selectedPillar) && selectedPillar.disabled && (
           <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
             <h3 className="text-center font-medium text-xl  flex-1">
               This pillar is disabled
             </h3>
           </div>
         )}
-        {!selectedPillar?.disabled && (
-          <>
-            <VerticalMenu
-              items={(selectedPillar?.questions || [])
-                .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
-                .map((question, index) => {
-                  // Find the latest question data from the cache
-                  const latestQuestion =
-                    pillars
-                      ?.find((p) => p.id === selectedPillar?.id)
-                      ?.questions?.find((q) => q.id === question.id) ||
-                    question;
+        {isFullPillar(selectedPillar) &&
+          !selectedPillar.disabled &&
+          selectedPillar.questions && (
+            <>
+              <VerticalMenu
+                items={(selectedPillar.questions || [])
+                  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
+                  .map((question, index) => {
+                    // Find the latest question data from the cache
+                    const latestQuestion =
+                      pillars
+                        ?.find((p) => p.id === selectedPillar.id)
+                        ?.questions?.find((q) => q.id === question.id) ||
+                      question;
 
-                  return {
-                    text: question.label || '',
-                    id: question.id || `question-${index}`,
-                    active: activeQuestionIndex === index,
-                    onClick: () => setActiveQuestionIndex(index),
-                    completed:
-                      latestQuestion.bestPractices?.every(
-                        (bestPractice) =>
-                          bestPractice.risk !== 'High' ||
-                          bestPractice.checked === true
-                      ) ?? false,
-                    started:
-                      latestQuestion.bestPractices?.some(
-                        (bestPractice) => bestPractice.checked
-                      ) ?? false,
-                    error: latestQuestion.none,
-                    disabled: latestQuestion.disabled,
-                  };
-                })}
-            />
+                    return {
+                      text: question.label || '',
+                      id: question.id || `question-${index}`,
+                      active: activeQuestionIndex === index,
+                      onClick: () => setActiveQuestionIndex(index),
+                      completed:
+                        latestQuestion.bestPractices?.every(
+                          (bestPractice) =>
+                            bestPractice.risk !== 'High' ||
+                            bestPractice.checked === true
+                        ) ?? false,
+                      started:
+                        latestQuestion.bestPractices?.some(
+                          (bestPractice) => bestPractice.checked
+                        ) ?? false,
+                      error: latestQuestion.none,
+                      disabled: latestQuestion.disabled,
+                    };
+                  })}
+              />
 
-            <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
-              <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
-                <h3 className="text-center font-medium text-lg text-primary flex-1">
-                  <span className="font-medium">
-                    {selectedPillar?.questions
-                      ? `${activeQuestionIndex + 1} / ${
-                          selectedPillar.questions.length
-                        }`
-                      : ''}
-                  </span>
-                  {'. '}
-                  <span className="font-light">{activeQuestion?.label}</span>
-                </h3>
-                <div>
-                  {!isLastQuestion && !isMilestone && (
-                    <div
-                      tabIndex={0}
-                      role="button"
-                      className="btn btn-ghost btn-xs p-1"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleNextQuestion();
-                      }}
-                    >
-                      <ChevronRight className="w-4 h-4 text-base-content/80" />
-                    </div>
-                  )}
-                  {!isMilestone && (
-                    <div
-                      className="dropdown dropdown-end"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    >
+              <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
+                <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
+                  <h3 className="text-center font-medium text-lg text-primary flex-1">
+                    <span className="font-medium">
+                      {isFullPillar(selectedPillar) && selectedPillar.questions
+                        ? `${activeQuestionIndex + 1} / ${
+                            selectedPillar.questions.length
+                          }`
+                        : ''}
+                    </span>
+                    {'. '}
+                    <span className="font-light">{activeQuestion?.label}</span>
+                  </h3>
+                  <div>
+                    {!isLastQuestion && !isMilestone && (
                       <div
                         tabIndex={0}
                         role="button"
                         className="btn btn-ghost btn-xs p-1"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleNextQuestion();
+                        }}
                       >
-                        <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                        <ChevronRight className="w-4 h-4 text-base-content/80" />
                       </div>
-                      <ul
-                        tabIndex={0}
-                        className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                    )}
+                    {!isMilestone && (
+                      <div
+                        className="dropdown dropdown-end"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                       >
-                        <li>
-                          <button
-                            className={`flex flex-row gap-2 w-full text-left ${
-                              activeQuestion?.disabled
-                                ? 'text-base-content'
-                                : 'text-error'
-                            }`}
-                            onClick={() => {
-                              handleDisabledQuestion(
-                                activeQuestion?.id || '',
-                                !activeQuestion?.disabled
-                              );
-                            }}
-                          >
-                            {activeQuestion?.disabled ? (
-                              <>
-                                <CircleCheck className="w-4 h-4" /> Enable this
-                                question
-                              </>
-                            ) : (
-                              <>
-                                <CircleMinus className="w-4 h-4" /> Disable this
-                                question
-                              </>
-                            )}
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                        <div
+                          tabIndex={0}
+                          role="button"
+                          className="btn btn-ghost btn-xs p-1"
+                        >
+                          <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                        </div>
+                        <ul
+                          tabIndex={0}
+                          className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                        >
+                          <li>
+                            <button
+                              className={`flex flex-row gap-2 w-full text-left ${
+                                activeQuestion?.disabled
+                                  ? 'text-base-content'
+                                  : 'text-error'
+                              }`}
+                              onClick={() => {
+                                handleDisabledQuestion(
+                                  activeQuestion?.id || '',
+                                  !activeQuestion?.disabled
+                                );
+                              }}
+                            >
+                              {activeQuestion?.disabled ? (
+                                <>
+                                  <CircleCheck className="w-4 h-4" /> Enable
+                                  this question
+                                </>
+                              ) : (
+                                <>
+                                  <CircleMinus className="w-4 h-4" /> Disable
+                                  this question
+                                </>
+                              )}
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {activeQuestion?.disabled && (
+                  <div className="flex flex-row gap-2 items-center justify-between p-8">
+                    <h3 className="text-center font-medium text-xl  flex-1">
+                      This question is disabled
+                    </h3>
+                  </div>
+                )}
+                {!activeQuestion?.disabled && (
+                  <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                    {activeQuestion && (
+                      <DataTable
+                        key={`${selectedPillar?.id}-${activeQuestion.id}`}
+                        data={tableData}
+                        columns={columns}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
-              {activeQuestion?.disabled && (
-                <div className="flex flex-row gap-2 items-center justify-between p-8">
-                  <h3 className="text-center font-medium text-xl  flex-1">
-                    This question is disabled
-                  </h3>
-                </div>
-              )}
-              {!activeQuestion?.disabled && (
-                <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                  {activeQuestion && (
-                    <DataTable
-                      key={`${selectedPillar?.id}-${activeQuestion.id}`}
-                      data={tableData}
-                      columns={columns}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          </>
-        )}
+            </>
+          )}
       </div>
     </>
   );
@@ -1093,7 +1120,7 @@ export function AssessmentDetails() {
 
   if (!id) return <div>No assessment ID found</div>;
   return (
-    <div className="container py-8 pt-2 overflow-auto flex-1 flex flex-col relative">
+    <div className="container px-4 py-8 pt-2 overflow-auto flex-1 flex flex-col relative ">
       <div className="breadcrumbs text-sm shrink-0">
         <ul>
           {[
