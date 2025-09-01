@@ -1,39 +1,41 @@
-import { components } from '@shared/api-schema';
 import { Calendar, Computer, Earth, Server } from 'lucide-react';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback,useMemo, useState } from 'react';
 import {
+  Bar,
+  BarChart,
+  CartesianGrid,
   Cell,
   Legend,
   Pie,
   PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   ResponsiveContainer,
   Tooltip,
   Treemap,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
 } from 'recharts';
+
+import { components } from '@shared/api-schema';
+
 import {
-  getChartColorByIndex,
-  getThemeColors,
-  darkenColor,
-  lightenColor,
-} from '../../lib/theme-colors';
-import {
-  calculatePillarCompletion,
   calculateOverallCompletion,
+  calculatePillarCompletion,
   extractAccountId,
-  formatWorkflowInfo,
   formatDate,
   formatRegions,
+  formatWorkflowInfo,
 } from '../../lib/assessment-utils';
+import {
+  darkenColor,
+  getChartColorByIndex,
+  getThemeColors,
+  lightenColor,
+} from '../../lib/theme-colors';
 
 const SEVERITIES = [
   'Fatal',
