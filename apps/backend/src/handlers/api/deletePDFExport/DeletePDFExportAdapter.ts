@@ -5,12 +5,12 @@ import { tokenDeletePDFExportUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import {
   MissingRequestPathError,
   RequestParsingFailedError,
 } from '../../../utils/api/HttpError';
-import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
-import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const DeletePDFExportPathSchema = z.object({
   assessmentId: z.string(),

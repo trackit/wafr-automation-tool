@@ -3,8 +3,9 @@ import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
-  AssessmentFileExports,
   AssessmentFileExport,
+  AssessmentFileExports,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPractice,
   BestPracticeBody,
@@ -17,7 +18,6 @@ import type {
   Question,
   QuestionBody,
   ScanningTool,
-  AssessmentFileExportType,
 } from '@backend/models';
 import {
   AssessmentsRepository,

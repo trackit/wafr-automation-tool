@@ -39,6 +39,7 @@ import {
   tokenFakeOrganizationRepository,
   tokenOrganizationRepository,
 } from './OrganizationRepository';
+import { tokenFakePDFService, tokenPDFService } from './PDFService';
 import {
   tokenFakeQuestionSetService,
   tokenQuestionSetService,
@@ -47,7 +48,6 @@ import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
 } from './WellArchitectedToolService';
-import { tokenFakePDFService, tokenPDFService } from './PDFService';
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });

@@ -1,6 +1,7 @@
-import { Finding } from '@backend/models';
 import { Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import React from 'react';
+
+import { Finding } from '@backend/models';
 
 import { FindingDetail } from './FindingDetail';
 

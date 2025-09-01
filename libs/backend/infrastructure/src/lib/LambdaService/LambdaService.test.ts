@@ -5,6 +5,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 
 import { inject, reset } from '@shared/di-container';
+
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { LambdaService, tokenLambdaClient } from './LambdaService';
 

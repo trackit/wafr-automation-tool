@@ -4,15 +4,15 @@ import { z, ZodError, ZodType } from 'zod';
 import { tokenStartPDFExportUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-
 import { parseJsonObject } from '@shared/utils';
+
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import {
   MissingRequestBodyError,
   MissingRequestPathError,
   RequestParsingFailedError,
 } from '../../../utils/api/HttpError';
-import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
-import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 
 const StartPDFExportPathSchema = z.object({
   assessmentId: z.string(),
