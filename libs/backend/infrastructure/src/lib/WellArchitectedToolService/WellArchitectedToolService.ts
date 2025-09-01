@@ -12,6 +12,7 @@ import {
   ListAnswersCommand,
   ListMilestonesCommand,
   ListWorkloadsCommand,
+  ListWorkloadsCommandOutput,
   Milestone as AWSMilestone,
   PillarReviewSummary,
   UpdateAnswerCommand,
@@ -20,7 +21,6 @@ import {
   WellArchitectedServiceException,
   WorkloadEnvironment,
   WorkloadSummary,
-  ListWorkloadsCommandOutput,
 } from '@aws-sdk/client-wellarchitected';
 
 import {
