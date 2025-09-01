@@ -20,6 +20,7 @@ import {
   WellArchitectedServiceException,
   WorkloadEnvironment,
   WorkloadSummary,
+  ListWorkloadsCommandOutput,
 } from '@aws-sdk/client-wellarchitected';
 
 import {
@@ -75,15 +76,22 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     wellArchitectedClient: WellArchitectedClient,
     workloadName: string
   ): Promise<WorkloadSummary | null> {
-    const workloads = await wellArchitectedClient.send(
-      new ListWorkloadsCommand()
-    );
-    const workloadSummaries = workloads.WorkloadSummaries ?? [];
-    return (
-      workloadSummaries.find(
+    let workloadNextToken = undefined;
+    do {
+      const workloads: ListWorkloadsCommandOutput =
+        await wellArchitectedClient.send(
+          new ListWorkloadsCommand({
+            NextToken: workloadNextToken,
+          })
+        );
+      workloadNextToken = workloads.NextToken;
+      const workloadSummaries = workloads.WorkloadSummaries ?? [];
+      const workloadSummary = workloadSummaries.find(
         (workload) => workload.WorkloadName === workloadName
-      ) || null
-    );
+      );
+      if (workloadSummary) return workloadSummary;
+    } while (workloadNextToken);
+    return null;
   }
 
   private getWorkloadName(assessment: Assessment): string {
