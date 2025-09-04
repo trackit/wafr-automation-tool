@@ -1,4 +1,4 @@
-import { ComputeGraphDataInput } from './ComputeGraphAdapter';
+import { ComputeGraphDataInput } from './ComputeGraphDataAdapter';
 
 export class ComputeGraphDataAdapterArgsMother {
   private data: ComputeGraphDataInput;

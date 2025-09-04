@@ -50,8 +50,10 @@ const SEVERITIES = [
 
 function AssessmentOverview({
   assessment,
+  pillars,
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
+  pillars: components['schemas']['Pillar'][];
 }) {
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
@@ -128,15 +130,15 @@ function AssessmentOverview({
 
   // Calculate pillar completion percentages
   const pillarCompletionData = useMemo(() => {
-    if (!assessment?.pillars) return [];
+    if (!pillars) return [];
 
-    return assessment.pillars
+    return pillars
       .filter((pillar) => !pillar.disabled) // Only include enabled pillars
       .map((pillar) => ({
         pillar: pillar.label || pillar.id || 'Unknown',
         completion: calculatePillarCompletion(pillar),
       }));
-  }, [assessment?.pillars]);
+  }, [pillars]);
 
   // Calculate overall completion percentage
   const overallCompletion = useMemo(() => {

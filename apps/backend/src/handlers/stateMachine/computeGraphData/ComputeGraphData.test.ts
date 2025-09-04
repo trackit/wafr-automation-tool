@@ -4,7 +4,7 @@ import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenComputeGraphDataUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { ComputeGraphDataAdapter } from './ComputeGraphAdapter';
+import { ComputeGraphDataAdapter } from './ComputeGraphDataAdapter';
 import { ComputeGraphDataAdapterArgsMother } from './ComputeGraphDataAdapterArgsMother';
 
 describe('ComputeGraphDataAdapter', () => {
