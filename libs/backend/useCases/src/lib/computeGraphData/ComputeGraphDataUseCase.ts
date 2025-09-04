@@ -5,7 +5,7 @@ import {
 import { AssessmentGraphDataMother } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type ComputeGraphDataUseCaseArgs = {
   assessmentId: string;
@@ -39,9 +39,10 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
       organization: args.organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organization: args.organization,
+      });
     }
 
     this.logger.info(

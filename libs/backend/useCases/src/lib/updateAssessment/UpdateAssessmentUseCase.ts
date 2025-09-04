@@ -1,13 +1,9 @@
 import {
-  AssessmentNotFoundError,
-  EmptyUpdateBodyError,
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { AssessmentBody } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-
-import { NoContentError, NotFoundError } from '../Errors';
 
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -26,20 +22,11 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
   public async updateAssessment(
     args: UpdateAssessmentUseCaseArgs
   ): Promise<void> {
-    await this.assessmentsRepository
-      .update({
-        assessmentId: args.assessmentId,
-        organization: args.organization,
-        assessmentBody: args.assessmentBody,
-      })
-      .catch((error) => {
-        if (error instanceof AssessmentNotFoundError) {
-          throw new NotFoundError(error.message);
-        } else if (error instanceof EmptyUpdateBodyError) {
-          throw new NoContentError(error.description);
-        }
-        throw error;
-      });
+    await this.assessmentsRepository.update({
+      assessmentId: args.assessmentId,
+      organization: args.organization,
+      assessmentBody: args.assessmentBody,
+    });
     this.logger.info(`Assessment#${args.assessmentId} updated successfully`);
   }
 }

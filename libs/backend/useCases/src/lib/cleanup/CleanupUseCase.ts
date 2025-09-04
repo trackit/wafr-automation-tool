@@ -10,7 +10,11 @@ import { AssessmentStep } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  OrganizationNotFoundError,
+  OrganizationSubscriptionNotFoundError,
+} from '../../errors';
 
 export type StateMachineError = {
   Cause: string;
@@ -44,9 +48,10 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       organization: args.organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organization: args.organization,
+      });
     }
     if (!this.debug) {
       await this.assessmentsRepository.deleteFindings({
@@ -78,7 +83,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       organizationDomain: args.organization,
     });
     if (!organization) {
-      throw new NotFoundError('Organization not found');
+      throw new OrganizationNotFoundError({ organization: args.organization });
     }
     if (
       organization.freeAssessmentsLeft &&
@@ -112,9 +117,9 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
           organization,
         });
       } else {
-        throw new NotFoundError(
-          `Organization ${args.organization} does not have a subscription`
-        );
+        throw new OrganizationSubscriptionNotFoundError({
+          organization: args.organization,
+        });
       }
     }
   }

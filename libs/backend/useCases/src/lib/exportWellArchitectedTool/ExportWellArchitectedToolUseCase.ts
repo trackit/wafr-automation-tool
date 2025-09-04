@@ -8,10 +8,13 @@ import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
+  AssessmentNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors';
+import {
   assertAssessmentIsReadyForExport,
   assertOrganizationHasExportRole,
 } from '../../services/exports';
-import { NotFoundError } from '../Errors';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
@@ -41,24 +44,26 @@ export class ExportWellArchitectedToolUseCaseImpl
       organization: args.user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organization: args.user.organizationDomain,
+      });
     }
     assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
     if (!organization) {
-      throw new NotFoundError(
-        `Organization with domain ${args.user.organizationDomain} not found`
-      );
+      throw new OrganizationNotFoundError({
+        organization: args.user.organizationDomain,
+      });
     }
     assertOrganizationHasExportRole(organization);
     await this.wellArchitectedToolService.exportAssessment({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       region: (args.region ?? assessment.exportRegion)!,
       user: args.user,
     });

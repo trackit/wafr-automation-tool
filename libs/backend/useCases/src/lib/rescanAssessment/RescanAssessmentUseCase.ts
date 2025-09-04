@@ -6,7 +6,7 @@ import {
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type RescanAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -46,9 +46,10 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       organization: args.user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organization: args.user.organizationDomain,
+      });
     }
 
     await this.assessmentsStateMachine.cancelAssessment(

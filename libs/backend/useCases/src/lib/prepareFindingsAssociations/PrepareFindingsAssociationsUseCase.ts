@@ -12,7 +12,7 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import {
   ScanFindingsBestPracticesMapping,
@@ -155,9 +155,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found in organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
     }
     const scanFindings =
       await this.getScannedFindingsUseCase.getScannedFindings(args);

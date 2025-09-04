@@ -6,8 +6,12 @@ import {
 import type { MilestoneSummary } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
+import {
+  AssessmentExportRegionNotSetError,
+  AssessmentNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors';
 import { assertOrganizationHasExportRole } from '../../services';
-import { ConflictError, NotFoundError } from '../Errors';
 
 export interface GetMilestonesUseCaseArgs {
   assessmentId: string;
@@ -46,19 +50,16 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
       }),
     ]);
     if (!organization) {
-      throw new NotFoundError(
-        `Organization with domain ${organizationDomain} not found`
-      );
+      throw new OrganizationNotFoundError({ organization: organizationDomain });
     } else if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organization: organizationDomain,
+      });
     }
     const milestonesRegion = region ?? assessment.exportRegion;
     if (!milestonesRegion) {
-      throw new ConflictError(
-        `Assessment with id ${assessmentId} has no export region set`
-      );
+      throw new AssessmentExportRegionNotSetError({ assessmentId });
     }
     assertOrganizationHasExportRole(organization);
     return this.wellArchitectedToolService.getMilestones({

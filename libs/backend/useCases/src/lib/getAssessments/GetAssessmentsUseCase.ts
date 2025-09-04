@@ -1,11 +1,6 @@
-import {
-  InvalidNextTokenError,
-  tokenAssessmentsRepository,
-} from '@backend/infrastructure';
+import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import { Assessment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-
-import { InvalidParametersError } from '../Errors';
 
 export type GetAssessmentsUseCaseArgs = {
   user: User;
@@ -27,18 +22,10 @@ export class GetAssessmentsUseCaseImpl implements GetAssessmentsUseCase {
     args: GetAssessmentsUseCaseArgs
   ): Promise<{ assessments: Assessment[]; nextToken?: string }> {
     const { user, ...remaining } = args;
-    try {
-      const response = await this.assessmentsRepository.getAll({
-        organization: user.organizationDomain,
-        ...remaining,
-      });
-      return response;
-    } catch (error) {
-      if (error instanceof InvalidNextTokenError) {
-        throw new InvalidParametersError('Invalid next token');
-      }
-      throw error;
-    }
+    return await this.assessmentsRepository.getAll({
+      organization: user.organizationDomain,
+      ...remaining,
+    });
   }
 }
 

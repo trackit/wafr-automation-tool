@@ -9,7 +9,10 @@ import {
 import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { ForbiddenError, NotFoundError } from '../Errors';
+import {
+  OrganizationNoActiveSubscriptionError,
+  OrganizationNotFoundError,
+} from '../../errors';
 
 export type StartAssessmentUseCaseArgs = {
   name: string;
@@ -42,7 +45,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       organizationDomain: args.user.organizationDomain,
     });
     if (!organization) {
-      throw new NotFoundError('Organization not found');
+      throw new OrganizationNotFoundError({
+        organization: args.user.organizationDomain,
+      });
     }
     if (
       organization.freeAssessmentsLeft &&
@@ -87,9 +92,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const regions = args.regions ?? [];
 
     if (!(await this.canStartAssessment(args))) {
-      throw new ForbiddenError(
-        'Organization does not have an active subscription or free assessments left'
-      );
+      throw new OrganizationNoActiveSubscriptionError({
+        organization: user.organizationDomain,
+      });
     }
     await this.stateMachine.startAssessment({
       name,

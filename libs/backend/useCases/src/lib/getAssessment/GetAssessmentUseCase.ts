@@ -2,7 +2,7 @@ import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { Assessment } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type GetAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -24,9 +24,10 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       organization: args.organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organization: args.organization,
+      });
     }
     return assessment;
   }

@@ -8,7 +8,7 @@ import { Finding, ScanFinding, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export interface StoreFindingsToAssociateUseCaseArgs {
   assessmentId: string;
@@ -70,9 +70,7 @@ export class StoreFindingsToAssociateUseCaseImpl
       organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found in organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
     }
     const findings = scanFindings.map<Finding>((scanFinding) => ({
       ...scanFinding,

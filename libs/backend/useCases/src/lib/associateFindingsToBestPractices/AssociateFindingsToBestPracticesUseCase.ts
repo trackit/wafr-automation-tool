@@ -8,7 +8,7 @@ import type { Finding, ScanningTool } from '@backend/models';
 import { FindingToBestPracticesAssociation } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type AssociateFindingsToBestPracticesUseCaseArgs = {
   assessmentId: string;
@@ -128,11 +128,9 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
       organization: args.organization,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
     }
-    const { pillars } = await this.questionSetService.get();
+    const { pillars } = this.questionSetService.get();
     this.logger.info(
       `Associating findings to best practices for assessment ${assessmentId} and organization ${organization}`
     );

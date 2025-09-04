@@ -1,12 +1,6 @@
-import {
-  BestPracticeNotFoundError,
-  InvalidNextTokenError,
-  tokenAssessmentsRepository,
-} from '@backend/infrastructure';
+import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { Finding, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
-
-import { InvalidParametersError, NotFoundError } from '../Errors';
 
 export interface GetBestPracticeFindingsUseCaseArgs {
   assessmentId: string;
@@ -39,19 +33,10 @@ export class GetBestPracticeFindingsUseCaseImpl
     nextToken?: string;
   }> {
     const { user, ...remaining } = args;
-    return this.assessmentsRepository
-      .getBestPracticeFindings({
-        organization: user.organizationDomain,
-        ...remaining,
-      })
-      .catch((error) => {
-        if (error instanceof InvalidNextTokenError) {
-          throw new InvalidParametersError(error.message);
-        } else if (error instanceof BestPracticeNotFoundError) {
-          throw new NotFoundError(error.message);
-        }
-        throw error;
-      });
+    return await this.assessmentsRepository.getBestPracticeFindings({
+      organization: user.organizationDomain,
+      ...remaining,
+    });
   }
 }
 
