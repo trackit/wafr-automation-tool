@@ -1,10 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
-import {
-  tokenCognitoService,
-  UserNotFoundError,
-} from '@backend/infrastructure';
+import { tokenCognitoService } from '@backend/infrastructure';
 import type { Finding } from '@backend/models';
 import { tokenGetBestPracticeFindingsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -12,7 +9,7 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError, NotFoundError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetBestPracticeFindingsPathArgsSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -56,7 +53,6 @@ export class GetBestPracticeFindingsAdapter {
         findings.flatMap((f) => (f.comments ?? []).map((c) => c.authorId))
       )
     );
-
     const users = await Promise.all(
       usersId.map((userId) => this.cognitoService.getUserById({ userId }))
     );
@@ -99,36 +95,22 @@ export class GetBestPracticeFindingsAdapter {
   ): Promise<
     operations['getBestPracticeFindings']['responses']['200']['content']['application/json']
   > {
-    const { pathParameters, queryStringParameters } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
+    const { pathParameters, queryStringParameters } = parseApiEvent(event, {
+      pathSchema: GetBestPracticeFindingsPathArgsSchema,
+      querySchema: GetBestPracticeFindingsQueryArgsSchema,
+    });
 
-    try {
-      const parsedPathParameters =
-        GetBestPracticeFindingsPathArgsSchema.parse(pathParameters);
-      const parsedQueryParameters =
-        GetBestPracticeFindingsQueryArgsSchema.parse(queryStringParameters);
-      const { findings, nextToken } =
-        await this.useCase.getBestPracticeFindings({
-          user: getUserFromEvent(event),
-          ...parsedPathParameters,
-          limit: parsedQueryParameters.limit,
-          nextToken: parsedQueryParameters.nextToken,
-          searchTerm: parsedQueryParameters.search,
-          showHidden: parsedQueryParameters.showHidden,
-        });
-      return {
-        items: await this.toGetBestPracticeFindingsItemsResponse(findings),
-        nextToken,
-      };
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError(`Invalid parameters: ${error.message}`);
-      } else if (error instanceof UserNotFoundError) {
-        throw new NotFoundError(error.message);
-      }
-      throw error;
-    }
+    const { findings, nextToken } = await this.useCase.getBestPracticeFindings({
+      user: getUserFromEvent(event),
+      ...pathParameters,
+      limit: queryStringParameters.limit,
+      nextToken: queryStringParameters.nextToken,
+      searchTerm: queryStringParameters.search,
+      showHidden: queryStringParameters.showHidden,
+    });
+    return {
+      items: await this.toGetBestPracticeFindingsItemsResponse(findings),
+      nextToken,
+    };
   }
 }

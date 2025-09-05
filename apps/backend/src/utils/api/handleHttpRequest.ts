@@ -1,16 +1,15 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { tokenLogger } from '@backend/infrastructure';
-import {
-  ConflictError,
-  ForbiddenError,
-  NoContentError,
-  NotFoundError,
-  ServerError,
-} from '@backend/useCases';
 import { inject } from '@shared/di-container';
+import { BasicError, BasicErrorCategory } from '@shared/utils';
 
-import { HttpError } from './HttpError';
+const CATEGORY_TO_HTTP = {
+  BAD_REQUEST: 400,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+} as const satisfies Record<BasicErrorCategory, number>;
 
 const buildResponse = (
   statusCode: number,
@@ -43,33 +42,23 @@ export const handleHttpRequest = async ({
     });
     return buildResponse(statusCode, await func(event));
   } catch (e: unknown) {
-    if (e instanceof ServerError) {
-      logger.error('ServerError', e);
-      let statusCode: number;
-      if (e instanceof NoContentError) {
-        statusCode = 204;
-      } else if (e instanceof ForbiddenError) {
-        statusCode = 403;
-      } else if (e instanceof NotFoundError) {
-        statusCode = 404;
-      } else if (e instanceof ConflictError) {
-        statusCode = 409;
-      } else {
-        statusCode = 400;
-      }
-      return buildResponse(statusCode, {
+    if (e instanceof BasicError) {
+      const httpStatus = CATEGORY_TO_HTTP[e.category];
+
+      logger.error(`${e.code}Error`, {
+        category: e.category,
         message: e.message,
         description: e.description,
       });
-    } else if (e instanceof HttpError) {
-      logger.error('HttpError', e);
-      return buildResponse(e.code, {
+      return buildResponse(httpStatus, {
+        code: e.code,
         message: e.message,
         description: e.description,
       });
     }
     logger.error('Internal Server Error', e);
     return buildResponse(500, {
+      code: 'INTERNAL_SERVER_ERROR',
       message: 'Internal Server Error.',
       description: 'An unexpected error occurred.',
     });

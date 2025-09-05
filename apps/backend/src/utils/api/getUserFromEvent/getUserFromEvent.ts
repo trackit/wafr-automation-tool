@@ -2,13 +2,13 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 import type { User } from '@backend/models';
 
-import { BadRequestError } from '../HttpError';
+import { UserClaimsMissingError } from '../../../errors/UserErrors';
 
 export const getUserFromEvent = (event: APIGatewayProxyEvent): User => {
   const userClaims = event.requestContext.authorizer?.claims;
 
   if (!userClaims) {
-    throw new BadRequestError('Missing claims');
+    throw new UserClaimsMissingError();
   }
 
   return {

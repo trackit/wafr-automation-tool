@@ -1,14 +1,15 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import type { Milestone } from '@backend/models';
 import { tokenGetMilestoneUseCase } from '@backend/useCases';
 import { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
+import { MilestoneInvalidIdError } from '../../../errors';
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetMilestonePathSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -58,31 +59,25 @@ export class GetMilestoneAdapter {
   ): Promise<
     operations['getMilestone']['responses']['200']['content']['application/json']
   > {
-    const { pathParameters, queryStringParameters } = event;
-    try {
-      const { assessmentId, milestoneId } =
-        GetMilestonePathSchema.parse(pathParameters);
-      const { region } = GetMilestoneQuerySchema.parse(
-        queryStringParameters ?? {}
-      );
-      const milestoneIdNumber = Number(milestoneId);
-      if (isNaN(milestoneIdNumber)) {
-        throw new BadRequestError('Invalid milestoneId');
-      }
+    const { pathParameters, queryStringParameters } = parseApiEvent(event, {
+      pathSchema: GetMilestonePathSchema,
+      querySchema: GetMilestoneQuerySchema,
+    });
+    const { assessmentId, milestoneId } = pathParameters;
+    const { region } = queryStringParameters;
 
-      const user = getUserFromEvent(event);
-      const milestone = await this.useCase.getMilestone({
-        organizationDomain: user.organizationDomain,
-        assessmentId,
-        milestoneId: milestoneIdNumber,
-        region,
-      });
-      return this.toGetMilestoneResponse(milestone);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request parameters: ${e.message}`);
-      }
-      throw e;
+    const milestoneIdNumber = Number(milestoneId);
+    if (isNaN(milestoneIdNumber)) {
+      throw new MilestoneInvalidIdError({ milestoneId });
     }
+
+    const user = getUserFromEvent(event);
+    const milestone = await this.useCase.getMilestone({
+      organizationDomain: user.organizationDomain,
+      assessmentId,
+      milestoneId: milestoneIdNumber,
+      region,
+    });
+    return this.toGetMilestoneResponse(milestone);
   }
 }

@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { Assessment } from '@backend/models';
 import { tokenGetAssessmentsUseCase } from '@backend/useCases';
@@ -8,7 +8,7 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetAssessmentsQuerySchema = z
   .object({
@@ -37,22 +37,8 @@ export class GetAssessmentsAdapter {
     assessment: Assessment[]
   ): operations['getAssessments']['responses'][200]['content']['application/json']['assessments'] {
     return assessment.map((assessment) => ({
-      id: assessment.id,
-      name: assessment.name,
-      createdBy: assessment.createdBy,
-      organization: assessment.organization,
-      regions: assessment.regions,
-      exportRegion: assessment.exportRegion,
-      roleArn: assessment.roleArn,
-      workflows: assessment.workflows,
+      ...assessment,
       createdAt: assessment.createdAt.toISOString(),
-      step: assessment.step,
-      ...(assessment.error && {
-        error: {
-          cause: assessment.error.cause,
-          error: assessment.error.error,
-        },
-      }),
     }));
   }
 
@@ -61,22 +47,14 @@ export class GetAssessmentsAdapter {
   ): Promise<
     operations['getAssessments']['responses'][200]['content']['application/json']
   > {
-    const { queryStringParameters } = event;
-    try {
-      const parsedQuery = GetAssessmentsQuerySchema.parse(
-        queryStringParameters
-      );
-      const { assessments, nextToken } = await this.useCase.getAssessments({
-        user: getUserFromEvent(event),
-        ...parsedQuery,
-      });
-      const convertedAssessments = this.convertToAPIAssessment(assessments);
-      return { assessments: convertedAssessments, nextToken };
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
-      }
-      throw e;
-    }
+    const { queryStringParameters } = parseApiEvent(event, {
+      querySchema: GetAssessmentsQuerySchema,
+    });
+
+    const { assessments, nextToken } = await this.useCase.getAssessments({
+      user: getUserFromEvent(event),
+      ...queryStringParameters,
+    });
+    return { assessments: this.convertToAPIAssessment(assessments), nextToken };
   }
 }

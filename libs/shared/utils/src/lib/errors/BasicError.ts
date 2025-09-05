@@ -1,4 +1,4 @@
-export const CATEGORIES = ['NOT_FOUND', 'FORBIDDEN', 'CONFLICT'] as const;
+export const CATEGORIES = ['NOT_FOUND', 'FORBIDDEN', 'CONFLICT', 'BAD_REQUEST'] as const;
 
 export type BasicErrorCategory = (typeof CATEGORIES)[number];
 export type BasicErrorArgs = {

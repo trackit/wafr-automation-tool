@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import type { Assessment } from '@backend/models';
 import { tokenGetAssessmentUseCase } from '@backend/useCases';
@@ -8,7 +8,7 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetAssessmentArgsSchema = z.object({
   assessmentId: z.string(),
@@ -31,39 +31,19 @@ export class GetAssessmentAdapter {
     assessment: Assessment
   ): operations['getAssessment']['responses'][200]['content']['application/json'] {
     return {
+      ...assessment,
       createdAt: assessment.createdAt.toISOString(),
-      createdBy: assessment.createdBy,
       pillars:
         assessment.pillars?.map((pillar) => ({
-          disabled: pillar.disabled,
-          id: pillar.id,
-          label: pillar.label,
+          ...pillar,
           questions: pillar.questions.map((question) => ({
+            ...question,
             bestPractices: question.bestPractices.map((bestPractice) => ({
-              description: bestPractice.description,
-              id: bestPractice.id,
-              label: bestPractice.label,
+              ...bestPractice,
               results: [...bestPractice.results],
-              risk: bestPractice.risk,
-              checked: bestPractice.checked,
             })),
-            disabled: question.disabled,
-            id: question.id,
-            label: question.label,
-            none: question.none,
           })),
         })) ?? [],
-      graphData: assessment.graphData,
-      id: assessment.id,
-      name: assessment.name,
-      organization: assessment.organization,
-      questionVersion: assessment.questionVersion,
-      regions: assessment.regions,
-      exportRegion: assessment.exportRegion,
-      roleArn: assessment.roleArn,
-      step: assessment.step,
-      workflows: assessment.workflows,
-      error: assessment.error,
     };
   }
 
@@ -72,23 +52,16 @@ export class GetAssessmentAdapter {
   ): Promise<
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: GetAssessmentArgsSchema,
+    });
+    const { assessmentId } = pathParameters;
 
-    try {
-      const { assessmentId } = GetAssessmentArgsSchema.parse(pathParameters);
-      const assessment = await this.useCase.getAssessment({
-        organization: getUserFromEvent(event).organizationDomain,
-        assessmentId,
-      });
-      return this.toGetAssessmentResponse(assessment);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${e.message}`);
-      }
-      throw e;
-    }
+    const assessment = await this.useCase.getAssessment({
+      organization: getUserFromEvent(event).organizationDomain,
+      assessmentId,
+    });
+
+    return this.toGetAssessmentResponse(assessment);
   }
 }

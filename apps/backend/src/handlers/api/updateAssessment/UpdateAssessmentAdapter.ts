@@ -1,14 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenUpdateAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateAssessmentPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -23,13 +22,6 @@ const UpdateAssessmentBodySchema = z.object({
 export class UpdateAssessmentAdapter {
   private readonly useCase = inject(tokenUpdateAssessmentUseCase);
 
-  private parseBody(
-    body: string
-  ): operations['updateAssessment']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return UpdateAssessmentBodySchema.parse(parsedBody);
-  }
-
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {
@@ -42,32 +34,16 @@ export class UpdateAssessmentAdapter {
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<operations['updateAssessment']['responses']['200']['content']> {
-    const { pathParameters, body } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
-    if (!body) {
-      throw new BadRequestError('Missing request body');
-    }
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdateAssessmentPathParametersSchema,
+      bodySchema: UpdateAssessmentBodySchema,
+    });
+    const { assessmentId } = pathParameters;
 
-    try {
-      const { assessmentId } =
-        UpdateAssessmentPathParametersSchema.parse(pathParameters);
-      const assessmentBody = this.parseBody(body);
-      await this.useCase.updateAssessment({
-        organization: getUserFromEvent(event).organizationDomain,
-        assessmentId,
-        assessmentBody,
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${error.message}`);
-      } else if (error instanceof JSONParseError) {
-        throw new BadRequestError(
-          `Invalid JSON in request body: ${error.message}`
-        );
-      }
-      throw error;
-    }
+    await this.useCase.updateAssessment({
+      organization: getUserFromEvent(event).organizationDomain,
+      assessmentId,
+      assessmentBody: body,
+    });
   }
 }

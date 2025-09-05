@@ -1,14 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenUpdatePillarUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdatePillarPathSchema = z.object({
   assessmentId: z.string(),
@@ -26,13 +25,6 @@ const UpdatePillarBodySchema = z
 export class UpdatePillarAdapter {
   private readonly useCase = inject(tokenUpdatePillarUseCase);
 
-  private parseBody(
-    body?: string
-  ): operations['updatePillar']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return UpdatePillarBodySchema.parse(parsedBody);
-  }
-
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {
@@ -44,30 +36,17 @@ export class UpdatePillarAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters, body } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
-    if (!body) {
-      throw new BadRequestError('Missing body parameters');
-    }
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdatePillarPathSchema,
+      bodySchema: UpdatePillarBodySchema,
+    });
+    const { assessmentId, pillarId } = pathParameters;
 
-    try {
-      const parsedPath = UpdatePillarPathSchema.parse(pathParameters);
-      const parsedBody = this.parseBody(body);
-      await this.useCase.updatePillar({
-        user: getUserFromEvent(event),
-        assessmentId: parsedPath.assessmentId,
-        pillarId: parsedPath.pillarId,
-        pillarBody: parsedBody,
-      });
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid parameters: ${e.message}`);
-      } else if (e instanceof JSONParseError) {
-        throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);
-      }
-      throw e;
-    }
+    await this.useCase.updatePillar({
+      user: getUserFromEvent(event),
+      assessmentId,
+      pillarId,
+      pillarBody: body,
+    });
   }
 }

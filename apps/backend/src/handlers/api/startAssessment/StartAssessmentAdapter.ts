@@ -1,14 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const StartAssessmentArgsSchema = z.object({
   name: z.string(),
@@ -21,13 +20,6 @@ const StartAssessmentArgsSchema = z.object({
 
 export class StartAssessmentAdapter {
   private readonly useCase = inject(tokenStartAssessmentUseCase);
-
-  private parseBody(
-    body?: string
-  ): operations['startAssessment']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return StartAssessmentArgsSchema.parse(parsedBody);
-  }
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -44,25 +36,14 @@ export class StartAssessmentAdapter {
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {
-    const { body } = event;
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
+    const { body } = parseApiEvent(event, {
+      bodySchema: StartAssessmentArgsSchema,
+    });
 
-    try {
-      const parsedBody = this.parseBody(body);
-      const { assessmentId } = await this.useCase.startAssessment({
-        user: getUserFromEvent(event),
-        ...parsedBody,
-      });
-      return { assessmentId };
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request body: ${e.message}`);
-      } else if (e instanceof JSONParseError) {
-        throw new BadRequestError(`Invalid JSON in request body: ${e.message}`);
-      }
-      throw e;
-    }
+    const { assessmentId } = await this.useCase.startAssessment({
+      user: getUserFromEvent(event),
+      ...body,
+    });
+    return { assessmentId };
   }
 }
