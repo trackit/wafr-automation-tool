@@ -23,7 +23,6 @@ import {
   tokenFakeFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
-import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
   tokenFakeMarketplaceService,
@@ -49,7 +48,6 @@ import {
 
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
-  register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });

@@ -1,4 +1,5 @@
 import {
+  tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
   tokenFeatureToggleRepository,
   tokenIdGenerator,
@@ -6,7 +7,7 @@ import {
   tokenMarketplaceService,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
-import { User } from '@backend/models';
+import { Assessment, AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { ForbiddenError, NotFoundError } from '../Errors';
@@ -28,6 +29,7 @@ export interface StartAssessmentUseCase {
 export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
   private readonly marketplaceService = inject(tokenMarketplaceService);
+  private readonly assessmentRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
     tokenFeatureToggleRepository
@@ -101,6 +103,20 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdBy: user.id,
       organization: user.organizationDomain,
     });
+    const assessment: Assessment = {
+      id: assessmentId,
+      name,
+      regions,
+      workflows,
+      roleArn,
+      createdAt: new Date(),
+      createdBy: user.id,
+      organization: user.organizationDomain,
+      executionArn: '',
+      rawGraphData: {},
+      step: AssessmentStep.SCANNING_STARTED,
+    };
+    await this.assessmentRepository.save(assessment);
     return { assessmentId };
   }
 }

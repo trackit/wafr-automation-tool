@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Network
-
 Parameters:
   Owner:
     Type: String
@@ -22,7 +21,8 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: VPC
-  Subnet:
+
+  PublicSubnetEcs:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -35,7 +35,38 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: Subnet
+          Value: PublicSubnetEcs
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Sub ${AWS::Region}a
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: PrivateSubnetA
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.5.0/24
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Sub ${AWS::Region}b
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: PrivateSubnetB
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -46,12 +77,14 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: InternetGateway
+
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
-  RouteTable:
+
+  PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
@@ -61,28 +94,80 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: RouteTable
-  Route:
+          Value: PublicRouteTable
+
+  PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref RouteTable
+      RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-  SubnetRouteTableAssociation:
+
+  PublicSubnetRouteTableAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Subnet
-      RouteTableId: !Ref RouteTable
-  SecurityGroup:
+      SubnetId: !Ref PublicSubnetEcs
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: PrivateRouteTableA
+
+  PrivateRouteTableB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: PrivateRouteTableB
+
+  PrivateSubnetARouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTableA
+
+  PrivateSubnetBRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTableB
+
+  AuroraDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for Aurora
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraDBSubnetGroup
+
+  EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security group for ECS
+      GroupDescription: Security group for ECS Fargate in public subnet
       VpcId: !Ref VPC
       SecurityGroupEgress:
-        - IpProtocol: 'tcp'
-          FromPort: 443
-          ToPort: 443
+        - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Project
@@ -90,12 +175,180 @@ Resources:
         - Key: Owner
           Value: !Ref Owner
         - Key: Name
-          Value: SecurityGroup
+          Value: EcsSecurityGroup
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Aurora
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref LambdaSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BastionSecurityGroup
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraSecurityGroup
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Lambdas in private subnets
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: LambdaSecurityGroup
+
+  InterfaceEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Interface VPC Endpoints
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref LambdaSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref EcsSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: InterfaceEndpointSecurityGroup
+
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      RouteTableIds:
+        - !Ref PrivateRouteTableA
+        - !Ref PrivateRouteTableB
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: 's3:*'
+            Resource: '*'
+
+  LogsInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      SecurityGroupIds:
+        - !Ref InterfaceEndpointSecurityGroup
+
+  StsInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.sts
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      SecurityGroupIds:
+        - !Ref InterfaceEndpointSecurityGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: 'sts:*'
+            Resource: '*'
+
+  StepFunctionsInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.states
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      SecurityGroupIds:
+        - !Ref InterfaceEndpointSecurityGroup
+
+  DynamoDBGatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
+      RouteTableIds:
+        - !Ref PrivateRouteTableA
+        - !Ref PrivateRouteTableB
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: 'dynamodb:*'
+            Resource: '*'
 
 Outputs:
-  Subnet:
-    Description: Subnet
-    Value: !Ref Subnet
-  SecurityGroup:
-    Description: Security Group
-    Value: !Ref SecurityGroup
+  VpcId:
+    Description: VPC Id
+    Value: !Ref VPC
+
+  PublicSubnetEcsId:
+    Description: Public subnet for ECS Fargate
+    Value: !Ref PublicSubnetEcs
+
+  PrivateSubnetAId:
+    Description: Private subnet A
+    Value: !Ref PrivateSubnetA
+
+  PrivateSubnetBId:
+    Description: Private subnet B
+    Value: !Ref PrivateSubnetB
+
+  AuroraSecurityGroupId:
+    Description: Security Group to attach to Aurora
+    Value: !Ref AuroraSecurityGroup
+
+  AuroraDBSubnetGroupId:
+    Description: Subnet Group to attach to Aurora
+    Value: !Ref AuroraDBSubnetGroup
+
+  LambdaSecurityGroupId:
+    Description: Security Group to attach to Lambdas
+    Value: !Ref LambdaSecurityGroup
+
+  EcsSecurityGroupId:
+    Description: Security Group to attach to ECS tasks
+    Value: !Ref EcsSecurityGroup

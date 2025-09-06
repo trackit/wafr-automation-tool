@@ -56,13 +56,15 @@ Resources:
             6,
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
-        DynamoDBArn: !GetAtt DynamoDB.Arn
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         ParentStackName: !Ref AWS::StackName
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -101,7 +103,6 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref 'AWS::StackName'
         Debug: !Ref Debug
-        DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
@@ -109,80 +110,17 @@ Resources:
         ScanTaskRole: !GetAtt ScanningTools.Outputs.ScanTaskRole
         CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
         CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
-        Subnet: !GetAtt Network.Outputs.Subnet
-        SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
+        Subnet: !GetAtt Network.Outputs.PublicSubnetEcsId
+        SecurityGroup: !GetAtt Network.Outputs.EcsSecurityGroupId
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         GenAIMaxRetries: !Ref GenAIMaxRetries
         AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
-  DynamoDB:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Ref AWS::StackName
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: DynamoDB
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: PK
-          AttributeType: S
-        - AttributeName: SK
-          AttributeType: S
-      KeySchema:
-        - AttributeName: PK
-          KeyType: HASH
-        - AttributeName: SK
-          KeyType: RANGE
-      DeletionProtectionEnabled: true
-  BackupRole:
-    Condition: CreateBackups
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: backup.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
-        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
-  BackupVault:
-    Condition: CreateBackups
-    Type: AWS::Backup::BackupVault
-    Properties:
-      BackupVaultName: !Sub ${AWS::StackName}-ddb-vault
-  BackupPlan:
-    Condition: CreateBackups
-    Type: AWS::Backup::BackupPlan
-    Properties:
-      BackupPlan:
-        BackupPlanName: !Sub ${AWS::StackName}-ddb-plan
-        BackupPlanRule:
-          - RuleName: daily-ddb
-            TargetBackupVault: !Ref BackupVault
-            ScheduleExpression: cron(0 1 * * ? *)
-            StartWindowMinutes: 60
-            CompletionWindowMinutes: 180
-            Lifecycle:
-              DeleteAfterDays: 15
-  BackupSelection:
-    Condition: CreateBackups
-    Type: AWS::Backup::BackupSelection
-    Properties:
-      BackupPlanId: !Ref BackupPlan
-      BackupSelection:
-        IamRoleArn: !GetAtt BackupRole.Arn
-        SelectionName: !Sub ${AWS::StackName}-select-ddb
-        Resources:
-          - !GetAtt DynamoDB.Arn
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
   OrganizationTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -201,7 +139,7 @@ Resources:
       KeySchema:
         - AttributeName: PK
           KeyType: HASH
-      DeletionProtectionEnabled: true
+      DeletionProtectionEnabled: false
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -225,6 +163,47 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         ParentStackName: !Ref AWS::StackName
+
+  # Cluster Aurora PG Serverless v2
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      DBSubnetGroupName: !GetAtt Network.Outputs.AuroraDBSubnetGroupId
+      VpcSecurityGroupIds: [!GetAtt Network.Outputs.AuroraSecurityGroupId]
+      DeletionProtection: !If [CreateBackups, true, false]
+      BackupRetentionPeriod: !If [CreateBackups, 7, 1]
+      StorageEncrypted: true
+      Port: 5432
+      MasterUsername: postgres
+      MasterUserPassword: tDdWd0sTgY$
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0
+        MaxCapacity: 1
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraCluster
+
+  # Instance serverless v2 rattachée au cluster
+  AuroraInstanceWriter:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraInstanceWriter
 
 Outputs:
   ApiEndpoint:

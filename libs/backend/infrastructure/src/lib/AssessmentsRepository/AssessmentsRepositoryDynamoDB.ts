@@ -1317,10 +1317,10 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }
 }
 
-export const tokenAssessmentsRepository =
-  createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {
-    useClass: AssessmentsRepositoryDynamoDB,
-  });
+// export const tokenAssessmentsRepository =
+//   createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {
+//     useClass: AssessmentsRepositoryDynamoDB,
+//   });
 
 export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
   'DynamoDBAssessmentTableName',
