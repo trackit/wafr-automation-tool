@@ -1,0 +1,48 @@
+import type { User } from '@backend/models';
+
+import type { AddCommentUseCaseArgs } from './AddCommentUseCase';
+
+export class AddCommentUseCaseArgsMother {
+  private data: AddCommentUseCaseArgs;
+
+  private constructor(data: AddCommentUseCaseArgs) {
+    this.data = data;
+  }
+
+  public static basic(): AddCommentUseCaseArgsMother {
+    return new AddCommentUseCaseArgsMother({
+      assessmentId: 'assessment-id',
+      findingId: 'tool#1',
+      text: 'This is a comment',
+      user: {
+        id: 'user-id',
+        organizationDomain: 'test.io',
+        email: 'user-id@test.io',
+      },
+    });
+  }
+
+  public withAssessmentId(assessmentId: string): AddCommentUseCaseArgsMother {
+    this.data.assessmentId = assessmentId;
+    return this;
+  }
+
+  public withFindingId(findingId: string): AddCommentUseCaseArgsMother {
+    this.data.findingId = findingId;
+    return this;
+  }
+
+  public withText(text: string): AddCommentUseCaseArgsMother {
+    this.data.text = text;
+    return this;
+  }
+
+  public withUser(user: User): AddCommentUseCaseArgsMother {
+    this.data.user = user;
+    return this;
+  }
+
+  public build(): AddCommentUseCaseArgs {
+    return this.data;
+  }
+}

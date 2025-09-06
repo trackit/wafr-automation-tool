@@ -1,3 +1,4 @@
+export * from './addComment';
 export * from './associateFindingsToBestPractices';
 export * from './cleanup';
 export * from './computeGraphData';
