@@ -73,6 +73,7 @@ Resources:
         S3BucketName: !Ref S3Bucket
         DynamoDBArn: !GetAtt DynamoDB.Arn
         OrganizationTableArn: !GetAtt OrganizationTable.Arn
+        StackSetName: !GetAtt StackSet.Outputs.StackSetName
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -152,7 +153,6 @@ Resources:
         Owner: !Ref Owner
         Project: !Ref Project
         ParentStackName: !Ref AWS::StackName
-
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -332,6 +332,19 @@ Resources:
         SelectionName: !Sub ${AWS::StackName}-select-ddb
         Resources:
           - !GetAtt DynamoDB.Arn
+
+  StackSet:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/stack-set.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: StackSet
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        ParentStackName: !Ref AWS::StackName
 
 Outputs:
   ApiEndpoint:

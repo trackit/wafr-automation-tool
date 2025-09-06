@@ -1,4 +1,5 @@
 export * from './Assessment';
+export * from './AssumedRole';
 export * from './BestPractice';
 export * from './Finding';
 export * from './Milestone';

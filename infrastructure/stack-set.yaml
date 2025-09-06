@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: StackSet + Admin role (self-managed)
+
+Parameters:
+  Owner:
+    Type: String
+  Project:
+    Type: String
+  ParentStackName:
+    Type: String
+
+Resources:
+  AdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ParentStackName}-stackset-admin-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowAssumeExecutionRoleInTargets
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !Sub arn:*:iam::*:role/wafr-automation-tool-execution-role
+  StackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: !Sub '${ParentStackName}-stackset'
+      PermissionModel: SELF_MANAGED
+      AdministrationRoleARN: !GetAtt AdministrationRole.Arn
+      ExecutionRoleName: wafr-automation-tool-execution-role
+      TemplateURL: 'https://wafr-automation-tool-prod-cf-394125495069.s3.us-west-2.amazonaws.com/cloudformation-templates/export-role.yaml'
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
+      OperationPreferences:
+        FailureToleranceCount: 0
+        MaxConcurrentCount: 1
+        RegionConcurrencyType: SEQUENTIAL
+
+Outputs:
+  StackSetName:
+    Value: !Ref StackSet

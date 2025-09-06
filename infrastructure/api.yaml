@@ -44,6 +44,8 @@ Parameters:
     Type: String
   OrganizationTableArn:
     Type: String
+  StackSetName:
+    Type: String
 
 Conditions:
   IsDebug:
@@ -68,6 +70,7 @@ Globals:
         DDB_TABLE: !Ref DynamoDBArn
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
         DEBUG: !Ref Debug
+        STACKSET_NAME: !Ref StackSetName
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -1301,6 +1304,86 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GetOrganizationStatusLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetOrganizationStatusFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetOrganizationStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getOrganizationStatus
+      Tags:
+        Name: GetOrganizationStatusFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        GetOrganizationStatus:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization/status
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  OnboardOrganizationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${OnboardOrganizationFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  OnboardOrganizationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/onboardOrganization
+      Tags:
+        Name: OnboardOrganizationFunction
+      Role: !GetAtt ExportAssessmentRole.Arn
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - cloudformation:CreateStackInstances
+              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/${StackSetName}
+            - Effect: Allow
+              Action:
+                - sts:AssumeRole
+              Resource:
+                - arn:aws:iam::*:role/*
+      Events:
+        OnboardOrganization:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization/onboarding
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
 Outputs:
   ApiEndpoint:
     Description: API Endpoint

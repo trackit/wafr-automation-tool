@@ -401,6 +401,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organization/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve the status of a specific organization
+         * @description Retrieves the status of a specific organization.
+         */
+        get: operations["getOrganizationStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organization/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start the onboarding process for a specific organization
+         * @description Starts the onboarding process for a specific organization.
+         */
+        post: operations["startOrganizationOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -584,6 +624,11 @@ export interface components {
             versionName: string;
             createdAt: string;
         };
+        /**
+         * @description The status of an organization
+         * @enum {string}
+         */
+        OrganizationStatus: "UNCOMPLETED" | "COMPLETED";
     };
     responses: never;
     parameters: never;
@@ -1849,6 +1894,96 @@ export interface operations {
                 content?: never;
             };
             /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getOrganizationStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the organization to retrieve the status of */
+                organizationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The status of the organization has been successfully retrieved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationStatus"];
+                };
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified organization could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    startOrganizationOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The AWS Account ID of the organization to start the onboarding process for */
+                    accountId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The onboarding process has been successfully started */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified organization could not be found */
             404: {
                 headers: {
                     [name: string]: unknown;

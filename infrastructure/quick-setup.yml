@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template creates an execution role for the CloudFormation stackset
+  execution. It is used by the CloudFormation stackset to assume the role
+  necessary to create the stackset.
+
+Parameters:
+  AdministratorAccountId:
+    Type: String
+    Description: AWS Account Id of the administrator account (the account in which StackSets will be created).
+    MaxLength: 12
+    MinLength: 12
+
+Resources:
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: wafr-automation-tool-execution-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref AdministratorAccountId
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess

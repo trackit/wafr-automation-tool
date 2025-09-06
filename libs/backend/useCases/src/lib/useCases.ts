@@ -20,6 +20,7 @@ export * from './getOrganization';
 export * from './getScannedFindings';
 export * from './listPDFExports';
 export * from './mapScanFindingsToBestPractices';
+export * from './onboardOrganization';
 export * from './prepareCustodian';
 export * from './prepareFindingsAssociations';
 export * from './rescanAssessment';

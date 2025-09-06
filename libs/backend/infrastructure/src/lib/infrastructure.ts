@@ -1,6 +1,7 @@
 export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
+export * from './CFNService';
 export * from './CognitoService';
 export * from './config/debug';
 export * from './config/dynamodb/config';
@@ -19,5 +20,6 @@ export * from './PDFService';
 export * from './QuestionSetService';
 export * from './registerTestInfrastructure';
 export * from './SecretsManager';
+export * from './STSService';
 export * from './TypeORMClientManager';
 export * from './WellArchitectedToolService';

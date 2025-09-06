@@ -90,6 +90,11 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
       }),
     );
   }
+
+  public isComplete(args: { organization: Organization }): boolean {
+    const { organization } = args;
+    return organization.assessmentExportRoleArn !== undefined;
+  }
 }
 
 export const tokenOrganizationRepositoryDynamoDB =

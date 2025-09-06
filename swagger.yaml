@@ -1066,6 +1066,63 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/organization/status':
+    get:
+      operationId: getOrganizationStatus
+      tags:
+        - Organizations
+      summary: Retrieve the status of a specific organization
+      description: |
+        Retrieves the status of a specific organization.
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          description: The unique ID of the organization to retrieve the status of
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The status of the organization has been successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationStatus'
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified organization could not be found
+        '500':
+          description: Internal server error.
+  '/organization/onboarding':
+    post:
+      operationId: startOrganizationOnboarding
+      tags:
+        - Organizations
+      summary: Start the onboarding process for a specific organization
+      description: |
+        Starts the onboarding process for a specific organization.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+              properties:
+                accountId:
+                  type: string
+                  description: The AWS Account ID of the organization to start the onboarding process for
+      responses:
+        '200':
+          description: The onboarding process has been successfully started
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified organization could not be found
+        '500':
+          description: Internal server error.
 components:
   schemas:
     Assessment:
@@ -1433,3 +1490,9 @@ components:
           type: string
         createdAt:
           type: string
+    OrganizationStatus:
+      type: string
+      description: The status of an organization
+      enum:
+        - UNCOMPLETED
+        - COMPLETED
