@@ -2,6 +2,9 @@ import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { Finding, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
+import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
+import { assertBestPracticeExists } from '../../services/asserts';
+
 export interface GetBestPracticeFindingsUseCaseArgs {
   assessmentId: string;
   pillarId: string;
@@ -32,10 +35,40 @@ export class GetBestPracticeFindingsUseCaseImpl
     findings: Finding[];
     nextToken?: string;
   }> {
-    const { user, ...remaining } = args;
+    const {
+      user,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      nextToken,
+    } = args;
+    const organizationDomain = user.organizationDomain;
+
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
+    }
+    assertBestPracticeExists({
+      assessment,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
     return await this.assessmentsRepository.getBestPracticeFindings({
-      organization: user.organizationDomain,
-      ...remaining,
+      organizationDomain,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      nextToken,
     });
   }
 }

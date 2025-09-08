@@ -39,12 +39,12 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organization: args.user.organizationDomain,
+        organizationDomain: args.user.organizationDomain,
       });
     }
     assertAssessmentIsReadyForExport(assessment, args.region);
@@ -53,7 +53,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
     });
     if (!organization) {
       throw new OrganizationNotFoundError({
-        organization: args.user.organizationDomain,
+        domain: args.user.organizationDomain,
       });
     }
     assertOrganizationHasExportRole(organization);
@@ -61,6 +61,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       region: (args.region ?? assessment.exportRegion)!,
       name: args.name,
       user: args.user,

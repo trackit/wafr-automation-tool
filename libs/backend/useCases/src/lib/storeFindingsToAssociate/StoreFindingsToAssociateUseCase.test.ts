@@ -10,7 +10,7 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import {
   StoreFindingsToAssociateUseCaseImpl,
   tokenStoreFindingsToAssociateUseCaseChunkSize,
@@ -18,30 +18,29 @@ import {
 import { StoreFindingsToAssociateUseCaseArgsMother } from './StoreFindingsToAssociateUseCaseArgsMother';
 
 describe('StoreFindingsToAssociate UseCase', () => {
-  it('should throw an NotFoundError if assessment does not exist', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const input = StoreFindingsToAssociateUseCaseArgsMother.basic().build();
     fakeAssessmentsRepository.assessments = {};
-    const args = StoreFindingsToAssociateUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('organization-id')
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
-    await expect(useCase.storeFindingsToAssociate(args)).rejects.toThrow(
-      NotFoundError
+    fakeAssessmentsRepository.assessmentFindings = {};
+
+    await expect(useCase.storeFindingsToAssociate(input)).rejects.toThrow(
+      AssessmentNotFoundError
     );
   });
 
   it('should store findings in objects storage', async () => {
     const { useCase, fakeAssessmentsRepository, fakeObjectsStorage } = setup();
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .build();
     fakeObjectsStorage.objects = {};
     const args = StoreFindingsToAssociateUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
@@ -51,7 +50,7 @@ describe('StoreFindingsToAssociate UseCase', () => {
       .build();
     await useCase.storeFindingsToAssociate(args);
     const key = StoreFindingsToAssociateUseCaseImpl.getFindingsChunkPath({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       scanningTool: ScanningTool.PROWLER,
       chunkIndex: 0,
     });
@@ -77,13 +76,14 @@ describe('StoreFindingsToAssociate UseCase', () => {
   it('should chunk findings if they exceed the maximum size', async () => {
     const { useCase, fakeAssessmentsRepository, fakeObjectsStorage } = setup(2);
     fakeObjectsStorage.objects = {};
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .build();
     const args = StoreFindingsToAssociateUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
@@ -94,12 +94,12 @@ describe('StoreFindingsToAssociate UseCase', () => {
       .build();
     await useCase.storeFindingsToAssociate(args);
     const key0 = StoreFindingsToAssociateUseCaseImpl.getFindingsChunkPath({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       scanningTool: ScanningTool.PROWLER,
       chunkIndex: 0,
     });
     const key1 = StoreFindingsToAssociateUseCaseImpl.getFindingsChunkPath({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       scanningTool: ScanningTool.PROWLER,
       chunkIndex: 1,
     });
@@ -117,16 +117,21 @@ describe('StoreFindingsToAssociate UseCase', () => {
   it('should return a list of URIs pointing to the chunks findings', async () => {
     const { useCase, fakeAssessmentsRepository, fakeObjectsStorage } = setup(1);
     fakeObjectsStorage.objects = {};
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .build();
     vi.spyOn(fakeObjectsStorage, 'put')
-      .mockResolvedValueOnce('s3://assessment-id/chunks/prowler_0.json')
-      .mockResolvedValueOnce('s3://assessment-id/chunks/prowler_1.json');
+      .mockResolvedValueOnce(
+        's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_0.json'
+      )
+      .mockResolvedValueOnce(
+        's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_1.json'
+      );
     const args = StoreFindingsToAssociateUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
@@ -136,8 +141,8 @@ describe('StoreFindingsToAssociate UseCase', () => {
       .build();
     const uris = await useCase.storeFindingsToAssociate(args);
     expect(uris).toEqual([
-      's3://assessment-id/chunks/prowler_0.json',
-      's3://assessment-id/chunks/prowler_1.json',
+      's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_0.json',
+      's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_1.json',
     ]);
   });
 });

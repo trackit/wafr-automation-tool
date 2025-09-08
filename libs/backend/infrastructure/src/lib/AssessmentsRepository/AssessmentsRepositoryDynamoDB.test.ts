@@ -14,15 +14,6 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import {
-  AssessmentNotFoundError,
-  BestPracticeNotFoundError,
-  EmptyUpdateBodyError,
-  FindingNotFoundError,
-  InvalidNextTokenError,
-  PillarNotFoundError,
-  QuestionNotFoundError,
-} from '../../Errors';
 import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
@@ -105,7 +96,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const savedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(savedAssessment).toEqual(assessment);
@@ -124,7 +115,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessments).toEqual({
@@ -151,7 +142,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         search: 'assessment1',
       });
 
@@ -179,7 +170,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         limit: 1,
       });
 
@@ -214,7 +205,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         AssessmentsRepositoryDynamoDB.encodeNextToken(nextTokenAssessment);
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         nextToken: nextToken,
       });
 
@@ -235,7 +226,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(fetchedAssessments).toEqual({
@@ -248,7 +239,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const fetchedAssessments = await repository.getAll({
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessments).toEqual({
@@ -271,7 +262,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessment).toEqual(assessment);
@@ -282,7 +273,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessment).toBeUndefined();
@@ -311,11 +302,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const fetchedAssessment2 = await repository.get({
         assessmentId: 'assessment2',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessment1).toEqual(assessment1);
@@ -352,7 +343,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await expect(
         repository.updateBestPractice({
           assessmentId: 'assessment1',
-          organization: 'organization1',
+          organizationDomain: 'organization1',
           pillarId: '0',
           questionId: '0',
           bestPracticeId: '0',
@@ -363,176 +354,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
           .checked
       ).toBe(true);
-    });
-
-    it('should throw AssessmentNotFound if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
-    it('should throw AssessmentNotFound if assessment exist for another organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization2')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('0')
-                    .withChecked(false)
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
-    it('should throw PillarNotFoundError if the pillar doesn’t exist in the assessment', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(PillarNotFoundError);
-    });
-
-    it('should throw QuestionNotFoundError if the question doesn’t exist in the assessment', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic().withId('0').withQuestions([]).build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(QuestionNotFoundError);
-    });
-
-    it('should throw BestPracticeNotFoundError if the best practice doesn’t exist in the assessment', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic().withId('0').withBestPractices([]).build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(BestPracticeNotFoundError);
-    });
-
-    it('should throw EmptyUpdateBodyError if bestPracticeBody is empty', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('0')
-                    .withChecked(false)
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {},
-        })
-      ).rejects.toThrow(EmptyUpdateBodyError);
     });
   });
 
@@ -561,7 +388,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.addBestPracticeFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: '0',
         questionId: '0',
         bestPracticeId: '0',
@@ -570,7 +397,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -603,7 +430,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.addBestPracticeFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: '0',
         questionId: '0',
         bestPracticeId: '0',
@@ -612,7 +439,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -650,7 +477,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.addBestPracticeFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: '0',
         questionId: '0',
         bestPracticeId: '0',
@@ -659,7 +486,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.addBestPracticeFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: '0',
         questionId: '0',
         bestPracticeId: '0',
@@ -668,7 +495,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -699,7 +526,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await expect(
         repository.updatePillar({
           assessmentId: 'assessment1',
-          organization: 'organization1',
+          organizationDomain: 'organization1',
           pillarId: '0',
           pillarBody: {
             disabled: true,
@@ -708,81 +535,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
-    });
-
-    it('should throw AssessmentNotFound if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.updatePillar({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          pillarBody: {},
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
-    it('should throw AssessmentNotFound if assessment exist for another organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization2')
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updatePillar({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          pillarBody: {},
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
-    it('should throw PillarNotFoundError if the pillar doesn’t exist in the assessment', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updatePillar({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          pillarBody: {},
-        })
-      ).rejects.toThrow(PillarNotFoundError);
-    });
-
-    it('should throw EmptyUpdateBodyError if pillarBody is empty', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([PillarMother.basic().withId('0').build()])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updatePillar({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: '0',
-          pillarBody: {},
-        })
-      ).rejects.toThrow(EmptyUpdateBodyError);
     });
   });
 
@@ -798,12 +553,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.delete({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       const fetchedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedAssessment).toBeUndefined();
@@ -827,32 +582,21 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.delete({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       const fetchedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       const fetchedAssessment2 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(fetchedAssessment1).toBeUndefined();
       expect(fetchedAssessment2).toEqual(assessment2);
-    });
-
-    it('should throw an error if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.delete({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-        })
-      ).rejects.toThrow(Error);
     });
   });
 
@@ -904,14 +648,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
       const savedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(savedFinding).toEqual(finding);
@@ -931,14 +675,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const finding = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
       const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedFinding).toEqual(finding);
@@ -956,7 +700,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedFinding).toBeUndefined();
@@ -980,26 +724,26 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const finding1 = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
 
       const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
         finding: finding2,
       });
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
         findingId: 'scanningTool#2',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedFinding1).toEqual(finding1);
@@ -1021,44 +765,33 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
       await repository.deleteFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#2',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedFinding1).toBeUndefined();
       expect(fetchedFinding2).toBeUndefined();
-    });
-
-    it('should throw an error if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.deleteFindings({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-        })
-      ).rejects.toThrow(Error);
     });
 
     it('should be scoped by organization', async () => {
@@ -1079,31 +812,31 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const finding1 = FindingMother.basic().withId('scanningTool#1').build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
 
       const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.saveFinding({
         assessmentId: 'assessment2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
         finding: finding2,
       });
 
       await repository.deleteFindings({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       const fetchedFinding1 = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'scanningTool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const fetchedFinding2 = await repository.getFinding({
         assessmentId: 'assessment2',
         findingId: 'scanningTool#2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(fetchedFinding1).toBeUndefined();
@@ -1127,81 +860,23 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
-      const comment = FindingCommentMother.basic().withId('comment-id').build();
+      const comment = FindingCommentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .build();
       await repository.addFindingComment({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
         comment,
       });
 
       const findingWithComment = await repository.getFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
-        findingId: finding.id,
-      });
-
-      expect(findingWithComment).toEqual(
-        expect.objectContaining({
-          comments: [comment],
-        })
-      );
-    });
-
-    it('should throw a FindingNotFoundError if finding does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const comment = FindingCommentMother.basic().withId('comment-id').build();
-      await expect(
-        repository.addFindingComment({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          findingId: 'scanningTool#12345',
-          comment,
-        })
-      ).rejects.toThrow(FindingNotFoundError);
-    });
-
-    it('should handle backward compatibility if finding has no comments field', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments(undefined)
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
-        finding,
-      });
-
-      const comment = FindingCommentMother.basic().withId('comment-id').build();
-      await repository.addFindingComment({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
-        findingId: finding.id,
-        comment,
-      });
-
-      const findingWithComment = await repository.getFinding({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
       });
 
@@ -1227,22 +902,22 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withId('scanningTool#12345')
         .withComments([
           FindingCommentMother.basic()
-            .withId('comment-id')
+            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
             .withText('old-comment-text')
             .build(),
         ])
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
       await repository.updateFindingComment({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
-        commentId: 'comment-id',
+        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         commentBody: {
           text: 'new-comment-text',
         },
@@ -1250,7 +925,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const findingWithComment = await repository.getFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
       });
 
@@ -1258,34 +933,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         expect.objectContaining({
           comments: [
             expect.objectContaining({
-              id: 'comment-id',
+              id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
               text: 'new-comment-text',
             }),
           ],
         })
       );
-    });
-
-    it('should throw a FindingNotFoundError if finding does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateFindingComment({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          findingId: 'scanningTool#12345',
-          commentId: 'comment-id',
-          commentBody: {
-            text: 'new-comment-text',
-          },
-        })
-      ).rejects.toThrow(FindingNotFoundError);
     });
   });
 
@@ -1302,25 +955,27 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const finding = FindingMother.basic()
         .withId('scanningTool#12345')
         .withComments([
-          FindingCommentMother.basic().withId('comment-id').build(),
+          FindingCommentMother.basic()
+            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+            .build(),
         ])
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
       await repository.deleteFindingComment({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
-        commentId: 'comment-id',
+        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       });
 
       const findingWithComment = await repository.getFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: finding.id,
       });
 
@@ -1329,39 +984,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           comments: [],
         })
       );
-    });
-    it('should throw a FindingNotFoundError if finding does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.deleteFindingComment({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          findingId: 'scanningTool#12345',
-          commentId: 'comment-id',
-        })
-      ).rejects.toThrow(FindingNotFoundError);
-    });
-  });
-
-  describe('nextToken validation', () => {
-    it('should throw an error if the next token is invalid', async () => {
-      const { repository } = setup();
-
-      const nextToken = 'test-token';
-
-      await expect(
-        repository.getAll({
-          organization: 'organization1',
-          nextToken,
-        })
-      ).rejects.toThrow(InvalidNextTokenError);
     });
   });
 
@@ -1394,7 +1016,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.update({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         assessmentBody: {
           name: 'New Name',
           pillars: [
@@ -1422,7 +1044,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(updatedAssessment).toEqual(
@@ -1452,37 +1074,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       );
     });
 
-    it('should throw a EmptyUpdateBodyError in case of empty assessment body', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withName('Old Name')
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.update({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          assessmentBody: {},
-        })
-      ).rejects.toThrow(EmptyUpdateBodyError);
-    });
-
-    it('should throw an error if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.update({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          assessmentBody: { name: 'New Name' },
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
     it('should be scoped by organization', async () => {
       const { repository } = setup();
 
@@ -1502,17 +1093,17 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.update({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         assessmentBody: { name: 'New Name' },
       });
 
       const updatedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(updatedAssessment1).toEqual(
@@ -1557,12 +1148,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
@@ -1631,12 +1222,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
         finding: finding2,
       });
       const { findings } = await repository.getBestPracticeFindings(
@@ -1687,84 +1278,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(findings).toEqual([]);
     });
 
-    it('should throw an error if the pillar does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-            .withAssessmentId('assessment1')
-            .withOrganization('organization1')
-            .withPillarId('pillar1')
-            .withQuestionId('question1')
-            .withBestPracticeId('bp1')
-            .build()
-        )
-      ).rejects.toThrow(PillarNotFoundError);
-    });
-
-    it('should throw an error if the question does not exist', async () => {
-      const { repository } = setup();
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic().withId('pillar1').withQuestions([]).build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-            .withAssessmentId('assessment1')
-            .withOrganization('organization1')
-            .withPillarId('pillar1')
-            .withQuestionId('question1')
-            .withBestPracticeId('bp1')
-            .build()
-        )
-      ).rejects.toThrow(QuestionNotFoundError);
-    });
-
-    it('should throw an error if the best practice does not exist', async () => {
-      const { repository } = setup();
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-      await expect(
-        repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-            .withAssessmentId('assessment1')
-            .withOrganization('organization1')
-            .withPillarId('pillar1')
-            .withQuestionId('question1')
-            .withBestPracticeId('bp1')
-            .build()
-        )
-      ).rejects.toThrow(BestPracticeNotFoundError);
-    });
-
     it('should not return the hidden findings', async () => {
       const { repository } = setup();
 
@@ -1799,12 +1312,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
@@ -1861,17 +1374,17 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding3,
       });
 
@@ -1928,17 +1441,17 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding3,
       });
 
@@ -1993,12 +1506,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
@@ -2049,12 +1562,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
@@ -2101,12 +1614,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding2,
       });
 
@@ -2149,13 +1662,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding,
       });
 
       await repository.updateFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: 'tool#1',
         findingBody: {
           hidden: true,
@@ -2165,7 +1678,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const fetchedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'tool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(fetchedFinding).toEqual(
@@ -2174,41 +1687,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           hidden: true,
         })
       );
-    });
-
-    it('should throw a EmptyUpdateBodyError in case of empty finding body', async () => {
-      const { repository } = setup();
-
-      const finding = FindingMother.basic().withId('tool#1').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organization: 'organization1',
-        finding,
-      });
-
-      await expect(
-        repository.updateFinding({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          findingId: 'tool#1',
-          findingBody: {},
-        })
-      ).rejects.toThrow(EmptyUpdateBodyError);
-    });
-
-    it('should throw an error if the finding does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.updateFinding({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          findingId: 'tool#1',
-          findingBody: {
-            hidden: true,
-          },
-        })
-      ).rejects.toThrow(FindingNotFoundError);
     });
 
     it('should be scoped by organization', async () => {
@@ -2225,18 +1703,18 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         finding: finding1,
       });
       await repository.saveFinding({
         assessmentId: 'assessment1',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
         finding: finding2,
       });
 
       await repository.updateFinding({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         findingId: 'tool#1',
         findingBody: {
           hidden: true,
@@ -2246,12 +1724,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const updatedFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'tool#1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const otherFinding = await repository.getFinding({
         assessmentId: 'assessment1',
         findingId: 'tool#1',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(updatedFinding).toEqual(expect.objectContaining({ hidden: true }));
@@ -2283,7 +1761,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateQuestion({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: 'pillar1',
         questionId: 'question1',
         questionBody: {
@@ -2294,109 +1772,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({ id: 'question1', disabled: true, none: true })
       );
-    });
-
-    it('should throw a EmptyBodyError if questionBody is empty', async () => {
-      const { repository } = setup();
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withDisabled(false)
-                .withNone(false)
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-      await expect(
-        repository.updateQuestion({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: 'pillar1',
-          questionId: 'question1',
-          questionBody: {},
-        })
-      ).rejects.toThrow(EmptyUpdateBodyError);
-    });
-
-    it('should throw a AssessmentNotFound if assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.updateQuestion({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: 'pillar1',
-          questionId: 'question1',
-          questionBody: {
-            disabled: true,
-            none: true,
-          },
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
-    });
-
-    it('should throw a PillarNotFound if pillar does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateQuestion({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: 'pillar1',
-          questionId: 'question1',
-          questionBody: {
-            disabled: true,
-            none: true,
-          },
-        })
-      ).rejects.toThrow(PillarNotFoundError);
-    });
-
-    it('should throw a QuestionNotFound if question does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic().withId('pillar1').withQuestions([]).build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateQuestion({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          pillarId: 'pillar1',
-          questionId: 'question1',
-          questionBody: {
-            disabled: true,
-            none: true,
-          },
-        })
-      ).rejects.toThrow(QuestionNotFoundError);
     });
 
     it('should be scoped by organization', async () => {
@@ -2440,7 +1821,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateQuestion({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         pillarId: 'pillar1',
         questionId: 'question1',
         questionBody: {
@@ -2451,11 +1832,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const updatedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
         assessmentId: 'assessment2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(updatedAssessment1?.pillars?.[0]?.questions?.[0]).toEqual(
@@ -2504,14 +1885,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateRawGraphDataForScanningTool({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
@@ -2551,14 +1932,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateRawGraphDataForScanningTool({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         scanningTool: ScanningTool.CLOUD_CUSTODIAN,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
@@ -2601,33 +1982,20 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateRawGraphDataForScanningTool({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
         [ScanningTool.PROWLER]: graphData,
         [ScanningTool.CLOUD_CUSTODIAN]: expect.any(Object),
       });
-    });
-
-    it('should throw an error if the assessment does not exist', async () => {
-      const { repository } = setup();
-
-      await expect(
-        repository.updateRawGraphDataForScanningTool({
-          assessmentId: 'assessment1',
-          organization: 'organization1',
-          scanningTool: ScanningTool.PROWLER,
-          graphData: AssessmentGraphDataMother.basic().build(),
-        })
-      ).rejects.toThrow(AssessmentNotFoundError);
     });
 
     it('should be scoped by organization', async () => {
@@ -2673,18 +2041,18 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       await repository.updateRawGraphDataForScanningTool({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment1 = await repository.get({
         assessmentId: 'assessment1',
-        organization: 'organization1',
+        organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
         assessmentId: 'assessment2',
-        organization: 'organization2',
+        organizationDomain: 'organization2',
       });
 
       expect(updatedAssessment1?.rawGraphData).toEqual({

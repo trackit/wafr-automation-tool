@@ -41,12 +41,12 @@ export class ExportWellArchitectedToolUseCaseImpl
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organization: args.user.organizationDomain,
+        organizationDomain: args.user.organizationDomain,
       });
     }
     assertAssessmentIsReadyForExport(assessment, args.region);
@@ -55,7 +55,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     });
     if (!organization) {
       throw new OrganizationNotFoundError({
-        organization: args.user.organizationDomain,
+        domain: args.user.organizationDomain,
       });
     }
     assertOrganizationHasExportRole(organization);
@@ -70,7 +70,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     if (!assessment.exportRegion) {
       await this.assessmentsRepository.update({
         assessmentId: assessment.id,
-        organization: args.user.organizationDomain,
+        organizationDomain: args.user.organizationDomain,
         assessmentBody: { exportRegion: args.region },
       });
       this.logger.info(

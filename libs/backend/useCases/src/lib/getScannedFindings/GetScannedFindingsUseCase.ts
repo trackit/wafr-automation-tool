@@ -42,12 +42,12 @@ export class GetScannedFindingsUseCaseImpl
       args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain: organization,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organization,
+        organizationDomain: organization,
       });
     }
     const scanProvider = new this.scanProviderTypes[scanningTool](

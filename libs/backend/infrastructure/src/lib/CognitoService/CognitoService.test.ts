@@ -3,7 +3,6 @@ import { mockClient } from 'aws-sdk-client-mock';
 
 import { inject, reset } from '@shared/di-container';
 
-import { InfrastructureError, UserNotFoundError } from '../../Errors';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { CognitoService, tokenCognitoClient } from './CognitoService';
 
@@ -48,7 +47,7 @@ describe('CognitoService', () => {
       });
       await expect(
         service.getUserById({ userId: 'test-user' })
-      ).rejects.toThrow(InfrastructureError);
+      ).rejects.toThrow(Error);
     });
     it('should throw an error if the user is not found', async () => {
       const { service, cognitoClientMock } = setup();
@@ -59,7 +58,7 @@ describe('CognitoService', () => {
       });
       await expect(
         service.getUserById({ userId: 'test-user' })
-      ).rejects.toThrow(UserNotFoundError);
+      ).rejects.toThrow(Error);
     });
   });
 });

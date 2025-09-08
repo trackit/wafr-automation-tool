@@ -21,12 +21,12 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   ): Promise<Assessment> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.organization,
+      organizationDomain: args.organization,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organization: args.organization,
+        organizationDomain: args.organization,
       });
     }
     return assessment;

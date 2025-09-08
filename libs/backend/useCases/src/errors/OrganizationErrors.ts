@@ -3,14 +3,14 @@ import { UseCaseError } from './UseCaseError';
 export class OrganizationNotFoundError extends UseCaseError {
   public constructor(
     args: {
-      organization: string;
+      domain: string;
     },
     description?: string
   ) {
-    const { organization } = args;
+    const { domain } = args;
     super({
       category: 'NOT_FOUND',
-      message: `Organization with domain ${organization} not found`,
+      message: `Organization with domain ${domain} not found`,
       description,
     });
   }
@@ -19,14 +19,14 @@ export class OrganizationNotFoundError extends UseCaseError {
 export class OrganizationSubscriptionNotFoundError extends UseCaseError {
   public constructor(
     args: {
-      organization: string;
+      domain: string;
     },
     description?: string
   ) {
-    const { organization } = args;
+    const { domain } = args;
     super({
       category: 'NOT_FOUND',
-      message: `Organization with domain ${organization} does not have a subscription`,
+      message: `Organization with domain ${domain} does not have a subscription`,
       description,
     });
   }
@@ -35,14 +35,14 @@ export class OrganizationSubscriptionNotFoundError extends UseCaseError {
 export class OrganizationExportRoleNotSetError extends UseCaseError {
   public constructor(
     args: {
-      organization: string;
+      domain: string;
     },
     description?: string
   ) {
-    const { organization } = args;
+    const { domain } = args;
     super({
       category: 'CONFLICT',
-      message: `Organization with domain ${organization} has no export role set`,
+      message: `Organization with domain ${domain} has no export role set`,
       description,
     });
   }
@@ -51,14 +51,46 @@ export class OrganizationExportRoleNotSetError extends UseCaseError {
 export class OrganizationNoActiveSubscriptionError extends UseCaseError {
   public constructor(
     args: {
-      organization: string;
+      domain: string;
     },
     description?: string
   ) {
-    const { organization } = args;
+    const { domain } = args;
     super({
       category: 'FORBIDDEN',
-      message: `Organization with domain ${organization} does not have an active subscription or free assessments left`,
+      message: `Organization with domain ${domain} does not have an active subscription or free assessments left`,
+      description,
+    });
+  }
+}
+
+export class OrganizationAccountIdNotSetError extends UseCaseError {
+  public constructor(
+    args: {
+      domain: string;
+    },
+    description?: string
+  ) {
+    const { domain } = args;
+    super({
+      category: 'CONFLICT',
+      message: `Organization with domain ${domain} has no account ID set`,
+      description,
+    });
+  }
+}
+
+export class OrganizationUnitBasedAgreementIdNotSetError extends UseCaseError {
+  public constructor(
+    args: {
+      domain: string;
+    },
+    description?: string
+  ) {
+    const { domain } = args;
+    super({
+      category: 'CONFLICT',
+      message: `Organization with domain ${domain} has no unit-based agreement ID set`,
       description,
     });
   }

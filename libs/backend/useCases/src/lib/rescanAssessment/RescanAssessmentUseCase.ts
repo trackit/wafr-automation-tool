@@ -31,24 +31,25 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     const { assessmentId, organization } = args;
     await this.assessmentsRepository.deleteFindings({
       assessmentId,
-      organization,
+      organizationDomain: organization,
     });
     await this.assessmentsRepository.delete({
       assessmentId,
-      organization,
+      organizationDomain: organization,
     });
   }
+
   public async rescanAssessment(
     args: RescanAssessmentUseCaseArgs
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organization: args.user.organizationDomain,
+        organizationDomain: args.user.organizationDomain,
       });
     }
 

@@ -38,9 +38,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
 
     const response = await this.client.send(command);
     if (response.$metadata.httpStatusCode !== 200) {
-      throw new Error(
-        `Failed to start assessment: ${response.$metadata.httpStatusCode}`
-      );
+      throw new Error(JSON.stringify(response));
     }
     this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
   }
@@ -50,9 +48,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
 
     const response = await this.client.send(command);
     if (response.$metadata.httpStatusCode !== 200) {
-      throw new Error(
-        `Failed to cancel assessment: ${response.$metadata.httpStatusCode}`
-      );
+      throw new Error(JSON.stringify(response));
     }
     this.logger.info(`Cancelled Assessment Execution#${executionId}`);
   }

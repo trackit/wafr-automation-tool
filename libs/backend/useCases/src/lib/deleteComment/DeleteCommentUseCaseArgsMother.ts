@@ -11,9 +11,9 @@ export class DeleteCommentUseCaseArgsMother {
 
   public static basic(): DeleteCommentUseCaseArgsMother {
     return new DeleteCommentUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
-      commentId: 'comment-id',
+      commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       user: {
         id: 'user-id',
         organizationDomain: 'test.io',

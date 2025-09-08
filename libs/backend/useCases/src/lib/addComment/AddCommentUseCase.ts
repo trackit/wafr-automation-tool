@@ -28,17 +28,30 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
     args: AddCommentUseCaseArgs
   ): Promise<FindingComment> {
     const { assessmentId, findingId, text, user } = args;
+    const { organizationDomain } = user;
 
     const finding = await this.assessmentsRepository.getFinding({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain,
       findingId,
     });
     if (!finding) {
       throw new FindingNotFoundError({
         assessmentId,
-        organization: user.organizationDomain,
+        organizationDomain,
         findingId,
+      });
+    }
+
+    // Backward compatibility: if finding has no comments field, create an empty object
+    if (!finding.comments) {
+      await this.assessmentsRepository.updateFinding({
+        assessmentId,
+        organizationDomain,
+        findingId,
+        findingBody: {
+          comments: [],
+        },
       });
     }
 
@@ -50,7 +63,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
     };
     await this.assessmentsRepository.addFindingComment({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain,
       findingId,
       comment,
     });

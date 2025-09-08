@@ -4,7 +4,6 @@ import { GetEntitlementsCommand } from '@aws-sdk/client-marketplace-entitlement-
 import { BatchMeterUsageCommand } from '@aws-sdk/client-marketplace-metering';
 import { mockClient } from 'aws-sdk-client-mock';
 
-import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
@@ -57,9 +56,7 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(true);
@@ -74,9 +71,7 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(false);
@@ -96,23 +91,10 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(false);
-    });
-    it('should return false if the organization has no account ID', async () => {
-      const { marketplaceService } = setup();
-
-      await expect(
-        marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId(undefined)
-            .build(),
-        })
-      ).resolves.toBe(false);
     });
   });
 
@@ -128,9 +110,7 @@ describe('MarketplaceService', () => {
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId('agreementId')
-            .build(),
+          unitBasedAgreementId: 'agreementId',
         });
 
       expect(hasUnitBasedSubscription).toBe(true);
@@ -146,23 +126,10 @@ describe('MarketplaceService', () => {
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId('agreementId')
-            .build(),
+          unitBasedAgreementId: 'agreementId',
         });
 
       expect(hasUnitBasedSubscription).toBe(false);
-    });
-    it('should return false if the organization has no unit-based agreement ID', async () => {
-      const { marketplaceService } = setup();
-
-      await expect(
-        marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId(undefined)
-            .build(),
-        })
-      ).resolves.toBe(false);
     });
   });
 
@@ -176,9 +143,7 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         })
       ).resolves.toBeUndefined();
     });
@@ -191,9 +156,7 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         })
       ).rejects.toThrowError();
     });

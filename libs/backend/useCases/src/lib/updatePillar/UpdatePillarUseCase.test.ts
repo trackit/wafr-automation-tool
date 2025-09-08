@@ -5,7 +5,7 @@ import {
 import { AssessmentMother, PillarMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError, PillarNotFoundError } from '../../errors';
 import { UpdatePillarUseCaseImpl } from './UpdatePillarUseCase';
 import { UpdatePillarUseCaseArgsMother } from './UpdatePillarUseCaseArgsMother';
 
@@ -14,18 +14,19 @@ describe('UpdatePillarUseCase', () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('other-org.io')
       .withPillars([
         PillarMother.basic().withId('1').withDisabled(false).build(),
       ])
       .build();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      assessment;
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#other-org.io'
+    ] = assessment;
 
     const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(
         UserMother.basic().withOrganizationDomain('other-org.io').build()
       )
@@ -40,8 +41,8 @@ describe('UpdatePillarUseCase', () => {
       fakeAssessmentsRepository.updatePillar
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
-        assessmentId: 'assessment-id',
-        organization: 'other-org.io',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'other-org.io',
         pillarId: '1',
         pillarBody: {
           disabled: true,
@@ -50,58 +51,38 @@ describe('UpdatePillarUseCase', () => {
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws AssessmentNotFoundError', async () => {
-    const { useCase } = setup();
-
-    const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().build())
-      .build();
-
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NotFoundError);
-  });
-
-  it('should throw a NotFoundError if the infrastructure throws PillarNotFoundError', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
+    const input = UpdatePillarUseCaseArgsMother.basic().build();
+    fakeAssessmentsRepository.assessments = {};
+    fakeAssessmentsRepository.assessmentFindings = {};
 
-    const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withPillarBody({
-        disabled: true,
-      })
-      .build();
-
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.updatePillar(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
   });
 
-  it('should throw a NoUpdateBodyError if the infrastructure throws EmptyUpdateBodyError', async () => {
+  it('should throw PillarNotFoundError if pillar does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarBody({})
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withPillars([])
       .build();
 
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NoContentError);
+    const input = UpdatePillarUseCaseArgsMother.basic()
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withPillarId('pillar-id')
+      .build();
+    await expect(useCase.updatePillar(input)).rejects.toThrow(
+      PillarNotFoundError
+    );
   });
 });
 

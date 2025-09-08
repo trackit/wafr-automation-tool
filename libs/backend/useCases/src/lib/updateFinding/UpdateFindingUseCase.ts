@@ -5,6 +5,8 @@ import {
 import type { FindingBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
+import { FindingNotFoundError } from '../../errors';
+
 export type UpdateFindingUseCaseArgs = {
   assessmentId: string;
   findingId: string;
@@ -22,9 +24,24 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
 
   public async updateFinding(args: UpdateFindingUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, user, findingBody } = args;
+    const { organizationDomain } = user;
+
+    const finding = await this.assessmentsRepository.getFinding({
+      assessmentId,
+      organizationDomain,
+      findingId,
+    });
+    if (!finding) {
+      throw new FindingNotFoundError({
+        assessmentId,
+        organizationDomain,
+        findingId,
+      });
+    }
+
     await this.assessmentsRepository.updateFinding({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
       findingBody,
     });

@@ -31,14 +31,14 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
 
     const finding = await this.assessmentsRepository.getFinding({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
     });
     if (!finding) {
       throw new FindingNotFoundError({
         assessmentId,
         findingId,
-        organization: user.organizationDomain,
+        organizationDomain: user.organizationDomain,
       });
     }
 
@@ -47,7 +47,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
       throw new FindingCommentNotFoundError({
         assessmentId,
         findingId,
-        organization: user.organizationDomain,
+        organizationDomain: user.organizationDomain,
         commentId,
       });
     }
@@ -62,7 +62,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
 
     await this.assessmentsRepository.deleteFindingComment({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
       commentId,
     });

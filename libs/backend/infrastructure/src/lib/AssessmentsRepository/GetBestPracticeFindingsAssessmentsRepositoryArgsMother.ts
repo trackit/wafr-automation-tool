@@ -9,8 +9,8 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
 
   public static basic(): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     return new GetBestPracticeFindingsAssessmentsRepositoryArgsMother({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'test.io',
       pillarId: 'pillar-id',
       questionId: 'question-id',
       bestPracticeId: 'best-practice-id',
@@ -29,9 +29,9 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   }
 
   public withOrganization(
-    organization: AssessmentsRepositoryGetBestPracticeFindingsArgs['organization']
+    organization: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain']
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organization;
     return this;
   }
 

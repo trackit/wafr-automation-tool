@@ -23,15 +23,6 @@ import {
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import {
-  AssessmentNotFoundError,
-  BestPracticeNotFoundError,
-  EmptyUpdateBodyError,
-  FindingNotFoundError,
-  InvalidNextTokenError,
-  PillarNotFoundError,
-  QuestionNotFoundError,
-} from '../../Errors';
 import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 import {
@@ -58,9 +49,9 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   private getFindingPK(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): string {
-    return `${args.organization}#${args.assessmentId}#FINDINGS`;
+    return `${args.organizationDomain}#${args.assessmentId}#FINDINGS`;
   }
 
   public static getBestPracticeCustomId(args: {
@@ -169,14 +160,14 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     finding: Finding,
     args: {
       assessmentId: string;
-      organization: string;
+      organizationDomain: string;
     }
   ): DynamoDBFinding {
-    const { assessmentId, organization } = args;
+    const { assessmentId, organizationDomain } = args;
     return {
       PK: this.getFindingPK({
         assessmentId,
-        organization,
+        organizationDomain,
       }),
       SK: finding.id,
       bestPractices: finding.bestPractices,
@@ -325,11 +316,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     nextToken?: string
   ): Record<string, unknown> | undefined {
     if (!nextToken) return undefined;
-    try {
-      return JSON.parse(Buffer.from(nextToken, 'base64').toString('utf8'));
-    } catch {
-      throw new InvalidNextTokenError();
-    }
+    return JSON.parse(Buffer.from(nextToken, 'base64').toString('utf8'));
   }
 
   public async save(assessment: Assessment): Promise<void> {
@@ -338,18 +325,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       Item: this.toDynamoDBAssessmentItem(assessment),
     };
 
-    try {
-      await this.client.put(params);
-      this.logger.info(`Assessment saved: ${assessment.id}`);
-    } catch (error) {
-      this.logger.error(`Failed to save assessment: ${error}`, params);
-      throw error;
-    }
+    await this.client.put(params);
+    this.logger.info(`Assessment saved: ${assessment.id}`);
   }
 
   public async saveFinding(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     finding: Finding;
   }): Promise<void> {
     const { assessmentId, finding } = args;
@@ -358,31 +340,26 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       Item: this.toDynamoDBFindingItem(finding, args),
     };
 
-    try {
-      await this.client.put(params);
-      this.logger.info(
-        `Finding saved: ${finding.id} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to save finding: ${error}`, params);
-      throw error;
-    }
+    await this.client.put(params);
+    this.logger.info(
+      `Finding saved: ${finding.id} for assessment: ${assessmentId}`
+    );
   }
 
   private createGetAllQuery(args: {
-    organization: string;
+    organizationDomain: string;
     limit?: number;
     search?: string;
     nextToken?: string;
   }): QueryCommandInput {
-    const { organization, limit, search, nextToken } = args;
+    const { organizationDomain, limit, search, nextToken } = args;
     const parsedNextToken =
       AssessmentsRepositoryDynamoDB.decodeNextToken(nextToken);
     const params: QueryCommandInput = {
       TableName: this.tableName,
       KeyConditionExpression: `PK = :pk`,
       ExpressionAttributeValues: {
-        ':pk': this.getAssessmentPK(organization),
+        ':pk': this.getAssessmentPK(organizationDomain),
       },
       ScanIndexForward: false,
       Limit: limit,
@@ -406,7 +383,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }
 
   public async getAll(args: {
-    organization: string;
+    organizationDomain: string;
     limit?: number;
     search?: string;
     nextToken?: string;
@@ -432,13 +409,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async get(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<Assessment | undefined> {
-    const { assessmentId, organization } = args;
+    const { assessmentId, organizationDomain } = args;
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
     };
@@ -453,7 +430,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): QueryCommandInput {
     const {
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
@@ -475,7 +452,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
           : []),
       ].join(' and '),
       ExpressionAttributeValues: {
-        ':pk': this.getFindingPK({ assessmentId, organization }),
+        ':pk': this.getFindingPK({ assessmentId, organizationDomain }),
         ':bestPraticeId': AssessmentsRepositoryDynamoDB.getBestPracticeCustomId(
           {
             pillarId,
@@ -500,29 +477,15 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   ): Promise<{ findings: Finding[]; nextToken?: string }> {
     const {
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
       limit = 100,
     } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to get best practice findings for non-existing assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
-    this.assertBestPracticeExists({
-      assessment,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-    });
     const params = this.buildGetBestPracticeFindingsQuery({
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
@@ -549,16 +512,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async getFinding(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
   }): Promise<Finding | undefined> {
-    const { assessmentId, organization, findingId } = args;
+    const { assessmentId, organizationDomain, findingId } = args;
     const params = {
       TableName: this.tableName,
       Key: {
         PK: this.getFindingPK({
           assessmentId,
-          organization,
+          organizationDomain,
         }),
         SK: findingId,
       },
@@ -571,43 +534,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async addFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     comment: FindingComment;
   }) {
-    const { assessmentId, organization, findingId, comment } = args;
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({
-        assessmentId,
-        organization,
-        findingId,
-      });
-    }
-
-    // Backward compatibility: if finding has no comments field, create an empty object
-    if (!finding.comments) {
-      await this.updateFinding({
-        assessmentId,
-        organization,
-        findingId,
-        findingBody: {
-          comments: [],
-        },
-      });
-    }
+    const { assessmentId, organizationDomain, findingId, comment } = args;
 
     const params: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
-        PK: this.getFindingPK({ assessmentId, organization }),
+        PK: this.getFindingPK({ assessmentId, organizationDomain }),
         SK: findingId,
       },
       ...this.buildUpdateExpression({
@@ -615,63 +551,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         UpdateExpressionPath: 'comments',
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to add comment to finding: ${error}`, params);
-      throw error;
-    }
-  }
 
-  public assertBestPracticeExists(args: {
-    assessment: Assessment;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-  }): void {
-    const { assessment, pillarId, questionId, bestPracticeId } = args;
-    const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+    await this.client.update(params);
+    this.logger.info(
+      `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
     );
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
-    const question = pillar.questions.find(
-      (question) => question.id === questionId.toString()
-    );
-    if (!question) {
-      throw new QuestionNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-      });
-    }
-    const bestPractice = question.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString()
-    );
-    if (!bestPractice) {
-      throw new BestPracticeNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-        bestPracticeId,
-      });
-    }
   }
 
   public async updateBestPractice(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -679,43 +568,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }) {
     const {
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
       bestPracticeBody,
     } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update non-existing assessment best practice: ${assessmentId}`
-      );
-      throw new AssessmentNotFoundError({
-        assessmentId,
-        organization,
-      });
-    }
 
-    this.assertBestPracticeExists({
-      assessment,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-    });
-
-    if (Object.keys(bestPracticeBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-    }
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
@@ -729,17 +592,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         },
       }),
     };
-    try {
-      await this.client.update(params);
-    } catch (error) {
-      this.logger.error(`Failed to update best practice: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`
+    );
   }
 
   public async addBestPracticeFindings(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -747,35 +609,17 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }) {
     const {
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
       bestPracticeFindingIds,
     } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update non-existing assessment best practice: ${assessmentId}`
-      );
-      throw new AssessmentNotFoundError({
-        assessmentId,
-        organization,
-      });
-    }
-
-    this.assertBestPracticeExists({
-      assessment,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-    });
 
     const params: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       UpdateExpression: `
@@ -790,69 +634,25 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         ':newFindings': bestPracticeFindingIds,
       },
     };
-    try {
-      await this.client.update(params);
-    } catch (error) {
-      this.logger.error(
-        `Failed to update best practice findings: ${error}`,
-        params
-      );
-      throw error;
-    }
-  }
 
-  public assertPillarExists(args: {
-    assessment: Assessment;
-    pillarId: string;
-  }): void {
-    const { assessment, pillarId } = args;
-    const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+    await this.client.update(params);
+    this.logger.info(
+      `Best practice findings updated successfully for assessment ${assessmentId}`
     );
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
   }
 
   public async updatePillar(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     pillarBody: PillarBody;
   }) {
-    const { assessmentId, organization, pillarId, pillarBody } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update non-existing assessment pillar: ${assessmentId}`
-      );
-      throw new AssessmentNotFoundError({
-        assessmentId,
-        organization,
-      });
-    }
+    const { assessmentId, organizationDomain, pillarId, pillarBody } = args;
 
-    this.assertPillarExists({
-      assessment,
-      pillarId,
-    });
-
-    if (Object.keys(pillarBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
-      );
-    }
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
@@ -863,142 +663,99 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         },
       }),
     };
-    try {
-      await this.client.update(params);
-    } catch (error) {
-      this.logger.error(`Failed to update pillar: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`
+    );
   }
 
   public async delete(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization } = args;
-    if (!(await this.get({ assessmentId, organization }))) {
-      this.logger.error(
-        `Attempted to delete non-existing assessment: ${assessmentId}`
-      );
-      throw new Error(`Assessment with ID ${assessmentId} does not exist`);
-    }
+    const { assessmentId, organizationDomain } = args;
+
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
     };
 
-    try {
-      await this.client.delete(params);
-      this.logger.info(`Assessment deleted: ${assessmentId}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete assessment: ${error}`, params);
-      throw error;
-    }
+    await this.client.delete(params);
+    this.logger.info(`Assessment successfully deleted: ${assessmentId}`);
   }
 
   public async deleteFindings(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization } = args;
-    if (!(await this.get({ assessmentId, organization }))) {
-      this.logger.error(
-        `Attempted to delete findings of non-existing assessment: ${assessmentId}`
-      );
-      throw new Error(`Assessment with ID ${assessmentId} does not exist`);
-    }
+    const { assessmentId, organizationDomain } = args;
 
-    try {
-      let lastEvaluatedKey: Record<string, unknown> | undefined;
-      const items = [];
-      do {
-        const result = await this.client.query({
-          TableName: this.tableName,
-          KeyConditionExpression: 'PK = :pk',
-          ExpressionAttributeValues: {
-            ':pk': this.getFindingPK({
-              assessmentId,
-              organization,
-            }),
-          },
-          ExclusiveStartKey: lastEvaluatedKey,
-          ProjectionExpression: 'PK, SK',
-        });
-        items.push(...(result.Items || []));
-        if (items.length === 0) return;
-        lastEvaluatedKey = result.LastEvaluatedKey;
-      } while (lastEvaluatedKey);
-
-      const deleteRequests = items.map((item) => ({
-        DeleteRequest: {
-          Key: {
-            PK: item.PK,
-            SK: item.SK,
-          },
+    let lastEvaluatedKey: Record<string, unknown> | undefined;
+    const items = [];
+    do {
+      const result = await this.client.query({
+        TableName: this.tableName,
+        KeyConditionExpression: 'PK = :pk',
+        ExpressionAttributeValues: {
+          ':pk': this.getFindingPK({
+            assessmentId,
+            organizationDomain,
+          }),
         },
-      }));
+        ExclusiveStartKey: lastEvaluatedKey,
+        ProjectionExpression: 'PK, SK',
+      });
+      items.push(...(result.Items || []));
+      if (items.length === 0) return;
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
 
-      for (let i = 0; i < deleteRequests.length; i += this.batchSize) {
-        const batch = deleteRequests.slice(i, i + this.batchSize);
-        await this.client.batchWrite({
-          RequestItems: { [this.tableName]: batch },
-        });
-      }
+    const deleteRequests = items.map((item) => ({
+      DeleteRequest: {
+        Key: {
+          PK: item.PK,
+          SK: item.SK,
+        },
+      },
+    }));
 
-      this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete findings: ${error}`, args);
-      throw error;
+    for (let i = 0; i < deleteRequests.length; i += this.batchSize) {
+      const batch = deleteRequests.slice(i, i + this.batchSize);
+      await this.client.batchWrite({
+        RequestItems: { [this.tableName]: batch },
+      });
     }
+    this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
   }
 
   public async deleteFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     commentId: string;
   }): Promise<void> {
-    const { assessmentId, organization, findingId, commentId } = args;
-
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({
-        assessmentId,
-        organization,
-        findingId,
-      });
-    }
+    const { assessmentId, organizationDomain, findingId, commentId } = args;
 
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getFindingPK({ assessmentId, organization }),
-        SK: finding.id,
+        PK: this.getFindingPK({ assessmentId, organizationDomain }),
+        SK: findingId,
       },
-      UpdateExpression: `REMOVE comments.#commentId`,
+      UpdateExpression: `remove comments.#commentId`,
       ExpressionAttributeNames: {
         '#commentId': commentId,
       },
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Finding comment deleted: ${finding.id} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to delete finding comment: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Comment successfully deleted: ${commentId} for finding: ${findingId} in assessment: ${assessmentId}`
+    );
   }
 
   private buildUpdateExpression(args: {
@@ -1043,78 +800,38 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async update(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     assessmentBody: AssessmentBody;
   }): Promise<void> {
-    const { assessmentId, organization, assessmentBody } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update non-existing assessment with id ${assessmentId} and organization ${organization}`
-      );
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
-    if (Object.keys(assessmentBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
-      );
-    }
+    const { assessmentId, organizationDomain, assessmentBody } = args;
+
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
         data: this.toDynamoDBAssessmentBody(assessmentBody),
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(`Assessment updated: ${assessmentId}`);
-    } catch (error) {
-      this.logger.error(`Failed to update assessment: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(`Assessment successfully updated: ${assessmentId}`);
   }
 
   public async updateFinding(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void> {
-    const { assessmentId, organization, findingId, findingBody } = args;
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({
-        assessmentId,
-        organization,
-        findingId,
-      });
-    }
-    if (Object.keys(findingBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
-      );
-    }
+    const { assessmentId, organizationDomain, findingId, findingBody } = args;
+
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getFindingPK({ assessmentId, organization }),
+        PK: this.getFindingPK({ assessmentId, organizationDomain }),
         SK: findingId,
       },
       ...this.buildUpdateExpression({
@@ -1131,49 +848,34 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         },
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Finding updated: ${findingId} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to update finding: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Finding  successfully updated: ${findingId} for assessment: ${assessmentId}`
+    );
   }
 
   public async updateFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
   }) {
-    const { assessmentId, organization, findingId, commentId, commentBody } =
-      args;
-
-    const finding = await this.getFinding({
+    const {
       assessmentId,
-      organization,
+      organizationDomain,
       findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({
-        assessmentId,
-        organization,
-        findingId,
-      });
-    }
+      commentId,
+      commentBody,
+    } = args;
 
     const params = {
       TableName: this.tableName,
       Key: {
         PK: this.getFindingPK({
           assessmentId,
-          organization,
+          organizationDomain,
         }),
         SK: findingId,
       },
@@ -1185,79 +887,32 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         },
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to update comment: ${error}`, params);
-      throw error;
-    }
-  }
 
-  private assertQuestionExists(args: {
-    assessment: Assessment;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-  }): void {
-    const { assessment, pillarId, questionId } = args;
-    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
-    const question = pillar.questions.find(
-      (question) => question.id === questionId
+    await this.client.update(params);
+    this.logger.info(
+      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
     );
-    if (!question) {
-      throw new QuestionNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-      });
-    }
   }
 
   public async updateQuestion(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
   }): Promise<void> {
-    const { assessmentId, organization, pillarId, questionId, questionBody } =
-      args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update non-existing assessment question: ${assessmentId}`
-      );
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
-    this.assertQuestionExists({
-      assessment,
-      organization,
+    const {
+      assessmentId,
+      organizationDomain,
       pillarId,
       questionId,
-    });
-    if (Object.keys(questionBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
-      );
-    }
+      questionBody,
+    } = args;
+
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
@@ -1269,35 +924,25 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         },
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization} updated successfully`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to update question: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`
+    );
   }
 
   public async updateRawGraphDataForScanningTool(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     scanningTool: ScanningTool;
     graphData: AssessmentGraphData;
   }): Promise<void> {
-    const { assessmentId, organization, scanningTool, graphData } = args;
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted to update raw graph data for non-existing assessment: ${assessmentId}`
-      );
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
+    const { assessmentId, organizationDomain, scanningTool, graphData } = args;
+
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: this.getAssessmentPK(organization),
+        PK: this.getAssessmentPK(organizationDomain),
         SK: this.getAssessmentSK(assessmentId),
       },
       ...this.buildUpdateExpression({
@@ -1305,15 +950,11 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         UpdateExpressionPath: 'rawGraphData',
       }),
     };
-    try {
-      await this.client.update(params);
-      this.logger.info(
-        `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to update raw graph data: ${error}`, params);
-      throw error;
-    }
+
+    await this.client.update(params);
+    this.logger.info(
+      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+    );
   }
 }
 

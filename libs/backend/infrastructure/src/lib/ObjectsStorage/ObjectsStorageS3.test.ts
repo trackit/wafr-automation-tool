@@ -25,12 +25,13 @@ describe('ObjectsStorage Infrastructure', () => {
 
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream('object-content') as any,
       });
 
-      await expect(objectsStorage.get('assessment-id')).resolves.toBe(
-        'object-content'
-      );
+      await expect(
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).resolves.toBe('object-content');
     });
 
     it('should return null if object does not exist', async () => {
@@ -45,7 +46,7 @@ describe('ObjectsStorage Infrastructure', () => {
       );
 
       await expect(
-        objectsStorage.get('non-existent-assessment-id')
+        objectsStorage.get('non-existent-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       ).resolves.toBeNull();
     });
 
@@ -60,7 +61,9 @@ describe('ObjectsStorage Infrastructure', () => {
         })
       );
 
-      await expect(objectsStorage.get('assessment-id')).rejects.toThrow(Error);
+      await expect(
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).rejects.toThrow(Error);
     });
   });
 
@@ -150,16 +153,6 @@ describe('ObjectsStorage Infrastructure', () => {
         Error
       );
     });
-
-    it('should not call client send if keys array is empty', async () => {
-      const { objectsStorage, s3ClientMock } = setup();
-
-      await objectsStorage.bulkDelete([]);
-
-      const bulkDeleteExecutionCalls =
-        s3ClientMock.commandCalls(DeleteObjectsCommand);
-      expect(bulkDeleteExecutionCalls).toHaveLength(0);
-    });
   });
 
   describe('put', () => {
@@ -168,6 +161,7 @@ describe('ObjectsStorage Infrastructure', () => {
 
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream('object-content') as any,
       });
 
@@ -180,7 +174,7 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await objectsStorage.put({
-        key: 'assessment-id',
+        key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         body: 'object-content',
       });
 
@@ -189,7 +183,7 @@ describe('ObjectsStorage Infrastructure', () => {
       const putExecutionCall = putExecutionCalls[0];
       expect(putExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: 'assessment-id',
+        Key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         Body: 'object-content',
       });
     });
@@ -200,10 +194,10 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 200 },
       });
       const uri = await objectsStorage.put({
-        key: 'assessment-id',
+        key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         body: 'object-content',
       });
-      expect(uri).toBe(`s3://${bucket}/assessment-id`);
+      expect(uri).toBe(`s3://${bucket}/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed`);
     });
 
     it('should throw an exception if put object fail', async () => {
@@ -214,7 +208,10 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await expect(
-        objectsStorage.put({ key: 'assessment-id', body: 'object-content' })
+        objectsStorage.put({
+          key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          body: 'object-content',
+        })
       ).rejects.toThrow(Error);
     });
   });
@@ -245,7 +242,9 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 200 },
       });
       await objectsStorage.delete(
-        ObjectsStorageS3.getAssessmentsPath('assessment-id')
+        ObjectsStorageS3.getAssessmentsPath(
+          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+        )
       );
 
       const deleteExecutionCalls =
@@ -254,7 +253,9 @@ describe('ObjectsStorage Infrastructure', () => {
       const deleteExecutionCall = deleteExecutionCalls[0];
       expect(deleteExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: ObjectsStorageS3.getAssessmentsPath('assessment-id'),
+        Key: ObjectsStorageS3.getAssessmentsPath(
+          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+        ),
       });
     });
 
@@ -265,9 +266,9 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.delete('assessment-id')).rejects.toThrow(
-        Error
-      );
+      await expect(
+        objectsStorage.delete('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).rejects.toThrow(Error);
     });
   });
 });

@@ -23,7 +23,7 @@ export class GetAssessmentsUseCaseImpl implements GetAssessmentsUseCase {
   ): Promise<{ assessments: Assessment[]; nextToken?: string }> {
     const { user, ...remaining } = args;
     return await this.assessmentsRepository.getAll({
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       ...remaining,
     });
   }

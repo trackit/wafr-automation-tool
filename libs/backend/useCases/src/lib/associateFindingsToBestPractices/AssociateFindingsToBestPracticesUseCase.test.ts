@@ -14,23 +14,23 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { AssociateFindingsToBestPracticesUseCaseImpl } from './AssociateFindingsToBestPracticesUseCase';
 import { AssociateFindingsToBestPracticesUseCaseArgsMother } from './AssociateFindingsToBestPracticesUseCaseArgsMother';
 
 describe('AssociateFindingsToBestPracticesUseCase', () => {
-  it('should throw an NotFoundError if assessment does not exist', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     fakeAssessmentsRepository.assessments = {};
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('organization-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganizationDomain('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .build();
     await expect(
       useCase.associateFindingsToBestPractices(args)
-    ).rejects.toThrow(NotFoundError);
+    ).rejects.toThrow(AssessmentNotFoundError);
   });
 
   it('should call the association service with findings, scanningTool & pillars', async () => {
@@ -40,20 +40,23 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       findingToBestPracticesAssociationService,
       fakeAssessmentsRepository,
     } = setup();
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .build();
-    const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('organization-id')
+      .build();
+
+    const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganizationDomain('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withFindings([
         FindingMother.basic().withId('prowler#1').build(),
         FindingMother.basic().withId('prowler#2').build(),
       ])
       .build();
+
     const pillars = [
       PillarMother.basic()
         .withId('pillar-1')
@@ -67,16 +70,19 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         ])
         .build(),
     ];
-    vi.spyOn(questionSetService, 'get').mockResolvedValue({
-      pillars,
-      version: '1.0',
-    });
-
     vi.spyOn(
       findingToBestPracticesAssociationService,
       'associateFindingsToBestPractices'
     );
-    await useCase.associateFindingsToBestPractices(args);
+    vi.spyOn(questionSetService, 'get').mockReturnValue({
+      pillars,
+      version: '1.0',
+    });
+
+    await expect(
+      useCase.associateFindingsToBestPractices(args)
+    ).resolves.not.toThrow();
+
     expect(
       findingToBestPracticesAssociationService.associateFindingsToBestPractices
     ).toHaveBeenCalledWith({
@@ -107,19 +113,20 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         ])
         .build(),
     ];
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .withPillars(pillars)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .withPillars(pillars)
+      .build();
     const findings = [
       FindingMother.basic().withId('prowler#1').build(),
       FindingMother.basic().withId('prowler#2').build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('organization-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganizationDomain('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withFindings(findings)
       .build();
@@ -156,7 +163,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await useCase.associateFindingsToBestPractices(args);
     expect(
       fakeAssessmentsRepository.assessmentFindings[
-        'assessment-id#organization-id'
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
       ]
     ).toEqual([
       expect.objectContaining({ id: 'prowler#1', isAIAssociated: true }),
@@ -184,19 +191,20 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         ])
         .build(),
     ];
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .withPillars(pillars)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .withPillars(pillars)
+      .build();
     const findings = [
       FindingMother.basic().withId('prowler#1').build(),
       FindingMother.basic().withId('prowler#2').build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('organization-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganizationDomain('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withFindings(findings)
       .build();
@@ -232,7 +240,9 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     ]);
     await useCase.associateFindingsToBestPractices(args);
     const assessment =
-      fakeAssessmentsRepository.assessments['assessment-id#organization-id'];
+      fakeAssessmentsRepository.assessments[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+      ];
     const bestPractice = assessment.pillars?.[0].questions[0].bestPractices[0];
     expect(bestPractice?.results).toEqual(new Set(['prowler#1', 'prowler#2']));
   });
@@ -258,19 +268,20 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         ])
         .build(),
     ];
-    fakeAssessmentsRepository.assessments['assessment-id#organization-id'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('organization-id')
-        .withPillars(pillars)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('organization-id')
+      .withPillars(pillars)
+      .build();
     const findings = [
       FindingMother.basic().withId('prowler#1').build(),
       FindingMother.basic().withId('prowler#2').build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('organization-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganizationDomain('organization-id')
       .withScanningTool(ScanningTool.PROWLER)
       .withFindings(findings)
       .build();
@@ -311,7 +322,9 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     ]);
     await useCase.associateFindingsToBestPractices(args);
     const assessment =
-      fakeAssessmentsRepository.assessments['assessment-id#organization-id'];
+      fakeAssessmentsRepository.assessments[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#organization-id'
+      ];
     const bestPractice1 = assessment.pillars?.[0].questions[0].bestPractices[0];
     const bestPractice2 = assessment.pillars?.[0].questions[0].bestPractices[1];
     expect(bestPractice1?.results).toEqual(new Set(['prowler#1']));

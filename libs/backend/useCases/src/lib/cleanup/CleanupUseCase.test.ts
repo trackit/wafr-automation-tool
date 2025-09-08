@@ -14,7 +14,12 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  OrganizationAccountIdNotSetError,
+  OrganizationNotFoundError,
+  OrganizationUnitBasedAgreementIdNotSetError,
+} from '../../errors';
 import { CleanupUseCaseImpl, tokenDebug } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
 
@@ -24,19 +29,21 @@ describe('CleanupUseCase', () => {
       const { useCase, fakeObjectsStorage } = setup();
 
       fakeObjectsStorage.put({
-        key: 'assessments/assessment-id/test',
+        key: 'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test',
         body: 'hello world',
       });
       useCase.cleanupSuccessful = vitest.fn();
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withError(undefined)
         .build();
       await useCase.cleanup(input);
 
       expect(
-        fakeObjectsStorage.objects['assessments/assessment-id/test']
+        fakeObjectsStorage.objects[
+          'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test'
+        ]
       ).toBeUndefined();
     });
 
@@ -44,52 +51,36 @@ describe('CleanupUseCase', () => {
       const { useCase, fakeObjectsStorage } = setup(true);
 
       fakeObjectsStorage.put({
-        key: 'assessments/assessment-id/test',
+        key: 'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test',
         body: 'hello world',
       });
       useCase.cleanupSuccessful = vitest.fn();
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withError(undefined)
         .build();
       await useCase.cleanup(input);
 
       expect(
-        fakeObjectsStorage.objects['assessments/assessment-id/test']
+        fakeObjectsStorage.objects[
+          'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test'
+        ]
       ).toBeDefined();
     });
   });
 
   describe('cleanupError', () => {
-    it('should throw a NotFoundError if the assessment doesn’t exist and error is defined', async () => {
-      const { useCase } = setup();
-
-      useCase.cleanupSuccessful = vitest.fn();
-
-      const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
-        .withOrganization('test.io')
-        .withError({ Cause: 'test-cause', Error: 'test-error' })
-        .build();
-      await expect(useCase.cleanupError(input)).rejects.toThrow(NotFoundError);
-    });
-
-    it('should throw a NotFoundError if the assessment exist for an another organization and error is defined', async () => {
+    it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
       const { useCase, fakeAssessmentsRepository } = setup();
 
-      fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-        AssessmentMother.basic()
-          .withId('assessment-id')
-          .withOrganization('other-org.io')
-          .build();
+      const input = CleanupUseCaseArgsMother.basic().build();
+      fakeAssessmentsRepository.assessments = {};
+      fakeAssessmentsRepository.assessmentFindings = {};
 
-      const input = CleanupUseCaseArgsMother.basic()
-        .withError({ Cause: 'test-cause', Error: 'test-error' })
-        .withAssessmentId('assessment-id')
-        .withOrganization('test.io')
-        .build();
-      await expect(useCase.cleanupError(input)).rejects.toThrow(NotFoundError);
+      await expect(useCase.cleanupError(input)).rejects.toThrow(
+        AssessmentNotFoundError
+      );
     });
 
     it('should delete assessment findings if not in debug mode and error is defined', async () => {
@@ -97,25 +88,27 @@ describe('CleanupUseCase', () => {
 
       fakeAssessmentsRepository.save(
         AssessmentMother.basic()
-          .withId('assessment-id')
+          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
           .withOrganization('test.io')
           .build()
       );
       fakeAssessmentsRepository.saveFinding({
-        assessmentId: 'assessment-id',
-        organization: 'test.io',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'test.io',
         finding: FindingMother.basic().build(),
       });
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
       await useCase.cleanupError(input);
 
       expect(
-        fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+        fakeAssessmentsRepository.assessmentFindings[
+          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+        ]
       ).toBeUndefined();
     });
 
@@ -124,25 +117,27 @@ describe('CleanupUseCase', () => {
 
       fakeAssessmentsRepository.save(
         AssessmentMother.basic()
-          .withId('assessment-id')
+          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
           .withOrganization('test.io')
           .build()
       );
       fakeAssessmentsRepository.saveFinding({
-        assessmentId: 'assessment-id',
-        organization: 'test.io',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'test.io',
         finding: FindingMother.basic().build(),
       });
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
       await useCase.cleanupError(input);
 
       expect(
-        fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+        fakeAssessmentsRepository.assessmentFindings[
+          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+        ]
       ).toBeDefined();
     });
 
@@ -151,20 +146,22 @@ describe('CleanupUseCase', () => {
 
       fakeAssessmentsRepository.save(
         AssessmentMother.basic()
-          .withId('assessment-id')
+          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
           .withOrganization('test.io')
           .build()
       );
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
       await useCase.cleanupError(input);
 
       const updatedAssessment =
-        fakeAssessmentsRepository.assessments['assessment-id#test.io'];
+        fakeAssessmentsRepository.assessments[
+          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+        ];
       expect(updatedAssessment.error).toEqual({
         error: 'test-error',
         cause: 'test-cause',
@@ -174,15 +171,73 @@ describe('CleanupUseCase', () => {
   });
 
   describe('cleanupSuccessful', () => {
-    it('should throw a NotFoundError if the organization doesn’t exist', async () => {
+    it('should throw a OrganizationNotFoundError if the organization doesn’t exist', async () => {
       const { useCase } = setup();
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
-        NotFoundError
+        OrganizationNotFoundError
+      );
+    });
+
+    it('should throw a OrganizationAccountIdNotSetError if the organization account ID is not set', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeFeatureToggleRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAccountId(undefined)
+        .withFreeAssessmentsLeft(0)
+        .build();
+      fakeOrganizationRepository.save({
+        organization,
+      });
+
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
+
+      const input = CleanupUseCaseArgsMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('test.io')
+        .build();
+      await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
+        OrganizationAccountIdNotSetError
+      );
+    });
+
+    it('should throw a OrganizationUnitBasedAgreementIdNotSetError if the organization unit-based agreement ID is not set', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeFeatureToggleRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withUnitBasedAgreementId(undefined)
+        .withFreeAssessmentsLeft(0)
+        .build();
+      fakeOrganizationRepository.save({
+        organization,
+      });
+
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
+
+      const input = CleanupUseCaseArgsMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('test.io')
+        .build();
+      await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
+        OrganizationUnitBasedAgreementIdNotSetError
       );
     });
 
@@ -198,7 +253,7 @@ describe('CleanupUseCase', () => {
       });
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
       await useCase.cleanupSuccessful(input);
@@ -225,7 +280,7 @@ describe('CleanupUseCase', () => {
         .mockImplementation(() => false);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
       await useCase.cleanupSuccessful(input);
@@ -257,7 +312,7 @@ describe('CleanupUseCase', () => {
         .mockImplementation(() => Promise.resolve(true));
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
       await useCase.cleanupSuccessful(input);
@@ -292,7 +347,7 @@ describe('CleanupUseCase', () => {
         .mockImplementation(() => Promise.resolve(true));
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
       await useCase.cleanupSuccessful(input);
@@ -300,7 +355,7 @@ describe('CleanupUseCase', () => {
       expect(
         fakeMarketplaceService.consumeReviewUnit
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ organization })
+        expect.objectContaining({ accountId: 'accountId' })
       );
     });
   });

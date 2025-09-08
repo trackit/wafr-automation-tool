@@ -67,10 +67,13 @@ export class StoreFindingsToAssociateUseCaseImpl
     const { assessmentId, organization, scanningTool, scanFindings } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain: organization,
     });
     if (!assessment) {
-      throw new AssessmentNotFoundError({ assessmentId, organization });
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: organization,
+      });
     }
     const findings = scanFindings.map<Finding>((scanFinding) => ({
       ...scanFinding,

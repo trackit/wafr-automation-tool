@@ -139,7 +139,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       findings.map((finding) =>
         this.assessmentsRepository.saveFinding({
           assessmentId,
-          organization,
+          organizationDomain: organization,
           finding,
         })
       )
@@ -152,10 +152,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const { assessmentId, scanningTool, organization } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain: organization,
     });
     if (!assessment) {
-      throw new AssessmentNotFoundError({ assessmentId, organization });
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: organization,
+      });
     }
     const scanFindings =
       await this.getScannedFindingsUseCase.getScannedFindings(args);
@@ -170,7 +173,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const updates = [
       this.assessmentsRepository.updateRawGraphDataForScanningTool({
         assessmentId,
-        organization,
+        organizationDomain: organization,
         scanningTool,
         graphData: this.formatScanningToolGraphData(scanFindings),
       }),
@@ -179,7 +182,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       updates.push(
         this.assessmentsRepository.update({
           assessmentId,
-          organization,
+          organizationDomain: organization,
           assessmentBody: {
             pillars: this.formatPillarsForAssessmentUpdate({
               rawPillars: questionSet.pillars,

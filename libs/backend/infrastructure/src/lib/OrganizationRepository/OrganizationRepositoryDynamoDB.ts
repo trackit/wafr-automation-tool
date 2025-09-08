@@ -33,13 +33,8 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
       },
     };
 
-    try {
-      await this.client.put(params);
-      this.logger.info(`Organization saved: ${organization.domain}`);
-    } catch (error) {
-      this.logger.error(`Failed to save organization: ${error}`);
-      throw error;
-    }
+    await this.client.put(params);
+    this.logger.info(`Organization saved: ${organization.domain}`);
   }
 
   public async get(args: {
@@ -56,6 +51,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     const result = await this.client.get(params);
     const dynamoOrganization = result.Item as DynamoDBOrganization | undefined;
     this.logger.info(`Organization retrieved: ${organizationDomain}`);
+
     if (!dynamoOrganization) {
       return undefined;
     }

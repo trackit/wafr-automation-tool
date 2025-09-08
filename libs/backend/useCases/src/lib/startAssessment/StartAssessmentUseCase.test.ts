@@ -8,7 +8,11 @@ import {
 import { OrganizationMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { ForbiddenError } from '../Errors';
+import {
+  OrganizationAccountIdNotSetError,
+  OrganizationNoActiveSubscriptionError,
+  OrganizationUnitBasedAgreementIdNotSetError,
+} from '../../errors/index';
 import {
   StartAssessmentUseCaseArgs,
   StartAssessmentUseCaseImpl,
@@ -244,7 +248,7 @@ describe('startAssessment UseCase', () => {
       );
     });
 
-    it('should throw an error if the user does not have a subscription or free assessments left', async () => {
+    it('should throw OrganizationNoActiveSubscriptionError if the user does not have a subscription or free assessments left', async () => {
       const {
         useCase,
         fakeOrganizationRepository,
@@ -268,7 +272,53 @@ describe('startAssessment UseCase', () => {
           )
           .build();
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
-        ForbiddenError
+        OrganizationNoActiveSubscriptionError
+      );
+    });
+
+    it('should throw OrganizationAccountIdNotSetError if the organization account ID is not set', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeFeatureToggleRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withAccountId(undefined)
+        .withFreeAssessmentsLeft(0)
+        .build();
+      fakeOrganizationRepository.save({ organization });
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic().build();
+      await expect(useCase.startAssessment(input)).rejects.toThrowError(
+        OrganizationAccountIdNotSetError
+      );
+    });
+
+    it('should throw OrganizationUnitBasedAgreementIdNotSetError if the organization unit-based agreement ID is not set', async () => {
+      const {
+        useCase,
+        fakeOrganizationRepository,
+        fakeFeatureToggleRepository,
+      } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('test.io')
+        .withUnitBasedAgreementId(undefined)
+        .withFreeAssessmentsLeft(0)
+        .build();
+      fakeOrganizationRepository.save({ organization });
+      fakeFeatureToggleRepository.marketplaceIntegration = vitest
+        .fn()
+        .mockImplementation(() => true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic().build();
+      await expect(useCase.startAssessment(input)).rejects.toThrowError(
+        OrganizationUnitBasedAgreementIdNotSetError
       );
     });
   });

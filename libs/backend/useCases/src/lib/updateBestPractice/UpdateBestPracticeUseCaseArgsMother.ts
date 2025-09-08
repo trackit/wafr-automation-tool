@@ -11,7 +11,7 @@ export class UpdateBestPracticeUseCaseArgsMother {
 
   public static basic(): UpdateBestPracticeUseCaseArgsMother {
     return new UpdateBestPracticeUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       user: {
         id: 'user-id',
         organizationDomain: 'test.io',

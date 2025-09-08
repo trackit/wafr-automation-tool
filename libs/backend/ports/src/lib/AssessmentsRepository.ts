@@ -14,7 +14,7 @@ import type {
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   pillarId: string;
   questionId: string;
   bestPracticeId: string;
@@ -28,11 +28,11 @@ export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
   saveFinding(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     finding: Finding;
   }): Promise<void>;
   getAll(args: {
-    organization: string;
+    organizationDomain: string;
     limit?: number;
     search?: string;
     nextToken?: string;
@@ -42,7 +42,7 @@ export interface AssessmentsRepository {
   }>;
   get(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<Assessment | undefined>;
   getBestPracticeFindings(
     args: AssessmentsRepositoryGetBestPracticeFindingsArgs
@@ -52,40 +52,43 @@ export interface AssessmentsRepository {
   }>;
   getFinding(args: {
     assessmentId: string;
+    organizationDomain: string;
     findingId: string;
-    organization: string;
   }): Promise<Finding | undefined>;
   addFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     comment: FindingComment;
   }): Promise<void>;
-  delete(args: { assessmentId: string; organization: string }): Promise<void>;
+  delete(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<void>;
   deleteFindings(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void>;
   deleteFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     commentId: string;
   }): Promise<void>;
   update(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     assessmentBody: AssessmentBody;
   }): Promise<void>;
   updatePillar(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     pillarBody: PillarBody;
   }): Promise<void>;
   updateBestPractice(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -93,7 +96,7 @@ export interface AssessmentsRepository {
   }): Promise<void>;
   addBestPracticeFindings(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -101,27 +104,27 @@ export interface AssessmentsRepository {
   }): Promise<void>;
   updateFinding(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void>;
   updateFindingComment(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
   }): Promise<void>;
   updateQuestion(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
   }): Promise<void>;
   updateRawGraphDataForScanningTool(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     scanningTool: ScanningTool;
     graphData: AssessmentGraphData;
   }): Promise<void>;

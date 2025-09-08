@@ -6,81 +6,69 @@ import {
 import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { RescanAssessmentUseCaseImpl } from './RescanAssessmentUseCase';
 import { RescanAssessmentUseCaseArgsMother } from './RescanAssessmentUseCaseArgsMother';
 
 describe('RescanAssessmentUseCase', () => {
-  it('should throw a NotFoundError if assessment does not exist', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const input = RescanAssessmentUseCaseArgsMother.basic().build();
     fakeAssessmentsRepository.assessments = {};
     fakeAssessmentsRepository.assessmentFindings = {};
 
-    const input = RescanAssessmentUseCaseArgsMother.basic().build();
     await expect(useCase.rescanAssessment(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw NotFoundError if assessment exist for another organization', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
-      .build();
-    await expect(useCase.rescanAssessment(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 
   it('should delete assessments findings', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic().build(),
-    ];
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .build();
+    fakeAssessmentsRepository.assessmentFindings[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = [FindingMother.basic().build()];
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await useCase.rescanAssessment(input);
 
     expect(
-      fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
+      fakeAssessmentsRepository.assessmentFindings[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+      ]
     ).toBeUndefined();
   });
 
   it('should delete assessment', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .build();
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await useCase.rescanAssessment(input);
 
     expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
+      fakeAssessmentsRepository.assessments[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+      ]
     ).toBeUndefined();
   });
 
@@ -88,15 +76,16 @@ describe('RescanAssessmentUseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withExecutionArn('old-test-arn')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withExecutionArn('old-test-arn')
+      .build();
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await useCase.rescanAssessment(input);
@@ -114,19 +103,20 @@ describe('RescanAssessmentUseCase', () => {
       date,
     } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withExecutionArn('old-test-arn')
-        .withRegions(['us-east-1'])
-        .withRoleArn('test-role-arn')
-        .withWorkflows(['test-workflow'])
-        .withName('test-assessment')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withExecutionArn('old-test-arn')
+      .withRegions(['us-east-1'])
+      .withRoleArn('test-role-arn')
+      .withWorkflows(['test-workflow'])
+      .withName('test-assessment')
+      .build();
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(
         UserMother.basic()
           .withId('user-id')
@@ -143,7 +133,7 @@ describe('RescanAssessmentUseCase', () => {
       regions: ['us-east-1'],
       roleArn: 'test-role-arn',
       workflows: ['test-workflow'],
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       createdAt: date,
       createdBy: 'user-id',
       organization: 'test.io',

@@ -36,12 +36,12 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.organization,
+      organizationDomain: args.organization,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organization: args.organization,
+        organizationDomain: args.organization,
       });
     }
 
@@ -70,7 +70,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
     );
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       assessmentBody: {
         graphData: assessmentGraphData,
       },

@@ -9,6 +9,7 @@ import { createInjectionToken, inject } from '@shared/di-container';
 import {
   AssessmentExportRegionNotSetError,
   AssessmentNotFoundError,
+  MilestoneNotFoundError,
   OrganizationNotFoundError,
 } from '../../errors';
 import { assertOrganizationHasExportRole } from '../../services';
@@ -39,16 +40,16 @@ export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
       }),
       this.assessmentsRepository.get({
         assessmentId,
-        organization: organizationDomain,
+        organizationDomain: organizationDomain,
       }),
     ]);
     if (!organization) {
-      throw new OrganizationNotFoundError({ organization: organizationDomain });
+      throw new OrganizationNotFoundError({ domain: organizationDomain });
     }
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organization: organizationDomain,
+        organizationDomain: organizationDomain,
       });
     }
     const milestonesRegion = region ?? assessment.exportRegion;
@@ -56,12 +57,19 @@ export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
       throw new AssessmentExportRegionNotSetError({ assessmentId });
     }
     assertOrganizationHasExportRole(organization);
-    return await this.wellArchitectedToolService.getMilestone({
+    const milestone = await this.wellArchitectedToolService.getMilestone({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       region: milestonesRegion,
       milestoneId,
     });
+    if (!milestone) {
+      throw new MilestoneNotFoundError({
+        assessmentId,
+        milestoneId,
+      });
+    }
+    return milestone;
   }
 }
 

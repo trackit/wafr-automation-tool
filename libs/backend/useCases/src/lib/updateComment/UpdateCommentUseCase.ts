@@ -32,14 +32,14 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
 
     const finding = await this.assessmentsRepository.getFinding({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
     });
     if (!finding) {
       throw new FindingNotFoundError({
         assessmentId,
         findingId,
-        organization: user.organizationDomain,
+        organizationDomain: user.organizationDomain,
       });
     }
 
@@ -48,7 +48,7 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       throw new FindingCommentNotFoundError({
         assessmentId,
         findingId,
-        organization: user.organizationDomain,
+        organizationDomain: user.organizationDomain,
         commentId,
       });
     }
@@ -64,7 +64,7 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
 
     await this.assessmentsRepository.updateFindingComment({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
       commentId,
       commentBody,

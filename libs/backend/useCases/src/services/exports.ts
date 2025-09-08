@@ -37,7 +37,7 @@ export function assertOrganizationHasExportRole(
 ): asserts organization is Organization & { assessmentExportRoleArn: string } {
   if (!organization.assessmentExportRoleArn) {
     throw new OrganizationExportRoleNotSetError({
-      organization: organization.domain,
+      domain: organization.domain,
     });
   }
 }

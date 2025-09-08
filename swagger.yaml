@@ -180,10 +180,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully updated
-        '204':
-          description: The assessment has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -596,10 +594,8 @@ paths:
       responses:
         '200':
           description: The best practice has been successfully updated
-        '204':
-          description: The best practice has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid or empty request body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment, pillar, question, or best practice could not be found
         '500':
@@ -668,10 +664,8 @@ paths:
       responses:
         '200':
           description: The finding has been successfully updated
-        '204':
-          description: The finding has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':

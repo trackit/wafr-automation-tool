@@ -11,7 +11,7 @@ export class StoreFindingsToAssociateUseCaseArgsMother {
 
   public static basic(): StoreFindingsToAssociateUseCaseArgsMother {
     return new StoreFindingsToAssociateUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       organization: 'organization-id',
       scanningTool: ScanningTool.PROWLER,
       scanFindings: [],

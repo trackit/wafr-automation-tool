@@ -11,7 +11,12 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  BestPracticeNotFoundError,
+  PillarNotFoundError,
+  QuestionNotFoundError,
+} from '../../errors';
 import { UpdateBestPracticeUseCaseImpl } from './UpdateBestPracticeUseCase';
 import { UpdateBestPracticeUseCaseArgsMother } from './UpdateBestPracticeUseCaseArgsMother';
 
@@ -20,7 +25,7 @@ describe('UpdateBestPracticeUseCase', () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('other-org.io')
       .withPillars([
         PillarMother.basic()
@@ -40,11 +45,12 @@ describe('UpdateBestPracticeUseCase', () => {
       ])
       .build();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      assessment;
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#other-org.io'
+    ] = assessment;
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(
         UserMother.basic().withOrganizationDomain('other-org.io').build()
       )
@@ -61,135 +67,109 @@ describe('UpdateBestPracticeUseCase', () => {
       fakeAssessmentsRepository.updateBestPractice
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         bestPracticeId: '1',
         bestPracticeBody: {
           checked: true,
         },
         pillarId: '1',
         questionId: '1',
-        organization: 'other-org.io',
+        organizationDomain: 'other-org.io',
       })
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws AssessmentNotFoundError', async () => {
-    const { useCase } = setup();
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
 
-    const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().build())
-      .build();
+    const input = UpdateBestPracticeUseCaseArgsMother.basic().build();
+    fakeAssessmentsRepository.assessments = {};
+    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws PillarNotFoundError', async () => {
+  it('should throw PillarNotFoundError if pillar does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withBestPracticeBody({
-        checked: true,
-      })
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withPillars([])
       .build();
 
+    const input = UpdateBestPracticeUseCaseArgsMother.basic()
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withPillarId('pillar-id')
+      .withQuestionId('question-id')
+      .withBestPracticeId('best-practice-id')
+      .build();
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      NotFoundError
+      PillarNotFoundError
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws QuestionNotFoundError', async () => {
+  it('should throw QuestionNotFoundError if question does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .withPillars([PillarMother.basic().withId('1').build()])
-        .build();
-
-    const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withQuestionId('1')
-      .withBestPracticeBody({
-        checked: true,
-      })
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withPillars([
+        PillarMother.basic().withId('pillar-id').withQuestions([]).build(),
+      ])
       .build();
 
+    const input = UpdateBestPracticeUseCaseArgsMother.basic()
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withPillarId('pillar-id')
+      .withQuestionId('question-id')
+      .withBestPracticeId('best-practice-id')
+      .build();
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      NotFoundError
+      QuestionNotFoundError
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws BestPracticeNotFoundError', async () => {
+  it('should throw BestPracticeNotFoundError if best practice does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .withPillars([
-          PillarMother.basic()
-            .withId('1')
-            .withQuestions([QuestionMother.basic().withId('1').build()])
-            .build(),
-        ])
-        .build();
-
-    const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withQuestionId('1')
-      .withBestPracticeId('1')
-      .withBestPracticeBody({
-        checked: true,
-      })
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withPillars([
+        PillarMother.basic()
+          .withId('pillar-id')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-id')
+              .withBestPractices([])
+              .build(),
+          ])
+          .build(),
+      ])
       .build();
 
-    await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a NoUpdateBodyError if the infrastructure throws EmptyUpdateBodyError', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withBestPracticeBody({})
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withPillarId('pillar-id')
+      .withQuestionId('question-id')
+      .withBestPracticeId('best-practice-id')
       .build();
-
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      NoContentError
+      BestPracticeNotFoundError
     );
   });
 });

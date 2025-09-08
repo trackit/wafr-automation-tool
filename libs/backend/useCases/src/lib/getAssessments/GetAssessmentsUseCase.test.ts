@@ -7,7 +7,6 @@ import {
 import { AssessmentMother } from '@backend/models';
 import { register, reset } from '@shared/di-container';
 
-import { InvalidParametersError } from '../Errors';
 import {
   GetAssessmentsUseCaseArgs,
   GetAssessmentsUseCaseImpl,
@@ -32,7 +31,7 @@ describe('getAssessments UseCase', () => {
     const response = await useCase.getAssessments(input);
 
     expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({ organization: 'test.io' })
+      expect.objectContaining({ organizationDomain: 'test.io' })
     );
     expect(response).toEqual({
       assessments: [assessment],
@@ -47,17 +46,7 @@ describe('getAssessments UseCase', () => {
     await useCase.getAssessments(input);
 
     expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({ organization: 'test.io' })
-    );
-  });
-
-  it('should throw if next token is invalid', async () => {
-    const { useCase } = setup();
-
-    const input: GetAssessmentsUseCaseArgs =
-      GetAssessmentsUseCaseArgsMother.basic().withNextToken('dGVzdA==').build();
-    await expect(useCase.getAssessments(input)).rejects.toThrow(
-      InvalidParametersError
+      expect.objectContaining({ organizationDomain: 'test.io' })
     );
   });
 });

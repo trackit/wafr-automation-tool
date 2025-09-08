@@ -24,7 +24,7 @@ export interface WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Milestone>;
+  }): Promise<Milestone | undefined>;
   getMilestones(args: {
     roleArn: string;
     assessment: Assessment;

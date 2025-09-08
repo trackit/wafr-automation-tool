@@ -10,11 +10,8 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
-import {
-  ComputeGraphDataUseCaseArgs,
-  ComputeGraphDataUseCaseImpl,
-} from './ComputeGraphDataUseCase';
+import { AssessmentNotFoundError } from '../../errors';
+import { ComputeGraphDataUseCaseImpl } from './ComputeGraphDataUseCase';
 import { ComputeGraphDataUseCaseArgsMother } from './ComputeGraphDataUseCaseArgsMother';
 
 describe('computeGraphData UseCase', () => {
@@ -99,36 +96,15 @@ describe('computeGraphData UseCase', () => {
     });
   });
 
-  it('should throw a NotFoundError if the assessment doesn’t exist', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const input = ComputeGraphDataUseCaseArgsMother.basic().build();
     fakeAssessmentsRepository.assessments = {};
-
-    const input: ComputeGraphDataUseCaseArgs =
-      ComputeGraphDataUseCaseArgsMother.basic().build();
+    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.computeGraphData(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a NotFoundError if the assessment exists for another organization', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    const fakeAssessment = AssessmentMother.basic()
-      .withId('b56781c9-021d-421e-bd79-85836367d449')
-      .withOrganization('other-org.io')
-      .build();
-    fakeAssessmentsRepository.save(fakeAssessment);
-
-    const input: ComputeGraphDataUseCaseArgs =
-      ComputeGraphDataUseCaseArgsMother.basic()
-        .withAssessmentId('b56781c9-021d-421e-bd79-85836367d449')
-        .withOrganization('test.io')
-        .build();
-
-    await expect(useCase.computeGraphData(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 });

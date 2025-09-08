@@ -28,7 +28,7 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Milestone> {
+  }): Promise<Milestone | undefined> {
     // No-op for fake implementation
     return {} as Milestone;
   }

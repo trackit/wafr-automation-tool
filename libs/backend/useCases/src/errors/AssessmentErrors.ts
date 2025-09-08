@@ -4,14 +4,14 @@ export class AssessmentNotFoundError extends UseCaseError {
   public constructor(
     args: {
       assessmentId: string;
-      organization: string;
+      organizationDomain: string;
     },
     description?: string
   ) {
-    const { assessmentId, organization } = args;
+    const { assessmentId, organizationDomain } = args;
     super({
       category: 'NOT_FOUND',
-      message: `Assessment with id ${assessmentId} not found for organization ${organization}`,
+      message: `Assessment with id ${assessmentId} not found for organization with domain ${organizationDomain}`,
       description,
     });
   }

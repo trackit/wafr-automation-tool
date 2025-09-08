@@ -13,7 +13,12 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentExportRegionNotSetError,
+  AssessmentNotFinishedError,
+  AssessmentNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors';
 import { ExportWellArchitectedToolUseCaseImpl } from './ExportWellArchitectedToolUseCase';
 import { ExportWellArchitectedToolUseCaseArgsMother } from './ExportWellArchitectedToolUseCaseArgsMother';
 
@@ -29,14 +34,16 @@ describe('exportWellArchitectedTool UseCase', () => {
     } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('test.io')
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = assessment;
 
     const organization = OrganizationMother.basic()
       .withDomain('test.io')
@@ -57,108 +64,112 @@ describe('exportWellArchitectedTool UseCase', () => {
     });
   });
 
-  it('should throw a NoContentError if the assessment findings are empty', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
+    const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
+    fakeAssessmentsRepository.assessments = {};
+    fakeAssessmentsRepository.assessmentFindings = {};
+
+    await expect(useCase.exportAssessment(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
+  });
+
+  it('should throw AssessmentNotFinishedError if the assessment findings are empty', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([])
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([])
+      .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      NoContentError
+      AssessmentNotFinishedError
     );
   });
 
-  it('should throw a NotFoundError if the assessment doesn’t exist', async () => {
-    const { useCase, fakeOrganizationRepository } = setup();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
-
-    const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
-    await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a ConflictError if the assessment findings are undefined', async () => {
+  it('should throw AssessmentNotFinishedError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withPillars(undefined)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withPillars(undefined)
+      .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      ConflictError
+      AssessmentNotFinishedError
     );
   });
 
-  it('should throw a ConflictError if the assessment is not finished', async () => {
+  it('should throw AssessmentNotFinishedError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      ConflictError
+      AssessmentNotFinishedError
     );
   });
 
-  it('should throw a ConflictError if the assessment does not have an exportRegion and the region is not provided', async () => {
+  it('should throw AssessmentExportRegionNotSetError if the assessment does not have an exportRegion and the region is not provided', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([PillarMother.basic().build()])
-        .withExportRegion(undefined)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([PillarMother.basic().build()])
+      .withExportRegion(undefined)
+      .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .withRegion(undefined)
       .build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      ConflictError
+      AssessmentExportRegionNotSetError
     );
   });
 
@@ -166,20 +177,21 @@ describe('exportWellArchitectedTool UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([PillarMother.basic().build()])
-        .withExportRegion(undefined)
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([PillarMother.basic().build()])
+      .withExportRegion(undefined)
+      .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .withRegion('us-west-2')
       .build();
@@ -191,49 +203,53 @@ describe('exportWellArchitectedTool UseCase', () => {
       setup();
 
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('test.io')
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = assessment;
 
     fakeOrganizationRepository.organizations['test.io'] =
       OrganizationMother.basic().withDomain('test.io').build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .withRegion('us-west-2')
       .build();
     await useCase.exportAssessment(input);
 
     expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
-        .exportRegion
+      fakeAssessmentsRepository.assessments[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+      ].exportRegion
     ).toBe('us-west-2');
   });
 
-  it('should throw a NotFoundError if the organization doesn’t exist', async () => {
+  it('should throw OrganizationNotFoundError if the organization doesn’t exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
-        .withPillars([PillarMother.basic().build()])
-        .withExportRegion('us-west-2')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([PillarMother.basic().build()])
+      .withExportRegion('us-west-2')
+      .build();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
       .build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      NotFoundError
+      OrganizationNotFoundError
     );
   });
 });

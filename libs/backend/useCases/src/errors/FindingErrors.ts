@@ -4,15 +4,15 @@ export class FindingNotFoundError extends UseCaseError {
   public constructor(
     args: {
       assessmentId: string;
-      organization: string;
+      organizationDomain: string;
       findingId: string;
     },
     description?: string
   ) {
-    const { assessmentId, findingId, organization } = args;
+    const { assessmentId, findingId, organizationDomain } = args;
     super({
       category: 'NOT_FOUND',
-      message: `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`,
+      message: `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organizationDomain}`,
       description,
     });
   }
@@ -22,16 +22,16 @@ export class FindingCommentNotFoundError extends UseCaseError {
   public constructor(
     args: {
       assessmentId: string;
-      organization: string;
+      organizationDomain: string;
       findingId: string;
       commentId: string;
     },
     description?: string
   ) {
-    const { assessmentId, findingId, organization, commentId } = args;
+    const { assessmentId, findingId, organizationDomain, commentId } = args;
     super({
       category: 'NOT_FOUND',
-      message: `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${organization}`,
+      message: `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${organizationDomain}`,
       description,
     });
   }

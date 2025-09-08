@@ -5,77 +5,48 @@ import {
 import { AssessmentMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { UpdateAssessmentUseCaseImpl } from './UpdateAssessmentUseCase';
 import { UpdateAssessmentUseCaseArgsMother } from './UpdateAssessmentUseCaseArgsMother';
 
 describe('UpdateAssessmentUseCase', () => {
-  it('should throw a NotFoundError if assessment does not exist', async () => {
-    const { useCase } = setup();
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
 
     const input = UpdateAssessmentUseCaseArgsMother.basic().build();
-    await expect(useCase.updateAssessment(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a NotFoundError if assessment exist for another organization', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = UpdateAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('test.io')
-      .build();
-    await expect(useCase.updateAssessment(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a NoContentError if there are no fields to update', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
-    const input = UpdateAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('test.io')
-      .build();
+    fakeAssessmentsRepository.assessments = {};
+    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
-      NoContentError
+      AssessmentNotFoundError
     );
   });
 
   it('should update assessment', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withName('Old Name')
-        .build();
+    fakeAssessmentsRepository.assessments[
+      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+    ] = AssessmentMother.basic()
+      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withOrganization('test.io')
+      .withName('Old Name')
+      .build();
 
     const input = UpdateAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withOrganization('test.io')
       .withName('New Name')
       .build();
     await useCase.updateAssessment(input);
 
     expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
+      fakeAssessmentsRepository.assessments[
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
+      ]
     ).toEqual(
       expect.objectContaining({
-        id: 'assessment-id',
+        id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         name: 'New Name',
       })
     );

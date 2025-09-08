@@ -16,7 +16,7 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import { tokenMapScanFindingsToBestPracticesUseCase } from '../mapScanFindingsToBestPractices';
 import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociate';
@@ -24,20 +24,15 @@ import { PrepareFindingsAssociationsUseCaseImpl } from './PrepareFindingsAssocia
 import { PrepareFindingsAssociationsUseCaseArgsMother } from './PrepareFindingsAssociationsUseCaseArgsMother';
 
 describe('PrepareFindingsAssociations Use Case', () => {
-  it('should throw an error if assessment is not found', async () => {
-    const { useCase, getScannedFindingsUseCase, fakeAssessmentsRepository } =
-      setup();
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
+    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic().build();
     fakeAssessmentsRepository.assessments = {};
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
+    fakeAssessmentsRepository.assessmentFindings = {};
+
     await expect(useCase.prepareFindingsAssociations(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 

@@ -10,8 +10,10 @@ import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
+  OrganizationAccountIdNotSetError,
   OrganizationNoActiveSubscriptionError,
   OrganizationNotFoundError,
+  OrganizationUnitBasedAgreementIdNotSetError,
 } from '../../errors';
 
 export type StartAssessmentUseCaseArgs = {
@@ -46,9 +48,10 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     });
     if (!organization) {
       throw new OrganizationNotFoundError({
-        organization: args.user.organizationDomain,
+        domain: args.user.organizationDomain,
       });
     }
+
     if (
       organization.freeAssessmentsLeft &&
       organization.freeAssessmentsLeft > 0
@@ -64,15 +67,27 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       );
       return true;
     }
+
+    if (!organization.accountId) {
+      throw new OrganizationAccountIdNotSetError({
+        domain: organization.domain,
+      });
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
-      organization,
+      accountId: organization.accountId,
     });
     if (monthly) {
       this.logger.info(`User ${args.user.id} has a monthly subscription`);
       return true;
     }
+
+    if (!organization.unitBasedAgreementId) {
+      throw new OrganizationUnitBasedAgreementIdNotSetError({
+        domain: organization.domain,
+      });
+    }
     const perUnit = await this.marketplaceService.hasUnitBasedSubscription({
-      organization,
+      unitBasedAgreementId: organization.unitBasedAgreementId,
     });
     if (perUnit) {
       this.logger.info(`User ${args.user.id} has a unit based subscription`);
@@ -93,7 +108,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
 
     if (!(await this.canStartAssessment(args))) {
       throw new OrganizationNoActiveSubscriptionError({
-        organization: user.organizationDomain,
+        domain: user.organizationDomain,
       });
     }
     await this.stateMachine.startAssessment({

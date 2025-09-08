@@ -62,20 +62,14 @@ export class AIServiceBedrock implements AIService {
         temperature: 0,
       },
     });
-    try {
-      const response = await this.client.send(command);
 
-      if (response.$metadata.httpStatusCode !== 200 || !response.stream) {
-        throw new Error(
-          `Failed to converse: ${response.$metadata.httpStatusCode}`
-        );
-      }
-      this.logger.info('Converse', { prompt });
-      return await this.collectStreamedText(response);
-    } catch (error) {
-      this.logger.error(`Failed to converse: ${error}`, { prompt });
-      throw error;
+    const response = await this.client.send(command);
+
+    if (response.$metadata.httpStatusCode !== 200 || !response.stream) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info('Converse', { prompt });
+    return await this.collectStreamedText(response);
   }
 }
 
