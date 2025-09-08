@@ -11,41 +11,16 @@ describe('startAssessment adapter', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = StartAssessmentAdapterEventMother.basic()
-        .withName('Test Assessment')
-        .withRegions(['us-west-1', 'us-west-2'])
-        .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-        .withWorkflows(['workflow-1', 'workflow-2'])
-        .build();
-      const response = await adapter.handle(event);
+      const event = StartAssessmentAdapterEventMother.basic().build();
 
+      const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should throw a bad request error without body', async () => {
+    it('should return a 400 without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid json body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
-        .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -75,17 +50,6 @@ describe('startAssessment adapter', () => {
       );
     });
 
-    it('should return the assessment id from the useCase', async () => {
-      const { adapter } = setup();
-
-      const event = StartAssessmentAdapterEventMother.basic().build();
-
-      const response = await adapter.handle(event);
-      const body = JSON.parse(response.body ?? '{}');
-
-      expect(body).toEqual({ assessmentId: 'assessment-id' });
-    });
-
     it('should return a 201 status code', async () => {
       const { adapter } = setup();
 
@@ -102,7 +66,7 @@ const setup = () => {
   registerTestInfrastructure();
   const useCase = { startAssessment: vitest.fn() };
   useCase.startAssessment.mockResolvedValueOnce({
-    assessmentId: 'assessment-id',
+    assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   });
   register(tokenStartAssessmentUseCase, { useValue: useCase });
   const adapter = new StartAssessmentAdapter();

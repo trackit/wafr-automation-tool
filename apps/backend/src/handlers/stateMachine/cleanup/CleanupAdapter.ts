@@ -4,8 +4,8 @@ import { tokenCleanupUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 export const CleanupInputSchema = z.object({
-  assessmentId: z.string(),
-  organization: z.string(),
+  assessmentId: z.string().uuid(),
+  organization: z.string().nonempty(),
   error: z
     .object({
       Cause: z.string(),

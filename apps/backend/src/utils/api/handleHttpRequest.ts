@@ -56,6 +56,7 @@ export const handleHttpRequest = async ({
         description: e.description,
       });
     }
+    console.log(e);
     logger.error('Internal Server Error', e);
     return buildResponse(500, {
       code: 'INTERNAL_SERVER_ERROR',

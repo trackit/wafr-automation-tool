@@ -11,7 +11,7 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const GetBestPracticeFindingsPathArgsSchema = z.object({
+const GetBestPracticeFindingsPathSchema = z.object({
   assessmentId: z.string().uuid(),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
@@ -22,9 +22,9 @@ const GetBestPracticeFindingsPathArgsSchema = z.object({
 
 const GetBestPracticeFindingsQueryArgsSchema = z.object({
   limit: z.coerce.number().int().min(1).optional(),
-  search: z.string().optional(),
+  search: z.string().nonempty().optional(),
   showHidden: z.coerce.boolean().optional(),
-  nextToken: z.string().nonempty().base64().optional(),
+  nextToken: z.string().nonempty().trim().base64().optional(),
 }) satisfies ZodType<
   operations['getBestPracticeFindings']['parameters']['query']
 >;
@@ -96,7 +96,7 @@ export class GetBestPracticeFindingsAdapter {
     operations['getBestPracticeFindings']['responses']['200']['content']['application/json']
   > {
     const { pathParameters, queryStringParameters } = parseApiEvent(event, {
-      pathSchema: GetBestPracticeFindingsPathArgsSchema,
+      pathSchema: GetBestPracticeFindingsPathSchema,
       querySchema: GetBestPracticeFindingsQueryArgsSchema,
     });
 

@@ -11,8 +11,8 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateQuestionPathSchema = z.object({
   assessmentId: z.string().uuid(),
-  pillarId: z.string(),
-  questionId: z.string(),
+  pillarId: z.string().nonempty(),
+  questionId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateQuestion']['parameters']['path']>;
 
 const UpdateQuestionBodySchema = z.object({
@@ -36,10 +36,13 @@ export class UpdateQuestionAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters, body } = parseApiEvent(event, {
-      pathSchema: UpdateQuestionPathSchema,
-      bodySchema: UpdateQuestionBodySchema,
-    });
+    const { pathParameters, body } = parseApiEvent(
+      event,
+      {
+        pathSchema: UpdateQuestionPathSchema,
+        bodySchema: UpdateQuestionBodySchema,
+      }
+    );
     const { assessmentId, pillarId, questionId } = pathParameters;
 
     await this.useCase.updateQuestion({

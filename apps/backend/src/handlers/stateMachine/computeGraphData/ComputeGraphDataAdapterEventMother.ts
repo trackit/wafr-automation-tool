@@ -1,14 +1,14 @@
-import { ComputeGraphDataInput } from './ComputeGraphAdapter';
+import { ComputeGraphDataInput } from './ComputeGraphDataAdapter';
 
-export class ComputeGraphDataAdapterArgsMother {
+export class ComputeGraphDataAdapterEventMother {
   private data: ComputeGraphDataInput;
 
   private constructor(data: ComputeGraphDataInput) {
     this.data = data;
   }
 
-  public static basic(): ComputeGraphDataAdapterArgsMother {
-    return new ComputeGraphDataAdapterArgsMother({
+  public static basic(): ComputeGraphDataAdapterEventMother {
+    return new ComputeGraphDataAdapterEventMother({
       assessmentId: 'e21c0679-4b87-46a9-9a8e-45f2728c0cf2',
       organization: 'test.io',
     });
@@ -16,14 +16,14 @@ export class ComputeGraphDataAdapterArgsMother {
 
   public withAssessmentId(
     assessmentId: string
-  ): ComputeGraphDataAdapterArgsMother {
+  ): ComputeGraphDataAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganization(
     organization: string
-  ): ComputeGraphDataAdapterArgsMother {
+  ): ComputeGraphDataAdapterEventMother {
     this.data.organization = organization;
     return this;
   }

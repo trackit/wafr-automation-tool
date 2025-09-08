@@ -5,7 +5,7 @@ import { inject } from '@shared/di-container';
 
 const ComputeGraphDataInputSchema = z.object({
   assessmentId: z.string().uuid(),
-  organization: z.string(),
+  organization: z.string().nonempty(),
 });
 
 export type ComputeGraphDataInput = z.infer<typeof ComputeGraphDataInputSchema>;

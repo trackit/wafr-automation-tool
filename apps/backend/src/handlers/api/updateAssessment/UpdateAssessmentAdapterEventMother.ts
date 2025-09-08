@@ -5,7 +5,7 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-export class UpdateAssessmentAdapterArgsMother {
+export class UpdateAssessmentAdapterEventMother {
   private assessmentId: operations['updateAssessment']['parameters']['path']['assessmentId'];
   private requestBody: operations['updateAssessment']['requestBody']['content']['application/json'];
   private user: Pick<User, 'id' | 'email'> = {
@@ -18,8 +18,8 @@ export class UpdateAssessmentAdapterArgsMother {
     this.requestBody = requestBody;
   }
 
-  public static basic(): UpdateAssessmentAdapterArgsMother {
-    return new UpdateAssessmentAdapterArgsMother(
+  public static basic(): UpdateAssessmentAdapterEventMother {
+    return new UpdateAssessmentAdapterEventMother(
       '14270881-e4b0-4f89-8941-449eed22071d',
       {
         name: 'Updated Assessment',
@@ -29,21 +29,21 @@ export class UpdateAssessmentAdapterArgsMother {
 
   public withAssessmentId(
     assessmentId: operations['updateAssessment']['parameters']['path']['assessmentId']
-  ): UpdateAssessmentAdapterArgsMother {
+  ): UpdateAssessmentAdapterEventMother {
     this.assessmentId = assessmentId;
     return this;
   }
 
   public withName(
     name: operations['updateAssessment']['requestBody']['content']['application/json']['name']
-  ): UpdateAssessmentAdapterArgsMother {
+  ): UpdateAssessmentAdapterEventMother {
     this.requestBody.name = name;
     return this;
   }
 
   public withUser(
     user: Pick<User, 'id' | 'email'>
-  ): UpdateAssessmentAdapterArgsMother {
+  ): UpdateAssessmentAdapterEventMother {
     this.user = user;
     return this;
   }

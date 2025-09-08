@@ -14,8 +14,8 @@ const CreateMilestonePathSchema = z.object({
 }) satisfies ZodType<operations['createMilestone']['parameters']['path']>;
 
 const CreateMilestoneBodySchema = z.object({
-  region: z.string().optional(),
-  name: z.string(),
+  region: z.string().nonempty().optional(),
+  name: z.string().nonempty(),
 }) satisfies ZodType<
   operations['createMilestone']['requestBody']['content']['application/json']
 >;

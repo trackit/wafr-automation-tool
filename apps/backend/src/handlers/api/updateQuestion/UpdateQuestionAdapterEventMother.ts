@@ -28,7 +28,10 @@ export class UpdateQuestionAdapterEventMother {
         pillarId: '1',
         questionId: '1',
       },
-      {}
+      {
+        disabled: false,
+        none: false,
+      }
     );
   }
 

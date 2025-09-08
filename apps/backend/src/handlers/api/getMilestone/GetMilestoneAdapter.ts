@@ -13,11 +13,11 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetMilestonePathSchema = z.object({
   assessmentId: z.string().uuid(),
-  milestoneId: z.string(),
+  milestoneId: z.string().nonempty(),
 }) satisfies ZodType<operations['getMilestone']['parameters']['path']>;
 
 const GetMilestoneQuerySchema = z.object({
-  region: z.string().optional(),
+  region: z.string().nonempty().optional(),
 }) satisfies ZodType<operations['getMilestone']['parameters']['query']>;
 
 export class GetMilestoneAdapter {

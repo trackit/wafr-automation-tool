@@ -12,18 +12,15 @@ describe('GetMilestonesAdapter', () => {
       const { adapter } = setup();
 
       const event = GetMilestonesAdapterEventMother.basic().build();
-      const response = await adapter.handle(event);
 
-      expect(response.statusCode).toBe(200);
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
-    it('should return a 400 without query parameters', async () => {
+    it('should return a 400 without parameters', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters(null)
-        .withBody(JSON.stringify({ region: 'us-west-2' }))
-        .build();
+      const event = APIGatewayProxyEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -32,9 +29,30 @@ describe('GetMilestonesAdapter', () => {
     it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'invalid-uuid' })
-        .withBody(JSON.stringify({ region: 'us-west-2' }))
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid limit', async () => {
+      const { adapter } = setup();
+
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withLimit(-1)
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid nextToken', async () => {
+      const { adapter } = setup();
+
+      const event = GetMilestonesAdapterEventMother.basic()
+        .withNextToken('NOT_BASE64')
         .build();
 
       const response = await adapter.handle(event);
@@ -42,7 +60,7 @@ describe('GetMilestonesAdapter', () => {
     });
   });
 
-  describe('getMilestones', () => {
+  describe('useCase and return value', () => {
     it('should call the use case with correct parameters', async () => {
       const { adapter, useCase } = setup();
       const event = GetMilestonesAdapterEventMother.basic()
@@ -83,26 +101,13 @@ describe('GetMilestonesAdapter', () => {
       });
     });
 
-    it('should return a 400 with invalid limit', async () => {
+    it('should return a 200 status code', async () => {
       const { adapter } = setup();
 
-      const event = GetMilestonesAdapterEventMother.basic()
-        .withLimit(-1)
-        .build();
+      const event = GetMilestonesAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should return a 400 with invalid nextToken', async () => {
-      const { adapter } = setup();
-
-      const event = GetMilestonesAdapterEventMother.basic()
-        .withNextToken('NOT_BASE64')
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
+      expect(response.statusCode).toBe(200);
     });
   });
 });

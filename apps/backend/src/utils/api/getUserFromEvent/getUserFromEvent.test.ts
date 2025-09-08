@@ -1,5 +1,5 @@
+import { UserClaimsMissingError } from '../../../errors/UserErrors';
 import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
-import { BadRequestError } from '../HttpError';
 import { getUserFromEvent } from './getUserFromEvent';
 
 describe('getUserFromEvent', () => {
@@ -18,11 +18,11 @@ describe('getUserFromEvent', () => {
     });
   });
 
-  it('should throw a bad request error if user claims are missing', () => {
+  it('should throw a UserClaimsMissingError if user claims are missing', () => {
     const event = APIGatewayProxyEventMother.basic()
       .withUserClaims(undefined)
       .build();
 
-    expect(() => getUserFromEvent(event)).toThrow(BadRequestError);
+    expect(() => getUserFromEvent(event)).toThrow(UserClaimsMissingError);
   });
 });

@@ -9,8 +9,8 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const DeleteAssessmentArgsSchema = z.object({
-  assessmentId: z.string(),
+const DeleteAssessmentPathSchema = z.object({
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['deleteAssessment']['parameters']['path']>;
 
 export class DeleteAssessmentAdapter {
@@ -29,7 +29,7 @@ export class DeleteAssessmentAdapter {
     event: APIGatewayProxyEvent
   ): Promise<operations['deleteAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
-      pathSchema: DeleteAssessmentArgsSchema,
+      pathSchema: DeleteAssessmentPathSchema,
     });
 
     await this.useCase.deleteAssessment({

@@ -11,10 +11,6 @@ import {
   QueryMissingError,
 } from '../../../errors';
 
-function acceptsUndefined(schema: ZodTypeAny): boolean {
-  return schema.safeParse(undefined).success;
-}
-
 function acceptsEmptyObject(schema: ZodTypeAny): boolean {
   return schema.safeParse({}).success;
 }
@@ -25,12 +21,6 @@ export function parsePathFromEvent<P extends ZodTypeAny>(
 ): z.infer<P> {
   const raw = event.pathParameters ?? undefined;
   if (raw == null) {
-    if (acceptsUndefined(schema)) {
-      return schema.parse(undefined) as z.infer<P>;
-    }
-    if (acceptsEmptyObject(schema)) {
-      return schema.parse({}) as z.infer<P>;
-    }
     throw new PathMissingError();
   }
   return schema.parse(raw) as z.infer<P>;
@@ -42,9 +32,6 @@ export function parseQueryFromEvent<Q extends ZodTypeAny>(
 ): z.infer<Q> {
   const raw = event.queryStringParameters ?? undefined;
   if (raw == null) {
-    if (acceptsUndefined(schema)) {
-      return schema.parse(undefined) as z.infer<Q>;
-    }
     if (acceptsEmptyObject(schema)) {
       return schema.parse({}) as z.infer<Q>;
     }
@@ -61,19 +48,13 @@ export function parseBodyFromEvent<B extends ZodTypeAny>(
   schema: B
 ): z.infer<B> {
   const rawBody =
-    event.body == null
+    event.body == null || event.body === '{}'
       ? undefined
       : event.isBase64Encoded
       ? Buffer.from(event.body, 'base64').toString('utf8')
       : event.body;
 
   if (rawBody == null) {
-    if (acceptsUndefined(schema)) {
-      return schema.parse(undefined) as z.infer<B>;
-    }
-    if (acceptsEmptyObject(schema)) {
-      return schema.parse({}) as z.infer<B>;
-    }
     throw new BodyMissingError();
   }
 

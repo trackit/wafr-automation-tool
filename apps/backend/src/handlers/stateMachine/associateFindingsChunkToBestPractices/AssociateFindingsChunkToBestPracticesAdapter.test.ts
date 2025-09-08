@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
@@ -24,6 +26,17 @@ describe('AssociateFindingsToBestPractices adapter', () => {
           .withFindingsChunkURI('s3://test/prowler_0.json')
           .build();
       await expect(adapter.handle(event)).resolves.not.toThrow();
+    });
+
+    it('should throw with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event =
+        AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
+          .withAssessmentId('invalid-uuid')
+          .build();
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
     });
 
     it('should throw with invalid args', async () => {
@@ -107,7 +120,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
 
       const event =
         AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
-          .withAssessmentId('assessment-id')
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
           .withOrganization('test.io')
           .withFindingsChunkURI('s3://findings-bucket/prowler_0.json')
           .build();
@@ -123,7 +136,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
       expect(
         useCase.associateFindingsToBestPractices
       ).toHaveBeenCalledExactlyOnceWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organization: 'test.io',
         scanningTool: ScanningTool.PROWLER,
         findings,

@@ -10,8 +10,8 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdatePillarPathSchema = z.object({
-  assessmentId: z.string(),
-  pillarId: z.string(),
+  assessmentId: z.string().uuid(),
+  pillarId: z.string().nonempty(),
 }) satisfies ZodType<operations['updatePillar']['parameters']['path']>;
 
 const UpdatePillarBodySchema = z

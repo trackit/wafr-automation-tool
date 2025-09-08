@@ -14,7 +14,8 @@ describe('exportWellArchitectedTool adapter', () => {
 
       const event = ExportWellArchitectedToolAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
@@ -26,20 +27,11 @@ describe('exportWellArchitectedTool adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid json body', async () => {
+    it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
+      const event = ExportWellArchitectedToolAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
@@ -52,7 +44,7 @@ describe('exportWellArchitectedTool adapter', () => {
       const { adapter, useCase } = setup();
 
       const event = ExportWellArchitectedToolAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withRegion('us-west-2')
         .withUser(
           UserMother.basic()
@@ -65,7 +57,7 @@ describe('exportWellArchitectedTool adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.exportAssessment).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         region: 'us-west-2',
         user: expect.objectContaining({
           organizationDomain: 'test.io',

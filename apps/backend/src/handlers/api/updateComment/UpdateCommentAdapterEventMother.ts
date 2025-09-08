@@ -32,9 +32,9 @@ export class UpdateCommentAdapterEventMother {
   public static basic(): UpdateCommentAdapterEventMother {
     return new UpdateCommentAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
-        commentId: 'comment-id',
+        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       },
       {
         text: 'comment-text',

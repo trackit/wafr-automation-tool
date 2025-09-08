@@ -5,7 +5,7 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-export class UpdateFindingAdapterArgsMother {
+export class UpdateFindingAdapterEventMother {
   private pathParameters: operations['updateFinding']['parameters']['path'];
   private requestBody: operations['updateFinding']['requestBody']['content']['application/json'];
   private user: Pick<User, 'id' | 'email'> = {
@@ -21,40 +21,42 @@ export class UpdateFindingAdapterArgsMother {
     this.requestBody = requestBody;
   }
 
-  public static basic(): UpdateFindingAdapterArgsMother {
-    return new UpdateFindingAdapterArgsMother(
+  public static basic(): UpdateFindingAdapterEventMother {
+    return new UpdateFindingAdapterEventMother(
       {
         assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
         findingId: 'scanning-tool#12345',
       },
-      {}
+      {
+        hidden: false,
+      }
     );
   }
 
   public withAssessmentId(
     assessmentId: operations['updateFinding']['parameters']['path']['assessmentId']
-  ): UpdateFindingAdapterArgsMother {
+  ): UpdateFindingAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withFindingId(
     findingId: operations['updateFinding']['parameters']['path']['findingId']
-  ): UpdateFindingAdapterArgsMother {
+  ): UpdateFindingAdapterEventMother {
     this.pathParameters.findingId = findingId;
     return this;
   }
 
   public withHidden(
     hidden: operations['updateFinding']['requestBody']['content']['application/json']['hidden']
-  ): UpdateFindingAdapterArgsMother {
+  ): UpdateFindingAdapterEventMother {
     this.requestBody.hidden = hidden;
     return this;
   }
 
   public withUser(
     user: Pick<User, 'id' | 'email'>
-  ): UpdateFindingAdapterArgsMother {
+  ): UpdateFindingAdapterEventMother {
     this.user = user;
     return this;
   }

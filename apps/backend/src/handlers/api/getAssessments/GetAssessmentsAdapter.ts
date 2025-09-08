@@ -13,8 +13,8 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 const GetAssessmentsQuerySchema = z
   .object({
     limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
-    search: z.string().optional(),
-    nextToken: z.string().trim().base64().optional(),
+    search: z.string().nonempty().optional(),
+    nextToken: z.string().trim().nonempty().base64().optional(),
   })
   .strict() satisfies ZodType<
   operations['getAssessments']['parameters']['query']
@@ -37,8 +37,22 @@ export class GetAssessmentsAdapter {
     assessment: Assessment[]
   ): operations['getAssessments']['responses'][200]['content']['application/json']['assessments'] {
     return assessment.map((assessment) => ({
-      ...assessment,
+      id: assessment.id,
+      name: assessment.name,
+      createdBy: assessment.createdBy,
+      organization: assessment.organization,
+      regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
+      roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
       createdAt: assessment.createdAt.toISOString(),
+      step: assessment.step,
+      ...(assessment.error && {
+        error: {
+          cause: assessment.error.cause,
+          error: assessment.error.error,
+        },
+      }),
     }));
   }
 

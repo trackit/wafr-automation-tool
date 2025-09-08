@@ -4,10 +4,7 @@ import {
   FindingMother,
   SeverityType,
 } from '@backend/models';
-import {
-  NotFoundError,
-  tokenGetBestPracticeFindingsUseCase,
-} from '@backend/useCases';
+import { tokenGetBestPracticeFindingsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -43,32 +40,13 @@ describe('GetBestPracticeFindings adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid parameters', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ invalid: 'pathParameters' })
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
     it('should return a 400 with limit lower than or equal to 0', async () => {
       const { adapter } = setup();
 
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withPillarId('pillar-id')
-        .withQuestionId('question-id')
-        .withBestPracticeId('best-practice-id')
         .withLimit(0)
         .build();
       const event2 = GetBestPracticeFindingsAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withPillarId('pillar-id')
-        .withQuestionId('question-id')
-        .withBestPracticeId('best-practice-id')
         .withLimit(-1)
         .build();
 
@@ -77,9 +55,29 @@ describe('GetBestPracticeFindings adapter', () => {
       expect(response.statusCode).toBe(400);
       expect(response2.statusCode).toBe(400);
     });
+
+    it('should return a 400 with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = GetBestPracticeFindingsAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should pass without query parameters', async () => {
+      const { adapter } = setup();
+
+      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
+    });
   });
 
-  describe('useCase', () => {
+  describe('useCase and return value', () => {
     it('should call useCase with assessmentId, pillarId, questionId, bestPracticeId', async () => {
       const { adapter, useCase } = setup();
 
@@ -124,32 +122,6 @@ describe('GetBestPracticeFindings adapter', () => {
           nextToken: 'YQ==',
         })
       );
-    });
-
-    it('should return a 200 status code', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
-      useCase.getBestPracticeFindings.mockResolvedValue({
-        findings: [],
-        nextToken: null,
-      });
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(200);
-    });
-
-    it('should return a 404 if useCase throws a NotFoundError', async () => {
-      const { adapter, useCase } = setup();
-
-      useCase.getBestPracticeFindings.mockRejectedValue(
-        new NotFoundError('Not found')
-      );
-
-      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(404);
     });
 
     it('should return formatted findings', async () => {
@@ -220,6 +192,15 @@ describe('GetBestPracticeFindings adapter', () => {
         })
       );
     });
+
+    it('should return a 200 status code', async () => {
+      const { adapter } = setup();
+
+      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
+    });
   });
 });
 
@@ -227,6 +208,10 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
   const useCase = { getBestPracticeFindings: vitest.fn() };
+  useCase.getBestPracticeFindings.mockResolvedValue({
+    findings: [],
+    nextToken: null,
+  });
   register(tokenGetBestPracticeFindingsUseCase, { useValue: useCase });
   return { useCase, adapter: new GetBestPracticeFindingsAdapter() };
 };

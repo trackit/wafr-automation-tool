@@ -14,13 +14,36 @@ describe('deleteComment adapter', () => {
 
       const event = DeleteCommentAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = DeleteCommentAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid commentId', async () => {
+      const { adapter } = setup();
+
+      const event = DeleteCommentAdapterEventMother.basic()
+        .withCommentId('invalid-uuid')
+        .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -32,9 +55,9 @@ describe('deleteComment adapter', () => {
       const { adapter, useCase } = setup();
 
       const event = DeleteCommentAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withFindingId('finding-id')
-        .withCommentId('comment-id')
+        .withCommentId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withUser(
           UserMother.basic()
             .withId('user-id')
@@ -46,9 +69,9 @@ describe('deleteComment adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.deleteComment).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
-        commentId: 'comment-id',
+        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         user: expect.objectContaining({
           organizationDomain: 'test.io',
         }),

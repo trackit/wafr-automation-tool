@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { ScanningTool } from '@backend/models';
 import { tokenPrepareFindingsAssociationsUseCase } from '@backend/useCases';
@@ -7,14 +9,14 @@ import {
   PrepareFindingsAssociationsAdapter,
   PrepareFindingsAssociationsInput,
 } from './PrepareFindingsAssociationsAdapter';
-import { PrepareFindingsAssociationsAdapterInputMother } from './PrepareFindingsAssociationsAdapterInputMother';
+import { PrepareFindingsAssociationsAdapterEventMother } from './PrepareFindingsAssociationsAdapterEventMother';
 
 describe('PrepareFindingsAssociationsAdapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const input = PrepareFindingsAssociationsAdapterInputMother.basic()
+      const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
         .withOrganization('organization-id')
         .withRegions(['us-east-1'])
@@ -33,13 +35,23 @@ describe('PrepareFindingsAssociationsAdapter', () => {
         } as unknown as PrepareFindingsAssociationsInput)
       ).rejects.toThrow();
     });
+
+    it('should throw with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = PrepareFindingsAssociationsAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
+    });
   });
 
   describe('useCase call and status code', () => {
     it('should call PrepareFindingsAssociations Use Case', async () => {
       const { adapter, useCase } = setup();
 
-      const input = PrepareFindingsAssociationsAdapterInputMother.basic()
+      const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
         .withOrganization('organization-id')
         .withRegions(['us-east-1'])
@@ -60,7 +72,7 @@ describe('PrepareFindingsAssociationsAdapter', () => {
     it('should return PrepareFindingsAssociations Use Case result', async () => {
       const { adapter, useCase } = setup();
 
-      const input = PrepareFindingsAssociationsAdapterInputMother.basic()
+      const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
         .withOrganization('organization-id')
         .withRegions(['us-east-1'])

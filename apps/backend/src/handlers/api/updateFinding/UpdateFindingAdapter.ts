@@ -11,7 +11,7 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const updateFindingPathParametersSchema = z.object({
   assessmentId: z.string().uuid(),
-  findingId: z.string(),
+  findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
 const updateFindingBodySchema = z.object({

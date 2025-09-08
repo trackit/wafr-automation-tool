@@ -1,19 +1,19 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
-import { NotFoundError, tokenUpdateAssessmentUseCase } from '@backend/useCases';
+import { tokenUpdateAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { UpdateAssessmentAdapter } from './UpdateAssessmentAdapter';
-import { UpdateAssessmentAdapterArgsMother } from './UpdateAssessmentAdapterArgsMother';
+import { UpdateAssessmentAdapterEventMother } from './UpdateAssessmentAdapterEventMother';
 
 describe('UpdateAssessmentAdapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = UpdateAssessmentAdapterArgsMother.basic().build();
-      const response = await adapter.handle(event);
+      const event = UpdateAssessmentAdapterEventMother.basic().build();
 
+      const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
     });
 
@@ -26,22 +26,11 @@ describe('UpdateAssessmentAdapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid parameters', async () => {
+    it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ invalid: 'pathParameters' })
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should return a 400 with empty name', async () => {
-      const { adapter } = setup();
-
-      const event = UpdateAssessmentAdapterArgsMother.basic()
-        .withName('')
+      const event = UpdateAssessmentAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
@@ -53,7 +42,7 @@ describe('UpdateAssessmentAdapter', () => {
     it('should call useCase with assessmentId and assessment body', async () => {
       const { adapter, useCase } = setup();
 
-      const event = UpdateAssessmentAdapterArgsMother.basic()
+      const event = UpdateAssessmentAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
         .withName('New Assessment Name')
         .build();
@@ -72,26 +61,10 @@ describe('UpdateAssessmentAdapter', () => {
     it('should return a 200 status code', async () => {
       const { adapter } = setup();
 
-      const event = UpdateAssessmentAdapterArgsMother.basic()
-        .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withName('New Assessment Name')
-        .build();
+      const event = UpdateAssessmentAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
-    });
-
-    it('should return a 404 if useCase throws a NotFoundError', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = UpdateAssessmentAdapterArgsMother.basic().build();
-
-      useCase.updateAssessment.mockRejectedValue(
-        new NotFoundError('Assessment not found')
-      );
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(404);
     });
   });
 });

@@ -7,9 +7,9 @@ import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 
 export const AssociateFindingsChunkToBestPracticesInputSchema = z.object({
-  assessmentId: z.string(),
-  organization: z.string(),
-  findingsChunkURI: z.string(),
+  assessmentId: z.string().uuid(),
+  organization: z.string().nonempty(),
+  findingsChunkURI: z.string().nonempty(),
 });
 
 export type AssociateFindingsChunkToBestPracticesInput = z.infer<

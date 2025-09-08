@@ -14,7 +14,8 @@ describe('updateComment adapter', () => {
 
       const event = UpdateCommentAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
@@ -26,20 +27,22 @@ describe('updateComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid json body', async () => {
+    it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
+      const event = UpdateCommentAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid body', async () => {
+    it('should return a 400 with invalid commentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
+      const event = UpdateCommentAdapterEventMother.basic()
+        .withCommentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
@@ -52,9 +55,9 @@ describe('updateComment adapter', () => {
       const { adapter, useCase } = setup();
 
       const event = UpdateCommentAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withFindingId('finding-id')
-        .withCommentId('comment-id')
+        .withCommentId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withText('comment-text')
         .withUser(
           UserMother.basic()
@@ -67,9 +70,9 @@ describe('updateComment adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.updateComment).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
-        commentId: 'comment-id',
+        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         commentBody: {
           text: 'comment-text',
         },

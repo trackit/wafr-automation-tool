@@ -24,7 +24,7 @@ export class UpdateBestPracticeAdapterEventMother {
   public static basic(): UpdateBestPracticeAdapterEventMother {
     return new UpdateBestPracticeAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         pillarId: '1',
         questionId: '1',
         bestPracticeId: '1',

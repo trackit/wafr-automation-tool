@@ -2,15 +2,15 @@ import { ScanningTool } from '@backend/models';
 
 import type { PrepareFindingsAssociationsInput } from './PrepareFindingsAssociationsAdapter';
 
-export class PrepareFindingsAssociationsAdapterInputMother {
+export class PrepareFindingsAssociationsAdapterEventMother {
   private input: PrepareFindingsAssociationsInput;
 
   private constructor(input: PrepareFindingsAssociationsInput) {
     this.input = input;
   }
 
-  public static basic(): PrepareFindingsAssociationsAdapterInputMother {
-    return new PrepareFindingsAssociationsAdapterInputMother({
+  public static basic(): PrepareFindingsAssociationsAdapterEventMother {
+    return new PrepareFindingsAssociationsAdapterEventMother({
       assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
       scanningTool: ScanningTool.PROWLER,
       regions: [],
@@ -21,35 +21,35 @@ export class PrepareFindingsAssociationsAdapterInputMother {
 
   public withAssessmentId(
     assessmentId: string
-  ): PrepareFindingsAssociationsAdapterInputMother {
+  ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.assessmentId = assessmentId;
     return this;
   }
 
   public withScanningTool(
     scanningTool: ScanningTool
-  ): PrepareFindingsAssociationsAdapterInputMother {
+  ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.scanningTool = scanningTool;
     return this;
   }
 
   public withRegions(
     regions: string[]
-  ): PrepareFindingsAssociationsAdapterInputMother {
+  ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.regions = regions;
     return this;
   }
 
   public withWorkflows(
     workflows: string[]
-  ): PrepareFindingsAssociationsAdapterInputMother {
+  ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.workflows = workflows;
     return this;
   }
 
   public withOrganization(
     organization: string
-  ): PrepareFindingsAssociationsAdapterInputMother {
+  ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.organization = organization;
     return this;
   }

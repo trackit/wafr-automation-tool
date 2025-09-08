@@ -10,8 +10,8 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const GetAssessmentArgsSchema = z.object({
-  assessmentId: z.string(),
+const GetAssessmentPathSchema = z.object({
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['getAssessment']['parameters']['path']>;
 
 export class GetAssessmentAdapter {
@@ -31,19 +31,39 @@ export class GetAssessmentAdapter {
     assessment: Assessment
   ): operations['getAssessment']['responses'][200]['content']['application/json'] {
     return {
-      ...assessment,
       createdAt: assessment.createdAt.toISOString(),
+      createdBy: assessment.createdBy,
       pillars:
         assessment.pillars?.map((pillar) => ({
-          ...pillar,
+          disabled: pillar.disabled,
+          id: pillar.id,
+          label: pillar.label,
           questions: pillar.questions.map((question) => ({
-            ...question,
             bestPractices: question.bestPractices.map((bestPractice) => ({
-              ...bestPractice,
+              description: bestPractice.description,
+              id: bestPractice.id,
+              label: bestPractice.label,
               results: [...bestPractice.results],
+              risk: bestPractice.risk,
+              checked: bestPractice.checked,
             })),
+            disabled: question.disabled,
+            id: question.id,
+            label: question.label,
+            none: question.none,
           })),
         })) ?? [],
+      graphData: assessment.graphData,
+      id: assessment.id,
+      name: assessment.name,
+      organization: assessment.organization,
+      questionVersion: assessment.questionVersion,
+      regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
+      roleArn: assessment.roleArn,
+      step: assessment.step,
+      workflows: assessment.workflows,
+      error: assessment.error,
     };
   }
 
@@ -53,7 +73,7 @@ export class GetAssessmentAdapter {
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {
     const { pathParameters } = parseApiEvent(event, {
-      pathSchema: GetAssessmentArgsSchema,
+      pathSchema: GetAssessmentPathSchema,
     });
     const { assessmentId } = pathParameters;
 

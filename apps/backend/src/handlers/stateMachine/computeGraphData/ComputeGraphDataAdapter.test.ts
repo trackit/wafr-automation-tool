@@ -4,15 +4,15 @@ import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenComputeGraphDataUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
-import { ComputeGraphDataAdapter } from './ComputeGraphAdapter';
-import { ComputeGraphDataAdapterArgsMother } from './ComputeGraphDataAdapterArgsMother';
+import { ComputeGraphDataAdapter } from './ComputeGraphDataAdapter';
+import { ComputeGraphDataAdapterEventMother } from './ComputeGraphDataAdapterEventMother';
 
 describe('ComputeGraphDataAdapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = ComputeGraphDataAdapterArgsMother.basic().build();
+      const event = ComputeGraphDataAdapterEventMother.basic().build();
       await expect(adapter.handle(event)).resolves.not.toThrow();
     });
 
@@ -31,13 +31,23 @@ describe('ComputeGraphDataAdapter', () => {
       };
       await expect(adapter.handle(event)).rejects.toThrow(ZodError);
     });
+
+    it('should throw with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = ComputeGraphDataAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
+    });
   });
 
   describe('useCase', () => {
     it('should call useCase with assessmentId and organization', async () => {
       const { adapter, useCase } = setup();
 
-      const event = ComputeGraphDataAdapterArgsMother.basic()
+      const event = ComputeGraphDataAdapterEventMother.basic()
         .withAssessmentId('36472c1c-1ee8-4ee4-953f-df5bf1d6da63')
         .withOrganization('example.com')
         .build();

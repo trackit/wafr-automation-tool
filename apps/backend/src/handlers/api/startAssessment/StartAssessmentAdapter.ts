@@ -9,11 +9,11 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const StartAssessmentArgsSchema = z.object({
-  name: z.string(),
-  regions: z.array(z.string()).optional(),
-  roleArn: z.string(),
-  workflows: z.array(z.string()).optional(),
+const StartAssessmentBodySchema = z.object({
+  name: z.string().nonempty(),
+  regions: z.array(z.string().nonempty()).nonempty().optional(),
+  roleArn: z.string().nonempty(),
+  workflows: z.array(z.string().nonempty()).nonempty().optional(),
 }) satisfies ZodType<
   operations['startAssessment']['requestBody']['content']['application/json']
 >;
@@ -37,7 +37,7 @@ export class StartAssessmentAdapter {
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {
     const { body } = parseApiEvent(event, {
-      bodySchema: StartAssessmentArgsSchema,
+      bodySchema: StartAssessmentBodySchema,
     });
 
     const { assessmentId } = await this.useCase.startAssessment({

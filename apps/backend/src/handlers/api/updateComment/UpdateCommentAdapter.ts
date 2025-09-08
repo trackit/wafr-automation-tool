@@ -10,13 +10,13 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateCommentPathSchema = z.object({
-  assessmentId: z.string(),
-  findingId: z.string(),
-  commentId: z.string(),
+  assessmentId: z.string().uuid(),
+  findingId: z.string().nonempty(),
+  commentId: z.string().uuid(),
 }) satisfies ZodType<operations['updateComment']['parameters']['path']>;
 
-const UpdateCommentArgsSchema = z.object({
-  text: z.string(),
+const UpdateCommentBodySchema = z.object({
+  text: z.string().nonempty(),
 }) satisfies ZodType<
   operations['updateComment']['requestBody']['content']['application/json']
 >;
@@ -37,7 +37,7 @@ export class UpdateCommentAdapter {
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateCommentPathSchema,
-      bodySchema: UpdateCommentArgsSchema,
+      bodySchema: UpdateCommentBodySchema,
     });
     const { assessmentId, findingId, commentId } = pathParameters;
 

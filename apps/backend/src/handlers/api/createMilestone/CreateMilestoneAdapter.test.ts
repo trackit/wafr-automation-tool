@@ -14,7 +14,8 @@ describe('CreateMilestone adapter', () => {
 
       const event = CreateMilestoneAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
     });
 
     it('should return a 400 without parameters', async () => {
@@ -26,20 +27,11 @@ describe('CreateMilestone adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid json body', async () => {
+    it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
+      const event = CreateMilestoneAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);

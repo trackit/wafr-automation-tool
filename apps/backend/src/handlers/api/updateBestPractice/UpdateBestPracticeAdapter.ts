@@ -10,10 +10,10 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateBestPracticePathSchema = z.object({
-  assessmentId: z.string(),
-  pillarId: z.string(),
-  questionId: z.string(),
-  bestPracticeId: z.string(),
+  assessmentId: z.string().uuid(),
+  pillarId: z.string().nonempty(),
+  questionId: z.string().nonempty(),
+  bestPracticeId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateBestPractice']['parameters']['path']>;
 
 const UpdateBestPracticeBodySchema = z

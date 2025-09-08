@@ -9,8 +9,8 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const RescanAssessmentArgsSchema = z.object({
-  assessmentId: z.string(),
+const RescanAssessmentPathSchema = z.object({
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['rescanAssessment']['parameters']['path']>;
 
 export class RescanAssessmentAdapter {
@@ -29,7 +29,7 @@ export class RescanAssessmentAdapter {
     event: APIGatewayProxyEvent
   ): Promise<operations['rescanAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
-      pathSchema: RescanAssessmentArgsSchema,
+      pathSchema: RescanAssessmentPathSchema,
     });
 
     await this.useCase.rescanAssessment({

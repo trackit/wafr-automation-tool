@@ -39,7 +39,7 @@ describe('parseApiEvent', () => {
     });
 
     it('should treat missing path as {} when object path schema allows empty', () => {
-      const schema = z.object({}); 
+      const schema = z.object({});
       const event = APIGatewayProxyEventMother.basic().build();
 
       const parsed = parsePathFromEvent(event, schema);
@@ -69,7 +69,7 @@ describe('parseApiEvent', () => {
     });
 
     it('should treat missing query as {} when object query schema allows empty', () => {
-      const schema = z.object({ page: z.string().optional() }); 
+      const schema = z.object({ page: z.string().optional() });
       const event = APIGatewayProxyEventMother.basic().build();
 
       const parsed = parseQueryFromEvent(event, schema);
@@ -113,8 +113,17 @@ describe('parseApiEvent', () => {
       expect(() => parseBodyFromEvent(event, schema)).toThrow(BodyMissingError);
     });
 
+    it('should throw BodyMissingError when required body is empty', () => {
+      const schema = z.object({ name: z.string() });
+      const event = APIGatewayProxyEventMother.basic().withBody('{}').build();
+
+      expect(() => parseBodyFromEvent(event, schema)).toThrow(
+        BodyMissingError
+      );
+    });
+
     it('should treat missing body as {} when object body schema allows empty', () => {
-      const schema = z.object({ name: z.string().optional() }); 
+      const schema = z.object({ name: z.string().optional() });
       const event = APIGatewayProxyEventMother.basic().build();
 
       const parsed = parseBodyFromEvent(event, schema);

@@ -11,12 +11,12 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const AddCommentPathSchema = z.object({
-  assessmentId: z.string(),
-  findingId: z.string(),
+  assessmentId: z.string().uuid(),
+  findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['addComment']['parameters']['path']>;
 
 const AddCommentArgsSchema = z.object({
-  text: z.string(),
+  text: z.string().nonempty(),
 }) satisfies ZodType<
   operations['addComment']['requestBody']['content']['application/json']
 >;

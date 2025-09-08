@@ -3,6 +3,7 @@ import { AssessmentMother, UserMother } from '@backend/models';
 import { tokenGetAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
+import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 import { GetAssessmentsAdapter } from './GetAssessmentsAdapter';
 import { GetAssessmentsAdapterEventMother } from './GetAssessmentsAdapterEventMother';
 
@@ -21,15 +22,29 @@ describe('getAssessments adapter', () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it('should return a 400 if the limit is negative', async () => {
+    it('should return a 200 without parameters', async () => {
+      const { adapter } = setup();
+
+      const event = APIGatewayProxyEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
+    });
+
+    it('should return a 400 if the limit is negative or 0', async () => {
       const { adapter } = setup();
 
       const event = GetAssessmentsAdapterEventMother.basic()
         .withLimit(-1)
         .build();
+      const event2 = GetAssessmentsAdapterEventMother.basic()
+        .withLimit(0)
+        .build();
 
       const response = await adapter.handle(event);
+      const response2 = await adapter.handle(event2);
       expect(response.statusCode).toBe(400);
+      expect(response2.statusCode).toBe(400);
     });
 
     it('should return a 400 if the next token is not in base64', async () => {
@@ -54,7 +69,7 @@ describe('getAssessments adapter', () => {
   });
 
   describe('useCase and return value', () => {
-    it('should call useCase with query parameters and organization', async () => {
+    it('should call useCase with query parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = GetAssessmentsAdapterEventMother.basic()

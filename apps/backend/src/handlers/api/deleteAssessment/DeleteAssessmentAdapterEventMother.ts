@@ -5,49 +5,37 @@ import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type DeleteCommentParameters = NonNullable<
-  operations['deleteComment']['parameters']['path']
+type DeleteAssessmentParameters = NonNullable<
+  operations['deleteAssessment']['parameters']['path']
 >;
 
-export class DeleteCommentAdapterEventMother {
-  private pathParameters: DeleteCommentParameters;
+export class DeleteAssessmentAdapterEventMother {
+  private pathParameters: DeleteAssessmentParameters;
   private user: Pick<User, 'id' | 'email'> = {
     id: 'user-id',
     email: 'user-id@test.io',
   };
 
-  private constructor(params: DeleteCommentParameters) {
+  private constructor(params: DeleteAssessmentParameters) {
     this.pathParameters = params;
   }
 
-  public static basic(): DeleteCommentAdapterEventMother {
-    return new DeleteCommentAdapterEventMother({
+  public static basic(): DeleteAssessmentAdapterEventMother {
+    return new DeleteAssessmentAdapterEventMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      findingId: 'finding-id',
-      commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
     });
   }
 
   public withAssessmentId(
     assessmentId: string
-  ): DeleteCommentAdapterEventMother {
+  ): DeleteAssessmentAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
-    return this;
-  }
-
-  public withFindingId(findingId: string): DeleteCommentAdapterEventMother {
-    this.pathParameters.findingId = findingId;
-    return this;
-  }
-
-  public withCommentId(commentId: string): DeleteCommentAdapterEventMother {
-    this.pathParameters.commentId = commentId;
     return this;
   }
 
   public withUser(
     user: Pick<User, 'id' | 'email'>
-  ): DeleteCommentAdapterEventMother {
+  ): DeleteAssessmentAdapterEventMother {
     this.user = user;
     return this;
   }
