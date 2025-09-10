@@ -432,9 +432,9 @@ function FindingsDetails({
         );
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: [
           'findings',
           assessmentId,
@@ -561,7 +561,7 @@ function FindingsDetails({
     if (virtualItems.length === 0) return;
     const lastItem = virtualItems[virtualItems.length - 1];
     if (lastItem.index >= sortedFindings.length - 10) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [
     virtualItems,

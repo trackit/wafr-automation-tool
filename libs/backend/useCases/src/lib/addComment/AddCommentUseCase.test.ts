@@ -70,7 +70,7 @@ describe('AddCommentUseCase', () => {
     const { useCase, fakeFindingsRepository } = setup();
 
     const user = UserMother.basic().build();
-    
+
     const comment = FindingCommentMother.basic().withAuthorId(user.id).build();
     const finding = FindingMother.basic().withComments([comment]).build();
     await fakeFindingsRepository.save({

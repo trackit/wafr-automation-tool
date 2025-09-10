@@ -162,7 +162,7 @@ describe('AssessmentDetails', () => {
 
     // Click on the Security pillar tab to access questions
     const securityTab = screen.getByRole('tab', { name: /Security.*/i });
-    await fireEvent.click(securityTab);
+    fireEvent.click(securityTab);
 
     await waitFor(() => {
       // Look for the question text in the vertical menu
@@ -192,7 +192,7 @@ describe('AssessmentDetails', () => {
     expect(securityTab).toBeInTheDocument();
 
     // Click on the Security pillar tab
-    await fireEvent.click(securityTab);
+    fireEvent.click(securityTab);
 
     // Verify that we can now see questions
     await waitFor(() => {
@@ -247,7 +247,7 @@ describe('AssessmentDetails', () => {
 
     // Click on the Security pillar tab to access questions
     const securityTab = screen.getByRole('tab', { name: /Security.*/i });
-    await fireEvent.click(securityTab);
+    fireEvent.click(securityTab);
 
     await waitFor(() => {
       expect(screen.getByText('Test Practice 1')).toBeInTheDocument();
@@ -255,7 +255,7 @@ describe('AssessmentDetails', () => {
 
     // Find the checkbox in the first row of the table
     const checkbox = screen.getAllByRole('checkbox')[0];
-    await fireEvent.click(checkbox);
+    fireEvent.click(checkbox);
 
     await waitFor(() => {
       expect(updateStatus).toHaveBeenCalledWith(
@@ -326,14 +326,14 @@ describe('AssessmentDetails', () => {
 
     // Click on the Security pillar tab to access questions
     const securityTab = screen.getByRole('tab', { name: /Security.*/i });
-    await fireEvent.click(securityTab);
+    fireEvent.click(securityTab);
 
     await waitFor(() => {
       expect(screen.getByText('1')).toBeInTheDocument();
     });
 
     const findingsButton = screen.getByText('1');
-    await fireEvent.click(findingsButton);
+    fireEvent.click(findingsButton);
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();

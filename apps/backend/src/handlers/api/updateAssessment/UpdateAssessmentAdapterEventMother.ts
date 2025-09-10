@@ -13,6 +13,7 @@ export class UpdateAssessmentAdapterEventMother {
     email: 'user-id@test.io',
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private constructor(assessmentId: string, requestBody: Record<string, any>) {
     this.assessmentId = assessmentId;
     this.requestBody = requestBody;

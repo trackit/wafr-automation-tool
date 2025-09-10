@@ -1,6 +1,11 @@
 import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 
-import type { Finding, FindingBody, FindingComment, FindingCommentBody } from '@backend/models';
+import type {
+  Finding,
+  FindingBody,
+  FindingComment,
+  FindingCommentBody,
+} from '@backend/models';
 import {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
   FindingRepository,

@@ -303,7 +303,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
           `Workflow pillar question ${answerQuestionId} does not exist in assessment pillars`
         );
       }
-      const answerSelectedChoiceList = await this.getAnswerSelectedChoiceList(
+      const answerSelectedChoiceList = this.getAnswerSelectedChoiceList(
         answerChoiceList,
         answerQuestionData
       );

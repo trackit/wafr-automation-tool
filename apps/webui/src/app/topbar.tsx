@@ -69,7 +69,7 @@ const Topbar = () => {
         <button
           className="btn btn-ghost btn-xs p-1"
           onClick={(e) => {
-            navigate('/faq');
+            void navigate('/faq');
           }}
         >
           <CircleHelp className="w-5 h-5" />

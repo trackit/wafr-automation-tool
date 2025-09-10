@@ -117,9 +117,7 @@ describe('parseApiEvent', () => {
       const schema = z.object({ name: z.string() });
       const event = APIGatewayProxyEventMother.basic().withBody('{}').build();
 
-      expect(() => parseBodyFromEvent(event, schema)).toThrow(
-        BodyMissingError
-      );
+      expect(() => parseBodyFromEvent(event, schema)).toThrow(BodyMissingError);
     });
 
     it('should treat missing body as {} when object body schema allows empty', () => {

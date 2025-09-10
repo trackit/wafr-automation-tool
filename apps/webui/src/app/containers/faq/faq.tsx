@@ -110,7 +110,7 @@ export function FAQ() {
         <button
           className="btn btn-primary btn-sm text-sm h-8 min-h-8"
           onClick={(e) => {
-            navigate('/');
+            void navigate('/');
           }}
         >
           <Home className="w-4 h-4" />

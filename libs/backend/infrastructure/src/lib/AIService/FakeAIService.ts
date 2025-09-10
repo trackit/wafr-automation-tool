@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 
 import type { AIService, Prompt, TextComponent } from '@backend/ports';

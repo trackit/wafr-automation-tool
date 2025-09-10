@@ -36,13 +36,10 @@ export class UpdateQuestionAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters, body } = parseApiEvent(
-      event,
-      {
-        pathSchema: UpdateQuestionPathSchema,
-        bodySchema: UpdateQuestionBodySchema,
-      }
-    );
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdateQuestionPathSchema,
+      bodySchema: UpdateQuestionBodySchema,
+    });
     const { assessmentId, pillarId, questionId } = pathParameters;
 
     await this.useCase.updateQuestion({

@@ -667,7 +667,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         },
       ];
       const selectedChoiceList =
-        await wellArchitectedToolService.getAnswerSelectedChoiceList(
+        wellArchitectedToolService.getAnswerSelectedChoiceList(
           answerChoiceList,
           questionData
         );

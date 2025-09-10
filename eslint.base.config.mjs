@@ -121,7 +121,6 @@ export default [
       ],
       '@typescript-eslint/await-thenable': 'error',
       'no-void': ['error', { allowAsStatement: true }],
-      'promise/prefer-await-to-then': 'error',
       'promise/no-return-wrap': 'error',
       'promise/valid-params': 'error',
     },
