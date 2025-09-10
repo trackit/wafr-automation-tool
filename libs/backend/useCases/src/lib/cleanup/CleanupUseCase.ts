@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenFeatureToggleRepository,
+  tokenFindingsRepository,
   tokenLogger,
   tokenMarketplaceService,
   tokenObjectsStorage,
@@ -36,6 +37,7 @@ export interface CleanupUseCase {
 export class CleanupUseCaseImpl implements CleanupUseCase {
   private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
@@ -56,7 +58,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       });
     }
     if (!this.debug) {
-      await this.assessmentsRepository.deleteFindings({
+      await this.findingsRepository.deleteAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
       });
@@ -143,7 +145,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       );
       this.logger.info(`Deleting assessment: ${listObjects}`);
       if (listObjects.length !== 0) {
-        this.objectsStorage.bulkDelete(listObjects);
+        await this.objectsStorage.bulkDelete(listObjects);
         this.logger.info(`Debug mode is disabled, deleting assessment`);
       } else {
         this.logger.info(`Debug mode is disabled, nothing to delete`);

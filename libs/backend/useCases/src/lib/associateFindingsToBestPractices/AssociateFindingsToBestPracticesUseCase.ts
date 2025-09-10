@@ -1,5 +1,6 @@
 import {
   tokenAssessmentsRepository,
+  tokenFindingsRepository,
   tokenFindingToBestPracticesAssociationService,
   tokenLogger,
   tokenQuestionSetService,
@@ -32,6 +33,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
     tokenFindingToBestPracticesAssociationService
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async storeFindings(args: {
@@ -44,7 +46,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
       findingsAssociations
         .filter(({ bestPractices }) => bestPractices.length > 0)
         .map((association) =>
-          this.assessmentsRepository.saveFinding({
+          this.findingsRepository.save({
             assessmentId,
             organizationDomain,
             finding: {
@@ -91,7 +93,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
           questionId,
           bestPracticeId,
         });
-        return this.assessmentsRepository.addBestPracticeFindings({
+        return this.assessmentsRepository.saveBestPracticeFindings({
           assessmentId: assessment.id,
           organizationDomain,
           pillarId,

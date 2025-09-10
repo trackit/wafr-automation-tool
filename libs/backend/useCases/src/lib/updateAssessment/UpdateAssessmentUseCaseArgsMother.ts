@@ -22,7 +22,7 @@ export class UpdateAssessmentUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
+  public withOrganizationDomain(
     organization: string
   ): UpdateAssessmentUseCaseArgsMother {
     this.data.organizationDomain = organization;

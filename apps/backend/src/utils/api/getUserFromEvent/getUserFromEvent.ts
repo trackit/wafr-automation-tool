@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 import type { User } from '@backend/models';
 
-import { UserClaimsMissingError } from '../../../errors/UserErrors';
+import { UserClaimsMissingError } from '../../../errors';
 
 export const getUserFromEvent = (event: APIGatewayProxyEvent): User => {
   const userClaims = event.requestContext.authorizer?.claims;

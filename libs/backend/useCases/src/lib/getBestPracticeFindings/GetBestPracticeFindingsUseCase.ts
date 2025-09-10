@@ -1,8 +1,11 @@
-import { tokenAssessmentsRepository } from '@backend/infrastructure';
+import {
+  tokenAssessmentsRepository,
+  tokenFindingsRepository,
+} from '@backend/infrastructure';
 import type { Finding, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
+import { AssessmentNotFoundError } from '../../errors';
 import { assertBestPracticeExists } from '../../services/asserts';
 
 export interface GetBestPracticeFindingsUseCaseArgs {
@@ -28,6 +31,7 @@ export class GetBestPracticeFindingsUseCaseImpl
   implements GetBestPracticeFindingsUseCase
 {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
 
   public async getBestPracticeFindings(
     args: GetBestPracticeFindingsUseCaseArgs
@@ -62,7 +66,7 @@ export class GetBestPracticeFindingsUseCaseImpl
       bestPracticeId,
     });
 
-    return await this.assessmentsRepository.getBestPracticeFindings({
+    return await this.findingsRepository.getBestPracticeFindings({
       organizationDomain,
       assessmentId,
       pillarId,

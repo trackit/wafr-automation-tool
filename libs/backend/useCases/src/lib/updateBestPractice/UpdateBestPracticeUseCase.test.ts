@@ -24,67 +24,63 @@ describe('UpdateBestPracticeUseCase', () => {
   it('should update best practice', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('other-org.io')
-      .withPillars([
-        PillarMother.basic()
-          .withId('1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('1')
-              .withBestPractices([
-                BestPracticeMother.basic()
-                  .withId('1')
-                  .withChecked(false)
-                  .build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ])
-      .build();
+    const user = UserMother.basic().build();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#other-org.io'
-    ] = assessment;
+    const bestPractice = BestPracticeMother.basic().withChecked(false).build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withQuestionId('1')
-      .withBestPracticeId('1')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId(pillar.id)
+      .withQuestionId(question.id)
+      .withBestPracticeId(bestPractice.id)
       .withBestPracticeBody({
         checked: true,
       })
       .build();
 
-    await expect(useCase.updateBestPractice(input)).resolves.not.toThrow();
-    expect(
-      fakeAssessmentsRepository.updateBestPractice
-    ).toHaveBeenCalledExactlyOnceWith(
+    await useCase.updateBestPractice(input);
+
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: user.organizationDomain,
+    });
+    expect(updatedAssessment).toEqual(
       expect.objectContaining({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        bestPracticeId: '1',
-        bestPracticeBody: {
-          checked: true,
-        },
-        pillarId: '1',
-        questionId: '1',
-        organizationDomain: 'other-org.io',
+        id: assessment.id,
+        pillars: [
+          expect.objectContaining({
+            id: pillar.id,
+            questions: [
+              expect.objectContaining({
+                id: question.id,
+                bestPractices: [
+                  expect.objectContaining({
+                    id: bestPractice.id,
+                    checked: true,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
       })
     );
   });
 
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -94,22 +90,22 @@ describe('UpdateBestPracticeUseCase', () => {
   it('should throw PillarNotFoundError if pillar does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withPillars([])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .withPillarId('pillar-id')
       .withQuestionId('question-id')
       .withBestPracticeId('best-practice-id')
       .build();
+
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       PillarNotFoundError
     );
@@ -118,23 +114,23 @@ describe('UpdateBestPracticeUseCase', () => {
   it('should throw QuestionNotFoundError if question does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .withPillars([
-        PillarMother.basic().withId('pillar-id').withQuestions([]).build(),
-      ])
+    const user = UserMother.basic().build();
+
+    const pillar = PillarMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([pillar])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
-      .withPillarId('pillar-id')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId(pillar.id)
       .withQuestionId('question-id')
       .withBestPracticeId('best-practice-id')
       .build();
+
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       QuestionNotFoundError
     );
@@ -143,31 +139,24 @@ describe('UpdateBestPracticeUseCase', () => {
   it('should throw BestPracticeNotFoundError if best practice does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .withPillars([
-        PillarMother.basic()
-          .withId('pillar-id')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-id')
-              .withBestPractices([])
-              .build(),
-          ])
-          .build(),
-      ])
+    const user = UserMother.basic().build();
+
+    const question = QuestionMother.basic().build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([pillar])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
-      .withPillarId('pillar-id')
-      .withQuestionId('question-id')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId(pillar.id)
+      .withQuestionId(question.id)
       .withBestPracticeId('best-practice-id')
       .build();
+
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
       BestPracticeNotFoundError
     );
@@ -177,10 +166,9 @@ describe('UpdateBestPracticeUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
-  vitest.spyOn(fakeAssessmentsRepository, 'updateBestPractice');
+
   return {
     useCase: new UpdateBestPracticeUseCaseImpl(),
-    fakeAssessmentsRepository: fakeAssessmentsRepository,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };

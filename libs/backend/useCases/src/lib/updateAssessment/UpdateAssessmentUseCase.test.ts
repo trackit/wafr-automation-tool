@@ -11,11 +11,9 @@ import { UpdateAssessmentUseCaseArgsMother } from './UpdateAssessmentUseCaseArgs
 
 describe('UpdateAssessmentUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = UpdateAssessmentUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -25,29 +23,25 @@ describe('UpdateAssessmentUseCase', () => {
   it('should update assessment', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .withName('Old Name')
-      .build();
+    const assessment = AssessmentMother.basic().withName('Old Name').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdateAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withName('New Name')
       .build();
+
     await useCase.updateAssessment(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments[
-        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-      ]
-    ).toEqual(
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(updatedAssessment).toEqual(
       expect.objectContaining({
-        id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        name: 'New Name',
+        id: assessment.id,
+        name: input.assessmentBody.name,
       })
     );
   });
@@ -56,6 +50,7 @@ describe('UpdateAssessmentUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return {
     useCase: new UpdateAssessmentUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),

@@ -12,11 +12,8 @@ import {
   OrganizationAccountIdNotSetError,
   OrganizationNoActiveSubscriptionError,
   OrganizationUnitBasedAgreementIdNotSetError,
-} from '../../errors/index';
-import {
-  StartAssessmentUseCaseArgs,
-  StartAssessmentUseCaseImpl,
-} from './StartAssessmentUseCase';
+} from '../../errors';
+import { StartAssessmentUseCaseImpl } from './StartAssessmentUseCase';
 import { StartAssessmentUseCaseArgsMother } from './StartAssessmentUseCaseArgsMother';
 
 vitest.useFakeTimers();
@@ -26,13 +23,13 @@ describe('startAssessment UseCase', () => {
     it('should start an assessment with default regions and workflows', async () => {
       const { useCase, fakeAssessmentsStateMachine } = setup();
 
-      useCase.canStartAssessment = vitest.fn().mockResolvedValueOnce(true);
+      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withRegions(undefined)
-          .withWorkflows(undefined)
-          .build();
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withRegions(undefined)
+        .withWorkflows(undefined)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
@@ -48,36 +45,32 @@ describe('startAssessment UseCase', () => {
     it('should start an assessment with complete args', async () => {
       const { useCase, fakeAssessmentsStateMachine, date } = setup();
 
-      useCase.canStartAssessment = vitest.fn().mockResolvedValueOnce(true);
+      const user = UserMother.basic().build();
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('Test Assessment')
-          .withRegions(['us-west-1', 'us-west-2'])
-          .withWorkflows(['workflow-1', 'workflow-2'])
-          .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-          .withUser(
-            UserMother.basic()
-              .withEmail('user-id@test.io')
-              .withId('user-id')
-              .withOrganizationDomain('test.io')
-              .build()
-          )
-          .build();
+      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('Test Assessment')
+        .withRegions(['us-west-1', 'us-west-2'])
+        .withWorkflows(['workflow-1', 'workflow-2'])
+        .withRoleArn('arn:aws:iam::123456789012:role/test-role')
+        .withUser(user)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
         fakeAssessmentsStateMachine.startAssessment
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          name: 'Test Assessment',
-          regions: ['us-west-1', 'us-west-2'],
-          roleArn: 'arn:aws:iam::123456789012:role/test-role',
-          workflows: ['workflow-1', 'workflow-2'],
+          name: input.name,
+          regions: input.regions,
+          roleArn: input.roleArn,
+          workflows: input.workflows,
           createdAt: date,
           assessmentId: expect.any(String),
-          createdBy: 'user-id',
-          organization: 'test.io',
+          createdBy: user.id,
+          organization: user.organizationDomain,
         })
       );
     });
@@ -85,12 +78,11 @@ describe('startAssessment UseCase', () => {
     it('should start an assessment with lowercase workflows name', async () => {
       const { useCase, fakeAssessmentsStateMachine } = setup();
 
-      useCase.canStartAssessment = vitest.fn().mockResolvedValueOnce(true);
+      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withWorkflows(['workFloW-1', 'WorKflOw-2'])
-          .build();
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withWorkflows(['workFloW-1', 'WorKflOw-2'])
+        .build();
       await useCase.startAssessment(input);
 
       expect(
@@ -112,24 +104,25 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(1)
         .build();
-      fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save({ organization });
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('test assessment')
-          .withUser(
-            UserMother.basic().withOrganizationDomain('test.io').build()
-          )
-          .build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('test assessment')
+        .withUser(user)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
         fakeAssessmentsStateMachine.startAssessment
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: 'test assessment' })
+        expect.objectContaining({ name: input.name })
       );
       expect(organization.freeAssessmentsLeft).toEqual(1);
     });
@@ -144,21 +137,24 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => false);
+      await fakeOrganizationRepository.save({ organization });
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('test assessment')
-          .withUser(
-            UserMother.basic().withOrganizationDomain('test.io').build()
-          )
-          .build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => false);
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('test assessment')
+        .withUser(user)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
@@ -167,7 +163,7 @@ describe('startAssessment UseCase', () => {
       expect(
         fakeAssessmentsStateMachine.startAssessment
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: 'test assessment' })
+        expect.objectContaining({ name: input.name })
       );
     });
 
@@ -181,24 +177,29 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
-      fakeMarketplaceService.hasMonthlySubscription = vitest
-        .fn()
-        .mockImplementation(() => Promise.resolve(true));
+      await fakeOrganizationRepository.save({ organization });
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('test assessment')
-          .withUser(
-            UserMother.basic().withOrganizationDomain('test.io').build()
-          )
-          .build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => true);
+
+      vi.spyOn(
+        fakeMarketplaceService,
+        'hasMonthlySubscription'
+      ).mockImplementation(() => Promise.resolve(true));
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('test assessment')
+        .withUser(user)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
@@ -207,7 +208,7 @@ describe('startAssessment UseCase', () => {
       expect(
         fakeAssessmentsStateMachine.startAssessment
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: 'test assessment' })
+        expect.objectContaining({ name: input.name })
       );
     });
 
@@ -221,30 +222,35 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
-      fakeMarketplaceService.hasUnitBasedSubscription = vitest
-        .fn()
-        .mockImplementation(() => Promise.resolve(true));
+      await fakeOrganizationRepository.save({ organization });
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('test assessment')
-          .withUser(
-            UserMother.basic().withOrganizationDomain('test.io').build()
-          )
-          .build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => true);
+
+      vi.spyOn(
+        fakeMarketplaceService,
+        'hasUnitBasedSubscription'
+      ).mockImplementation(() => Promise.resolve(true));
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('test assessment')
+        .withUser(user)
+        .build();
+
       await useCase.startAssessment(input);
 
       expect(
         fakeAssessmentsStateMachine.startAssessment
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: 'test assessment' })
+        expect.objectContaining({ name: input.name })
       );
     });
 
@@ -256,21 +262,24 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
+      await fakeOrganizationRepository.save({ organization });
 
-      const input: StartAssessmentUseCaseArgs =
-        StartAssessmentUseCaseArgsMother.basic()
-          .withName('test assessment')
-          .withUser(
-            UserMother.basic().withOrganizationDomain('test.io').build()
-          )
-          .build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('test assessment')
+        .withUser(user)
+        .build();
+
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
         OrganizationNoActiveSubscriptionError
       );
@@ -284,16 +293,24 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withAccountId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
+      await fakeOrganizationRepository.save({ organization });
 
-      const input = StartAssessmentUseCaseArgsMother.basic().build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withUser(user)
+        .build();
+
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
         OrganizationAccountIdNotSetError
       );
@@ -307,16 +324,24 @@ describe('startAssessment UseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withUnitBasedAgreementId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({ organization });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
+      await fakeOrganizationRepository.save({ organization });
 
-      const input = StartAssessmentUseCaseArgsMother.basic().build();
+      const user = UserMother.basic()
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockImplementation(() => true);
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withUser(user)
+        .build();
+
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
         OrganizationUnitBasedAgreementIdNotSetError
       );
@@ -327,22 +352,23 @@ describe('startAssessment UseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const fakeAssessmentsStateMachine = inject(tokenFakeAssessmentsStateMachine);
   vitest.spyOn(fakeAssessmentsStateMachine, 'startAssessment');
-  const fakeOrganizationRepository = inject(tokenFakeOrganizationRepository);
+
   const fakeMarketplaceService = inject(tokenFakeMarketplaceService);
   vitest.spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription');
   vitest.spyOn(fakeMarketplaceService, 'hasMonthlySubscription');
-  const fakeFeatureToggleRepository = inject(tokenFakeFeatureToggleRepository);
+
   const date = new Date();
   vitest.setSystemTime(date);
-  const useCase = new StartAssessmentUseCaseImpl();
+
   return {
-    useCase,
+    useCase: new StartAssessmentUseCaseImpl(),
     fakeAssessmentsStateMachine,
-    date,
-    fakeOrganizationRepository,
     fakeMarketplaceService,
-    fakeFeatureToggleRepository,
+    date,
+    fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
+    fakeFeatureToggleRepository: inject(tokenFakeFeatureToggleRepository),
   };
 };

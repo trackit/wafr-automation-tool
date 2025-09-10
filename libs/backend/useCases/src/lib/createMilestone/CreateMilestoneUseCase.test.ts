@@ -32,27 +32,29 @@ describe('CreateMilestone UseCase', () => {
       fakeOrganizationRepository,
     } = setup();
 
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-
-    const organization = OrganizationMother.basic()
-      .withDomain('test.io')
-      .withAssessmentExportRoleArn('export-role-arn')
+    const input = CreateMilestoneUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
 
-    fakeOrganizationRepository.organizations['test.io'] = organization;
-
-    const input = CreateMilestoneUseCaseArgsMother.basic().build();
-    await expect(useCase.createMilestone(input)).resolves.toBeUndefined();
+    await useCase.createMilestone(input);
 
     expect(
       fakeWellArchitectedToolService.createMilestone
@@ -66,11 +68,9 @@ describe('CreateMilestone UseCase', () => {
   });
 
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = CreateMilestoneUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -81,22 +81,27 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn('export-role-arn')
-        .build();
+    const input = CreateMilestoneUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
-    const input = CreateMilestoneUseCaseArgsMother.basic().build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
@@ -106,24 +111,27 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .withPillars(undefined)
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
       .build();
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn('export-role-arn')
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
@@ -133,24 +141,27 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
       .build();
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn('export-role-arn')
-        .build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .withStep(AssessmentStep.FINISHED)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
@@ -159,20 +170,21 @@ describe('CreateMilestone UseCase', () => {
   it('should throw OrganizationNotFoundError if the organization doesn’t exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().withOrganizationDomain('test.io').build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       OrganizationNotFoundError
     );
@@ -182,26 +194,28 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn(undefined)
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn(undefined)
-        .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = CreateMilestoneUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       OrganizationExportRoleNotSetError
     );
@@ -211,23 +225,28 @@ describe('CreateMilestone UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn('export-role-arn')
-        .build();
+    const input = CreateMilestoneUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
-    const input = CreateMilestoneUseCaseArgsMother.basic().build();
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentExportRegionNotSetError
     );
@@ -237,11 +256,13 @@ describe('CreateMilestone UseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const fakeWellArchitectedToolService = inject(
     tokenFakeWellArchitectedToolService
   );
   vitest.spyOn(fakeWellArchitectedToolService, 'createMilestone');
   const useCase = new CreateMilestoneUseCaseImpl();
+
   return {
     useCase,
     fakeWellArchitectedToolService,

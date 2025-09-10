@@ -3,6 +3,7 @@ export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './CognitoPort';
 export * from './FeatureTogglePort';
+export * from './FindingRepository';
 export * from './FindingToBestPracticesAssociationService';
 export * from './IdGenerator';
 export * from './Logger';

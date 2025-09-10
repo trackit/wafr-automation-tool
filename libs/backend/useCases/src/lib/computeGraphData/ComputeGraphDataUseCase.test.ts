@@ -15,6 +15,16 @@ import { ComputeGraphDataUseCaseImpl } from './ComputeGraphDataUseCase';
 import { ComputeGraphDataUseCaseArgsMother } from './ComputeGraphDataUseCaseArgsMother';
 
 describe('computeGraphData UseCase', () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase } = setup();
+
+    const input = ComputeGraphDataUseCaseArgsMother.basic().build();
+
+    await expect(useCase.computeGraphData(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
+  });
+
   it('should compute the correct graph data', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
@@ -59,52 +69,43 @@ describe('computeGraphData UseCase', () => {
         .build(),
       [ScanningTool.CLOUD_CUSTODIAN]: AssessmentGraphDataMother.basic().build(),
     };
-    const fakeAssessmentMother =
+    const assessmentMother =
       AssessmentMother.basic().withRawGraphData(rawGraphData);
-    const fakeAssessment = fakeAssessmentMother.build();
-    await fakeAssessmentsRepository.save(fakeAssessment);
+    const assessment = assessmentMother.build();
+    await fakeAssessmentsRepository.save(assessment);
 
     await useCase.computeGraphData({
-      assessmentId: fakeAssessment.id,
-      organization: fakeAssessment.organization,
+      assessmentId: assessment.id,
+      organization: assessment.organization,
     });
 
-    expect(fakeAssessmentsRepository.assessments).toEqual({
-      [`${fakeAssessment.id}#${fakeAssessment.organization}`]:
-        fakeAssessmentMother
-          .withGraphData({
-            findings: 450,
-            regions: {
-              'us-east-1': 30,
-              'us-west-2': 230,
-            },
-            resourceTypes: {
-              AwsAccount: 8,
-              AwsEc2Instance: 1,
-              AwsIamUser: 40,
-              AwsS3Bucket: 220,
-              AwsS3BucketPolicy: 10,
-            },
-            severities: {
-              Critical: 25,
-              High: 70,
-              Low: 50,
-              Medium: 45,
-            },
-          })
-          .build(),
+    const computedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
     });
-  });
-
-  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    const input = ComputeGraphDataUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
-
-    await expect(useCase.computeGraphData(input)).rejects.toThrow(
-      AssessmentNotFoundError
+    expect(computedAssessment).toEqual(
+      assessmentMother
+        .withGraphData({
+          findings: 450,
+          regions: {
+            'us-east-1': 30,
+            'us-west-2': 230,
+          },
+          resourceTypes: {
+            AwsAccount: 8,
+            AwsEc2Instance: 1,
+            AwsIamUser: 40,
+            AwsS3Bucket: 220,
+            AwsS3BucketPolicy: 10,
+          },
+          severities: {
+            Critical: 25,
+            High: 70,
+            Low: 50,
+            Medium: 45,
+          },
+        })
+        .build()
     );
   });
 });
@@ -112,6 +113,7 @@ describe('computeGraphData UseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return {
     useCase: new ComputeGraphDataUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),

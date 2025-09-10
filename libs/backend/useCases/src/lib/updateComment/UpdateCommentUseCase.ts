@@ -1,7 +1,4 @@
-import {
-  tokenAssessmentsRepository,
-  tokenLogger,
-} from '@backend/infrastructure';
+import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
 import type { FindingCommentBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -24,13 +21,13 @@ export interface UpdateCommentUseCase {
 }
 
 export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async updateComment(args: UpdateCommentUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, commentId, user, commentBody } = args;
 
-    const finding = await this.assessmentsRepository.getFinding({
+    const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain: user.organizationDomain,
       findingId,
@@ -62,7 +59,7 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
       });
     }
 
-    await this.assessmentsRepository.updateFindingComment({
+    await this.findingsRepository.updateComment({
       assessmentId,
       organizationDomain: user.organizationDomain,
       findingId,

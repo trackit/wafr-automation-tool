@@ -15,13 +15,12 @@ describe('Prepare custodian use case', () => {
   it('should put the policies file', async () => {
     const { useCase, fakeObjectsStorage } = setup();
 
-    await expect(useCase.prepareCustodian()).resolves.toEqual(
-      's3://test-s3-bucket/custodian.yml'
-    );
+    const result = await useCase.prepareCustodian();
 
-    expect(fakeObjectsStorage.objects[CUSTODIAN_FILE_NAME]).toEqual(
-      'mocked-policies-content'
-    );
+    expect(result).toEqual('s3://test-s3-bucket/custodian.yml');
+
+    const object = await fakeObjectsStorage.get(CUSTODIAN_FILE_NAME);
+    expect(object).toEqual('mocked-policies-content');
   });
 });
 

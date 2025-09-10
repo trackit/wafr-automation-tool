@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
+  tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
@@ -22,6 +23,7 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     tokenAssessmentsStateMachine
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   private async deleteAssessmentFromRepository(args: {
@@ -29,7 +31,7 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     organization: string;
   }): Promise<void> {
     const { assessmentId, organization } = args;
-    await this.assessmentsRepository.deleteFindings({
+    await this.findingsRepository.deleteAll({
       assessmentId,
       organizationDomain: organization,
     });

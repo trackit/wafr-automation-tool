@@ -1,7 +1,4 @@
-import {
-  tokenAssessmentsRepository,
-  tokenLogger,
-} from '@backend/infrastructure';
+import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -23,13 +20,13 @@ export interface DeleteCommentUseCase {
 }
 
 export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async deleteComment(args: DeleteCommentUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, commentId, user } = args;
 
-    const finding = await this.assessmentsRepository.getFinding({
+    const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain: user.organizationDomain,
       findingId,
@@ -60,12 +57,15 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
       });
     }
 
-    await this.assessmentsRepository.deleteFindingComment({
+    await this.findingsRepository.deleteComment({
       assessmentId,
       organizationDomain: user.organizationDomain,
       findingId,
       commentId,
     });
+    this.logger.info(
+      `Delete comment for finding ${findingId} in assessment ${assessmentId} by user ${user.id}`
+    );
   }
 }
 

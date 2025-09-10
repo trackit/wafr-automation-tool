@@ -2,6 +2,7 @@ import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
   tokenFakeAssessmentsStateMachine,
+  tokenFakeFindingsRepository,
 } from '@backend/infrastructure';
 import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
@@ -12,11 +13,9 @@ import { DeleteAssessmentUseCaseArgsMother } from './DeleteAssessmentUseCaseArgs
 
 describe('deleteAssessment UseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = DeleteAssessmentUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.deleteAssessment(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -24,87 +23,95 @@ describe('deleteAssessment UseCase', () => {
   });
 
   it('should delete assessments findings', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+      setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .build();
-    fakeAssessmentsRepository.assessmentFindings[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = [FindingMother.basic().build()];
+    await fakeAssessmentsRepository.save(assessment);
+
+    const finding = FindingMother.basic().build();
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding,
+    });
 
     const input = DeleteAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await useCase.deleteAssessment(input);
 
-    expect(
-      fakeAssessmentsRepository.assessmentFindings[
-        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-      ]
-    ).toBeUndefined();
+    const findings = await fakeFindingsRepository.getAll({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(findings).toBeUndefined();
   });
 
   it('should delete assessment', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeleteAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await useCase.deleteAssessment(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments[
-        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-      ]
-    ).toBeUndefined();
+    const { assessments } = await fakeAssessmentsRepository.getAll({
+      organizationDomain: assessment.organization,
+    });
+    expect(assessments).toEqual([]);
   });
 
   it('should cancel state machine', async () => {
     const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
       setup();
+    const user = UserMother.basic().build();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withExecutionArn('test-arn')
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = DeleteAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await useCase.deleteAssessment(input);
 
     expect(
       fakeAssessmentsStateMachine.cancelAssessment
-    ).toHaveBeenCalledExactlyOnceWith('test-arn');
+    ).toHaveBeenCalledExactlyOnceWith(assessment.executionArn);
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const fakeAssessmentsStateMachine = inject(tokenFakeAssessmentsStateMachine);
   vitest.spyOn(fakeAssessmentsStateMachine, 'cancelAssessment');
-  const useCase = new DeleteAssessmentUseCaseImpl();
+
   return {
-    useCase,
+    useCase: new DeleteAssessmentUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
     fakeAssessmentsStateMachine,
   };
 };

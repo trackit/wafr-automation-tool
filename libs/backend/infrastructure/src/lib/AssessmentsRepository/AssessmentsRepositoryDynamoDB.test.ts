@@ -5,22 +5,20 @@ import {
   AssessmentMother,
   AssessmentStep,
   BestPracticeMother,
-  FindingCommentMother,
-  FindingMother,
   PillarMother,
   QuestionMother,
   ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
+import { encodeNextToken } from '@shared/utils';
 
-import { tokenDynamoDBClient } from '../config/dynamodb/config';
-import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
-  AssessmentsRepositoryDynamoDB,
   tokenDynamoDBAssessmentTableName,
-} from './AssessmentsRepositoryDynamoDB';
-import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
+  tokenDynamoDBClient,
+} from '../config/dynamodb/config';
+import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 
 afterEach(async () => {
   const dynamoDBClient = inject(tokenDynamoDBClient);
@@ -83,7 +81,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
             ])
             .build(),
         ])
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
@@ -95,11 +93,223 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const savedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
       expect(savedAssessment).toEqual(assessment);
+    });
+  });
+
+  describe('saveBestPracticeFindings', () => {
+    it('should add findings to a best practice', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticeFindings({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+    });
+
+    it('should add several findings to a best practice', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticeFindings({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#2'
+        )
+      ).toBe(true);
+    });
+
+    it('should be able to add findings several times', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('0').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticeFindings({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#1']),
+      });
+
+      await repository.saveBestPracticeFindings({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        pillarId: '0',
+        questionId: '0',
+        bestPracticeId: '0',
+        bestPracticeFindingIds: new Set(['scanningTool#2']),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1'
+        )
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#2'
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe('get', () => {
+    it('should get an assessment by ID and organization', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+
+      await repository.save(assessment);
+
+      const fetchedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+
+      expect(fetchedAssessment).toEqual(assessment);
+    });
+
+    it('should return undefined if assessment does not exist', async () => {
+      const { repository } = setup();
+
+      const fetchedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+
+      expect(fetchedAssessment).toBeUndefined();
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization2')
+        .build();
+      await repository.save(assessment2);
+
+      const assessment3 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization2')
+        .build();
+      await repository.save(assessment3);
+
+      const fetchedAssessment1 = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      const fetchedAssessment2 = await repository.get({
+        assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+
+      expect(fetchedAssessment1).toEqual(assessment1);
+      expect(fetchedAssessment2).toBeUndefined();
     });
   });
 
@@ -108,7 +318,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -128,14 +338,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -143,7 +353,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const fetchedAssessments = await repository.getAll({
         organizationDomain: 'organization1',
-        search: 'assessment1',
+        search: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       });
 
       expect(fetchedAssessments).toEqual({
@@ -156,14 +366,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -175,7 +385,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(fetchedAssessments).toEqual({
-        assessments: [expect.objectContaining({ id: 'assessment2' })],
+        assessments: [
+          expect.objectContaining({
+            id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          }),
+        ],
         nextToken: expect.any(String),
       });
     });
@@ -184,14 +398,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -199,10 +413,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 
       const nextTokenAssessment = {
         PK: 'organization1',
-        SK: 'ASSESSMENT#assessment2',
+        SK: 'ASSESSMENT#2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       };
-      const nextToken =
-        AssessmentsRepositoryDynamoDB.encodeNextToken(nextTokenAssessment);
+      const nextToken = encodeNextToken(nextTokenAssessment);
 
       const fetchedAssessments = await repository.getAll({
         organizationDomain: 'organization1',
@@ -219,7 +432,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -249,315 +462,23 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
-  describe('get', () => {
-    it('should get an assessment by ID and organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-
-      await repository.save(assessment);
-
-      const fetchedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedAssessment).toEqual(assessment);
-    });
-
-    it('should return undefined if assessment does not exist', async () => {
-      const { repository } = setup();
-
-      const fetchedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedAssessment).toBeUndefined();
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment1);
-
-      const assessment2 = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization2')
-        .build();
-      await repository.save(assessment2);
-
-      const assessment3 = AssessmentMother.basic()
-        .withId('assessment2')
-        .withOrganization('organization2')
-        .build();
-      await repository.save(assessment3);
-
-      const fetchedAssessment1 = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      const fetchedAssessment2 = await repository.get({
-        assessmentId: 'assessment2',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedAssessment1).toEqual(assessment1);
-      expect(fetchedAssessment2).toBeUndefined();
-    });
-  });
-
-  describe('updateBestPractice', () => {
-    it('should update the best practice status', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('0')
-                    .withChecked(false)
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updateBestPractice({
-          assessmentId: 'assessment1',
-          organizationDomain: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
-          bestPracticeBody: {
-            checked: true,
-          },
-        })
-      ).resolves.not.toThrow();
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
-          .checked
-      ).toBe(true);
-    });
-  });
-
-  describe('addBestPracticeFindings', () => {
-    it('should add findings to a best practice', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await repository.addBestPracticeFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
-      ).toBe(true);
-    });
-
-    it('should add several findings to a best practice', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await repository.addBestPracticeFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
-        bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2'
-        )
-      ).toBe(true);
-    });
-
-    it('should be able to add findings several times', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await repository.addBestPracticeFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
-      });
-
-      await repository.addBestPracticeFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
-        bestPracticeFindingIds: new Set(['scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2'
-        )
-      ).toBe(true);
-    });
-  });
-
-  describe('updatePillar', () => {
-    it('should update the pillar disabled status', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic().withId('0').withDisabled(false).build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      await expect(
-        repository.updatePillar({
-          assessmentId: 'assessment1',
-          organizationDomain: 'organization1',
-          pillarId: '0',
-          pillarBody: {
-            disabled: true,
-          },
-        })
-      ).resolves.not.toThrow();
-      const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-      expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
-    });
-  });
-
   describe('delete', () => {
     it('should delete an assessment by ID and organization', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
       await repository.save(assessment);
 
       await repository.delete({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
       const fetchedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -568,30 +489,30 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .build();
 
       await repository.save(assessment2);
 
       await repository.delete({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
       const fetchedAssessment1 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
       const fetchedAssessment2 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
       });
 
@@ -600,399 +521,12 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
-  describe('saveFinding', () => {
-    it('should save a finding by scanningTool for an assessment by ID and organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withId('scanningTool#1')
-        .withBestPractices('0#0#0')
-        .withHidden(false)
-        .withIsAIAssociated(false)
-        .withMetadata({ eventCode: 'event1' })
-        .withRemediation({
-          desc: 'Remediation description',
-          references: ['ref1', 'ref2'],
-        })
-        .withResources([
-          {
-            name: 'resource1',
-            type: 'AWS::EC2::Instance',
-            uid: 'resource-id-1',
-            region: 'us-west-2',
-          },
-        ])
-        .withRiskDetails('Risk details for finding 1')
-        .withSeverity(SeverityType.High)
-        .withStatusCode('status-code-1')
-        .withStatusDetail('Status detail for finding 1')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      const savedFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(savedFinding).toEqual(finding);
-    });
-  });
-
-  describe('getFinding', () => {
-    it('should get finding for an assessment by ID and organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic().withId('scanningTool#1').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      const fetchedFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedFinding).toEqual(finding);
-    });
-
-    it('should return undefined if finding does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const fetchedFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedFinding).toBeUndefined();
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment1);
-
-      const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
-        .withOrganization('organization2')
-        .build();
-      await repository.save(assessment2);
-
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment2',
-        organizationDomain: 'organization2',
-        finding: finding2,
-      });
-
-      const fetchedFinding1 = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-      const fetchedFinding2 = await repository.getFinding({
-        assessmentId: 'assessment2',
-        findingId: 'scanningTool#2',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedFinding1).toEqual(finding1);
-      expect(fetchedFinding2).toBeUndefined();
-    });
-  });
-
-  describe('deleteFindings', () => {
-    it('should delete findings for an assessment by ID and organization', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      await repository.deleteFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-
-      const fetchedFinding1 = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-      const fetchedFinding2 = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#2',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedFinding1).toBeUndefined();
-      expect(fetchedFinding2).toBeUndefined();
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment1);
-
-      const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
-        .withOrganization('organization2')
-        .build();
-      await repository.save(assessment2);
-
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
-      await repository.saveFinding({
-        assessmentId: 'assessment2',
-        organizationDomain: 'organization2',
-        finding: finding2,
-      });
-
-      await repository.deleteFindings({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-      });
-
-      const fetchedFinding1 = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'scanningTool#1',
-        organizationDomain: 'organization1',
-      });
-      const fetchedFinding2 = await repository.getFinding({
-        assessmentId: 'assessment2',
-        findingId: 'scanningTool#2',
-        organizationDomain: 'organization2',
-      });
-
-      expect(fetchedFinding1).toBeUndefined();
-      expect(fetchedFinding2).toEqual(finding2);
-    });
-  });
-
-  describe('addFindingComment', () => {
-    it('should add a comment to a finding', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments([])
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      const comment = FindingCommentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .build();
-      await repository.addFindingComment({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-        comment,
-      });
-
-      const findingWithComment = await repository.getFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-      });
-
-      expect(findingWithComment).toEqual(
-        expect.objectContaining({
-          comments: [comment],
-        })
-      );
-    });
-  });
-
-  describe('updateFindingComment', () => {
-    it('should update a comment in a finding', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-            .withText('old-comment-text')
-            .build(),
-        ])
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      await repository.updateFindingComment({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        commentBody: {
-          text: 'new-comment-text',
-        },
-      });
-
-      const findingWithComment = await repository.getFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-      });
-
-      expect(findingWithComment).toEqual(
-        expect.objectContaining({
-          comments: [
-            expect.objectContaining({
-              id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-              text: 'new-comment-text',
-            }),
-          ],
-        })
-      );
-    });
-  });
-
-  describe('deleteFindingComment', () => {
-    it('should delete a comment from a finding', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-            .build(),
-        ])
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      await repository.deleteFindingComment({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      });
-
-      const findingWithComment = await repository.getFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: finding.id,
-      });
-
-      expect(findingWithComment).toEqual(
-        expect.objectContaining({
-          comments: [],
-        })
-      );
-    });
-  });
-
   describe('update', () => {
     it('should update the assessment', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Old Name')
         .withPillars([])
@@ -1015,7 +549,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withSeverities({ [SeverityType.High]: 1 })
         .build();
       await repository.update({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         assessmentBody: {
           name: 'New Name',
@@ -1043,7 +577,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -1078,31 +612,31 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Old Name')
         .build();
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .withName('Old Name')
         .build();
       await repository.save(assessment2);
 
       await repository.update({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         assessmentBody: { name: 'New Name' },
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
       });
 
@@ -1115,625 +649,34 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
-  describe('getBestPracticeFindings', () => {
-    it('should return all findings', async () => {
+  describe('updatePillar', () => {
+    it('should update the pillar disabled status', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
+          PillarMother.basic().withId('0').withDisabled(false).build(),
         ])
         .build();
       await repository.save(assessment);
 
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .build()
-      );
-
-      expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
-      ]);
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-      const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment1);
-      const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
-        .withOrganization('organization2')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment2);
-
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment2',
-        organizationDomain: 'organization2',
-        finding: finding2,
-      });
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .build()
-      );
-
-      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
-    });
-
-    it('should return an empty array if no findings exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .build()
-      );
-
-      expect(findings).toEqual([]);
-    });
-
-    it('should not return the hidden findings', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withHidden(true)
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .build()
-      );
-
-      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
-    });
-
-    it('should only return the matching findings', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .withRiskDetails('dummy risk details')
-        .withStatusDetail('dummy status detail')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withStatusDetail('searchterm')
-        .build();
-      const finding3 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#3')
-        .withRiskDetails('searchterm')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding3,
-      });
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .withSearchTerm('searchterm')
-          .build()
-      );
-
-      expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#2' }),
-        expect.objectContaining({ id: 'tool#3' }),
-      ]);
-    });
-
-    it('should only return a limited number of findings', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
-      const finding3 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#3')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding3,
-      });
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .withLimit(2)
-          .build()
-      );
-
-      expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
-      ]);
-    });
-
-    it('should also return the hidden findings', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withHidden(true)
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .withShowHidden(true)
-          .build()
-      );
-
-      expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
-      ]);
-    });
-
-    it('should return a nextToken if more results are available', async () => {
-      const { repository } = setup();
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      const { nextToken } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-          .withAssessmentId('assessment1')
-          .withOrganization('organization1')
-          .withPillarId('pillar1')
-          .withQuestionId('question1')
-          .withBestPracticeId('bp1')
-          .withLimit(1)
-          .build()
-      );
-      expect(nextToken).toBeDefined();
-    });
-
-    it('should return more results using nextToken', async () => {
-      const { repository } = setup();
-      const assessment = AssessmentMother.basic()
-        .withId('assessment1')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('bp1').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await repository.save(assessment);
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding2,
-      });
-
-      const { findings: firstFindings, nextToken } =
-        await repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-            .withAssessmentId('assessment1')
-            .withOrganization('organization1')
-            .withPillarId('pillar1')
-            .withQuestionId('question1')
-            .withBestPracticeId('bp1')
-            .withLimit(1)
-            .build()
-        );
-      const { findings: secondFindings } =
-        await repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
-            .withAssessmentId('assessment1')
-            .withOrganization('organization1')
-            .withPillarId('pillar1')
-            .withQuestionId('question1')
-            .withBestPracticeId('bp1')
-            .withNextToken(nextToken as string)
-            .build()
-        );
-
-      expect(firstFindings).not.toEqual(secondFindings);
-      expect(firstFindings.length).toBe(1);
-      expect(secondFindings.length).toBe(1);
-    });
-  });
-
-  describe('updateFinding', () => {
-    it('should update the finding visibility', async () => {
-      const { repository } = setup();
-
-      const finding = FindingMother.basic()
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding,
-      });
-
-      await repository.updateFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: 'tool#1',
-        findingBody: {
-          hidden: true,
-        },
-      });
-
-      const fetchedFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'tool#1',
-        organizationDomain: 'organization1',
-      });
-
-      expect(fetchedFinding).toEqual(
-        expect.objectContaining({
-          id: 'tool#1',
-          hidden: true,
+      await expect(
+        repository.updatePillar({
+          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          organizationDomain: 'organization1',
+          pillarId: '0',
+          pillarBody: {
+            disabled: true,
+          },
         })
-      );
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const finding1 = FindingMother.basic()
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
-      const finding2 = FindingMother.basic()
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
-
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        finding: finding1,
-      });
-      await repository.saveFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization2',
-        finding: finding2,
-      });
-
-      await repository.updateFinding({
-        assessmentId: 'assessment1',
-        organizationDomain: 'organization1',
-        findingId: 'tool#1',
-        findingBody: {
-          hidden: true,
-        },
-      });
-
-      const updatedFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'tool#1',
+      ).resolves.not.toThrow();
+      const updatedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
-      const otherFinding = await repository.getFinding({
-        assessmentId: 'assessment1',
-        findingId: 'tool#1',
-        organizationDomain: 'organization2',
-      });
-
-      expect(updatedFinding).toEqual(expect.objectContaining({ hidden: true }));
-      expect(otherFinding).toEqual(expect.objectContaining({ hidden: false }));
+      expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
     });
   });
 
@@ -1742,7 +685,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withPillars([
           PillarMother.basic()
@@ -1760,7 +703,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       await repository.updateQuestion({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         pillarId: 'pillar1',
         questionId: 'question1',
@@ -1771,7 +714,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -1784,7 +727,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withPillars([
           PillarMother.basic()
@@ -1802,7 +745,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .withPillars([
           PillarMother.basic()
@@ -1820,7 +763,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       await repository.updateQuestion({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         pillarId: 'pillar1',
         questionId: 'question1',
@@ -1831,11 +774,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: 'assessment2',
+        assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
       });
 
@@ -1852,12 +795,61 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('updateBestPractice', () => {
+    it('should update the best practice status', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withPillars([
+          PillarMother.basic()
+            .withId('0')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('0')
+                .withBestPractices([
+                  BestPracticeMother.basic()
+                    .withId('0')
+                    .withChecked(false)
+                    .build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.updateBestPractice({
+          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          organizationDomain: 'organization1',
+          pillarId: '0',
+          questionId: '0',
+          bestPracticeId: '0',
+          bestPracticeBody: {
+            checked: true,
+          },
+        })
+      ).resolves.not.toThrow();
+      const updatedAssessment = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
+          .checked
+      ).toBe(true);
+    });
+  });
+
   describe('updateRawGraphDataForScanningTool', () => {
     it('should update the raw graph data for a scanning tool', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withRawGraphData({})
         .build();
@@ -1884,14 +876,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -1904,7 +896,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withRawGraphData({})
         .build();
@@ -1931,14 +923,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         scanningTool: ScanningTool.CLOUD_CUSTODIAN,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -1951,7 +943,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withRawGraphData({
           [ScanningTool.CLOUD_CUSTODIAN]:
@@ -1981,14 +973,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
 
@@ -2002,7 +994,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('assessment1')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withRawGraphData({
           [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
@@ -2011,7 +1003,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('assessment2')
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .withRawGraphData({
           [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
@@ -2040,18 +1032,18 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: 'assessment1',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: 'assessment2',
+        assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
       });
 

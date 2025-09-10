@@ -2,6 +2,7 @@ import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
   tokenFakeFeatureToggleRepository,
+  tokenFakeFindingsRepository,
   tokenFakeMarketplaceService,
   tokenFakeObjectsStorage,
   tokenFakeOrganizationRepository,
@@ -28,7 +29,7 @@ describe('CleanupUseCase', () => {
     it('should delete assessment storage if not in debug mode', async () => {
       const { useCase, fakeObjectsStorage } = setup();
 
-      fakeObjectsStorage.put({
+      await fakeObjectsStorage.put({
         key: 'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test',
         body: 'hello world',
       });
@@ -38,6 +39,7 @@ describe('CleanupUseCase', () => {
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withError(undefined)
         .build();
+
       await useCase.cleanup(input);
 
       expect(
@@ -50,7 +52,7 @@ describe('CleanupUseCase', () => {
     it('should not delete assessment storage if debug mode is enabled', async () => {
       const { useCase, fakeObjectsStorage } = setup(true);
 
-      fakeObjectsStorage.put({
+      await fakeObjectsStorage.put({
         key: 'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test',
         body: 'hello world',
       });
@@ -60,6 +62,7 @@ describe('CleanupUseCase', () => {
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withError(undefined)
         .build();
+
       await useCase.cleanup(input);
 
       expect(
@@ -72,11 +75,9 @@ describe('CleanupUseCase', () => {
 
   describe('cleanupError', () => {
     it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-      const { useCase, fakeAssessmentsRepository } = setup();
+      const { useCase } = setup();
 
       const input = CleanupUseCaseArgsMother.basic().build();
-      fakeAssessmentsRepository.assessments = {};
-      fakeAssessmentsRepository.assessmentFindings = {};
 
       await expect(useCase.cleanupError(input)).rejects.toThrow(
         AssessmentNotFoundError
@@ -84,89 +85,86 @@ describe('CleanupUseCase', () => {
     });
 
     it('should delete assessment findings if not in debug mode and error is defined', async () => {
-      const { useCase, fakeAssessmentsRepository } = setup();
+      const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+        setup();
 
-      fakeAssessmentsRepository.save(
-        AssessmentMother.basic()
-          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-          .withOrganization('test.io')
-          .build()
-      );
-      fakeAssessmentsRepository.saveFinding({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'test.io',
-        finding: FindingMother.basic().build(),
+      const assessment = AssessmentMother.basic().build();
+      await fakeAssessmentsRepository.save(assessment);
+
+      const finding = FindingMother.basic().build();
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding,
       });
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withAssessmentId(assessment.id)
+        .withOrganization(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
+
       await useCase.cleanupError(input);
 
-      expect(
-        fakeAssessmentsRepository.assessmentFindings[
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-        ]
-      ).toBeUndefined();
+      const findings = await fakeFindingsRepository.getAll({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(findings).toBeUndefined();
     });
 
     it('should not delete assessment findings if debug mode is enabled and error is defined', async () => {
-      const { useCase, fakeAssessmentsRepository } = setup(true);
+      const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+        setup(true);
 
-      fakeAssessmentsRepository.save(
-        AssessmentMother.basic()
-          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-          .withOrganization('test.io')
-          .build()
-      );
-      fakeAssessmentsRepository.saveFinding({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'test.io',
-        finding: FindingMother.basic().build(),
+      const assessment = AssessmentMother.basic().build();
+      await fakeAssessmentsRepository.save(assessment);
+
+      const finding = FindingMother.basic().build();
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding,
       });
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withAssessmentId(assessment.id)
+        .withOrganization(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
+
       await useCase.cleanupError(input);
 
-      expect(
-        fakeAssessmentsRepository.assessmentFindings[
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-        ]
-      ).toBeDefined();
+      const findings = await fakeFindingsRepository.getAll({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(findings).toBeDefined();
     });
 
     it('should update assessment error if error is defined', async () => {
       const { useCase, fakeAssessmentsRepository } = setup(true);
 
-      fakeAssessmentsRepository.save(
-        AssessmentMother.basic()
-          .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-          .withOrganization('test.io')
-          .build()
-      );
+      const assessment = AssessmentMother.basic().build();
+      await fakeAssessmentsRepository.save(assessment);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withAssessmentId(assessment.id)
+        .withOrganization(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
+
       await useCase.cleanupError(input);
 
-      const updatedAssessment =
-        fakeAssessmentsRepository.assessments[
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-        ];
-      expect(updatedAssessment.error).toEqual({
+      const updatedAssessment = await fakeAssessmentsRepository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(updatedAssessment?.error).toEqual({
         error: 'test-error',
         cause: 'test-cause',
       });
-      expect(updatedAssessment.step).toEqual(AssessmentStep.ERRORED);
+      expect(updatedAssessment?.step).toEqual(AssessmentStep.ERRORED);
     });
   });
 
@@ -175,9 +173,9 @@ describe('CleanupUseCase', () => {
       const { useCase } = setup();
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('test.io')
         .build();
+
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
         OrganizationNotFoundError
       );
@@ -191,22 +189,23 @@ describe('CleanupUseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withAccountId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({
+      await fakeOrganizationRepository.save({
         organization,
       });
 
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
         OrganizationAccountIdNotSetError
       );
@@ -220,22 +219,23 @@ describe('CleanupUseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withUnitBasedAgreementId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      fakeOrganizationRepository.save({
+      await fakeOrganizationRepository.save({
         organization,
       });
 
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
         OrganizationUnitBasedAgreementIdNotSetError
       );
@@ -245,17 +245,17 @@ describe('CleanupUseCase', () => {
       const { useCase, fakeOrganizationRepository } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
         .withFreeAssessmentsLeft(1)
         .build();
-      fakeOrganizationRepository.save({
+      await fakeOrganizationRepository.save({
         organization,
       });
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await useCase.cleanupSuccessful(input);
 
       expect(organization.freeAssessmentsLeft).toEqual(0);
@@ -269,20 +269,21 @@ describe('CleanupUseCase', () => {
         fakeFeatureToggleRepository,
       } = setup();
 
-      const organization = OrganizationMother.basic()
-        .withDomain('test.io')
-        .build();
-      fakeOrganizationRepository.save({
+      const organization = OrganizationMother.basic().build();
+      await fakeOrganizationRepository.save({
         organization,
       });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => false);
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockReturnValue(false);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await useCase.cleanupSuccessful(input);
 
       expect(
@@ -298,23 +299,25 @@ describe('CleanupUseCase', () => {
         fakeFeatureToggleRepository,
       } = setup();
 
-      const organization = OrganizationMother.basic()
-        .withDomain('test.io')
-        .build();
-      fakeOrganizationRepository.save({
+      const organization = OrganizationMother.basic().build();
+      await fakeOrganizationRepository.save({
         organization,
       });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
-      fakeMarketplaceService.hasMonthlySubscription = vitest
-        .fn()
-        .mockImplementation(() => Promise.resolve(true));
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockReturnValue(true);
+      vi.spyOn(
+        fakeMarketplaceService,
+        'hasMonthlySubscription'
+      ).mockResolvedValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await useCase.cleanupSuccessful(input);
 
       expect(fakeMarketplaceService.hasMonthlySubscription).toHaveBeenCalled();
@@ -329,33 +332,35 @@ describe('CleanupUseCase', () => {
         fakeFeatureToggleRepository,
       } = setup();
 
-      const organization = OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAccountId('accountId')
-        .build();
-      fakeOrganizationRepository.save({
+      const organization = OrganizationMother.basic().build();
+      await fakeOrganizationRepository.save({
         organization,
       });
-      fakeFeatureToggleRepository.marketplaceIntegration = vitest
-        .fn()
-        .mockImplementation(() => true);
-      fakeMarketplaceService.hasMonthlySubscription = vitest
-        .fn()
-        .mockImplementation(() => Promise.resolve(false));
-      fakeMarketplaceService.hasUnitBasedSubscription = vitest
-        .fn()
-        .mockImplementation(() => Promise.resolve(true));
+
+      vi.spyOn(
+        fakeFeatureToggleRepository,
+        'marketplaceIntegration'
+      ).mockReturnValue(true);
+      vi.spyOn(
+        fakeMarketplaceService,
+        'hasMonthlySubscription'
+      ).mockResolvedValue(false);
+      vi.spyOn(
+        fakeMarketplaceService,
+        'hasUnitBasedSubscription'
+      ).mockResolvedValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('test.io')
+        .withOrganization(organization.domain)
         .build();
+
       await useCase.cleanupSuccessful(input);
 
       expect(
         fakeMarketplaceService.consumeReviewUnit
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ accountId: 'accountId' })
+        expect.objectContaining({ accountId: organization.accountId })
       );
     });
   });
@@ -365,20 +370,19 @@ const setup = (debug = false) => {
   reset();
   registerTestInfrastructure();
   register(tokenDebug, { useValue: debug });
-  const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
-  const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
-  const fakeOrganizationRepository = inject(tokenFakeOrganizationRepository);
+
   const fakeMarketplaceService = inject(tokenFakeMarketplaceService);
   vitest.spyOn(fakeMarketplaceService, 'consumeReviewUnit');
   vitest.spyOn(fakeMarketplaceService, 'hasMonthlySubscription');
   vitest.spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription');
-  const fakeFeatureToggleRepository = inject(tokenFakeFeatureToggleRepository);
+
   return {
     useCase: new CleanupUseCaseImpl(),
-    fakeAssessmentsRepository,
-    fakeObjectsStorage,
-    fakeOrganizationRepository,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
+    fakeObjectsStorage: inject(tokenFakeObjectsStorage),
+    fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
     fakeMarketplaceService,
-    fakeFeatureToggleRepository,
+    fakeFeatureToggleRepository: inject(tokenFakeFeatureToggleRepository),
   };
 };

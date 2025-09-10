@@ -1,4 +1,4 @@
-import { UserClaimsMissingError } from '../../../errors/UserErrors';
+import { UserClaimsMissingError } from '../../../errors';
 import { APIGatewayProxyEventMother } from '../APIGatewayProxyEventMother';
 import { getUserFromEvent } from './getUserFromEvent';
 

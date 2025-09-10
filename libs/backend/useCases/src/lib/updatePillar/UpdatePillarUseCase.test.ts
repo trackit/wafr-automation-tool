@@ -13,50 +13,38 @@ describe('UpdatePillarUseCase', () => {
   it('should update pillar', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('other-org.io')
-      .withPillars([
-        PillarMother.basic().withId('1').withDisabled(false).build(),
-      ])
-      .build();
+    const user = UserMother.basic().build();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#other-org.io'
-    ] = assessment;
+    const pillar = PillarMother.basic().withDisabled(false).build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId(pillar.id)
       .withPillarBody({
         disabled: true,
       })
       .build();
 
-    await expect(useCase.updatePillar(input)).resolves.not.toThrow();
-    expect(
-      fakeAssessmentsRepository.updatePillar
-    ).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'other-org.io',
-        pillarId: '1',
-        pillarBody: {
-          disabled: true,
-        },
-      })
-    );
+    await useCase.updatePillar(input);
+
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: user.organizationDomain,
+    });
+    expect(updatedAssessment).toBeDefined();
+    expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
   });
 
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = UpdatePillarUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.updatePillar(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -66,20 +54,20 @@ describe('UpdatePillarUseCase', () => {
   it('should throw PillarNotFoundError if pillar does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withPillars([])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .withPillarId('pillar-id')
       .build();
+
     await expect(useCase.updatePillar(input)).rejects.toThrow(
       PillarNotFoundError
     );
@@ -89,10 +77,9 @@ describe('UpdatePillarUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
-  vitest.spyOn(fakeAssessmentsRepository, 'updatePillar');
+
   return {
     useCase: new UpdatePillarUseCaseImpl(),
-    fakeAssessmentsRepository: fakeAssessmentsRepository,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };

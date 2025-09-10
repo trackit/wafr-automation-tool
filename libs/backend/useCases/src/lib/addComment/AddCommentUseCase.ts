@@ -1,5 +1,5 @@
 import {
-  tokenAssessmentsRepository,
+  tokenFindingsRepository,
   tokenIdGenerator,
   tokenLogger,
 } from '@backend/infrastructure';
@@ -20,7 +20,7 @@ export interface AddCommentUseCase {
 }
 
 export class AddCommentUseCaseImpl implements AddCommentUseCase {
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly logger = inject(tokenLogger);
 
@@ -30,7 +30,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
     const { assessmentId, findingId, text, user } = args;
     const { organizationDomain } = user;
 
-    const finding = await this.assessmentsRepository.getFinding({
+    const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain,
       findingId,
@@ -45,7 +45,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
 
     // Backward compatibility: if finding has no comments field, create an empty object
     if (!finding.comments) {
-      await this.assessmentsRepository.updateFinding({
+      await this.findingsRepository.update({
         assessmentId,
         organizationDomain,
         findingId,
@@ -61,7 +61,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
       text,
       createdAt: new Date(),
     };
-    await this.assessmentsRepository.addFindingComment({
+    await this.findingsRepository.saveComment({
       assessmentId,
       organizationDomain,
       findingId,

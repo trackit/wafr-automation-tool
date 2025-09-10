@@ -33,26 +33,27 @@ describe('exportWellArchitectedTool UseCase', () => {
       fakeOrganizationRepository,
     } = setup();
 
+    const organization = OrganizationMother.basic().build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-
-    const organization = OrganizationMother.basic()
-      .withDomain('test.io')
+    const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
 
-    fakeOrganizationRepository.organizations['test.io'] = organization;
-
-    const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
-    await expect(useCase.exportAssessment(input)).resolves.toBeUndefined();
+    await useCase.exportAssessment(input);
 
     expect(
       fakeWellArchitectedToolService.exportAssessment
@@ -65,11 +66,9 @@ describe('exportWellArchitectedTool UseCase', () => {
   });
 
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase } = setup();
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       AssessmentNotFoundError
@@ -80,174 +79,175 @@ describe('exportWellArchitectedTool UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const organization = OrganizationMother.basic().build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([])
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
-    const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
   });
 
   it('should throw AssessmentNotFinishedError if the assessment findings are undefined', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
-      setup();
+    const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withPillars(undefined)
       .build();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
   });
 
   it('should throw AssessmentNotFinishedError if the assessment is not finished', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
-      setup();
+    const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
       .build();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       AssessmentNotFinishedError
     );
   });
 
   it('should throw AssessmentExportRegionNotSetError if the assessment does not have an exportRegion and the region is not provided', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
-      setup();
+    const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .withRegion(undefined)
       .build();
+
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       AssessmentExportRegionNotSetError
     );
   });
 
-  it('should not throw a ConflictError if the assessment does not have an exportRegion and the region is provided', async () => {
+  it('should not throw an Error if the assessment does not have an exportRegion and the region is provided', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const organization = OrganizationMother.basic().build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .withRegion('us-west-2')
       .build();
-    await expect(useCase.exportAssessment(input)).resolves.not.toThrow();
+
+    await useCase.exportAssessment(input);
   });
 
   it('should update the assessment export region if the region is provided and the assessment does not have one', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
+    const organization = OrganizationMother.basic().build();
+    await fakeOrganizationRepository.save({ organization });
+
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+      .withOrganization(organization.domain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
-
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .withRegion('us-west-2')
       .build();
+
     await useCase.exportAssessment(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments[
-        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-      ].exportRegion
-    ).toBe('us-west-2');
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: organization.domain,
+    });
+    expect(updatedAssessment?.exportRegion).toBe(input.region);
   });
 
   it('should throw OrganizationNotFoundError if the organization doesn’t exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
+
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
       OrganizationNotFoundError
     );
@@ -257,15 +257,16 @@ describe('exportWellArchitectedTool UseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const fakeWellArchitectedToolService = inject(
     tokenFakeWellArchitectedToolService
   );
   vitest.spyOn(fakeWellArchitectedToolService, 'exportAssessment');
-  const useCase = new ExportWellArchitectedToolUseCaseImpl();
+
   return {
-    useCase,
-    fakeWellArchitectedToolService,
+    useCase: new ExportWellArchitectedToolUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
+    fakeWellArchitectedToolService,
   };
 };

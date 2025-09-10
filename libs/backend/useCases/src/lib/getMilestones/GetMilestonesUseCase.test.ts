@@ -4,7 +4,11 @@ import {
   tokenFakeOrganizationRepository,
   tokenFakeWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { AssessmentMother, OrganizationMother } from '@backend/models';
+import {
+  AssessmentMother,
+  MilestoneMother,
+  OrganizationMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import {
@@ -14,6 +18,7 @@ import {
   OrganizationNotFoundError,
 } from '../../errors';
 import { GetMilestonesUseCaseImpl } from './GetMilestonesUseCase';
+import { GetMilestonesUseCaseArgsMother } from './GetMilestonesUseCaseArgsMother';
 
 describe('GetMilestonesUseCase', () => {
   it('should return milestones for a valid assessment', async () => {
@@ -24,24 +29,19 @@ describe('GetMilestonesUseCase', () => {
       fakeWellArchitectedToolService,
     } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .build();
-
     const organization = OrganizationMother.basic()
-      .withDomain('test.io')
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
+    await fakeOrganizationRepository.save({ organization });
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-    fakeOrganizationRepository.organizations['test.io'] = organization;
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const expectedMilestones = [
-      { id: 1, name: 'Milestone 1', createdAt: new Date() },
-      { id: 2, name: 'Milestone 2', createdAt: new Date() },
+      MilestoneMother.basic().withId(1).withName('Milestone 1').build(),
+      MilestoneMother.basic().withId(2).withName('Milestone 2').build(),
     ];
 
     vi.spyOn(fakeWellArchitectedToolService, 'getMilestones').mockResolvedValue(
@@ -50,17 +50,19 @@ describe('GetMilestonesUseCase', () => {
       }
     );
 
-    const result = await useCase.getMilestones({
-      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organizationDomain: 'test.io',
-      region: 'us-east-1',
-    });
+    const input = GetMilestonesUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
+      .withRegion('us-east-1')
+      .build();
+
+    const result = await useCase.getMilestones(input);
 
     expect(result.milestones).toEqual(expectedMilestones);
     expect(fakeWellArchitectedToolService.getMilestones).toHaveBeenCalledWith({
-      roleArn: 'arn:aws:iam::123456789012:role/export-role',
+      roleArn: organization.assessmentExportRoleArn,
       assessment,
-      region: 'us-east-1',
+      region: input.region,
     });
   });
 
@@ -68,96 +70,84 @@ describe('GetMilestonesUseCase', () => {
     const { useCase, fakeOrganizationRepository } = setup();
 
     const organization = OrganizationMother.basic()
-      .withDomain('test.io')
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
+    await fakeOrganizationRepository.save({ organization });
 
-    fakeOrganizationRepository.organizations['test.io'] = organization;
+    const input = GetMilestonesUseCaseArgsMother.basic()
+      .withAssessmentId('non-existent-assessment')
+      .withOrganizationDomain(organization.domain)
+      .build();
 
-    await expect(
-      useCase.getMilestones({
-        assessmentId: 'non-existent-assessment',
-        organizationDomain: 'test.io',
-        region: 'us-east-1',
-      })
-    ).rejects.toThrow(AssessmentNotFoundError);
+    await expect(useCase.getMilestones(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
   });
 
   it('should throw OrganizationExportRoleNotSetError if organization does not have export role ARN', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
-      .build();
-
     const organization = OrganizationMother.basic()
-      .withDomain('test.io')
       .withAssessmentExportRoleArn(undefined)
       .build();
+    await fakeOrganizationRepository.save({ organization });
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-    fakeOrganizationRepository.organizations['test.io'] = organization;
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    await expect(
-      useCase.getMilestones({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'test.io',
-        region: 'us-east-1',
-      })
-    ).rejects.toThrow(OrganizationExportRoleNotSetError);
+    const input = GetMilestonesUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
+      .build();
+
+    await expect(useCase.getMilestones(input)).rejects.toThrow(
+      OrganizationExportRoleNotSetError
+    );
   });
 
   it('should throw OrganizationNotFoundError if organization does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const input = GetMilestonesUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .build();
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
-
-    await expect(
-      useCase.getMilestones({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'test.io',
-        region: 'us-east-1',
-      })
-    ).rejects.toThrow(OrganizationNotFoundError);
+    await expect(useCase.getMilestones(input)).rejects.toThrow(
+      OrganizationNotFoundError
+    );
   });
 
   it('should throw AssessmentExportRegionNotSetError if assessment export region is not set', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
+    const organization = OrganizationMother.basic()
+      .withAssessmentExportRoleArn('export-role-arn')
+      .build();
+    await fakeOrganizationRepository.save({ organization });
+
     const assessment = AssessmentMother.basic()
-      .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-      .withOrganization('test.io')
+      .withOrganization(organization.domain)
       .withExportRegion(undefined)
       .build();
+    await fakeAssessmentsRepository.save(assessment);
 
-    fakeAssessmentsRepository.assessments[
-      '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed#test.io'
-    ] = assessment;
+    const input = GetMilestonesUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
+      .withRegion(undefined)
+      .build();
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic()
-        .withDomain('test.io')
-        .withAssessmentExportRoleArn('export-role-arn')
-        .build();
-
-    await expect(
-      useCase.getMilestones({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'test.io',
-      })
-    ).rejects.toThrow(AssessmentExportRegionNotSetError);
+    await expect(useCase.getMilestones(input)).rejects.toThrow(
+      AssessmentExportRegionNotSetError
+    );
   });
 });
 

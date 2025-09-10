@@ -1,5 +1,6 @@
 import {
   tokenAssessmentsRepository,
+  tokenFindingsRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
 import {
@@ -39,6 +40,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
 {
   private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly getScannedFindingsUseCase = inject(
     tokenGetScannedFindingsUseCase
   );
@@ -137,7 +139,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     );
     await Promise.all(
       findings.map((finding) =>
-        this.assessmentsRepository.saveFinding({
+        this.findingsRepository.save({
           assessmentId,
           organizationDomain: organization,
           finding,
