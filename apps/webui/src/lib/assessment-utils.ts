@@ -41,15 +41,13 @@ export function calculatePillarCompletion(pillar: Pillar): number {
 /**
  * Calculates the overall completion percentage for an assessment
  */
-export function calculateOverallCompletion(
-  assessment: AssessmentContent | null
-): number {
-  if (!assessment?.pillars) return 0;
+export function calculateOverallCompletion(pillars?: Pillar[]): number {
+  if (!pillars) return 0;
 
   let completedQuestions = 0;
   let totalQuestions = 0;
 
-  for (const pillar of assessment.pillars) {
+  for (const pillar of pillars) {
     if (pillar.disabled) continue;
 
     const questions = pillar.questions || [];
