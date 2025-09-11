@@ -12,6 +12,7 @@ type AssessmentContent = components['schemas']['AssessmentContent'];
  */
 export function isQuestionCompleted(question: Question): boolean {
   if (question.disabled) return false;
+  if (question.none) return true;
 
   const highSeverityPractices =
     question.bestPractices?.filter((bp) => bp.risk === 'High') ?? [];
