@@ -46,6 +46,9 @@ export class GetBestPracticeFindingsUseCaseImpl
       questionId,
       bestPracticeId,
       nextToken,
+      limit,
+      searchTerm,
+      showHidden,
     } = args;
     const organizationDomain = user.organizationDomain;
 
@@ -73,6 +76,9 @@ export class GetBestPracticeFindingsUseCaseImpl
       questionId,
       bestPracticeId,
       nextToken,
+      limit,
+      searchTerm,
+      showHidden,
     });
   }
 }

@@ -9,7 +9,7 @@ import { AssessmentNotFoundError } from '../../errors';
 
 export type UpdateAssessmentUseCaseArgs = {
   assessmentId: string;
-  organizationDomain: string;
+  organization: string;
   assessmentBody: AssessmentBody;
 };
 
@@ -24,7 +24,11 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
   public async updateAssessment(
     args: UpdateAssessmentUseCaseArgs
   ): Promise<void> {
-    const { organizationDomain, assessmentId, assessmentBody } = args;
+    const {
+      organization: organizationDomain,
+      assessmentId,
+      assessmentBody,
+    } = args;
 
     const assessment = await this.assessmentsRepository.get({
       assessmentId,

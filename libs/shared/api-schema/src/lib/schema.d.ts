@@ -642,14 +642,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The assessment has no fields to update */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            /** @description Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1147,14 +1140,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The best practice has no fields to update */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            /** @description Invalid or empty request body or a issue occurred while trying to retrieve the organization of the user */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1248,14 +1234,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The finding has no fields to update */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body or a issue occurred while trying to retrieve the organization of the user */
+            /** @description Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user */
             400: {
                 headers: {
                     [name: string]: unknown;
