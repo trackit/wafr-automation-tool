@@ -25,7 +25,7 @@ export class ParametersValidationError extends HandlerError {
         ? `; +${count - ParametersValidationError.MAX_PREVIEW} more`
         : '';
     super({
-      category: 'BAD_REQUEST',
+      type: 'BAD_REQUEST',
       message: `Validation failed with ${count} error(s): ${previews}${more}`,
       description: description ?? JSON.stringify(err.format(), null, 2),
     });
@@ -35,7 +35,7 @@ export class ParametersValidationError extends HandlerError {
 export class ParametersJSONParseError extends HandlerError {
   public constructor(message: string, description?: string) {
     super({
-      category: 'BAD_REQUEST',
+      type: 'BAD_REQUEST',
       message: `Failed to parse JSON: ${message}`,
       description,
     });
@@ -45,7 +45,7 @@ export class ParametersJSONParseError extends HandlerError {
 export class BodyMissingError extends HandlerError {
   public constructor(description?: string) {
     super({
-      category: 'BAD_REQUEST',
+      type: 'BAD_REQUEST',
       message: `The request body is missing`,
       description,
     });
@@ -55,7 +55,7 @@ export class BodyMissingError extends HandlerError {
 export class PathMissingError extends HandlerError {
   public constructor(description?: string) {
     super({
-      category: 'BAD_REQUEST',
+      type: 'BAD_REQUEST',
       message: `The path parameters are missing`,
       description,
     });
@@ -65,7 +65,7 @@ export class PathMissingError extends HandlerError {
 export class QueryMissingError extends HandlerError {
   public constructor(description?: string) {
     super({
-      category: 'BAD_REQUEST',
+      type: 'BAD_REQUEST',
       message: `The query string parameters are missing`,
       description,
     });

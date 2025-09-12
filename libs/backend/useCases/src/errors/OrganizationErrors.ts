@@ -9,7 +9,7 @@ export class OrganizationNotFoundError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Organization with domain ${domain} not found`,
       description,
     });
@@ -25,7 +25,7 @@ export class OrganizationSubscriptionNotFoundError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Organization with domain ${domain} does not have a subscription`,
       description,
     });
@@ -41,7 +41,7 @@ export class OrganizationExportRoleNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Organization with domain ${domain} has no export role set`,
       description,
     });
@@ -57,7 +57,7 @@ export class OrganizationNoActiveSubscriptionError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'FORBIDDEN',
+      type: 'FORBIDDEN',
       message: `Organization with domain ${domain} does not have an active subscription or free assessments left`,
       description,
     });
@@ -73,7 +73,7 @@ export class OrganizationAccountIdNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Organization with domain ${domain} has no account ID set`,
       description,
     });
@@ -89,7 +89,7 @@ export class OrganizationUnitBasedAgreementIdNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Organization with domain ${domain} has no unit-based agreement ID set`,
       description,
     });

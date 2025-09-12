@@ -12,7 +12,7 @@ export class QuestionNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, organizationDomain, pillarId, questionId } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Question with id ${questionId} not found for assessment with id ${assessmentId} for organization with domain ${organizationDomain} and pillar with id ${pillarId}`,
       description,
     });

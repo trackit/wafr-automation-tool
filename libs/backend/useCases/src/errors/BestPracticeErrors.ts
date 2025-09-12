@@ -19,7 +19,7 @@ export class BestPracticeNotFoundError extends UseCaseError {
       bestPracticeId,
     } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Best practice with id ${bestPracticeId} not found for assessment with id ${assessmentId} for organization with domain ${organizationDomain} and pillar with id ${pillarId} and question with id ${questionId}`,
       description,
     });
@@ -45,7 +45,7 @@ export class BestPracticeEmptyUpdateBodyError extends UseCaseError {
       bestPracticeId,
     } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Nothing to update for best practice with id ${bestPracticeId} in assessment with id ${assessmentId} for organization with domain ${organizationDomain} and pillar with id ${pillarId} and question with id ${questionId}`,
       description,
     });

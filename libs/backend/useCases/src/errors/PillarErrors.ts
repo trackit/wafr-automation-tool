@@ -11,7 +11,7 @@ export class PillarNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, organizationDomain, pillarId } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Pillar with id ${pillarId} not found for assessment with id ${assessmentId} for organization with domain ${organizationDomain}`,
       description,
     });

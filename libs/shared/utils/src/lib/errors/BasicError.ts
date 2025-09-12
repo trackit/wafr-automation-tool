@@ -5,17 +5,17 @@ export const CATEGORIES = [
   'BAD_REQUEST',
 ] as const;
 
-export type BasicErrorCategory = (typeof CATEGORIES)[number];
+export type BasicErrorType = (typeof CATEGORIES)[number];
 export type BasicErrorArgs = {
   code?: string;
-  category: BasicErrorCategory;
+  type: BasicErrorType;
   message: string;
   description?: string;
 };
 
 export abstract class BasicError extends Error {
   readonly code: string;
-  readonly category: BasicErrorCategory;
+  readonly type: BasicErrorType;
   readonly description?: string;
 
   protected constructor(params: BasicErrorArgs) {
@@ -25,7 +25,7 @@ export abstract class BasicError extends Error {
     const className = new.target.name;
     this.name = className;
     this.code = params.code ?? BasicError.deriveCodeFromClassName(className);
-    this.category = params.category;
+    this.type = params.type;
     this.description = params.description;
   }
 

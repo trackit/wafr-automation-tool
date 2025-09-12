@@ -11,7 +11,7 @@ export class FindingNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, findingId, organizationDomain } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organizationDomain}`,
       description,
     });
@@ -30,7 +30,7 @@ export class FindingCommentNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, findingId, organizationDomain, commentId } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${organizationDomain}`,
       description,
     });
@@ -49,7 +49,7 @@ export class FindingCommentForbiddenError extends UseCaseError {
   ) {
     const { findingId, commentId, userEmail, actionType } = args;
     super({
-      category: 'FORBIDDEN',
+      type: 'FORBIDDEN',
       message: `User ${userEmail} is not allowed to perform ${actionType} action on comment ${commentId} for finding ${findingId}`,
       description,
     });

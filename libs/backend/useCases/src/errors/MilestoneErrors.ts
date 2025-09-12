@@ -10,7 +10,7 @@ export class MilestoneNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, milestoneId } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Milestone with id ${milestoneId} not found for assessment with id ${assessmentId}`,
       description,
     });

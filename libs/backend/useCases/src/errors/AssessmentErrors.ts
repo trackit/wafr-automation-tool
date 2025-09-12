@@ -10,7 +10,7 @@ export class AssessmentNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, organizationDomain } = args;
     super({
-      category: 'NOT_FOUND',
+      type: 'NOT_FOUND',
       message: `Assessment with id ${assessmentId} not found for organization with domain ${organizationDomain}`,
       description,
     });
@@ -26,7 +26,7 @@ export class AssessmentNotFinishedError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Assessment with id ${assessmentId} is not finished`,
       description,
     });
@@ -42,7 +42,7 @@ export class AssessmentExportRegionNotSetError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      category: 'CONFLICT',
+      type: 'CONFLICT',
       message: `Assessment with id ${assessmentId} has no export region set`,
       description,
     });
