@@ -44,7 +44,6 @@ describe('FindingsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const finding = FindingMother.basic()
-        .withId('scanningTool#1')
         .withBestPractices('0#0#0')
         .withHidden(false)
         .withIsAIAssociated(false)
@@ -74,8 +73,8 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const savedFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'scanningTool#1',
         organizationDomain: 'organization1',
+        findingId: finding.id,
       });
 
       expect(savedFinding).toEqual(finding);
@@ -86,19 +85,15 @@ describe('FindingsRepositoryDynamoDB', () => {
     it('should add a comment to a finding', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments([])
-        .build();
+      const finding = FindingMother.basic().withComments([]).build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding,
       });
 
-      const comment = FindingCommentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .build();
+      const comment = FindingCommentMother.basic().build();
+
       await repository.saveComment({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -124,7 +119,7 @@ describe('FindingsRepositoryDynamoDB', () => {
     it('should get finding for an assessment by ID and organization', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic().withId('scanningTool#1').build();
+      const finding = FindingMother.basic().build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -133,8 +128,8 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const fetchedFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'scanningTool#1',
         organizationDomain: 'organization1',
+        findingId: finding.id,
       });
 
       expect(fetchedFinding).toEqual(finding);
@@ -145,8 +140,8 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const fetchedFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'scanningTool#1',
         organizationDomain: 'organization1',
+        findingId: 'scanningTool#1',
       });
 
       expect(fetchedFinding).toBeUndefined();
@@ -171,13 +166,13 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const fetchedFinding1 = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'scanningTool#1',
         organizationDomain: 'organization1',
+        findingId: finding1.id,
       });
       const fetchedFinding2 = await repository.get({
         assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'scanningTool#2',
         organizationDomain: 'organization1',
+        findingId: finding2.id,
       });
 
       expect(fetchedFinding1).toEqual(finding1);
@@ -193,15 +188,16 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -219,8 +215,8 @@ describe('FindingsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
+        expect.objectContaining({ id: finding1.id }),
+        expect.objectContaining({ id: finding2.id }),
       ]);
     });
 
@@ -231,20 +227,22 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#1')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#1')
+        .build();
       await repository.save({
         assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
         finding: finding2,
       });
+
       const { findings } = await repository.getBestPracticeFindings(
         GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
           .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -255,7 +253,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .build()
       );
 
-      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
+      expect(findings).toEqual([expect.objectContaining({ id: finding1.id })]);
     });
 
     it('should return an empty array if no findings exist', async () => {
@@ -282,16 +280,17 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withId('tool#1')
         .withHidden(false)
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withHidden(true)
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .withHidden(true)
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -308,7 +307,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .build()
       );
 
-      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
+      expect(findings).toEqual([expect.objectContaining({ id: finding1.id })]);
     });
 
     it('should only return the matching findings', async () => {
@@ -320,26 +319,28 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withRiskDetails('dummy risk details')
         .withStatusDetail('dummy status detail')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withStatusDetail('searchterm')
-        .build();
-      const finding3 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#3')
-        .withRiskDetails('searchterm')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .withStatusDetail('searchterm')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding2,
       });
+
+      const finding3 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#3')
+        .withRiskDetails('searchterm')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -358,8 +359,8 @@ describe('FindingsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#2' }),
-        expect.objectContaining({ id: 'tool#3' }),
+        expect.objectContaining({ id: finding2.id }),
+        expect.objectContaining({ id: finding3.id }),
       ]);
     });
 
@@ -370,24 +371,26 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
-      const finding3 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#3')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding2,
       });
+
+      const finding3 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#3')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -406,8 +409,8 @@ describe('FindingsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
+        expect.objectContaining({ id: finding1.id }),
+        expect.objectContaining({ id: finding2.id }),
       ]);
     });
 
@@ -419,16 +422,17 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withId('tool#1')
         .withHidden(false)
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .withHidden(true)
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .withHidden(true)
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -447,8 +451,8 @@ describe('FindingsRepositoryDynamoDB', () => {
       );
 
       expect(findings).toEqual([
-        expect.objectContaining({ id: 'tool#1' }),
-        expect.objectContaining({ id: 'tool#2' }),
+        expect.objectContaining({ id: finding1.id }),
+        expect.objectContaining({ id: finding2.id }),
       ]);
     });
 
@@ -459,15 +463,16 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -494,15 +499,16 @@ describe('FindingsRepositoryDynamoDB', () => {
         .withBestPractices('pillar1#question1#bp1')
         .withId('tool#1')
         .build();
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar1#question1#bp1')
-        .withId('tool#2')
-        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar1#question1#bp1')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -543,12 +549,13 @@ describe('FindingsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const finding1 = FindingMother.basic().withId('scanningTool#1').build();
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
+
+      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -617,13 +624,10 @@ describe('FindingsRepositoryDynamoDB', () => {
     it('should delete a comment from a finding', async () => {
       const { repository } = setup();
 
+      const comment = FindingCommentMother.basic().build();
       const finding = FindingMother.basic()
         .withId('scanningTool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-            .build(),
-        ])
+        .withComments([comment])
         .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
@@ -635,7 +639,7 @@ describe('FindingsRepositoryDynamoDB', () => {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         findingId: finding.id,
-        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        commentId: comment.id,
       });
 
       const findingWithComment = await repository.get({
@@ -656,10 +660,7 @@ describe('FindingsRepositoryDynamoDB', () => {
     it('should update the finding visibility', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic()
-        .withId('tool#1')
-        .withHidden(false)
-        .build();
+      const finding = FindingMother.basic().withHidden(false).build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -669,7 +670,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       await repository.update({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
-        findingId: 'tool#1',
+        findingId: finding.id,
         findingBody: {
           hidden: true,
         },
@@ -677,13 +678,13 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const fetchedFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'tool#1',
         organizationDomain: 'organization1',
+        findingId: finding.id,
       });
 
       expect(fetchedFinding).toEqual(
         expect.objectContaining({
-          id: 'tool#1',
+          id: finding.id,
           hidden: true,
         })
       );
@@ -715,7 +716,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       await repository.update({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
-        findingId: 'tool#1',
+        findingId: finding1.id,
         findingBody: {
           hidden: true,
         },
@@ -723,13 +724,13 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const updatedFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'tool#1',
         organizationDomain: 'organization1',
+        findingId: finding1.id,
       });
       const otherFinding = await repository.get({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'tool#1',
         organizationDomain: 'organization2',
+        findingId: finding2.id,
       });
 
       expect(updatedFinding).toEqual(expect.objectContaining({ hidden: true }));
@@ -741,15 +742,10 @@ describe('FindingsRepositoryDynamoDB', () => {
     it('should update a comment in a finding', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic()
-        .withId('scanningTool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-            .withText('old-comment-text')
-            .build(),
-        ])
+      const comment = FindingCommentMother.basic()
+        .withText('old-comment-text')
         .build();
+      const finding = FindingMother.basic().withComments([comment]).build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -760,7 +756,7 @@ describe('FindingsRepositoryDynamoDB', () => {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         findingId: finding.id,
-        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        commentId: comment.id,
         commentBody: {
           text: 'new-comment-text',
         },
@@ -776,7 +772,7 @@ describe('FindingsRepositoryDynamoDB', () => {
         expect.objectContaining({
           comments: [
             expect.objectContaining({
-              id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+              id: comment.id,
               text: 'new-comment-text',
             }),
           ],
