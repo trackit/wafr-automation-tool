@@ -175,7 +175,13 @@ describe('CleanupUseCase', () => {
 
   describe('cleanupSuccessful', () => {
     it('should throw a NotFoundError if the organization doesn’t exist', async () => {
-      const { useCase } = setup();
+      const { useCase, fakeAssessmentsRepository } = setup();
+
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        AssessmentMother.basic()
+          .withId('assessment-id')
+          .withOrganization('test.io')
+          .build();
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('assessment-id')
@@ -187,7 +193,14 @@ describe('CleanupUseCase', () => {
     });
 
     it('should consume a free assessment trial if available', async () => {
-      const { useCase, fakeOrganizationRepository } = setup();
+      const { useCase, fakeOrganizationRepository, fakeAssessmentsRepository } =
+        setup();
+
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        AssessmentMother.basic()
+          .withId('assessment-id')
+          .withOrganization('test.io')
+          .build();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
@@ -212,7 +225,14 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
+
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        AssessmentMother.basic()
+          .withId('assessment-id')
+          .withOrganization('test.io')
+          .build();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
@@ -241,7 +261,14 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
+
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        AssessmentMother.basic()
+          .withId('assessment-id')
+          .withOrganization('test.io')
+          .build();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
@@ -272,7 +299,14 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
+
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
+        AssessmentMother.basic()
+          .withId('assessment-id')
+          .withOrganization('test.io')
+          .build();
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
