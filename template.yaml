@@ -31,6 +31,12 @@ Parameters:
   AIFindingsAssociationChunkSize:
     Type: Number
     Default: 10
+  DatabaseUsername:
+    Type: String
+    Default: postgres
+  DatabasePassword:
+    Type: String
+    Default: tDdWd0sTgY$
 
 Conditions:
   CreateBackups:
@@ -65,6 +71,8 @@ Resources:
         PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBUsername: !Ref DatabaseUsername
+        DBPassword: !Ref DatabasePassword
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -121,6 +129,29 @@ Resources:
         PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref AWS::StackName
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: DynamoDB
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      DeletionProtectionEnabled: true
   OrganizationTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -176,8 +207,8 @@ Resources:
       BackupRetentionPeriod: !If [CreateBackups, 7, 1]
       StorageEncrypted: true
       Port: 5432
-      MasterUsername: postgres
-      MasterUserPassword: tDdWd0sTgY$
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
       ServerlessV2ScalingConfiguration:
         MinCapacity: 0
         MaxCapacity: 1

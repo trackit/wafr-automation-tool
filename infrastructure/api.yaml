@@ -32,6 +32,10 @@ Parameters:
     Description: Security group IDs to attach to Lambdas for VPC access
   DBHost:
     Type: String
+  DBUsername:
+    Type: String
+  DBPassword:
+    Type: String
 
 Globals:
   Function:
@@ -47,6 +51,8 @@ Globals:
         STATE_MACHINE_ARN: !Ref StateMachineArn
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
         DB_HOST: !Ref DBHost
+        DB_USERNAME: !Ref DBUsername
+        DB_PASSWORD: !Ref DBPassword
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -143,6 +149,32 @@ Resources:
       IdentityPoolId: !Ref IdentityPool
       Roles:
         authenticated: !GetAtt CognitoAuthenticatedRole.Arn
+  
+  MigrationRunnerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${MigrationRunnerFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  
+  MigrationRunnerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 900
+      CodeUri: ../apps/backend/src/handlers/migrationRunner
+      Tags:
+        Name: MigrationRunnerFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
 
   Api:
     Type: AWS::Serverless::Api

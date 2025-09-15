@@ -15,6 +15,7 @@ import {
   testDynamoDbConfig,
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
+import { testTypeORMConfig, tokenTypeORMConfig } from './config/typeorm/config';
 import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,
@@ -51,6 +52,7 @@ export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
+  register(tokenTypeORMConfig, { useValue: testTypeORMConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
   register(tokenAssessmentsStateMachine, {

@@ -8,4 +8,6 @@ export const env = {
   UNIT_BASED_PRICING_PRODUCT_CODE: 'unit-based-product-code',
   MONTHLY_SUBSCRIPTION_PRODUCT_CODE: 'monthly-subscription-product-code',
   COGNITO_USER_POOL_ID: 'COGNITO_USER_POOL_ID',
+  DB_USERNAME: 'postgres',
+  DB_PASSWORD: 'postgres',
 };

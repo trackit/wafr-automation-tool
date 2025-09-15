@@ -1,6 +1,5 @@
 import {
   Column,
-  DataSource,
   Entity,
   EntityTarget,
   Index,
@@ -9,6 +8,7 @@ import {
   ObjectLiteral,
   OneToMany,
   PrimaryColumn,
+  Repository,
 } from 'typeorm';
 
 import type {
@@ -44,15 +44,13 @@ import {
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
+import { tokenTypeORMClientManager } from '../config/typeorm/TypeORMClientManager';
 import { tokenLogger } from '../Logger';
 
 @Entity('assessments')
-export class AssessmentEntity implements Assessment {
+export class AssessmentEntity implements Omit<Assessment, 'organization'> {
   @PrimaryColumn('uuid')
   id!: string;
-
-  @PrimaryColumn('varchar')
-  organization!: string;
 
   @Column('varchar')
   createdBy!: string;
@@ -116,23 +114,17 @@ export class AssessmentEntity implements Assessment {
 }
 
 @Entity('pillars')
-export class PillarEntity implements Pillar {
+export class PillarEntity implements Omit<Pillar, 'organization'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
   @PrimaryColumn('varchar')
   id!: string;
 
-  @Column('varchar')
-  organization!: string;
-
   @ManyToOne(() => AssessmentEntity, (assessment) => assessment.pillars, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn([
-    { name: 'assessmentId', referencedColumnName: 'id' },
-    { name: 'organization', referencedColumnName: 'organization' },
-  ])
+  @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
   assessment!: AssessmentEntity;
 
   @Column('boolean')
@@ -247,9 +239,6 @@ export class FindingEntity implements Finding {
   assessmentId!: string;
 
   @PrimaryColumn('varchar')
-  organization!: string;
-
-  @PrimaryColumn('varchar')
   id!: string;
 
   @Index()
@@ -350,16 +339,12 @@ export class FindingCommentEntity implements FindingComment {
   assessmentId!: string;
 
   @Column('varchar')
-  organization!: string;
-
-  @Column('varchar')
   findingId!: string;
 
   @ManyToOne(() => FindingEntity, (f) => f.comments, { onDelete: 'CASCADE' })
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
-    { name: 'organization', referencedColumnName: 'organization' },
   ])
   finding!: FindingEntity;
 
@@ -373,21 +358,25 @@ export class FindingCommentEntity implements FindingComment {
   createdAt!: Date;
 }
 
+export const entities = [
+  AssessmentEntity,
+  PillarEntity,
+  QuestionEntity,
+  BestPracticeEntity,
+  FindingEntity,
+  FindingCommentEntity,
+];
+
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
-  private readonly dataSource = inject(tokenTypeORMDataSource);
+  private readonly clientManager = inject(tokenTypeORMClientManager);
   private readonly logger = inject(tokenLogger);
-  private readonly ready: Promise<void>;
 
-  constructor() {
-    console.log('AssessmentsRepositorySQL constructor');
-    this.ready = this.dataSource.isInitialized
-      ? Promise.resolve()
-      : this.dataSource.initialize().then(() => void 0);
-  }
-
-  private async repo<T extends ObjectLiteral>(entity: EntityTarget<T>) {
-    await this.ready;
-    return this.dataSource.getRepository(entity);
+  private async repo<T extends ObjectLiteral>(
+    entity: EntityTarget<T>,
+    organization: string
+  ): Promise<Repository<T>> {
+    const dataSource = await this.clientManager.getClient(organization);
+    return dataSource.getRepository(entity);
   }
 
   public static encodeNextToken(
@@ -443,10 +432,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     };
   }
 
-  private toDomainAssessment(e: AssessmentEntity): Assessment {
+  private toDomainAssessment(
+    e: AssessmentEntity,
+    organization: string
+  ): Assessment {
     return {
       id: e.id,
-      organization: e.organization,
+      organization,
       createdBy: e.createdBy,
       executionArn: e.executionArn,
       createdAt: e.createdAt,
@@ -491,7 +483,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }
 
   public async save(assessment: Assessment): Promise<void> {
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, assessment.organization);
 
     const entity = repo.create(assessment);
     try {
@@ -509,12 +501,11 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     finding: Finding;
   }): Promise<void> {
     const { assessmentId, organization, finding } = args;
-    const repo = await this.repo(FindingEntity);
+    const repo = await this.repo(FindingEntity, organization);
 
     const entity = repo.create({
       ...finding,
       assessmentId,
-      organization,
       comments: finding.comments,
     });
 
@@ -536,7 +527,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     nextToken?: string;
   }): Promise<{ assessments: Assessment[]; nextToken?: string }> {
     const { organization, limit = 20, search, nextToken } = args;
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, organization);
 
     const decoded = AssessmentsRepositorySQL.decodeNextToken(nextToken) as
       | { offset?: number }
@@ -545,7 +536,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     const qb = repo
       .createQueryBuilder('a')
-      .where('a.organization = :organization', { organization })
       .orderBy('a.createdAt', 'DESC')
       .skip(offset)
       .take(limit);
@@ -558,7 +548,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     }
 
     const [entities, total] = await qb.getManyAndCount();
-    const items = entities.map((e) => this.toDomainAssessment(e));
+    const items = entities.map((e) => this.toDomainAssessment(e, organization));
 
     const nextOffset = offset + items.length;
     const nextTk =
@@ -574,12 +564,12 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     organization: string;
   }): Promise<Assessment | undefined> {
     const { assessmentId, organization } = args;
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, organization);
     const entity = await repo.findOne({
-      where: { id: assessmentId, organization },
+      where: { id: assessmentId },
       relations: { pillars: { questions: { bestPractices: true } } },
     });
-    return entity ? this.toDomainAssessment(entity) : undefined;
+    return entity ? this.toDomainAssessment(entity, organization) : undefined;
   }
 
   public async getFinding(args: {
@@ -588,9 +578,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     findingId: string;
   }): Promise<Finding | undefined> {
     const { assessmentId, organization, findingId } = args;
-    const repo = await this.repo(FindingEntity);
+    const repo = await this.repo(FindingEntity, organization);
     const entity = await repo.findOne({
-      where: { id: findingId, assessmentId, organization },
+      where: { id: findingId, assessmentId },
       relations: { comments: true },
     });
     return entity ? this.toDomainFinding(entity) : undefined;
@@ -638,7 +628,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       bestPracticeId,
     });
 
-    const repo = await this.repo(FindingEntity);
+    const repo = await this.repo(FindingEntity, organization);
     const decoded = AssessmentsRepositorySQL.decodeNextToken(nextToken) as
       | { offset?: number }
       | undefined;
@@ -649,7 +639,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const qb = repo
       .createQueryBuilder('f')
       .where('f.assessmentId = :assessmentId', { assessmentId })
-      .andWhere('f.organization = :organization', { organization })
       .andWhere('f.bestPractices LIKE :bp', { bp: `%${customId}%` })
       .orderBy('f.id', 'ASC')
       .skip(offset)
@@ -693,12 +682,11 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       throw new FindingNotFoundError({ assessmentId, organization, findingId });
     }
 
-    const commentsRepo = await this.repo(FindingCommentEntity);
+    const commentsRepo = await this.repo(FindingCommentEntity, organization);
     const entity = commentsRepo.create({
       ...comment,
       findingId: findingId,
       assessmentId,
-      organization,
     });
     try {
       await commentsRepo.save(entity);
@@ -782,7 +770,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       );
     }
 
-    const repo = await this.repo(BestPracticeEntity);
+    const repo = await this.repo(BestPracticeEntity, organization);
     const bp = await repo.findOne({
       where: { id: bestPracticeId, questionId, pillarId, assessmentId },
     });
@@ -825,7 +813,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await this.loadAssessmentOrThrow(assessmentId, organization);
 
-    const repo = await this.repo(BestPracticeEntity);
+    const repo = await this.repo(BestPracticeEntity, organization);
     const bp = await repo.findOne({
       where: { id: bestPracticeId, questionId, pillarId, assessmentId },
     });
@@ -874,10 +862,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }): Promise<void> {
     const { assessmentId, organization, pillarId, pillarBody } = args;
 
-    const assessment = await this.loadAssessmentOrThrow(
-      assessmentId,
-      organization
-    );
+    const assessment: Assessment = {
+      ...(await this.loadAssessmentOrThrow(assessmentId, organization)),
+      organization,
+    };
 
     this.assertPillarExists({ assessment, pillarId });
 
@@ -890,7 +878,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       );
     }
 
-    const repo = await this.repo(PillarEntity);
+    const repo = await this.repo(PillarEntity, organization);
     const pillar = await repo.findOne({
       where: { id: pillarId, assessmentId },
     });
@@ -911,9 +899,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await this.loadAssessmentOrThrow(assessmentId, organization);
 
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, organization);
     try {
-      await repo.delete({ id: assessmentId, organization });
+      await repo.delete({ id: assessmentId });
       this.logger.info(`Assessment deleted: ${assessmentId}`);
     } catch (error) {
       this.logger.error(`Failed to delete assessment: ${error}`, args);
@@ -929,9 +917,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await this.loadAssessmentOrThrow(assessmentId, organization);
 
-    const repo = await this.repo(FindingEntity);
+    const repo = await this.repo(FindingEntity, organization);
     try {
-      await repo.delete({ assessmentId, organization });
+      await repo.delete({ assessmentId });
       this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
     } catch (error) {
       this.logger.error(`Failed to delete findings: ${error}`, args);
@@ -959,7 +947,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       throw new FindingNotFoundError({ assessmentId, organization, findingId });
     }
 
-    const repo = await this.repo(FindingCommentEntity);
+    const repo = await this.repo(FindingCommentEntity, organization);
     try {
       await repo.delete({ id: commentId, findingId: finding.id });
       this.logger.info(
@@ -989,9 +977,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       );
     }
 
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, organization);
     const entity = await repo.findOne({
-      where: { id: assessmentId, organization },
+      where: { id: assessmentId },
       relations: { pillars: { questions: { bestPractices: true } } },
     });
     if (!entity)
@@ -1025,9 +1013,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }): Promise<void> {
     const { assessmentId, organization, findingId, findingBody } = args;
 
-    const repo = await this.repo(FindingEntity);
+    const repo = await this.repo(FindingEntity, organization);
     const entity = await repo.findOne({
-      where: { id: findingId, assessmentId, organization },
+      where: { id: findingId, assessmentId },
     });
     if (!entity) {
       this.logger.error(
@@ -1048,7 +1036,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     if (typeof findingBody.hidden === 'boolean')
       entity.hidden = findingBody.hidden;
     if (findingBody.comments !== undefined) {
-      const commentsRepo = await this.repo(FindingCommentEntity);
+      const commentsRepo = await this.repo(FindingCommentEntity, organization);
       await commentsRepo.delete({ findingId: entity.id });
       const replacements = (findingBody.comments as FindingComment[]).map((c) =>
         commentsRepo.create({ ...c, findingId: entity.id })
@@ -1085,7 +1073,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       throw new FindingNotFoundError({ assessmentId, organization, findingId });
     }
 
-    const repo = await this.repo(FindingCommentEntity);
+    const repo = await this.repo(FindingCommentEntity, organization);
     const entity = await repo.findOne({ where: { id: commentId, findingId } });
     if (!entity) {
       this.logger.error(
@@ -1138,10 +1126,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const { assessmentId, organization, pillarId, questionId, questionBody } =
       args;
 
-    const assessment = await this.loadAssessmentOrThrow(
-      assessmentId,
-      organization
-    );
+    const assessment: Assessment = {
+      ...(await this.loadAssessmentOrThrow(assessmentId, organization)),
+      organization,
+    };
     this.assertQuestionExists({
       assessment,
       organization,
@@ -1158,7 +1146,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       );
     }
 
-    const repo = await this.repo(QuestionEntity);
+    const repo = await this.repo(QuestionEntity, organization);
     const question = await repo.findOne({
       where: { id: questionId, pillarId, assessmentId },
     });
@@ -1189,9 +1177,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }): Promise<void> {
     const { assessmentId, organization, scanningTool, graphData } = args;
 
-    const repo = await this.repo(AssessmentEntity);
+    const repo = await this.repo(AssessmentEntity, organization);
     const entity = await repo.findOne({
-      where: { id: assessmentId, organization },
+      where: { id: assessmentId },
     });
     if (!entity)
       throw new AssessmentNotFoundError({ assessmentId, organization });
@@ -1208,44 +1196,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     );
   }
 }
-
-/**
- * ==========================
- * Tokens / DI
- * ==========================
- */
-
-const dataSource = new DataSource({
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: 5432,
-  database: 'postgres',
-  username: 'postgres',
-  password: 'tDdWd0sTgY$',
-  entities: [
-    AssessmentEntity,
-    PillarEntity,
-    QuestionEntity,
-    BestPracticeEntity,
-    FindingEntity,
-    FindingCommentEntity,
-  ],
-  synchronize: true,
-  logging: true,
-  dropSchema: false,
-});
-
-export const tokenTypeORMDataSource = createInjectionToken<DataSource>(
-  'TypeORMDataSource',
-  {
-    useFactory: () => {
-      if (!dataSource.isInitialized) {
-        dataSource.initialize();
-      }
-      return dataSource;
-    },
-  }
-);
 
 export const tokenAssessmentsRepository =
   createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {

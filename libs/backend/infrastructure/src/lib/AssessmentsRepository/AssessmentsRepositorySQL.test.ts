@@ -21,32 +21,29 @@ import {
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
+import { tokenTypeORMClientManager } from '../config/typeorm/TypeORMClientManager';
 import { tokenIdGenerator } from '../IdGenerator';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
-import {
-  AssessmentEntity,
-  AssessmentsRepositorySQL,
-  FindingEntity,
-  tokenTypeORMDataSource,
-} from './AssessmentsRepositorySQL';
+import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
 
+beforeAll(async () => {
+  reset();
+  registerTestInfrastructure();
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.createClient('organization1');
+  await clientManager.createClient('organization2');
+});
+
 afterEach(async () => {
-  const dataSource = inject(tokenTypeORMDataSource);
-
-  const findingRepository = dataSource.getRepository(FindingEntity);
-  const assessmentRepository = dataSource.getRepository(AssessmentEntity);
-
-  await findingRepository.deleteAll();
-  await assessmentRepository.deleteAll();
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.clearClients();
 });
 
 afterAll(async () => {
-  const ds = inject(tokenTypeORMDataSource);
-  if (ds?.isInitialized) {
-    await ds.destroy();
-  }
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.closeConnections();
 });
 
 describe('AssessmentsRepositoryDynamoDB', () => {
