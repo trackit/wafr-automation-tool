@@ -28,6 +28,7 @@ import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -213,6 +214,9 @@ function AssessmentsList() {
                             assessmentId={assessment.id ?? ''}
                             disabled={!assessment.exportRegion}
                           />
+                        </li>
+                        <li>
+                          <PDFExportsDialog assessmentId={assessment.id!} />
                         </li>
                         <li className="m-1"></li>
                         <li>

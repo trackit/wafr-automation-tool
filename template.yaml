@@ -57,6 +57,7 @@ Resources:
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
         DynamoDBArn: !GetAtt DynamoDB.Arn
+        S3BucketName: !Ref S3Bucket
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
         OrganizationTableArn: !GetAtt OrganizationTable.Arn

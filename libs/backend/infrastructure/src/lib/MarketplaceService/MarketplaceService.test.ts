@@ -1,4 +1,3 @@
-import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { DescribeAgreementCommand } from '@aws-sdk/client-marketplace-agreement';
 import { GetEntitlementsCommand } from '@aws-sdk/client-marketplace-entitlement-service';
 import { BatchMeterUsageCommand } from '@aws-sdk/client-marketplace-metering';
@@ -7,8 +6,6 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
-import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MarketplaceService,
@@ -16,29 +13,6 @@ import {
   tokenMarketplaceEntitlementServiceClient,
   tokenMarketplaceMeteringClient,
 } from './MarketplaceService';
-
-afterEach(async () => {
-  const dynamoDBClient = inject(tokenDynamoDBClient);
-  const tableName = inject(tokenDynamoDBAssessmentTableName);
-
-  const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName })
-  );
-
-  await Promise.all(
-    (scanResult.Items || []).map(async (item) => {
-      await dynamoDBClient.send(
-        new DeleteItemCommand({
-          TableName: tableName,
-          Key: {
-            PK: item.PK,
-            SK: item.SK,
-          },
-        })
-      );
-    })
-  );
-});
 
 describe('MarketplaceService', () => {
   describe('hasMonthlySubscription', () => {

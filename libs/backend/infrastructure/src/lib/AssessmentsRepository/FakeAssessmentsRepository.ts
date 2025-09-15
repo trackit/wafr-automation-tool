@@ -1,6 +1,8 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPracticeBody,
   Finding,
@@ -21,6 +23,7 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FileExportNotFoundError,
   FindingNotFoundError,
   PillarNotFoundError,
   QuestionNotFoundError,
@@ -157,6 +160,15 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       findings,
       nextToken: undefined, // No pagination in this fake implementation
     };
+  }
+
+  public async getAssessmentFindings(args: {
+    assessmentId: string;
+    organization: string;
+  }): Promise<Finding[]> {
+    const { assessmentId, organization } = args;
+    const key = `${assessmentId}#${organization}`;
+    return this.assessmentFindings[key] || [];
   }
 
   public async getFinding(args: {
@@ -548,6 +560,78 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       assessment.rawGraphData = {};
     }
     assessment.rawGraphData[scanningTool] = graphData;
+  }
+
+  public async updateFileExport({
+    assessmentId,
+    organization,
+    type,
+    data,
+  }: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void> {
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = {};
+    }
+    const fileExports = assessment.fileExports;
+    if (!fileExports[type]) {
+      fileExports[type] = [];
+    }
+    const fileExportIndex = fileExports[type].findIndex(
+      (fileExport) => fileExport.id === data.id
+    );
+    if (fileExportIndex === -1) {
+      fileExports[type].push(data);
+      return;
+    }
+    Object.assign(fileExports[type][fileExportIndex], data);
+  }
+
+  public async deleteFileExport({
+    assessmentId,
+    organization,
+    type,
+    id,
+  }: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
+  }): Promise<void> {
+    const assessmentKey = `${assessmentId}#${organization}`;
+    if (!this.assessments[assessmentKey]) {
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = {};
+    }
+    const fileExports = assessment.fileExports;
+    if (!fileExports[type]) {
+      fileExports[type] = [];
+    }
+    const fileExport = fileExports[type].find(
+      (fileExport) => fileExport.id === id
+    );
+    if (!fileExport) {
+      throw new FileExportNotFoundError({
+        assessmentId,
+        organization,
+        type,
+        id: id,
+      });
+    }
+    fileExports[type] = fileExports[type].filter(
+      (fileExport) => fileExport.id !== id
+    );
   }
 }
 

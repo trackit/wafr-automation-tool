@@ -1,6 +1,9 @@
 import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 
 import {
+  AssessmentFileExportMother,
+  AssessmentFileExportStatus,
+  AssessmentFileExportType,
   AssessmentGraphDataMother,
   AssessmentMother,
   AssessmentStep,
@@ -18,6 +21,7 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FileExportNotFoundError,
   FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
@@ -2139,6 +2143,155 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('getAssessmentFindings', () => {
+    it('should return all findings', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withPillars([
+          PillarMother.basic()
+            .withId('pillar-id')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question-id')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('best-practice-id').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar-id#question-id#best-practice-id')
+        .withId('tool#1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar-id#question-id#best-practice-id')
+        .withId('tool#2')
+        .build();
+      await repository.saveFinding({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        finding: finding2,
+      });
+
+      const findings = await repository.getAssessmentFindings({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+
+      expect(findings).toEqual([
+        expect.objectContaining({ id: 'tool#1' }),
+        expect.objectContaining({ id: 'tool#2' }),
+      ]);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+      const assessment1 = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withPillars([
+          PillarMother.basic()
+            .withId('pillar-id')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question-id')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('best-practice-id').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment1);
+      const assessment2 = AssessmentMother.basic()
+        .withId('assessment-id2')
+        .withOrganization('test2.io')
+        .withPillars([
+          PillarMother.basic()
+            .withId('pillar-id')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question-id')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('best-practice-id').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment2);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices('pillar-id#question-id#best-practice-id')
+        .withId('tool#1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('pillar-id#question-id#best-practice-id')
+        .withId('tool#1')
+        .build();
+      await repository.saveFinding({
+        assessmentId: assessment1.id,
+        organization: assessment1.organization,
+        finding: finding1,
+      });
+      await repository.saveFinding({
+        assessmentId: assessment2.id,
+        organization: assessment2.organization,
+        finding: finding2,
+      });
+      const findings = await repository.getAssessmentFindings({
+        assessmentId: assessment1.id,
+        organization: assessment1.organization,
+      });
+
+      expect(findings).toEqual([expect.objectContaining({ id: 'tool#1' })]);
+    });
+
+    it('should return an empty array if no findings exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withPillars([
+          PillarMother.basic()
+            .withId('pillar-id')
+            .withQuestions([
+              QuestionMother.basic()
+                .withId('question-id')
+                .withBestPractices([
+                  BestPracticeMother.basic().withId('best-practice-id').build(),
+                ])
+                .build(),
+            ])
+            .build(),
+        ])
+        .build();
+      await repository.save(assessment);
+
+      const findings = await repository.getAssessmentFindings({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+
+      expect(findings).toEqual([]);
+    });
+  });
+
   describe('updateFinding', () => {
     it('should update the finding visibility', async () => {
       const { repository } = setup();
@@ -2693,6 +2846,166 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       expect(updatedAssessment2?.rawGraphData).toEqual({
         [ScanningTool.PROWLER]: expect.any(Object),
       });
+    });
+  });
+
+  describe('updateFileExport', () => {
+    it('should update the file export for an export type', async () => {
+      const { repository } = setup();
+
+      const fileExportId = 'file-export-id';
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [
+            AssessmentFileExportMother.basic()
+              .withId(fileExportId)
+              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+              .build(),
+          ],
+        })
+        .build();
+      await repository.save(assessment);
+
+      const fileExport = AssessmentFileExportMother.basic()
+        .withId(fileExportId)
+        .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
+        .build();
+
+      await repository.updateFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        data: fileExport,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      });
+    });
+
+    it('should create the file export for an export type if it does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [],
+        })
+        .build();
+      await repository.save(assessment);
+
+      const fileExport = AssessmentFileExportMother.basic()
+        .withId('file-export-id')
+        .build();
+
+      await repository.updateFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        data: fileExport,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      });
+    });
+
+    it('should throw an error if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateFileExport({
+          assessmentId: 'assessment-id',
+          organization: 'test.io',
+          type: AssessmentFileExportType.PDF,
+          data: AssessmentFileExportMother.basic().build(),
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+  });
+
+  describe('deleteFileExport', () => {
+    it('should delete the file export for an export type', async () => {
+      const { repository } = setup();
+
+      const fileExportId = 'file-export-id';
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [
+            AssessmentFileExportMother.basic()
+              .withId(fileExportId)
+              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+              .build(),
+          ],
+        })
+        .build();
+      await repository.save(assessment);
+
+      await repository.deleteFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        id: fileExportId,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [],
+      });
+    });
+
+    it('should throw an error if the assessment does not exist', async () => {
+      const { repository } = setup();
+
+      await expect(
+        repository.updateFileExport({
+          assessmentId: 'assessment-id',
+          organization: 'test.io',
+          type: AssessmentFileExportType.PDF,
+          data: AssessmentFileExportMother.basic().build(),
+        })
+      ).rejects.toThrow(AssessmentNotFoundError);
+    });
+
+    it('should throw an error if the file export does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [],
+        })
+        .build();
+      await repository.save(assessment);
+
+      await expect(
+        repository.deleteFileExport({
+          assessmentId: assessment.id,
+          organization: assessment.organization,
+          type: AssessmentFileExportType.PDF,
+          id: 'file-export-id',
+        })
+      ).rejects.toThrow(FileExportNotFoundError);
     });
   });
 });

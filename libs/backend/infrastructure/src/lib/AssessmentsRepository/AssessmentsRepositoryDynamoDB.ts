@@ -3,6 +3,9 @@ import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExports,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPractice,
   BestPracticeBody,
@@ -27,6 +30,7 @@ import {
   AssessmentNotFoundError,
   BestPracticeNotFoundError,
   EmptyUpdateBodyError,
+  FileExportNotFoundError,
   FindingNotFoundError,
   InvalidNextTokenError,
   PillarNotFoundError,
@@ -36,6 +40,8 @@ import { tokenDynamoDBDocument } from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 import {
   DynamoDBAssessment,
+  DynamoDBAssessmentFileExport,
+  DynamoDBAssessmentFileExports,
   DynamoDBFinding,
   DynamoDBFindingComment,
   DynamoDBPillar,
@@ -145,6 +151,28 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       step: assessment.step,
       workflows: assessment.workflows,
       error: assessment.error,
+      ...(assessment.fileExports && {
+        fileExports: Object.fromEntries(
+          Object.entries(assessment.fileExports).map(([k, v]) => [
+            k,
+            Object.fromEntries(
+              (v as AssessmentFileExport[]).map((fileExport) => [
+                fileExport.id,
+                this.toDynamoDBFileExportItem(fileExport),
+              ])
+            ),
+          ])
+        ) as DynamoDBAssessmentFileExports,
+      }),
+    };
+  }
+
+  private toDynamoDBFileExportItem(
+    assessmentFileExport: AssessmentFileExport
+  ): DynamoDBAssessmentFileExport {
+    return {
+      ...assessmentFileExport,
+      createdAt: assessmentFileExport.createdAt.toISOString(),
     };
   }
 
@@ -160,6 +188,19 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
             [pillar.id]: this.toDynamoDBPillarItem(pillar),
           }),
           {}
+        ),
+      }),
+      ...(assessmentBody.fileExports && {
+        fileExports: Object.fromEntries(
+          Object.entries(assessmentBody.fileExports).map(([k, v]) => [
+            k,
+            Object.fromEntries(
+              (v as AssessmentFileExport[]).map((fileExport) => [
+                fileExport.id,
+                this.toDynamoDBFileExportItem(fileExport),
+              ])
+            ),
+          ])
         ),
       }),
     };
@@ -238,6 +279,15 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     };
   }
 
+  private fromDynamoDBFileExportItem(
+    item: DynamoDBAssessmentFileExport
+  ): AssessmentFileExport {
+    return {
+      ...item,
+      createdAt: new Date(item.createdAt),
+    };
+  }
+
   private fromDynamoDBAssessmentItem(
     item: DynamoDBAssessment | undefined
   ): Assessment | undefined {
@@ -264,6 +314,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       step: assessment.step,
       workflows: assessment.workflows,
       error: assessment.error,
+      ...(assessment.fileExports && {
+        fileExports: Object.fromEntries(
+          Object.entries(assessment.fileExports).map(([k, v]) => [
+            k,
+            Object.values(
+              v as Record<string, DynamoDBAssessmentFileExport>
+            ).map((item) => this.fromDynamoDBFileExportItem(item)),
+          ])
+        ) as AssessmentFileExports,
+      }),
     };
   }
 
@@ -545,6 +605,37 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
         params.ExclusiveStartKey
       ),
     };
+  }
+
+  public async getAssessmentFindings({
+    assessmentId,
+    organization,
+  }: {
+    assessmentId: string;
+    organization: string;
+  }): Promise<Finding[]> {
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to get all findings for non-existing assessment ${assessmentId} in organization ${organization}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const params: QueryCommandInput = {
+      TableName: this.tableName,
+      KeyConditionExpression: 'PK = :pk',
+      ExpressionAttributeValues: {
+        ':pk': this.getFindingPK({ assessmentId, organization }),
+      },
+      ExclusiveStartKey: undefined,
+    };
+    const items = [];
+    do {
+      const result = await this.client.query(params);
+      items.push(...((result.Items || []) as DynamoDBFinding[]));
+      params.ExclusiveStartKey = result.LastEvaluatedKey;
+    } while (params.ExclusiveStartKey);
+    return items.map((item) => this.fromDynamoDBFindingItem(item) as Finding);
   }
 
   public async getFinding(args: {
@@ -1025,14 +1116,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     if (args.UpdateExpressionPath && !args.UpdateExpressionPath.endsWith('.')) {
       args.UpdateExpressionPath += '.';
     }
+    let i = 0;
     for (const [key, value] of Object.entries(data)) {
-      const attributeName = `#${key.replace(/-/g, '_')}`;
-      const attributeValue = `:${key.replace(/-/g, '_')}`;
+      const attributeName = `#property_${i}`;
+      const attributeValue = `:value_${i}`;
       updateExpressions.push(
         `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
       );
       expressionAttributeValues[attributeValue] = value;
       expressionAttributeNames[attributeName] = key;
+      i++;
     }
     return {
       UpdateExpression: `set ${updateExpressions.join(', ')}`,
@@ -1312,6 +1405,109 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       );
     } catch (error) {
       this.logger.error(`Failed to update raw graph data: ${error}`, params);
+      throw error;
+    }
+  }
+
+  public async updateFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organization, type, data } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to update ${type.toUpperCase()} file export for non-existing assessment: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      ...this.buildUpdateExpression({
+        data: {
+          [data.id]: this.toDynamoDBFileExportItem(data),
+        },
+        UpdateExpressionPath: 'fileExports.#type',
+        DefaultExpressionAttributeNames: {
+          '#type': type,
+        },
+      }),
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `${type.toUpperCase()} file with id ${
+          data.id
+        } export updated successfully for assessment ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to update ${type.toUpperCase()} file export with id ${
+          data.id
+        } for assessment ${assessmentId}: ${error}`,
+        params
+      );
+      throw error;
+    }
+  }
+
+  public async deleteFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
+  }): Promise<void> {
+    const { assessmentId, organization, type, id } = args;
+    const assessment = await this.get({ assessmentId, organization });
+    if (!assessment) {
+      this.logger.error(
+        `Attempted to delete file export with id ${id} for non-existing assessment: ${assessmentId}`
+      );
+      throw new AssessmentNotFoundError({ assessmentId, organization });
+    }
+    if (
+      !assessment.fileExports?.[type]?.find(
+        (fileExport) => fileExport.id === id
+      )
+    ) {
+      this.logger.error(
+        `Attempted to delete file export with id ${id} for assessment: ${assessmentId} but it does not exist`
+      );
+      throw new FileExportNotFoundError({
+        assessmentId,
+        organization,
+        type,
+        id,
+      });
+    }
+    const params: UpdateCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        PK: this.getAssessmentPK(organization),
+        SK: this.getAssessmentSK(assessmentId),
+      },
+      UpdateExpression: `remove fileExports.#type.#id`,
+      ExpressionAttributeNames: {
+        '#type': type,
+        '#id': id,
+      },
+    };
+    try {
+      await this.client.update(params);
+      this.logger.info(
+        `${type.toUpperCase()} file export with id ${id} deleted successfully for assessment ${assessmentId}`
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete ${type.toUpperCase()} file export with id ${id} for assessment ${assessmentId}: ${error}`,
+        params
+      );
       throw error;
     }
   }

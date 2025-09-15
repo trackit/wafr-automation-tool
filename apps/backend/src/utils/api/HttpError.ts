@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 export class HttpError extends Error {
   public readonly code: number;
   public readonly description?: string;
@@ -26,6 +28,24 @@ export class BadRequestError extends HttpError {
       message: 'Bad Request',
       description,
     });
+  }
+}
+
+export class MissingRequestPathError extends BadRequestError {
+  public constructor() {
+    super('Missing request path');
+  }
+}
+
+export class MissingRequestBodyError extends BadRequestError {
+  public constructor() {
+    super('Missing request path');
+  }
+}
+
+export class RequestParsingFailedError extends BadRequestError {
+  public constructor(error: ZodError) {
+    super(`Request parsing failed ${error.message}`);
   }
 }
 

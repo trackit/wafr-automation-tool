@@ -7,6 +7,7 @@ import {
   S3Client,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -55,7 +56,10 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     });
     try {
       const response = await this.client.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
+      if (
+        response.$metadata.httpStatusCode !== 200 &&
+        response.$metadata.httpStatusCode !== 204
+      ) {
         throw new Error(
           `Failed to delete assessment: ${response.$metadata.httpStatusCode}`
         );
@@ -112,7 +116,10 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     }
   }
 
-  public async put(args: { key: string; body: string }): Promise<string> {
+  public async put(args: {
+    key: string;
+    body: string | Buffer;
+  }): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: args.key,
@@ -125,7 +132,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
           `Failed to put object: ${response.$metadata.httpStatusCode}`
         );
       }
-      this.logger.info(`Object succesfuly added: ${args.key}`);
+      this.logger.info(`Object succesfully added: ${args.key}`);
       return this.buildURI(args.key);
     } catch (error) {
       this.logger.error(`Failed to put object: ${error}`, args.key);
@@ -137,6 +144,26 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     const { hostname: bucket, pathname } = new URL(uri);
     const key = pathname.startsWith('/') ? pathname.slice(1) : pathname;
     return { bucket, key };
+  }
+
+  public async generatePresignedURL(args: {
+    key: string;
+    expiresInSeconds: number;
+  }): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: args.key,
+    });
+    try {
+      const url = await getSignedUrl(this.client, command, {
+        expiresIn: args.expiresInSeconds,
+      });
+      this.logger.info(`Presigned URL generated: ${url}`);
+      return url;
+    } catch (error) {
+      this.logger.error(`Failed to generate presigned URL: ${error}`, args);
+      throw error;
+    }
   }
 }
 

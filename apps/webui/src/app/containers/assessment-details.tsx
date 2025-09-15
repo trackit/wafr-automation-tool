@@ -43,6 +43,7 @@ import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = components['schemas']['Question'];
@@ -897,6 +898,9 @@ export function AssessmentDetails() {
                     </button>
                   </li>
                   <li className="m-1"></li>
+                  <li>
+                    <PDFExportsDialog assessmentId={id!} />
+                  </li>
                   <li>
                     <ExportToAWSDialog
                       assessmentId={id ?? ''}
