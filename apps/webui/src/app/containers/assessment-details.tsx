@@ -693,8 +693,8 @@ export function AssessmentDetails() {
 
   useEffect(() => {
     if (!pillars) return;
-    setProgress(calculateOverallCompletion(assessmentData ?? null));
-  }, [assessmentData]);
+    setProgress(calculateOverallCompletion(pillars));
+  }, [pillars]);
 
   const handleNextQuestion = () => {
     if (!isFullPillar(selectedPillar) || !selectedPillar.questions) return;
@@ -831,20 +831,18 @@ export function AssessmentDetails() {
 
   const details = (
     <>
-      {!isMilestone && (
-        <div
-          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
-          data-tip={`${progress}% completed`}
-        >
-          <progress
-            className={`progress w-full rounded-none h-1 ${
-              progress === 100 ? 'progress-success' : 'progress-primary'
-            }`}
-            value={progress}
-            max="100"
-          ></progress>
-        </div>
-      )}
+      <div
+        className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
+        data-tip={`${progress}% completed`}
+      >
+        <progress
+          className={`progress w-full rounded-none h-1 ${
+            progress === 100 ? 'progress-success' : 'progress-primary'
+          }`}
+          value={progress}
+          max="100"
+        ></progress>
+      </div>
 
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
