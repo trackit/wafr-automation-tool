@@ -8,7 +8,7 @@ interface CommentsPaneProps {
   maxHeight: number;
   minHeight: number;
   isUpdateCommentPending: boolean;
-  deletingCommentId: string | null;
+  deletingCommentIds: string[];
   onCancel: () => void;
   onAdded: (text: string) => void;
   onUpdate: (commentId: string, text: string) => void;
@@ -34,7 +34,7 @@ export function CommentsPane({
   maxHeight,
   minHeight,
   isUpdateCommentPending,
-  deletingCommentId,
+  deletingCommentIds,
   onCancel,
   onAdded,
   onUpdate,
@@ -89,7 +89,7 @@ export function CommentsPane({
   };
 
   const handleDelete = (commentId: string) => {
-    if (deletingCommentId === commentId) return;
+    if (deletingCommentIds.includes(commentId)) return;
     onDelete(commentId);
   };
 
@@ -108,6 +108,7 @@ export function CommentsPane({
         {finding.comments?.map((c) => {
           const username = usernameFromEmail(c.authorEmail);
           const isPending = c.id?.toString().startsWith('temp-');
+          const isDeleting = c.id ? deletingCommentIds.includes(c.id) : false;
           return (
             <div key={c.id} className="flex space-x-2">
               <div className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
@@ -131,7 +132,9 @@ export function CommentsPane({
                     ) : (
                       <button
                         onClick={() => handleEdit(c.id)}
-                        disabled={isUpdateCommentPending || isPending}
+                        disabled={
+                          isUpdateCommentPending || isPending || isDeleting
+                        }
                         className="text-gray-500 cursor-pointer"
                       >
                         <Pen className="w-4 h-4" />
@@ -139,10 +142,10 @@ export function CommentsPane({
                     )}
                     <button
                       onClick={() => handleDelete(c.id)}
-                      disabled={deletingCommentId === c.id || isPending}
+                      disabled={isDeleting || isPending}
                       className="text-gray-500 cursor-pointer"
                     >
-                      {deletingCommentId === c.id ? (
+                      {isDeleting ? (
                         <span className="loading loading-spinner loading-xs" />
                       ) : (
                         <Trash className="w-4 h-4" />

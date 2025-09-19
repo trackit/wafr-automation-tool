@@ -285,9 +285,7 @@ function FindingsDetails({
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
-    null
-  );
+  const [deletingCommentIds, setDeletingCommentIds] = useState<string[]>([]);
   const [username, setUsername] = useState<string>('');
 
   useEffect(() => {
@@ -595,7 +593,8 @@ function FindingsDetails({
   const { mutate: mutateDeleteComment } = useMutation<
     string,
     unknown,
-    { findingId: string; commentId: string }
+    { findingId: string; commentId: string },
+    { commentId: string }
   >({
     mutationFn: async ({ findingId, commentId }) => {
       await deleteComment({
@@ -606,14 +605,22 @@ function FindingsDetails({
       return commentId;
     },
     onMutate: ({ commentId }) => {
-      setDeletingCommentId(commentId);
+      setDeletingCommentIds((prev) =>
+        prev.includes(commentId) ? prev : [...prev, commentId]
+      );
+      return { commentId };
     },
-    onError: (err) => {
+    onError: (err, _variables, context) => {
       console.error(err);
       enqueueSnackbar({
         message: 'Failed to delete comment. Please try again later',
         variant: 'error',
       });
+      if (context?.commentId) {
+        setDeletingCommentIds((prev) =>
+          prev.filter((id) => id !== context.commentId)
+        );
+      }
     },
     onSuccess: (_commentId, variables) => {
       const { findingId, commentId } = variables;
@@ -626,9 +633,13 @@ function FindingsDetails({
           comments,
         } as components['schemas']['Finding'];
       });
+      setDeletingCommentIds((prev) => prev.filter((id) => id !== commentId));
     },
-    onSettled: () => {
-      setDeletingCommentId(null);
+    onSettled: (_data, _error, variables) => {
+      if (!variables?.commentId) return;
+      setDeletingCommentIds((prev) =>
+        prev.filter((id) => id !== variables.commentId)
+      );
     },
   });
 
@@ -821,7 +832,7 @@ function FindingsDetails({
                   commentId,
                 })
               }
-              deletingCommentId={deletingCommentId}
+              deletingCommentIds={deletingCommentIds}
               onCancel={() => {
                 setCommentPos(null);
                 setShowCommentsFor(null);
