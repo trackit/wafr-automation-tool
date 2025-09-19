@@ -15,7 +15,14 @@ import {
   Server,
 } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { components } from '@shared/api-schema';
 import {
@@ -286,13 +293,20 @@ function FindingsDetails({
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
   const [deletingCommentIds, setDeletingCommentIds] = useState<string[]>([]);
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState('');
+
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const user = await getCurrentUser();
+      setUsername(user?.signInDetails?.loginId || '');
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   useEffect(() => {
-    getCurrentUser()
-      .then((user) => setUsername(user.signInDetails?.loginId || ''))
-      .catch(console.error);
-  }, []);
+    void loadCurrentUser();
+  }, [loadCurrentUser]);
 
   function handleCommentClick(
     e: React.MouseEvent<HTMLButtonElement>,
