@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useDebounce } from '@uidotdev/usehooks';
+import { getCurrentUser } from 'aws-amplify/auth';
 import {
   Earth,
   FileCheck,
@@ -25,7 +26,6 @@ import {
   updateFinding,
 } from '@webui/api-client';
 import { CommentsPane, Modal } from '@webui/ui';
-import { getCurrentUser } from 'aws-amplify/auth';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -292,10 +292,7 @@ function FindingsDetails({
 
   useEffect(() => {
     getCurrentUser()
-      .then((user) => {
-        console.log(user);
-        setUsername(user.signInDetails?.loginId || '');
-      })
+      .then((user) => setUsername(user.signInDetails?.loginId || ''))
       .catch(console.error);
   }, []);
 
@@ -614,7 +611,7 @@ function FindingsDetails({
     onError: (err) => {
       console.error(err);
       enqueueSnackbar({
-        message: 'Failed to update comment. Please try again later',
+        message: 'Failed to delete comment. Please try again later',
         variant: 'error',
       });
     },
