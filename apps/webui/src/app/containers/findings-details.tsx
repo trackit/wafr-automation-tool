@@ -25,6 +25,7 @@ import {
   updateFinding,
 } from '@webui/api-client';
 import { CommentsPane, Modal } from '@webui/ui';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 interface FindingsDetailsProps {
   assessmentId: string;
@@ -227,7 +228,7 @@ function FindingItem({
               {remediations?.nonUrls.length ? (
                 <div className="flex flex-col gap-1">
                   <p className="text-sm text-base-content">Commands:</p>
-                  {remediations?.nonUrls.map((reference, index) => {
+                  {remediations?.nonUrls.map((reference) => {
                     return (
                       <p className="bg-gray-100 rounded-md pl-3 pr-3 p-1 text-sm text-base-content">
                         {reference}
@@ -284,6 +285,19 @@ function FindingsDetails({
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
+    null
+  );
+  const [username, setUsername] = useState<string>('');
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((user) => {
+        console.log(user);
+        setUsername(user.signInDetails?.loginId || '');
+      })
+      .catch(console.error);
+  }, []);
 
   function handleCommentClick(
     e: React.MouseEvent<HTMLButtonElement>,
@@ -293,6 +307,12 @@ function FindingsDetails({
     if (!finding) {
       setShowCommentsFor(null);
       setCommentPos(null);
+    } else {
+      const findingClone: components['schemas']['Finding'] = {
+        ...finding,
+        comments: finding.comments ? [...finding.comments] : [],
+      };
+      setShowCommentsFor(findingClone);
     }
     const containerRect = containerRef.current.getBoundingClientRect();
     const btnRect = e.currentTarget.getBoundingClientRect();
@@ -307,7 +327,6 @@ function FindingsDetails({
       : 150;
 
     setCommentPos({ y, maxHeight, minHeight: cardHeight });
-    setShowCommentsFor(finding);
   }
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -446,8 +465,13 @@ function FindingsDetails({
     },
   });
 
-  const { mutate: mutateComment } = useMutation({
-    mutationFn: async (args: { findingId: string; text: string }) => {
+  const { mutate: mutateComment } = useMutation<
+    components['schemas']['Comment'],
+    unknown,
+    { findingId: string; text: string; tempId: string },
+    { tempId: string; findingId: string }
+  >({
+    mutationFn: async (args) => {
       const { findingId, text } = args;
       const response = await addComment({
         assessmentId,
@@ -456,95 +480,160 @@ function FindingsDetails({
       });
       return response;
     },
-    onError: (err) => {
+    onMutate: ({ findingId, text, tempId }) => {
+      setShowCommentsFor((current) => {
+        if (!current || current.id !== findingId) return current;
+        const optimisticComment = {
+          id: tempId,
+          text,
+          authorEmail: username,
+          createdAt: new Date().toISOString(),
+        } as components['schemas']['Comment'];
+        const comments = [...(current.comments ?? []), optimisticComment];
+        return {
+          ...current,
+          comments,
+        } as components['schemas']['Finding'];
+      });
+      return { tempId, findingId };
+    },
+    onError: (err, _variables, context) => {
       console.error(err);
       enqueueSnackbar({
         message: 'Failed to add comment. Please try again later',
         variant: 'error',
       });
+      if (!context) return;
+      setShowCommentsFor((current) => {
+        if (!current || current.id !== context.findingId || !current.comments)
+          return current;
+        const comments = current.comments.filter(
+          (comment) => comment.id !== context.tempId
+        );
+        return {
+          ...current,
+          comments,
+        } as components['schemas']['Finding'];
+      });
     },
-    onSuccess: (comment: components['schemas']['Comment']) => {
-      if (!showCommentsFor) return;
-      if (!showCommentsFor.comments) {
-        showCommentsFor.comments = [];
-      }
-      showCommentsFor.comments.push(comment);
+    onSuccess: (comment, _variables, context) => {
+      if (!context) return;
+      setShowCommentsFor((current) => {
+        if (!current || current.id !== context.findingId || !current.comments)
+          return current;
+        const comments = current.comments.map((existing) =>
+          existing.id === context.tempId ? comment : existing
+        );
+        return {
+          ...current,
+          comments,
+        } as components['schemas']['Finding'];
+      });
     },
   });
 
   const { mutate: mutateUpdateComment, isPending: isUpdateCommentPending } =
-    useMutation({
-      mutationFn: async (args: {
-        findingId: string;
-        commentId: string;
-        text: string;
-      }) => {
-        const { findingId, commentId, text } = args;
-        const comment = showCommentsFor?.comments?.find(
-          (c) => c.id === commentId
-        );
-        if (comment && comment.text !== text) {
-          await updateComment({
-            assessmentId,
-            findingId,
-            commentId,
-            commentDto: {
-              text,
-            },
-          });
-          return {
-            text,
-            comment,
-          };
-        }
-        return {
-          text,
-          comment: null,
-        };
-      },
-      onError: (err) => {
-        console.error(err);
-        enqueueSnackbar({
-          message: 'Failed to update comment. Please try again later',
-          variant: 'error',
-        });
-      },
-      onSuccess: (args: {
-        text: string;
-        comment: components['schemas']['Comment'] | null;
-      }) => {
-        const { text, comment } = args;
-        if (!comment) return;
-        comment.text = text;
-      },
-    });
-
-  const { mutate: mutateDeleteComment, isPending: isDeleteCommentPending } =
-    useMutation({
-      mutationFn: async (args: { findingId: string; commentId: string }) => {
-        const { findingId, commentId } = args;
-        await deleteComment({
+    useMutation<
+      void,
+      unknown,
+      { findingId: string; commentId: string; text: string },
+      { previousText?: string; findingId: string; commentId: string }
+    >({
+      mutationFn: async ({ findingId, commentId, text }) => {
+        await updateComment({
           assessmentId,
           findingId,
           commentId,
+          commentDto: {
+            text,
+          },
         });
-        return commentId;
       },
-      onError: (err) => {
+      onMutate: ({ findingId, commentId, text }) => {
+        let previousText: string | undefined;
+        setShowCommentsFor((current) => {
+          if (!current || current.id !== findingId || !current.comments)
+            return current;
+          const comments = current.comments.map((existing) => {
+            if (existing.id !== commentId) return existing;
+            previousText = existing.text;
+            return {
+              ...existing,
+              text,
+            } as components['schemas']['Comment'];
+          });
+          return {
+            ...current,
+            comments,
+          } as components['schemas']['Finding'];
+        });
+        return { previousText, findingId, commentId };
+      },
+      onError: (err, _variables, context) => {
         console.error(err);
         enqueueSnackbar({
           message: 'Failed to update comment. Please try again later',
           variant: 'error',
         });
-      },
-      onSuccess: (commentId: string) => {
-        if (showCommentsFor?.comments) {
-          showCommentsFor.comments = showCommentsFor.comments.filter(
-            (c) => c.id !== commentId
+        if (!context || context.previousText === undefined) return;
+        setShowCommentsFor((current) => {
+          if (!current || current.id !== context.findingId || !current.comments)
+            return current;
+          const comments = current.comments.map((existing) =>
+            existing.id === context.commentId
+              ? {
+                  ...existing,
+                  text: context.previousText,
+                }
+              : existing
           );
-        }
+          return {
+            ...current,
+            comments,
+          } as components['schemas']['Finding'];
+        });
       },
     });
+
+  const { mutate: mutateDeleteComment } = useMutation<
+    string,
+    unknown,
+    { findingId: string; commentId: string }
+  >({
+    mutationFn: async ({ findingId, commentId }) => {
+      await deleteComment({
+        assessmentId,
+        findingId,
+        commentId,
+      });
+      return commentId;
+    },
+    onMutate: ({ commentId }) => {
+      setDeletingCommentId(commentId);
+    },
+    onError: (err) => {
+      console.error(err);
+      enqueueSnackbar({
+        message: 'Failed to update comment. Please try again later',
+        variant: 'error',
+      });
+    },
+    onSuccess: (_commentId, variables) => {
+      const { findingId, commentId } = variables;
+      setShowCommentsFor((current) => {
+        if (!current || current.id !== findingId || !current.comments)
+          return current;
+        const comments = current.comments.filter((c) => c.id !== commentId);
+        return {
+          ...current,
+          comments,
+        } as components['schemas']['Finding'];
+      });
+    },
+    onSettled: () => {
+      setDeletingCommentId(null);
+    },
+  });
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
@@ -715,13 +804,13 @@ function FindingsDetails({
               maxHeight={commentPos.maxHeight}
               minHeight={commentPos.minHeight}
               isUpdateCommentPending={isUpdateCommentPending}
-              isDeleteCommentPending={isDeleteCommentPending}
-              onAdded={(text: string) =>
+              onAdded={(text: string) => {
                 mutateComment({
                   findingId: showCommentsFor.id ?? '',
                   text,
-                })
-              }
+                  tempId: `temp-${Date.now()}`,
+                });
+              }}
               onUpdate={(commentId, text) =>
                 mutateUpdateComment({
                   findingId: showCommentsFor.id ?? '',
@@ -735,6 +824,7 @@ function FindingsDetails({
                   commentId,
                 })
               }
+              deletingCommentId={deletingCommentId}
               onCancel={() => {
                 setCommentPos(null);
                 setShowCommentsFor(null);

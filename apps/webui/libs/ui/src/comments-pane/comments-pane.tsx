@@ -8,7 +8,7 @@ interface CommentsPaneProps {
   maxHeight: number;
   minHeight: number;
   isUpdateCommentPending: boolean;
-  isDeleteCommentPending: boolean;
+  deletingCommentId: string | null;
   onCancel: () => void;
   onAdded: (text: string) => void;
   onUpdate: (commentId: string, text: string) => void;
@@ -34,7 +34,7 @@ export function CommentsPane({
   maxHeight,
   minHeight,
   isUpdateCommentPending,
-  isDeleteCommentPending,
+  deletingCommentId,
   onCancel,
   onAdded,
   onUpdate,
@@ -89,7 +89,7 @@ export function CommentsPane({
   };
 
   const handleDelete = (commentId: string) => {
-    if (isDeleteCommentPending) return;
+    if (deletingCommentId === commentId) return;
     onDelete(commentId);
   };
 
@@ -107,12 +107,17 @@ export function CommentsPane({
       >
         {finding.comments?.map((c) => {
           const username = usernameFromEmail(c.authorEmail);
+          const isPending = c.id?.toString().startsWith('temp-');
           return (
             <div key={c.id} className="flex space-x-2">
               <div className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
                 {username.charAt(0).toUpperCase() ?? '?'}
               </div>
-              <div className="flex-1 bg-gray-100 rounded-lg p-2 flex flex-col">
+              <div
+                className={`flex-1 bg-gray-100 rounded-lg p-2 flex flex-col ${
+                  isPending ? 'opacity-60' : ''
+                }`}
+              >
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
                   <span className="break-words">{username}</span>
                   <div className="flex items-center space-x-2">
@@ -126,7 +131,7 @@ export function CommentsPane({
                     ) : (
                       <button
                         onClick={() => handleEdit(c.id)}
-                        disabled={isUpdateCommentPending}
+                        disabled={isUpdateCommentPending || isPending}
                         className="text-gray-500 cursor-pointer"
                       >
                         <Pen className="w-4 h-4" />
@@ -134,10 +139,14 @@ export function CommentsPane({
                     )}
                     <button
                       onClick={() => handleDelete(c.id)}
-                      disabled={isDeleteCommentPending}
+                      disabled={deletingCommentId === c.id || isPending}
                       className="text-gray-500 cursor-pointer"
                     >
-                      <Trash className="w-4 h-4" />
+                      {deletingCommentId === c.id ? (
+                        <span className="loading loading-spinner loading-xs" />
+                      ) : (
+                        <Trash className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -164,9 +173,14 @@ export function CommentsPane({
                     {c.text}
                   </p>
                 )}
-                {c.createdAt && (
+                {!isPending && c.createdAt && (
                   <span className="text-[10px] text-gray-500 self-end">
                     {formatDate(c.createdAt)}
+                  </span>
+                )}
+                {isPending && (
+                  <span className="text-[10px] text-gray-500 self-end">
+                    Posting...
                   </span>
                 )}
               </div>
