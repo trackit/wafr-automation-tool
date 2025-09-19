@@ -292,7 +292,9 @@ function FindingsDetails({
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
-  const [deletingCommentIds, setDeletingCommentIds] = useState<string[]>([]);
+  const [deletingCommentIds, setDeletingCommentIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const [username, setUsername] = useState('');
 
   const loadCurrentUser = useCallback(async () => {
@@ -619,9 +621,11 @@ function FindingsDetails({
       return commentId;
     },
     onMutate: ({ commentId }) => {
-      setDeletingCommentIds((prev) =>
-        prev.includes(commentId) ? prev : [...prev, commentId]
-      );
+      setDeletingCommentIds((prev) => {
+        const next = new Set(prev);
+        next.add(commentId);
+        return next;
+      });
       return { commentId };
     },
     onError: (err, _variables, context) => {
@@ -631,9 +635,11 @@ function FindingsDetails({
         variant: 'error',
       });
       if (context?.commentId) {
-        setDeletingCommentIds((prev) =>
-          prev.filter((id) => id !== context.commentId)
-        );
+        setDeletingCommentIds((prev) => {
+          const next = new Set(prev);
+          next.delete(context.commentId as string);
+          return next;
+        });
       }
     },
     onSuccess: (_commentId, variables) => {
@@ -647,13 +653,19 @@ function FindingsDetails({
           comments,
         } as components['schemas']['Finding'];
       });
-      setDeletingCommentIds((prev) => prev.filter((id) => id !== commentId));
+      setDeletingCommentIds((prev) => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      });
     },
     onSettled: (_data, _error, variables) => {
       if (!variables?.commentId) return;
-      setDeletingCommentIds((prev) =>
-        prev.filter((id) => id !== variables.commentId)
-      );
+      setDeletingCommentIds((prev) => {
+        const next = new Set(prev);
+        next.delete(variables.commentId);
+        return next;
+      });
     },
   });
 

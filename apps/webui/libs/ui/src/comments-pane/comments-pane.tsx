@@ -8,7 +8,7 @@ interface CommentsPaneProps {
   maxHeight: number;
   minHeight: number;
   isUpdateCommentPending: boolean;
-  deletingCommentIds: string[];
+  deletingCommentIds: Set<string>;
   onCancel: () => void;
   onAdded: (text: string) => void;
   onUpdate: (commentId: string, text: string) => void;
@@ -89,7 +89,7 @@ export function CommentsPane({
   };
 
   const handleDelete = (commentId: string) => {
-    if (deletingCommentIds.includes(commentId)) return;
+    if (deletingCommentIds.has(commentId)) return;
     onDelete(commentId);
   };
 
@@ -108,7 +108,7 @@ export function CommentsPane({
         {finding.comments?.map((c) => {
           const username = usernameFromEmail(c.authorEmail);
           const isPending = c.id?.toString().startsWith('temp-');
-          const isDeleting = c.id ? deletingCommentIds.includes(c.id) : false;
+          const isDeleting = c.id ? deletingCommentIds.has(c.id) : false;
           return (
             <div key={c.id} className="flex space-x-2">
               <div className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
