@@ -34,7 +34,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     } = setup();
 
     const organization = OrganizationMother.basic().build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -80,7 +80,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       setup();
 
     const organization = OrganizationMother.basic().build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -173,7 +173,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       setup();
 
     const organization = OrganizationMother.basic().build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -201,7 +201,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       setup();
 
     const organization = OrganizationMother.basic().build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)

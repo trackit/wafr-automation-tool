@@ -32,7 +32,7 @@ describe('GetMilestonesUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
@@ -72,7 +72,7 @@ describe('GetMilestonesUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId('non-existent-assessment')
@@ -91,7 +91,7 @@ describe('GetMilestonesUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn(undefined)
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
@@ -131,7 +131,7 @@ describe('GetMilestonesUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)

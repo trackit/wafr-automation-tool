@@ -34,7 +34,7 @@ describe('GetMilestoneUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
@@ -77,7 +77,7 @@ describe('GetMilestoneUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn(undefined)
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -95,7 +95,7 @@ describe('GetMilestoneUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn(undefined)
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
@@ -143,7 +143,7 @@ describe('GetMilestoneUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
@@ -174,7 +174,7 @@ describe('GetMilestoneUseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('arn:aws:iam::123456789012:role/export-role')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)

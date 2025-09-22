@@ -35,9 +35,7 @@ export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
   public async getMilestone(args: GetMilestoneUseCaseArgs): Promise<Milestone> {
     const { organizationDomain, assessmentId, region, milestoneId } = args;
     const [organization, assessment] = await Promise.all([
-      this.organizationRepository.get({
-        organizationDomain,
-      }),
+      this.organizationRepository.get(organizationDomain),
       this.assessmentsRepository.get({
         assessmentId,
         organizationDomain: organizationDomain,

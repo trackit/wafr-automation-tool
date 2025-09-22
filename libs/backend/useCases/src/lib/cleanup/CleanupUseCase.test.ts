@@ -192,9 +192,7 @@ describe('CleanupUseCase', () => {
         .withAccountId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       vi.spyOn(
         fakeFeatureToggleRepository,
@@ -222,9 +220,7 @@ describe('CleanupUseCase', () => {
         .withUnitBasedAgreementId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       vi.spyOn(
         fakeFeatureToggleRepository,
@@ -247,9 +243,7 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(1)
         .build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -270,9 +264,7 @@ describe('CleanupUseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic().build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       vi.spyOn(
         fakeFeatureToggleRepository,
@@ -300,9 +292,7 @@ describe('CleanupUseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic().build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       vi.spyOn(
         fakeFeatureToggleRepository,
@@ -333,9 +323,7 @@ describe('CleanupUseCase', () => {
       } = setup();
 
       const organization = OrganizationMother.basic().build();
-      await fakeOrganizationRepository.save({
-        organization,
-      });
+      await fakeOrganizationRepository.save(organization);
 
       vi.spyOn(
         fakeFeatureToggleRepository,

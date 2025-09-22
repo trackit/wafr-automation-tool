@@ -45,20 +45,16 @@ describe('OrganizationRepositoryDynamoDB', () => {
         .withDomain('test.io')
         .build();
 
-      await repository.save({ organization });
+      await repository.save(organization);
 
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+      const fetchedOrganization = await repository.get('test.io');
 
       expect(fetchedOrganization).toEqual(organization);
     });
     it('should return undefined if organization does not exist', async () => {
       const { repository } = setup();
 
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+      const fetchedOrganization = await repository.get('test.io');
 
       expect(fetchedOrganization).toBeUndefined();
     });
@@ -75,11 +71,7 @@ describe('OrganizationRepositoryDynamoDB', () => {
         },
       });
 
-      await expect(
-        repository.get({
-          organizationDomain: 'test.io',
-        })
-      ).rejects.toThrowError(ZodError);
+      await expect(repository.get('test.io')).rejects.toThrowError(ZodError);
     });
   });
 });

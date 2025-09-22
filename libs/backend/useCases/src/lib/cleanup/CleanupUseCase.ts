@@ -83,9 +83,9 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   }
 
   public async cleanupSuccessful(args: CleanupUseCaseArgs) {
-    const organization = await this.organizationRepository.get({
-      organizationDomain: args.organization,
-    });
+    const organization = await this.organizationRepository.get(
+      args.organization
+    );
     if (!organization) {
       throw new OrganizationNotFoundError({ domain: args.organization });
     }
@@ -95,9 +95,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     ) {
       this.logger.info(`Consume free assessment for ${args.organization}`);
       organization.freeAssessmentsLeft--;
-      await this.organizationRepository.save({
-        organization,
-      });
+      await this.organizationRepository.save(organization);
       return;
     }
     if (!this.featureToggleRepository.marketplaceIntegration()) {

@@ -23,8 +23,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   private readonly logger = inject(tokenLogger);
   private readonly tableName = inject(tokenDynamoDBOrganizationTableName);
 
-  public async save(args: { organization: Organization }): Promise<void> {
-    const { organization } = args;
+  public async save(organization: Organization): Promise<void> {
     const params = {
       TableName: this.tableName,
       Item: {
@@ -37,10 +36,9 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     this.logger.info(`Organization saved: ${organization.domain}`);
   }
 
-  public async get(args: {
-    organizationDomain: string;
-  }): Promise<Organization | undefined> {
-    const { organizationDomain } = args;
+  public async get(
+    organizationDomain: string
+  ): Promise<Organization | undefined> {
     const params = {
       TableName: this.tableName,
       Key: {

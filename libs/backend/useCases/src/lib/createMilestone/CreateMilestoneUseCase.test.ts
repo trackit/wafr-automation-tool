@@ -35,7 +35,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -84,7 +84,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -114,7 +114,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -144,7 +144,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -197,7 +197,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn(undefined)
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
@@ -228,7 +228,7 @@ describe('CreateMilestone UseCase', () => {
     const organization = OrganizationMother.basic()
       .withAssessmentExportRoleArn('export-role-arn')
       .build();
-    await fakeOrganizationRepository.save({ organization });
+    await fakeOrganizationRepository.save(organization);
 
     const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)

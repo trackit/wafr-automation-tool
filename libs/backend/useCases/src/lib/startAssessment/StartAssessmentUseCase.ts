@@ -43,9 +43,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   public async canStartAssessment(
     args: StartAssessmentUseCaseArgs
   ): Promise<boolean> {
-    const organization = await this.organizationRepository.get({
-      organizationDomain: args.user.organizationDomain,
-    });
+    const organization = await this.organizationRepository.get(
+      args.user.organizationDomain
+    );
     if (!organization) {
       throw new OrganizationNotFoundError({
         domain: args.user.organizationDomain,

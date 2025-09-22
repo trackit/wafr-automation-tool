@@ -106,7 +106,7 @@ describe('startAssessment UseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(1)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -139,7 +139,7 @@ describe('startAssessment UseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -179,7 +179,7 @@ describe('startAssessment UseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -224,7 +224,7 @@ describe('startAssessment UseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -264,7 +264,7 @@ describe('startAssessment UseCase', () => {
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -296,7 +296,7 @@ describe('startAssessment UseCase', () => {
         .withAccountId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
@@ -327,7 +327,7 @@ describe('startAssessment UseCase', () => {
         .withUnitBasedAgreementId(undefined)
         .withFreeAssessmentsLeft(0)
         .build();
-      await fakeOrganizationRepository.save({ organization });
+      await fakeOrganizationRepository.save(organization);
 
       const user = UserMother.basic()
         .withOrganizationDomain(organization.domain)
