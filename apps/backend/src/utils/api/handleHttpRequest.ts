@@ -2,9 +2,9 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { tokenLogger } from '@backend/infrastructure';
 import { inject } from '@shared/di-container';
-import { BasicError, BasicErrorType, BasicErrorTypes } from '@shared/utils';
+import { BasicError, BasicErrorTypes } from '@shared/utils';
 
-const CATEGORY_TO_HTTP: Record<BasicErrorType, number> = {
+const ErrorTypeResponseCode: Record<BasicErrorTypes, number> = {
   [BasicErrorTypes.BAD_REQUEST]: 400,
   [BasicErrorTypes.FORBIDDEN]: 403,
   [BasicErrorTypes.NOT_FOUND]: 404,
@@ -43,7 +43,7 @@ export const handleHttpRequest = async ({
     return buildResponse(statusCode, await func(event));
   } catch (e: unknown) {
     if (e instanceof BasicError) {
-      const httpStatus = CATEGORY_TO_HTTP[e.type];
+      const httpStatus = ErrorTypeResponseCode[e.type];
 
       logger.error(`${e.code}Error`, {
         type: e.type,
