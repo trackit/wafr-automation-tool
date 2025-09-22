@@ -70,7 +70,15 @@ describe('GetBestPracticeFindings adapter', () => {
     it('should pass without query parameters', async () => {
       const { adapter } = setup();
 
-      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
+      const event = APIGatewayProxyEventMother.basic()
+        .withQueryStringParameters({})
+        .withPathParameters({
+          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          pillarId: '1',
+          questionId: '1',
+          bestPracticeId: '1',
+        })
+        .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
