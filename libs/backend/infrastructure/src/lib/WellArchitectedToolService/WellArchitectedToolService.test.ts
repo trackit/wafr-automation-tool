@@ -173,8 +173,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -462,8 +461,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -794,8 +792,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       expect(createWorkloadCalls.length).toBe(1);
       expect(createWorkloadCalls[0].args[0].input).toEqual(
         expect.objectContaining({
-          WorkloadName:
-            'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          WorkloadName: 'wafr-assessment-name-assessment-id',
           Environment: WorkloadEnvironment.PRODUCTION,
           AwsRegions: assessment.regions,
         })
@@ -854,8 +851,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -948,8 +944,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1024,8 +1019,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1113,8 +1107,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1260,8 +1253,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1311,8 +1303,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1369,8 +1360,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1445,8 +1435,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1517,8 +1506,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1633,8 +1621,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1681,8 +1668,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName:
-              'wafr-assessment-name-1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            WorkloadName: 'wafr-assessment-name-assessment-id',
           },
         ],
         $metadata: { httpStatusCode: 200 },
