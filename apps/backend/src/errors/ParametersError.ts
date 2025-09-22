@@ -3,8 +3,6 @@ import { ZodError } from 'zod';
 import { HandlerError } from './HandlerError';
 
 export class ParametersValidationError extends HandlerError {
-  private static MAX_PREVIEW = 3;
-
   private static pathToString(path?: (string | number)[]): string {
     if (!path?.length) return '(root)';
     return path
@@ -15,18 +13,13 @@ export class ParametersValidationError extends HandlerError {
   constructor(err: ZodError, description?: string) {
     const count = err.issues.length;
     const previews = err.issues
-      .slice(0, ParametersValidationError.MAX_PREVIEW)
       .map(
         (i) => `${ParametersValidationError.pathToString(i.path)}: ${i.message}`
       )
       .join('; ');
-    const more =
-      count > ParametersValidationError.MAX_PREVIEW
-        ? `; +${count - ParametersValidationError.MAX_PREVIEW} more`
-        : '';
     super({
       type: 'BAD_REQUEST',
-      message: `Validation failed with ${count} error(s): ${previews}${more}`,
+      message: `Validation failed with ${count} error(s): ${previews}`,
       description: description ?? JSON.stringify(err.format(), null, 2),
     });
   }
