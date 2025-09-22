@@ -109,6 +109,14 @@ export default [
       'import/no-duplicates': 'error',
       'import/order': 'off',
       'unused-imports/no-unused-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],
 
       '@typescript-eslint/no-floating-promises': [

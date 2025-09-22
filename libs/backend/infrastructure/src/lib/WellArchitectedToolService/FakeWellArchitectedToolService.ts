@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Assessment, Milestone, MilestoneSummary, User } from '@backend/models';
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';

@@ -55,8 +55,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
     if (!dynamoOrganization) {
       return undefined;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { PK, ...organization } = dynamoOrganization;
+    const { PK: _PK, ...organization } = dynamoOrganization;
     return OrganizationSchema.parse(organization);
   }
 }
