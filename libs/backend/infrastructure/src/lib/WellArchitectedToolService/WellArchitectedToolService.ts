@@ -63,11 +63,8 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     }
     return this.wellArchitectedClientConstructor({
       credentials: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         accessKeyId: credentials.Credentials.AccessKeyId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         secretAccessKey: credentials.Credentials.SecretAccessKey!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         sessionToken: credentials.Credentials.SessionToken!,
       },
       region,

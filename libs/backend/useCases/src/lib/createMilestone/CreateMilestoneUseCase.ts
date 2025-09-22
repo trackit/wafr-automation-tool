@@ -61,7 +61,6 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
       roleArn: organization.assessmentExportRoleArn,
       assessment,
       // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       region: (args.region ?? assessment.exportRegion)!,
       name: args.name,
       user: args.user,

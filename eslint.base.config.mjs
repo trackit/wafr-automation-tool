@@ -117,6 +117,7 @@ export default [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/no-non-null-assertion': 'off',
       'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],
 
       '@typescript-eslint/no-floating-promises': [
