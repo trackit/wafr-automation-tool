@@ -10,10 +10,24 @@ import { tokenLogger } from '../Logger';
 
 const OrganizationSchema = z.object({
   domain: z.string(),
+  name: z.string(),
   accountId: z.string().optional(),
   assessmentExportRoleArn: z.string().optional(),
   unitBasedAgreementId: z.string().optional(),
   freeAssessmentsLeft: z.number().optional(),
+  aceIntegration: z
+    .object({
+      roleArn: z.string().optional(),
+      opportunityTeamMembers: z.array(
+        z.object({
+          email: z.string(),
+          firstName: z.string(),
+          lastName: z.string(),
+        })
+      ),
+      solutions: z.array(z.string()),
+    })
+    .optional(),
 }) as z.ZodType<Organization>;
 
 export type DynamoDBOrganization = Organization & { PK: string };

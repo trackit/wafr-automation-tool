@@ -314,6 +314,8 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       step: assessment.step,
       workflows: assessment.workflows,
       error: assessment.error,
+      wafrWorkloadArn: assessment.wafrWorkloadArn,
+      opportunityId: assessment.opportunityId,
       ...(assessment.fileExports && {
         fileExports: Object.fromEntries(
           Object.entries(assessment.fileExports).map(([k, v]) => [

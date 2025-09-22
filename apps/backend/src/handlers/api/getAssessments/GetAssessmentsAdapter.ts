@@ -45,6 +45,8 @@ export class GetAssessmentsAdapter {
       exportRegion: assessment.exportRegion,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
+      wafrWorkloadArn: assessment.wafrWorkloadArn,
+      opportunityId: assessment.opportunityId,
       createdAt: assessment.createdAt.toISOString(),
       step: assessment.step,
       ...(assessment.error && {

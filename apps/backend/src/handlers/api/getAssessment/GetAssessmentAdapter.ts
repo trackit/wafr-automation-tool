@@ -64,6 +64,8 @@ export class GetAssessmentAdapter {
       step: assessment.step,
       workflows: assessment.workflows,
       error: assessment.error,
+      wafrWorkloadArn: assessment.wafrWorkloadArn,
+      opportunityId: assessment.opportunityId,
     };
   }
 

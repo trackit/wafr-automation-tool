@@ -4,7 +4,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { User } from '@backend/models';
+import { AssessmentBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -55,23 +55,26 @@ export class ExportWellArchitectedToolUseCaseImpl
       );
     }
     assertOrganizationHasExportRole(organization);
-    await this.wellArchitectedToolService.exportAssessment({
-      roleArn: organization.assessmentExportRoleArn,
-      assessment,
-      // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
-      region: (args.region ?? assessment.exportRegion)!,
-      user: args.user,
-    });
-    if (!assessment.exportRegion) {
-      await this.assessmentsRepository.update({
-        assessmentId: assessment.id,
-        organization: args.user.organizationDomain,
-        assessmentBody: { exportRegion: args.region },
+    const { workloadArn } =
+      await this.wellArchitectedToolService.exportAssessment({
+        roleArn: organization.assessmentExportRoleArn,
+        assessment,
+        // Non-null assertion since exportRegion and args.region are checked in assertAssessmentIsReadyForExport
+        region: (args.region ?? assessment.exportRegion)!,
+        user: args.user,
       });
+    const assessmentBody: AssessmentBody = { wafrWorkloadArn: workloadArn };
+    if (!assessment.exportRegion) {
+      assessmentBody.exportRegion = args.region;
       this.logger.info(
-        `Export region for assessment ${assessment.id} updated to ${args.region}`
+        `Updating export region for assessment ${assessment.id} to ${args.region}`
       );
     }
+    await this.assessmentsRepository.update({
+      assessmentId: assessment.id,
+      organization: args.user.organizationDomain,
+      assessmentBody,
+    });
     this.logger.info(
       `Export for assessment ${assessment.id} to the Well Architected Tool finished`
     );

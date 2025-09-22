@@ -1,4 +1,4 @@
-import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
+import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import {
   Answer,
   AnswerSummary,
@@ -38,6 +38,7 @@ import { createInjectionToken, inject } from '@shared/di-container';
 import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
+import { tokenSTSClient } from '../STSClientService';
 
 export const WAFRLens = 'wellarchitected';
 
@@ -118,10 +119,13 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     wellArchitectedClient: WellArchitectedClient,
     assessment: Assessment,
     user: User
-  ): Promise<string> {
+  ): Promise<{ workloadId: string; workloadArn: string }> {
     const workload = await this.getWorkload(wellArchitectedClient, assessment);
-    if (workload && workload.WorkloadId) {
-      return workload.WorkloadId;
+    if (workload && workload.WorkloadId && workload.WorkloadArn) {
+      return {
+        workloadId: workload.WorkloadId,
+        workloadArn: workload.WorkloadArn,
+      };
     }
     const command = new CreateWorkloadCommand({
       WorkloadName: this.getWorkloadName(assessment),
@@ -138,12 +142,19 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       },
     });
     const response = await wellArchitectedClient.send(command);
-    if (response.$metadata.httpStatusCode !== 200 || !response.WorkloadId) {
+    if (
+      response.$metadata.httpStatusCode !== 200 ||
+      !response.WorkloadId ||
+      !response.WorkloadArn
+    ) {
       throw new Error(
         `Failed to create workload: ${response.$metadata.httpStatusCode}`
       );
     }
-    return response.WorkloadId;
+    return {
+      workloadId: response.WorkloadId,
+      workloadArn: response.WorkloadArn,
+    };
   }
 
   public async getWorkloadLensReview(
@@ -362,14 +373,14 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     user: User;
-  }): Promise<string> {
+  }): Promise<{ workloadId: string; workloadArn: string }> {
     const { roleArn, assessment, region, user } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
       region
     );
     const assessmentPillarList = assessment.pillars ?? [];
-    const workloadId = await this.createWorkload(
+    const { workloadId, workloadArn } = await this.createWorkload(
       wellArchitectedClient,
       assessment,
       user
@@ -385,7 +396,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessmentPillarList,
       workloadPillarList
     );
-    return workloadId;
+    return { workloadId, workloadArn };
   }
 
   public async createMilestone(args: {
@@ -400,7 +411,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       roleArn,
       region
     );
-    const workloadId = await this.exportAssessment(args);
+    const { workloadId } = await this.exportAssessment(args);
     const res = await wellArchitectedClient.send(
       new CreateMilestoneCommand({
         WorkloadId: workloadId,
@@ -667,8 +678,4 @@ export const tokenWellArchitectedClientConstructor = createInjectionToken<
     return (...args: [] | [WellArchitectedClientConfig]) =>
       new WellArchitectedClient(...args);
   },
-});
-
-export const tokenSTSClient = createInjectionToken<STSClient>('STSClient', {
-  useClass: STSClient,
 });

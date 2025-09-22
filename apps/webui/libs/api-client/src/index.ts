@@ -1,6 +1,7 @@
 export * from './lib/addComment';
 export * from './lib/client';
 export * from './lib/createAWSMilestone';
+export * from './lib/createOpportunity';
 export * from './lib/deleteAssessment';
 export * from './lib/deleteComment';
 export * from './lib/deletePDFExport';

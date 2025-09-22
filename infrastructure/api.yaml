@@ -400,10 +400,22 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !GetAtt ExportAssessmentRole.Arn
+              AWS:
+                - !GetAtt ExportAssessmentRole.Arn
+                - !GetAtt CreateOpportunityRole.Arn
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/WellArchitectedConsoleFullAccess
+      Policies:
+        - PolicyName: PartnerCentralInlinePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - partnercentral:CreateOpportunity
+                  - partnercentral:AssociateOpportunity
+                Resource: '*'
   ExportAssessmentWellArchitectedToolLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -1045,6 +1057,66 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
             Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  CreateOpportunityLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CreateOpportunityFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  CreateOpportunityRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ParentStackName}-create-opportunity'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Resource: !Ref DynamoDBArn
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !Ref OrganizationTableArn
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - arn:aws:iam::*:role/*
+  CreateOpportunityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/createOpportunity
+      Tags:
+        Name: CreateOpportunityFunction
+      Role: !GetAtt CreateOpportunityRole.Arn
+      Events:
+        CreateOpportunity:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/opportunities
+            Method: POST
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

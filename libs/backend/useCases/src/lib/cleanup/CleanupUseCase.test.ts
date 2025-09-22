@@ -1,5 +1,6 @@
 import {
   registerTestInfrastructure,
+  tokenDebug,
   tokenFakeAssessmentsRepository,
   tokenFakeFeatureToggleRepository,
   tokenFakeMarketplaceService,
@@ -15,7 +16,7 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 
 import { NotFoundError } from '../Errors';
-import { CleanupUseCaseImpl, tokenDebug } from './CleanupUseCase';
+import { CleanupUseCaseImpl } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
 
 describe('CleanupUseCase', () => {

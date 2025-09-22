@@ -146,6 +146,8 @@ describe('GetAssessmentAdapter', () => {
         .withRoleArn('role-arn')
         .withStep(AssessmentStep.FINISHED)
         .withWorkflows([])
+        .withWAFRWorkloadArn('wafr-workload-arn')
+        .withOpportunityId('O1234567')
         .build();
 
       useCase.getAssessment.mockResolvedValue(assessment);
@@ -192,6 +194,8 @@ describe('GetAssessmentAdapter', () => {
         roleArn: 'role-arn',
         step: AssessmentStep.FINISHED,
         workflows: [],
+        opportunityId: 'O1234567',
+        wafrWorkloadArn: 'wafr-workload-arn',
       });
     });
   });
