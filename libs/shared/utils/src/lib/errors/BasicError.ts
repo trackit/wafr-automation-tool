@@ -20,7 +20,9 @@ export abstract class BasicError extends Error {
   protected constructor(params: BasicErrorArgs) {
     super(params.message);
 
+    // Keep the prototype chain pointing at the subclass so instanceof works
     Object.setPrototypeOf(this, new.target.prototype);
+    // Capture the concrete class name to surface it in the error payload
     const className = new.target.name;
     this.name = className;
     this.code = params.code ?? BasicError.deriveCodeFromClassName(className);
