@@ -76,6 +76,9 @@ export class ObjectsStorageS3 implements ObjectsStorage {
   }
 
   public async bulkDelete(keys: string[]): Promise<void> {
+    if (keys.length === 0) {
+      return;
+    }
     const command = new DeleteObjectsCommand({
       Bucket: this.bucket,
       Delete: {
