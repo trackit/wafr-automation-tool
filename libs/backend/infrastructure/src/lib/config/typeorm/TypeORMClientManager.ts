@@ -117,6 +117,6 @@ class TypeORMClientManager implements ITypeORMClientManager {
 }
 
 export const tokenTypeORMClientManager =
-  createInjectionToken<ITypeORMClientManager>('ClientManager', {
+  createInjectionToken<ITypeORMClientManager>('TypeORMClientManager', {
     useClass: TypeORMClientManager,
   });

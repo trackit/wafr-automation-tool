@@ -3,7 +3,7 @@ import type { DataSourceOptions } from 'typeorm';
 
 import { createInjectionToken } from '@shared/di-container';
 
-import { entities } from '../../AssessmentsRepository';
+import { entities } from './entities';
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
 
