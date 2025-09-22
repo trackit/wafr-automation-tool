@@ -1,4 +1,4 @@
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { UpdateQuestionUseCaseArgs } from './UpdateQuestionUseCase';
 
@@ -14,11 +14,7 @@ export class UpdateQuestionUseCaseArgsMother {
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       pillarId: 'pillar-id',
       questionId: 'question-id',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
       questionBody: {
         disabled: false,
         none: false,

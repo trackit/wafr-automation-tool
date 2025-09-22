@@ -1,4 +1,4 @@
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { GetBestPracticeFindingsUseCaseArgs } from './GetBestPracticeFindingsUseCase';
 
@@ -15,11 +15,7 @@ export class GetBestPracticeFindingsUseCaseArgsMother {
       pillarId: 'pillar-id',
       questionId: 'question-id',
       bestPracticeId: 'best-practice-id',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
       limit: 10,
       nextToken: undefined,
       searchTerm: undefined,

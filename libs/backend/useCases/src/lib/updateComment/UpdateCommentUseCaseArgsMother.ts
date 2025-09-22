@@ -1,4 +1,8 @@
-import type { FindingCommentBody, User } from '@backend/models';
+import {
+  type FindingCommentBody,
+  type User,
+  UserMother,
+} from '@backend/models';
 
 import type { UpdateCommentUseCaseArgs } from './UpdateCommentUseCase';
 
@@ -17,11 +21,7 @@ export class UpdateCommentUseCaseArgsMother {
       commentBody: {
         text: 'comment-text',
       },
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
     });
   }
 

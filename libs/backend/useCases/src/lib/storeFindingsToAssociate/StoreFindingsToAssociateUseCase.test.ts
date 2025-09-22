@@ -129,12 +129,8 @@ describe('StoreFindingsToAssociate UseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     vi.spyOn(fakeObjectsStorage, 'put')
-      .mockResolvedValueOnce(
-        's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_0.json'
-      )
-      .mockResolvedValueOnce(
-        's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_1.json'
-      );
+      .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_0.json`)
+      .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_1.json`);
 
     const input = StoreFindingsToAssociateUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -149,8 +145,8 @@ describe('StoreFindingsToAssociate UseCase', () => {
     const result = await useCase.storeFindingsToAssociate(input);
 
     expect(result).toEqual([
-      's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_0.json',
-      's3://1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/chunks/prowler_1.json',
+      `s3://${assessment.id}/chunks/prowler_0.json`,
+      `s3://${assessment.id}/chunks/prowler_1.json`,
     ]);
   });
 });

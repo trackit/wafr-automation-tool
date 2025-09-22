@@ -1,4 +1,4 @@
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { DeleteAssessmentUseCaseArgs } from './DeleteAssessmentUseCase';
 
@@ -12,11 +12,7 @@ export class DeleteAssessmentUseCaseArgsMother {
   public static basic(): DeleteAssessmentUseCaseArgsMother {
     return new DeleteAssessmentUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
     });
   }
 
