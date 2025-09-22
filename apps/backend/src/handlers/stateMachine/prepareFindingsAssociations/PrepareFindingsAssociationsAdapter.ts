@@ -9,7 +9,7 @@ const PrepareFindingsAssociationsInputSchema = z.object({
   scanningTool: z.nativeEnum(ScanningTool),
   regions: z.array(z.string().nonempty()),
   workflows: z.array(z.string().nonempty()),
-  organization: z.string().nonempty(),
+  organizationDomain: z.string().nonempty(),
 });
 
 export type PrepareFindingsAssociationsInput = z.infer<

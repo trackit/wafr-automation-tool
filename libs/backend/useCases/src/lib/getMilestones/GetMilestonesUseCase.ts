@@ -44,7 +44,7 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
       this.organizationRepository.get(organizationDomain),
       this.assessmentsRepository.get({
         assessmentId,
-        organizationDomain: organizationDomain,
+        organizationDomain,
       }),
     ]);
     if (!organization) {
@@ -52,7 +52,7 @@ export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
     } else if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organizationDomain: organizationDomain,
+        organizationDomain,
       });
     }
     const milestonesRegion = region ?? assessment.exportRegion;

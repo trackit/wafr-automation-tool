@@ -40,10 +40,10 @@ export class GetMilestonesAdapterEventMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): GetMilestonesAdapterEventMother {
-    this.user.email = `${this.user.id}@${organization}`;
+    this.user.email = `${this.user.id}@${organizationDomain}`;
     return this;
   }
 

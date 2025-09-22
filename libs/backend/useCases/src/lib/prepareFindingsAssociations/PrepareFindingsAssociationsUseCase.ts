@@ -26,7 +26,7 @@ export interface PrepareFindingsAssociationsUseCaseArgs {
   scanningTool: ScanningTool;
   regions: string[];
   workflows: string[];
-  organization: string;
+  organizationDomain: string;
 }
 
 export interface PrepareFindingsAssociationsUseCase {
@@ -121,11 +121,12 @@ export class PrepareFindingsAssociationsUseCaseImpl
 
   private async saveMappedScanFindingsToBestPractices(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     scanningTool: ScanningTool;
     scanFindingsToBestPractices: ScanFindingsBestPracticesMapping;
   }): Promise<void> {
-    const { assessmentId, organization, scanFindingsToBestPractices } = args;
+    const { assessmentId, organizationDomain, scanFindingsToBestPractices } =
+      args;
     const findings = scanFindingsToBestPractices.map<Finding>(
       ({ scanFinding, bestPractices }) => ({
         ...scanFinding,
@@ -141,7 +142,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       findings.map((finding) =>
         this.findingsRepository.save({
           assessmentId,
-          organizationDomain: organization,
+          organizationDomain,
           finding,
         })
       )
@@ -151,15 +152,15 @@ export class PrepareFindingsAssociationsUseCaseImpl
   public async prepareFindingsAssociations(
     args: PrepareFindingsAssociationsUseCaseArgs
   ): Promise<string[]> {
-    const { assessmentId, scanningTool, organization } = args;
+    const { assessmentId, scanningTool, organizationDomain } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organizationDomain: organization,
+        organizationDomain,
       });
     }
     const scanFindings =
@@ -175,7 +176,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const updates = [
       this.assessmentsRepository.updateRawGraphDataForScanningTool({
         assessmentId,
-        organizationDomain: organization,
+        organizationDomain,
         scanningTool,
         graphData: this.formatScanningToolGraphData(scanFindings),
       }),
@@ -184,7 +185,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       updates.push(
         this.assessmentsRepository.update({
           assessmentId,
-          organizationDomain: organization,
+          organizationDomain,
           assessmentBody: {
             pillars: this.formatPillarsForAssessmentUpdate({
               rawPillars: questionSet.pillars,
@@ -211,13 +212,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const [findingsChunksURIs] = await Promise.all([
       this.storeFindingsToAssociateUseCase.storeFindingsToAssociate({
         assessmentId,
-        organization,
+        organizationDomain,
         scanningTool,
         scanFindings: nonMappedScanFindings,
       }),
       this.saveMappedScanFindingsToBestPractices({
         assessmentId,
-        organization,
+        organizationDomain,
         scanningTool,
         scanFindingsToBestPractices: mappedScanFindingsToBestPractices,
       }),

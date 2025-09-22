@@ -56,7 +56,7 @@ describe('GetScannedFindings UseCase', () => {
 
       const input = GetScannedFindingsUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withScanningTool(ScanningTool.PROWLER)
         .build();
 
@@ -114,7 +114,7 @@ describe('GetScannedFindings UseCase', () => {
 
       const input = GetScannedFindingsUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withScanningTool(ScanningTool.CLOUDSPLOIT)
         .build();
 
@@ -173,7 +173,7 @@ describe('GetScannedFindings UseCase', () => {
 
       const input = GetScannedFindingsUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withScanningTool(ScanningTool.CLOUDSPLOIT)
         .build();
 
@@ -234,7 +234,7 @@ describe('GetScannedFindings UseCase', () => {
 
       const input = GetScannedFindingsUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withRegions(['us-west-2'])
         .withScanningTool(ScanningTool.CLOUDSPLOIT)
         .build();
@@ -294,7 +294,7 @@ describe('GetScannedFindings UseCase', () => {
 
       const input = GetScannedFindingsUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withScanningTool(ScanningTool.CLOUDSPLOIT)
         .build();
 
@@ -363,7 +363,7 @@ describe('GetScannedFindings UseCase', () => {
 
     const input = GetScannedFindingsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .build();
 
@@ -405,7 +405,7 @@ describe('GetScannedFindings UseCase', () => {
 
     const input = GetScannedFindingsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .build();
 
@@ -447,7 +447,7 @@ describe('GetScannedFindings UseCase', () => {
 
     const input = GetScannedFindingsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .build();
 

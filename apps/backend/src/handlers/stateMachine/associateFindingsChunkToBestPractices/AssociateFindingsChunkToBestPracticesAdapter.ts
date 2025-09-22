@@ -8,7 +8,7 @@ import { parseJsonArray } from '@shared/utils';
 
 export const AssociateFindingsChunkToBestPracticesInputSchema = z.object({
   assessmentId: z.string().uuid(),
-  organization: z.string().nonempty(),
+  organizationDomain: z.string().nonempty(),
   findingsChunkURI: z.string().nonempty(),
 });
 
@@ -56,14 +56,14 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
   public async handle(
     event: Record<string, unknown>
   ): Promise<AssociateFindingsChunkToBestPracticesOutput> {
-    const { assessmentId, organization, findingsChunkURI } =
+    const { assessmentId, organizationDomain, findingsChunkURI } =
       AssociateFindingsChunkToBestPracticesInputSchema.parse(event);
     const { scanningTool, findings } = await this.fetchFindingsToAssociate(
       findingsChunkURI
     );
     await this.useCase.associateFindingsToBestPractices({
       assessmentId,
-      organization,
+      organizationDomain,
       scanningTool,
       findings,
     });

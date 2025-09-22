@@ -10,7 +10,7 @@ export class CleanupUseCaseArgsMother {
   public static basic(): CleanupUseCaseArgsMother {
     return new CleanupUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organization: 'test.io',
+      organizationDomain: 'test.io',
       error: {
         Cause: 'test-cause',
         Error: 'test-error',
@@ -23,8 +23,10 @@ export class CleanupUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(organization: string): CleanupUseCaseArgsMother {
-    this.data.organization = organization;
+  public withOrganizationDomain(
+    organizationDomain: string
+  ): CleanupUseCaseArgsMother {
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

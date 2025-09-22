@@ -5,7 +5,7 @@ import { inject } from '@shared/di-container';
 
 const ComputeGraphDataInputSchema = z.object({
   assessmentId: z.string().uuid(),
-  organization: z.string().nonempty(),
+  organizationDomain: z.string().nonempty(),
 });
 
 export type ComputeGraphDataInput = z.infer<typeof ComputeGraphDataInputSchema>;
@@ -19,9 +19,6 @@ export class ComputeGraphDataAdapter {
     event: Record<string, unknown>
   ): Promise<ComputeGraphDataOutput> {
     const input = ComputeGraphDataInputSchema.parse(event);
-    return await this.useCase.computeGraphData({
-      assessmentId: input.assessmentId,
-      organization: input.organization,
-    });
+    return await this.useCase.computeGraphData(input);
   }
 }

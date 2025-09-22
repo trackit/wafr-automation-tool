@@ -12,7 +12,7 @@ import { AssessmentNotFoundError } from '../../errors';
 
 export interface StoreFindingsToAssociateUseCaseArgs {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   scanningTool: ScanningTool;
   scanFindings: ScanFinding[];
 }
@@ -64,15 +64,16 @@ export class StoreFindingsToAssociateUseCaseImpl
   public async storeFindingsToAssociate(
     args: StoreFindingsToAssociateUseCaseArgs
   ): Promise<string[]> {
-    const { assessmentId, organization, scanningTool, scanFindings } = args;
+    const { assessmentId, organizationDomain, scanningTool, scanFindings } =
+      args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organizationDomain: organization,
+        organizationDomain,
       });
     }
     const findings = scanFindings.map<Finding>((scanFinding) => ({

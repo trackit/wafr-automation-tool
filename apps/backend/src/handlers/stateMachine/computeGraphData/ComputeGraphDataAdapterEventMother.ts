@@ -10,7 +10,7 @@ export class ComputeGraphDataAdapterEventMother {
   public static basic(): ComputeGraphDataAdapterEventMother {
     return new ComputeGraphDataAdapterEventMother({
       assessmentId: 'e21c0679-4b87-46a9-9a8e-45f2728c0cf2',
-      organization: 'test.io',
+      organizationDomain: 'test.io',
     });
   }
 
@@ -21,10 +21,10 @@ export class ComputeGraphDataAdapterEventMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): ComputeGraphDataAdapterEventMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

@@ -6,7 +6,7 @@ export type AssessmentsStateMachineStartAssessmentArgs = {
   assessmentId: string;
   createdAt: Date;
   createdBy: string;
-  organization: string;
+  organizationDomain: string;
 };
 
 export interface AssessmentsStateMachine {

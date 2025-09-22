@@ -49,7 +49,7 @@ describe('ComputeGraphDataAdapter', () => {
 
       const event = ComputeGraphDataAdapterEventMother.basic()
         .withAssessmentId('36472c1c-1ee8-4ee4-953f-df5bf1d6da63')
-        .withOrganization('example.com')
+        .withOrganizationDomain('example.com')
         .build();
 
       await adapter.handle(event);

@@ -48,10 +48,10 @@ export class GetMilestoneAdapterEventMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): GetMilestoneAdapterEventMother {
-    this.user.email = `${this.user.id}@${organization}`;
+    this.user.email = `${this.user.id}@${organizationDomain}`;
     return this;
   }
 

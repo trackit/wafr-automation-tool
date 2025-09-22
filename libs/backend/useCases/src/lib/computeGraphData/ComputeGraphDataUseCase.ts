@@ -9,7 +9,7 @@ import { AssessmentNotFoundError } from '../../errors';
 
 export type ComputeGraphDataUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
 };
 
 export interface ComputeGraphDataUseCase {
@@ -36,12 +36,12 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organizationDomain: args.organization,
+      organizationDomain: args.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organizationDomain: args.organization,
+        organizationDomain: args.organizationDomain,
       });
     }
 

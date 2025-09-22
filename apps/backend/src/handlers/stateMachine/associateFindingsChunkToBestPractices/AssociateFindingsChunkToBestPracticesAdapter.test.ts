@@ -121,7 +121,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
       const event =
         AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
           .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-          .withOrganization('test.io')
+          .withOrganizationDomain('test.io')
           .withFindingsChunkURI('s3://findings-bucket/prowler_0.json')
           .build();
       const findings = [

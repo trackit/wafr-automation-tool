@@ -26,7 +26,7 @@ export type StateMachineError = {
 
 export type CleanupUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   error?: StateMachineError;
 };
 
@@ -49,12 +49,12 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   public async cleanupError(args: CleanupUseCaseArgs): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organizationDomain: args.organization,
+      organizationDomain: args.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organizationDomain: args.organization,
+        organizationDomain: args.organizationDomain,
       });
     }
     if (!this.debug) {
@@ -84,16 +84,18 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
 
   public async cleanupSuccessful(args: CleanupUseCaseArgs) {
     const organization = await this.organizationRepository.get(
-      args.organization
+      args.organizationDomain
     );
     if (!organization) {
-      throw new OrganizationNotFoundError({ domain: args.organization });
+      throw new OrganizationNotFoundError({ domain: args.organizationDomain });
     }
     if (
       organization.freeAssessmentsLeft &&
       organization.freeAssessmentsLeft > 0
     ) {
-      this.logger.info(`Consume free assessment for ${args.organization}`);
+      this.logger.info(
+        `Consume free assessment for ${args.organizationDomain}`
+      );
       organization.freeAssessmentsLeft--;
       await this.organizationRepository.save(organization);
       return;
@@ -123,14 +125,14 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       });
       if (perUnit) {
         this.logger.info(
-          `Consume review unit for ${args.organization} because it is not a monthly subscription`
+          `Consume review unit for ${args.organizationDomain} because it is not a monthly subscription`
         );
         await this.marketplaceService.consumeReviewUnit({
           accountId: organization.accountId,
         });
       } else {
         throw new OrganizationSubscriptionNotFoundError({
-          domain: args.organization,
+          domain: args.organizationDomain,
         });
       }
     }

@@ -10,7 +10,7 @@ export class UpdateAssessmentUseCaseArgsMother {
   public static basic(): UpdateAssessmentUseCaseArgsMother {
     return new UpdateAssessmentUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organization: 'organization.io',
+      organizationDomain: 'organization.io',
       assessmentBody: {},
     });
   }
@@ -25,7 +25,7 @@ export class UpdateAssessmentUseCaseArgsMother {
   public withOrganizationDomain(
     organization: string
   ): UpdateAssessmentUseCaseArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organization;
     return this;
   }
 

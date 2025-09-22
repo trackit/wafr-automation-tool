@@ -12,7 +12,7 @@ export class GetScannedFindingsUseCaseArgsMother {
   public static basic(): GetScannedFindingsUseCaseArgsMother {
     return new GetScannedFindingsUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organization: 'organization.io',
+      organizationDomain: 'organization.io',
       regions: [],
       workflows: [],
       scanningTool: ScanningTool.PROWLER,
@@ -26,10 +26,10 @@ export class GetScannedFindingsUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): GetScannedFindingsUseCaseArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

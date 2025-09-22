@@ -138,7 +138,7 @@ describe('RescanAssessmentUseCase', () => {
       assessmentId: assessment.id,
       createdAt: date,
       createdBy: user.id,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
   });
 });

@@ -14,7 +14,7 @@ import { assertBestPracticeExists } from '../../services/asserts';
 
 export type AssociateFindingsToBestPracticesUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   scanningTool: ScanningTool;
   findings: Finding[];
 };
@@ -132,12 +132,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   public async associateFindingsToBestPractices(
     args: AssociateFindingsToBestPracticesUseCaseArgs
   ): Promise<void> {
-    const {
-      assessmentId,
-      organization: organizationDomain,
-      scanningTool,
-      findings,
-    } = args;
+    const { assessmentId, organizationDomain, scanningTool, findings } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
       organizationDomain,

@@ -70,7 +70,7 @@ describe('startAssessment UseCase', () => {
           createdAt: date,
           assessmentId: expect.any(String),
           createdBy: user.id,
-          organization: user.organizationDomain,
+          organizationDomain: user.organizationDomain,
         })
       );
     });

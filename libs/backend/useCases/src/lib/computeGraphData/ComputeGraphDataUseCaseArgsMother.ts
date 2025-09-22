@@ -10,7 +10,7 @@ export class ComputeGraphDataUseCaseArgsMother {
   public static basic(): ComputeGraphDataUseCaseArgsMother {
     return new ComputeGraphDataUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organization: 'test.io',
+      organizationDomain: 'test.io',
     });
   }
 
@@ -21,10 +21,10 @@ export class ComputeGraphDataUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): ComputeGraphDataUseCaseArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

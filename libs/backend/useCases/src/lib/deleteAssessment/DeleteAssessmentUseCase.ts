@@ -28,16 +28,16 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
 
   private async deleteAssessmentFromRepository(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization } = args;
+    const { assessmentId, organizationDomain } = args;
     await this.findingsRepository.deleteAll({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
     await this.assessmentsRepository.delete({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
   }
 
@@ -59,7 +59,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
     );
     await this.deleteAssessmentFromRepository({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     this.logger.info(`Assessment#${args.assessmentId} deleted successfully`);
   }

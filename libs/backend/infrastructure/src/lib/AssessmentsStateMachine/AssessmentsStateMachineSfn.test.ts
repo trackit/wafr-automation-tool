@@ -29,7 +29,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         workflows: [],
         regions: [],
         createdBy: 'test-user',
-        organization: 'test.io',
+        organizationDomain: 'test.io',
       };
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
@@ -59,7 +59,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         workflows: [],
         regions: [],
         createdBy: 'test-user',
-        organization: 'test.io',
+        organizationDomain: 'test.io',
       };
       sfnClientMock.on(StartExecutionCommand).resolves({
         $metadata: { httpStatusCode: 500 },
@@ -81,7 +81,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         workflows: [],
         regions: [],
         createdBy: 'test-user',
-        organization: 'test.io',
+        organizationDomain: 'test.io',
       };
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
@@ -104,7 +104,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           roleArn: 'arn:aws:iam::123456789012:role/test-role',
           createdAt: input.createdAt.toISOString(),
           createdBy: 'test-user',
-          organization: 'test.io',
+          organizationDomain: 'test.io',
         })
       );
     });

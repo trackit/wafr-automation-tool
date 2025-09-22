@@ -76,7 +76,7 @@ describe('computeGraphData UseCase', () => {
 
     await useCase.computeGraphData({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
     });
 
     const computedAssessment = await fakeAssessmentsRepository.get({

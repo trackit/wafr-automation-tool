@@ -28,10 +28,10 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain']
+  public withOrganizationDomain(
+    organizationDomain: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain']
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
-    this.data.organizationDomain = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

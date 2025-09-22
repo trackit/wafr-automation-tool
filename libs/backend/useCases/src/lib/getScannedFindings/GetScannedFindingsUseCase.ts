@@ -12,7 +12,7 @@ import {
 
 export interface GetScannedFindingsArgs {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   regions: string[];
   workflows: string[];
   scanningTool: ScanningTool;
@@ -38,16 +38,21 @@ export class GetScannedFindingsUseCaseImpl
   public async getScannedFindings(
     args: GetScannedFindingsArgs
   ): Promise<ScanFinding[]> {
-    const { assessmentId, organization, regions, workflows, scanningTool } =
-      args;
+    const {
+      assessmentId,
+      organizationDomain,
+      regions,
+      workflows,
+      scanningTool,
+    } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organizationDomain: organization,
+        organizationDomain,
       });
     }
     const scanProvider = new this.scanProviderTypes[scanningTool](

@@ -100,7 +100,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
 
@@ -129,7 +129,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
 
@@ -150,7 +150,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
-        .withOrganization(assessment.organization)
+        .withOrganizationDomain(assessment.organization)
         .withError({ Cause: 'test-cause', Error: 'test-error' })
         .build();
 
@@ -173,7 +173,7 @@ describe('CleanupUseCase', () => {
       const { useCase } = setup();
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withOrganization('test.io')
+        .withOrganizationDomain('test.io')
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
@@ -201,7 +201,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
@@ -229,7 +229,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
@@ -247,7 +247,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await useCase.cleanupSuccessful(input);
@@ -273,7 +273,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await useCase.cleanupSuccessful(input);
@@ -305,7 +305,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await useCase.cleanupSuccessful(input);
@@ -340,7 +340,7 @@ describe('CleanupUseCase', () => {
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization(organization.domain)
+        .withOrganizationDomain(organization.domain)
         .build();
 
       await useCase.cleanupSuccessful(input);

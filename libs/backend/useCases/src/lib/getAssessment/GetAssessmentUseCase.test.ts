@@ -28,7 +28,7 @@ describe('GetAssessmentUseCase', () => {
 
     const input = GetAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .build();
 
     const returnedAssessment = await useCase.getAssessment(input);

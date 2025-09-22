@@ -18,7 +18,7 @@ describe('PrepareFindingsAssociationsAdapter', () => {
 
       const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withOrganization('organization-id')
+        .withOrganizationDomain('organization-id')
         .withRegions(['us-east-1'])
         .withWorkflows(['workflow-1'])
         .withScanningTool(ScanningTool.PROWLER)
@@ -53,7 +53,7 @@ describe('PrepareFindingsAssociationsAdapter', () => {
 
       const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withOrganization('organization-id')
+        .withOrganizationDomain('organization-id')
         .withRegions(['us-east-1'])
         .withWorkflows(['workflow-1'])
         .withScanningTool(ScanningTool.PROWLER)
@@ -74,7 +74,7 @@ describe('PrepareFindingsAssociationsAdapter', () => {
 
       const input = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withOrganization('organization-id')
+        .withOrganizationDomain('organization-id')
         .withRegions(['us-east-1'])
         .withWorkflows(['workflow-1'])
         .withScanningTool(ScanningTool.PROWLER)

@@ -53,7 +53,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -66,7 +66,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         scanningTool: input.scanningTool,
         regions: input.regions,
         workflows: input.workflows,
@@ -111,7 +111,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -199,7 +199,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -305,7 +305,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -361,7 +361,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -412,7 +412,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -468,7 +468,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
@@ -480,7 +480,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
       storeFindingsToAssociateUseCase.storeFindingsToAssociate
     ).toHaveBeenCalledExactlyOnceWith({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       scanningTool: input.scanningTool,
       scanFindings: [mockedScanFindings[0]],
     });
@@ -509,7 +509,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)

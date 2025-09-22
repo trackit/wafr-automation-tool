@@ -119,7 +119,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       assessmentId,
       createdAt: new Date(),
       createdBy: user.id,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     return { assessmentId };
   }

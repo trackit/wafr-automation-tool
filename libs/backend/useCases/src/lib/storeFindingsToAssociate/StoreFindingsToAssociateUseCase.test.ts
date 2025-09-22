@@ -36,7 +36,7 @@ describe('StoreFindingsToAssociate UseCase', () => {
 
     const input = StoreFindingsToAssociateUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
         ScanFindingMother.basic().withId('prowler#1').build(),
@@ -80,7 +80,7 @@ describe('StoreFindingsToAssociate UseCase', () => {
 
     const input = StoreFindingsToAssociateUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
         ScanFindingMother.basic().withId('prowler#1').build(),
@@ -134,7 +134,7 @@ describe('StoreFindingsToAssociate UseCase', () => {
 
     const input = StoreFindingsToAssociateUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganization(assessment.organization)
+      .withOrganizationDomain(assessment.organization)
       .withScanningTool(ScanningTool.PROWLER)
       .withScanFindings([
         ScanFindingMother.basic().withId('prowler#1').build(),

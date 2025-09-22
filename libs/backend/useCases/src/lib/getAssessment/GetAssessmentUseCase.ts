@@ -6,7 +6,7 @@ import { AssessmentNotFoundError } from '../../errors';
 
 export type GetAssessmentUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
 };
 
 export interface GetAssessmentUseCase {
@@ -21,12 +21,12 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   ): Promise<Assessment> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organizationDomain: args.organization,
+      organizationDomain: args.organizationDomain,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId: args.assessmentId,
-        organizationDomain: args.organization,
+        organizationDomain: args.organizationDomain,
       });
     }
     return assessment;

@@ -80,7 +80,7 @@ export class GetAssessmentAdapter {
     const user = getUserFromEvent(event);
 
     const assessment = await this.useCase.getAssessment({
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       assessmentId,
     });
 

@@ -44,7 +44,7 @@ export class UpdateAssessmentAdapter {
     const user = getUserFromEvent(event);
 
     await this.useCase.updateAssessment({
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       assessmentId,
       assessmentBody: body,
     });

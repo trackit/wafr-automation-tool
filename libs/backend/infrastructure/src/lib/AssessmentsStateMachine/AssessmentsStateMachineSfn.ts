@@ -19,20 +19,10 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly logger = inject(tokenLogger);
 
   public async startAssessment(
-    assessment: AssessmentsStateMachineStartAssessmentArgs
+    startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs
   ): Promise<void> {
-    const input = {
-      assessmentId: assessment.assessmentId,
-      name: assessment.name,
-      regions: assessment.regions,
-      roleArn: assessment.roleArn,
-      workflows: assessment.workflows,
-      createdAt: assessment.createdAt,
-      createdBy: assessment.createdBy,
-      organization: assessment.organization,
-    };
     const command = new StartExecutionCommand({
-      input: JSON.stringify(input),
+      input: JSON.stringify(startAssessmentInput),
       stateMachineArn: this.stateMachineArn,
     });
 
@@ -40,7 +30,10 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     if (response.$metadata.httpStatusCode !== 200) {
       throw new Error(JSON.stringify(response));
     }
-    this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
+    this.logger.info(
+      `Started Assessment#${startAssessmentInput.assessmentId}`,
+      startAssessmentInput
+    );
   }
 
   public async cancelAssessment(executionId: string): Promise<void> {

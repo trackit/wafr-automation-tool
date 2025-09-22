@@ -28,16 +28,16 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
 
   private async deleteAssessmentFromRepository(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization } = args;
+    const { assessmentId, organizationDomain } = args;
     await this.findingsRepository.deleteAll({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
     await this.assessmentsRepository.delete({
       assessmentId,
-      organizationDomain: organization,
+      organizationDomain,
     });
   }
 
@@ -60,12 +60,12 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     );
     await this.deleteAssessmentFromRepository({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
 
     await this.assessmentsStateMachine.startAssessment({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
       createdAt: new Date(),
       createdBy: args.user.id,
       name: assessment.name,

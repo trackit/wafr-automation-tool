@@ -5,7 +5,7 @@ import { inject } from '@shared/di-container';
 
 export const CleanupInputSchema = z.object({
   assessmentId: z.string().uuid(),
-  organization: z.string().nonempty(),
+  organizationDomain: z.string().nonempty(),
   error: z
     .object({
       Cause: z.string(),
