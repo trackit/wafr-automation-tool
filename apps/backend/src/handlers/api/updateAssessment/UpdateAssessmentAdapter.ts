@@ -9,7 +9,7 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const UpdateAssessmentPathParametersSchema = z.object({
+const UpdateAssessmentPathSchema = z.object({
   assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['updateAssessment']['parameters']['path']>;
 
@@ -28,6 +28,7 @@ export class UpdateAssessmentAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
@@ -35,13 +36,15 @@ export class UpdateAssessmentAdapter {
     event: APIGatewayProxyEvent
   ): Promise<operations['updateAssessment']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
-      pathSchema: UpdateAssessmentPathParametersSchema,
+      pathSchema: UpdateAssessmentPathSchema,
       bodySchema: UpdateAssessmentBodySchema,
     });
     const { assessmentId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updateAssessment({
-      organization: getUserFromEvent(event).organizationDomain,
+      organization: user.organizationDomain,
       assessmentId,
       assessmentBody: body,
     });

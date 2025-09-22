@@ -45,12 +45,14 @@ export class UpdateBestPracticeAdapter {
     const { assessmentId, pillarId, questionId, bestPracticeId } =
       pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updateBestPractice({
-      user: getUserFromEvent(event),
       assessmentId,
       pillarId,
       questionId,
       bestPracticeId,
+      user,
       bestPracticeBody: body,
     });
   }

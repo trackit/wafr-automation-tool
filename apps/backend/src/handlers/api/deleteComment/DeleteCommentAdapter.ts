@@ -35,11 +35,13 @@ export class DeleteCommentAdapter {
 
     const { assessmentId, findingId, commentId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.deleteComment({
       assessmentId,
       findingId: decodeURIComponent(findingId),
       commentId,
-      user: getUserFromEvent(event),
+      user,
     });
   }
 }

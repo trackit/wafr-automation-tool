@@ -1,26 +1,27 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
-import { operations } from '@shared/api-schema';
+import { type User, UserMother } from '@backend/models';
+import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type GetMilestonesPathParameters =
+  operations['getMilestones']['parameters']['path'];
+type GetMilestonesQueryStringParameters = NonNullable<
+  operations['getMilestones']['parameters']['query']
+>;
+
 export class GetMilestonesAdapterEventMother {
-  private pathParameters: operations['getMilestones']['parameters']['path'];
-  private queryStringParameters: NonNullable<
-    operations['getMilestones']['parameters']['query']
-  >;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: GetMilestonesPathParameters;
+  private queryStringParameters: GetMilestonesQueryStringParameters;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    path: operations['getMilestones']['parameters']['path'],
-    query: NonNullable<operations['getMilestones']['parameters']['query']>
+    pathParameters: GetMilestonesPathParameters,
+    queryStringParameters: GetMilestonesQueryStringParameters
   ) {
-    this.pathParameters = path;
-    this.queryStringParameters = query;
+    this.pathParameters = pathParameters;
+    this.queryStringParameters = queryStringParameters;
   }
 
   public static basic(): GetMilestonesAdapterEventMother {

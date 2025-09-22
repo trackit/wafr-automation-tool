@@ -40,9 +40,11 @@ export class StartAssessmentAdapter {
       bodySchema: StartAssessmentBodySchema,
     });
 
+    const user = getUserFromEvent(event);
+
     const { assessmentId } = await this.useCase.startAssessment({
-      user: getUserFromEvent(event),
       ...body,
+      user,
     });
     return { assessmentId };
   }

@@ -3,10 +3,11 @@ import { tokenRescanAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { RescanAssessmentAdapter } from './RescanAssessmentAdapter';
 import { RescanAssessmentAdapterEventMother } from './RescanAssessmentAdapterEventMother';
 
-describe('RescanAssessmentAdapter', () => {
+describe('rescanAssessment adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
@@ -15,6 +16,21 @@ describe('RescanAssessmentAdapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = RescanAssessmentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -37,19 +53,19 @@ describe('RescanAssessmentAdapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with assessmentId', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const event = RescanAssessmentAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withAssessmentId(assessmentId)
         .build();
 
       await adapter.handle(event);
       expect(useCase.rescanAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          assessmentId,
         })
       );
     });
@@ -68,8 +84,11 @@ describe('RescanAssessmentAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { rescanAssessment: vitest.fn() };
   register(tokenRescanAssessmentUseCase, { useValue: useCase });
-  const adapter = new RescanAssessmentAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new RescanAssessmentAdapter() };
 };

@@ -22,6 +22,7 @@ export class DeleteAssessmentAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
@@ -32,9 +33,11 @@ export class DeleteAssessmentAdapter {
       pathSchema: DeleteAssessmentPathSchema,
     });
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.deleteAssessment({
-      user: getUserFromEvent(event),
       ...pathParameters,
+      user,
     });
   }
 }

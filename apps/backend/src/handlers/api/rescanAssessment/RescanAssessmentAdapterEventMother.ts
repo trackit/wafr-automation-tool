@@ -1,22 +1,19 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
-import { operations } from '@shared/api-schema';
+import { type User, UserMother } from '@backend/models';
+import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type RescanAssessmentPathParameters =
+  operations['rescanAssessment']['parameters']['path'];
+
 export class RescanAssessmentAdapterEventMother {
-  private pathParameters: operations['rescanAssessment']['parameters']['path'];
+  private pathParameters: RescanAssessmentPathParameters;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
-
-  private constructor(
-    path: operations['rescanAssessment']['parameters']['path']
-  ) {
-    this.pathParameters = path;
+  private constructor(pathParameters: RescanAssessmentPathParameters) {
+    this.pathParameters = pathParameters;
   }
 
   public static basic(): RescanAssessmentAdapterEventMother {

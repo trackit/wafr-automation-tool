@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import {
   BodyMissingError,
+  ParametersJSONParseError,
   ParametersValidationError,
   PathMissingError,
   QueryMissingError,
@@ -150,6 +151,19 @@ describe('parseApiEvent', () => {
       expect(() =>
         parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
       ).toThrow(ParametersValidationError);
+    });
+
+    it('should throw ParametersJSONParseError when body is not a valid JSON', () => {
+      const event = APIGatewayProxyEventMother.basic()
+        .withPathParameters({
+          assessmentId: '123e4567-e89b-12d3-a456-426614174000',
+        })
+        .withBody('{"name":')
+        .build();
+
+      expect(() =>
+        parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
+      ).toThrow(ParametersJSONParseError);
     });
 
     it('should propagate all MissingError when required segments are absent', () => {

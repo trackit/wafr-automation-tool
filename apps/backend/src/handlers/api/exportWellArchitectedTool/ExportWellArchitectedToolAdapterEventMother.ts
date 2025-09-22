@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -18,10 +18,7 @@ type ExportWellArchitectedToolBody = NonNullable<
 export class ExportWellArchitectedToolAdapterEventMother {
   private pathParameters: ExportWellArchitectedToolParameters;
   private body: ExportWellArchitectedToolBody;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
     params: ExportWellArchitectedToolParameters,
@@ -43,7 +40,7 @@ export class ExportWellArchitectedToolAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: ExportWellArchitectedToolParameters['assessmentId']
+    assessmentId: string
   ): ExportWellArchitectedToolAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;

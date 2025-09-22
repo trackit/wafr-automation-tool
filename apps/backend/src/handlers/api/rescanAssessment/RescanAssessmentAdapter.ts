@@ -22,6 +22,7 @@ export class RescanAssessmentAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
@@ -32,9 +33,11 @@ export class RescanAssessmentAdapter {
       pathSchema: RescanAssessmentPathSchema,
     });
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.rescanAssessment({
-      user: getUserFromEvent(event),
       ...pathParameters,
+      user,
     });
   }
 }

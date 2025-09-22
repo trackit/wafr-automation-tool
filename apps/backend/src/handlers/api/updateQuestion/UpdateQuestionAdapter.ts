@@ -42,11 +42,13 @@ export class UpdateQuestionAdapter {
     });
     const { assessmentId, pillarId, questionId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updateQuestion({
-      user: getUserFromEvent(event),
       assessmentId,
       pillarId,
       questionId,
+      user,
       questionBody: body,
     });
   }

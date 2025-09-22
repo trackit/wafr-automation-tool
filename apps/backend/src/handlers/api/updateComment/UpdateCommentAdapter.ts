@@ -41,11 +41,13 @@ export class UpdateCommentAdapter {
     });
     const { assessmentId, findingId, commentId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updateComment({
       assessmentId,
       findingId: decodeURIComponent(findingId),
       commentId,
-      user: getUserFromEvent(event),
+      user,
       commentBody: body,
     });
   }

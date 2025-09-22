@@ -1,13 +1,14 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
-import { MilestoneMother } from '@backend/models';
+import { MilestoneMother, UserMother } from '@backend/models';
 import { tokenGetMilestoneUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { GetMilestoneAdapter } from './GetMilestoneAdapter';
 import { GetMilestoneAdapterEventMother } from './GetMilestoneAdapterEventMother';
 
-describe('GetMilestoneAdapter', () => {
+describe('getMilestone adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
@@ -16,6 +17,22 @@ describe('GetMilestoneAdapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = GetMilestoneAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          querySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -64,28 +81,29 @@ describe('GetMilestoneAdapter', () => {
       expect(response.statusCode).toBe(200);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call the use case with correct parameters', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const milestoneId = 2;
+      const region = 'eu-west-1';
       const event = GetMilestoneAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withMilestoneId(2)
-        .withRegion('eu-west-1')
-        .withUser({
-          id: 'user-id',
-          email: 'user-id@test.io',
-        })
+        .withAssessmentId(assessmentId)
+        .withMilestoneId(milestoneId)
+        .withRegion(region)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.getMilestone).toHaveBeenCalledWith({
         organizationDomain: 'test.io',
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        milestoneId: 2,
-        region: 'eu-west-1',
+        assessmentId,
+        milestoneId,
+        region,
       });
     });
 
@@ -103,11 +121,14 @@ describe('GetMilestoneAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { getMilestone: vitest.fn() };
   useCase.getMilestone.mockResolvedValueOnce(
     Promise.resolve(MilestoneMother.basic().build())
   );
   register(tokenGetMilestoneUseCase, { useValue: useCase });
-  const adapter = new GetMilestoneAdapter();
-  return { adapter, useCase };
+
+  return { parseSpy, useCase, adapter: new GetMilestoneAdapter() };
 };

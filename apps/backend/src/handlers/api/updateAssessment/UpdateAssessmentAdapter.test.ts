@@ -3,10 +3,11 @@ import { tokenUpdateAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { UpdateAssessmentAdapter } from './UpdateAssessmentAdapter';
 import { UpdateAssessmentAdapterEventMother } from './UpdateAssessmentAdapterEventMother';
 
-describe('UpdateAssessmentAdapter', () => {
+describe('updateAssessment adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
@@ -15,6 +16,22 @@ describe('UpdateAssessmentAdapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = UpdateAssessmentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          bodySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -37,23 +54,22 @@ describe('UpdateAssessmentAdapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
-
-  describe('useCase call and return value', () => {
-    it('should call useCase with assessmentId and assessment body', async () => {
+  describe('useCase and return value', () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const assessmentId = '14270881-e4b0-4f89-8941-449eed22071d';
+      const assessmentBody = { name: 'New Assessment Name' };
       const event = UpdateAssessmentAdapterEventMother.basic()
-        .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withName('New Assessment Name')
+        .withAssessmentId(assessmentId)
+        .withName(assessmentBody.name)
         .build();
 
       await adapter.handle(event);
       expect(useCase.updateAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-          assessmentBody: {
-            name: 'New Assessment Name',
-          },
+          assessmentId,
+          assessmentBody,
         })
       );
     });
@@ -72,7 +88,11 @@ describe('UpdateAssessmentAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { updateAssessment: vitest.fn() };
   register(tokenUpdateAssessmentUseCase, { useValue: useCase });
-  return { useCase, adapter: new UpdateAssessmentAdapter() };
+
+  return { parseSpy, useCase, adapter: new UpdateAssessmentAdapter() };
 };

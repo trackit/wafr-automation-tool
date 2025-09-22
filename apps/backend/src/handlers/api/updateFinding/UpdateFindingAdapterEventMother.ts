@@ -1,24 +1,26 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type UpdateFindingPathParameters =
+  operations['updateFinding']['parameters']['path'];
+type UpdateFindingBody =
+  operations['updateFinding']['requestBody']['content']['application/json'];
+
 export class UpdateFindingAdapterEventMother {
-  private pathParameters: operations['updateFinding']['parameters']['path'];
-  private requestBody: operations['updateFinding']['requestBody']['content']['application/json'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: UpdateFindingPathParameters;
+  private body: UpdateFindingBody;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    pathParameters: operations['updateFinding']['parameters']['path'],
-    requestBody: operations['updateFinding']['requestBody']['content']['application/json']
+    pathParameters: UpdateFindingPathParameters,
+    body: UpdateFindingBody
   ) {
     this.pathParameters = pathParameters;
-    this.requestBody = requestBody;
+    this.body = body;
   }
 
   public static basic(): UpdateFindingAdapterEventMother {
@@ -34,23 +36,19 @@ export class UpdateFindingAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: operations['updateFinding']['parameters']['path']['assessmentId']
+    assessmentId: string
   ): UpdateFindingAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
-  public withFindingId(
-    findingId: operations['updateFinding']['parameters']['path']['findingId']
-  ): UpdateFindingAdapterEventMother {
+  public withFindingId(findingId: string): UpdateFindingAdapterEventMother {
     this.pathParameters.findingId = findingId;
     return this;
   }
 
-  public withHidden(
-    hidden: operations['updateFinding']['requestBody']['content']['application/json']['hidden']
-  ): UpdateFindingAdapterEventMother {
-    this.requestBody.hidden = hidden;
+  public withHidden(hidden: boolean): UpdateFindingAdapterEventMother {
+    this.body.hidden = hidden;
     return this;
   }
 
@@ -63,7 +61,7 @@ export class UpdateFindingAdapterEventMother {
 
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withBody(JSON.stringify(this.requestBody))
+      .withBody(JSON.stringify(this.body))
       .withPathParameters(this.pathParameters)
       .withUserClaims({
         sub: this.user.id,

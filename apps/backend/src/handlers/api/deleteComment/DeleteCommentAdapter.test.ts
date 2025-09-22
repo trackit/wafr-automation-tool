@@ -4,6 +4,7 @@ import { tokenDeleteCommentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { DeleteCommentAdapter } from './DeleteCommentAdapter';
 import { DeleteCommentAdapterEventMother } from './DeleteCommentAdapterEventMother';
 
@@ -16,6 +17,21 @@ describe('deleteComment adapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = DeleteCommentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -49,32 +65,29 @@ describe('deleteComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with path parameters and user', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const findingId = 'finding-id';
+      const commentId = '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const event = DeleteCommentAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withFindingId('finding-id')
-        .withCommentId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withAssessmentId(assessmentId)
+        .withFindingId(findingId)
+        .withCommentId(commentId)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.deleteComment).toHaveBeenCalledWith({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        findingId: 'finding-id',
-        commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        assessmentId,
+        findingId,
+        commentId,
+        user,
       });
     });
 
@@ -92,9 +105,12 @@ describe('deleteComment adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { deleteComment: vitest.fn() };
   useCase.deleteComment.mockResolvedValueOnce(Promise.resolve());
   register(tokenDeleteCommentUseCase, { useValue: useCase });
-  const adapter = new DeleteCommentAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new DeleteCommentAdapter() };
 };

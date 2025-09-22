@@ -4,11 +4,12 @@ import { tokenGetAssessmentsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { GetAssessmentsAdapter } from './GetAssessmentsAdapter';
 import { GetAssessmentsAdapterEventMother } from './GetAssessmentsAdapterEventMother';
 
 describe('getAssessments adapter', () => {
-  describe('query parameters validation', () => {
+  describe('args validation', () => {
     it('should validate parameters', async () => {
       const { adapter } = setup();
 
@@ -20,6 +21,21 @@ describe('getAssessments adapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = GetAssessmentsAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          querySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 200 without parameters', async () => {
@@ -67,32 +83,29 @@ describe('getAssessments adapter', () => {
       expect(response.statusCode).toBe(200);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with query parameters', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const limit = 10;
+      const search = 'test';
+      const nextToken = 'test';
       const event = GetAssessmentsAdapterEventMother.basic()
-        .withLimit(10)
-        .withSearch('test')
-        .withNextToken('test')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withLimit(limit)
+        .withSearch(search)
+        .withNextToken(nextToken)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.getAssessments).toHaveBeenCalledWith({
-        limit: 10,
-        search: 'test',
-        nextToken: 'test',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        limit,
+        search,
+        nextToken,
+        user,
       });
     });
 
@@ -105,7 +118,6 @@ describe('getAssessments adapter', () => {
       expect(response.statusCode).toBe(200);
     });
   });
-
   describe('convertToAPIAssessment', () => {
     it('should convert an assessment to an API assessment', () => {
       const { adapter } = setup();
@@ -132,6 +144,9 @@ describe('getAssessments adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { getAssessments: vitest.fn() };
   useCase.getAssessments.mockResolvedValueOnce(
     Promise.resolve({
@@ -139,6 +154,6 @@ const setup = () => {
     })
   );
   register(tokenGetAssessmentsUseCase, { useValue: useCase });
-  const adapter = new GetAssessmentsAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new GetAssessmentsAdapter() };
 };

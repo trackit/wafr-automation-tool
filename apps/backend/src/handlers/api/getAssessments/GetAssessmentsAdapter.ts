@@ -65,8 +65,10 @@ export class GetAssessmentsAdapter {
       querySchema: GetAssessmentsQuerySchema,
     });
 
+    const user = getUserFromEvent(event);
+
     const { assessments, nextToken } = await this.useCase.getAssessments({
-      user: getUserFromEvent(event),
+      user,
       ...queryStringParameters,
     });
     return { assessments: this.convertToAPIAssessment(assessments), nextToken };

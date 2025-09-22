@@ -29,6 +29,7 @@ export class CreateMilestoneAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
@@ -38,10 +39,12 @@ export class CreateMilestoneAdapter {
       bodySchema: CreateMilestoneBodySchema,
     });
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.createMilestone({
-      user: getUserFromEvent(event),
       ...pathParameters,
       ...body,
+      user,
     });
   }
 }

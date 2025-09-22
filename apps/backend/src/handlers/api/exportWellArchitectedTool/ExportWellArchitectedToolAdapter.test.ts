@@ -4,6 +4,7 @@ import { tokenExportWellArchitectedToolUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { ExportWellArchitectedToolAdapter } from './ExportWellArchitectedToolAdapter';
 import { ExportWellArchitectedToolAdapterEventMother } from './ExportWellArchitectedToolAdapterEventMother';
 
@@ -16,6 +17,22 @@ describe('exportWellArchitectedTool adapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = ExportWellArchitectedToolAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          bodySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -38,30 +55,26 @@ describe('exportWellArchitectedTool adapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with path parameters and user', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const region = 'us-west-2';
       const event = ExportWellArchitectedToolAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withRegion('us-west-2')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withAssessmentId(assessmentId)
+        .withRegion(region)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.exportAssessment).toHaveBeenCalledWith({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        region: 'us-west-2',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        assessmentId,
+        region,
+        user,
       });
     });
 
@@ -79,9 +92,12 @@ describe('exportWellArchitectedTool adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { exportAssessment: vitest.fn() };
   useCase.exportAssessment.mockResolvedValueOnce(Promise.resolve());
   register(tokenExportWellArchitectedToolUseCase, { useValue: useCase });
-  const adapter = new ExportWellArchitectedToolAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new ExportWellArchitectedToolAdapter() };
 };

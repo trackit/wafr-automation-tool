@@ -100,13 +100,15 @@ export class GetBestPracticeFindingsAdapter {
       querySchema: GetBestPracticeFindingsQueryArgsSchema,
     });
 
+    const user = getUserFromEvent(event);
+
     const { findings, nextToken } = await this.useCase.getBestPracticeFindings({
-      user: getUserFromEvent(event),
       ...pathParameters,
       limit: queryStringParameters.limit,
       nextToken: queryStringParameters.nextToken,
       searchTerm: queryStringParameters.search,
       showHidden: queryStringParameters.showHidden,
+      user,
     });
     return {
       items: await this.toGetBestPracticeFindingsItemsResponse(findings),

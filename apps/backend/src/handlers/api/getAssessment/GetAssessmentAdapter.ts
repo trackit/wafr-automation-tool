@@ -77,8 +77,10 @@ export class GetAssessmentAdapter {
     });
     const { assessmentId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     const assessment = await this.useCase.getAssessment({
-      organization: getUserFromEvent(event).organizationDomain,
+      organization: user.organizationDomain,
       assessmentId,
     });
 

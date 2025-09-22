@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -11,10 +11,7 @@ type DeleteAssessmentParameters = NonNullable<
 
 export class DeleteAssessmentAdapterEventMother {
   private pathParameters: DeleteAssessmentParameters;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(params: DeleteAssessmentParameters) {
     this.pathParameters = params;

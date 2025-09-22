@@ -3,7 +3,7 @@ import { z, ZodType } from 'zod';
 
 import type { Milestone } from '@backend/models';
 import { tokenGetMilestoneUseCase } from '@backend/useCases';
-import { operations } from '@shared/api-schema';
+import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
 import { MilestoneInvalidIdError } from '../../../errors';

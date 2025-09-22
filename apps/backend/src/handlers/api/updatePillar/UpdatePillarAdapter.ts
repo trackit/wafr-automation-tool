@@ -42,10 +42,12 @@ export class UpdatePillarAdapter {
     });
     const { assessmentId, pillarId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updatePillar({
-      user: getUserFromEvent(event),
       assessmentId,
       pillarId,
+      user,
       pillarBody: body,
     });
   }

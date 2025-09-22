@@ -9,12 +9,12 @@ import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFro
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const updateFindingPathParametersSchema = z.object({
+const UpdateFindingPathSchema = z.object({
   assessmentId: z.string().uuid(),
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
-const updateFindingBodySchema = z.object({
+const UpdateFindingBodySchema = z.object({
   hidden: z.boolean().optional(),
 }) satisfies ZodType<
   operations['updateFinding']['requestBody']['content']['application/json']
@@ -29,6 +29,7 @@ export class UpdateFindingAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
@@ -36,16 +37,18 @@ export class UpdateFindingAdapter {
     event: APIGatewayProxyEvent
   ): Promise<operations['updateFinding']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
-      pathSchema: updateFindingPathParametersSchema,
-      bodySchema: updateFindingBodySchema,
+      pathSchema: UpdateFindingPathSchema,
+      bodySchema: UpdateFindingBodySchema,
     });
     const { assessmentId, findingId } = pathParameters;
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.updateFinding({
-      user: getUserFromEvent(event),
       assessmentId,
       findingId: decodeURIComponent(findingId),
       findingBody: body,
+      user,
     });
   }
 }

@@ -8,10 +8,11 @@ import { tokenGetBestPracticeFindingsUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { GetBestPracticeFindingsAdapter } from './GetBestPracticeFindingsAdapter';
 import { GetBestPracticeFindingsAdapterEventMother } from './GetBestPracticeFindingsAdapterEventMother';
 
-describe('GetBestPracticeFindings adapter', () => {
+describe('getBestPracticeFindings adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
@@ -29,6 +30,22 @@ describe('GetBestPracticeFindings adapter', () => {
 
       const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          querySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -84,25 +101,28 @@ describe('GetBestPracticeFindings adapter', () => {
       expect(response.statusCode).toBe(200);
     });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with assessmentId, pillarId, questionId, bestPracticeId', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const pillarId = 'pillar-id';
+      const questionId = 'question-id';
+      const bestPracticeId = 'best-practice-id';
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withPillarId('pillar-id')
-        .withQuestionId('question-id')
-        .withBestPracticeId('best-practice-id')
+        .withAssessmentId(assessmentId)
+        .withPillarId(pillarId)
+        .withQuestionId(questionId)
+        .withBestPracticeId(bestPracticeId)
         .build();
 
       await adapter.handle(event);
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-          pillarId: 'pillar-id',
-          questionId: 'question-id',
-          bestPracticeId: 'best-practice-id',
+          assessmentId,
+          pillarId,
+          questionId,
+          bestPracticeId,
         })
       );
     });
@@ -110,30 +130,35 @@ describe('GetBestPracticeFindings adapter', () => {
     it('should call useCase with limit, search, showHidden and nextToken', async () => {
       const { adapter, useCase } = setup();
 
+      const limit = 10;
+      const searchTerm = 'search-term';
+      const showHidden = true;
+      const nextToken = 'YQ==';
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withPillarId('pillar-id')
         .withQuestionId('question-id')
         .withBestPracticeId('best-practice-id')
-        .withLimit(10)
-        .withSearch('search-term')
-        .withShowHidden(true)
-        .withNextToken('YQ==')
+        .withLimit(limit)
+        .withSearch(searchTerm)
+        .withShowHidden(showHidden)
+        .withNextToken(nextToken)
         .build();
 
       await adapter.handle(event);
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          limit: 10,
-          searchTerm: 'search-term',
-          showHidden: true,
-          nextToken: 'YQ==',
+          limit,
+          searchTerm,
+          showHidden,
+          nextToken,
         })
       );
     });
 
     it('should return formatted findings', async () => {
       const { adapter, useCase } = setup();
+
       const comment = FindingCommentMother.basic()
         .withAuthorId('user-id')
         .build();
@@ -165,6 +190,7 @@ describe('GetBestPracticeFindings adapter', () => {
       ];
 
       useCase.getBestPracticeFindings.mockResolvedValue({ findings });
+
       const event = GetBestPracticeFindingsAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
@@ -215,11 +241,15 @@ describe('GetBestPracticeFindings adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { getBestPracticeFindings: vitest.fn() };
   useCase.getBestPracticeFindings.mockResolvedValue({
     findings: [],
     nextToken: null,
   });
   register(tokenGetBestPracticeFindingsUseCase, { useValue: useCase });
-  return { useCase, adapter: new GetBestPracticeFindingsAdapter() };
+
+  return { parseSpy, useCase, adapter: new GetBestPracticeFindingsAdapter() };
 };

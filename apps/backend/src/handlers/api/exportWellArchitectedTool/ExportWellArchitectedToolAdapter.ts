@@ -42,10 +42,12 @@ export class ExportWellArchitectedToolAdapter {
       bodySchema: ExportWellArchitectedToolBodySchema,
     });
 
+    const user = getUserFromEvent(event);
+
     await this.useCase.exportAssessment({
-      user: getUserFromEvent(event),
       ...pathParameters,
       ...body,
+      user,
     });
   }
 }
