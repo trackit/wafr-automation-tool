@@ -1,3 +1,5 @@
+import { BasicErrorTypes } from '@shared/utils';
+
 import { UseCaseError } from './UseCaseError';
 
 export class OrganizationNotFoundError extends UseCaseError {
@@ -9,7 +11,7 @@ export class OrganizationNotFoundError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'NOT_FOUND',
+      type: BasicErrorTypes.NOT_FOUND,
       message: `Organization with domain ${domain} not found`,
       description,
     });
@@ -25,7 +27,7 @@ export class OrganizationSubscriptionNotFoundError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'NOT_FOUND',
+      type: BasicErrorTypes.NOT_FOUND,
       message: `Organization with domain ${domain} does not have a subscription`,
       description,
     });
@@ -41,7 +43,7 @@ export class OrganizationExportRoleNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'CONFLICT',
+      type: BasicErrorTypes.CONFLICT,
       message: `Organization with domain ${domain} has no export role set`,
       description,
     });
@@ -57,7 +59,7 @@ export class OrganizationNoActiveSubscriptionError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'FORBIDDEN',
+      type: BasicErrorTypes.FORBIDDEN,
       message: `Organization with domain ${domain} does not have an active subscription or free assessments left`,
       description,
     });
@@ -73,7 +75,7 @@ export class OrganizationAccountIdNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'CONFLICT',
+      type: BasicErrorTypes.CONFLICT,
       message: `Organization with domain ${domain} has no account ID set`,
       description,
     });
@@ -89,7 +91,7 @@ export class OrganizationUnitBasedAgreementIdNotSetError extends UseCaseError {
   ) {
     const { domain } = args;
     super({
-      type: 'CONFLICT',
+      type: BasicErrorTypes.CONFLICT,
       message: `Organization with domain ${domain} has no unit-based agreement ID set`,
       description,
     });

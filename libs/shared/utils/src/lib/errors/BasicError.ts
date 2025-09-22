@@ -1,21 +1,20 @@
-export const CATEGORIES = [
-  'NOT_FOUND',
-  'FORBIDDEN',
-  'CONFLICT',
-  'BAD_REQUEST',
-] as const;
+export enum BasicErrorTypes {
+  NOT_FOUND = 'NOT_FOUND',
+  FORBIDDEN = 'FORBIDDEN',
+  CONFLICT = 'CONFLICT',
+  BAD_REQUEST = 'BAD_REQUEST',
+}
 
-export type BasicErrorType = (typeof CATEGORIES)[number];
 export type BasicErrorArgs = {
   code?: string;
-  type: BasicErrorType;
+  type: BasicErrorTypes;
   message: string;
   description?: string;
 };
 
 export abstract class BasicError extends Error {
   readonly code: string;
-  readonly type: BasicErrorType;
+  readonly type: BasicErrorTypes;
   readonly description?: string;
 
   protected constructor(params: BasicErrorArgs) {

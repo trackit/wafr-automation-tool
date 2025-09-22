@@ -1,3 +1,5 @@
+import { BasicErrorTypes } from '@shared/utils';
+
 import { UseCaseError } from './UseCaseError';
 
 export class AssessmentNotFoundError extends UseCaseError {
@@ -10,7 +12,7 @@ export class AssessmentNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, organizationDomain } = args;
     super({
-      type: 'NOT_FOUND',
+      type: BasicErrorTypes.NOT_FOUND,
       message: `Assessment with id ${assessmentId} not found for organization with domain ${organizationDomain}`,
       description,
     });
@@ -26,7 +28,7 @@ export class AssessmentNotFinishedError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      type: 'CONFLICT',
+      type: BasicErrorTypes.CONFLICT,
       message: `Assessment with id ${assessmentId} is not finished`,
       description,
     });
@@ -42,7 +44,7 @@ export class AssessmentExportRegionNotSetError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      type: 'CONFLICT',
+      type: BasicErrorTypes.CONFLICT,
       message: `Assessment with id ${assessmentId} has no export region set`,
       description,
     });

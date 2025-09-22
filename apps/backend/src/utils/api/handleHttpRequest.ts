@@ -2,14 +2,14 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { tokenLogger } from '@backend/infrastructure';
 import { inject } from '@shared/di-container';
-import { BasicError, BasicErrorType } from '@shared/utils';
+import { BasicError, BasicErrorType, BasicErrorTypes } from '@shared/utils';
 
-const CATEGORY_TO_HTTP = {
-  BAD_REQUEST: 400,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-} as const satisfies Record<BasicErrorType, number>;
+const CATEGORY_TO_HTTP: Record<BasicErrorType, number> = {
+  [BasicErrorTypes.BAD_REQUEST]: 400,
+  [BasicErrorTypes.FORBIDDEN]: 403,
+  [BasicErrorTypes.NOT_FOUND]: 404,
+  [BasicErrorTypes.CONFLICT]: 409,
+};
 
 const buildResponse = (
   statusCode: number,
