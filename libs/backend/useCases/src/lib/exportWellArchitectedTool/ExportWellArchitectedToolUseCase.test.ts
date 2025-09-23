@@ -24,7 +24,7 @@ import { ExportWellArchitectedToolUseCaseArgsMother } from './ExportWellArchitec
 
 vitest.useFakeTimers();
 
-describe('exportWellArchitectedTool UseCase', () => {
+describe('ExportWellArchitectedToolUseCase', () => {
   it('should call the WellArchitectedToolService infrastructure', async () => {
     const {
       useCase,

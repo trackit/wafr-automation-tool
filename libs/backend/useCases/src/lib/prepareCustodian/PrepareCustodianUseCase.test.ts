@@ -1,5 +1,3 @@
-import { vi } from 'vitest';
-
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
@@ -11,7 +9,7 @@ import {
   PrepareCustodianUseCaseImpl,
 } from './PrepareCustodianUseCase';
 
-describe('Prepare custodian use case', () => {
+describe('PrepareCustodianUseCase', () => {
   it('should put the policies file', async () => {
     const { useCase, fakeObjectsStorage } = setup();
 
@@ -27,10 +25,13 @@ describe('Prepare custodian use case', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  vi.mock('fs', () => ({
-    readFileSync: vi.fn(() => 'mocked-policies-content'),
+
+  vitest.mock('fs', () => ({
+    readFileSync: vitest.fn(() => 'mocked-policies-content'),
   }));
+
   const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
+
   return {
     useCase: new PrepareCustodianUseCaseImpl(),
     fakeObjectsStorage,

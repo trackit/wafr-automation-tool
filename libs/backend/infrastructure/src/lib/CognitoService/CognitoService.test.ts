@@ -11,34 +11,39 @@ describe('CognitoService', () => {
     it('should get a user by id', async () => {
       const { service, cognitoClientMock } = setup();
 
+      const userId = 'test-user';
+      const email = `${userId}@test.io`;
       cognitoClientMock.on(ListUsersCommand).resolves({
         Users: [
           {
-            Username: 'test-user',
+            Username: userId,
             Attributes: [
               {
                 Name: 'email',
-                Value: 'test-user@test.io',
+                Value: email,
               },
             ],
           },
         ],
         $metadata: { httpStatusCode: 200 },
       });
-      const user = await service.getUserById({ userId: 'test-user' });
+
+      const user = await service.getUserById({ userId });
       expect(user).toEqual({
-        id: 'test-user',
-        email: 'test-user@test.io',
+        id: userId,
+        email,
         organizationDomain: 'test.io',
       });
+
       const listUsersCalls = cognitoClientMock.commandCalls(ListUsersCommand);
       expect(listUsersCalls.length).toBe(1);
       expect(listUsersCalls[0].args[0].input).toEqual({
         UserPoolId: 'COGNITO_USER_POOL_ID',
-        Filter: `sub = "test-user"`,
+        Filter: `sub = "${userId}"`,
         Limit: 1,
       });
     });
+
     it('should throw an error if the request fails', async () => {
       const { service, cognitoClientMock } = setup();
 
@@ -49,6 +54,7 @@ describe('CognitoService', () => {
         service.getUserById({ userId: 'test-user' })
       ).rejects.toThrow(Error);
     });
+
     it('should throw an error if the user is not found', async () => {
       const { service, cognitoClientMock } = setup();
 

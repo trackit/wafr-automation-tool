@@ -14,7 +14,7 @@ import { AssessmentNotFoundError } from '../../errors';
 import { ComputeGraphDataUseCaseImpl } from './ComputeGraphDataUseCase';
 import { ComputeGraphDataUseCaseArgsMother } from './ComputeGraphDataUseCaseArgsMother';
 
-describe('computeGraphData UseCase', () => {
+describe('ComputeGraphDataUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 

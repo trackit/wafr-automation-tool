@@ -67,11 +67,11 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         ])
         .build(),
     ];
-    vi.spyOn(
+    vitest.spyOn(
       findingToBestPracticesAssociationService,
       'associateFindingsToBestPractices'
     );
-    vi.spyOn(questionSetService, 'get').mockReturnValue({
+    vitest.spyOn(questionSetService, 'get').mockReturnValue({
       pillars,
       version: '1.0',
     });
@@ -125,11 +125,11 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       .withFindings(findings)
       .build();
 
-    vi.spyOn(questionSetService, 'get').mockResolvedValue({
+    vitest.spyOn(questionSetService, 'get').mockResolvedValue({
       pillars,
       version: '1.0',
     });
-    vi.spyOn(
+    vitest.spyOn(
       findingToBestPracticesAssociationService,
       'associateFindingsToBestPractices'
     ).mockResolvedValue([
@@ -203,11 +203,11 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       .withFindings(findings)
       .build();
 
-    vi.spyOn(questionSetService, 'get').mockResolvedValue({
+    vitest.spyOn(questionSetService, 'get').mockResolvedValue({
       pillars,
       version: '1.0',
     });
-    vi.spyOn(
+    vitest.spyOn(
       findingToBestPracticesAssociationService,
       'associateFindingsToBestPractices'
     ).mockResolvedValue([
@@ -283,11 +283,11 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       .withFindings(findings)
       .build();
 
-    vi.spyOn(questionSetService, 'get').mockResolvedValue({
+    vitest.spyOn(questionSetService, 'get').mockResolvedValue({
       pillars,
       version: '1.0',
     });
-    vi.spyOn(
+    vitest.spyOn(
       findingToBestPracticesAssociationService,
       'associateFindingsToBestPractices'
     ).mockResolvedValue([

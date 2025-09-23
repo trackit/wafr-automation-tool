@@ -10,7 +10,7 @@ import { AssessmentNotFoundError } from '../../errors';
 import { GetScannedFindingsUseCaseImpl } from './GetScannedFindingsUseCase';
 import { GetScannedFindingsUseCaseArgsMother } from './GetScannedFindingsUseCaseArgsMother';
 
-describe('GetScannedFindings UseCase', () => {
+describe('GetScannedFindingsUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 

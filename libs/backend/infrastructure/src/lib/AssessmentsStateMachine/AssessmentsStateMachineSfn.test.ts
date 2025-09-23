@@ -15,7 +15,7 @@ import {
   tokenStateMachineArn,
 } from './AssessmentsStateMachineSfn';
 
-describe('AssessmentsStateMachine Infrastructure', () => {
+describe('AssessmentsStateMachineSfn', () => {
   describe('startAssessment', () => {
     it('should start state machine', async () => {
       const { assessmentsStateMachineSfn, stateMachineArn, sfnClientMock } =
@@ -73,15 +73,19 @@ describe('AssessmentsStateMachine Infrastructure', () => {
     it('should test the input of the state machine', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
 
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const createdBy = 'test-user';
+      const organizationDomain = 'test.io';
+      const name = 'Test Assessment';
       const input: AssessmentsStateMachineStartAssessmentArgs = {
         assessmentId: new IdGeneratorCrypto().generate(),
         createdAt: new Date(),
-        name: 'Test Assessment',
-        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        name,
+        roleArn,
         workflows: [],
         regions: [],
-        createdBy: 'test-user',
-        organizationDomain: 'test.io',
+        createdBy,
+        organizationDomain,
       };
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
@@ -98,13 +102,13 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         JSON.parse(startExecutionCall.args[0].input.input ?? '{}')
       ).toEqual(
         expect.objectContaining({
-          name: 'Test Assessment',
+          name,
           regions: [],
           workflows: [],
-          roleArn: 'arn:aws:iam::123456789012:role/test-role',
+          roleArn,
           createdAt: input.createdAt.toISOString(),
-          createdBy: 'test-user',
-          organizationDomain: 'test.io',
+          createdBy,
+          organizationDomain,
         })
       );
     });
@@ -118,14 +122,15 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         $metadata: { httpStatusCode: 200 },
       });
 
-      await assessmentsStateMachineSfn.cancelAssessment('execution-arn');
+      const executionArn = 'execution-arn';
+      await assessmentsStateMachineSfn.cancelAssessment(executionArn);
 
       const stopExecutionCalls =
         sfnClientMock.commandCalls(StopExecutionCommand);
       expect(stopExecutionCalls).toHaveLength(1);
       const stopExecutionCall = stopExecutionCalls[0];
       expect(stopExecutionCall.args[0].input.executionArn).toEqual(
-        'execution-arn'
+        executionArn
       );
     });
 
@@ -146,10 +151,11 @@ describe('AssessmentsStateMachine Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const assessmentsStateMachineSfn = new AssessmentsStateMachineSfn();
+
   const sfnClientMock = mockClient(inject(tokenClientSfn));
+
   return {
-    assessmentsStateMachineSfn,
+    assessmentsStateMachineSfn: new AssessmentsStateMachineSfn(),
     stateMachineArn: inject(tokenStateMachineArn),
     sfnClientMock,
   };

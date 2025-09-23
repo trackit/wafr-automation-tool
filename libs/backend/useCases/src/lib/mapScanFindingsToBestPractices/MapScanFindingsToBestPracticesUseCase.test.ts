@@ -13,7 +13,7 @@ import { inject, reset } from '@shared/di-container';
 import { MapScanFindingsToBestPracticesUseCaseImpl } from './MapScanFindingsToBestPracticesUseCase';
 import { MapScanFindingsToBestPracticesUseCaseArgsMother } from './MapScanFindingsToBestPracticesUseCaseArgsMother';
 
-describe('MapScanFindingsToBestPractices UseCase', () => {
+describe('MapScanFindingsToBestPracticesUseCase', () => {
   it('should return empty best practices arrays if no mapping exists', async () => {
     const { useCase } = setup();
 

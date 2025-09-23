@@ -24,7 +24,7 @@ import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociat
 import { PrepareFindingsAssociationsUseCaseImpl } from './PrepareFindingsAssociationsUseCase';
 import { PrepareFindingsAssociationsUseCaseArgsMother } from './PrepareFindingsAssociationsUseCaseArgsMother';
 
-describe('PrepareFindingsAssociations Use Case', () => {
+describe('PrepareFindingsAssociationsUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 
@@ -107,7 +107,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
         .build(),
     ];
     const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -195,7 +195,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
         .build(),
     ];
     const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -301,7 +301,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
         .build(),
     ];
     const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -843,18 +843,18 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  const getScannedFindingsUseCase = { getScannedFindings: vi.fn() };
+  const getScannedFindingsUseCase = { getScannedFindings: vitest.fn() };
   register(tokenGetScannedFindingsUseCase, {
     useValue: getScannedFindingsUseCase,
   });
 
-  const storeFindingsToAssociateUseCase = { storeFindingsToAssociate: vi.fn() };
+  const storeFindingsToAssociateUseCase = { storeFindingsToAssociate: vitest.fn() };
   register(tokenStoreFindingsToAssociateUseCase, {
     useValue: storeFindingsToAssociateUseCase,
   });
 
   const mapScanFindingsToBestPracticesUseCase = {
-    mapScanFindingsToBestPractices: vi.fn(),
+    mapScanFindingsToBestPractices: vitest.fn(),
   };
   register(tokenMapScanFindingsToBestPracticesUseCase, {
     useValue: mapScanFindingsToBestPracticesUseCase,

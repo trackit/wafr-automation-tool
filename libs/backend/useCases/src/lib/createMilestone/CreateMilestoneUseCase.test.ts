@@ -23,7 +23,7 @@ import {
 import { CreateMilestoneUseCaseImpl } from './CreateMilestoneUseCase';
 import { CreateMilestoneUseCaseArgsMother } from './CreateMilestoneUseCaseArgsMother';
 
-describe('CreateMilestone UseCase', () => {
+describe('CreateMilestoneUseCase', () => {
   it('should call the WellArchitectedToolService infrastructure', async () => {
     const {
       useCase,

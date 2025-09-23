@@ -93,8 +93,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const savedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(savedAssessment).toEqual(assessment);
@@ -105,37 +105,30 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should add findings to a best practice', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
+      const bestPractice = BestPracticeMother.basic().withId('0').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice])
         .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
         bestPracticeFindingIds: new Set(['scanningTool#1']),
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -147,37 +140,30 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should add several findings to a best practice', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
+      const bestPractice = BestPracticeMother.basic().withId('0').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice])
         .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
         bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -194,46 +180,39 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should be able to add findings several times', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('0').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
+      const bestPractice = BestPracticeMother.basic().withId('0').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice])
         .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
         bestPracticeFindingIds: new Set(['scanningTool#1']),
       });
 
       await repository.saveBestPracticeFindings({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: '0',
-        questionId: '0',
-        bestPracticeId: '0',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
         bestPracticeFindingIds: new Set(['scanningTool#2']),
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
@@ -260,8 +239,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       const fetchedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(fetchedAssessment).toEqual(assessment);
@@ -318,14 +297,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment);
 
       const fetchedAssessments = await repository.getAll({
-        organizationDomain: 'organization1',
+        organizationDomain: assessment.organization,
       });
 
       expect(fetchedAssessments).toEqual({
@@ -352,8 +330,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const fetchedAssessments = await repository.getAll({
-        organizationDomain: 'organization1',
-        search: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: assessment1.organization,
+        search: assessment1.id,
       });
 
       expect(fetchedAssessments).toEqual({
@@ -366,28 +344,26 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment2);
 
       const fetchedAssessments = await repository.getAll({
-        organizationDomain: 'organization1',
+        organizationDomain: assessment1.organization,
         limit: 1,
       });
 
       expect(fetchedAssessments).toEqual({
         assessments: [
           expect.objectContaining({
-            id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+            id: assessment2.id,
           }),
         ],
         nextToken: expect.any(String),
@@ -412,14 +388,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       const nextTokenAssessment = {
-        PK: 'organization1',
-        SK: 'ASSESSMENT#2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        PK: assessment2.organization,
+        SK: `ASSESSMENT#${assessment2.id}`,
       };
       const nextToken = encodeNextToken(nextTokenAssessment);
 
       const fetchedAssessments = await repository.getAll({
-        organizationDomain: 'organization1',
-        nextToken: nextToken,
+        organizationDomain: assessment1.organization,
+        nextToken,
       });
 
       expect(fetchedAssessments).toEqual({
@@ -432,7 +408,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -473,13 +448,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment);
 
       await repository.delete({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       const fetchedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(fetchedAssessment).toBeUndefined();
@@ -502,18 +477,18 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       await repository.delete({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
       });
 
       const fetchedAssessment1 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
       });
 
       const fetchedAssessment2 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization2',
+        assessmentId: assessment2.id,
+        organizationDomain: assessment2.organization,
       });
 
       expect(fetchedAssessment1).toBeUndefined();
@@ -549,8 +524,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withSeverities({ [SeverityType.High]: 1 })
         .build();
       await repository.update({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
         assessmentBody: {
           name: 'New Name',
           pillars: [
@@ -577,8 +552,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(updatedAssessment).toEqual(
@@ -626,18 +601,18 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       await repository.save(assessment2);
 
       await repository.update({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
         assessmentBody: { name: 'New Name' },
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization2',
+        assessmentId: assessment2.id,
+        organizationDomain: assessment2.organization,
       });
 
       expect(updatedAssessment1).toEqual(
@@ -653,28 +628,27 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the pillar disabled status', async () => {
       const { repository } = setup();
 
+      const pillar = PillarMother.basic().withDisabled(false).build();
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic().withId('0').withDisabled(false).build(),
-        ])
+        .withPillars([pillar])
         .build();
       await repository.save(assessment);
 
       await expect(
         repository.updatePillar({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-          organizationDomain: 'organization1',
-          pillarId: '0',
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          pillarId: pillar.id,
           pillarBody: {
             disabled: true,
           },
         })
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
       expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
     });
@@ -684,29 +658,23 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update a question in an assessment', async () => {
       const { repository } = setup();
 
+      const question = QuestionMother.basic()
+        .withDisabled(false)
+        .withNone(false)
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withDisabled(false)
-                .withNone(false)
-                .build(),
-            ])
-            .build(),
-        ])
+        .withPillars([pillar])
         .build();
       await repository.save(assessment);
 
       await repository.updateQuestion({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: 'pillar1',
-        questionId: 'question1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
         questionBody: {
           disabled: true,
           none: true,
@@ -714,59 +682,47 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
-        expect.objectContaining({ id: 'question1', disabled: true, none: true })
+        expect.objectContaining({ id: question.id, disabled: true, none: true })
       );
     });
 
     it('should be scoped by organization', async () => {
       const { repository } = setup();
 
+      const question1 = QuestionMother.basic()
+        .withDisabled(false)
+        .withNone(false)
+        .build();
+      const pillar1 = PillarMother.basic().withQuestions([question1]).build();
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withDisabled(false)
-                .withNone(false)
-                .build(),
-            ])
-            .build(),
-        ])
+        .withPillars([pillar1])
         .build();
       await repository.save(assessment1);
 
+      const question2 = QuestionMother.basic()
+        .withDisabled(false)
+        .withNone(false)
+        .build();
+      const pillar2 = PillarMother.basic().withQuestions([question2]).build();
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question1')
-                .withDisabled(false)
-                .withNone(false)
-                .build(),
-            ])
-            .build(),
-        ])
+        .withPillars([pillar2])
         .build();
       await repository.save(assessment2);
 
       await repository.updateQuestion({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        pillarId: 'pillar1',
-        questionId: 'question1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
+        pillarId: pillar1.id,
+        questionId: question1.id,
         questionBody: {
           disabled: true,
           none: true,
@@ -774,20 +730,24 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization2',
+        assessmentId: assessment2.id,
+        organizationDomain: assessment2.organization,
       });
 
       expect(updatedAssessment1?.pillars?.[0]?.questions?.[0]).toEqual(
-        expect.objectContaining({ id: 'question1', disabled: true, none: true })
+        expect.objectContaining({
+          id: question1.id,
+          disabled: true,
+          none: true,
+        })
       );
       expect(updatedAssessment2?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({
-          id: 'question1',
+          id: question2.id,
           disabled: false,
           none: false,
         })
@@ -799,43 +759,37 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the best practice status', async () => {
       const { repository } = setup();
 
+      const bestPractice = BestPracticeMother.basic()
+        .withChecked(false)
+        .build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic()
+        .withQuestions([question])
+        .build();
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
-        .withPillars([
-          PillarMother.basic()
-            .withId('0')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('0')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('0')
-                    .withChecked(false)
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
+        .withPillars([pillar])
         .build();
       await repository.save(assessment);
 
       await expect(
         repository.updateBestPractice({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-          organizationDomain: 'organization1',
-          pillarId: '0',
-          questionId: '0',
-          bestPracticeId: '0',
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          pillarId: pillar.id,
+          questionId: question.id,
+          bestPracticeId: bestPractice.id,
           bestPracticeBody: {
             checked: true,
           },
         })
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
@@ -849,8 +803,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
         .withRawGraphData({})
         .build();
       await repository.save(assessment);
@@ -876,15 +828,15 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
@@ -896,8 +848,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
         .withRawGraphData({})
         .build();
       await repository.save(assessment);
@@ -923,15 +873,15 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
         scanningTool: ScanningTool.CLOUD_CUSTODIAN,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
@@ -943,8 +893,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
         .withRawGraphData({
           [ScanningTool.CLOUD_CUSTODIAN]:
             AssessmentGraphDataMother.basic().build(),
@@ -973,15 +921,15 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
       });
 
       expect(updatedAssessment?.rawGraphData).toEqual({
@@ -1032,19 +980,19 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .build();
 
       await repository.updateRawGraphDataForScanningTool({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
         scanningTool: ScanningTool.PROWLER,
         graphData,
       });
 
       const updatedAssessment1 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
       });
       const updatedAssessment2 = await repository.get({
-        assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization2',
+        assessmentId: assessment2.id,
+        organizationDomain: assessment2.organization,
       });
 
       expect(updatedAssessment1?.rawGraphData).toEqual({
@@ -1060,5 +1008,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+  
   return { repository: new AssessmentsRepositoryDynamoDB() };
 };

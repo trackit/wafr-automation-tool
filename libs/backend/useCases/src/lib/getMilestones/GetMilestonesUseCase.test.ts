@@ -44,7 +44,7 @@ describe('GetMilestonesUseCase', () => {
       MilestoneMother.basic().withId(2).withName('Milestone 2').build(),
     ];
 
-    vi.spyOn(fakeWellArchitectedToolService, 'getMilestones').mockResolvedValue(
+    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestones').mockResolvedValue(
       {
         milestones: expectedMilestones,
       }
@@ -154,6 +154,7 @@ describe('GetMilestonesUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return {
     useCase: new GetMilestonesUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),

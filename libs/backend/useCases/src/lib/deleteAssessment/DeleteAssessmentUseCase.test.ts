@@ -11,7 +11,7 @@ import { AssessmentNotFoundError } from '../../errors';
 import { DeleteAssessmentUseCaseImpl } from './DeleteAssessmentUseCase';
 import { DeleteAssessmentUseCaseArgsMother } from './DeleteAssessmentUseCaseArgsMother';
 
-describe('deleteAssessment UseCase', () => {
+describe('DeleteAssessmentUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 

@@ -6,6 +6,7 @@ import { LoggerConsole } from './LoggerConsole';
 describe('LoggerConsole', () => {
   it('should log with console.debug', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'debug').mockImplementation(() => undefined);
 
     logger.debug('debug-message', { foo: 'bar' });
@@ -20,6 +21,7 @@ describe('LoggerConsole', () => {
 
   it('should log with console.info', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
 
     logger.info('info-message', { a: 1 });
@@ -34,6 +36,7 @@ describe('LoggerConsole', () => {
 
   it('should log with console.warn', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     logger.warn('warn-message', { b: true });
@@ -48,6 +51,7 @@ describe('LoggerConsole', () => {
 
   it('should log with console.error', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const err = new Error('boom');
 
@@ -62,6 +66,7 @@ describe('LoggerConsole', () => {
 
   it('should log with console.log', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     logger.log('log-message', { ok: false });
@@ -76,6 +81,7 @@ describe('LoggerConsole', () => {
 
   it('should transform nested errors and arrays to plain JSON', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     const data = {
@@ -98,6 +104,7 @@ describe('LoggerConsole', () => {
 
   it('should omit context when data is undefined', () => {
     const { logger } = setup();
+
     const spy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
 
     logger.info('no-context-message', undefined);

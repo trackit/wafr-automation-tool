@@ -194,7 +194,7 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockReturnValue(true);
@@ -222,7 +222,7 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockReturnValue(true);
@@ -266,7 +266,7 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockReturnValue(false);
@@ -294,11 +294,11 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockReturnValue(true);
-      vi.spyOn(
+      vitest.spyOn(
         fakeMarketplaceService,
         'hasMonthlySubscription'
       ).mockResolvedValue(true);
@@ -325,15 +325,15 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockReturnValue(true);
-      vi.spyOn(
+      vitest.spyOn(
         fakeMarketplaceService,
         'hasMonthlySubscription'
       ).mockResolvedValue(false);
-      vi.spyOn(
+      vitest.spyOn(
         fakeMarketplaceService,
         'hasUnitBasedSubscription'
       ).mockResolvedValue(true);
@@ -357,6 +357,7 @@ describe('CleanupUseCase', () => {
 const setup = (debug = false) => {
   reset();
   registerTestInfrastructure();
+
   register(tokenDebug, { useValue: debug });
 
   const fakeMarketplaceService = inject(tokenFakeMarketplaceService);

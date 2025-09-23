@@ -10,7 +10,7 @@ import { GetAssessmentsUseCaseArgsMother } from './GetAssessmentsUseCaseArgsMoth
 
 vitest.useFakeTimers();
 
-describe('getAssessments UseCase', () => {
+describe('GetAssessmentsUseCase', () => {
   it('should return all assessments', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 

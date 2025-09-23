@@ -17,7 +17,7 @@ import {
 } from './StoreFindingsToAssociateUseCase';
 import { StoreFindingsToAssociateUseCaseArgsMother } from './StoreFindingsToAssociateUseCaseArgsMother';
 
-describe('StoreFindingsToAssociate UseCase', () => {
+describe('StoreFindingsToAssociateUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 
@@ -128,7 +128,7 @@ describe('StoreFindingsToAssociate UseCase', () => {
     const assessment = AssessmentMother.basic().build();
     await fakeAssessmentsRepository.save(assessment);
 
-    vi.spyOn(fakeObjectsStorage, 'put')
+    vitest.spyOn(fakeObjectsStorage, 'put')
       .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_0.json`)
       .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_1.json`);
 

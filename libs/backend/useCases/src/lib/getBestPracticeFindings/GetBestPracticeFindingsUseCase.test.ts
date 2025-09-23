@@ -23,7 +23,7 @@ import {
 import { GetBestPracticeFindingsUseCaseImpl } from './GetBestPracticeFindingsUseCase';
 import { GetBestPracticeFindingsUseCaseArgsMother } from './GetBestPracticeFindingsUseCaseArgsMother';
 
-describe('GetBestPracticeFindings UseCase', () => {
+describe('GetBestPracticeFindingsUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 

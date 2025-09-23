@@ -51,7 +51,7 @@ describe('GetMilestoneUseCase', () => {
       .withCreatedAt(new Date('2023-01-01T00:00:00Z'))
       .withPillars(expectedPillars)
       .build();
-    vi.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockResolvedValue(
+    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockResolvedValue(
       milestone
     );
 
@@ -151,7 +151,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    vi.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockReturnValue(
+    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockReturnValue(
       Promise.resolve(undefined)
     );
 

@@ -18,12 +18,12 @@ import { StartAssessmentUseCaseArgsMother } from './StartAssessmentUseCaseArgsMo
 
 vitest.useFakeTimers();
 
-describe('startAssessment UseCase', () => {
+describe('StartAssessmentUseCase', () => {
   describe('startAssessment', () => {
     it('should start an assessment with default regions and workflows', async () => {
       const { useCase, fakeAssessmentsStateMachine } = setup();
 
-      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
+      vitest.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withRegions(undefined)
@@ -47,7 +47,7 @@ describe('startAssessment UseCase', () => {
 
       const user = UserMother.basic().build();
 
-      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
+      vitest.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withName('Test Assessment')
@@ -78,7 +78,7 @@ describe('startAssessment UseCase', () => {
     it('should start an assessment with lowercase workflows name', async () => {
       const { useCase, fakeAssessmentsStateMachine } = setup();
 
-      vi.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
+      vitest.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withWorkflows(['workFloW-1', 'WorKflOw-2'])
@@ -145,7 +145,7 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => false);
@@ -185,12 +185,12 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => true);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeMarketplaceService,
         'hasMonthlySubscription'
       ).mockImplementation(() => Promise.resolve(true));
@@ -230,12 +230,12 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => true);
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeMarketplaceService,
         'hasUnitBasedSubscription'
       ).mockImplementation(() => Promise.resolve(true));
@@ -270,7 +270,7 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => true);
@@ -302,7 +302,7 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => true);
@@ -333,7 +333,7 @@ describe('startAssessment UseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vi.spyOn(
+      vitest.spyOn(
         fakeFeatureToggleRepository,
         'marketplaceIntegration'
       ).mockImplementation(() => true);

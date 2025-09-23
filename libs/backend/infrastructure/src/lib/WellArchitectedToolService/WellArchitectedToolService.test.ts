@@ -36,7 +36,7 @@ import {
   WellArchitectedToolService,
 } from './WellArchitectedToolService';
 
-describe('wellArchitectedTool Infrastructure', () => {
+describe('WellArchitectedToolService', () => {
   describe('createWellArchitectedClient', () => {
     it('should create a new Well Architected client', async () => {
       const { wellArchitectedToolService, stsClientMock } = setup();
