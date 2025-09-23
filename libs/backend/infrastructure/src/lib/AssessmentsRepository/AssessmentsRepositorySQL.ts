@@ -38,9 +38,9 @@ import {
   FindingEntity,
   PillarEntity,
   QuestionEntity,
-  tokenTypeORMClientManager,
 } from '../config/typeorm';
 import { tokenLogger } from '../Logger';
+import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);

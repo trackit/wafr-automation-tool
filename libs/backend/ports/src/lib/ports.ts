@@ -10,4 +10,5 @@ export * from './MarketplacePort';
 export * from './ObjectsStorage';
 export * from './OrganizationRepository';
 export * from './QuestionSetPort';
+export * from './TypeORMClientManager';
 export * from './WellArchitectedToolPort';

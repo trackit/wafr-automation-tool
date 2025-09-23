@@ -6,9 +6,10 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
+import { TypeORMClientManager } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { tokenTypeORMConfig, TypeORMConfig } from './config';
+import { tokenTypeORMConfig, TypeORMConfig } from '../config/typeorm';
 
 @Entity('tenants')
 export class Tenant {
@@ -22,15 +23,7 @@ export class Tenant {
   createdAt!: Date;
 }
 
-export interface ITypeORMClientManager {
-  initializeDefaultDatabase(): Promise<DataSource>;
-  getClient(id: string): Promise<DataSource>;
-  createClient(id: string): Promise<DataSource>;
-  clearClients(): Promise<void>;
-  closeConnections(): Promise<void>;
-}
-
-class TypeORMClientManager implements ITypeORMClientManager {
+class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   private clients: Record<string, DataSource> = {};
   private baseConfig: TypeORMConfig = inject(tokenTypeORMConfig);
 
@@ -117,6 +110,6 @@ class TypeORMClientManager implements ITypeORMClientManager {
 }
 
 export const tokenTypeORMClientManager =
-  createInjectionToken<ITypeORMClientManager>('TypeORMClientManager', {
-    useClass: TypeORMClientManager,
+  createInjectionToken<TypeORMClientManager>('TypeORMClientManager', {
+    useClass: MultiDatabaseTypeORMClientManager,
   });

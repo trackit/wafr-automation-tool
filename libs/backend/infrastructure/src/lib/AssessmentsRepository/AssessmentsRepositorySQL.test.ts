@@ -21,9 +21,9 @@ import {
   PillarNotFoundError,
   QuestionNotFoundError,
 } from '../../Errors';
-import { tokenTypeORMClientManager } from '../config/typeorm/TypeORMClientManager';
 import { tokenIdGenerator } from '../IdGenerator';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
