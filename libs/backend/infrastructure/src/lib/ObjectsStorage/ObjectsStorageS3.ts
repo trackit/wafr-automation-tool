@@ -112,7 +112,7 @@ export class ObjectsStorageS3 implements ObjectsStorage {
     if (response.$metadata.httpStatusCode !== 200) {
       throw new Error(JSON.stringify(response));
     }
-    this.logger.info(`Object succesfuly added: ${args.key}`);
+    this.logger.info(`Object successfully added: ${args.key}`);
     return this.buildURI(args.key);
   }
 
