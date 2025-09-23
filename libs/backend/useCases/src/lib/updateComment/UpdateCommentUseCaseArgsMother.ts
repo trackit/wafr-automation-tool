@@ -1,4 +1,8 @@
-import type { FindingCommentBody, User } from '@backend/models';
+import {
+  type FindingCommentBody,
+  type User,
+  UserMother,
+} from '@backend/models';
 
 import type { UpdateCommentUseCaseArgs } from './UpdateCommentUseCase';
 
@@ -11,17 +15,13 @@ export class UpdateCommentUseCaseArgsMother {
 
   public static basic(): UpdateCommentUseCaseArgsMother {
     return new UpdateCommentUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
-      commentId: 'comment-id',
+      commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       commentBody: {
         text: 'comment-text',
       },
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
     });
   }
 

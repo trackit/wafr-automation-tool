@@ -1,24 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Organization } from '@backend/models';
 import { MarketplacePort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeMarketplaceService implements MarketplacePort {
-  async hasMonthlySubscription(args: {
-    organization: Organization;
+  async hasMonthlySubscription(_args: { accountId: string }): Promise<boolean> {
+    // No-op for fake implementation
+    return false;
+  }
+
+  async hasUnitBasedSubscription(_args: {
+    unitBasedAgreementId: string;
   }): Promise<boolean> {
     // No-op for fake implementation
     return false;
   }
 
-  async hasUnitBasedSubscription(args: {
-    organization: Organization;
-  }): Promise<boolean> {
-    // No-op for fake implementation
-    return false;
-  }
-
-  async consumeReviewUnit(args: { organization: Organization }): Promise<void> {
+  async consumeReviewUnit(_args: { accountId: string }): Promise<void> {
     // No-op for fake implementation
   }
 }

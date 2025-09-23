@@ -1,14 +1,10 @@
-import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { DescribeAgreementCommand } from '@aws-sdk/client-marketplace-agreement';
 import { GetEntitlementsCommand } from '@aws-sdk/client-marketplace-entitlement-service';
 import { BatchMeterUsageCommand } from '@aws-sdk/client-marketplace-metering';
 import { mockClient } from 'aws-sdk-client-mock';
 
-import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { tokenDynamoDBAssessmentTableName } from '../AssessmentsRepository';
-import { tokenDynamoDBClient } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MarketplaceService,
@@ -16,29 +12,6 @@ import {
   tokenMarketplaceEntitlementServiceClient,
   tokenMarketplaceMeteringClient,
 } from './MarketplaceService';
-
-afterEach(async () => {
-  const dynamoDBClient = inject(tokenDynamoDBClient);
-  const tableName = inject(tokenDynamoDBAssessmentTableName);
-
-  const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName })
-  );
-
-  await Promise.all(
-    (scanResult.Items || []).map(async (item) => {
-      await dynamoDBClient.send(
-        new DeleteItemCommand({
-          TableName: tableName,
-          Key: {
-            PK: item.PK,
-            SK: item.SK,
-          },
-        })
-      );
-    })
-  );
-});
 
 describe('MarketplaceService', () => {
   describe('hasMonthlySubscription', () => {
@@ -57,13 +30,12 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(true);
     });
+
     it('should return false if the user does not have a monthly subscription', async () => {
       const { marketplaceService, marketplaceEntitlementServiceClient } =
         setup();
@@ -74,13 +46,12 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(false);
     });
+
     it('should return false if the user has a monthly subscription but it is expired', async () => {
       const { marketplaceService, marketplaceEntitlementServiceClient } =
         setup();
@@ -96,23 +67,10 @@ describe('MarketplaceService', () => {
 
       const hasMonthlySubscription =
         await marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         });
 
       expect(hasMonthlySubscription).toBe(false);
-    });
-    it('should return false if the organization has no account ID', async () => {
-      const { marketplaceService } = setup();
-
-      await expect(
-        marketplaceService.hasMonthlySubscription({
-          organization: OrganizationMother.basic()
-            .withAccountId(undefined)
-            .build(),
-        })
-      ).resolves.toBe(false);
     });
   });
 
@@ -120,49 +78,37 @@ describe('MarketplaceService', () => {
     it('should return true if the user has an active agreement', async () => {
       const { marketplaceService, marketplaceAgreementClient } = setup();
 
+      const unitBasedAgreementId = 'agreement-id';
       marketplaceAgreementClient.on(DescribeAgreementCommand).resolves({
-        agreementId: 'agreementId',
+        agreementId: unitBasedAgreementId,
         status: 'ACTIVE',
         $metadata: { httpStatusCode: 200 },
       });
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId('agreementId')
-            .build(),
+          unitBasedAgreementId,
         });
 
       expect(hasUnitBasedSubscription).toBe(true);
     });
+
     it('should return false if the user does not have an active agreement', async () => {
       const { marketplaceService, marketplaceAgreementClient } = setup();
 
+      const unitBasedAgreementId = 'agreement-id';
       marketplaceAgreementClient.on(DescribeAgreementCommand).resolves({
-        agreementId: 'agreementId',
+        agreementId: unitBasedAgreementId,
         status: 'EXPIRED',
         $metadata: { httpStatusCode: 200 },
       });
 
       const hasUnitBasedSubscription =
         await marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId('agreementId')
-            .build(),
+          unitBasedAgreementId,
         });
 
       expect(hasUnitBasedSubscription).toBe(false);
-    });
-    it('should return false if the organization has no unit-based agreement ID', async () => {
-      const { marketplaceService } = setup();
-
-      await expect(
-        marketplaceService.hasUnitBasedSubscription({
-          organization: OrganizationMother.basic()
-            .withUnitBasedAgreementId(undefined)
-            .build(),
-        })
-      ).resolves.toBe(false);
     });
   });
 
@@ -176,12 +122,11 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         })
       ).resolves.toBeUndefined();
     });
+
     it('should throw an error if consumeReviewUnit fails', async () => {
       const { marketplaceService, marketplaceMeteringClient } = setup();
 
@@ -191,9 +136,7 @@ describe('MarketplaceService', () => {
 
       await expect(
         marketplaceService.consumeReviewUnit({
-          organization: OrganizationMother.basic()
-            .withAccountId('accountId')
-            .build(),
+          accountId: 'accountId',
         })
       ).rejects.toThrowError();
     });
@@ -203,7 +146,7 @@ describe('MarketplaceService', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const marketplaceService = new MarketplaceService();
+
   const marketplaceAgreementClient = mockClient(
     inject(tokenMarketplaceAgreementClient)
   );
@@ -213,8 +156,9 @@ const setup = () => {
   const marketplaceMeteringClient = mockClient(
     inject(tokenMarketplaceMeteringClient)
   );
+
   return {
-    marketplaceService,
+    marketplaceService: new MarketplaceService(),
     marketplaceAgreementClient,
     marketplaceEntitlementServiceClient,
     marketplaceMeteringClient,

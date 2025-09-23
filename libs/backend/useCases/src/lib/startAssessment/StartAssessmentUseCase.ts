@@ -10,7 +10,12 @@ import {
 import { Assessment, AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { ForbiddenError, NotFoundError } from '../Errors';
+import {
+  OrganizationAccountIdNotSetError,
+  OrganizationNoActiveSubscriptionError,
+  OrganizationNotFoundError,
+  OrganizationUnitBasedAgreementIdNotSetError,
+} from '../../errors';
 
 export type StartAssessmentUseCaseArgs = {
   name: string;
@@ -40,12 +45,15 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   public async canStartAssessment(
     args: StartAssessmentUseCaseArgs
   ): Promise<boolean> {
-    const organization = await this.organizationRepository.get({
-      organizationDomain: args.user.organizationDomain,
-    });
+    const organization = await this.organizationRepository.get(
+      args.user.organizationDomain
+    );
     if (!organization) {
-      throw new NotFoundError('Organization not found');
+      throw new OrganizationNotFoundError({
+        domain: args.user.organizationDomain,
+      });
     }
+
     if (
       organization.freeAssessmentsLeft &&
       organization.freeAssessmentsLeft > 0
@@ -61,15 +69,27 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       );
       return true;
     }
+
+    if (!organization.accountId) {
+      throw new OrganizationAccountIdNotSetError({
+        domain: organization.domain,
+      });
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
-      organization,
+      accountId: organization.accountId,
     });
     if (monthly) {
       this.logger.info(`User ${args.user.id} has a monthly subscription`);
       return true;
     }
+
+    if (!organization.unitBasedAgreementId) {
+      throw new OrganizationUnitBasedAgreementIdNotSetError({
+        domain: organization.domain,
+      });
+    }
     const perUnit = await this.marketplaceService.hasUnitBasedSubscription({
-      organization,
+      unitBasedAgreementId: organization.unitBasedAgreementId,
     });
     if (perUnit) {
       this.logger.info(`User ${args.user.id} has a unit based subscription`);
@@ -89,9 +109,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const regions = args.regions ?? [];
 
     if (!(await this.canStartAssessment(args))) {
-      throw new ForbiddenError(
-        'Organization does not have an active subscription or free assessments left'
-      );
+      throw new OrganizationNoActiveSubscriptionError({
+        domain: user.organizationDomain,
+      });
     }
     await this.stateMachine.startAssessment({
       name,
@@ -101,7 +121,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       assessmentId,
       createdAt: new Date(),
       createdBy: user.id,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     const assessment: Assessment = {
       id: assessmentId,

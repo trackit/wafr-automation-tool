@@ -7,9 +7,9 @@ import { inject } from '@shared/di-container';
 const PrepareFindingsAssociationsInputSchema = z.object({
   assessmentId: z.string().uuid(),
   scanningTool: z.nativeEnum(ScanningTool),
-  regions: z.array(z.string()),
-  workflows: z.array(z.string()),
-  organization: z.string(),
+  regions: z.array(z.string().nonempty()),
+  workflows: z.array(z.string().nonempty()),
+  organizationDomain: z.string().nonempty(),
 });
 
 export type PrepareFindingsAssociationsInput = z.infer<

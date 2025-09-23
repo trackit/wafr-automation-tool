@@ -5,11 +5,11 @@ import {
 import { AssessmentGraphDataMother } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type ComputeGraphDataUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
 };
 
 export interface ComputeGraphDataUseCase {
@@ -36,12 +36,13 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.organization,
+      organizationDomain: args.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.organizationDomain,
+      });
     }
 
     this.logger.info(
@@ -69,7 +70,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
     );
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       assessmentBody: {
         graphData: assessmentGraphData,
       },

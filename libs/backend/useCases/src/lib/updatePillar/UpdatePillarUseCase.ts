@@ -1,13 +1,9 @@
-import {
-  AssessmentNotFoundError,
-  EmptyUpdateBodyError,
-  PillarNotFoundError,
-  tokenAssessmentsRepository,
-} from '@backend/infrastructure';
+import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { PillarBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
+import { assertPillarExists } from '../../services/asserts';
 
 export type UpdatePillarUseCaseArgs = {
   user: User;
@@ -24,23 +20,30 @@ export class UpdatePillarUseCaseImpl implements UpdatePillarUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async updatePillar(args: UpdatePillarUseCaseArgs): Promise<void> {
-    try {
-      const { user, ...remaining } = args;
-      await this.assessmentsRepository.updatePillar({
-        organization: user.organizationDomain,
-        ...remaining,
+    const { user, assessmentId, pillarId, pillarBody } = args;
+    const { organizationDomain } = user;
+
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
       });
-    } catch (e) {
-      if (
-        e instanceof AssessmentNotFoundError ||
-        e instanceof PillarNotFoundError
-      ) {
-        throw new NotFoundError(e.message);
-      } else if (e instanceof EmptyUpdateBodyError) {
-        throw new NoContentError(e.description);
-      }
-      throw e;
     }
+    assertPillarExists({
+      assessment,
+      pillarId,
+    });
+
+    await this.assessmentsRepository.updatePillar({
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      pillarBody,
+    });
   }
 }
 

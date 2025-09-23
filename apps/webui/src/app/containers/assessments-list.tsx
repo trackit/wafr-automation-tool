@@ -28,6 +28,7 @@ import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 function AssessmentsList() {
   const navigate = useNavigate();
@@ -73,8 +74,8 @@ function AssessmentsList() {
     onMutate: () => {
       setIdToDelete(null);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['assessments'] });
     },
     onError: () => {
       setIdToDelete(null);
@@ -84,13 +85,19 @@ function AssessmentsList() {
   const rescanAssessmentMutation = useMutation({
     mutationFn: (id: string) => rescanAssessment({ assessmentId: id }),
     onMutate: async () => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['assessment', idToRescan],
+        }),
+        queryClient.invalidateQueries({ queryKey: ['assessments'] }),
+      ]);
       setIdToRescan(null);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', idToRescan] });
-      refetch();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['assessment', idToRescan],
+      });
+      await refetch();
     },
   });
 
@@ -213,6 +220,9 @@ function AssessmentsList() {
                             assessmentId={assessment.id ?? ''}
                             disabled={!assessment.exportRegion}
                           />
+                        </li>
+                        <li>
+                          <PDFExportsDialog assessmentId={assessment.id!} />
                         </li>
                         <li className="m-1"></li>
                         <li>

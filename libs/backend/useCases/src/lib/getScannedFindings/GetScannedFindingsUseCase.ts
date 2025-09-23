@@ -2,7 +2,7 @@ import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import { ScanFinding, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import {
   CloudCustodianScanProvider,
   CloudSploitScanProvider,
@@ -12,7 +12,7 @@ import {
 
 export interface GetScannedFindingsArgs {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   regions: string[];
   workflows: string[];
   scanningTool: ScanningTool;
@@ -38,16 +38,22 @@ export class GetScannedFindingsUseCaseImpl
   public async getScannedFindings(
     args: GetScannedFindingsArgs
   ): Promise<ScanFinding[]> {
-    const { assessmentId, organization, regions, workflows, scanningTool } =
-      args;
+    const {
+      assessmentId,
+      organizationDomain,
+      regions,
+      workflows,
+      scanningTool,
+    } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment ${assessmentId} for organization ${organization} not found`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
     const scanProvider = new this.scanProviderTypes[scanningTool](
       assessmentId,

@@ -43,6 +43,7 @@ import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
+import PDFExportsDialog from './pdf-exports-dialog';
 
 type BestPractice = components['schemas']['BestPractice'];
 type Question = components['schemas']['Question'];
@@ -207,11 +208,11 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       if (!isMilestone) {
         console.log('Mutation settled, refetching data');
         // Always refetch after error or success to ensure data is in sync with server
-        queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+        await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
       }
     },
   });
@@ -286,10 +287,10 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
@@ -386,10 +387,10 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
@@ -397,12 +398,12 @@ export function AssessmentDetails() {
     mutationFn: () => rescanAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowRescanModal(false);
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
-      refetch();
-      navigate(`/`);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await refetch();
+      void navigate(`/`);
     },
   });
 
@@ -411,9 +412,9 @@ export function AssessmentDetails() {
     onMutate: async () => {
       setShowCancelModal(false);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
-      navigate(`/`);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      void navigate(`/`);
     },
   });
 
@@ -488,7 +489,7 @@ export function AssessmentDetails() {
         }
       }
     }
-  }, [pillars, selectedPillar?.id, activeQuestion?.id]);
+  }, [pillars, selectedPillar?.id, activeQuestion?.id, selectedPillar]);
 
   // Set question from the selected indices
   useEffect(() => {
@@ -692,8 +693,8 @@ export function AssessmentDetails() {
 
   useEffect(() => {
     if (!pillars) return;
-    setProgress(calculateOverallCompletion(assessmentData ?? null));
-  }, [assessmentData]);
+    setProgress(calculateOverallCompletion(pillars));
+  }, [pillars]);
 
   const handleNextQuestion = () => {
     if (!isFullPillar(selectedPillar) || !selectedPillar.questions) return;
@@ -830,20 +831,18 @@ export function AssessmentDetails() {
 
   const details = (
     <>
-      {!isMilestone && (
-        <div
-          className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
-          data-tip={`${progress}% completed`}
-        >
-          <progress
-            className={`progress w-full rounded-none h-1 ${
-              progress === 100 ? 'progress-success' : 'progress-primary'
-            }`}
-            value={progress}
-            max="100"
-          ></progress>
-        </div>
-      )}
+      <div
+        className=" w-full fixed top-16 left-0 w-full h-1 flex flex-row items-center tooltip tooltip-bottom z-50"
+        data-tip={`${progress}% completed`}
+      >
+        <progress
+          className={`progress w-full rounded-none h-1 ${
+            progress === 100 ? 'progress-success' : 'progress-primary'
+          }`}
+          value={progress}
+          max="100"
+        ></progress>
+      </div>
 
       <div className="flex flex-row gap-2 justify-between">
         <div className="prose mb-2 w-full flex flex-col gap-2">
@@ -899,6 +898,9 @@ export function AssessmentDetails() {
                     </button>
                   </li>
                   <li className="m-1"></li>
+                  <li>
+                    <PDFExportsDialog assessmentId={id!} />
+                  </li>
                   <li>
                     <ExportToAWSDialog
                       assessmentId={id ?? ''}

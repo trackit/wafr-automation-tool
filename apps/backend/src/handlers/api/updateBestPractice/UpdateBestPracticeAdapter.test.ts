@@ -1,98 +1,96 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
-import {
-  NoContentError,
-  NotFoundError,
-  tokenUpdateBestPracticeUseCase,
-} from '@backend/useCases';
+import { tokenUpdateBestPracticeUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { UpdateBestPracticeAdapter } from './UpdateBestPracticeAdapter';
 import { UpdateBestPracticeAdapterEventMother } from './UpdateBestPracticeAdapterEventMother';
 
-describe('UpdateBestPracticeAdapter', () => {
+describe('updateBestPractice adapter', () => {
   describe('args validation', () => {
     it('should validate args parameters', async () => {
       const { adapter } = setup();
 
-      const event = UpdateBestPracticeAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withPillarId('1')
-        .withQuestionId('2')
-        .withBestPracticeId('3')
-        .withBody({ checked: true })
-        .build();
-      const response = await adapter.handle(event);
+      const event = UpdateBestPracticeAdapterEventMother.basic().build();
 
+      const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = UpdateBestPracticeAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          bodySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without path parameters', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters(null)
+      const event = APIGatewayProxyEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return a 400 with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid body parameters', async () => {
+    it('should return a 400 with empty body parameters', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
-        .withBody(JSON.stringify({ test: true }))
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should return a 400 with undefined body parameters', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-        })
+      const event = UpdateBestPracticeAdapterEventMother.basic()
+        .withBody({})
         .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
   });
-
-  describe('useCase call and status code', () => {
-    it('should call useCase with path parameters and BestPracticeBody', async () => {
+  describe('useCase and return value', () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const pillarId = '1';
+      const questionId = '2';
+      const bestPracticeId = '3';
+      const bestPracticeBody = { checked: true };
       const event = UpdateBestPracticeAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withPillarId('1')
-        .withQuestionId('2')
-        .withBestPracticeId('3')
-        .withBody({ checked: true })
+        .withAssessmentId(assessmentId)
+        .withPillarId(pillarId)
+        .withQuestionId(questionId)
+        .withBestPracticeId(bestPracticeId)
+        .withBody(bestPracticeBody)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.updateBestPractice).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: 'assessment-id',
-          pillarId: '1',
-          questionId: '2',
-          bestPracticeId: '3',
-          bestPracticeBody: { checked: true },
+          assessmentId,
+          pillarId,
+          questionId,
+          bestPracticeId,
+          bestPracticeBody,
         })
       );
     });
@@ -100,48 +98,10 @@ describe('UpdateBestPracticeAdapter', () => {
     it('should return a 200 status code', async () => {
       const { adapter } = setup();
 
-      const event = UpdateBestPracticeAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withPillarId('1')
-        .withQuestionId('2')
-        .withBestPracticeId('3')
-        .withBody({ checked: true })
-        .build();
+      const event = UpdateBestPracticeAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
-    });
-
-    it('should return a 204 if useCase throws a NoContentError', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = UpdateBestPracticeAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withPillarId('1')
-        .withQuestionId('2')
-        .withBestPracticeId('3')
-        .withBody({ checked: true })
-        .build();
-      useCase.updateBestPractice.mockRejectedValue(new NoContentError());
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(204);
-    });
-
-    it('should return a 404 if useCase throws a NotFoundError', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = UpdateBestPracticeAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withPillarId('1')
-        .withQuestionId('2')
-        .withBestPracticeId('3')
-        .withBody({ checked: true })
-        .build();
-      useCase.updateBestPractice.mockRejectedValue(new NotFoundError());
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(404);
     });
   });
 });
@@ -149,7 +109,11 @@ describe('UpdateBestPracticeAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { updateBestPractice: vitest.fn() };
   register(tokenUpdateBestPracticeUseCase, { useValue: useCase });
-  return { useCase, adapter: new UpdateBestPracticeAdapter() };
+
+  return { parseSpy, useCase, adapter: new UpdateBestPracticeAdapter() };
 };

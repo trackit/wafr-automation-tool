@@ -180,10 +180,8 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully updated
-        '204':
-          description: The assessment has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -402,6 +400,141 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/exports/pdf':
+    get:
+      operationId: listPDFExports
+      tags:
+        - Exports
+      summary: List the PDF exports of an assessment
+      description: |
+        Lists the PDF exports of an assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to list the exports of
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The list of PDF exports has been successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileExport'
+        '400':
+          description: Invalid request path parameters
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+    post:
+      operationId: startPDFExport
+      tags:
+        - Exports
+      summary: Starts a PDF export for the specified assessment
+      description: |
+        Starts a PDF export for the specified assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to export
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - versionName
+              properties:
+                versionName:
+                  type: string
+                  description: The version name of the PDF export
+      responses:
+        '200':
+          description: The PDF export has been started successfully
+        '400':
+          description: Invalid request parameters
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/exports/pdf/{fileExportId}/url':
+    get:
+      operationId: generatePDFExportURL
+      tags:
+        - Exports
+      summary: Generate a pre-signed URL for a specific PDF export of an assessment
+      description: |
+        Generates a pre-signed URL for a specific PDF export of an assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to list the exports of
+          required: true
+          schema:
+            type: string
+        - name: fileExportId
+          in: path
+          description: The unique ID of the PDF export to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The PDF export URL has been successfully generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - url
+                properties:
+                  url:
+                    type: string
+                    description: The URL of the PDF export
+        '400':
+          description: Invalid request path parameters
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/exports/pdf/{fileExportId}':
+    delete:
+      operationId: deletePDFExport
+      tags:
+        - Exports
+      summary: Delete a specific PDF export of an assessment
+      description: |
+        Deletes a specific PDF export of an assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to list the exports of
+          required: true
+          schema:
+            type: string
+        - name: fileExportId
+          in: path
+          description: The unique ID of the PDF export to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The PDF export has been successfully deleted
+        '400':
+          description: Invalid request path parameters
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
   '/assessments/{assessmentId}/pillars/{pillarId}':
     put:
       operationId: updatePillar
@@ -596,10 +729,8 @@ paths:
       responses:
         '200':
           description: The best practice has been successfully updated
-        '204':
-          description: The best practice has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid or empty request body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment, pillar, question, or best practice could not be found
         '500':
@@ -668,10 +799,8 @@ paths:
       responses:
         '200':
           description: The finding has been successfully updated
-        '204':
-          description: The finding has no fields to update
         '400':
-          description: Invalid request body or a issue occurred while trying to retrieve the organization of the user
+          description: Invalid request or empty body or a issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified assessment could not be found
         '500':
@@ -1131,3 +1260,28 @@ components:
         createdAt:
           type: string
           format: date-time
+    FileExport:
+      type: object
+      description: A file export related to an assessment
+      additionalProperties: false
+      required:
+        - id
+        - status
+        - versionName
+        - createdAt
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - NOT_STARTED
+            - IN_PROGRESS
+            - COMPLETED
+            - ERRORED
+        error:
+          type: string
+        versionName:
+          type: string
+        createdAt:
+          type: string

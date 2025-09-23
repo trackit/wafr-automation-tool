@@ -1,36 +1,32 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type GetBestPracticeFindingsPathParameters =
+  operations['getBestPracticeFindings']['parameters']['path'];
+type GetBestPracticeFindingsQueryStringParameters = NonNullable<
+  operations['getBestPracticeFindings']['parameters']['query']
+>;
+
 export class GetBestPracticeFindingsAdapterEventMother {
-  private queryParameters: NonNullable<
-    operations['getBestPracticeFindings']['parameters']['query']
-  >;
-  private pathParameters: operations['getBestPracticeFindings']['parameters']['path'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: GetBestPracticeFindingsPathParameters;
+  private queryStringParameters: GetBestPracticeFindingsQueryStringParameters;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    queryParameters: operations['getBestPracticeFindings']['parameters']['query'],
-    pathParameters: operations['getBestPracticeFindings']['parameters']['path']
+    queryStringParameters: GetBestPracticeFindingsQueryStringParameters,
+    pathParameters: GetBestPracticeFindingsPathParameters
   ) {
-    this.queryParameters = queryParameters || {};
+    this.queryStringParameters = queryStringParameters;
     this.pathParameters = pathParameters;
   }
 
   public static basic(): GetBestPracticeFindingsAdapterEventMother {
     return new GetBestPracticeFindingsAdapterEventMother(
-      {
-        limit: undefined,
-        search: undefined,
-        showHidden: undefined,
-        nextToken: undefined,
-      },
+      {},
       {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         pillarId: 'pillar-id',
@@ -40,65 +36,55 @@ export class GetBestPracticeFindingsAdapterEventMother {
     );
   }
 
-  public withLimit(
-    limit: NonNullable<
-      operations['getBestPracticeFindings']['parameters']['query']
-    >['limit']
-  ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.limit = limit;
+  public withLimit(limit?: number): GetBestPracticeFindingsAdapterEventMother {
+    this.queryStringParameters.limit = limit;
     return this;
   }
 
   public withSearch(
-    search: NonNullable<
-      operations['getBestPracticeFindings']['parameters']['query']
-    >['search']
+    search?: string
   ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.search = search;
+    this.queryStringParameters.search = search;
     return this;
   }
 
   public withShowHidden(
-    showHidden: NonNullable<
-      operations['getBestPracticeFindings']['parameters']['query']
-    >['showHidden']
+    showHidden?: boolean
   ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.showHidden = showHidden;
+    this.queryStringParameters.showHidden = showHidden;
     return this;
   }
 
   public withNextToken(
-    nextToken: NonNullable<
-      operations['getBestPracticeFindings']['parameters']['query']
-    >['nextToken']
+    nextToken?: string
   ): GetBestPracticeFindingsAdapterEventMother {
-    this.queryParameters.nextToken = nextToken;
+    this.queryStringParameters.nextToken = nextToken;
     return this;
   }
 
   public withAssessmentId(
-    assessmentId: operations['getBestPracticeFindings']['parameters']['path']['assessmentId']
+    assessmentId: string
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withPillarId(
-    pillarId: operations['getBestPracticeFindings']['parameters']['path']['pillarId']
+    pillarId: string
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(
-    questionId: operations['getBestPracticeFindings']['parameters']['path']['questionId']
+    questionId: string
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: operations['getBestPracticeFindings']['parameters']['path']['bestPracticeId']
+    bestPracticeId: string
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.bestPracticeId = bestPracticeId;
     return this;
@@ -113,7 +99,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
 
   public build(): APIGatewayProxyEvent {
     const queryStringParameters = Object.fromEntries(
-      Object.entries(this.queryParameters).map(([key, value]) => [
+      Object.entries(this.queryStringParameters).map(([key, value]) => [
         key,
         value === undefined ? undefined : String(value),
       ])

@@ -11,8 +11,8 @@ export class AssociateFindingsToBestPracticesUseCaseArgsMother {
 
   public static basic(): AssociateFindingsToBestPracticesUseCaseArgsMother {
     return new AssociateFindingsToBestPracticesUseCaseArgsMother({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'test.io',
       scanningTool: ScanningTool.PROWLER,
       findings: [],
     });
@@ -25,10 +25,10 @@ export class AssociateFindingsToBestPracticesUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

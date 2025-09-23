@@ -1,23 +1,25 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type UpdateQuestionPathParameters =
+  operations['updateQuestion']['parameters']['path'];
+type UpdateQuestionBody =
+  operations['updateQuestion']['requestBody']['content']['application/json'];
+
 export class UpdateQuestionAdapterEventMother {
-  private path: operations['updateQuestion']['parameters']['path'];
-  private body: operations['updateQuestion']['requestBody']['content']['application/json'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: UpdateQuestionPathParameters;
+  private body: UpdateQuestionBody;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    path: operations['updateQuestion']['parameters']['path'],
-    body: operations['updateQuestion']['requestBody']['content']['application/json']
+    pathParameters: UpdateQuestionPathParameters,
+    body: UpdateQuestionBody
   ) {
-    this.path = path;
+    this.pathParameters = pathParameters;
     this.body = body;
   }
 
@@ -28,24 +30,27 @@ export class UpdateQuestionAdapterEventMother {
         pillarId: '1',
         questionId: '1',
       },
-      {}
+      {
+        disabled: false,
+        none: false,
+      }
     );
   }
 
   public withAssessmentId(
     assessmentId: string
   ): UpdateQuestionAdapterEventMother {
-    this.path.assessmentId = assessmentId;
+    this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withPillarId(pillarId: string): UpdateQuestionAdapterEventMother {
-    this.path.pillarId = pillarId;
+    this.pathParameters.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(questionId: string): UpdateQuestionAdapterEventMother {
-    this.path.questionId = questionId;
+    this.pathParameters.questionId = questionId;
     return this;
   }
 
@@ -68,7 +73,7 @@ export class UpdateQuestionAdapterEventMother {
 
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withPathParameters(this.path)
+      .withPathParameters(this.pathParameters)
       .withBody(JSON.stringify(this.body))
       .withUserClaims({
         sub: this.user.id,

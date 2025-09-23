@@ -140,7 +140,7 @@ function AssessmentOverview({
 
   // Calculate overall completion percentage
   const overallCompletion = useMemo(() => {
-    return calculateOverallCompletion(assessment);
+    return calculateOverallCompletion(assessment?.pillars);
   }, [assessment]);
 
   // Get severity-specific colors for the pie chart

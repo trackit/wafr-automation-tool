@@ -483,6 +483,88 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  ExportAssessmentToPDFLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ExportAssessmentToPDFFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ExportAssessmentToPDFFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 300
+      MemorySize: 4096
+      CodeUri: ../apps/backend/src/handlers/process/exportPDF/
+      Tags:
+        Name: ExportAssessmentToPDFFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:Query
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub 'arn:aws:s3:::${S3BucketName}/assessments/*/exports/*'
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3BucketName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  StartPDFExportLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${StartPDFExportFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  StartPDFExportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/startPDFExport/
+      Tags:
+        Name: StartPDFExportFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: !GetAtt ExportAssessmentToPDFFunction.Arn
+      Environment:
+        Variables:
+          PDF_EXPORT_LAMBDA_ARN: !GetAtt ExportAssessmentToPDFFunction.Arn
+      Events:
+        StartPDFExport:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/pdf
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   CreateMilestoneLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -503,6 +585,41 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/exports/create-milestone
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  ListPDFExportsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ListPDFExportsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ListPDFExportsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/listPDFExports/
+      Tags:
+        Name: ListPDFExportsFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !Ref DynamoDBArn
+      Events:
+        ListPDFExports:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/pdf
+            Method: GET
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -543,6 +660,53 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GeneratePDFExportURLLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GeneratePDFExportURLFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GeneratePDFExportURLFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/generatePDFExportURL/
+      Tags:
+        Name: GeneratePDFExportURLFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub 'arn:aws:s3:::${S3BucketName}/assessments/*/exports/*'
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource: !Sub 'arn:aws:s3:::${S3BucketName}'
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3BucketName
+      Events:
+        GeneratePDFExportURL:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/pdf/{fileExportId}/url
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   GetMilestoneLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -563,6 +727,49 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/milestones/{milestoneId}
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2020
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  DeletePDFExportLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeletePDFExportFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  DeletePDFExportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/deletePDFExport/
+      Tags:
+        Name: DeletePDFExportFunction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !Ref DynamoDBArn
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+              Resource: !Sub 'arn:aws:s3:::${S3BucketName}/assessments/*/exports/*'
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3BucketName
+      Events:
+        DeletePDFExport:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/exports/pdf/{fileExportId}
+            Method: DELETE
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

@@ -8,10 +8,13 @@ import { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
+  AssessmentNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors';
+import {
   assertAssessmentIsReadyForExport,
   assertOrganizationHasExportRole,
 } from '../../services/exports';
-import { NotFoundError } from '../Errors';
 
 export type ExportWellArchitectedToolUseCaseArgs = {
   assessmentId: string;
@@ -38,21 +41,22 @@ export class ExportWellArchitectedToolUseCaseImpl
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
-    });
-    if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
-    }
-    assertAssessmentIsReadyForExport(assessment, args.region);
-    const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.user.organizationDomain,
+      });
+    }
+    assertAssessmentIsReadyForExport(assessment, args.region);
+    const organization = await this.organizationRepository.get(
+      args.user.organizationDomain
+    );
     if (!organization) {
-      throw new NotFoundError(
-        `Organization with domain ${args.user.organizationDomain} not found`
-      );
+      throw new OrganizationNotFoundError({
+        domain: args.user.organizationDomain,
+      });
     }
     assertOrganizationHasExportRole(organization);
     await this.wellArchitectedToolService.exportAssessment({
@@ -65,7 +69,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     if (!assessment.exportRegion) {
       await this.assessmentsRepository.update({
         assessmentId: assessment.id,
-        organization: args.user.organizationDomain,
+        organizationDomain: args.user.organizationDomain,
         assessmentBody: { exportRegion: args.region },
       });
       this.logger.info(

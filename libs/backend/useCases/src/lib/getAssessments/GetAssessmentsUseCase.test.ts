@@ -1,81 +1,56 @@
 import {
-  FakeAssessmentsRepository,
-  FakeIdGenerator,
-  tokenAssessmentsRepository,
-  tokenIdGenerator,
+  registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
-import { AssessmentMother } from '@backend/models';
-import { register, reset } from '@shared/di-container';
+import { AssessmentMother, UserMother } from '@backend/models';
+import { inject, reset } from '@shared/di-container';
 
-import { InvalidParametersError } from '../Errors';
-import {
-  GetAssessmentsUseCaseArgs,
-  GetAssessmentsUseCaseImpl,
-} from './GetAssessmentsUseCase';
+import { GetAssessmentsUseCaseImpl } from './GetAssessmentsUseCase';
 import { GetAssessmentsUseCaseArgsMother } from './GetAssessmentsUseCaseArgsMother';
 
 vitest.useFakeTimers();
 
-describe('getAssessments UseCase', () => {
+describe('GetAssessmentsUseCase', () => {
   it('should return all assessments', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('assessment1')
-      .withOrganization('test.io')
-      .build();
+    const user = UserMother.basic().build();
 
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    const input: GetAssessmentsUseCaseArgs =
-      GetAssessmentsUseCaseArgsMother.basic().build();
-    const response = await useCase.getAssessments(input);
+    const input = GetAssessmentsUseCaseArgsMother.basic()
+      .withUser(user)
+      .build();
 
-    expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({ organization: 'test.io' })
-    );
-    expect(response).toEqual({
-      assessments: [assessment],
-    });
+    const { assessments } = await useCase.getAssessments(input);
+
+    expect(assessments).toEqual([assessment]);
   });
 
   it('should return an empty list if no assessments', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    const input: GetAssessmentsUseCaseArgs =
-      GetAssessmentsUseCaseArgsMother.basic().build();
-    await useCase.getAssessments(input);
-
-    expect(fakeAssessmentsRepository.getAll).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({ organization: 'test.io' })
-    );
-  });
-
-  it('should throw if next token is invalid', async () => {
     const { useCase } = setup();
 
-    const input: GetAssessmentsUseCaseArgs =
-      GetAssessmentsUseCaseArgsMother.basic().withNextToken('dGVzdA==').build();
-    await expect(useCase.getAssessments(input)).rejects.toThrow(
-      InvalidParametersError
-    );
+    const user = UserMother.basic().build();
+
+    const input = GetAssessmentsUseCaseArgsMother.basic()
+      .withUser(user)
+      .build();
+
+    const { assessments } = await useCase.getAssessments(input);
+
+    expect(assessments).toEqual([]);
   });
 });
 
 const setup = () => {
   reset();
-
-  const fakeAssessmentsRepository = new FakeAssessmentsRepository();
-  vitest.spyOn(fakeAssessmentsRepository, 'getAll');
-  register(tokenAssessmentsRepository, {
-    useValue: fakeAssessmentsRepository,
-  });
-  register(tokenIdGenerator, { useClass: FakeIdGenerator });
-
-  const useCase = new GetAssessmentsUseCaseImpl();
+  registerTestInfrastructure();
 
   return {
-    useCase,
-    fakeAssessmentsRepository: fakeAssessmentsRepository,
+    useCase: new GetAssessmentsUseCaseImpl(),
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };

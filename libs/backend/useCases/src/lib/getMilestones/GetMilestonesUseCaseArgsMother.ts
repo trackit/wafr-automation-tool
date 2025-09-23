@@ -22,7 +22,9 @@ export class GetMilestonesUseCaseArgsMother {
     return this;
   }
 
-  public withRegion(region: string): GetMilestonesUseCaseArgsMother {
+  public withRegion(
+    region: string | undefined
+  ): GetMilestonesUseCaseArgsMother {
     this.data.region = region;
     return this;
   }

@@ -1,12 +1,12 @@
 import {
-  BestPracticeNotFoundError,
-  InvalidNextTokenError,
   tokenAssessmentsRepository,
+  tokenFindingsRepository,
 } from '@backend/infrastructure';
 import type { Finding, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { InvalidParametersError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
+import { assertBestPracticeExists } from '../../services/asserts';
 
 export interface GetBestPracticeFindingsUseCaseArgs {
   assessmentId: string;
@@ -31,6 +31,7 @@ export class GetBestPracticeFindingsUseCaseImpl
   implements GetBestPracticeFindingsUseCase
 {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
 
   public async getBestPracticeFindings(
     args: GetBestPracticeFindingsUseCaseArgs
@@ -38,20 +39,47 @@ export class GetBestPracticeFindingsUseCaseImpl
     findings: Finding[];
     nextToken?: string;
   }> {
-    const { user, ...remaining } = args;
-    return this.assessmentsRepository
-      .getBestPracticeFindings({
-        organization: user.organizationDomain,
-        ...remaining,
-      })
-      .catch((error) => {
-        if (error instanceof InvalidNextTokenError) {
-          throw new InvalidParametersError(error.message);
-        } else if (error instanceof BestPracticeNotFoundError) {
-          throw new NotFoundError(error.message);
-        }
-        throw error;
+    const {
+      user,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      nextToken,
+      limit,
+      searchTerm,
+      showHidden,
+    } = args;
+    const organizationDomain = user.organizationDomain;
+
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
       });
+    }
+    assertBestPracticeExists({
+      assessment,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
+    return await this.findingsRepository.getBestPracticeFindings({
+      organizationDomain,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      nextToken,
+      limit,
+      searchTerm,
+      showHidden,
+    });
   }
 }
 

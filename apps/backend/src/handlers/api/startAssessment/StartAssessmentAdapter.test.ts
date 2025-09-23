@@ -3,6 +3,7 @@ import { tokenStartAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { StartAssessmentAdapter } from './StartAssessmentAdapter';
 import { StartAssessmentAdapterEventMother } from './StartAssessmentAdapterEventMother';
 
@@ -11,18 +12,28 @@ describe('startAssessment adapter', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = StartAssessmentAdapterEventMother.basic()
-        .withName('Test Assessment')
-        .withRegions(['us-west-1', 'us-west-2'])
-        .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-        .withWorkflows(['workflow-1', 'workflow-2'])
-        .build();
-      const response = await adapter.handle(event);
+      const event = StartAssessmentAdapterEventMother.basic().build();
 
+      const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should throw a bad request error without body', async () => {
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = StartAssessmentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          bodySchema: expect.anything(),
+        })
+      );
+    });
+
+    it('should return a 400 without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -30,60 +41,32 @@ describe('startAssessment adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
-
-    it('should throw a bad request error with invalid json body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
   });
-
   describe('useCase and return value', () => {
-    it('should call useCase with deserialized body', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
+      const name = 'Test Assessment';
+      const regions = ['us-west-1', 'us-west-2'];
+      const roleArn = 'arn:aws:iam::123456789012:role/test-role';
+      const workflows = ['workflow-1', 'workflow-2'];
       const event = StartAssessmentAdapterEventMother.basic()
-        .withName('Test Assessment')
-        .withRegions(['us-west-1', 'us-west-2'])
-        .withRoleArn('arn:aws:iam::123456789012:role/test-role')
-        .withWorkflows(['workflow-1', 'workflow-2'])
+        .withName(name)
+        .withRegions(regions)
+        .withRoleArn(roleArn)
+        .withWorkflows(workflows)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.startAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          name: 'Test Assessment',
-          regions: ['us-west-1', 'us-west-2'],
-          roleArn: 'arn:aws:iam::123456789012:role/test-role',
-          workflows: ['workflow-1', 'workflow-2'],
+          name,
+          regions,
+          roleArn,
+          workflows,
         })
       );
-    });
-
-    it('should return the assessment id from the useCase', async () => {
-      const { adapter } = setup();
-
-      const event = StartAssessmentAdapterEventMother.basic().build();
-
-      const response = await adapter.handle(event);
-      const body = JSON.parse(response.body ?? '{}');
-
-      expect(body).toEqual({ assessmentId: 'assessment-id' });
     });
 
     it('should return a 201 status code', async () => {
@@ -100,11 +83,14 @@ describe('startAssessment adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { startAssessment: vitest.fn() };
   useCase.startAssessment.mockResolvedValueOnce({
-    assessmentId: 'assessment-id',
+    assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
   });
   register(tokenStartAssessmentUseCase, { useValue: useCase });
-  const adapter = new StartAssessmentAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new StartAssessmentAdapter() };
 };

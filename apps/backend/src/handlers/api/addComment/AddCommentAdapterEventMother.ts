@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -16,10 +16,7 @@ type AddCommentBody = NonNullable<
 export class AddCommentAdapterEventMother {
   private pathParameters: AddCommentParameters;
   private body: AddCommentBody;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(params: AddCommentParameters, body: AddCommentBody) {
     this.pathParameters = params;
@@ -29,7 +26,7 @@ export class AddCommentAdapterEventMother {
   public static basic(): AddCommentAdapterEventMother {
     return new AddCommentAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
       },
       {

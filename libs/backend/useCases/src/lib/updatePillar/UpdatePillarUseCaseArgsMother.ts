@@ -1,4 +1,4 @@
-import type { PillarBody, User } from '@backend/models';
+import { type PillarBody, type User, UserMother } from '@backend/models';
 
 import type { UpdatePillarUseCaseArgs } from './UpdatePillarUseCase';
 
@@ -11,12 +11,8 @@ export class UpdatePillarUseCaseArgsMother {
 
   public static basic(): UpdatePillarUseCaseArgsMother {
     return new UpdatePillarUseCaseArgsMother({
-      assessmentId: 'assessment-id',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      user: UserMother.basic().build(),
       pillarId: '0',
       pillarBody: {},
     });

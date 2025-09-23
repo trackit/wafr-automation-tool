@@ -21,10 +21,15 @@ import {
   tokenFeatureToggleRepository,
 } from './FeatureToggleRepository';
 import {
+  tokenFakeFindingsRepository,
+  tokenFindingsRepository,
+} from './FindingsRepository';
+import {
   tokenFakeFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
+import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
   tokenFakeMarketplaceService,
@@ -39,6 +44,7 @@ import {
   tokenFakeOrganizationRepository,
   tokenOrganizationRepository,
 } from './OrganizationRepository';
+import { tokenFakePDFService, tokenPDFService } from './PDFService';
 import {
   tokenFakeQuestionSetService,
   tokenQuestionSetService,
@@ -61,8 +67,17 @@ export const registerTestInfrastructure = () => {
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
   });
+  register(tokenFindingsRepository, {
+    useFactory: () => inject(tokenFakeFindingsRepository),
+  });
   register(tokenAIService, {
     useFactory: () => inject(tokenFakeAIService),
+  });
+  register(tokenLambdaService, {
+    useFactory: () => inject(tokenFakeLambdaService),
+  });
+  register(tokenPDFService, {
+    useFactory: () => inject(tokenFakePDFService),
   });
   register(tokenQuestionSetService, {
     useFactory: () => inject(tokenFakeQuestionSetService),

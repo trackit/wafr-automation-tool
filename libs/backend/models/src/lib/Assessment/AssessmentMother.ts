@@ -2,6 +2,7 @@ import type { Pillar } from '../Pillar';
 import type { ScanningTool } from '../ScanningTool';
 import {
   type Assessment,
+  type AssessmentFileExports,
   type AssessmentGraphData,
   AssessmentStep,
 } from './Assessment';
@@ -26,7 +27,7 @@ export class AssessmentMother {
         resourceTypes: {},
         severities: {},
       },
-      id: 'assessment-id',
+      id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       name: 'Test Assessment',
       organization: 'organization-id',
       questionVersion: '1.0',
@@ -35,6 +36,7 @@ export class AssessmentMother {
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       step: AssessmentStep.FINISHED,
       workflows: [],
+      fileExports: {},
     });
   }
 
@@ -112,6 +114,11 @@ export class AssessmentMother {
 
   public withWorkflows(workflows: string[]): AssessmentMother {
     this.data.workflows = workflows;
+    return this;
+  }
+
+  public withFileExports(fileExports: AssessmentFileExports): AssessmentMother {
+    this.data.fileExports = fileExports;
     return this;
   }
 

@@ -27,7 +27,7 @@ function NewAssessmentDialog() {
     },
     onSuccess: (data: { assessmentId: string }) => {
       setOpen(false);
-      navigate(`/assessments/${data.assessmentId}`);
+      void navigate(`/assessments/${data.assessmentId}`);
     },
   });
 

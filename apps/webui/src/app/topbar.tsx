@@ -7,16 +7,20 @@ import logo from '../assets/logo.png';
 
 const Topbar = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState('');
+
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const user = await getCurrentUser();
+      setUsername(user?.signInDetails?.loginId || '');
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   useEffect(() => {
-    getCurrentUser()
-      .then((user) => {
-        console.log(user);
-        setUsername(user.signInDetails?.loginId || '');
-      })
-      .catch(console.error);
-  }, []);
+    void loadCurrentUser();
+  }, [loadCurrentUser]);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -69,7 +73,7 @@ const Topbar = () => {
         <button
           className="btn btn-ghost btn-xs p-1"
           onClick={(e) => {
-            navigate('/faq');
+            void navigate('/faq');
           }}
         >
           <CircleHelp className="w-5 h-5" />

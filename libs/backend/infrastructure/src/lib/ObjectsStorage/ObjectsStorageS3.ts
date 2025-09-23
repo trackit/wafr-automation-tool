@@ -7,6 +7,7 @@ import {
   S3Client,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -32,10 +33,11 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       Bucket: this.bucket,
       Key: key,
     });
+
     try {
       const response = await this.client.send(command);
       return response.Body ? streamToString(response.Body as Readable) : null;
-    } catch (error: unknown) {
+    } catch (error) {
       if (
         error instanceof S3ServiceException &&
         error.$metadata?.httpStatusCode === 404
@@ -43,7 +45,6 @@ export class ObjectsStorageS3 implements ObjectsStorage {
         this.logger.warn(`Object not found on S3 (key="${key}")`);
         return null;
       }
-      this.logger.error(`Failed to get object: ${error}`, key);
       throw error;
     }
   }
@@ -53,18 +54,15 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       Bucket: this.bucket,
       Key: key,
     });
-    try {
-      const response = await this.client.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
-        throw new Error(
-          `Failed to delete assessment: ${response.$metadata.httpStatusCode}`
-        );
-      }
-      this.logger.info(`Object deleted: ${key}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete object: ${error}`, key);
-      throw error;
+
+    const response = await this.client.send(command);
+    if (
+      response.$metadata.httpStatusCode !== 200 &&
+      response.$metadata.httpStatusCode !== 204
+    ) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`Object deleted: ${key}`);
   }
 
   public async list(prefix: string): Promise<string[]> {
@@ -72,19 +70,13 @@ export class ObjectsStorageS3 implements ObjectsStorage {
       Bucket: this.bucket,
       Prefix: prefix,
     });
-    try {
-      const response = await this.client.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
-        throw new Error(
-          `Failed to list objects: ${response.$metadata.httpStatusCode}`
-        );
-      }
-      this.logger.info(`Listing objects: ${prefix}`);
-      return response.Contents?.map((content) => content.Key as string) ?? [];
-    } catch (error) {
-      this.logger.error(`Failed to list objects: ${error}`, prefix);
-      throw error;
+
+    const response = await this.client.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`Listing objects: ${prefix}`);
+    return response.Contents?.map((content) => content.Key as string) ?? [];
   }
 
   public async bulkDelete(keys: string[]): Promise<void> {
@@ -98,45 +90,56 @@ export class ObjectsStorageS3 implements ObjectsStorage {
         Quiet: true,
       },
     });
-    try {
-      const response = await this.client.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
-        throw new Error(
-          `Failed to delete objects: ${response.$metadata.httpStatusCode}`
-        );
-      }
-      this.logger.info(`Deleted objects: ${keys}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete objects: ${error}`, keys);
-      throw error;
+
+    const response = await this.client.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`Deleted objects: ${keys}`);
   }
 
-  public async put(args: { key: string; body: string }): Promise<string> {
+  public async put(args: {
+    key: string;
+    body: string | Buffer;
+  }): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: args.key,
       Body: args.body,
     });
-    try {
-      const response = await this.client.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
-        throw new Error(
-          `Failed to put object: ${response.$metadata.httpStatusCode}`
-        );
-      }
-      this.logger.info(`Object succesfuly added: ${args.key}`);
-      return this.buildURI(args.key);
-    } catch (error) {
-      this.logger.error(`Failed to put object: ${error}`, args.key);
-      throw error;
+
+    const response = await this.client.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`Object successfully added: ${args.key}`);
+    return this.buildURI(args.key);
   }
 
   public parseURI(uri: string): { bucket: string; key: string } {
     const { hostname: bucket, pathname } = new URL(uri);
     const key = pathname.startsWith('/') ? pathname.slice(1) : pathname;
     return { bucket, key };
+  }
+
+  public async generatePresignedURL(args: {
+    key: string;
+    expiresInSeconds: number;
+  }): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: args.key,
+    });
+    try {
+      const url = await getSignedUrl(this.client, command, {
+        expiresIn: args.expiresInSeconds,
+      });
+      this.logger.info(`Presigned URL generated: ${url}`);
+      return url;
+    } catch (error) {
+      this.logger.error(`Failed to generate presigned URL: ${error}`, args);
+      throw error;
+    }
   }
 }
 

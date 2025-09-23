@@ -1,6 +1,6 @@
 import {
   registerTestInfrastructure,
-  tokenFakeAssessmentsRepository,
+  tokenFakeFindingsRepository,
 } from '@backend/infrastructure';
 import {
   FindingCommentMother,
@@ -9,128 +9,130 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { ForbiddenError, NotFoundError } from '../Errors';
+import {
+  FindingCommentForbiddenError,
+  FindingCommentNotFoundError,
+  FindingNotFoundError,
+} from '../../errors';
 import { UpdateCommentUseCaseImpl } from './UpdateCommentUseCase';
 import { UpdateCommentUseCaseArgsMother } from './UpdateCommentUseCaseArgsMother';
 
 describe('UpdateCommentUseCase', () => {
-  it('should throw a NotFoundError if finding does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+  it('should throw FindingNotFoundError if finding does not exist', async () => {
+    const { useCase } = setup();
 
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [];
+    const user = UserMother.basic().build();
 
     const input = UpdateCommentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId('scanning-tool#finding-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withUser(user)
       .build();
 
-    await expect(useCase.updateComment(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.updateComment(input)).rejects.toThrow(
+      FindingNotFoundError
+    );
   });
 
-  it('should throw a NotFoundError if comment does not exist in the finding', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+  it('should throw FindingCommentNotFoundError if comment does not exist in the finding', async () => {
+    const { useCase, fakeFindingsRepository } = setup();
 
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic()
-        .withId('scanning-tool#12345')
-        .withComments([FindingCommentMother.basic().build()])
-        .build(),
-    ];
+    const user = UserMother.basic().build();
+
+    const finding = FindingMother.basic()
+      .withComments([FindingCommentMother.basic().build()])
+      .build();
+    await fakeFindingsRepository.save({
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: user.organizationDomain,
+      finding,
+    });
 
     const input = UpdateCommentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withFindingId('scanning-tool#12345')
-      .withCommentId('comment-id2')
-      .withUser(
-        UserMother.basic()
-          .withOrganizationDomain('test.io')
-          .withEmail('user@test.io')
-          .build()
-      )
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withFindingId(finding.id)
+      .withCommentId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed2')
+      .withUser(user)
       .build();
 
-    await expect(useCase.updateComment(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.updateComment(input)).rejects.toThrow(
+      FindingCommentNotFoundError
+    );
   });
 
-  it('should throw a ForbiddenError if user is not the comment author', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+  it('should throw FindingCommentForbiddenError if user is not the comment author', async () => {
+    const { useCase, fakeFindingsRepository } = setup();
 
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic()
-        .withId('scanning-tool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withAuthorId('other-user-id')
-            .withId('comment-id')
-            .build(),
-        ])
-        .build(),
-    ];
+    const user = UserMother.basic().build();
 
-    const input = UpdateCommentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withFindingId('scanning-tool#12345')
-      .withCommentId('comment-id')
-      .withUser(
-        UserMother.basic()
-          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
-          .withOrganizationDomain('test.io')
-          .build()
-      )
+    const comment = FindingCommentMother.basic()
+      .withAuthorId('other-user-id')
       .build();
 
-    await expect(useCase.updateComment(input)).rejects.toThrow(ForbiddenError);
+    const finding = FindingMother.basic().withComments([comment]).build();
+    await fakeFindingsRepository.save({
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: user.organizationDomain,
+      finding,
+    });
+
+    const input = UpdateCommentUseCaseArgsMother.basic()
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withFindingId(finding.id)
+      .withCommentId(comment.id)
+      .withUser(user)
+      .build();
+
+    await expect(useCase.updateComment(input)).rejects.toThrow(
+      FindingCommentForbiddenError
+    );
   });
 
   it('should update comment using the provided comment body', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { useCase, fakeFindingsRepository } = setup();
 
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic()
-        .withId('scanning-tool#12345')
-        .withComments([
-          FindingCommentMother.basic()
-            .withAuthorId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
-            .withId('comment-id')
-            .withText('old-comment-text')
-            .build(),
-        ])
-        .build(),
-    ];
+    const user = UserMother.basic().build();
+
+    const comment = FindingCommentMother.basic()
+      .withAuthorId(user.id)
+      .withText('old-comment-text')
+      .build();
+
+    const finding = FindingMother.basic().withComments([comment]).build();
+    await fakeFindingsRepository.save({
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: user.organizationDomain,
+      finding,
+    });
 
     const input = UpdateCommentUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withFindingId('scanning-tool#12345')
-      .withCommentId('comment-id')
+      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withFindingId(finding.id)
+      .withCommentId(comment.id)
       .withCommentBody({
         text: 'new-comment-text',
       })
-      .withUser(
-        UserMother.basic()
-          .withId('e4eaaaf2-d142-11e1-b3e4-080027620cdd')
-          .withOrganizationDomain('test.io')
-          .build()
-      )
+      .withUser(user)
       .build();
 
     await useCase.updateComment(input);
 
-    const finding = fakeAssessmentsRepository.assessmentFindings[
-      'assessment-id#test.io'
-    ].find((finding) => finding.id === 'scanning-tool#12345');
-    expect(finding).toBeDefined();
-    const comment = finding?.comments?.find((c) => c.id === 'comment-id');
-    expect(comment).toBeDefined();
-    expect(comment?.text).toBe('new-comment-text');
+    const updatedFinding = await fakeFindingsRepository.get({
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: user.organizationDomain,
+      findingId: finding.id,
+    });
+    expect(updatedFinding).toBeDefined();
+    expect(updatedFinding?.comments?.[0].text).toBe('new-comment-text');
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return {
     useCase: new UpdateCommentUseCaseImpl(),
-    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
   };
 };

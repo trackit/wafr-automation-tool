@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import type { Assessment } from '@backend/models';
 import { tokenGetAssessmentUseCase } from '@backend/useCases';
@@ -8,10 +8,10 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const GetAssessmentArgsSchema = z.object({
-  assessmentId: z.string(),
+const GetAssessmentPathSchema = z.object({
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['getAssessment']['parameters']['path']>;
 
 export class GetAssessmentAdapter {
@@ -72,23 +72,18 @@ export class GetAssessmentAdapter {
   ): Promise<
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: GetAssessmentPathSchema,
+    });
+    const { assessmentId } = pathParameters;
 
-    try {
-      const { assessmentId } = GetAssessmentArgsSchema.parse(pathParameters);
-      const assessment = await this.useCase.getAssessment({
-        organization: getUserFromEvent(event).organizationDomain,
-        assessmentId,
-      });
-      return this.toGetAssessmentResponse(assessment);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${e.message}`);
-      }
-      throw e;
-    }
+    const user = getUserFromEvent(event);
+
+    const assessment = await this.useCase.getAssessment({
+      organizationDomain: user.organizationDomain,
+      assessmentId,
+    });
+
+    return this.toGetAssessmentResponse(assessment);
   }
 }

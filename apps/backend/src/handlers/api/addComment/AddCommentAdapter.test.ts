@@ -1,11 +1,10 @@
-import {
-  registerTestInfrastructure,
-  tokenAssessmentsRepository,
-} from '@backend/infrastructure';
-import { FindingMother } from '@backend/models';
-import { inject, reset } from '@shared/di-container';
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { FindingCommentMother, UserMother } from '@backend/models';
+import { tokenAddCommentUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { AddCommentAdapter } from './AddCommentAdapter';
 import { AddCommentAdapterEventMother } from './AddCommentAdapterEventMother';
 
@@ -16,7 +15,24 @@ describe('addComment adapter', () => {
 
       const event = AddCommentAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = AddCommentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          bodySchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
@@ -28,88 +44,65 @@ describe('addComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should throw a bad request error with invalid json body', async () => {
+    it('should return a 400 with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
+      const event = AddCommentAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
   });
-  it('should add a comment', async () => {
-    const { adapter, assessmentsRepository, date } = setup();
+  describe('useCase and return value', () => {
+    it('should call useCase with correct parameters', async () => {
+      const { adapter, useCase } = setup();
 
-    assessmentsRepository.saveFinding({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
-      finding: FindingMother.basic()
-        .withId('finding-id')
-        .withComments([])
-        .build(),
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const findingId = 'finding-id';
+      const text = 'This is a comment';
+      const event = AddCommentAdapterEventMother.basic()
+        .withAssessmentId(assessmentId)
+        .withFindingId(findingId)
+        .withText(text)
+        .withUser(user)
+        .build();
+
+      await adapter.handle(event);
+
+      expect(useCase.addComment).toHaveBeenCalledWith({
+        assessmentId,
+        findingId,
+        text,
+        user,
+      });
     });
 
-    const event = APIGatewayProxyEventMother.basic()
-      .withPathParameters({
-        assessmentId: 'assessment-id',
-        findingId: 'finding-id',
-      })
-      .withBody(JSON.stringify({ text: 'comment-text' }))
-      .build();
+    it('should return a 200 status code', async () => {
+      const { adapter } = setup();
 
-    const response = await adapter.handle(event);
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toBe(
-      JSON.stringify({
-        id: 'fake-id-0',
-        authorId: 'user-id',
-        authorEmail: 'user-id@test.io',
-        text: 'comment-text',
-        createdAt: date.toISOString(),
-      })
-    );
+      const event = AddCommentAdapterEventMother.basic().build();
 
-    const updatedFinding = await assessmentsRepository.getFinding({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
-      findingId: 'finding-id',
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
     });
-    expect(updatedFinding?.comments?.length).toBe(1);
-    expect(updatedFinding?.comments?.[0].text).toBe('comment-text');
-  });
-  it('should return 404 if finding does not exist', async () => {
-    const { adapter } = setup();
-
-    const event = APIGatewayProxyEventMother.basic()
-      .withPathParameters({
-        assessmentId: 'assessment-id',
-        findingId: 'finding-id',
-      })
-      .withBody(JSON.stringify({ text: 'comment-text' }))
-      .build();
-
-    const response = await adapter.handle(event);
-    expect(response.statusCode).toBe(404);
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const date = new Date();
-  vitest.setSystemTime(date);
-  const adapter = new AddCommentAdapter();
-  const assessmentsRepository = inject(tokenAssessmentsRepository);
-  return { adapter, assessmentsRepository, date };
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
+  const useCase = { addComment: vitest.fn() };
+  useCase.addComment.mockResolvedValueOnce(
+    Promise.resolve(FindingCommentMother.basic().build())
+  );
+  register(tokenAddCommentUseCase, { useValue: useCase });
+
+  return { parseSpy, useCase, adapter: new AddCommentAdapter() };
 };

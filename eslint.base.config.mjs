@@ -1,5 +1,8 @@
 import nx from '@nx/eslint-plugin';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import pluginImport from 'eslint-plugin-import';
+import pluginPromise from 'eslint-plugin-promise';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 
@@ -7,15 +10,23 @@ export default [
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
+  { ignores: ['**/dist'] },
+
   {
-    ignores: ['**/dist'],
-  },
-  {
-    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    files: ['**/*.{ts,tsx,js,jsx}'],
     plugins: {
+      '@typescript-eslint': tseslint,
+      promise: pluginPromise,
       'simple-import-sort': simpleImportSort,
       import: pluginImport,
       'unused-imports': unusedImports,
+    },
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     rules: {
       '@nx/enforce-module-boundaries': [
@@ -77,17 +88,12 @@ export default [
               sourceTag: 'type:backend-models',
               onlyDependOnLibsWithTags: ['type:backend-models', 'scope:shared'],
             },
-            {
-              sourceTag: 'type:di-container',
-              onlyDependOnLibsWithTags: [],
-            },
-            {
-              sourceTag: 'type:backend-errors',
-              onlyDependOnLibsWithTags: [],
-            },
+            { sourceTag: 'type:di-container', onlyDependOnLibsWithTags: [] },
+            { sourceTag: 'type:backend-errors', onlyDependOnLibsWithTags: [] },
           ],
         },
       ],
+
       'simple-import-sort/imports': [
         'error',
         {
@@ -101,9 +107,31 @@ export default [
       ],
       'simple-import-sort/exports': 'error',
       'import/no-duplicates': 'error',
-      'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],
       'import/order': 'off',
       'unused-imports/no-unused-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 1, maxEOF: 0 }],
+
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        { ignoreVoid: true, ignoreIIFE: false },
+      ],
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { arguments: false, attributes: false } },
+      ],
+      '@typescript-eslint/await-thenable': 'error',
+      'no-void': ['error', { allowAsStatement: true }],
+      'promise/no-return-wrap': 'error',
+      'promise/valid-params': 'error',
     },
   },
   {
@@ -117,7 +145,6 @@ export default [
       '**/*.cjs',
       '**/*.mjs',
     ],
-    // Override or add rules here
     rules: {},
   },
 ];

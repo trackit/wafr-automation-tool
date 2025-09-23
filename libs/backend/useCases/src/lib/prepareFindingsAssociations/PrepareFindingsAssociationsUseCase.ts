@@ -1,5 +1,6 @@
 import {
   tokenAssessmentsRepository,
+  tokenFindingsRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
 import {
@@ -12,7 +13,7 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import {
   ScanFindingsBestPracticesMapping,
@@ -25,7 +26,7 @@ export interface PrepareFindingsAssociationsUseCaseArgs {
   scanningTool: ScanningTool;
   regions: string[];
   workflows: string[];
-  organization: string;
+  organizationDomain: string;
 }
 
 export interface PrepareFindingsAssociationsUseCase {
@@ -39,6 +40,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
 {
   private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly getScannedFindingsUseCase = inject(
     tokenGetScannedFindingsUseCase
   );
@@ -119,11 +121,12 @@ export class PrepareFindingsAssociationsUseCaseImpl
 
   private async saveMappedScanFindingsToBestPractices(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     scanningTool: ScanningTool;
     scanFindingsToBestPractices: ScanFindingsBestPracticesMapping;
   }): Promise<void> {
-    const { assessmentId, organization, scanFindingsToBestPractices } = args;
+    const { assessmentId, organizationDomain, scanFindingsToBestPractices } =
+      args;
     const findings = scanFindingsToBestPractices.map<Finding>(
       ({ scanFinding, bestPractices }) => ({
         ...scanFinding,
@@ -137,9 +140,9 @@ export class PrepareFindingsAssociationsUseCaseImpl
     );
     await Promise.all(
       findings.map((finding) =>
-        this.assessmentsRepository.saveFinding({
+        this.findingsRepository.save({
           assessmentId,
-          organization,
+          organizationDomain,
           finding,
         })
       )
@@ -149,15 +152,16 @@ export class PrepareFindingsAssociationsUseCaseImpl
   public async prepareFindingsAssociations(
     args: PrepareFindingsAssociationsUseCaseArgs
   ): Promise<string[]> {
-    const { assessmentId, scanningTool, organization } = args;
+    const { assessmentId, scanningTool, organizationDomain } = args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found in organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
     const scanFindings =
       await this.getScannedFindingsUseCase.getScannedFindings(args);
@@ -172,7 +176,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const updates = [
       this.assessmentsRepository.updateRawGraphDataForScanningTool({
         assessmentId,
-        organization,
+        organizationDomain,
         scanningTool,
         graphData: this.formatScanningToolGraphData(scanFindings),
       }),
@@ -181,7 +185,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       updates.push(
         this.assessmentsRepository.update({
           assessmentId,
-          organization,
+          organizationDomain,
           assessmentBody: {
             pillars: this.formatPillarsForAssessmentUpdate({
               rawPillars: questionSet.pillars,
@@ -208,13 +212,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const [findingsChunksURIs] = await Promise.all([
       this.storeFindingsToAssociateUseCase.storeFindingsToAssociate({
         assessmentId,
-        organization,
+        organizationDomain,
         scanningTool,
         scanFindings: nonMappedScanFindings,
       }),
       this.saveMappedScanFindingsToBestPractices({
         assessmentId,
-        organization,
+        organizationDomain,
         scanningTool,
         scanFindingsToBestPractices: mappedScanFindingsToBestPractices,
       }),

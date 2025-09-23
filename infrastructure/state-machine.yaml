@@ -315,7 +315,7 @@ Resources:
             Type: Pass
             Assign:
               assessmentId: '{% $states.input.assessmentId %}'
-              organization: '{% $states.input.organization %}'
+              organizationDomain: '{% $states.input.organizationDomain %}'
               regions: '{% $states.input.regions %}'
               roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
@@ -462,7 +462,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           # PrepareFindingsAssociationsUpdateStep:
           #   Type: Task
@@ -497,7 +497,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'prowler'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -509,7 +509,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'cloud-custodian'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -521,7 +521,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'cloudsploit'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -534,7 +534,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           # AssociateFindingsChunkToBestPracticesUpdateStep:
           #   Type: Task
@@ -573,7 +573,7 @@ Resources:
                   Resource: !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                   Arguments:
                     assessmentId: '{% $assessmentId %}'
-                    organization: '{% $organization %}'
+                    organizationDomain: '{% $organizationDomain %}'
                     findingsChunkURI: '{% $states.input %}'
                   End: true
                   Retry:
@@ -589,21 +589,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           ComputeGraphData:
             Type: Task
             Resource: !GetAtt ComputeGraphDataFunction.Arn
             Arguments:
               assessmentId: '{% $assessmentId %}'
-              organization: '{% $organization %}'
+              organizationDomain: '{% $organizationDomain %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
             Next: Cleanup
           # FinishUpdateStep:
@@ -634,14 +634,14 @@ Resources:
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessmentId: '{% $assessmentId %}'
-              organization: '{% $organization %}'
+              organizationDomain: '{% $organizationDomain %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
             End: true
           CleanupOnError:

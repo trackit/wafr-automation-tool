@@ -9,6 +9,7 @@ import BestPracticesAnswer from './answers/best-practice';
 import CollectedInformationAnswer from './answers/collected-information';
 import ExportRoleAnswer from './answers/export-role';
 import HowDoesWAFRAutomationWorkAnswer from './answers/how-does-wafr-automation-tool-work';
+import MilestonesAnswer from './answers/milestones-answer';
 import PrimaryGoalAnswer from './answers/primary-goal';
 import ReportBugAnswer from './answers/report-bug';
 import RescanAssessmentAnswer from './answers/rescan-assessment';
@@ -96,6 +97,10 @@ export function FAQ() {
       question: 'What information is collected during an assessment?',
       answer: <CollectedInformationAnswer />,
     },
+    {
+      question: 'How do Milestones work?',
+      answer: <MilestonesAnswer />,
+    },
   ];
 
   return (
@@ -105,7 +110,7 @@ export function FAQ() {
         <button
           className="btn btn-primary btn-sm text-sm h-8 min-h-8"
           onClick={(e) => {
-            navigate('/');
+            void navigate('/');
           }}
         >
           <Home className="w-4 h-4" />

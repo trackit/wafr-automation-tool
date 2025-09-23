@@ -1,30 +1,32 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type UpdatePillarPathParameters =
+  operations['updatePillar']['parameters']['path'];
+type UpdatePillarBody =
+  operations['updatePillar']['requestBody']['content']['application/json'];
+
 export class UpdatePillarAdapterEventMother {
-  private path: operations['updatePillar']['parameters']['path'];
-  private body: operations['updatePillar']['requestBody']['content']['application/json'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: UpdatePillarPathParameters;
+  private body: UpdatePillarBody;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    path: operations['updatePillar']['parameters']['path'],
-    body: operations['updatePillar']['requestBody']['content']['application/json']
+    pathParameters: UpdatePillarPathParameters,
+    body: UpdatePillarBody
   ) {
-    this.path = path;
+    this.pathParameters = pathParameters;
     this.body = body;
   }
 
   public static basic(): UpdatePillarAdapterEventMother {
     return new UpdatePillarAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         pillarId: '1',
       },
       {
@@ -34,29 +36,32 @@ export class UpdatePillarAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: operations['updatePillar']['parameters']['path']['assessmentId']
+    assessmentId: string
   ): UpdatePillarAdapterEventMother {
-    this.path.assessmentId = assessmentId;
+    this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
-  public withPillarId(
-    pillarId: operations['updatePillar']['parameters']['path']['pillarId']
-  ): UpdatePillarAdapterEventMother {
-    this.path.pillarId = pillarId;
+  public withPillarId(pillarId: string): UpdatePillarAdapterEventMother {
+    this.pathParameters.pillarId = pillarId;
     return this;
   }
 
-  public withBody(
-    body: operations['updatePillar']['requestBody']['content']['application/json']
-  ): UpdatePillarAdapterEventMother {
+  public withBody(body: UpdatePillarBody): UpdatePillarAdapterEventMother {
     this.body = body;
+    return this;
+  }
+
+  public withUser(
+    user: Pick<User, 'id' | 'email'>
+  ): UpdatePillarAdapterEventMother {
+    this.user = user;
     return this;
   }
 
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withPathParameters(this.path)
+      .withPathParameters(this.pathParameters)
       .withBody(JSON.stringify(this.body))
       .withUserClaims({
         sub: this.user.id,

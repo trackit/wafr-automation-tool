@@ -11,8 +11,8 @@ export class StoreFindingsToAssociateUseCaseArgsMother {
 
   public static basic(): StoreFindingsToAssociateUseCaseArgsMother {
     return new StoreFindingsToAssociateUseCaseArgsMother({
-      assessmentId: 'assessment-id',
-      organization: 'organization-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'organization-id',
       scanningTool: ScanningTool.PROWLER,
       scanFindings: [],
     });
@@ -25,10 +25,10 @@ export class StoreFindingsToAssociateUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): StoreFindingsToAssociateUseCaseArgsMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

@@ -1,4 +1,6 @@
 import {
+  AssessmentFileExportStatus,
+  AssessmentFileExportType,
   AssessmentStep,
   FindingMetadata,
   FindingRemediation,
@@ -26,6 +28,7 @@ export interface DynamoDBAssessment {
   step: AssessmentStep;
   workflows: string[];
   error?: DynamoDBAssessmentError;
+  fileExports?: DynamoDBAssessmentFileExports;
 }
 
 export interface DynamoDBAssessmentGraphData {
@@ -94,4 +97,17 @@ export interface DynamoDBQuestion {
   label: string;
   none: boolean;
   primaryId: string;
+}
+
+export type DynamoDBAssessmentFileExports = Partial<
+  Record<AssessmentFileExportType, Record<string, DynamoDBAssessmentFileExport>>
+>;
+
+export interface DynamoDBAssessmentFileExport {
+  id: string;
+  status: AssessmentFileExportStatus;
+  error?: string;
+  versionName: string;
+  objectKey?: string;
+  createdAt: string;
 }

@@ -1,7 +1,7 @@
 import {
   ComputeGraphDataAdapter,
   ComputeGraphDataOutput,
-} from './ComputeGraphAdapter';
+} from './ComputeGraphDataAdapter';
 
 const adapter = new ComputeGraphDataAdapter();
 

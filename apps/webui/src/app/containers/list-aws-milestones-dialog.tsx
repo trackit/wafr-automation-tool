@@ -60,23 +60,33 @@ export default function ListAWSMilestonesDialog({
     }
   };
 
+  const button = (
+    <button
+      className={`flex flex-row gap-2 w-full text-left ${
+        disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
+      }`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!disabled) {
+          setOpen(true);
+        }
+      }}
+      disabled={disabled}
+    >
+      <List className="w-4 h-4" /> List AWS Milestones
+    </button>
+  );
+
   return (
     <>
-      <button
-        className={`flex flex-row gap-2 w-full text-left ${
-          disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
-        }`}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (!disabled) {
-            setOpen(true);
-          }
-        }}
-        disabled={disabled}
-      >
-        <List className="w-4 h-4" /> List AWS Milestones
-      </button>
+      {disabled ? (
+        <div className="tooltip" data-tip="Please export to AWS first">
+          {button}
+        </div>
+      ) : (
+        button
+      )}
       <Modal
         open={open}
         onClose={() => setOpen(false)}

@@ -1,5 +1,3 @@
-import { vi } from 'vitest';
-
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
@@ -11,27 +9,29 @@ import {
   PrepareCustodianUseCaseImpl,
 } from './PrepareCustodianUseCase';
 
-describe('Prepare custodian use case', () => {
+describe('PrepareCustodianUseCase', () => {
   it('should put the policies file', async () => {
     const { useCase, fakeObjectsStorage } = setup();
 
-    await expect(useCase.prepareCustodian()).resolves.toEqual(
-      's3://test-s3-bucket/custodian.yml'
-    );
+    const result = await useCase.prepareCustodian();
 
-    expect(fakeObjectsStorage.objects[CUSTODIAN_FILE_NAME]).toEqual(
-      'mocked-policies-content'
-    );
+    expect(result).toEqual('s3://test-s3-bucket/custodian.yml');
+
+    const object = await fakeObjectsStorage.get(CUSTODIAN_FILE_NAME);
+    expect(object).toEqual('mocked-policies-content');
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  vi.mock('fs', () => ({
-    readFileSync: vi.fn(() => 'mocked-policies-content'),
+
+  vitest.mock('fs', () => ({
+    readFileSync: vitest.fn(() => 'mocked-policies-content'),
   }));
+
   const fakeObjectsStorage = inject(tokenFakeObjectsStorage);
+
   return {
     useCase: new PrepareCustodianUseCaseImpl(),
     fakeObjectsStorage,
