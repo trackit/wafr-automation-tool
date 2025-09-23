@@ -150,6 +150,31 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
     };
   }
 
+  public async getAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<Finding[]> {
+    const { assessmentId, organizationDomain } = args;
+
+    const params: QueryCommandInput = {
+      TableName: this.tableName,
+      KeyConditionExpression: 'PK = :pk',
+      ExpressionAttributeValues: {
+        ':pk': getFindingPK({ assessmentId, organizationDomain }),
+      },
+      ExclusiveStartKey: undefined,
+    };
+
+    const items = [];
+    do {
+      const result = await this.client.query(params);
+      items.push(...((result.Items || []) as DynamoDBFinding[]));
+      params.ExclusiveStartKey = result.LastEvaluatedKey;
+    } while (params.ExclusiveStartKey);
+
+    return items.map((item) => fromDynamoDBFindingItem(item) as Finding);
+  }
+
   public async getBestPracticeFindings(
     args: AssessmentsRepositoryGetBestPracticeFindingsArgs
   ): Promise<{ findings: Finding[]; nextToken?: string }> {

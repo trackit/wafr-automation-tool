@@ -4,7 +4,7 @@ import { Assessment, SeverityType } from '@backend/models';
 import type { PDFServicePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { tokenAssessmentsRepository } from '../AssessmentsRepository';
+import { tokenFindingsRepository } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { AssessmentDocument } from './components/AssessmentDocument';
 
@@ -26,17 +26,16 @@ Font.register({
 
 export class PDFService implements PDFServicePort {
   private readonly logger = inject(tokenLogger);
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly renderToBuffer = inject(tokenPDFRenderToBuffer);
   private readonly assessmentDocument = inject(tokenPDFAssessmentDocument);
 
-  public async exportAssessment({
-    assessment,
-    versionName,
-  }: {
+  public async exportAssessment(args: {
     assessment: Assessment;
     versionName: string;
   }): Promise<Buffer> {
+    const { assessment, versionName } = args;
+
     this.logger.info(`Exporting assessment ${assessment.name}`);
     const allowed = [
       SeverityType.Critical,
@@ -46,9 +45,9 @@ export class PDFService implements PDFServicePort {
       SeverityType.Informational,
     ];
 
-    const findings = await this.assessmentsRepository.getAssessmentFindings({
+    const findings = await this.findingsRepository.getAll({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
     });
 
     const filtered = findings.filter(

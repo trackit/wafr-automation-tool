@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenDeletePDFExportUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -7,14 +7,11 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import {
-  MissingRequestPathError,
-  RequestParsingFailedError,
-} from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const DeletePDFExportPathSchema = z.object({
-  assessmentId: z.string(),
-  fileExportId: z.string(),
+  assessmentId: z.string().uuid(),
+  fileExportId: z.string().nonempty(),
 }) satisfies ZodType<operations['listPDFExports']['parameters']['path']>;
 
 export class DeletePDFExportAdapter {
@@ -31,22 +28,13 @@ export class DeletePDFExportAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new MissingRequestPathError();
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: DeletePDFExportPathSchema,
+    });
 
-    try {
-      const parsedPath = DeletePDFExportPathSchema.parse(pathParameters);
-      await this.useCase.deletePDFExport({
-        ...parsedPath,
-        user: getUserFromEvent(event),
-      });
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new RequestParsingFailedError(e);
-      }
-      throw e;
-    }
+    await this.useCase.deletePDFExport({
+      ...pathParameters,
+      user: getUserFromEvent(event),
+    });
   }
 }

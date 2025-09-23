@@ -36,6 +36,7 @@ export class AssessmentMother {
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       step: AssessmentStep.FINISHED,
       workflows: [],
+      fileExports: {},
     });
   }
 

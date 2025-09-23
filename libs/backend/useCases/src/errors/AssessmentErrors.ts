@@ -1,3 +1,7 @@
+import {
+  AssessmentFileExport,
+  AssessmentFileExportType,
+} from '@backend/models';
 import { BasicErrorTypes } from '@shared/utils';
 
 import { UseCaseError } from './UseCaseError';
@@ -46,6 +50,79 @@ export class AssessmentExportRegionNotSetError extends UseCaseError {
     super({
       type: BasicErrorTypes.CONFLICT,
       message: `Assessment with id ${assessmentId} has no export region set`,
+      description,
+    });
+  }
+}
+
+export class AssessmentFileExportNotFoundError extends UseCaseError {
+  public constructor(
+    args: {
+      assessmentId: string;
+      fileExportId: string;
+      fileExportType: AssessmentFileExportType;
+    },
+    description?: string
+  ) {
+    const { assessmentId, fileExportId, fileExportType } = args;
+    super({
+      type: BasicErrorTypes.NOT_FOUND,
+      message: `${fileExportType.toUpperCase()} export with id ${fileExportId} not found for assessment ${assessmentId}`,
+      description,
+    });
+  }
+}
+
+export class AssessmentFileExportNotFinishedError extends UseCaseError {
+  public constructor(
+    args: {
+      assessmentId: string;
+      fileExportId: string;
+      fileExportType: AssessmentFileExportType;
+    },
+    description?: string
+  ) {
+    const { assessmentId, fileExportId, fileExportType } = args;
+    super({
+      type: BasicErrorTypes.CONFLICT,
+      message: `${fileExportType.toUpperCase()} export with id ${fileExportId} is not finished for assessment ${assessmentId}`,
+      description,
+    });
+  }
+}
+
+export class AssessmentFileExportFieldNotFoundError extends UseCaseError {
+  constructor(
+    args: {
+      assessmentId: string;
+      fileExportId: string;
+      fileExportType: AssessmentFileExportType;
+      fieldName: keyof AssessmentFileExport;
+    },
+    description?: string
+  ) {
+    const { assessmentId, fileExportId, fileExportType, fieldName } = args;
+    super({
+      type: BasicErrorTypes.NOT_FOUND,
+      message: `${fileExportType.toUpperCase()} export with id ${fileExportId} has no field ${fieldName} for assessment ${assessmentId}`,
+      description,
+    });
+  }
+}
+
+export class AssessmentFileExportAlreadyExistsError extends UseCaseError {
+  constructor(
+    args: {
+      assessmentId: string;
+      fileExportType: AssessmentFileExportType;
+      versionName: string;
+    },
+    description?: string
+  ) {
+    const { assessmentId, fileExportType, versionName } = args;
+    super({
+      type: BasicErrorTypes.CONFLICT,
+      message: `${fileExportType.toUpperCase()} export with version ${versionName} already exists for assessment ${assessmentId}`,
       description,
     });
   }

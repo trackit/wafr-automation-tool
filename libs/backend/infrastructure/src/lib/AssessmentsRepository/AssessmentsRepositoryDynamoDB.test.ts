@@ -1005,29 +1005,24 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the file export for an export type', async () => {
       const { repository } = setup();
 
-      const fileExportId = 'file-export-id';
+      const assessmentFileExport = AssessmentFileExportMother.basic()
+        .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .build();
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
         .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            AssessmentFileExportMother.basic()
-              .withId(fileExportId)
-              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
-              .build(),
-          ],
+          [AssessmentFileExportType.PDF]: [assessmentFileExport],
         })
         .build();
       await repository.save(assessment);
 
       const fileExport = AssessmentFileExportMother.basic()
-        .withId(fileExportId)
+        .withId(assessmentFileExport.id)
         .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
         .build();
 
       await repository.updateFileExport({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         type: AssessmentFileExportType.PDF,
         data: fileExport,
       });
@@ -1046,21 +1041,17 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
         .withFileExports({
           [AssessmentFileExportType.PDF]: [],
         })
         .build();
       await repository.save(assessment);
 
-      const fileExport = AssessmentFileExportMother.basic()
-        .withId('file-export-id')
-        .build();
+      const fileExport = AssessmentFileExportMother.basic().build();
 
       await repository.updateFileExport({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         type: AssessmentFileExportType.PDF,
         data: fileExport,
       });
@@ -1080,26 +1071,21 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should delete the file export for an export type', async () => {
       const { repository } = setup();
 
-      const fileExportId = 'file-export-id';
+      const assessmentFileExport = AssessmentFileExportMother.basic()
+        .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .build();
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
         .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            AssessmentFileExportMother.basic()
-              .withId(fileExportId)
-              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
-              .build(),
-          ],
+          [AssessmentFileExportType.PDF]: [assessmentFileExport],
         })
         .build();
       await repository.save(assessment);
 
       await repository.deleteFileExport({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         type: AssessmentFileExportType.PDF,
-        id: fileExportId,
+        id: assessmentFileExport.id,
       });
 
       const updatedAssessment = await repository.get({

@@ -342,16 +342,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async updateFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organization, type, data } = args;
+    const { assessmentId, organizationDomain, type, data } = args;
 
     const params = {
       TableName: this.tableName,
       Key: {
-        PK: getAssessmentPK(organization),
+        PK: getAssessmentPK(organizationDomain),
         SK: getAssessmentSK(assessmentId),
       },
       ...buildUpdateExpression({
@@ -375,31 +375,16 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
   public async deleteFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
-    const { assessmentId, organization, type, id } = args;
+    const { assessmentId, organizationDomain, type, id } = args;
 
-    // if (
-    //   !assessment.fileExports?.[type]?.find(
-    //     (fileExport) => fileExport.id === id
-    //   )
-    // ) {
-    //   this.logger.error(
-    //     `Attempted to delete file export with id ${id} for assessment: ${assessmentId} but it does not exist`
-    //   );
-    //   throw new FileExportNotFoundError({
-    //     assessmentId,
-    //     organization,
-    //     type,
-    //     id,
-    //   });
-    // }
     const params: UpdateCommandInput = {
       TableName: this.tableName,
       Key: {
-        PK: getAssessmentPK(organization),
+        PK: getAssessmentPK(organizationDomain),
         SK: getAssessmentSK(assessmentId),
       },
       UpdateExpression: `remove fileExports.#type.#id`,

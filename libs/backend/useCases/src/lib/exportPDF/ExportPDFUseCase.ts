@@ -12,7 +12,11 @@ import {
 import { createInjectionToken, inject } from '@shared/di-container';
 import { normalizeFilename } from '@shared/utils';
 
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentFileExportNotFoundError,
+  AssessmentNotFinishedError,
+  AssessmentNotFoundError,
+} from '../../errors';
 
 export type ExportPDFUseCaseArgs = {
   assessmentId: string;
@@ -30,44 +34,44 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
   private readonly pdfService = inject(tokenPDFService);
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
-  public async exportPDF({
-    assessmentId,
-    organizationDomain,
-    fileExportId,
-  }: ExportPDFUseCaseArgs): Promise<void> {
+  public async exportPDF(args: ExportPDFUseCaseArgs): Promise<void> {
+    const { assessmentId, organizationDomain, fileExportId } = args;
+
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization: organizationDomain,
+      organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
-    if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
-      throw new ConflictError(
-        `Assessment with id ${assessment.id} is not finished`
-      );
-    }
-    if (assessment.pillars.length === 0) {
-      throw new NoContentError(
-        `Assessment with id ${assessment.id} has no findings`
-      );
+    if (
+      !assessment.pillars ||
+      assessment.pillars.length === 0 ||
+      assessment.step !== AssessmentStep.FINISHED
+    ) {
+      throw new AssessmentNotFinishedError({
+        assessmentId,
+      });
     }
 
     const assessmentExport = assessment.fileExports?.[
       AssessmentFileExportType.PDF
     ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
     if (!assessmentExport) {
-      throw new NotFoundError(
-        `PDF export with id ${fileExportId} not found for assessment ${assessment.id}`
-      );
+      throw new AssessmentFileExportNotFoundError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+      });
     }
 
     assessmentExport.status = AssessmentFileExportStatus.IN_PROGRESS;
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       type: AssessmentFileExportType.PDF,
       data: assessmentExport,
     });
@@ -103,7 +107,7 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
 
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       type: AssessmentFileExportType.PDF,
       data: assessmentExport,
     });

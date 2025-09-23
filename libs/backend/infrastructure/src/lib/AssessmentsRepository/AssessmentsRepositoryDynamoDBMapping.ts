@@ -1,6 +1,8 @@
 import {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExports,
   BestPractice,
   Pillar,
   Question,
@@ -9,6 +11,8 @@ import { getAssessmentPK, getAssessmentSK } from '@shared/utils';
 
 import {
   DynamoDBAssessment,
+  DynamoDBAssessmentFileExport,
+  DynamoDBAssessmentFileExports,
   DynamoDBPillar,
   DynamoDBQuestion,
 } from './AssessmentsRepositoryDynamoDBModels';
@@ -91,6 +95,28 @@ export function toDynamoDBAssessmentItem(
     step: assessment.step,
     workflows: assessment.workflows,
     error: assessment.error,
+    ...(assessment.fileExports && {
+      fileExports: Object.fromEntries(
+        Object.entries(assessment.fileExports).map(([k, v]) => [
+          k,
+          Object.fromEntries(
+            (v as AssessmentFileExport[]).map((fileExport) => [
+              fileExport.id,
+              toDynamoDBFileExportItem(fileExport),
+            ])
+          ),
+        ])
+      ) as DynamoDBAssessmentFileExports,
+    }),
+  };
+}
+
+export function toDynamoDBFileExportItem(
+  assessmentFileExport: AssessmentFileExport
+): DynamoDBAssessmentFileExport {
+  return {
+    ...assessmentFileExport,
+    createdAt: assessmentFileExport.createdAt.toISOString(),
   };
 }
 
@@ -106,6 +132,19 @@ export function toDynamoDBAssessmentBody(
           [pillar.id]: toDynamoDBPillarItem(pillar),
         }),
         {}
+      ),
+    }),
+    ...(assessmentBody.fileExports && {
+      fileExports: Object.fromEntries(
+        Object.entries(assessmentBody.fileExports).map(([k, v]) => [
+          k,
+          Object.fromEntries(
+            (v as AssessmentFileExport[]).map((fileExport) => [
+              fileExport.id,
+              toDynamoDBFileExportItem(fileExport),
+            ])
+          ),
+        ])
       ),
     }),
   };
@@ -148,6 +187,15 @@ export function fromDynamoDBPillarItem(item: DynamoDBPillar): Pillar {
   };
 }
 
+export function fromDynamoDBFileExportItem(
+  item: DynamoDBAssessmentFileExport
+): AssessmentFileExport {
+  return {
+    ...item,
+    createdAt: new Date(item.createdAt),
+  };
+}
+
 export function fromDynamoDBAssessmentItem(
   item: DynamoDBAssessment | undefined
 ): Assessment | undefined {
@@ -174,5 +222,15 @@ export function fromDynamoDBAssessmentItem(
     step: assessment.step,
     workflows: assessment.workflows,
     error: assessment.error,
+    ...(assessment.fileExports && {
+      fileExports: Object.fromEntries(
+        Object.entries(assessment.fileExports).map(([k, v]) => [
+          k,
+          Object.values(v as Record<string, DynamoDBAssessmentFileExport>).map(
+            (item) => fromDynamoDBFileExportItem(item)
+          ),
+        ])
+      ) as AssessmentFileExports,
+    }),
   };
 }

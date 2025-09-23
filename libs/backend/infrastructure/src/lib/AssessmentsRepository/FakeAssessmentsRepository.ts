@@ -230,18 +230,15 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     assessment.rawGraphData[scanningTool] = graphData;
   }
 
-  public async updateFileExport({
-    assessmentId,
-    organization,
-    type,
-    data,
-  }: {
+  public async updateFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const assessmentKey = `${assessmentId}#${organization}`;
+    const { assessmentId, organizationDomain, type, data } = args;
+
+    const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
       assessment.fileExports = {};
@@ -260,18 +257,15 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     Object.assign(fileExports[type][fileExportIndex], data);
   }
 
-  public async deleteFileExport({
-    assessmentId,
-    organization,
-    type,
-    id,
-  }: {
+  public async deleteFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
-    const assessmentKey = `${assessmentId}#${organization}`;
+    const { assessmentId, organizationDomain, type, id } = args;
+
+    const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
       assessment.fileExports = {};

@@ -35,6 +35,12 @@ export interface FindingRepository {
     organizationDomain: string;
     findingId: string;
   }): Promise<Finding | undefined>;
+
+  getAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<Finding[]>;
+
   getBestPracticeFindings(
     args: AssessmentsRepositoryGetBestPracticeFindingsArgs
   ): Promise<{

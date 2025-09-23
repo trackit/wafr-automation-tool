@@ -193,6 +193,7 @@ describe('ObjectsStorageS3', () => {
         Bucket: bucket,
         Key: objectKey,
         Body: objectContent,
+      });
     });
 
     it('should put an object with a Buffer', async () => {
@@ -202,6 +203,7 @@ describe('ObjectsStorageS3', () => {
       const objectContent = 'object-content';
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream(objectContent) as any,
       });
 

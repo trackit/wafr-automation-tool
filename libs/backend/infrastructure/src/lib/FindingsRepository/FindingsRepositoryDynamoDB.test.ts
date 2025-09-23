@@ -180,6 +180,71 @@ describe('FindingsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('getAll', () => {
+    it('should return all findings', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const organizationDomain = 'organization1';
+
+      const finding1 = FindingMother.basic().withId('tool#1').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic().withId('tool#2').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding2,
+      });
+
+      const findings = await repository.getAll({
+        assessmentId,
+        organizationDomain,
+      });
+      expect(findings).toEqual([finding1, finding2]);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+
+      const finding1 = FindingMother.basic().withId('tool#1').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization1',
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic().withId('tool#2').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization2',
+        finding: finding2,
+      });
+
+      const findings = await repository.getAll({
+        assessmentId,
+        organizationDomain: 'organization1',
+      });
+      expect(findings).toEqual([finding1]);
+    });
+
+    it('should return an empty array if no findings exist', async () => {
+      const { repository } = setup();
+
+      const findings = await repository.getAll({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(findings).toEqual([]);
+    });
+  });
+
   describe('getBestPracticeFindings', () => {
     it('should return all findings', async () => {
       const { repository } = setup();
@@ -205,10 +270,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -245,10 +309,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -262,10 +325,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       const { repository } = setup();
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -301,10 +363,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -352,10 +413,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -403,10 +463,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -446,10 +505,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { findings } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -487,10 +545,9 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       const { nextToken } = await repository.getBestPracticeFindings(
-        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-          '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-        ).withOrganizationDomai,
-        n('organization1')
+        GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('organization1')
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
@@ -525,10 +582,9 @@ describe('FindingsRepositoryDynamoDB', () => {
 
       const { findings: firstFindings, nextToken } =
         await repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-            '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-          ).withOrganizationDomai,
-          n('organization1')
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+            .withOrganizationDomain('organization1')
             .withPillarId('pillar1')
             .withQuestionId('question1')
             .withBestPracticeId('bp1')
@@ -537,10 +593,9 @@ describe('FindingsRepositoryDynamoDB', () => {
         );
       const { findings: secondFindings } =
         await repository.getBestPracticeFindings(
-          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic().withAssessmentId(
-            '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-          ).withOrganizationDomai,
-          n('organization1')
+          GetBestPracticeFindingsAssessmentsRepositoryArgsMother.basic()
+            .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+            .withOrganizationDomain('organization1')
             .withPillarId('pillar1')
             .withQuestionId('question1')
             .withBestPracticeId('bp1')

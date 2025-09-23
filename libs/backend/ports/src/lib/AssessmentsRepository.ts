@@ -37,6 +37,7 @@ export interface AssessmentsRepository {
 
   delete(args: {
     assessmentId: string;
+    organizationDomain: string;
   }): Promise<void>;
 
   update(args: {
@@ -73,13 +74,13 @@ export interface AssessmentsRepository {
   }): Promise<void>;
   updateFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void>;
   deleteFileExport(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void>;
