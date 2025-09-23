@@ -65,12 +65,12 @@ export class MarketplaceService implements MarketplacePort {
       agreementId: unitBasedAgreementId,
     });
 
-    const reponse = await this.agreementClient.send(cmd);
-    if (reponse.$metadata.httpStatusCode !== 200) {
-      throw new Error(JSON.stringify(reponse));
+    const response = await this.agreementClient.send(cmd);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
     this.logger.info(`DescribeAgreement for ${unitBasedAgreementId}`);
-    return reponse.status === AgreementStatus.ACTIVE;
+    return response.status === AgreementStatus.ACTIVE;
   }
 
   public async consumeReviewUnit(args: { accountId: string }): Promise<void> {

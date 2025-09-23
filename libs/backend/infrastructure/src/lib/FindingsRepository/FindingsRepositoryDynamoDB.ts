@@ -106,50 +106,6 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
     return fromDynamoDBFindingItem(dynamoFinding);
   }
 
-  private buildGetBestPracticeFindingsQuery(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
-  ): QueryCommandInput {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      limit = 100,
-      searchTerm = '',
-      showHidden = false,
-      nextToken,
-    } = args;
-    return {
-      TableName: this.tableName,
-      KeyConditionExpression: 'PK = :pk',
-      FilterExpression: [
-        'contains(bestPractices, :bestPraticeId)',
-        ...(!showHidden ? ['#hidden = :hiddenValue'] : []),
-        ...(searchTerm
-          ? [
-              'contains(riskDetails, :searchTerm) or contains(statusDetail, :searchTerm)',
-            ]
-          : []),
-      ].join(' and '),
-      ExpressionAttributeValues: {
-        ':pk': getFindingPK({ assessmentId, organizationDomain }),
-        ':bestPraticeId': getBestPracticeCustomId({
-          pillarId,
-          questionId,
-          bestPracticeId,
-        }),
-        ...(!showHidden && { ':hiddenValue': false }),
-        ...(searchTerm && { ':searchTerm': searchTerm }),
-      },
-      ...(!showHidden && {
-        ExpressionAttributeNames: { '#hidden': 'hidden' },
-      }),
-      Limit: limit,
-      ExclusiveStartKey: decodeNextToken(nextToken),
-    };
-  }
-
   public async getAll(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -173,6 +129,50 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
     } while (params.ExclusiveStartKey);
 
     return items.map((item) => fromDynamoDBFindingItem(item) as Finding);
+  }
+
+  private buildGetBestPracticeFindingsQuery(
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+  ): QueryCommandInput {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      limit = 100,
+      searchTerm = '',
+      showHidden = false,
+      nextToken,
+    } = args;
+    return {
+      TableName: this.tableName,
+      KeyConditionExpression: 'PK = :pk',
+      FilterExpression: [
+        'contains(bestPractices, :bestPracticeId)',
+        ...(!showHidden ? ['#hidden = :hiddenValue'] : []),
+        ...(searchTerm
+          ? [
+              'contains(riskDetails, :searchTerm) or contains(statusDetail, :searchTerm)',
+            ]
+          : []),
+      ].join(' and '),
+      ExpressionAttributeValues: {
+        ':pk': getFindingPK({ assessmentId, organizationDomain }),
+        ':bestPracticeId': getBestPracticeCustomId({
+          pillarId,
+          questionId,
+          bestPracticeId,
+        }),
+        ...(!showHidden && { ':hiddenValue': false }),
+        ...(searchTerm && { ':searchTerm': searchTerm }),
+      },
+      ...(!showHidden && {
+        ExpressionAttributeNames: { '#hidden': 'hidden' },
+      }),
+      Limit: limit,
+      ExclusiveStartKey: decodeNextToken(nextToken),
+    };
   }
 
   public async getBestPracticeFindings(
