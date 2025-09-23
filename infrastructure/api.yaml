@@ -160,6 +160,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Timeout: 900
+      ReservedConcurrentExecutions: 1
       CodeUri: ../apps/backend/src/handlers/migrationRunner
       Tags:
         Name: MigrationRunnerFunction
