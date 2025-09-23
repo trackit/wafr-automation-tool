@@ -4,6 +4,7 @@ import { tokenGeneratePDFExportURLUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { GeneratePDFExportURLAdapter } from './GeneratePDFExportURLAdapter';
 import { GeneratePDFExportURLAdapterEventMother } from './GeneratePDFExportURLAdapterEventMother';
 
@@ -14,7 +15,8 @@ describe('generatePDFExportURL adapter', () => {
 
       const event = GeneratePDFExportURLAdapterEventMother.basic().build();
 
-      expect(adapter.handle(event)).not.toBe(400);
+      const response = await adapter.handle(event);
+      expect(response).not.toBe(400);
     });
 
     it('should return a 400 status code without parameters', async () => {
@@ -25,31 +27,44 @@ describe('generatePDFExportURL adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should call parseApiEvent with correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = GeneratePDFExportURLAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
+    });
   });
 
   describe('useCase and return value', () => {
     it('should call useCase with path parameters and user', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const fileExportId = 'file-export-id';
+
       const event = GeneratePDFExportURLAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withFileExportId('file-export-id')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withAssessmentId(assessmentId)
+        .withFileExportId(fileExportId)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.generatePDFExportURL).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
-        fileExportId: 'file-export-id',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        assessmentId,
+        fileExportId,
+        user,
       });
     });
 
@@ -68,10 +83,11 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { generatePDFExportURL: vitest.fn() };
   useCase.generatePDFExportURL.mockResolvedValueOnce(Promise.resolve([]));
   register(tokenGeneratePDFExportURLUseCase, { useValue: useCase });
 
-  const adapter = new GeneratePDFExportURLAdapter();
-  return { useCase, adapter };
+  return { parseSpy, useCase, adapter: new GeneratePDFExportURLAdapter() };
 };

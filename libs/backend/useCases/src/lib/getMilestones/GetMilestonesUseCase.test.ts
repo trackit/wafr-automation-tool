@@ -44,11 +44,11 @@ describe('GetMilestonesUseCase', () => {
       MilestoneMother.basic().withId(2).withName('Milestone 2').build(),
     ];
 
-    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestones').mockResolvedValue(
-      {
+    vitest
+      .spyOn(fakeWellArchitectedToolService, 'getMilestones')
+      .mockResolvedValue({
         milestones: expectedMilestones,
-      }
-    );
+      });
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

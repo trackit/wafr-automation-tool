@@ -848,7 +848,9 @@ const setup = () => {
     useValue: getScannedFindingsUseCase,
   });
 
-  const storeFindingsToAssociateUseCase = { storeFindingsToAssociate: vitest.fn() };
+  const storeFindingsToAssociateUseCase = {
+    storeFindingsToAssociate: vitest.fn(),
+  };
   register(tokenStoreFindingsToAssociateUseCase, {
     useValue: storeFindingsToAssociateUseCase,
   });

@@ -83,6 +83,6 @@ describe('OrganizationRepositoryDynamoDB', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  
+
   return { repository: new OrganizationRepositoryDynamoDB() };
 };

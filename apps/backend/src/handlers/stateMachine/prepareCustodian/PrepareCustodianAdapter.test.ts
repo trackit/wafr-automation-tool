@@ -17,10 +17,11 @@ describe('Prepare custodian adapter', () => {
 
 const setup = () => {
   reset();
+
   const useCase = {
     prepareCustodian: vi.fn().mockResolvedValue('test-s3-uri'),
   };
   register(tokenPrepareCustodianUseCase, { useValue: useCase });
-  const adapter = new PrepareCustodianAdapter();
-  return { useCase, adapter };
+
+  return { useCase, adapter: new PrepareCustodianAdapter() };
 };

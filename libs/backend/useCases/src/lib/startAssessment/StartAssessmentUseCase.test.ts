@@ -145,10 +145,9 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => false);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => false);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withName('test assessment')
@@ -185,15 +184,13 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => true);
 
-      vitest.spyOn(
-        fakeMarketplaceService,
-        'hasMonthlySubscription'
-      ).mockImplementation(() => Promise.resolve(true));
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasMonthlySubscription')
+        .mockImplementation(() => Promise.resolve(true));
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withName('test assessment')
@@ -230,15 +227,13 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => true);
 
-      vitest.spyOn(
-        fakeMarketplaceService,
-        'hasUnitBasedSubscription'
-      ).mockImplementation(() => Promise.resolve(true));
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription')
+        .mockImplementation(() => Promise.resolve(true));
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withName('test assessment')
@@ -270,10 +265,9 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withName('test assessment')
@@ -302,10 +296,9 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withUser(user)
@@ -333,10 +326,9 @@ describe('StartAssessmentUseCase', () => {
         .withOrganizationDomain(organization.domain)
         .build();
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockImplementation(() => true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockImplementation(() => true);
 
       const input = StartAssessmentUseCaseArgsMother.basic()
         .withUser(user)

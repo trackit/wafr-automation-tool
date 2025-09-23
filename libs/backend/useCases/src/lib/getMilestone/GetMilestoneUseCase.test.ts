@@ -51,9 +51,9 @@ describe('GetMilestoneUseCase', () => {
       .withCreatedAt(new Date('2023-01-01T00:00:00Z'))
       .withPillars(expectedPillars)
       .build();
-    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockResolvedValue(
-      milestone
-    );
+    vitest
+      .spyOn(fakeWellArchitectedToolService, 'getMilestone')
+      .mockResolvedValue(milestone);
 
     const result = await useCase.getMilestone({
       assessmentId: assessment.id,
@@ -151,9 +151,9 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    vitest.spyOn(fakeWellArchitectedToolService, 'getMilestone').mockReturnValue(
-      Promise.resolve(undefined)
-    );
+    vitest
+      .spyOn(fakeWellArchitectedToolService, 'getMilestone')
+      .mockReturnValue(Promise.resolve(undefined));
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

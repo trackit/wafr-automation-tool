@@ -51,39 +51,34 @@ describe('PrepareFindingsAssociationsAdapter', () => {
     it('should call PrepareFindingsAssociations Use Case', async () => {
       const { adapter, useCase } = setup();
 
-      const input = PrepareFindingsAssociationsAdapterEventMother.basic()
+      const event = PrepareFindingsAssociationsAdapterEventMother.basic()
         .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
         .withOrganizationDomain('organization-id')
         .withRegions(['us-east-1'])
         .withWorkflows(['workflow-1'])
         .withScanningTool(ScanningTool.PROWLER)
         .build();
-      await adapter.handle(input);
+      await adapter.handle(event);
 
       expect(useCase.prepareFindingsAssociations).toHaveBeenCalledWith({
-        assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-        organization: 'organization-id',
-        scanningTool: ScanningTool.PROWLER,
-        regions: ['us-east-1'],
-        workflows: ['workflow-1'],
+        assessmentId: event.assessmentId,
+        organizationDomain: event.organizationDomain,
+        scanningTool: event.scanningTool,
+        regions: event.regions,
+        workflows: event.workflows,
       });
     });
 
     it('should return PrepareFindingsAssociations Use Case result', async () => {
       const { adapter, useCase } = setup();
 
-      const input = PrepareFindingsAssociationsAdapterEventMother.basic()
-        .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-        .withOrganizationDomain('organization-id')
-        .withRegions(['us-east-1'])
-        .withWorkflows(['workflow-1'])
-        .withScanningTool(ScanningTool.PROWLER)
-        .build();
       useCase.prepareFindingsAssociations.mockResolvedValue([
         'prompt-uri-1',
         'prompt-uri-2',
       ]);
 
+      const input =
+        PrepareFindingsAssociationsAdapterEventMother.basic().build();
       const result = await adapter.handle(input);
 
       expect(result).toEqual(['prompt-uri-1', 'prompt-uri-2']);
@@ -94,8 +89,10 @@ describe('PrepareFindingsAssociationsAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const useCase = { prepareFindingsAssociations: vi.fn() };
   register(tokenPrepareFindingsAssociationsUseCase, { useValue: useCase });
+
   return {
     useCase,
     adapter: new PrepareFindingsAssociationsAdapter(),

@@ -128,7 +128,8 @@ describe('StoreFindingsToAssociateUseCase', () => {
     const assessment = AssessmentMother.basic().build();
     await fakeAssessmentsRepository.save(assessment);
 
-    vitest.spyOn(fakeObjectsStorage, 'put')
+    vitest
+      .spyOn(fakeObjectsStorage, 'put')
       .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_0.json`)
       .mockResolvedValueOnce(`s3://${assessment.id}/chunks/prowler_1.json`);
 

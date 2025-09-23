@@ -194,10 +194,9 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockReturnValue(true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -222,10 +221,9 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockReturnValue(true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -266,10 +264,9 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockReturnValue(false);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(false);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -294,14 +291,12 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockReturnValue(true);
-      vitest.spyOn(
-        fakeMarketplaceService,
-        'hasMonthlySubscription'
-      ).mockResolvedValue(true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(true);
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasMonthlySubscription')
+        .mockResolvedValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -325,18 +320,15 @@ describe('CleanupUseCase', () => {
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
 
-      vitest.spyOn(
-        fakeFeatureToggleRepository,
-        'marketplaceIntegration'
-      ).mockReturnValue(true);
-      vitest.spyOn(
-        fakeMarketplaceService,
-        'hasMonthlySubscription'
-      ).mockResolvedValue(false);
-      vitest.spyOn(
-        fakeMarketplaceService,
-        'hasUnitBasedSubscription'
-      ).mockResolvedValue(true);
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(true);
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasMonthlySubscription')
+        .mockResolvedValue(false);
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription')
+        .mockResolvedValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')

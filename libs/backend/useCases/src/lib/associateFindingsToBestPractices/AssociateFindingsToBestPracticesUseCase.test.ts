@@ -129,31 +129,33 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       pillars,
       version: '1.0',
     });
-    vitest.spyOn(
-      findingToBestPracticesAssociationService,
-      'associateFindingsToBestPractices'
-    ).mockResolvedValue([
-      {
-        finding: findings[0],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
-          },
-        ],
-      },
-      {
-        finding: findings[1],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
-          },
-        ],
-      },
-    ]);
+    vitest
+      .spyOn(
+        findingToBestPracticesAssociationService,
+        'associateFindingsToBestPractices'
+      )
+      .mockResolvedValue([
+        {
+          finding: findings[0],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+            },
+          ],
+        },
+        {
+          finding: findings[1],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
+            },
+          ],
+        },
+      ]);
 
     await useCase.associateFindingsToBestPractices(args);
 
@@ -207,31 +209,33 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       pillars,
       version: '1.0',
     });
-    vitest.spyOn(
-      findingToBestPracticesAssociationService,
-      'associateFindingsToBestPractices'
-    ).mockResolvedValue([
-      {
-        finding: findings[0],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
-          },
-        ],
-      },
-      {
-        finding: findings[1],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
-          },
-        ],
-      },
-    ]);
+    vitest
+      .spyOn(
+        findingToBestPracticesAssociationService,
+        'associateFindingsToBestPractices'
+      )
+      .mockResolvedValue([
+        {
+          finding: findings[0],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+            },
+          ],
+        },
+        {
+          finding: findings[1],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+            },
+          ],
+        },
+      ]);
 
     await useCase.associateFindingsToBestPractices(args);
 
@@ -287,36 +291,38 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       pillars,
       version: '1.0',
     });
-    vitest.spyOn(
-      findingToBestPracticesAssociationService,
-      'associateFindingsToBestPractices'
-    ).mockResolvedValue([
-      {
-        finding: findings[0],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
-          },
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
-          },
-        ],
-      },
-      {
-        finding: findings[1],
-        bestPractices: [
-          {
-            pillarId: pillars[0].id,
-            questionId: pillars[0].questions[0].id,
-            bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
-          },
-        ],
-      },
-    ]);
+    vitest
+      .spyOn(
+        findingToBestPracticesAssociationService,
+        'associateFindingsToBestPractices'
+      )
+      .mockResolvedValue([
+        {
+          finding: findings[0],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+            },
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
+            },
+          ],
+        },
+        {
+          finding: findings[1],
+          bestPractices: [
+            {
+              pillarId: pillars[0].id,
+              questionId: pillars[0].questions[0].id,
+              bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
+            },
+          ],
+        },
+      ]);
 
     await useCase.associateFindingsToBestPractices(args);
 

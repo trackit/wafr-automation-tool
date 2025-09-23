@@ -44,7 +44,7 @@ describe('ComputeGraphDataAdapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call useCase with assessmentId and organization', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = ComputeGraphDataAdapterEventMother.basic()
@@ -55,8 +55,8 @@ describe('ComputeGraphDataAdapter', () => {
       await adapter.handle(event);
       expect(useCase.computeGraphData).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: '36472c1c-1ee8-4ee4-953f-df5bf1d6da63',
-          organization: 'example.com',
+          assessmentId: event.assessmentId,
+          organizationDomain: event.organizationDomain,
         })
       );
     });
@@ -66,7 +66,9 @@ describe('ComputeGraphDataAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const useCase = { computeGraphData: vitest.fn() };
   register(tokenComputeGraphDataUseCase, { useValue: useCase });
+
   return { useCase, adapter: new ComputeGraphDataAdapter() };
 };

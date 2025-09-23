@@ -29,7 +29,7 @@ describe('cleanup adapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call useCase with assessmentId, organization and error', async () => {
+    it('should call useCase with correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = CleanupAdapterEventMother.basic()
@@ -44,9 +44,9 @@ describe('cleanup adapter', () => {
       await expect(adapter.handle(event)).resolves.toBeUndefined();
       expect(useCase.cleanup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-          organization: 'test.io',
-          error: { Cause: 'test-cause', Error: 'test-error' },
+          assessmentId: event.assessmentId,
+          organizationDomain: event.organizationDomain,
+          error: event.error,
         })
       );
     });
@@ -56,8 +56,9 @@ describe('cleanup adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const useCase = { cleanup: vitest.fn() };
   register(tokenCleanupUseCase, { useValue: useCase });
-  const adapter = new CleanupAdapter();
-  return { useCase, adapter };
+
+  return { useCase, adapter: new CleanupAdapter() };
 };
