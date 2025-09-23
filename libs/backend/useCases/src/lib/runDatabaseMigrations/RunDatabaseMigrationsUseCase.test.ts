@@ -1,28 +1,48 @@
 import {
-  ITypeORMClientManager,
   registerTestInfrastructure,
   tokenTypeORMClientManager,
 } from '@backend/infrastructure';
-import { register, reset } from '@shared/di-container';
+import { inject, reset } from '@shared/di-container';
 
 import { RunDatabaseMigrationsUseCaseImpl } from './RunDatabaseMigrationsUseCase';
 
-describe('RunDatabaseMigrationUseCase', () => {});
+afterEach(async () => {
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.clearClients();
+});
+
+afterAll(async () => {
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.closeConnections();
+});
+
+describe('RunDatabaseMigrationUseCase', () => {
+  it('should initialize default database', async () => {
+    const { useCase, clientManager } = setup();
+    vi.spyOn(clientManager, 'initializeDefaultDatabase');
+    await useCase.runDatabaseMigrations();
+    expect(
+      clientManager.initializeDefaultDatabase
+    ).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('should run migrations for all tenants', async () => {
+    const { useCase, clientManager } = setup();
+    const client1 = await clientManager.createClient('organization1');
+    const client2 = await clientManager.createClient('organization2');
+    vi.spyOn(client1, 'runMigrations').mockResolvedValue([]);
+    vi.spyOn(client2, 'runMigrations').mockResolvedValue([]);
+    await useCase.runDatabaseMigrations();
+    expect(client1.runMigrations).toHaveBeenCalledExactlyOnceWith();
+    expect(client2.runMigrations).toHaveBeenCalledExactlyOnceWith();
+  });
+});
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const useCase = new RunDatabaseMigrationsUseCaseImpl();
-  const fakeTypeORMClientManager: ITypeORMClientManager = {
-    initializeDefaultDatabase: vi.fn(),
-    getClient: vi.fn(),
-    closeConnections: vi.fn(),
-    clearClients: vi.fn(),
-    createClient: vi.fn(),
-  };
-  register(tokenTypeORMClientManager, { useValue: fakeTypeORMClientManager });
   return {
-    useCase,
-    fakeTypeORMClientManager,
+    useCase: new RunDatabaseMigrationsUseCaseImpl(),
+    clientManager: inject(tokenTypeORMClientManager),
   };
 };

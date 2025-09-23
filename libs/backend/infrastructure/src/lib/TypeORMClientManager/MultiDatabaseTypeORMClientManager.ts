@@ -29,14 +29,14 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
 
   constructor() {
     // Ensure the default database is always available
-    this.clients.postgres = new DataSource({
+    this.clients.default = new DataSource({
       ...this.baseConfig,
       entities: [Tenant],
     });
   }
 
   public async initializeDefaultDatabase(): Promise<DataSource> {
-    const client = await this.getClient('postgres');
+    const client = await this.getClient();
     await client.query(
       'CREATE TABLE IF NOT EXISTS "tenants" (id varchar PRIMARY KEY, "databaseName" varchar UNIQUE NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now());'
     );
@@ -47,7 +47,8 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     return `database_${identifier.replace(/[^A-Za-z_0-9]/g, '_')}`;
   }
 
-  public async getClient(id: string): Promise<DataSource> {
+  public async getClient(id?: string): Promise<DataSource> {
+    id = id ?? 'default';
     if (!this.clients[id]) {
       this.clients[id] = new DataSource({
         ...this.baseConfig,
@@ -86,7 +87,7 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
 
   private async createDatabase(id: string): Promise<void> {
     const databaseName = this.toDatabaseName(id);
-    const defaultClient = await this.getClient('postgres');
+    const defaultClient = await this.getClient();
     const databaseAlreadyExists = await defaultClient
       .getRepository(Tenant)
       .findOneBy({ id });
