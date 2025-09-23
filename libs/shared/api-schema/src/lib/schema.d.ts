@@ -154,6 +154,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/exports/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the PDF exports of an assessment
+         * @description Lists the PDF exports of an assessment.
+         *
+         */
+        get: operations["listPDFExports"];
+        put?: never;
+        /**
+         * Starts a PDF export for the specified assessment
+         * @description Starts a PDF export for the specified assessment.
+         *
+         */
+        post: operations["startPDFExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/exports/pdf/{fileExportId}/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Generate a pre-signed URL for a specific PDF export of an assessment
+         * @description Generates a pre-signed URL for a specific PDF export of an assessment.
+         *
+         */
+        get: operations["generatePDFExportURL"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/exports/pdf/{fileExportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a specific PDF export of an assessment
+         * @description Deletes a specific PDF export of an assessment.
+         *
+         */
+        delete: operations["deletePDFExport"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/pillars/{pillarId}": {
         parameters: {
             query?: never;
@@ -461,6 +529,15 @@ export interface components {
             id: number;
             name: string;
             /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description A file export related to an assessment */
+        FileExport: {
+            id: string;
+            /** @enum {string} */
+            status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "ERRORED";
+            error?: string;
+            versionName: string;
             createdAt: string;
         };
     };
@@ -933,6 +1010,192 @@ export interface operations {
                 content?: never;
             };
             /** @description Invalid request body or a issue occurred while trying to retrieve the organization or email of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listPDFExports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to list the exports of */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The list of PDF exports has been successfully retrieved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileExport"][];
+                };
+            };
+            /** @description Invalid request path parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    startPDFExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to export */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The version name of the PDF export */
+                    versionName: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The PDF export has been started successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    generatePDFExportURL: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to list the exports of */
+                assessmentId: string;
+                /** @description The unique ID of the PDF export to delete */
+                fileExportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The PDF export URL has been successfully generated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The URL of the PDF export */
+                        url: string;
+                    };
+                };
+            };
+            /** @description Invalid request path parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deletePDFExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to list the exports of */
+                assessmentId: string;
+                /** @description The unique ID of the PDF export to delete */
+                fileExportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The PDF export has been successfully deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request path parameters */
             400: {
                 headers: {
                     [name: string]: unknown;

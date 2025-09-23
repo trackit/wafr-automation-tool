@@ -162,7 +162,7 @@ describe('ObjectsStorageS3', () => {
   });
 
   describe('put', () => {
-    it('should put an object', async () => {
+    it('should put an object with a string', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
       const objectKey = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
@@ -193,6 +193,38 @@ describe('ObjectsStorageS3', () => {
         Bucket: bucket,
         Key: objectKey,
         Body: objectContent,
+    });
+
+    it('should put an object with a Buffer', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+
+      const objectKey = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const objectContent = 'object-content';
+      s3ClientMock.on(GetObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        Body: stringToStream(objectContent) as any,
+      });
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      s3ClientMock.on(PutObjectCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+      });
+
+      await objectsStorage.put({
+        key: objectKey,
+        body: Buffer.from(objectContent),
+      });
+
+      const putExecutionCalls = s3ClientMock.commandCalls(PutObjectCommand);
+      expect(putExecutionCalls).toHaveLength(1);
+      const putExecutionCall = putExecutionCalls[0];
+      expect(putExecutionCall.args[0].input).toEqual({
+        Bucket: bucket,
+        Key: objectKey,
+        Body: Buffer.from(objectContent),
       });
     });
 
@@ -268,6 +300,26 @@ describe('ObjectsStorageS3', () => {
       expect(deleteExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
         Key: assessmentObjectKey,
+      });
+    });
+
+    it('should succeed if object does not exist', async () => {
+      const { objectsStorage, s3ClientMock, bucket } = setup();
+
+      s3ClientMock.on(DeleteObjectCommand).resolves({
+        $metadata: { httpStatusCode: 204 },
+      });
+      await objectsStorage.delete(
+        ObjectsStorageS3.getAssessmentsPath('assessment-id')
+      );
+
+      const deleteExecutionCalls =
+        s3ClientMock.commandCalls(DeleteObjectCommand);
+      expect(deleteExecutionCalls).toHaveLength(1);
+      const deleteExecutionCall = deleteExecutionCalls[0];
+      expect(deleteExecutionCall.args[0].input).toEqual({
+        Bucket: bucket,
+        Key: ObjectsStorageS3.getAssessmentsPath('assessment-id'),
       });
     });
 

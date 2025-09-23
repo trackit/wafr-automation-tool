@@ -4,8 +4,15 @@ import { createInjectionToken } from '@shared/di-container';
 export class FakeObjectsStorage implements ObjectsStorage {
   public objects: Record<string, string> = {};
 
-  public async put(args: { key: string; body: string }): Promise<string> {
-    this.objects[args.key] = args.body;
+  public async put(args: {
+    key: string;
+    body: string | Buffer;
+  }): Promise<string> {
+    if (typeof args.body === 'string') {
+      this.objects[args.key] = args.body;
+      return `https://fake-storage.com/${args.key}`;
+    }
+    this.objects[args.key] = args.body.toString('utf8');
     return `https://fake-storage.com/${args.key}`;
   }
 
@@ -36,6 +43,13 @@ export class FakeObjectsStorage implements ObjectsStorage {
 
   public async delete(key: string): Promise<void> {
     delete this.objects[key];
+  }
+
+  public async generatePresignedURL(args: {
+    key: string;
+    expiresInSeconds: number;
+  }): Promise<string> {
+    return `https://fake-storage.com/${args.key}?expiresInSeconds=${args.expiresInSeconds}`;
   }
 }
 

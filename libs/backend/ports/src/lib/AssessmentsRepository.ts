@@ -1,6 +1,8 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
@@ -35,7 +37,6 @@ export interface AssessmentsRepository {
 
   delete(args: {
     assessmentId: string;
-    organizationDomain: string;
   }): Promise<void>;
 
   update(args: {
@@ -69,5 +70,17 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     scanningTool: ScanningTool;
     graphData: AssessmentGraphData;
+  }): Promise<void>;
+  updateFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void>;
+  deleteFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
   }): Promise<void>;
 }

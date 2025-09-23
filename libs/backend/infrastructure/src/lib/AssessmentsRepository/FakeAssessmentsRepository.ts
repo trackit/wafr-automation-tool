@@ -1,6 +1,8 @@
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
@@ -226,6 +228,61 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
     assessment.rawGraphData[scanningTool] = graphData;
+  }
+
+  public async updateFileExport({
+    assessmentId,
+    organization,
+    type,
+    data,
+  }: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void> {
+    const assessmentKey = `${assessmentId}#${organization}`;
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = {};
+    }
+    const fileExports = assessment.fileExports;
+    if (!fileExports[type]) {
+      fileExports[type] = [];
+    }
+    const fileExportIndex = fileExports[type].findIndex(
+      (fileExport) => fileExport.id === data.id
+    );
+    if (fileExportIndex === -1) {
+      fileExports[type].push(data);
+      return;
+    }
+    Object.assign(fileExports[type][fileExportIndex], data);
+  }
+
+  public async deleteFileExport({
+    assessmentId,
+    organization,
+    type,
+    id,
+  }: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
+  }): Promise<void> {
+    const assessmentKey = `${assessmentId}#${organization}`;
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = {};
+    }
+    const fileExports = assessment.fileExports;
+    if (!fileExports[type]) {
+      fileExports[type] = [];
+    }
+    fileExports[type] = fileExports[type].filter(
+      (fileExport) => fileExport.id !== id
+    );
   }
 }
 

@@ -3,6 +3,8 @@ import { QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import type {
   Assessment,
   AssessmentBody,
+  AssessmentFileExport,
+  AssessmentFileExportType,
   AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
@@ -28,6 +30,7 @@ import {
   fromDynamoDBAssessmentItem,
   toDynamoDBAssessmentBody,
   toDynamoDBAssessmentItem,
+  toDynamoDBFileExportItem,
 } from './AssessmentsRepositoryDynamoDBMapping';
 import { DynamoDBAssessment } from './AssessmentsRepositoryDynamoDBModels';
 
@@ -334,6 +337,81 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     await this.client.update(params);
     this.logger.info(
       `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+    );
+  }
+
+  public async updateFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    data: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organization, type, data } = args;
+
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        PK: getAssessmentPK(organization),
+        SK: getAssessmentSK(assessmentId),
+      },
+      ...buildUpdateExpression({
+        data: {
+          [data.id]: toDynamoDBFileExportItem(data),
+        },
+        UpdateExpressionPath: 'fileExports.#type',
+        DefaultExpressionAttributeNames: {
+          '#type': type,
+        },
+      }),
+    };
+
+    await this.client.update(params);
+    this.logger.info(
+      `${type.toUpperCase()} file with id ${
+        data.id
+      } export updated successfully for assessment ${assessmentId}`
+    );
+  }
+
+  public async deleteFileExport(args: {
+    assessmentId: string;
+    organization: string;
+    type: AssessmentFileExportType;
+    id: string;
+  }): Promise<void> {
+    const { assessmentId, organization, type, id } = args;
+
+    // if (
+    //   !assessment.fileExports?.[type]?.find(
+    //     (fileExport) => fileExport.id === id
+    //   )
+    // ) {
+    //   this.logger.error(
+    //     `Attempted to delete file export with id ${id} for assessment: ${assessmentId} but it does not exist`
+    //   );
+    //   throw new FileExportNotFoundError({
+    //     assessmentId,
+    //     organization,
+    //     type,
+    //     id,
+    //   });
+    // }
+    const params: UpdateCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        PK: getAssessmentPK(organization),
+        SK: getAssessmentSK(assessmentId),
+      },
+      UpdateExpression: `remove fileExports.#type.#id`,
+      ExpressionAttributeNames: {
+        '#type': type,
+        '#id': id,
+      },
+    };
+
+    await this.client.update(params);
+    this.logger.info(
+      `${type.toUpperCase()} file export with id ${id} deleted successfully for assessment ${assessmentId}`
     );
   }
 }

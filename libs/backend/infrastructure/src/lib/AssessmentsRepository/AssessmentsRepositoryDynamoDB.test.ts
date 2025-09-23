@@ -1,6 +1,9 @@
 import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 
 import {
+  AssessmentFileExportMother,
+  AssessmentFileExportStatus,
+  AssessmentFileExportType,
   AssessmentGraphDataMother,
   AssessmentMother,
   AssessmentStep,
@@ -765,9 +768,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       const question = QuestionMother.basic()
         .withBestPractices([bestPractice])
         .build();
-      const pillar = PillarMother.basic()
-        .withQuestions([question])
-        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
@@ -802,9 +803,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the raw graph data for a scanning tool', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withRawGraphData({})
-        .build();
+      const assessment = AssessmentMother.basic().withRawGraphData({}).build();
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
@@ -847,9 +846,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withRawGraphData({})
-        .build();
+      const assessment = AssessmentMother.basic().withRawGraphData({}).build();
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
@@ -1003,11 +1000,123 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
     });
   });
+
+  describe('updateFileExport', () => {
+    it('should update the file export for an export type', async () => {
+      const { repository } = setup();
+
+      const fileExportId = 'file-export-id';
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [
+            AssessmentFileExportMother.basic()
+              .withId(fileExportId)
+              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+              .build(),
+          ],
+        })
+        .build();
+      await repository.save(assessment);
+
+      const fileExport = AssessmentFileExportMother.basic()
+        .withId(fileExportId)
+        .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
+        .build();
+
+      await repository.updateFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        data: fileExport,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      });
+    });
+
+    it('should create the file export for an export type if it does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [],
+        })
+        .build();
+      await repository.save(assessment);
+
+      const fileExport = AssessmentFileExportMother.basic()
+        .withId('file-export-id')
+        .build();
+
+      await repository.updateFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        data: fileExport,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      });
+    });
+  });
+
+  describe('deleteFileExport', () => {
+    it('should delete the file export for an export type', async () => {
+      const { repository } = setup();
+
+      const fileExportId = 'file-export-id';
+      const assessment = AssessmentMother.basic()
+        .withId('assessment-id')
+        .withOrganization('test.io')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [
+            AssessmentFileExportMother.basic()
+              .withId(fileExportId)
+              .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+              .build(),
+          ],
+        })
+        .build();
+      await repository.save(assessment);
+
+      await repository.deleteFileExport({
+        assessmentId: assessment.id,
+        organization: assessment.organization,
+        type: AssessmentFileExportType.PDF,
+        id: fileExportId,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [],
+      });
+    });
+  });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  
+
   return { repository: new AssessmentsRepositoryDynamoDB() };
 };
