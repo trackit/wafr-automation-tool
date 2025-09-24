@@ -34,6 +34,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
         $metadata: { httpStatusCode: 200 },
+        executionArn: 'execution-arn',
       });
       await assessmentsStateMachineSfn.startAssessment(input);
 
@@ -86,6 +87,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
         $metadata: { httpStatusCode: 200 },
+        executionArn: 'execution-arn',
       });
       await assessmentsStateMachineSfn.startAssessment(input);
 
@@ -107,6 +109,30 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           organization: 'test.io',
         })
       );
+    });
+
+    it('should return the executionArn when starting the assessment', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+
+      const input: AssessmentsStateMachineStartAssessmentArgs = {
+        assessmentId: new IdGeneratorCrypto().generate(),
+        createdAt: new Date(),
+        name: 'Test Assessment',
+        roleArn: 'arn:aws:iam::123456789012:role/test-role',
+        workflows: [],
+        regions: [],
+        createdBy: 'test-user',
+        organization: 'test.io',
+      };
+      sfnClientMock.on(StartExecutionCommand).resolves({
+        startDate: new Date(),
+        $metadata: { httpStatusCode: 200 },
+        executionArn: 'execution-arn',
+      });
+      const executionArn = await assessmentsStateMachineSfn.startAssessment(
+        input
+      );
+      expect(executionArn).toEqual('execution-arn');
     });
   });
 

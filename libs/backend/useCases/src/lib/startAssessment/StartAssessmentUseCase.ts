@@ -93,7 +93,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
         'Organization does not have an active subscription or free assessments left'
       );
     }
-    await this.stateMachine.startAssessment({
+    const executionId = await this.stateMachine.startAssessment({
       name,
       regions,
       workflows,
@@ -112,7 +112,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdAt: new Date(),
       createdBy: user.id,
       organization: user.organizationDomain,
-      executionArn: '',
+      executionArn: executionId,
       rawGraphData: {},
       step: AssessmentStep.SCANNING_STARTED,
     };

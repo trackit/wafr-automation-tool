@@ -50,4 +50,5 @@ export interface AssessmentBody {
   pillars?: Pillar[];
   questionVersion?: string;
   exportRegion?: string;
+  executionArn?: string;
 }

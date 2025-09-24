@@ -20,7 +20,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
 
   public async startAssessment(
     assessment: AssessmentsStateMachineStartAssessmentArgs
-  ): Promise<void> {
+  ): Promise<string> {
     const input = {
       assessmentId: assessment.assessmentId,
       name: assessment.name,
@@ -37,12 +37,13 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     });
 
     const response = await this.client.send(command);
-    if (response.$metadata.httpStatusCode !== 200) {
+    if (response.$metadata.httpStatusCode !== 200 || !response.executionArn) {
       throw new Error(
         `Failed to start assessment: ${response.$metadata.httpStatusCode}`
       );
     }
     this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
+    return response.executionArn;
   }
 
   public async cancelAssessment(executionId: string): Promise<void> {

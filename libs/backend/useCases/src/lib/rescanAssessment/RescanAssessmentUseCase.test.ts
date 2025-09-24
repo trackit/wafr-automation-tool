@@ -3,7 +3,12 @@ import {
   tokenFakeAssessmentsRepository,
   tokenFakeAssessmentsStateMachine,
 } from '@backend/infrastructure';
-import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
+import {
+  AssessmentMother,
+  AssessmentStep,
+  FindingMother,
+  UserMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import { NotFoundError } from '../Errors';
@@ -64,14 +69,21 @@ describe('RescanAssessmentUseCase', () => {
     ).toBeUndefined();
   });
 
-  it('should delete assessment', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+  it('should update assessment step to SCANNING_STARTED and executionArn to new value', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
+      setup();
 
     fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
+        .withStep(AssessmentStep.FINISHED)
+        .withExecutionArn('old-test-arn')
         .build();
+
+    fakeAssessmentsStateMachine.startAssessment = vitest
+      .fn()
+      .mockResolvedValue('new-test-arn');
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
       .withAssessmentId('assessment-id')
@@ -79,9 +91,10 @@ describe('RescanAssessmentUseCase', () => {
       .build();
     await useCase.rescanAssessment(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
-    ).toBeUndefined();
+    const updatedAssessment =
+      fakeAssessmentsRepository.assessments['assessment-id#test.io'];
+    expect(updatedAssessment.step).toBe(AssessmentStep.SCANNING_STARTED);
+    expect(updatedAssessment.executionArn).toBe('new-test-arn');
   });
 
   it('should cancel old state machine execution', async () => {

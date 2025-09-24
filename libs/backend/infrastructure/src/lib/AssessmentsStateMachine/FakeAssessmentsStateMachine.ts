@@ -2,8 +2,9 @@ import type { AssessmentsStateMachine } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeAssessmentsStateMachine implements AssessmentsStateMachine {
-  public async startAssessment(): Promise<void> {
+  public async startAssessment(): Promise<string> {
     // No-op for fake implementation
+    return 'fake-execution-arn';
   }
 
   public async cancelAssessment(): Promise<void> {
