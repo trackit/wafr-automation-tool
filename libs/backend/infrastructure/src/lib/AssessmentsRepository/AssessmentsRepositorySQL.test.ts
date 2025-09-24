@@ -32,6 +32,7 @@ beforeAll(async () => {
   reset();
   registerTestInfrastructure();
   const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
 });

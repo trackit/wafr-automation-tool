@@ -28,6 +28,7 @@ describe('RunDatabaseMigrationUseCase', () => {
 
   it('should run migrations for all tenants', async () => {
     const { useCase, clientManager } = setup();
+    await clientManager.initialize();
     const client1 = await clientManager.createClient('organization1');
     const client2 = await clientManager.createClient('organization2');
     vi.spyOn(client1, 'runMigrations').mockResolvedValue([]);

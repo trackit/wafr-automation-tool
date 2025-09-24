@@ -50,6 +50,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     entity: EntityTarget<T>,
     organization: string
   ): Promise<Repository<T>> {
+    if (!this.clientManager.isInitialized) {
+      await this.clientManager.initialize();
+    }
     const dataSource = await this.clientManager.getClient(organization);
     return dataSource.getRepository(entity);
   }

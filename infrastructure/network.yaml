@@ -315,6 +315,19 @@ Resources:
             Principal: '*'
             Action: 'dynamodb:*'
             Resource: '*'
+  
+  SecretsManagerInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      SecurityGroupIds:
+        - !Ref InterfaceEndpointSecurityGroup
 
 Outputs:
   VpcId:

@@ -31,12 +31,6 @@ Parameters:
   AIFindingsAssociationChunkSize:
     Type: Number
     Default: 10
-  DatabaseUsername:
-    Type: String
-    Default: postgres
-  DatabasePassword:
-    Type: String
-    Default: tDdWd0sTgY$
 
 Conditions:
   CreateBackups:
@@ -71,8 +65,7 @@ Resources:
         PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
-        DBUsername: !Ref DatabaseUsername
-        DBPassword: !Ref DatabasePassword
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -207,8 +200,8 @@ Resources:
       BackupRetentionPeriod: !If [CreateBackups, 7, 1]
       StorageEncrypted: true
       Port: 5432
-      MasterUsername: !Ref DatabaseUsername
-      MasterUserPassword: !Ref DatabasePassword
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
       ServerlessV2ScalingConfiguration:
         MinCapacity: 0
         MaxCapacity: 1

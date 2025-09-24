@@ -9,7 +9,7 @@ import {
 import { TypeORMClientManager } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { tokenTypeORMConfig, TypeORMConfig } from '../config/typeorm';
+import { tokenTypeORMConfigCreator, TypeORMConfig } from '../config/typeorm';
 
 @Entity('tenants')
 export class Tenant {
@@ -25,14 +25,23 @@ export class Tenant {
 
 class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   private clients: Record<string, DataSource> = {};
-  private baseConfig: TypeORMConfig = inject(tokenTypeORMConfig);
+  private baseConfigCreator: Promise<TypeORMConfig> = inject(
+    tokenTypeORMConfigCreator
+  );
+  private baseConfig: TypeORMConfig | null = null;
+  public isInitialized = false;
 
-  constructor() {
-    // Ensure the default database is always available
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+    const baseConfig = await this.baseConfigCreator;
+    this.baseConfig = baseConfig;
     this.clients.default = new DataSource({
-      ...this.baseConfig,
+      ...baseConfig,
       entities: [Tenant],
     });
+    this.isInitialized = true;
   }
 
   public async initializeDefaultDatabase(): Promise<DataSource> {
@@ -49,6 +58,11 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
 
   public async getClient(id?: string): Promise<DataSource> {
     id = id ?? 'default';
+    if (!this.baseConfig) {
+      throw new Error(
+        'TypeORMClientManager not initialized. Call initialize() first.'
+      );
+    }
     if (!this.clients[id]) {
       this.clients[id] = new DataSource({
         ...this.baseConfig,
