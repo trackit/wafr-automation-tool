@@ -11,5 +11,6 @@ export * from './ObjectsStorage';
 export * from './OrganizationRepository';
 export * from './QuestionSetService';
 export * from './registerTestInfrastructure';
+export * from './SecretsManager';
 export * from './TypeORMClientManager';
 export * from './WellArchitectedToolService';
