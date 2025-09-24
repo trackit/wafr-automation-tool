@@ -315,7 +315,7 @@ Resources:
             Principal: '*'
             Action: 'dynamodb:*'
             Resource: '*'
-  
+
   SecretsManagerInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:

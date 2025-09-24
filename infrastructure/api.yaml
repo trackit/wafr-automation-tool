@@ -146,13 +146,13 @@ Resources:
       IdentityPoolId: !Ref IdentityPool
       Roles:
         authenticated: !GetAtt CognitoAuthenticatedRole.Arn
-  
+
   MigrationRunnerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${MigrationRunnerFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  
+
   MigrationRunnerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -174,7 +174,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-
 
   Api:
     Type: AWS::Serverless::Api
