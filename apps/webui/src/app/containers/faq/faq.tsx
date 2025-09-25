@@ -39,6 +39,7 @@ function highlightText(text: string, search: string) {
 export function FAQ() {
   const navigate = useNavigate();
   const [search, setSearch] = useState<string>('');
+  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
 
   const faqs: FAQItem[] = [
     {
@@ -109,7 +110,7 @@ export function FAQ() {
         <h2 className="mt-0 mb-0">FAQ</h2>
         <button
           className="btn btn-primary btn-sm text-sm h-8 min-h-8"
-          onClick={(e) => {
+          onClick={() => {
             void navigate('/');
           }}
         >
@@ -151,9 +152,19 @@ export function FAQ() {
                 />
               ),
             }))
-            .map((faq) => (
-              <FAQCollapse key={faq.question} {...faq} />
-            ))}
+            .map((faq, index) => {
+              const id = `${index}-${faq.question}`;
+              return (
+                <FAQCollapse
+                  key={id}
+                  item={faq}
+                  isOpen={openFaqId === id}
+                  onToggle={() =>
+                    setOpenFaqId((current) => (current === id ? null : id))
+                  }
+                />
+              );
+            })}
         </div>
       </div>
     </div>
