@@ -4,10 +4,18 @@ import {
   tokenFakeOrganizationRepository,
   tokenFakePartnerCentralSellingService,
 } from '@backend/infrastructure';
-import { AssessmentMother, OrganizationMother } from '@backend/models';
+import {
+  AssessmentMother,
+  OrganizationMother,
+  UserMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { ConflictError, NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  AssessmentOpportunityAlreadyLinkedError,
+  OrganizationNotFoundError,
+} from '../../errors';
 import { CreateOpportunityUseCaseImpl } from './CreateOpportunityUseCase';
 import { CreateOpportunityUseCaseArgsMother } from './CreateOpportunityUseCaseArgsMother';
 
@@ -19,13 +27,6 @@ describe('CreateOpportunity UseCase', () => {
       fakeAssessmentsRepository,
       fakeOrganizationRepository,
     } = setup();
-
-    const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
-      .build();
-
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
 
     const organization = OrganizationMother.basic()
       .withDomain('test.io')
@@ -42,14 +43,27 @@ describe('CreateOpportunity UseCase', () => {
         solutions: ['aceIntegrationSolution'],
       })
       .build();
+    await fakeOrganizationRepository.save(organization);
 
-    fakeOrganizationRepository.organizations['test.io'] = organization;
-    const accountId = '123456789012';
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const opportunityId = 'opportunity-123';
+
     vitest
       .spyOn(fakePartnerCentralSellingService, 'createOpportunity')
-      .mockResolvedValueOnce('opportunity-123');
+      .mockResolvedValueOnce(opportunityId);
 
-    const input = CreateOpportunityUseCaseArgsMother.basic().build();
+    const input = CreateOpportunityUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
     const customerBusinessProblem = `Internal Workload (${assessment.name})`;
 
     await expect(useCase.createOpportunity(input)).resolves.toBeUndefined();
@@ -61,65 +75,75 @@ describe('CreateOpportunity UseCase', () => {
       organizationName: organization.name,
       aceIntegration: organization.aceIntegration,
       opportunityDetails: input.opportunityDetails,
-      accountId,
+      accountId: '123456789012',
       customerBusinessProblem,
     });
 
-    expect(
-      fakeAssessmentsRepository.assessments['assessment-id#test.io']
-        .opportunityId
-    ).toBe('opportunity-123');
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(updatedAssessment?.opportunityId).toBe(opportunityId);
   });
 
-  it('should throw NotFoundError if the assessment does not exist', async () => {
-    const { useCase, fakeOrganizationRepository } = setup();
-
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+  it('should throw AssessmentNotFoundError if the assessment does not exist', async () => {
+    const { useCase } = setup();
 
     const input = CreateOpportunityUseCaseArgsMother.basic()
       .withAssessmentId('missing-assessment')
       .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 
-  it('should throw NotFoundError if the organization does not exist', async () => {
+  it('should throw OrganizationNotFoundError if the organization does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
+    const user = UserMother.basic().build();
 
-    const input = CreateOpportunityUseCaseArgsMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const input = CreateOpportunityUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      NotFoundError
+      OrganizationNotFoundError
     );
   });
 
-  it('should throw ConflictError if the assessment already has an opportunityId', async () => {
+  it('should throw AssessmentOpportunityAlreadyLinkedError if the assessment already has an opportunityId', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withOpportunityId('existing-opp')
-        .build();
+    const organization = OrganizationMother.basic()
+      .withDomain('test.io')
+      .build();
+    await fakeOrganizationRepository.save(organization);
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
 
-    const input = CreateOpportunityUseCaseArgsMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .withOpportunityId('existing-opp')
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const input = CreateOpportunityUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      ConflictError
+      AssessmentOpportunityAlreadyLinkedError
     );
   });
 
@@ -127,16 +151,24 @@ describe('CreateOpportunity UseCase', () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
+    const organization = OrganizationMother.basic()
+      .withAceIntegration(undefined)
+      .build();
+    await fakeOrganizationRepository.save(organization);
 
-    fakeOrganizationRepository.organizations['test.io'] =
-      OrganizationMother.basic().withDomain('test.io').build();
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
 
-    const input = CreateOpportunityUseCaseArgsMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(organization.domain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const input = CreateOpportunityUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow();
   });
@@ -145,17 +177,14 @@ describe('CreateOpportunity UseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   vitest.useFakeTimers();
-  const fakePartnerCentralSellingService = inject(
-    tokenFakePartnerCentralSellingService
-  );
-  vitest
-    .spyOn(fakePartnerCentralSellingService, 'createOpportunity')
-    .mockResolvedValueOnce('opportunity-123');
-  const useCase = new CreateOpportunityUseCaseImpl();
+
   return {
-    useCase,
-    fakePartnerCentralSellingService,
+    useCase: new CreateOpportunityUseCaseImpl(),
+    fakePartnerCentralSellingService: inject(
+      tokenFakePartnerCentralSellingService
+    ),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
   };

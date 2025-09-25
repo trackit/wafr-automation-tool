@@ -1,27 +1,22 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import { CustomerType, type User } from '@backend/models';
+import { CustomerType, type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type CreateOpportunityParameters = NonNullable<
-  operations['createOpportunity']['parameters']['path']
->;
+type CreateOpportunityParameters =
+  operations['createOpportunity']['parameters']['path'];
 
 type CreateOpportunityBody = NonNullable<
-  NonNullable<
-    operations['createOpportunity']['requestBody']
-  >['content']['application/json']
->;
+  operations['createOpportunity']['requestBody']
+>['content']['application/json'];
 
 export class CreateOpportunityAdapterEventMother {
   private pathParameters: CreateOpportunityParameters;
   private body: CreateOpportunityBody;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
+
   private constructor(
     params: CreateOpportunityParameters,
     body: CreateOpportunityBody
@@ -29,6 +24,7 @@ export class CreateOpportunityAdapterEventMother {
     this.pathParameters = params;
     this.body = body;
   }
+
   public static basic(): CreateOpportunityAdapterEventMother {
     return new CreateOpportunityAdapterEventMother(
       {

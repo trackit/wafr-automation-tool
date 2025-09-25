@@ -4,6 +4,7 @@ import { tokenCreateOpportunityUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { CreateOpportunityAdapter } from './CreateOpportunityAdapter';
 import { CreateOpportunityAdapterEventMother } from './CreateOpportunityAdapterEventMother';
 
@@ -14,33 +15,29 @@ describe('CreateOpportunity adapter', () => {
 
       const event = CreateOpportunityAdapterEventMother.basic().build();
 
-      await expect(adapter.handle(event)).resolves.not.toThrow();
+      const response = await adapter.handle(event);
+      expect(response.statusCode).not.toBe(400);
+    });
+
+    it('should call parseApiEvent with the correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = CreateOpportunityAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
     });
 
     it('should return a 400 without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid json body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
-
-    it('should throw a bad request error with invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
-        .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
@@ -72,18 +69,16 @@ describe('CreateOpportunity adapter', () => {
       expect(response.body).toContain('Invalid industry');
     });
   });
+
   describe('useCase and return value', () => {
     it('should call useCase with path parameters and user', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
       const event = CreateOpportunityAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withUser(user)
         .withCompanyName('testCompany')
         .withDuns('123456789')
         .withIndustry('Aerospace')
@@ -114,9 +109,7 @@ describe('CreateOpportunity adapter', () => {
           customerCity: 'City',
           customerAddress: 'street',
         },
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        user,
       });
     });
 
@@ -134,8 +127,11 @@ describe('CreateOpportunity adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { createOpportunity: vitest.fn() };
   register(tokenCreateOpportunityUseCase, { useValue: useCase });
-  const adapter = new CreateOpportunityAdapter();
-  return { useCase, adapter };
+
+  return { parseSpy, useCase, adapter: new CreateOpportunityAdapter() };
 };

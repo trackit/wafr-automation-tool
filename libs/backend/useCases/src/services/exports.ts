@@ -41,13 +41,3 @@ export function assertOrganizationHasExportRole(
     });
   }
 }
-
-export function assertOrganizationHasAceIntegration(
-  organization: Organization
-): asserts organization is Organization & { aceIntegration: object } {
-  if (!organization.aceIntegration) {
-    throw new ConflictError(
-      `No ace details found for organization ${organization.domain}`
-    );
-  }
-}

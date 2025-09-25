@@ -1685,7 +1685,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The unique ID of the assessment to export */
+                /** @description The unique ID of the assessment */
                 assessmentId: string;
             };
             cookie?: never;

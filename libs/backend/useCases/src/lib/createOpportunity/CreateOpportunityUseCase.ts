@@ -7,8 +7,14 @@ import {
 import { CustomerType, OpportunityDetails, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { assertOrganizationHasAceIntegration } from '../../services/exports';
-import { ConflictError, NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  AssessmentOpportunityAlreadyLinkedError,
+} from '../../errors/AssessmentErrors';
+import {
+  OrganizationAceDetailsNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors/OrganizationErrors';
 
 export type CreateOpportunityUseCaseArgs = {
   user: User;
@@ -39,27 +45,33 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
-    });
-    if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
-    }
-    if (assessment.opportunityId) {
-      throw new ConflictError(
-        `Assessment with id ${args.assessmentId} is linked already to opportunity ${assessment.opportunityId}`
-      );
-    }
-    const organization = await this.organizationRepository.get({
       organizationDomain: args.user.organizationDomain,
     });
-    if (!organization) {
-      throw new NotFoundError(
-        `Organization with domain ${args.user.organizationDomain} not found`
-      );
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.user.organizationDomain,
+      });
     }
-    assertOrganizationHasAceIntegration(organization);
+    if (assessment.opportunityId) {
+      throw new AssessmentOpportunityAlreadyLinkedError({
+        assessmentId: args.assessmentId,
+        opportunityId: assessment.opportunityId,
+      });
+    }
+    const organization = await this.organizationRepository.get(
+      args.user.organizationDomain
+    );
+    if (!organization) {
+      throw new OrganizationNotFoundError({
+        domain: args.user.organizationDomain,
+      });
+    }
+    if (!organization.aceIntegration) {
+      throw new OrganizationAceDetailsNotFoundError({
+        domain: organization.domain,
+      });
+    }
 
     const accountId = this.extractAccountId(assessment.roleArn);
     const customerBusinessProblem =
@@ -78,7 +90,7 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
       });
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
       assessmentBody: { opportunityId: opportunityId },
     });
     this.logger.info(

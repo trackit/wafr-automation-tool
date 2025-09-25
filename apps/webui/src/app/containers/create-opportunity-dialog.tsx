@@ -1,3 +1,4 @@
+import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CirclePlus } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
@@ -6,28 +7,33 @@ import { useState } from 'react';
 import { ApiError, createOpportunity } from '@webui/api-client';
 import { NewAceOpportunity } from '@webui/forms';
 import { Modal } from '@webui/ui';
+
 type CreateOpportunityDialogProps = {
   assessmentId: string;
   hasOpportunityId: boolean;
   hasWafrWorkloadArn: boolean;
 };
+
 type NewOpportunityForm = {
   companyName: string;
   duns: string;
-  industry: string;
+  industry?: Industry;
   companyWebsiteUrl: string;
   monthlyRecurringRevenue: string;
   customerType: string;
   targetCloseDate: string;
-  country: string;
+  country?: CountryCode;
   postalCode: string;
   city?: string;
   streetAddress?: string;
 };
+
 type MutationPayload = {
   assessmentId: string;
 } & NewOpportunityForm;
+
 type CustomerType = 'INTERNAL_WORKLOAD' | 'CUSTOMER';
+
 function CreateOpportunityDialog({
   assessmentId,
   hasOpportunityId,
@@ -35,6 +41,7 @@ function CreateOpportunityDialog({
 }: CreateOpportunityDialogProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: MutationPayload) => {
       await createOpportunity(
@@ -44,10 +51,10 @@ function CreateOpportunityDialog({
         {
           companyName: data.companyName,
           duns: data.duns,
-          industry: data.industry,
+          industry: data.industry ?? 'N/A',
           customerType: data.customerType as CustomerType,
           companyWebsiteUrl: data.companyWebsiteUrl,
-          customerCountry: data.country,
+          customerCountry: data.country ?? 'N/A',
           customerPostalCode: data.postalCode,
           monthlyRecurringRevenue: data.monthlyRecurringRevenue,
           targetCloseDate: data.targetCloseDate,
@@ -91,6 +98,7 @@ function CreateOpportunityDialog({
       }
     },
   });
+
   const onSubmit = (data: NewOpportunityForm) => {
     mutate({
       assessmentId,
@@ -107,6 +115,7 @@ function CreateOpportunityDialog({
       postalCode: data.postalCode,
     });
   };
+
   const disabled = !hasWafrWorkloadArn || hasOpportunityId;
   const button = (
     <button
@@ -123,9 +132,11 @@ function CreateOpportunityDialog({
       <CirclePlus className="w-4 h-4" /> Create ACE opportunity
     </button>
   );
+
   const dataTipMessage = !hasWafrWorkloadArn
     ? 'Please export to AWS first'
     : 'Assessment has already an opportunity';
+
   return (
     <>
       <div className="not-prose">

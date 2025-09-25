@@ -304,19 +304,21 @@ const setup = (debug = false) => {
   registerTestInfrastructure();
 
   register(tokenDebug, { useValue: debug });
+
   const partnerCentralSellingClient = new PartnerCentralSellingClient();
   register(tokenPartnerCentralSellingClientConstructor, {
     useFactory: () => {
       return () => partnerCentralSellingClient;
     },
   });
-  const partnerCentralSellingService = new PartnerCentralSellingService();
+
   const partnerCentralSellingClientMock = mockClient(
     partnerCentralSellingClient
   );
   const stsClientMock = mockClient(inject(tokenSTSClient));
+  
   return {
-    partnerCentralSellingService,
+    partnerCentralSellingService: new PartnerCentralSellingService(),
     stsClientMock,
     partnerCentralSellingClient,
     partnerCentralSellingClientMock,

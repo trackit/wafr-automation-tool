@@ -1,3 +1,5 @@
+import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
+
 import { CustomerType, User, UserMother } from '@backend/models';
 
 import { CreateOpportunityUseCaseArgs } from './CreateOpportunityUseCase';
@@ -10,7 +12,7 @@ export class CreateOpportunityUseCaseArgsMother {
 
   public static basic(): CreateOpportunityUseCaseArgsMother {
     return new CreateOpportunityUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       user: UserMother.basic().build(),
       opportunityDetails: {
         companyName: 'testCompany',
@@ -50,7 +52,7 @@ export class CreateOpportunityUseCaseArgsMother {
     return this;
   }
 
-  public withIndustry(industry: string): CreateOpportunityUseCaseArgsMother {
+  public withIndustry(industry: Industry): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.industry = industry;
     return this;
   }
@@ -70,7 +72,7 @@ export class CreateOpportunityUseCaseArgsMother {
   }
 
   public withCustomerCountry(
-    customerCountry: string
+    customerCountry: CountryCode
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerCountry = customerCountry;
     return this;
