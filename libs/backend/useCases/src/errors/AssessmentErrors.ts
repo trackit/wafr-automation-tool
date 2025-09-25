@@ -2,7 +2,7 @@ import {
   AssessmentFileExport,
   AssessmentFileExportType,
 } from '@backend/models';
-import { BasicErrorTypes } from '@shared/utils';
+import { BasicErrorType } from '@shared/utils';
 
 import { UseCaseError } from './UseCaseError';
 
@@ -16,7 +16,7 @@ export class AssessmentNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, organizationDomain } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `Assessment with id ${assessmentId} not found for organization with domain ${organizationDomain}`,
       description,
     });
@@ -32,7 +32,7 @@ export class AssessmentNotFinishedError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      type: BasicErrorTypes.CONFLICT,
+      type: BasicErrorType.CONFLICT,
       message: `Assessment with id ${assessmentId} is not finished`,
       description,
     });
@@ -48,7 +48,7 @@ export class AssessmentExportRegionNotSetError extends UseCaseError {
   ) {
     const { assessmentId } = args;
     super({
-      type: BasicErrorTypes.CONFLICT,
+      type: BasicErrorType.CONFLICT,
       message: `Assessment with id ${assessmentId} has no export region set`,
       description,
     });
@@ -66,7 +66,7 @@ export class AssessmentFileExportNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, fileExportId, fileExportType } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `${fileExportType.toUpperCase()} export with id ${fileExportId} not found for assessment ${assessmentId}`,
       description,
     });
@@ -84,7 +84,7 @@ export class AssessmentFileExportNotFinishedError extends UseCaseError {
   ) {
     const { assessmentId, fileExportId, fileExportType } = args;
     super({
-      type: BasicErrorTypes.CONFLICT,
+      type: BasicErrorType.CONFLICT,
       message: `${fileExportType.toUpperCase()} export with id ${fileExportId} is not finished for assessment ${assessmentId}`,
       description,
     });
@@ -103,7 +103,7 @@ export class AssessmentFileExportFieldNotFoundError extends UseCaseError {
   ) {
     const { assessmentId, fileExportId, fileExportType, fieldName } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `${fileExportType.toUpperCase()} export with id ${fileExportId} has no field ${fieldName} for assessment ${assessmentId}`,
       description,
     });
@@ -121,7 +121,7 @@ export class AssessmentFileExportAlreadyExistsError extends UseCaseError {
   ) {
     const { assessmentId, fileExportType, versionName } = args;
     super({
-      type: BasicErrorTypes.CONFLICT,
+      type: BasicErrorType.CONFLICT,
       message: `${fileExportType.toUpperCase()} export with version ${versionName} already exists for assessment ${assessmentId}`,
       description,
     });
