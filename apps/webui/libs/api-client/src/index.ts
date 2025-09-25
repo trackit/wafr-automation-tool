@@ -6,6 +6,7 @@ export * from './lib/deleteComment';
 export * from './lib/exportToAWS';
 export * from './lib/getAssessment';
 export * from './lib/getAssessments';
+export * from './lib/getAssessmentStep';
 export * from './lib/getFindings';
 export * from './lib/getMilestone';
 export * from './lib/getMilestones';

@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
-import { getAssessment, updateStatus } from '@webui/api-client';
+import { getAssessment, getAssessmentStep, updateStatus } from '@webui/api-client';
 
 import AssessmentDetails from './assessment-details';
 
@@ -20,13 +20,13 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 vi.mock('@webui/api-client', () => ({
   getAssessment: vi.fn(),
   updateStatus: vi.fn(),
+  getAssessmentStep: vi.fn(),
 }));
 
 // Mock data
 const mockAssessment = {
   id: '1',
   name: 'Test Assessment',
-  step: 'FINISHED',
   pillars: [
     {
       id: 'pillar-1',
@@ -144,6 +144,7 @@ describe('AssessmentDetails', () => {
     (getAssessment as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
       mockAssessment
     );
+    (getAssessmentStep as unknown as ReturnType<typeof vi.fn>).mockResolvedValue('FINISHED');
   });
 
   it('renders loading state initially', () => {
@@ -201,10 +202,7 @@ describe('AssessmentDetails', () => {
   });
 
   it('shows loading state when assessment is scanning', async () => {
-    (getAssessment as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ...mockAssessment,
-      step: 'SCANNING_STARTED',
-    });
+    (getAssessmentStep as unknown as ReturnType<typeof vi.fn>).mockResolvedValue('SCANNING_STARTED');
 
     render(<AssessmentDetails />, { wrapper });
 
@@ -218,10 +216,7 @@ describe('AssessmentDetails', () => {
   });
 
   it('shows error state when assessment has errored', async () => {
-    (getAssessment as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ...mockAssessment,
-      step: 'ERRORED',
-    });
+    (getAssessmentStep as unknown as ReturnType<typeof vi.fn>).mockResolvedValue('ERRORED');
 
     render(<AssessmentDetails />, { wrapper });
 

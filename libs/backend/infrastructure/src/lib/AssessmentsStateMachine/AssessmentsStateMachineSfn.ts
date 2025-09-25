@@ -1,9 +1,13 @@
 import {
+  DescribeExecutionCommand,
+  ExecutionStatus,
+  GetExecutionHistoryCommand,
   SFNClient,
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 
+import { AssessmentStep } from '@backend/models';
 import type {
   AssessmentsStateMachine,
   AssessmentsStateMachineStartAssessmentArgs,
@@ -17,6 +21,44 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly client = inject(tokenClientSfn);
   private readonly stateMachineArn = inject(tokenStateMachineArn);
   private readonly logger = inject(tokenLogger);
+
+  public async getAssessmentStep(
+    executionArn: string
+  ): Promise<AssessmentStep> {
+    const historyResponse = await this.client.send(
+      new GetExecutionHistoryCommand({
+        executionArn,
+        maxResults: 10,
+        reverseOrder: true,
+      })
+    );
+    const events = historyResponse.events || [];
+
+    const knownStepToAssessmentStep: Record<string, AssessmentStep> = {
+      Pass: AssessmentStep.SCANNING_STARTED,
+      ScanningTools: AssessmentStep.SCANNING_STARTED,
+      PrepareFindingsAssociations: AssessmentStep.PREPARING_ASSOCIATIONS,
+      PromptMap: AssessmentStep.ASSOCIATING_FINDINGS,
+      ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
+      Cleanup: AssessmentStep.FINISHED,
+      CleanupOnError: AssessmentStep.ERRORED,
+    };
+
+    for (const event of events) {
+      const stateName = event.stateEnteredEventDetails?.name;
+      if (stateName && knownStepToAssessmentStep[stateName]) {
+        return knownStepToAssessmentStep[stateName];
+      }
+    }
+
+    const describeResponse = await this.client.send(
+      new DescribeExecutionCommand({ executionArn })
+    );
+
+    return describeResponse.status === ExecutionStatus.SUCCEEDED
+      ? AssessmentStep.FINISHED
+      : AssessmentStep.ERRORED;
+  }
 
   public async startAssessment(
     assessment: AssessmentsStateMachineStartAssessmentArgs

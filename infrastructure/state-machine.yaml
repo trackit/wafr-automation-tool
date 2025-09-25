@@ -320,53 +320,6 @@ Resources:
               roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
             Next: ScanningTools
-          # CreateAssessment:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:putItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Item:
-          #       PK:
-          #         S: '{% $states.input.organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
-          #       id:
-          #         S: '{% $states.input.assessmentId %}'
-          #       createdBy:
-          #         S: '{% $states.input.createdBy %}'
-          #       organization:
-          #         S: '{% $states.input.organization %}'
-          #       name:
-          #         S: '{% $states.input.name %}'
-          #       regions:
-          #         L: '{% $states.input.regions %}'
-          #       roleArn:
-          #         S: '{% $states.input.roleArn %}'
-          #       workflows:
-          #         L: '{% $states.input.workflows %}'
-          #       step:
-          #         S: 'SCANNING_STARTED'
-          #       rawGraphData:
-          #         M: {}
-          #       executionArn:
-          #         S: '{% $states.context.Execution.Id %}'
-          #       createdAt:
-          #         S: '{% $states.input.createdAt %}'
-          #   Assign:
-          #     assessmentId: '{% $states.input.assessmentId %}'
-          #     organization: '{% $states.input.organization %}'
-          #     regions: '{% $states.input.regions %}'
-          #     roleArn: '{% $states.input.roleArn %}'
-          #     workflows: '{% $states.input.workflows %}'
-          #   Next: ScanningTools
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $states.input.assessmentId %}'
-          #         organization: '{% $states.input.organization %}'
-          #         error: '{% $states.errorOutput %}'
           ScanningTools:
             Type: Parallel
             Branches:
@@ -455,7 +408,7 @@ Resources:
                               - Name: ROLE_ARN
                                 Value: '{% $roleArn %}'
                     End: true
-            Next: Prepare Findings Associations
+            Next: PrepareFindingsAssociations
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -464,30 +417,7 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          # PrepareFindingsAssociationsUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'PREPARING_ASSOCIATIONS'
-          #   Next: Prepare Findings Associations
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
-          Prepare Findings Associations:
+          PrepareFindingsAssociations:
             Type: Parallel
             Branches:
               - StartAt: Prepare Prowler Findings Associations
@@ -536,30 +466,6 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
-          # AssociateFindingsChunkToBestPracticesUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'ASSOCIATING_FINDINGS'
-          #   Next: PromptMap
-          #   Output: '{% $states.input %}'
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
           PromptMap:
             Type: Map
             MaxConcurrency: 5
@@ -606,29 +512,6 @@ Resources:
                   organization: '{% $organization %}'
                   error: '{% $states.errorOutput %}'
             Next: Cleanup
-          # FinishUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'FINISHED'
-          #   Next: Cleanup
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn

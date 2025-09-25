@@ -15,7 +15,7 @@ export class InitialMigration1758120351308 implements MigrationInterface {
         "regions" varchar[] NOT NULL DEFAULT ARRAY[]::varchar[],
         "exportRegion" varchar,
         "roleArn" varchar NOT NULL,
-        "step" varchar NOT NULL,
+        "finished" boolean NOT NULL DEFAULT false,
         "workflows" varchar[] NOT NULL DEFAULT ARRAY[]::varchar[],
         "error" jsonb
       );

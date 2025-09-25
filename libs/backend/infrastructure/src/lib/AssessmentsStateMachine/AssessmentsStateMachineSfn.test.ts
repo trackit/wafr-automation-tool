@@ -1,9 +1,13 @@
 import {
+  DescribeExecutionCommand,
+  ExecutionStatus,
+  GetExecutionHistoryCommand,
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 import { mockClient } from 'aws-sdk-client-mock';
 
+import { AssessmentStep } from '@backend/models';
 import type { AssessmentsStateMachineStartAssessmentArgs } from '@backend/ports';
 import { inject, reset } from '@shared/di-container';
 
@@ -165,6 +169,167 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       await expect(
         assessmentsStateMachineSfn.cancelAssessment('execution-arn')
       ).rejects.toThrow(Error);
+    });
+  });
+
+  describe('getAssessmentStep', () => {
+    it('should return SCANNING_STARTED for Pass or ScanningTools state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'Pass' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 1,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
+    });
+
+    it('should return PREPARING_ASSOCIATIONS for PrepareFindingsAssociations state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'PrepareFindingsAssociations' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 2,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.PREPARING_ASSOCIATIONS);
+    });
+
+    it('should return ASSOCIATING_FINDINGS for PromptMap or ComputeGraphData state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'PromptMap' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 3,
+          },
+        ],
+      });
+      let step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
+      sfnClientMock.reset();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'ComputeGraphData' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 4,
+          },
+        ],
+      });
+      step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
+    });
+
+    it('should return FINISHED for Cleanup state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'Cleanup' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 5,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.FINISHED);
+    });
+
+    it('should return ERRORED for CleanupOnError state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'CleanupOnError' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 6,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.ERRORED);
+    });
+
+    it('should return FINISHED if execution status is SUCCEEDED and no known state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({ events: [] });
+      sfnClientMock
+        .on(DescribeExecutionCommand)
+        .resolves({ status: ExecutionStatus.SUCCEEDED });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.FINISHED);
+    });
+
+    it('should return ERRORED if execution status is not SUCCEEDED and no known state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({ events: [] });
+      sfnClientMock
+        .on(DescribeExecutionCommand)
+        .resolves({ status: ExecutionStatus.FAILED });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.ERRORED);
+    });
+
+    it('should use the latest relevant state from multiple history events', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'Cleanup' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 5,
+          },
+          {
+            stateEnteredEventDetails: { name: 'PromptMap' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 4,
+          },
+          {
+            stateEnteredEventDetails: { name: 'PrepareFindingsAssociations' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 3,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.FINISHED);
     });
   });
 });

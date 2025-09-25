@@ -8,6 +8,7 @@ export * from './Errors';
 export * from './exportWellArchitectedTool';
 export * from './getAssessment';
 export * from './getAssessments';
+export * from './getAssessmentStep';
 export * from './getBestPracticeFindings';
 export * from './getMilestone';
 export * from './getMilestones';

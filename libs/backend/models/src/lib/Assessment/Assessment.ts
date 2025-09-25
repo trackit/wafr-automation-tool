@@ -16,9 +16,9 @@ export interface Assessment {
   regions: string[];
   exportRegion?: string;
   roleArn: string;
-  step: AssessmentStep;
   workflows: string[];
   error?: AssessmentError;
+  finished: boolean;
 }
 
 export interface AssessmentGraphData {
@@ -45,10 +45,10 @@ export interface AssessmentBody {
   name?: string;
   graphData?: AssessmentGraphData;
   error?: AssessmentError;
-  step?: AssessmentStep;
   rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
   pillars?: Pillar[];
   questionVersion?: string;
   exportRegion?: string;
   executionArn?: string;
+  finished?: boolean;
 }

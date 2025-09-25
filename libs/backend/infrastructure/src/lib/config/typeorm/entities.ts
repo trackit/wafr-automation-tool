@@ -11,7 +11,6 @@ import {
 import type {
   Assessment,
   AssessmentGraphData,
-  AssessmentStep,
   BestPractice,
   Finding,
   FindingComment,
@@ -64,8 +63,8 @@ export class AssessmentEntity implements Omit<Assessment, 'organization'> {
   @Column('varchar')
   roleArn!: string;
 
-  @Column('varchar')
-  step!: AssessmentStep;
+  @Column('boolean', { default: false })
+  finished!: boolean;
 
   @Column('text', {
     array: false,

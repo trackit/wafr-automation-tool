@@ -3,7 +3,7 @@ import {
   tokenAssessmentsStateMachine,
   tokenLogger,
 } from '@backend/infrastructure';
-import { AssessmentStep, type User } from '@backend/models';
+import { type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { NotFoundError } from '../Errors';
@@ -60,7 +60,6 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       organization: args.user.organizationDomain,
       assessmentBody: {
         executionArn: executionId,
-        step: AssessmentStep.SCANNING_STARTED,
       },
     });
     this.logger.info(

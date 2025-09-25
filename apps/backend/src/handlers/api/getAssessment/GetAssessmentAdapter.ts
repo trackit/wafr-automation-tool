@@ -61,7 +61,6 @@ export class GetAssessmentAdapter {
       regions: assessment.regions,
       exportRegion: assessment.exportRegion,
       roleArn: assessment.roleArn,
-      step: assessment.step,
       workflows: assessment.workflows,
       error: assessment.error,
     };

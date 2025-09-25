@@ -1,7 +1,6 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -144,7 +143,6 @@ describe('GetAssessmentAdapter', () => {
         })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
-        .withStep(AssessmentStep.FINISHED)
         .withWorkflows([])
         .build();
 
@@ -190,7 +188,6 @@ describe('GetAssessmentAdapter', () => {
         questionVersion: '1.0.0',
         regions: ['us-west-2'],
         roleArn: 'role-arn',
-        step: AssessmentStep.FINISHED,
         workflows: [],
       });
     });

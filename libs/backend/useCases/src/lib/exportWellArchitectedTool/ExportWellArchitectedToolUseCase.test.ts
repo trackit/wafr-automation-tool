@@ -6,7 +6,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   OrganizationMother,
   PillarMother,
   UserMother,
@@ -31,7 +30,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('test.io')
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -65,7 +64,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([])
         .build();
 
@@ -121,7 +120,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+        .withFinished(false)
         .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
@@ -144,7 +143,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .withExportRegion(undefined)
         .build();
@@ -170,7 +169,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .withExportRegion(undefined)
         .build();
@@ -193,7 +192,7 @@ describe('exportWellArchitectedTool UseCase', () => {
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('test.io')
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
@@ -223,7 +222,7 @@ describe('exportWellArchitectedTool UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .withExportRegion('us-west-2')
         .build();

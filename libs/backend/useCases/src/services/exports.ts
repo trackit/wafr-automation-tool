@@ -1,9 +1,4 @@
-import {
-  type Assessment,
-  AssessmentStep,
-  Organization,
-  Pillar,
-} from '@backend/models';
+import { type Assessment, Organization, Pillar } from '@backend/models';
 
 import { ConflictError, NoContentError } from '../lib/Errors';
 
@@ -12,9 +7,9 @@ export function assertAssessmentIsReadyForExport(
   exportRegion?: string
 ): asserts assessment is Assessment & {
   pillars: Pillar;
-  step: AssessmentStep.FINISHED;
+  finished: true;
 } {
-  if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
+  if (!assessment.pillars || !assessment.finished) {
     throw new ConflictError(
       `Assessment with id ${assessment.id} is not finished`
     );

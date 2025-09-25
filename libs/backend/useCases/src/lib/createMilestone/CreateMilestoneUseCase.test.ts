@@ -6,7 +6,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   OrganizationMother,
   PillarMother,
   UserMother,
@@ -29,7 +28,7 @@ describe('CreateMilestone UseCase', () => {
     const assessment = AssessmentMother.basic()
       .withId('assessment-id')
       .withOrganization('test.io')
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -65,7 +64,7 @@ describe('CreateMilestone UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([])
         .build();
 
@@ -126,7 +125,7 @@ describe('CreateMilestone UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+        .withFinished(false)
         .build();
 
     fakeOrganizationRepository.organizations['test.io'] =
@@ -149,7 +148,7 @@ describe('CreateMilestone UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .withExportRegion('us-west-2')
         .build();
@@ -169,7 +168,7 @@ describe('CreateMilestone UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .build();
 
@@ -194,7 +193,7 @@ describe('CreateMilestone UseCase', () => {
       AssessmentMother.basic()
         .withId('assessment-id')
         .withOrganization('test.io')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withPillars([PillarMother.basic().build()])
         .withExportRegion(undefined)
         .build();

@@ -8,7 +8,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   FindingMother,
   OrganizationMother,
 } from '@backend/models';
@@ -144,32 +143,6 @@ describe('CleanupUseCase', () => {
       expect(
         fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io']
       ).toBeDefined();
-    });
-
-    it('should update assessment error if error is defined', async () => {
-      const { useCase, fakeAssessmentsRepository } = setup(true);
-
-      fakeAssessmentsRepository.save(
-        AssessmentMother.basic()
-          .withId('assessment-id')
-          .withOrganization('test.io')
-          .build()
-      );
-
-      const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('assessment-id')
-        .withOrganization('test.io')
-        .withError({ Cause: 'test-cause', Error: 'test-error' })
-        .build();
-      await useCase.cleanupError(input);
-
-      const updatedAssessment =
-        fakeAssessmentsRepository.assessments['assessment-id#test.io'];
-      expect(updatedAssessment.error).toEqual({
-        error: 'test-error',
-        cause: 'test-cause',
-      });
-      expect(updatedAssessment.step).toEqual(AssessmentStep.ERRORED);
     });
   });
 

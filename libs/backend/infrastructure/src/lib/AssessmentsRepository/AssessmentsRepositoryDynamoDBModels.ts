@@ -1,5 +1,4 @@
 import {
-  AssessmentStep,
   FindingMetadata,
   FindingRemediation,
   FindingResource,
@@ -23,9 +22,9 @@ export interface DynamoDBAssessment {
   regions: string[];
   exportRegion?: string;
   roleArn: string;
-  step: AssessmentStep;
   workflows: string[];
   error?: DynamoDBAssessmentError;
+  finished?: boolean;
 }
 
 export interface DynamoDBAssessmentGraphData {
