@@ -941,7 +941,7 @@ paths:
       parameters:
         - name: assessmentId
           in: path
-          description: The unique ID of the assessment to export
+          description: The unique ID of the assessment
           required: true
           schema:
             type: string

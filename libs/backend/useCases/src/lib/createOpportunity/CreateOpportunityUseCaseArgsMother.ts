@@ -25,6 +25,7 @@ export class CreateOpportunityUseCaseArgsMother {
       },
     });
   }
+
   public withAssessmentId(
     assessmentId: string
   ): CreateOpportunityUseCaseArgsMother {
@@ -36,6 +37,7 @@ export class CreateOpportunityUseCaseArgsMother {
     this.data.user = user;
     return this;
   }
+
   public withCompanyName(
     companyName: string
   ): CreateOpportunityUseCaseArgsMother {

@@ -40,6 +40,7 @@ export function assertOrganizationHasExportRole(
     );
   }
 }
+
 export function assertOrganizationHasAceIntegration(
   organization: Organization
 ): asserts organization is Organization & { aceIntegration: object } {

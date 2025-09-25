@@ -2,7 +2,7 @@ export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './CognitoService';
-export * from './config/debug/config';
+export * from './config/debug';
 export * from './FeatureToggleRepository';
 export * from './FindingToBestPracticesAssociationService';
 export * from './IdGenerator';

@@ -45,13 +45,39 @@ describe('CreateOpportunity adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return 400 when opportunityDetails.customerCountry is invalid', async () => {
+      const { adapter } = setup();
+
+      const event = CreateOpportunityAdapterEventMother.basic()
+        .withCustomerCountry('XX_INVALID')
+        .build();
+
+      const response = await adapter.handle(event);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toContain('Invalid country code');
+    });
+
+    it('should return 400 when opportunityDetails.industry is invalid', async () => {
+      const { adapter } = setup();
+
+      const event = CreateOpportunityAdapterEventMother.basic()
+        .withIndustry('NotARealIndustry')
+        .build();
+
+      const response = await adapter.handle(event);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toContain('Invalid industry');
+    });
   });
   describe('useCase and return value', () => {
     it('should call useCase with path parameters and user', async () => {
       const { adapter, useCase } = setup();
 
       const event = CreateOpportunityAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withUser(
           UserMother.basic()
             .withId('user-id')
@@ -74,7 +100,7 @@ describe('CreateOpportunity adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.createOpportunity).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         opportunityDetails: {
           companyName: 'testCompany',
           duns: '123456789',
@@ -109,7 +135,6 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
   const useCase = { createOpportunity: vitest.fn() };
-  useCase.createOpportunity.mockResolvedValueOnce(Promise.resolve());
   register(tokenCreateOpportunityUseCase, { useValue: useCase });
   const adapter = new CreateOpportunityAdapter();
   return { useCase, adapter };

@@ -1,10 +1,12 @@
+import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
+
 export interface OpportunityDetails {
   companyName: string;
   duns: string;
-  industry: string;
+  industry: Industry;
   customerType: CustomerType;
   companyWebsiteUrl: string;
-  customerCountry: string;
+  customerCountry: CountryCode;
   customerPostalCode: string;
   monthlyRecurringRevenue: string;
   targetCloseDate: string;

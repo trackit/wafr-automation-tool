@@ -10,7 +10,7 @@ import { inject, reset } from '@shared/di-container';
 import { ConflictError, NotFoundError } from '../Errors';
 import { CreateOpportunityUseCaseImpl } from './CreateOpportunityUseCase';
 import { CreateOpportunityUseCaseArgsMother } from './CreateOpportunityUseCaseArgsMother';
-vitest.useFakeTimers();
+
 describe('CreateOpportunity UseCase', () => {
   it('should call PartnerCentralSellingService and update assessment', async () => {
     const {
@@ -140,69 +140,12 @@ describe('CreateOpportunity UseCase', () => {
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow();
   });
-
-  it('should throw when opportunityDetails.customerCountry is invalid', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
-      setup();
-
-    const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
-      .build();
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
-
-    const organization = OrganizationMother.basic()
-      .withDomain('test.io')
-      .withAceIntegration({
-        opportunityTeamMembers: [],
-        roleArn: 'roleArn',
-        solutions: [],
-      })
-      .build();
-    fakeOrganizationRepository.organizations['test.io'] = organization;
-
-    const input = CreateOpportunityUseCaseArgsMother.basic()
-      .withCustomerCountry('XX_INVALID')
-      .build();
-
-    await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      /Invalid country code/
-    );
-  });
-
-  it('should throw when opportunityDetails.industry is invalid', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
-      setup();
-
-    const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
-      .build();
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] = assessment;
-
-    const organization = OrganizationMother.basic()
-      .withDomain('test.io')
-      .withAceIntegration({
-        opportunityTeamMembers: [],
-        roleArn: 'roleArn',
-        solutions: [],
-      })
-      .build();
-    fakeOrganizationRepository.organizations['test.io'] = organization;
-
-    const input = CreateOpportunityUseCaseArgsMother.basic()
-      .withIndustry('NotARealIndustry')
-      .build();
-
-    await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      /Invalid industry/
-    );
-  });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
+  vitest.useFakeTimers();
   const fakePartnerCentralSellingService = inject(
     tokenFakePartnerCentralSellingService
   );

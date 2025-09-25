@@ -1,3 +1,4 @@
+import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodError, ZodType } from 'zod';
 
@@ -12,14 +13,14 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { BadRequestError } from '../../../utils/api/HttpError';
 
 const CreateOpportunityPathSchema = z.object({
-  assessmentId: z.string(),
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['createOpportunity']['parameters']['path']>;
 
 const CreateOpportunityBodySchema = z.object({
   companyName: z.string(),
   duns: z.string(),
   industry: z.string(),
-  customerType: z.enum(['INTERNAL_WORKLOAD', 'CUSTOMER']),
+  customerType: z.nativeEnum(CustomerType),
   companyWebsiteUrl: z.string(),
   customerCountry: z.string(),
   customerPostalCode: z.string(),
@@ -30,6 +31,14 @@ const CreateOpportunityBodySchema = z.object({
 }) satisfies ZodType<
   operations['createOpportunity']['requestBody']['content']['application/json']
 >;
+
+function isIndustry(value: string): value is Industry {
+  return Object.values(Industry).includes(value as Industry);
+}
+
+function isCountryCode(value: string): value is CountryCode {
+  return Object.values(CountryCode).includes(value as CountryCode);
+}
 
 export class CreateOpportunityAdapter {
   private readonly useCase = inject(tokenCreateOpportunityUseCase);
@@ -50,16 +59,27 @@ export class CreateOpportunityAdapter {
       statusCode: 200,
     });
   }
+
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
     const { pathParameters, body } = event;
     try {
       const parsedPath = CreateOpportunityPathSchema.parse(pathParameters);
       const parsedBody = this.parseBody(body ?? undefined);
+      if (!isCountryCode(parsedBody.customerCountry)) {
+        throw new BadRequestError(
+          `Invalid country code: ${parsedBody.customerCountry}`
+        );
+      }
+      if (!isIndustry(parsedBody.industry)) {
+        throw new BadRequestError(`Invalid industry: ${parsedBody.industry}`);
+      }
       await this.useCase.createOpportunity({
         ...parsedPath,
         opportunityDetails: {
           ...parsedBody,
           customerType: parsedBody.customerType as CustomerType,
+          customerCountry: parsedBody.customerCountry as CountryCode,
+          industry: parsedBody.industry as Industry,
         },
         user: getUserFromEvent(event),
       });

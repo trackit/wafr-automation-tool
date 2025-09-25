@@ -1,5 +1,3 @@
-import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
-
 import {
   tokenAssessmentsRepository,
   tokenLogger,
@@ -22,13 +20,6 @@ export interface CreateOpportunityUseCase {
   createOpportunity(args: CreateOpportunityUseCaseArgs): Promise<void>;
 }
 
-function isIndustry(value: string): value is Industry {
-  return Object.values(Industry).includes(value as Industry);
-}
-
-function isCountryCode(value: string): value is CountryCode {
-  return Object.values(CountryCode).includes(value as CountryCode);
-}
 export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   private readonly logger = inject(tokenLogger);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
@@ -36,11 +27,13 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   private readonly partnerCentralSellingService = inject(
     tokenPartnerCentralSellingService
   );
+
   public extractAccountId(roleArn: string | undefined): string {
     if (!roleArn) return '';
     const match = roleArn.match(/arn:aws:iam::(\d+):/);
     return match ? match[1] : '';
   }
+
   public async createOpportunity(
     args: CreateOpportunityUseCaseArgs
   ): Promise<void> {
@@ -67,14 +60,6 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
       );
     }
     assertOrganizationHasAceIntegration(organization);
-    if (!isCountryCode(args.opportunityDetails.customerCountry)) {
-      throw new Error(
-        `Invalid country code: ${args.opportunityDetails.customerCountry}`
-      );
-    }
-    if (!isIndustry(args.opportunityDetails.industry)) {
-      throw new Error(`Invalid industry: ${args.opportunityDetails.industry}`);
-    }
 
     const accountId = this.extractAccountId(assessment.roleArn);
     const customerBusinessProblem =

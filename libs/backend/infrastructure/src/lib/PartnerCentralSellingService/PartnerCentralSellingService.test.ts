@@ -11,16 +11,18 @@ import {
   AssessmentMother,
   CustomerType,
   OpportunityDetails,
+  OpportunityDetailsMother,
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { tokenDebug } from '../config/debug/config';
+import { tokenDebug } from '../config/debug';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenSTSClient } from '../STSClientService';
 import {
   PartnerCentralSellingService,
   tokenPartnerCentralSellingClientConstructor,
 } from './PartnerCentralSellingService';
+
 describe('PartnerCentralSelling Infrastructure', () => {
   describe('createPartnerCentralSellingClient', () => {
     it('should create a new Partner Central Selling client', async () => {
@@ -85,19 +87,19 @@ describe('PartnerCentralSelling Infrastructure', () => {
         .build();
 
       const organizationName = 'testOrganization';
-      const opportunityDetails: OpportunityDetails = {
-        companyName: 'testCompany',
-        duns: '123456789',
-        industry: 'Aerospace',
-        customerType: CustomerType.INTERNAL_WORKLOAD,
-        companyWebsiteUrl: 'https://test.io',
-        customerCountry: 'US',
-        customerPostalCode: '1111',
-        monthlyRecurringRevenue: '1111',
-        targetCloseDate: '2097-01-01',
-        customerCity: 'City',
-        customerAddress: 'street',
-      };
+      const opportunityDetails = OpportunityDetailsMother.basic()
+        .withCompanyName('testCompany')
+        .withDuns('123456789')
+        .withIndustry('Aerospace')
+        .withCustomerType(CustomerType.INTERNAL_WORKLOAD)
+        .withCompanyWebsiteUrl('https://test.io')
+        .withCustomerCountry('US')
+        .withCustomerPostalCode('1111')
+        .withMonthlyRecurringRevenue('1111')
+        .withTargetCloseDate('2097-01-01')
+        .withCustomerCity('City')
+        .withCustomerAddress('street')
+        .build();
       const aceIntegration: AceIntegration = {
         opportunityTeamMembers: [
           {

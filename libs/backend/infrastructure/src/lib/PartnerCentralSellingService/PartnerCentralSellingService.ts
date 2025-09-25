@@ -1,9 +1,7 @@
 import {
   AssociateOpportunityCommand,
   Contact,
-  CountryCode,
   CreateOpportunityCommand,
-  Industry,
   PartnerCentralSellingClient,
   PartnerCentralSellingClientConfig,
   RelatedEntityType,
@@ -18,17 +16,26 @@ import {
 import { PartnerCentralSellingPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { tokenDebug } from '../config/debug/config';
+import { tokenDebug } from '../config/debug';
 import { tokenIdGenerator } from '../IdGenerator';
 import { tokenSTSClient } from '../STSClientService';
 
+type AssociateOpportunityArgs = {
+  client: PartnerCentralSellingClient;
+  catalog: string;
+  opportunityId: string;
+  relatedEntityType: RelatedEntityType;
+  relatedEntityIdentifier: string;
+};
+
 export class PartnerCentralSellingService implements PartnerCentralSellingPort {
   private readonly stsClient = inject(tokenSTSClient);
-  private readonly idgenerator = inject(tokenIdGenerator);
+  private readonly idGenerator = inject(tokenIdGenerator);
   private readonly debug = inject(tokenDebug);
   private readonly partnerCentralSellingClientConstructor = inject(
     tokenPartnerCentralSellingClientConstructor
   );
+
   public async createPartnerCentralSellingClient(
     roleArn: string
   ): Promise<PartnerCentralSellingClient> {
@@ -50,13 +57,14 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
       region: 'us-east-1',
     });
   }
-  public async associateOpportunity(
-    client: PartnerCentralSellingClient,
-    catalog: string,
-    opportunityId: string,
-    relatedEntityType: RelatedEntityType,
-    relatedEntityIdentifier: string
-  ): Promise<void> {
+
+  public async associateOpportunity({
+    client,
+    catalog,
+    opportunityId,
+    relatedEntityType,
+    relatedEntityIdentifier,
+  }: AssociateOpportunityArgs): Promise<void> {
     const command = new AssociateOpportunityCommand({
       Catalog: catalog,
       OpportunityIdentifier: opportunityId,
@@ -97,14 +105,14 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
 
     const command = new CreateOpportunityCommand({
       Catalog: catalog,
-      ClientToken: `WAFR-${assessment.id}-${this.idgenerator.generate()}`,
+      ClientToken: `WAFR-${assessment.id}-${this.idGenerator.generate()}`,
       Customer: {
         Account: {
           CompanyName: opportunityDetails.companyName,
           WebsiteUrl: opportunityDetails.companyWebsiteUrl,
-          Industry: opportunityDetails.industry as Industry,
+          Industry: opportunityDetails.industry,
           Address: {
-            CountryCode: opportunityDetails.customerCountry as CountryCode,
+            CountryCode: opportunityDetails.customerCountry,
             City: opportunityDetails.customerCity ?? '',
             PostalCode: opportunityDetails.customerPostalCode,
             StreetAddress: opportunityDetails.customerAddress ?? '',
@@ -139,13 +147,13 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
     const createResult = await client.send(command);
     const returnedOpportunityId = createResult.Id!;
     for (const solution of aceIntegration.solutions) {
-      await this.associateOpportunity(
+      await this.associateOpportunity({
         client,
         catalog,
-        returnedOpportunityId,
-        'Solutions',
-        solution
-      );
+        opportunityId: returnedOpportunityId,
+        relatedEntityType: 'Solutions',
+        relatedEntityIdentifier: solution,
+      });
     }
     return returnedOpportunityId;
   }
