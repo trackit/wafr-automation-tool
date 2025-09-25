@@ -8,11 +8,11 @@ import { Finding, ScanFinding, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export interface StoreFindingsToAssociateUseCaseArgs {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   scanningTool: ScanningTool;
   scanFindings: ScanFinding[];
 }
@@ -64,15 +64,17 @@ export class StoreFindingsToAssociateUseCaseImpl
   public async storeFindingsToAssociate(
     args: StoreFindingsToAssociateUseCaseArgs
   ): Promise<string[]> {
-    const { assessmentId, organization, scanningTool, scanFindings } = args;
+    const { assessmentId, organizationDomain, scanningTool, scanFindings } =
+      args;
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization,
+      organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found in organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
     const findings = scanFindings.map<Finding>((scanFinding) => ({
       ...scanFinding,

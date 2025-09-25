@@ -10,7 +10,11 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { ConflictError, NotFoundError } from '../Errors';
+import {
+  AssessmentFileExportNotFinishedError,
+  AssessmentFileExportNotFoundError,
+  AssessmentNotFoundError,
+} from '../../errors';
 
 export type DeletePDFExportUseCaseArgs = {
   assessmentId: string;
@@ -27,37 +31,42 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
-  public async deletePDFExport({
-    assessmentId,
-    fileExportId,
-    user,
-  }: DeletePDFExportUseCaseArgs): Promise<void> {
+  public async deletePDFExport(
+    args: DeletePDFExportUseCaseArgs
+  ): Promise<void> {
+    const { assessmentId, fileExportId, user } = args;
+
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: user.organizationDomain,
+      });
     }
 
     const assessmentExport = assessment.fileExports?.[
       AssessmentFileExportType.PDF
     ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
     if (!assessmentExport) {
-      throw new NotFoundError(
-        `PDF export with id ${fileExportId} not found for assessment ${assessmentId}`
-      );
+      throw new AssessmentFileExportNotFoundError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+      });
     }
 
     if (
       assessmentExport.status === AssessmentFileExportStatus.NOT_STARTED ||
       assessmentExport.status === AssessmentFileExportStatus.IN_PROGRESS
     ) {
-      throw new ConflictError(
-        `PDF export with id ${fileExportId} is not finished for assessment ${assessmentId}`
-      );
+      throw new AssessmentFileExportNotFinishedError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+      });
     }
 
     if (assessmentExport.objectKey) {
@@ -66,7 +75,7 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
 
     await this.assessmentsRepository.deleteFileExport({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       type: AssessmentFileExportType.PDF,
       id: fileExportId,
     });

@@ -9,8 +9,8 @@ export class CleanupAdapterEventMother {
 
   public static basic(): CleanupAdapterEventMother {
     return new CleanupAdapterEventMother({
-      assessmentId: 'assessment-id',
-      organization: 'test.io',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'test.io',
       error: {
         Cause: 'test-cause',
         Error: 'test-error',
@@ -25,10 +25,10 @@ export class CleanupAdapterEventMother {
     return this;
   }
 
-  public withOrganization(
-    organization: CleanupInput['organization']
+  public withOrganizationDomain(
+    organizationDomain: CleanupInput['organizationDomain']
   ): CleanupAdapterEventMother {
-    this.data.organization = organization;
+    this.data.organizationDomain = organizationDomain;
     return this;
   }
 

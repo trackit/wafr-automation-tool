@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenDeleteAssessmentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -7,10 +7,10 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const DeleteAssessmentArgsSchema = z.object({
-  assessmentId: z.string(),
+const DeleteAssessmentPathSchema = z.object({
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['deleteAssessment']['parameters']['path']>;
 
 export class DeleteAssessmentAdapter {
@@ -22,28 +22,22 @@ export class DeleteAssessmentAdapter {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<operations['deleteAssessment']['responses']['200']['content']> {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: DeleteAssessmentPathSchema,
+    });
 
-    try {
-      const parsedParameters = DeleteAssessmentArgsSchema.parse(pathParameters);
-      await this.useCase.deleteAssessment({
-        user: getUserFromEvent(event),
-        ...parsedParameters,
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${error.message}`);
-      }
-      throw error;
-    }
+    const user = getUserFromEvent(event);
+
+    await this.useCase.deleteAssessment({
+      ...pathParameters,
+      user,
+    });
   }
 }

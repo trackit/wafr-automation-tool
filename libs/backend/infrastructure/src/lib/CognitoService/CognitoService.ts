@@ -9,7 +9,6 @@ import { CognitoPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { InfrastructureError, UserNotFoundError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 
 export class CognitoService implements CognitoPort {
@@ -27,39 +26,26 @@ export class CognitoService implements CognitoPort {
 
   public async getUserById(args: { userId: string }): Promise<User> {
     const { userId } = args;
-
     const cmd = new ListUsersCommand({
       UserPoolId: this.userPoolId,
       Filter: `sub = "${userId}"`,
       Limit: 1,
     });
 
-    try {
-      const res = await this.client.send(cmd);
+    const response = await this.client.send(cmd);
 
-      if (res.$metadata.httpStatusCode !== 200) {
-        throw new InfrastructureError({
-          message: `Cognito ListUsers failed: ${res.$metadata.httpStatusCode}`,
-        });
-      }
-
-      const user = res.Users?.[0];
-      if (!user) {
-        this.logger.info(`Cognito user not found for sub=${userId}`);
-        throw new UserNotFoundError({ userId });
-      }
-
-      this.logger.info(`Fetched Cognito user sub=${userId}`);
-      const attrs = this.toAttrMap(user.Attributes ?? []);
-      return {
-        id: userId,
-        email: attrs.email,
-        organizationDomain: attrs.email.split('@')[1],
-      };
-    } catch (err) {
-      this.logger.error(`Error fetching Cognito user sub=${userId}: ${err}`);
-      throw err;
+    const user = response.Users?.[0];
+    if (response.$metadata.httpStatusCode !== 200 || !user) {
+      throw new Error(JSON.stringify(response));
     }
+
+    this.logger.info(`Fetched Cognito user sub=${userId}`);
+    const attrs = this.toAttrMap(user.Attributes ?? []);
+    return {
+      id: userId,
+      email: attrs.email,
+      organizationDomain: attrs.email.split('@')[1],
+    };
   }
 }
 

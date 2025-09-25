@@ -1,36 +1,28 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenUpdateCommentUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateCommentPathSchema = z.object({
-  assessmentId: z.string(),
-  findingId: z.string(),
-  commentId: z.string(),
+  assessmentId: z.string().uuid(),
+  findingId: z.string().nonempty(),
+  commentId: z.string().uuid(),
 }) satisfies ZodType<operations['updateComment']['parameters']['path']>;
 
-const UpdateCommentArgsSchema = z.object({
-  text: z.string(),
+const UpdateCommentBodySchema = z.object({
+  text: z.string().nonempty(),
 }) satisfies ZodType<
   operations['updateComment']['requestBody']['content']['application/json']
 >;
 
 export class UpdateCommentAdapter {
   private readonly useCase = inject(tokenUpdateCommentUseCase);
-
-  private parseBody(
-    body?: string
-  ): operations['updateComment']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return UpdateCommentArgsSchema.parse(parsedBody);
-  }
 
   public async handle(
     event: APIGatewayProxyEvent
@@ -43,27 +35,20 @@ export class UpdateCommentAdapter {
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters, body } = event;
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdateCommentPathSchema,
+      bodySchema: UpdateCommentBodySchema,
+    });
+    const { assessmentId, findingId, commentId } = pathParameters;
 
-    try {
-      const parsedPath = UpdateCommentPathSchema.parse(pathParameters);
-      const parsedBody = this.parseBody(body);
+    const user = getUserFromEvent(event);
 
-      await this.useCase.updateComment({
-        assessmentId: parsedPath.assessmentId,
-        findingId: decodeURIComponent(parsedPath.findingId),
-        commentId: parsedPath.commentId,
-        user: getUserFromEvent(event),
-        commentBody: parsedBody,
-      });
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
-      }
-      throw e;
-    }
+    await this.useCase.updateComment({
+      assessmentId,
+      findingId: decodeURIComponent(findingId),
+      commentId,
+      user,
+      commentBody: body,
+    });
   }
 }

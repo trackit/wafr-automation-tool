@@ -4,6 +4,7 @@ import { tokenDeletePDFExportUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { DeletePDFExportAdapter } from './DeletePDFExportAdapter';
 import { DeletePDFExportAdapterEventMother } from './DeletePDFExportAdapterEventMother';
 
@@ -26,31 +27,44 @@ describe('deletePDFExport adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should call parseApiEvent with the correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = DeletePDFExportAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
+    });
   });
 
   describe('useCase and return value', () => {
     it('should call useCase with path parameters and user', async () => {
       const { adapter, useCase } = setup();
 
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const fileExportId = 'file-export-id';
+
+      const user = UserMother.basic().build();
+
       const event = DeletePDFExportAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withFileExportId('file-export-id')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withAssessmentId(assessmentId)
+        .withFileExportId(fileExportId)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.deletePDFExport).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
-        fileExportId: 'file-export-id',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        assessmentId,
+        fileExportId,
+        user,
       });
     });
 
@@ -69,10 +83,11 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { deletePDFExport: vitest.fn() };
   useCase.deletePDFExport.mockResolvedValueOnce(Promise.resolve());
   register(tokenDeletePDFExportUseCase, { useValue: useCase });
 
-  const adapter = new DeletePDFExportAdapter();
-  return { useCase, adapter };
+  return { parseSpy, useCase, adapter: new DeletePDFExportAdapter() };
 };

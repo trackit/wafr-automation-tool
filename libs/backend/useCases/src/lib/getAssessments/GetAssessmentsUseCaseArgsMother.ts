@@ -1,4 +1,4 @@
-import { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { GetAssessmentsUseCaseArgs } from './GetAssessmentsUseCase';
 
@@ -11,11 +11,7 @@ export class GetAssessmentsUseCaseArgsMother {
 
   public static basic(): GetAssessmentsUseCaseArgsMother {
     return new GetAssessmentsUseCaseArgsMother({
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
     });
   }
 

@@ -15,7 +15,7 @@ export class PrepareFindingsAssociationsUseCaseArgsMother {
       scanningTool: ScanningTool.PROWLER,
       regions: [],
       workflows: [],
-      organization: 'test.io',
+      organizationDomain: 'test.io',
     });
   }
 
@@ -47,10 +47,10 @@ export class PrepareFindingsAssociationsUseCaseArgsMother {
     return this;
   }
 
-  public withOrganization(
-    organization: string
+  public withOrganizationDomain(
+    organizationDomain: string
   ): PrepareFindingsAssociationsUseCaseArgsMother {
-    this.input.organization = organization;
+    this.input.organizationDomain = organizationDomain;
     return this;
   }
 

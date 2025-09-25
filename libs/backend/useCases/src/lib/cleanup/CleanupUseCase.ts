@@ -2,6 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenDebug,
   tokenFeatureToggleRepository,
+  tokenFindingsRepository,
   tokenLogger,
   tokenMarketplaceService,
   tokenObjectsStorage,
@@ -10,7 +11,13 @@ import {
 import { AssessmentStep } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import {
+  AssessmentNotFoundError,
+  OrganizationAccountIdNotSetError,
+  OrganizationNotFoundError,
+  OrganizationSubscriptionNotFoundError,
+  OrganizationUnitBasedAgreementIdNotSetError,
+} from '../../errors';
 
 export type StateMachineError = {
   Cause: string;
@@ -19,7 +26,7 @@ export type StateMachineError = {
 
 export type CleanupUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   error?: StateMachineError;
 };
 
@@ -30,6 +37,7 @@ export interface CleanupUseCase {
 export class CleanupUseCaseImpl implements CleanupUseCase {
   private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
@@ -41,23 +49,24 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   public async cleanupError(args: CleanupUseCaseArgs): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.organization,
+      organizationDomain: args.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.organizationDomain,
+      });
     }
     if (!this.debug) {
-      await this.assessmentsRepository.deleteFindings({
+      await this.findingsRepository.deleteAll({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
       });
       this.logger.info(`Deleting findings for assessment ${assessment.id}`);
     }
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       assessmentBody: {
         step: AssessmentStep.ERRORED,
         error: args.error
@@ -74,21 +83,21 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   }
 
   public async cleanupSuccessful(args: CleanupUseCaseArgs) {
-    const organization = await this.organizationRepository.get({
-      organizationDomain: args.organization,
-    });
+    const organization = await this.organizationRepository.get(
+      args.organizationDomain
+    );
     if (!organization) {
-      throw new NotFoundError('Organization not found');
+      throw new OrganizationNotFoundError({ domain: args.organizationDomain });
     }
     if (
       organization.freeAssessmentsLeft &&
       organization.freeAssessmentsLeft > 0
     ) {
-      this.logger.info(`Consume free assessment for ${args.organization}`);
+      this.logger.info(
+        `Consume free assessment for ${args.organizationDomain}`
+      );
       organization.freeAssessmentsLeft--;
-      await this.organizationRepository.save({
-        organization,
-      });
+      await this.organizationRepository.save(organization);
       return;
     }
     if (!this.featureToggleRepository.marketplaceIntegration()) {
@@ -97,24 +106,34 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       );
       return;
     }
+    if (!organization.accountId) {
+      throw new OrganizationAccountIdNotSetError({
+        domain: organization.domain,
+      });
+    }
     const monthly = await this.marketplaceService.hasMonthlySubscription({
-      organization,
+      accountId: organization.accountId,
     });
     if (!monthly) {
+      if (!organization.unitBasedAgreementId) {
+        throw new OrganizationUnitBasedAgreementIdNotSetError({
+          domain: organization.domain,
+        });
+      }
       const perUnit = await this.marketplaceService.hasUnitBasedSubscription({
-        organization,
+        unitBasedAgreementId: organization.unitBasedAgreementId,
       });
       if (perUnit) {
         this.logger.info(
-          `Consume review unit for ${args.organization} because it is not a monthly subscription`
+          `Consume review unit for ${args.organizationDomain} because it is not a monthly subscription`
         );
         await this.marketplaceService.consumeReviewUnit({
-          organization,
+          accountId: organization.accountId,
         });
       } else {
-        throw new NotFoundError(
-          `Organization ${args.organization} does not have a subscription`
-        );
+        throw new OrganizationSubscriptionNotFoundError({
+          domain: args.organizationDomain,
+        });
       }
     }
   }
@@ -125,8 +144,12 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
         `assessments/${args.assessmentId}`
       );
       this.logger.info(`Deleting assessment: ${listObjects}`);
-      this.objectsStorage.bulkDelete(listObjects);
-      this.logger.info(`Debug mode is disabled, deleting assessment`);
+      if (listObjects.length !== 0) {
+        await this.objectsStorage.bulkDelete(listObjects);
+        this.logger.info(`Debug mode is disabled, deleting assessment`);
+      } else {
+        this.logger.info(`Debug mode is disabled, nothing to delete`);
+      }
     }
     try {
       if (args.error) {

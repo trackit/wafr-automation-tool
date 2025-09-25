@@ -5,5 +5,19 @@
     "declaration": true,
     "types": ["node", "vite/client"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["**/*.ts"],
+  "exclude": [
+    "vite.config.ts",
+    "vite.config.mts",
+    "vitest.config.ts",
+    "vitest.config.mts",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+    "**/*.test.js",
+    "**/*.spec.js",
+    "**/*.test.jsx",
+    "**/*.spec.jsx"
+  ]
 }

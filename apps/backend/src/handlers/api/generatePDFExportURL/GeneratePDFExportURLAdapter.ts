@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenGeneratePDFExportURLUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -7,14 +7,11 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import {
-  MissingRequestPathError,
-  RequestParsingFailedError,
-} from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GeneratePDFExportURLPathSchema = z.object({
-  assessmentId: z.string(),
-  fileExportId: z.string(),
+  assessmentId: z.string().uuid(),
+  fileExportId: z.string().nonempty(),
 }) satisfies ZodType<operations['generatePDFExportURL']['parameters']['path']>;
 
 export class GeneratePDFExportURLAdapter {
@@ -35,25 +32,16 @@ export class GeneratePDFExportURLAdapter {
   ): Promise<
     operations['generatePDFExportURL']['responses']['200']['content']['application/json']
   > {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new MissingRequestPathError();
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: GeneratePDFExportURLPathSchema,
+    });
 
-    try {
-      const parsedPath = GeneratePDFExportURLPathSchema.parse(pathParameters);
-      const presignedURL = await this.useCase.generatePDFExportURL({
-        ...parsedPath,
-        user: getUserFromEvent(event),
-      });
-      return {
-        url: presignedURL,
-      };
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new RequestParsingFailedError(e);
-      }
-      throw e;
-    }
+    const presignedURL = await this.useCase.generatePDFExportURL({
+      ...pathParameters,
+      user: getUserFromEvent(event),
+    });
+    return {
+      url: presignedURL,
+    };
   }
 }

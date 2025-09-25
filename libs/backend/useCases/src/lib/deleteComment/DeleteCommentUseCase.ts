@@ -1,12 +1,12 @@
-import {
-  FindingNotFoundError,
-  tokenAssessmentsRepository,
-  tokenLogger,
-} from '@backend/infrastructure';
+import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { ForbiddenError, NotFoundError } from '../Errors';
+import {
+  FindingCommentForbiddenError,
+  FindingCommentNotFoundError,
+  FindingNotFoundError,
+} from '../../errors';
 
 export type DeleteCommentUseCaseArgs = {
   assessmentId: string;
@@ -20,55 +20,52 @@ export interface DeleteCommentUseCase {
 }
 
 export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async deleteComment(args: DeleteCommentUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, commentId, user } = args;
 
-    const finding = await this.assessmentsRepository.getFinding({
+    const finding = await this.findingsRepository.get({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
       findingId,
     });
     if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${user.organizationDomain}`
-      );
-      throw new NotFoundError(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${user.organizationDomain}`
-      );
+      throw new FindingNotFoundError({
+        assessmentId,
+        findingId,
+        organizationDomain: user.organizationDomain,
+      });
     }
 
     const comment = finding.comments?.find((c) => c.id === commentId);
     if (!comment) {
-      this.logger.error(
-        `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${user.organizationDomain}`
-      );
-      throw new NotFoundError(
-        `Comment with commentId ${commentId} not found for finding ${findingId} in assessment ${assessmentId} in organization ${user.organizationDomain}`
-      );
-    }
-
-    if (comment.authorId !== user.id) {
-      throw new ForbiddenError(
-        `User ${user.email} is not allowed to delete comment ${commentId} for finding ${findingId}`
-      );
-    }
-
-    await this.assessmentsRepository
-      .deleteFindingComment({
+      throw new FindingCommentNotFoundError({
         assessmentId,
-        organization: user.organizationDomain,
+        findingId,
+        organizationDomain: user.organizationDomain,
+        commentId,
+      });
+    }
+    if (comment.authorId !== user.id) {
+      throw new FindingCommentForbiddenError({
         findingId,
         commentId,
-      })
-      .catch((error) => {
-        if (error instanceof FindingNotFoundError) {
-          throw new NotFoundError(error.message);
-        }
-        throw error;
+        userEmail: user.email,
+        actionType: 'delete',
       });
+    }
+
+    await this.findingsRepository.deleteComment({
+      assessmentId,
+      organizationDomain: user.organizationDomain,
+      findingId,
+      commentId,
+    });
+    this.logger.info(
+      `Delete comment for finding ${findingId} in assessment ${assessmentId} by user ${user.id}`
+    );
   }
 }
 

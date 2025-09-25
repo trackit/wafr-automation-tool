@@ -41,45 +41,41 @@ describe('OrganizationRepositoryDynamoDB', () => {
     it('should get an organization by domain', async () => {
       const { repository } = setup();
 
+      const domain = 'test.io';
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
+        .withDomain(domain)
         .build();
 
-      await repository.save({ organization });
+      await repository.save(organization);
 
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+      const fetchedOrganization = await repository.get(domain);
 
       expect(fetchedOrganization).toEqual(organization);
     });
+
     it('should return undefined if organization does not exist', async () => {
       const { repository } = setup();
 
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+      const fetchedOrganization = await repository.get('test.io');
 
       expect(fetchedOrganization).toBeUndefined();
     });
+
     it('should throw a ZodError if organization is invalid', async () => {
       const { repository } = setup();
 
       const client = inject(tokenDynamoDBDocument);
       const tableName = inject(tokenDynamoDBOrganizationTableName);
+      const domain = 'test.io';
       await client.put({
         TableName: tableName,
         Item: {
-          PK: 'test.io',
+          PK: domain,
           NOT_A_VALID_FIELD: 'test',
         },
       });
 
-      await expect(
-        repository.get({
-          organizationDomain: 'test.io',
-        })
-      ).rejects.toThrowError(ZodError);
+      await expect(repository.get(domain)).rejects.toThrowError(ZodError);
     });
   });
 });
@@ -87,5 +83,6 @@ describe('OrganizationRepositoryDynamoDB', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return { repository: new OrganizationRepositoryDynamoDB() };
 };

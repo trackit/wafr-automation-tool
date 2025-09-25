@@ -1,4 +1,4 @@
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { UpdateFindingUseCaseArgs } from './UpdateFindingUseCase';
 
@@ -11,13 +11,9 @@ export class UpdateFindingUseCaseArgsMother {
 
   public static basic(): UpdateFindingUseCaseArgsMother {
     return new UpdateFindingUseCaseArgsMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
       findingBody: {},
     });
   }

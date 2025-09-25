@@ -8,94 +8,81 @@ import {
   ScanningTool,
   SeverityType,
 } from '@backend/models';
-import { NotFoundError, tokenGetAssessmentUseCase } from '@backend/useCases';
+import { tokenGetAssessmentUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { GetAssessmentAdapter } from './GetAssessmentAdapter';
+import { GetAssessmentAdapterEventMother } from './GetAssessmentAdapterEventMother';
 
-describe('GetAssessmentAdapter', () => {
+describe('getAssessment adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
-        .build();
-      const response = await adapter.handle(event);
+      const event = GetAssessmentAdapterEventMother.basic().build();
 
+      const response = await adapter.handle(event);
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
+
+      const event = GetAssessmentAdapterEventMother.basic().build();
+
+      await adapter.handle(event);
+
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+        })
+      );
+    });
+
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters(null)
-        .build();
+      const event = APIGatewayProxyEventMother.basic().build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid parameters', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ invalid: 'pathParameters' })
+      const event = GetAssessmentAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
         .build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
   });
-
-  describe('useCase', () => {
-    it('should call useCase with assessmentId', async () => {
+  describe('useCase and return value', () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const event = GetAssessmentAdapterEventMother.basic()
+        .withAssessmentId(assessmentId)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.getAssessment).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ assessmentId: 'assessment-id' })
+        expect.objectContaining({
+          assessmentId,
+        })
       );
-    });
-
-    it('should return a 200 status code', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
-        .build();
-      const assessment = AssessmentMother.basic().build();
-      useCase.getAssessment.mockResolvedValue(assessment);
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(200);
-    });
-
-    it('should return a 404 if useCase throws a NotFoundError', async () => {
-      const { adapter, useCase } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
-        .build();
-      useCase.getAssessment.mockRejectedValue(new NotFoundError());
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(404);
     });
 
     it('should return a formatted assessment', async () => {
       const { adapter, useCase, date } = setup();
 
-      const event = APIGatewayProxyEventMother.basic()
-        .withPathParameters({ assessmentId: 'assessment-id' })
-        .build();
       const assessment = AssessmentMother.basic()
         .withCreatedAt(date)
         .withCreatedBy('user-id')
@@ -130,7 +117,6 @@ describe('GetAssessmentAdapter', () => {
           resourceTypes: { type: 2 },
           severities: { [SeverityType.Medium]: 2 },
         })
-        .withId('assessment-id')
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
@@ -149,12 +135,16 @@ describe('GetAssessmentAdapter', () => {
         .withWAFRWorkloadArn('wafr-workload-arn')
         .withOpportunityId('O1234567')
         .build();
-
       useCase.getAssessment.mockResolvedValue(assessment);
+
+      const event = GetAssessmentAdapterEventMother.basic()
+        .withAssessmentId(assessment.id)
+        .build();
+
       const response = await adapter.handle(event);
       expect(JSON.parse(response.body)).toEqual({
         createdAt: date.toISOString(),
-        createdBy: 'user-id',
+        createdBy: assessment.createdBy,
         pillars: [
           {
             disabled: false,
@@ -180,23 +170,30 @@ describe('GetAssessmentAdapter', () => {
             ],
           },
         ],
-        graphData: {
-          findings: 2,
-          regions: { 'us-west-2': 2 },
-          resourceTypes: { type: 2 },
-          severities: { [SeverityType.Medium]: 2 },
-        },
-        id: 'assessment-id',
-        name: 'assessment name',
-        organization: 'test.io',
-        questionVersion: '1.0.0',
-        regions: ['us-west-2'],
-        roleArn: 'role-arn',
-        step: AssessmentStep.FINISHED,
-        workflows: [],
-        opportunityId: 'O1234567',
-        wafrWorkloadArn: 'wafr-workload-arn',
+        graphData: assessment.graphData,
+        id: assessment.id,
+        name: assessment.name,
+        organization: assessment.organization,
+        questionVersion: assessment.questionVersion,
+        regions: assessment.regions,
+        roleArn: assessment.roleArn,
+        step: assessment.step,
+        workflows: assessment.workflows,
+        wafrWorkloadArn: assessment.wafrWorkloadArn,
+        opportunityId: assessment.opportunityId,
       });
+    });
+
+    it('should return a 200 status code', async () => {
+      const { adapter, useCase } = setup();
+
+      const event = GetAssessmentAdapterEventMother.basic().build();
+
+      const assessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue(assessment);
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
     });
   });
 });
@@ -204,9 +201,14 @@ describe('GetAssessmentAdapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { getAssessment: vitest.fn() };
   register(tokenGetAssessmentUseCase, { useValue: useCase });
+
   const date = new Date();
   vitest.setSystemTime(date);
-  return { useCase, adapter: new GetAssessmentAdapter(), date };
+
+  return { parseSpy, useCase, adapter: new GetAssessmentAdapter(), date };
 };

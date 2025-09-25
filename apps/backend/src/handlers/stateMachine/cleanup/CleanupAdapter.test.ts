@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { tokenCleanupUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
@@ -11,17 +13,28 @@ describe('cleanup adapter', () => {
       const { adapter } = setup();
 
       const event = CleanupAdapterEventMother.basic().build();
-      await adapter.handle(event);
+
+      await expect(adapter.handle(event)).resolves.not.toThrow();
+    });
+
+    it('should throw with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event = CleanupAdapterEventMother.basic()
+        .withAssessmentId('invalid-uuid')
+        .build();
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
     });
   });
 
   describe('useCase', () => {
-    it('should call useCase with assessmentId, organization and error', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = CleanupAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withOrganization('test.io')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganizationDomain('test.io')
         .withError({
           Cause: 'test-cause',
           Error: 'test-error',
@@ -31,9 +44,9 @@ describe('cleanup adapter', () => {
       await expect(adapter.handle(event)).resolves.toBeUndefined();
       expect(useCase.cleanup).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          assessmentId: 'assessment-id',
-          organization: 'test.io',
-          error: { Cause: 'test-cause', Error: 'test-error' },
+          assessmentId: event.assessmentId,
+          organizationDomain: event.organizationDomain,
+          error: event.error,
         })
       );
     });
@@ -43,8 +56,9 @@ describe('cleanup adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const useCase = { cleanup: vitest.fn() };
   register(tokenCleanupUseCase, { useValue: useCase });
-  const adapter = new CleanupAdapter();
-  return { useCase, adapter };
+
+  return { useCase, adapter: new CleanupAdapter() };
 };

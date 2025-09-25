@@ -1,15 +1,9 @@
-import {
-  AssessmentNotFoundError,
-  BestPracticeNotFoundError,
-  EmptyUpdateBodyError,
-  PillarNotFoundError,
-  QuestionNotFoundError,
-  tokenAssessmentsRepository,
-} from '@backend/infrastructure';
+import { tokenAssessmentsRepository } from '@backend/infrastructure';
 import type { BestPracticeBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
+import { assertBestPracticeExists } from '../../services/asserts';
 
 export type UpdateBestPracticeUseCaseArgs = {
   user: User;
@@ -32,25 +26,41 @@ export class UpdateBestPracticeUseCaseImpl
   public async updateBestPractice(
     args: UpdateBestPracticeUseCaseArgs
   ): Promise<void> {
-    try {
-      const { user, ...remaining } = args;
-      await this.assessmentsRepository.updateBestPractice({
-        organization: user.organizationDomain,
-        ...remaining,
+    const {
+      user,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeBody,
+    } = args;
+    const { organizationDomain } = user;
+
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
       });
-    } catch (e) {
-      if (
-        e instanceof AssessmentNotFoundError ||
-        e instanceof PillarNotFoundError ||
-        e instanceof QuestionNotFoundError ||
-        e instanceof BestPracticeNotFoundError
-      ) {
-        throw new NotFoundError(e.message);
-      } else if (e instanceof EmptyUpdateBodyError) {
-        throw new NoContentError(e.description);
-      }
-      throw e;
     }
+    assertBestPracticeExists({
+      assessment,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    });
+
+    await this.assessmentsRepository.updateBestPractice({
+      organizationDomain: user.organizationDomain,
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeBody,
+    });
   }
 }
 

@@ -7,15 +7,12 @@ export class FakeOrganizationRepositoryDynamoDB
 {
   public organizations: Record<string, Organization> = {};
 
-  async save(args: { organization: Organization }): Promise<void> {
-    const { organization } = args;
+  async save(organization: Organization): Promise<void> {
     this.organizations[organization.domain] = organization;
   }
 
-  async get(args: {
-    organizationDomain: string;
-  }): Promise<Organization | undefined> {
-    return this.organizations[args.organizationDomain];
+  async get(organizationDomain: string): Promise<Organization | undefined> {
+    return this.organizations[organizationDomain];
   }
 }
 

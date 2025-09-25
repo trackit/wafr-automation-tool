@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { AssessmentFileExport } from '@backend/models';
 import { tokenListPDFExportsUseCase } from '@backend/useCases';
@@ -8,13 +8,10 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import {
-  MissingRequestPathError,
-  RequestParsingFailedError,
-} from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const ListPDFExportsPathSchema = z.object({
-  assessmentId: z.string(),
+  assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['listPDFExports']['parameters']['path']>;
 
 export class ListPDFExportsAdapter {
@@ -24,7 +21,7 @@ export class ListPDFExportsAdapter {
     assessmentFileExports: AssessmentFileExport[]
   ): operations['listPDFExports']['responses'][200]['content']['application/json'] {
     return assessmentFileExports.map(
-      ({ objectKey, ...assessmentFileExport }) => ({
+      ({ objectKey: _, ...assessmentFileExport }) => ({
         ...assessmentFileExport,
         createdAt: assessmentFileExport.createdAt.toISOString(),
       })
@@ -46,23 +43,18 @@ export class ListPDFExportsAdapter {
   ): Promise<
     operations['listPDFExports']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new MissingRequestPathError();
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: ListPDFExportsPathSchema,
+    });
 
-    try {
-      const parsedPath = ListPDFExportsPathSchema.parse(pathParameters);
-      const pdfExports = await this.useCase.listPDFExports({
-        user: getUserFromEvent(event),
-        assessmentId: parsedPath.assessmentId,
-      });
-      return this.toAPIResponse(pdfExports);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new RequestParsingFailedError(e);
-      }
-      throw e;
-    }
+    const { assessmentId } = pathParameters;
+
+    const user = getUserFromEvent(event);
+
+    const pdfExports = await this.useCase.listPDFExports({
+      user,
+      assessmentId,
+    });
+    return this.toAPIResponse(pdfExports);
   }
 }

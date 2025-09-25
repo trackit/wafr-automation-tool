@@ -1,16 +1,10 @@
 import { Document } from '@react-pdf/renderer';
 import React from 'react';
 
-import {
-  AssessmentMother,
-  BestPracticeMother,
-  FindingMother,
-  PillarMother,
-  QuestionMother,
-} from '@backend/models';
+import { AssessmentMother, FindingMother } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
+import { tokenFakeFindingsRepository } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   PDFService,
@@ -25,45 +19,22 @@ describe('PDFService Infrastructure', () => {
         pdfService,
         renderToBuffer,
         AssessmentDocument,
-        fakeAssessmentsRepository,
+        fakeFindingsRepository,
       } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withName('assessment-name')
-        .withOrganization('test.io')
-        .withPillars([
-          PillarMother.basic()
-            .withId('pillar-id')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('question-id')
-                .withBestPractices([
-                  BestPracticeMother.basic().withId('best-practice-id').build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      await fakeAssessmentsRepository.save(assessment);
+      const assessment = AssessmentMother.basic().build();
 
-      const finding1 = FindingMother.basic()
-        .withBestPractices('pillar-id#question-id#best-practice-id')
-        .withId('tool#1')
-        .build();
-      await fakeAssessmentsRepository.saveFinding({
+      const finding1 = FindingMother.basic().withId('tool#1').build();
+      await fakeFindingsRepository.save({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         finding: finding1,
       });
-      const finding2 = FindingMother.basic()
-        .withBestPractices('pillar-id#question-id#best-practice-id')
-        .withId('tool#2')
-        .build();
-      await fakeAssessmentsRepository.saveFinding({
+
+      const finding2 = FindingMother.basic().withId('tool#2').build();
+      await fakeFindingsRepository.save({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         finding: finding2,
       });
 
@@ -82,7 +53,7 @@ describe('PDFService Infrastructure', () => {
       ).resolves.toStrictEqual(Buffer.from(pdfContent));
 
       expect(AssessmentDocument).toHaveBeenCalledExactlyOnceWith({
-        assessmentName: 'assessment-name',
+        assessmentName: assessment.name,
         versionName,
         findings: [finding1, finding2],
       });
@@ -107,6 +78,6 @@ const setup = () => {
     pdfService: new PDFService(),
     renderToBuffer,
     AssessmentDocument,
-    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
   };
 };

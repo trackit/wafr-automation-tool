@@ -14,7 +14,10 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentNotFinishedError,
+  AssessmentNotFoundError,
+} from '../../errors';
 import {
   StartPDFExportUseCaseImpl,
   tokenStartPDFExportLambdaArn,
@@ -33,26 +36,28 @@ describe('startPDFExport UseCase', () => {
       lambdaArn,
     } = setup();
 
+    const user = UserMother.basic().build();
+    const versionName = 'version-name';
+
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withVersionName('version-name')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withVersionName(versionName)
+      .withUser(user)
       .build();
+
     await expect(useCase.startPDFExport(input)).resolves.toBeUndefined();
 
     const updatedAssessment = await fakeAssessmentsRepository.get({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
     });
-
     const fileExportId = 'fake-id-0';
     expect(updatedAssessment).toMatchObject({
       fileExports: {
@@ -66,73 +71,89 @@ describe('startPDFExport UseCase', () => {
         ],
       },
     });
-
     expect(fakeLambdaService.asyncInvokeLambda).toHaveBeenCalledExactlyOnceWith(
       {
         lambdaArn,
         payload: JSON.stringify({
-          assessmentId: 'assessment-id',
-          organizationDomain: 'test.io',
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
           fileExportId: fileExportId,
         }),
       }
     );
   });
 
-  it('should throw a NotFoundError if the assessment does not exist', async () => {
+  it('should throw AssessmentNotFoundError if the assessment does not exist', async () => {
     const { useCase } = setup();
 
     const input = StartPDFExportUseCaseArgsMother.basic().build();
-    await expect(useCase.startPDFExport(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.startPDFExport(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
   });
 
-  it('should throw a ConflictError if the assessment findings are undefined', async () => {
+  it('should throw AssessmentNotFinishedError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const user = UserMother.basic().build();
+
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
-    await expect(useCase.startPDFExport(input)).rejects.toThrow(ConflictError);
+
+    await expect(useCase.startPDFExport(input)).rejects.toThrow(
+      AssessmentNotFinishedError
+    );
   });
 
-  it('should throw a ConflictError if the assessment is not finished', async () => {
+  it('should throw AssessmentNotFinishedError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const user = UserMother.basic().build();
+
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
     const input = StartPDFExportUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
-    await expect(useCase.startPDFExport(input)).rejects.toThrow(ConflictError);
+    await expect(useCase.startPDFExport(input)).rejects.toThrow(
+      AssessmentNotFinishedError
+    );
   });
 
-  it('should throw a NoContentError if the assessment findings are empty', async () => {
+  it('should throw AssessmentNotFinishedError if the assessment findings are empty', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
+    const user = UserMother.basic().build();
+
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
+      .withOrganization(user.organizationDomain)
       .withStep(AssessmentStep.FINISHED)
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    const input = StartPDFExportUseCaseArgsMother.basic().build();
-    await expect(useCase.startPDFExport(input)).rejects.toThrow(NoContentError);
+    const input = StartPDFExportUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .build();
+    await expect(useCase.startPDFExport(input)).rejects.toThrow(
+      AssessmentNotFinishedError
+    );
   });
 });
 

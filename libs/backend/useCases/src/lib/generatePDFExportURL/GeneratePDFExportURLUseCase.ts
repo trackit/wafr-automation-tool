@@ -10,7 +10,12 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentFileExportFieldNotFoundError,
+  AssessmentFileExportNotFinishedError,
+  AssessmentFileExportNotFoundError,
+  AssessmentNotFoundError,
+} from '../../errors';
 
 export type GeneratePDFExportURLUseCaseArgs = {
   assessmentId: string;
@@ -29,51 +34,55 @@ export class GeneratePDFExportURLUseCaseImpl
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
-  public async generatePDFExportURL({
-    assessmentId,
-    fileExportId,
-    user,
-  }: GeneratePDFExportURLUseCaseArgs): Promise<string> {
+  public async generatePDFExportURL(
+    args: GeneratePDFExportURLUseCaseArgs
+  ): Promise<string> {
+    const { assessmentId, fileExportId, user } = args;
+
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: user.organizationDomain,
+      });
     }
 
     const assessmentExport = assessment.fileExports?.[
       AssessmentFileExportType.PDF
     ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
     if (!assessmentExport) {
-      throw new NotFoundError(
-        `PDF export with id ${fileExportId} not found for assessment ${assessmentId}`
-      );
+      throw new AssessmentFileExportNotFoundError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+      });
     }
-
     if (assessmentExport.status !== AssessmentFileExportStatus.COMPLETED) {
-      throw new ConflictError(
-        `PDF export with id ${fileExportId} is not completed for assessment ${assessmentId}`
-      );
+      throw new AssessmentFileExportNotFinishedError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+      });
     }
-
     if (!assessmentExport.objectKey) {
-      throw new NoContentError(
-        `PDF export with id ${fileExportId} has no object key for assessment ${assessmentId}`
-      );
+      throw new AssessmentFileExportFieldNotFoundError({
+        assessmentId,
+        fileExportId,
+        fileExportType: AssessmentFileExportType.PDF,
+        fieldName: 'objectKey',
+      });
     }
 
     const presignedURL = await this.objectsStorage.generatePresignedURL({
       key: assessmentExport.objectKey,
       expiresInSeconds: 60 * 60, // 1 hour
     });
-
     this.logger.info(
       `Successfully generated pre-signed URL for PDF export with id ${fileExportId} for assessment ${assessmentId}`
     );
-
     return presignedURL;
   }
 }

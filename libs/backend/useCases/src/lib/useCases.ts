@@ -1,3 +1,4 @@
+export * from './addComment';
 export * from './associateFindingsToBestPractices';
 export * from './cleanup';
 export * from './computeGraphData';
@@ -6,7 +7,6 @@ export * from './createOpportunity';
 export * from './deleteAssessment';
 export * from './deleteComment';
 export * from './deletePDFExport';
-export * from './Errors';
 export * from './exportPDF';
 export * from './exportWellArchitectedTool';
 export * from './generatePDFExportURL';

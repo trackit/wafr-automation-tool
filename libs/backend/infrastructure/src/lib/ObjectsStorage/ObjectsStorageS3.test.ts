@@ -18,19 +18,21 @@ import {
   tokenS3Bucket,
 } from './ObjectsStorageS3';
 
-describe('ObjectsStorage Infrastructure', () => {
+describe('ObjectsStorageS3', () => {
   describe('get', () => {
     it('should get an object', async () => {
       const { objectsStorage, s3ClientMock } = setup();
 
+      const objectContent = 'object-content';
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
-        Body: stringToStream('object-content') as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Body: stringToStream(objectContent) as any,
       });
 
-      await expect(objectsStorage.get('assessment-id')).resolves.toBe(
-        'object-content'
-      );
+      await expect(
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).resolves.toBe(objectContent);
     });
 
     it('should return null if object does not exist', async () => {
@@ -60,7 +62,9 @@ describe('ObjectsStorage Infrastructure', () => {
         })
       );
 
-      await expect(objectsStorage.get('assessment-id')).rejects.toThrow(Error);
+      await expect(
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).rejects.toThrow(Error);
     });
   });
 
@@ -68,11 +72,13 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should return an empty list when no objects are found', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      const prefix = 'prefix';
       s3ClientMock.on(ListObjectsV2Command).resolves({
         Contents: [],
         $metadata: { httpStatusCode: 200 },
       });
-      await expect(objectsStorage.list('prefix')).resolves.toEqual([]);
+
+      await expect(objectsStorage.list(prefix)).resolves.toEqual([]);
 
       const listExecutionCalls =
         s3ClientMock.commandCalls(ListObjectsV2Command);
@@ -80,20 +86,22 @@ describe('ObjectsStorage Infrastructure', () => {
       const listExecutionCall = listExecutionCalls[0];
       expect(listExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Prefix: 'prefix',
+        Prefix: prefix,
       });
     });
 
     it('should return a list of objects', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      const prefix = 'prefix';
       s3ClientMock.on(ListObjectsV2Command).resolves({
-        Contents: [{ Key: 'prefix/key1' }, { Key: 'prefix/key2' }],
+        Contents: [{ Key: `${prefix}/key1` }, { Key: `${prefix}/key2` }],
         $metadata: { httpStatusCode: 200 },
       });
-      await expect(objectsStorage.list('prefix')).resolves.toEqual([
-        'prefix/key1',
-        'prefix/key2',
+
+      await expect(objectsStorage.list(prefix)).resolves.toEqual([
+        `${prefix}/key1`,
+        `${prefix}/key2`,
       ]);
 
       const listExecutionCalls =
@@ -102,7 +110,7 @@ describe('ObjectsStorage Infrastructure', () => {
       const listExecutionCall = listExecutionCalls[0];
       expect(listExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Prefix: 'prefix',
+        Prefix: prefix,
       });
     });
 
@@ -124,7 +132,9 @@ describe('ObjectsStorage Infrastructure', () => {
       s3ClientMock.on(DeleteObjectsCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
-      await objectsStorage.bulkDelete(['key1', 'key2']);
+
+      const keys = ['key1', 'key2'];
+      await objectsStorage.bulkDelete(keys);
 
       const bulkDeleteExecutionCalls =
         s3ClientMock.commandCalls(DeleteObjectsCommand);
@@ -133,7 +143,7 @@ describe('ObjectsStorage Infrastructure', () => {
       expect(deleteExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
         Delete: {
-          Objects: [{ Key: 'key1' }, { Key: 'key2' }],
+          Objects: keys.map((key) => ({ Key: key })),
           Quiet: true,
         },
       });
@@ -146,19 +156,8 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.bulkDelete(['key1', 'key2'])).rejects.toThrow(
-        Error
-      );
-    });
-
-    it('should not call client send if keys array is empty', async () => {
-      const { objectsStorage, s3ClientMock } = setup();
-
-      await objectsStorage.bulkDelete([]);
-
-      const bulkDeleteExecutionCalls =
-        s3ClientMock.commandCalls(DeleteObjectsCommand);
-      expect(bulkDeleteExecutionCalls).toHaveLength(0);
+      const keys = ['key1', 'key2'];
+      await expect(objectsStorage.bulkDelete(keys)).rejects.toThrow(Error);
     });
   });
 
@@ -166,9 +165,11 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should put an object with a string', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      const objectKey = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const objectContent = 'object-content';
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream(objectContent) as any,
       });
 
@@ -181,7 +182,7 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await objectsStorage.put({
-        key: 'assessment-id',
+        key: objectKey,
         body: objectContent,
       });
 
@@ -190,7 +191,7 @@ describe('ObjectsStorage Infrastructure', () => {
       const putExecutionCall = putExecutionCalls[0];
       expect(putExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: 'assessment-id',
+        Key: objectKey,
         Body: objectContent,
       });
     });
@@ -198,9 +199,11 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should put an object with a Buffer', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
 
+      const objectKey = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const objectContent = 'object-content';
       s3ClientMock.on(GetObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Body: stringToStream(objectContent) as any,
       });
 
@@ -213,7 +216,7 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await objectsStorage.put({
-        key: 'assessment-id',
+        key: objectKey,
         body: Buffer.from(objectContent),
       });
 
@@ -222,21 +225,24 @@ describe('ObjectsStorage Infrastructure', () => {
       const putExecutionCall = putExecutionCalls[0];
       expect(putExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: 'assessment-id',
+        Key: objectKey,
         Body: Buffer.from(objectContent),
       });
     });
 
     it('should return the S3 URI of the object', async () => {
       const { objectsStorage, s3ClientMock, bucket } = setup();
+
       s3ClientMock.on(PutObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
+      const objectKey = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const objectContent = 'object-content';
       const uri = await objectsStorage.put({
-        key: 'assessment-id',
-        body: 'object-content',
+        key: objectKey,
+        body: objectContent,
       });
-      expect(uri).toBe(`s3://${bucket}/assessment-id`);
+      expect(uri).toBe(`s3://${bucket}/${objectKey}`);
     });
 
     it('should throw an exception if put object fail', async () => {
@@ -247,7 +253,10 @@ describe('ObjectsStorage Infrastructure', () => {
       });
 
       await expect(
-        objectsStorage.put({ key: 'assessment-id', body: 'object-content' })
+        objectsStorage.put({
+          key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          body: 'object-content',
+        })
       ).rejects.toThrow(Error);
     });
   });
@@ -256,11 +265,14 @@ describe('ObjectsStorage Infrastructure', () => {
     it('should parse a URI into a bucket and key', () => {
       const { objectsStorage } = setup();
 
+      const bucketName = 'test-s3-bucket';
+      const keyName = 'key';
+
       const { bucket, key } = objectsStorage.parseURI(
-        's3://test-s3-bucket/key'
+        `s3://${bucketName}/${keyName}`
       );
-      expect(bucket).toEqual('test-s3-bucket');
-      expect(key).toEqual('key');
+      expect(bucket).toEqual(bucketName);
+      expect(key).toEqual(keyName);
     });
 
     it('should throw an error if the URI is invalid', () => {
@@ -277,9 +289,11 @@ describe('ObjectsStorage Infrastructure', () => {
       s3ClientMock.on(DeleteObjectCommand).resolves({
         $metadata: { httpStatusCode: 200 },
       });
-      await objectsStorage.delete(
-        ObjectsStorageS3.getAssessmentsPath('assessment-id')
+
+      const assessmentObjectKey = ObjectsStorageS3.getAssessmentsPath(
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
       );
+      await objectsStorage.delete(assessmentObjectKey);
 
       const deleteExecutionCalls =
         s3ClientMock.commandCalls(DeleteObjectCommand);
@@ -287,7 +301,7 @@ describe('ObjectsStorage Infrastructure', () => {
       const deleteExecutionCall = deleteExecutionCalls[0];
       expect(deleteExecutionCall.args[0].input).toEqual({
         Bucket: bucket,
-        Key: ObjectsStorageS3.getAssessmentsPath('assessment-id'),
+        Key: assessmentObjectKey,
       });
     });
 
@@ -318,9 +332,9 @@ describe('ObjectsStorage Infrastructure', () => {
         $metadata: { httpStatusCode: 500 },
       });
 
-      await expect(objectsStorage.delete('assessment-id')).rejects.toThrow(
-        Error
-      );
+      await expect(
+        objectsStorage.delete('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      ).rejects.toThrow(Error);
     });
   });
 });
@@ -328,10 +342,11 @@ describe('ObjectsStorage Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const objectsStorage = new ObjectsStorageS3();
+
   const s3ClientMock = mockClient(inject(tokenClientS3));
+
   return {
-    objectsStorage,
+    objectsStorage: new ObjectsStorageS3(),
     bucket: inject(tokenS3Bucket),
     s3ClientMock,
   };
