@@ -23,7 +23,7 @@ describe('getAssessments adapter', () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GetAssessmentsAdapterEventMother.basic().build();
@@ -84,7 +84,7 @@ describe('getAssessments adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const user = UserMother.basic().build();

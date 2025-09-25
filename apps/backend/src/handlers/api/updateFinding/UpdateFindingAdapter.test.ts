@@ -18,7 +18,7 @@ describe('updateFinding adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = UpdateFindingAdapterEventMother.basic().build();
@@ -34,7 +34,7 @@ describe('updateFinding adapter', () => {
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -43,7 +43,7 @@ describe('updateFinding adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = UpdateFindingAdapterEventMother.basic()
@@ -55,7 +55,7 @@ describe('updateFinding adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const assessmentId = '14270881-e4b0-4f89-8941-449eed22071d';

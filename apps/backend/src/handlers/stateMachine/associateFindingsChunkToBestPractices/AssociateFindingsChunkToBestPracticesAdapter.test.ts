@@ -115,7 +115,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase, fakeObjectsStorage } = setup();
 
       const findings = [

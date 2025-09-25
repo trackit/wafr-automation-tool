@@ -44,7 +44,7 @@ describe('ComputeGraphDataAdapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = ComputeGraphDataAdapterEventMother.basic()
