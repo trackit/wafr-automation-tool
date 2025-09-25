@@ -52,6 +52,57 @@ describe('AWSSecretsManager Infrastructure', () => {
       ).rejects.toThrowError();
     });
   });
+
+  describe('getDatabaseCredentialsSecret', () => {
+    it('should get and parse database credentials secret', async () => {
+      const { secretsManager, secretsManagerClientMock } = setup();
+      const secretValue = JSON.stringify({
+        username: 'dbuser',
+        password: 'dbpassword',
+      });
+      secretsManagerClientMock.on(GetSecretValueCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        SecretString: secretValue,
+      });
+      await expect(
+        secretsManager.getDatabaseCredentialsSecret(
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
+        )
+      ).resolves.toEqual({
+        username: 'dbuser',
+        password: 'dbpassword',
+      });
+    });
+
+    it('should throw an error if secret value is not valid JSON', async () => {
+      const { secretsManager, secretsManagerClientMock } = setup();
+      secretsManagerClientMock.on(GetSecretValueCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        SecretString: 'invalid-json',
+      });
+      await expect(
+        secretsManager.getDatabaseCredentialsSecret(
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
+        )
+      ).rejects.toThrowError();
+    });
+
+    it('should throw an error if required fields are missing', async () => {
+      const { secretsManager, secretsManagerClientMock } = setup();
+      const secretValue = JSON.stringify({
+        username: 'dbuser',
+      });
+      secretsManagerClientMock.on(GetSecretValueCommand).resolves({
+        $metadata: { httpStatusCode: 200 },
+        SecretString: secretValue,
+      });
+      await expect(
+        secretsManager.getDatabaseCredentialsSecret(
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
+        )
+      ).rejects.toThrowError();
+    });
+  });
 });
 
 const setup = () => {

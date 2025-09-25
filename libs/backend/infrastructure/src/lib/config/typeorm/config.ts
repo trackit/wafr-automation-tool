@@ -1,9 +1,8 @@
 import path from 'path';
 import type { DataSourceOptions } from 'typeorm';
-import z from 'zod';
 
 import { createInjectionToken, inject } from '@shared/di-container';
-import { assertIsDefined, parseJsonObject } from '@shared/utils';
+import { assertIsDefined } from '@shared/utils';
 
 import { tokenSecretsManager } from '../../SecretsManager';
 import { entities } from './entities';
@@ -29,30 +28,18 @@ export const testTypeORMConfig: TypeORMConfig = {
   migrations: [],
 };
 
-interface DBCredentials {
-  username: string;
-  password: string;
-}
-const DBCredentialsSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-}) satisfies z.ZodType<DBCredentials>;
-
 export const tokenTypeORMConfigCreator = createInjectionToken<
   Promise<TypeORMConfig>
 >('TypeORMConfig', {
   useFactory: async () => {
     const secretsManager = inject(tokenSecretsManager);
-    const credentialsSecretValue = await secretsManager.getSecretValue(
-      inject(tokenDBCredentialsSecretArn)
-    );
-    const dbCredentials = DBCredentialsSchema.parse(
-      parseJsonObject(credentialsSecretValue)
-    );
+    const credentialsSecretValue =
+      await secretsManager.getDatabaseCredentialsSecret(
+        inject(tokenDBCredentialsSecretArn)
+      );
     return {
       ...defaultTypeORMConfig,
-      username: dbCredentials.username,
-      password: dbCredentials.password,
+      ...credentialsSecretValue,
     };
   },
 });
