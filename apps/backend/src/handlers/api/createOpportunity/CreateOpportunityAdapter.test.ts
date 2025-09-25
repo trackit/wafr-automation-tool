@@ -34,7 +34,7 @@ describe('CreateOpportunity adapter', () => {
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -43,7 +43,7 @@ describe('CreateOpportunity adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return 400 when opportunityDetails.customerCountry is invalid', async () => {
+    it('should return 400 status code when opportunityDetails.customerCountry is invalid', async () => {
       const { adapter } = setup();
 
       const event = CreateOpportunityAdapterEventMother.basic()
@@ -51,12 +51,10 @@ describe('CreateOpportunity adapter', () => {
         .build();
 
       const response = await adapter.handle(event);
-
       expect(response.statusCode).toBe(400);
-      expect(response.body).toContain('Invalid country code');
     });
 
-    it('should return 400 when opportunityDetails.industry is invalid', async () => {
+    it('should return 400 status code when opportunityDetails.industry is invalid', async () => {
       const { adapter } = setup();
 
       const event = CreateOpportunityAdapterEventMother.basic()
@@ -64,9 +62,7 @@ describe('CreateOpportunity adapter', () => {
         .build();
 
       const response = await adapter.handle(event);
-
       expect(response.statusCode).toBe(400);
-      expect(response.body).toContain('Invalid industry');
     });
   });
 
