@@ -26,7 +26,6 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { MilestoneNotFoundError } from '../../Errors';
 import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 import { tokenFakeQuestionSetService } from '../QuestionSetService';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
@@ -37,7 +36,7 @@ import {
   WellArchitectedToolService,
 } from './WellArchitectedToolService';
 
-describe('wellArchitectedTool Infrastructure', () => {
+describe('WellArchitectedToolService', () => {
   describe('createWellArchitectedClient', () => {
     it('should create a new Well Architected client', async () => {
       const { wellArchitectedToolService, stsClientMock } = setup();
@@ -98,7 +97,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -131,7 +130,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -164,7 +163,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -174,7 +173,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -421,7 +420,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .withPillars([
           PillarMother.basic()
@@ -462,7 +461,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -666,7 +665,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         },
       ];
       const selectedChoiceList =
-        await wellArchitectedToolService.getAnswerSelectedChoiceList(
+        wellArchitectedToolService.getAnswerSelectedChoiceList(
           answerChoiceList,
           questionData
         );
@@ -736,15 +735,14 @@ describe('wellArchitectedTool Infrastructure', () => {
         fakeAssessmentsRepository,
       } = setup();
 
+      const user = UserMother.basic().build();
+
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
+        .withOrganization(user.organizationDomain)
         .withName('assessment-name')
         .withRegions(['us-west-2'])
         .build();
-      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-        assessment;
-      const user = UserMother.basic().build();
+      await fakeAssessmentsRepository.save(assessment);
 
       stsClientMock.on(AssumeRoleCommand).resolves({
         Credentials: {
@@ -792,7 +790,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       expect(createWorkloadCalls.length).toBe(1);
       expect(createWorkloadCalls[0].args[0].input).toEqual(
         expect.objectContaining({
-          WorkloadName: 'wafr-assessment-name-assessment-id',
+          WorkloadName: `wafr-assessment-name-${assessment.id}`,
           Environment: WorkloadEnvironment.PRODUCTION,
           AwsRegions: assessment.regions,
         })
@@ -807,36 +805,21 @@ describe('wellArchitectedTool Infrastructure', () => {
         fakeAssessmentsRepository,
       } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withName('assessment-name')
-        .withRegions(['us-west-2'])
-        .withPillars([
-          PillarMother.basic()
-            .withPrimaryId('pillar-id')
-            .withLabel('Pillar 1')
-            .withDisabled(false)
-            .withQuestions([
-              QuestionMother.basic()
-                .withPrimaryId('question-id')
-                .withLabel('Question 1')
-                .withDisabled(false)
-                .withNone(false)
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withPrimaryId('best-practice-id')
-                    .withLabel('Best Practice 1')
-                    .withChecked(true)
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
-        .build();
-      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-        assessment;
       const user = UserMother.basic().build();
+
+      const bestPractice = BestPracticeMother.basic().build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization(user.organizationDomain)
+        .withRegions(['us-west-2'])
+        .withPillars([pillar])
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+
+      const workloadId = 'workload-id';
 
       stsClientMock.on(AssumeRoleCommand).resolves({
         Credentials: {
@@ -849,22 +832,22 @@ describe('wellArchitectedTool Infrastructure', () => {
       wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
         WorkloadSummaries: [
           {
-            WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadId: workloadId,
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
-        WorkloadId: 'workload-id',
+        WorkloadId: workloadId,
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
         LensReview: {
           PillarReviewSummaries: [
             {
-              PillarId: 'pillar-id',
-              PillarName: 'Pillar 1',
+              PillarId: pillar.primaryId,
+              PillarName: pillar.label,
             },
           ],
         },
@@ -873,12 +856,12 @@ describe('wellArchitectedTool Infrastructure', () => {
       wellArchitectedClientMock.on(ListAnswersCommand).resolves({
         AnswerSummaries: [
           {
-            QuestionId: 'question-id',
-            QuestionTitle: 'Question 1',
+            QuestionId: question.primaryId,
+            QuestionTitle: question.label,
             Choices: [
               {
-                ChoiceId: 'best-practice-id',
-                Title: 'Best Practice 1',
+                ChoiceId: bestPractice.primaryId,
+                Title: bestPractice.label,
               },
             ],
           },
@@ -905,10 +888,10 @@ describe('wellArchitectedTool Infrastructure', () => {
       expect(updateAnswerCalls.length).toBe(1);
       expect(updateAnswerCalls[0].args[0].input).toEqual(
         expect.objectContaining({
-          WorkloadId: 'workload-id',
+          WorkloadId: workloadId,
           LensAlias: WAFRLens,
-          QuestionId: 'question-id',
-          SelectedChoices: ['best-practice-id'],
+          QuestionId: question.primaryId,
+          SelectedChoices: [bestPractice.primaryId],
           IsApplicable: true,
         })
       );
@@ -922,13 +905,17 @@ describe('wellArchitectedTool Infrastructure', () => {
         fakeAssessmentsRepository,
       } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withName('assessment-name')
-        .build();
-      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-        assessment;
       const user = UserMother.basic().build();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withName('assessment-name')
+        .withOrganization(user.organizationDomain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+
+      const workloadId = 'workload-id';
+      const milestoneName = 'Milestone Name';
 
       stsClientMock.on(AssumeRoleCommand).resolves({
         Credentials: {
@@ -941,14 +928,14 @@ describe('wellArchitectedTool Infrastructure', () => {
       wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
         WorkloadSummaries: [
           {
-            WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadId: workloadId,
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
-        WorkloadId: 'workload-id',
+        WorkloadId: workloadId,
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
@@ -972,7 +959,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         roleArn: 'arn:aws:iam::123456789012:role/test-role',
         assessment,
         region: 'us-west-2',
-        name: 'Milestone Name',
+        name: milestoneName,
         user,
       });
 
@@ -982,8 +969,8 @@ describe('wellArchitectedTool Infrastructure', () => {
       expect(createMilestoneCalls.length).toBe(1);
       expect(createMilestoneCalls[0].args[0].input).toEqual(
         expect.objectContaining({
-          WorkloadId: 'workload-id',
-          MilestoneName: 'Milestone Name',
+          WorkloadId: workloadId,
+          MilestoneName: milestoneName,
         })
       );
     });
@@ -996,13 +983,16 @@ describe('wellArchitectedTool Infrastructure', () => {
         fakeAssessmentsRepository,
       } = setup();
 
-      const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
-        .withName('assessment-name')
-        .build();
-      fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-        assessment;
       const user = UserMother.basic().build();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withName('assessment-name')
+        .withOrganization(user.organizationDomain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+
+      const workloadId = 'workload-id';
 
       stsClientMock.on(AssumeRoleCommand).resolves({
         Credentials: {
@@ -1015,14 +1005,14 @@ describe('wellArchitectedTool Infrastructure', () => {
       wellArchitectedClientMock.on(ListWorkloadsCommand).resolves({
         WorkloadSummaries: [
           {
-            WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadId: workloadId,
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
-        WorkloadId: 'workload-id',
+        WorkloadId: workloadId,
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
@@ -1064,7 +1054,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1104,7 +1094,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1193,7 +1183,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1225,7 +1215,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       ).rejects.toThrow(Error);
     });
 
-    it('should throw an error if milestone is not found', async () => {
+    it('should return undefined if milestone is not found', async () => {
       const {
         wellArchitectedToolService,
         wellArchitectedClientMock,
@@ -1233,7 +1223,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1250,7 +1240,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1272,7 +1262,7 @@ describe('wellArchitectedTool Infrastructure', () => {
           region,
           milestoneId,
         })
-      ).rejects.toThrow(MilestoneNotFoundError);
+      ).resolves.toBeUndefined();
     });
 
     it('should throw an error if milestone has no WorkloadId', async () => {
@@ -1283,7 +1273,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1300,7 +1290,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1340,7 +1330,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1357,7 +1347,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1415,7 +1405,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1432,7 +1422,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1486,7 +1476,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1503,7 +1493,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-assessment-name-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1563,7 +1553,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1601,7 +1591,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1618,7 +1608,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -1648,7 +1638,7 @@ describe('wellArchitectedTool Infrastructure', () => {
       } = setup();
 
       const assessment = AssessmentMother.basic()
-        .withId('assessment-id')
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withName('assessment-name')
         .build();
 
@@ -1665,7 +1655,7 @@ describe('wellArchitectedTool Infrastructure', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: 'wafr-assessment-name-assessment-id',
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },

@@ -27,7 +27,7 @@ describe('exportPDF adapter', () => {
   });
 
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = ExportPDFAdapterEventMother.basic()

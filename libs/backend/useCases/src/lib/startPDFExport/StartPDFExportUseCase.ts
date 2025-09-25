@@ -14,7 +14,11 @@ import {
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { ConflictError, NoContentError, NotFoundError } from '../Errors';
+import {
+  AssessmentFileExportAlreadyExistsError,
+  AssessmentNotFinishedError,
+  AssessmentNotFoundError,
+} from '../../errors';
 
 export type StartPDFExportUseCaseArgs = {
   user: User;
@@ -35,31 +39,26 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
     tokenStartPDFExportLambdaArn
   );
 
-  public async startPDFExport({
-    assessmentId,
-    user,
-    versionName,
-  }: StartPDFExportUseCaseArgs): Promise<void> {
+  public async startPDFExport(args: StartPDFExportUseCaseArgs): Promise<void> {
+    const { assessmentId, user, versionName } = args;
+
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: user.organizationDomain,
+      });
     }
-    if (!assessment.pillars || assessment.step !== AssessmentStep.FINISHED) {
-      throw new ConflictError(
-        `Assessment with id ${assessment.id} is not finished`
-      );
+    if (
+      !assessment.pillars ||
+      assessment.pillars.length === 0 ||
+      assessment.step !== AssessmentStep.FINISHED
+    ) {
+      throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
     }
-    if (assessment.pillars.length === 0) {
-      throw new NoContentError(
-        `Assessment with id ${assessment.id} has no findings`
-      );
-    }
-
     if (!assessment.fileExports) {
       assessment.fileExports = {
         [AssessmentFileExportType.PDF]: [],
@@ -67,7 +66,7 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
 
       await this.assessmentsRepository.update({
         assessmentId: assessment.id,
-        organization: assessment.organization,
+        organizationDomain: assessment.organization,
         assessmentBody: {
           fileExports: assessment.fileExports,
         },
@@ -78,9 +77,11 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       AssessmentFileExportType.PDF
     ]?.find((assessmentExport) => assessmentExport.versionName === versionName);
     if (foundAssessmentExport) {
-      throw new ConflictError(
-        `PDF export with version ${versionName} already exists for assessment ${assessment.id}`
-      );
+      throw new AssessmentFileExportAlreadyExistsError({
+        assessmentId: assessment.id,
+        fileExportType: AssessmentFileExportType.PDF,
+        versionName,
+      });
     }
 
     const fileExport = AssessmentFileExportMother.basic()
@@ -89,10 +90,9 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       .withVersionName(versionName)
       .withCreatedAt(new Date())
       .build();
-
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
-      organization: assessment.organization,
+      organizationDomain: assessment.organization,
       type: AssessmentFileExportType.PDF,
       data: fileExport,
     });

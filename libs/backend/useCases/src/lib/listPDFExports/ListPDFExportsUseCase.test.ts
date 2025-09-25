@@ -4,35 +4,25 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentFileExportMother,
-  AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { ListPDFExportsUseCaseImpl } from './ListPDFExportsUseCase';
 import { ListPDFExportsUseCaseArgsMother } from './ListPDFExportsUseCaseArgsMother';
 
 describe('listPDFExports UseCase', () => {
   it('should list the PDF exports', async () => {
-    const {
-      useCase,
+    const { useCase, fakeAssessmentsRepository } = setup();
 
-      fakeAssessmentsRepository,
-    } = setup();
+    const user = UserMother.basic().build();
 
-    const fileExport = AssessmentFileExportMother.basic()
-      .withId('file-export-id')
-      .withStatus(AssessmentFileExportStatus.COMPLETED)
-      .withVersionName('version-name')
-      .withObjectKey('object-key')
-      .withCreatedAt(new Date())
-      .build();
+    const fileExport = AssessmentFileExportMother.basic().build();
     const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('test.io')
+      .withOrganization(user.organizationDomain)
       .withFileExports({
         [AssessmentFileExportType.PDF]: [fileExport],
       })
@@ -40,19 +30,21 @@ describe('listPDFExports UseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     const input = ListPDFExportsUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().withOrganizationDomain('test.io').build())
+      .withAssessmentId(assessment.id)
+      .withUser(user)
       .build();
     await expect(useCase.listPDFExports(input)).resolves.toStrictEqual([
       fileExport,
     ]);
   });
 
-  it('should throw a NotFoundError if the assessment does not exist', async () => {
+  it('should throw AssessmentNotFoundError if the assessment does not exist', async () => {
     const { useCase } = setup();
 
     const input = ListPDFExportsUseCaseArgsMother.basic().build();
-    await expect(useCase.listPDFExports(input)).rejects.toThrow(NotFoundError);
+    await expect(useCase.listPDFExports(input)).rejects.toThrow(
+      AssessmentNotFoundError
+    );
   });
 });
 

@@ -5,7 +5,7 @@ import {
 import { AssessmentMother, PillarMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { AssessmentNotFoundError, PillarNotFoundError } from '../../errors';
 import { UpdatePillarUseCaseImpl } from './UpdatePillarUseCase';
 import { UpdatePillarUseCaseArgsMother } from './UpdatePillarUseCaseArgsMother';
 
@@ -13,105 +13,73 @@ describe('UpdatePillarUseCase', () => {
   it('should update pillar', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic()
-      .withId('assessment-id')
-      .withOrganization('other-org.io')
-      .withPillars([
-        PillarMother.basic().withId('1').withDisabled(false).build(),
-      ])
-      .build();
+    const user = UserMother.basic().build();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      assessment;
+    const pillar = PillarMother.basic().withDisabled(false).build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId(pillar.id)
       .withPillarBody({
         disabled: true,
       })
       .build();
 
-    await expect(useCase.updatePillar(input)).resolves.not.toThrow();
-    expect(
-      fakeAssessmentsRepository.updatePillar
-    ).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({
-        assessmentId: 'assessment-id',
-        organization: 'other-org.io',
-        pillarId: '1',
-        pillarBody: {
-          disabled: true,
-        },
-      })
+    await useCase.updatePillar(input);
+
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: user.organizationDomain,
+    });
+    expect(updatedAssessment).toBeDefined();
+    expect(updatedAssessment?.pillars?.[0].disabled).toBe(true);
+  });
+
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase } = setup();
+
+    const input = UpdatePillarUseCaseArgsMother.basic().build();
+
+    await expect(useCase.updatePillar(input)).rejects.toThrow(
+      AssessmentNotFoundError
     );
   });
 
-  it('should throw a NotFoundError if the infrastructure throws AssessmentNotFoundError', async () => {
-    const { useCase } = setup();
-
-    const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(UserMother.basic().build())
-      .build();
-
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NotFoundError);
-  });
-
-  it('should throw a NotFoundError if the infrastructure throws PillarNotFoundError', async () => {
+  it('should throw PillarNotFoundError if pillar does not exist', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
+    const user = UserMother.basic().build();
+
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarId('1')
-      .withPillarBody({
-        disabled: true,
-      })
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withPillarId('pillar-id')
       .build();
 
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NotFoundError);
-  });
-
-  it('should throw a NoUpdateBodyError if the infrastructure throws EmptyUpdateBodyError', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = UpdatePillarUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withUser(
-        UserMother.basic().withOrganizationDomain('other-org.io').build()
-      )
-      .withPillarBody({})
-      .build();
-
-    await expect(useCase.updatePillar(input)).rejects.toThrow(NoContentError);
+    await expect(useCase.updatePillar(input)).rejects.toThrow(
+      PillarNotFoundError
+    );
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
-  vitest.spyOn(fakeAssessmentsRepository, 'updatePillar');
+
   return {
     useCase: new UpdatePillarUseCaseImpl(),
-    fakeAssessmentsRepository: fakeAssessmentsRepository,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };

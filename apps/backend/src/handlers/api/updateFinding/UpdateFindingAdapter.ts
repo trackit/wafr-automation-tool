@@ -1,21 +1,20 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenUpdateFindingUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { JSONParseError, parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
-const updateFindingPathParametersSchema = z.object({
+const UpdateFindingPathSchema = z.object({
   assessmentId: z.string().uuid(),
-  findingId: z.string(),
+  findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
-const updateFindingBodySchema = z.object({
+const UpdateFindingBodySchema = z.object({
   hidden: z.boolean().optional(),
 }) satisfies ZodType<
   operations['updateFinding']['requestBody']['content']['application/json']
@@ -24,52 +23,32 @@ const updateFindingBodySchema = z.object({
 export class UpdateFindingAdapter {
   private readonly useCase = inject(tokenUpdateFindingUseCase);
 
-  private parseBody(
-    body: string
-  ): operations['updateFinding']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return updateFindingBodySchema.parse(parsedBody);
-  }
-
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
   private async processRequest(
     event: APIGatewayProxyEvent
   ): Promise<operations['updateFinding']['responses']['200']['content']> {
-    const { pathParameters, body } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
-    if (!body) {
-      throw new BadRequestError('Missing request body');
-    }
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdateFindingPathSchema,
+      bodySchema: UpdateFindingBodySchema,
+    });
+    const { assessmentId, findingId } = pathParameters;
 
-    try {
-      const { assessmentId, findingId } =
-        updateFindingPathParametersSchema.parse(pathParameters);
-      const findingBody = this.parseBody(body);
-      await this.useCase.updateFinding({
-        user: getUserFromEvent(event),
-        assessmentId,
-        findingId: decodeURIComponent(findingId),
-        findingBody,
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${error.message}`);
-      } else if (error instanceof JSONParseError) {
-        throw new BadRequestError(
-          `Invalid JSON in request body: ${error.message}`
-        );
-      }
-      throw error;
-    }
+    const user = getUserFromEvent(event);
+
+    await this.useCase.updateFinding({
+      assessmentId,
+      findingId: decodeURIComponent(findingId),
+      findingBody: body,
+      user,
+    });
   }
 }

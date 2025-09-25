@@ -32,6 +32,8 @@ describe('AIService Infrastructure', () => {
     it('should call bedrock converse stream with proper parameters', async () => {
       const { aiServiceBedrock, bedrockRuntimeClientMock } = setup();
 
+      const promptText = 'Hello world';
+
       bedrockRuntimeClientMock.on(ConverseStreamCommand).resolves({
         stream: (async function* () {
           for (const chunk of fakeChunks) {
@@ -42,8 +44,8 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
-      ).resolves.toEqual('Hello world');
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
+      ).resolves.toEqual(promptText);
 
       const converseStreamCalls = bedrockRuntimeClientMock.commandCalls(
         ConverseStreamCommand
@@ -57,7 +59,7 @@ describe('AIService Infrastructure', () => {
               role: 'user',
               content: [
                 {
-                  text: 'Hello world',
+                  text: promptText,
                 },
               ],
             },
@@ -69,6 +71,8 @@ describe('AIService Infrastructure', () => {
     it('should throw an exception if the converse stream fails', async () => {
       const { aiServiceBedrock, bedrockRuntimeClientMock } = setup();
 
+      const promptText = 'Hello world';
+
       bedrockRuntimeClientMock.on(ConverseStreamCommand).resolves({
         stream: (async function* () {
           for (const chunk of fakeChunks) {
@@ -79,12 +83,14 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
       ).rejects.toThrow(Error);
     });
 
     it('should throw an exception if the converse stream return an undefined stream', async () => {
       const { aiServiceBedrock, bedrockRuntimeClientMock } = setup();
+
+      const promptText = 'Hello world';
 
       bedrockRuntimeClientMock.on(ConverseStreamCommand).resolves({
         stream: undefined,
@@ -92,7 +98,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: 'Hello world' }] })
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
       ).rejects.toThrow(Error);
     });
   });
@@ -101,12 +107,13 @@ describe('AIService Infrastructure', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const aiServiceBedrock = new AIServiceBedrock();
+
   const bedrockRuntimeClientMock = mockClient(
     inject(tokenClientBedrockRuntime)
   );
+
   return {
-    aiServiceBedrock,
+    aiServiceBedrock: new AIServiceBedrock(),
     bedrockRuntimeClientMock,
   };
 };

@@ -35,7 +35,6 @@ import {
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { MilestoneNotFoundError, WorkloadNotFoundError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
 
@@ -60,7 +59,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       })
     );
     if (!credentials.Credentials) {
-      throw new Error('Failed to assume role');
+      throw new Error(`Failed to assume role: ${roleArn}`);
     }
     return this.wellArchitectedClientConstructor({
       credentials: {
@@ -301,7 +300,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
           `Workflow pillar question ${answerQuestionId} does not exist in assessment pillars`
         );
       }
-      const answerSelectedChoiceList = await this.getAnswerSelectedChoiceList(
+      const answerSelectedChoiceList = this.getAnswerSelectedChoiceList(
         answerChoiceList,
         answerQuestionData
       );
@@ -421,7 +420,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     wellArchitectedClient: WellArchitectedClient,
     workloadId: string,
     milestoneNumber: number
-  ): Promise<AWSMilestone> {
+  ): Promise<AWSMilestone | undefined> {
     const command = new GetMilestoneCommand({
       WorkloadId: workloadId,
       MilestoneNumber: milestoneNumber,
@@ -433,13 +432,13 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
           error instanceof WellArchitectedServiceException &&
           error.$metadata?.httpStatusCode === 404
         ) {
-          throw new MilestoneNotFoundError({
-            assessmentId: workloadId,
-            milestoneId: milestoneNumber,
-          });
+          return undefined;
         }
         throw error;
       });
+    if (!response) {
+      return undefined;
+    }
     if (response.$metadata.httpStatusCode !== 200 || !response.Milestone) {
       throw new Error(
         `Failed to get milestone ${milestoneNumber} for workload ${workloadId}: ${response.$metadata.httpStatusCode}`
@@ -524,7 +523,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Milestone> {
+  }): Promise<Milestone | undefined> {
     const { roleArn, assessment, region, milestoneId } = args;
     const wellArchitectedClient = await this.createWellArchitectedClient(
       roleArn,
@@ -535,18 +534,15 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment
     );
     if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
-      throw new WorkloadNotFoundError(assessment.id);
+      throw new Error(`Workload not found for assessment ${assessment.id}`);
     }
     const milestone = await this.getAWSMilestone(
       wellArchitectedClient,
       assessmentWorkload.WorkloadId,
       milestoneId
     );
-    if (!milestone.MilestoneNumber || !milestone.Workload) {
-      throw new MilestoneNotFoundError({
-        assessmentId: assessment.id,
-        milestoneId,
-      });
+    if (!milestone || !milestone.MilestoneNumber || !milestone.Workload) {
+      return undefined;
     }
     if (!milestone.RecordedAt || !milestone.MilestoneName) {
       throw new Error(`Milestone#${milestoneId} is missing required fields`);
@@ -616,7 +612,7 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
       assessment
     );
     if (!assessmentWorkload || !assessmentWorkload.WorkloadId) {
-      throw new WorkloadNotFoundError(assessment.id);
+      throw new Error(`Workload not found for assessment ${assessment.id}`);
     }
 
     // Paginated request

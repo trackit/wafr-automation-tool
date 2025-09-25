@@ -6,7 +6,7 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type ListPDFExportsUseCaseArgs = {
   user: User;
@@ -22,18 +22,20 @@ export interface ListPDFExportsUseCase {
 export class ListPDFExportsUseCaseImpl implements ListPDFExportsUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
-  public async listPDFExports({
-    assessmentId,
-    user,
-  }: ListPDFExportsUseCaseArgs): Promise<AssessmentFileExport[]> {
+  public async listPDFExports(
+    args: ListPDFExportsUseCaseArgs
+  ): Promise<AssessmentFileExport[]> {
+    const { assessmentId, user } = args;
+
     const assessment = await this.assessmentsRepository.get({
       assessmentId,
-      organization: user.organizationDomain,
+      organizationDomain: user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: user.organizationDomain,
+      });
     }
 
     const fileExports = assessment.fileExports?.[AssessmentFileExportType.PDF];

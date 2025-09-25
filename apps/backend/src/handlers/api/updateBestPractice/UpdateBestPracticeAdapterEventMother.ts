@@ -1,30 +1,32 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
+type UpdateBestPracticePathParameters =
+  operations['updateBestPractice']['parameters']['path'];
+type UpdateBestPracticeBody =
+  operations['updateBestPractice']['requestBody']['content']['application/json'];
+
 export class UpdateBestPracticeAdapterEventMother {
-  private path: operations['updateBestPractice']['parameters']['path'];
-  private body: operations['updateBestPractice']['requestBody']['content']['application/json'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private pathParameters: UpdateBestPracticePathParameters;
+  private body: UpdateBestPracticeBody;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    path: operations['updateBestPractice']['parameters']['path'],
-    body: operations['updateBestPractice']['requestBody']['content']['application/json']
+    pathParameters: UpdateBestPracticePathParameters,
+    body: UpdateBestPracticeBody
   ) {
-    this.path = path;
+    this.pathParameters = pathParameters;
     this.body = body;
   }
 
   public static basic(): UpdateBestPracticeAdapterEventMother {
     return new UpdateBestPracticeAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         pillarId: '1',
         questionId: '1',
         bestPracticeId: '1',
@@ -36,43 +38,48 @@ export class UpdateBestPracticeAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: operations['updateBestPractice']['parameters']['path']['assessmentId']
+    assessmentId: string
   ): UpdateBestPracticeAdapterEventMother {
-    this.path.assessmentId = assessmentId;
+    this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
-  public withPillarId(
-    pillarId: operations['updateBestPractice']['parameters']['path']['pillarId']
-  ): UpdateBestPracticeAdapterEventMother {
-    this.path.pillarId = pillarId;
+  public withPillarId(pillarId: string): UpdateBestPracticeAdapterEventMother {
+    this.pathParameters.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(
-    questionId: operations['updateBestPractice']['parameters']['path']['questionId']
+    questionId: string
   ): UpdateBestPracticeAdapterEventMother {
-    this.path.questionId = questionId;
+    this.pathParameters.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: operations['updateBestPractice']['parameters']['path']['bestPracticeId']
+    bestPracticeId: string
   ): UpdateBestPracticeAdapterEventMother {
-    this.path.bestPracticeId = bestPracticeId;
+    this.pathParameters.bestPracticeId = bestPracticeId;
     return this;
   }
 
   public withBody(
-    body: operations['updateBestPractice']['requestBody']['content']['application/json']
+    body: UpdateBestPracticeBody
   ): UpdateBestPracticeAdapterEventMother {
     this.body = body;
     return this;
   }
 
+  public withUser(
+    user: Pick<User, 'id' | 'email'>
+  ): UpdateBestPracticeAdapterEventMother {
+    this.user = user;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withPathParameters(this.path)
+      .withPathParameters(this.pathParameters)
       .withBody(JSON.stringify(this.body))
       .withUserClaims({
         sub: this.user.id,

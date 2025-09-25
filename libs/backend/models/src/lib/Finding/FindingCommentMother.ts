@@ -9,7 +9,7 @@ export class FindingCommentMother {
 
   public static basic(): FindingCommentMother {
     return new FindingCommentMother({
-      id: 'comment-id',
+      id: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       authorId: 'author-id',
       text: 'comment-text',
       createdAt: new Date(),

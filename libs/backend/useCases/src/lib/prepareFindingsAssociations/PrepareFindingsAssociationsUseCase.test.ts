@@ -1,6 +1,7 @@
 import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
+  tokenFakeFindingsRepository,
   tokenFakeQuestionSetService,
 } from '@backend/infrastructure';
 import {
@@ -16,28 +17,21 @@ import {
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import { tokenMapScanFindingsToBestPracticesUseCase } from '../mapScanFindingsToBestPractices';
 import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociate';
 import { PrepareFindingsAssociationsUseCaseImpl } from './PrepareFindingsAssociationsUseCase';
 import { PrepareFindingsAssociationsUseCaseArgsMother } from './PrepareFindingsAssociationsUseCaseArgsMother';
 
-describe('PrepareFindingsAssociations Use Case', () => {
-  it('should throw an error if assessment is not found', async () => {
-    const { useCase, getScannedFindingsUseCase, fakeAssessmentsRepository } =
-      setup();
-    fakeAssessmentsRepository.assessments = {};
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
+describe('PrepareFindingsAssociationsUseCase', () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase } = setup();
+
+    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic().build();
+
     await expect(useCase.prepareFindingsAssociations(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 
@@ -49,31 +43,33 @@ describe('PrepareFindingsAssociations Use Case', () => {
       fakeAssessmentsRepository,
     } = setup();
 
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
+
     expect(
       getScannedFindingsUseCase.getScannedFindings
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
-        assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-        scanningTool: ScanningTool.PROWLER,
-        regions: ['us-east-1'],
-        workflows: ['workflow-1'],
-        organization: 'test.io',
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        scanningTool: input.scanningTool,
+        regions: input.regions,
+        workflows: input.workflows,
       })
     );
   });
@@ -87,6 +83,9 @@ describe('PrepareFindingsAssociations Use Case', () => {
       fakeQuestionSetService,
     } = setup();
 
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('prowler#1').build(),
       ScanFindingMother.basic().withId('prowler#2').build(),
@@ -97,41 +96,29 @@ describe('PrepareFindingsAssociations Use Case', () => {
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
-    const questionVersion = 'question-set-version';
+
     const pillars = [
       PillarMother.basic()
-        .withId('pillar-id')
         .withQuestions([
           QuestionMother.basic()
-            .withId('question-id')
-            .withBestPractices([
-              BestPracticeMother.basic().withId('best-practice-id').build(),
-            ])
+            .withBestPractices([BestPracticeMother.basic().build()])
             .build(),
         ])
         .build(),
     ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
-      QuestionSetMother.basic()
-        .withVersion(questionVersion)
-        .withPillars(pillars)
-        .build()
-    );
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      []
-    );
+    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
+
     expect(
       mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices
     ).toHaveBeenCalledExactlyOnceWith(
@@ -151,20 +138,6 @@ describe('PrepareFindingsAssociations Use Case', () => {
       fakeAssessmentsRepository,
     } = setup();
 
-    const mockedScanFindings = [
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-1', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Medium)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-    ];
     const cloudSploitGraphData = AssessmentGraphDataMother.basic()
       .withFindings(8)
       .withRegions({
@@ -189,51 +162,56 @@ describe('PrepareFindingsAssociations Use Case', () => {
     const assessment = AssessmentMother.basic()
       .withRawGraphData({ [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData })
       .build();
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-    ] = assessment;
+    await fakeAssessmentsRepository.save(assessment);
 
-    const questionVersion = 'question-set-version';
-    const pillars = [
-      PillarMother.basic()
-        .withId('pillar-id')
-        .withQuestions([
-          QuestionMother.basic()
-            .withId('question-id')
-            .withBestPractices([
-              BestPracticeMother.basic().withId('best-practice-id').build(),
-            ])
-            .build(),
-        ])
+    const mockedScanFindings = [
+      ScanFindingMother.basic()
+        .withSeverity(SeverityType.Low)
+        .withResources([{ type: 'type-1', region: 'us-east-1' }])
+        .build(),
+      ScanFindingMother.basic()
+        .withSeverity(SeverityType.Low)
+        .withResources([{ type: 'type-2', region: 'us-east-1' }])
+        .build(),
+      ScanFindingMother.basic()
+        .withSeverity(SeverityType.Medium)
+        .withResources([{ type: 'type-2', region: 'us-east-1' }])
         .build(),
     ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
-      QuestionSetMother.basic()
-        .withVersion(questionVersion)
-        .withPillars(pillars)
-        .build()
+    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
+      mockedScanFindings
     );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
 
+    const pillars = [
+      PillarMother.basic()
+        .withQuestions([
+          QuestionMother.basic()
+            .withBestPractices([BestPracticeMother.basic().build()])
+            .build(),
+        ])
+        .build(),
+    ];
+    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
+
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('organization-id')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments[
-        '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-      ]
-    ).toEqual(
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(updatedAssessment).toEqual(
       expect.objectContaining({
         rawGraphData: {
           [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
@@ -260,6 +238,9 @@ describe('PrepareFindingsAssociations Use Case', () => {
       fakeQuestionSetService,
     } = setup();
 
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
     const mockedScanFindings = [
       ScanFindingMother.basic()
         .withId('prowler#1')
@@ -279,29 +260,6 @@ describe('PrepareFindingsAssociations Use Case', () => {
     ];
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
       mockedScanFindings
-    );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-    ] = AssessmentMother.basic().build();
-    const questionVersion = 'question-set-version';
-    const pillars = [
-      PillarMother.basic()
-        .withId('pillar-1')
-        .withQuestions([
-          QuestionMother.basic()
-            .withId('question-1')
-            .withBestPractices([
-              BestPracticeMother.basic().withId('best-practice-1').build(),
-            ])
-            .build(),
-        ])
-        .build(),
-    ];
-    vi.spyOn(fakeQuestionSetService, 'get').mockReturnValue(
-      QuestionSetMother.basic()
-        .withVersion(questionVersion)
-        .withPillars(pillars)
-        .build()
     );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       [
@@ -329,29 +287,44 @@ describe('PrepareFindingsAssociations Use Case', () => {
       ]
     );
 
+    const pillars = [
+      PillarMother.basic()
+        .withId('pillar-1')
+        .withQuestions([
+          QuestionMother.basic()
+            .withId('question-1')
+            .withBestPractices([
+              BestPracticeMother.basic().withId('best-practice-1').build(),
+            ])
+            .build(),
+        ])
+        .build(),
+    ];
+    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
+    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
+
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('organization-id')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
 
-    expect(
-      fakeAssessmentsRepository.assessments[
-        '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-      ]
-    ).toEqual(
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(updatedAssessment).toEqual(
       expect.objectContaining({
-        questionVersion,
+        questionVersion: questionSet.version,
       })
     );
     expect(
-      fakeAssessmentsRepository.assessments[
-        '14270881-e4b0-4f89-8941-449eed22071d#organization-id'
-      ].pillars?.[0].questions[0].bestPractices[0].results
-    ).toEqual(new Set(['prowler#1', 'prowler#2']));
+      updatedAssessment?.pillars?.[0].questions[0].bestPractices[0].results
+    ).toEqual(new Set([mockedScanFindings[0].id, mockedScanFindings[1].id]));
   });
 
   it('should save scan findings with mapped best practices', async () => {
@@ -360,19 +333,19 @@ describe('PrepareFindingsAssociations Use Case', () => {
       getScannedFindingsUseCase,
       mapScanFindingsToBestPracticesUseCase,
       fakeAssessmentsRepository,
+      fakeFindingsRepository,
     } = setup();
-    const mockedScanFindings = [
-      ScanFindingMother.basic().withId('prowler#1').build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
+
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const scanFinding = ScanFindingMother.basic().build();
+    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([
+      scanFinding,
+    ]);
     const scanFindingsToBestPracticesMapping = [
       {
-        scanFinding: mockedScanFindings[0],
+        scanFinding,
         bestPractices: [
           {
             pillarId: 'pillar-1',
@@ -387,26 +360,28 @@ describe('PrepareFindingsAssociations Use Case', () => {
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
 
-    expect(
-      fakeAssessmentsRepository.assessmentFindings[
-        '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-      ]
-    ).toEqual([
+    const finding = await fakeFindingsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      findingId: scanFinding.id,
+    });
+    expect(finding).toEqual(
       expect.objectContaining({
-        id: 'prowler#1',
+        id: scanFinding.id,
         bestPractices: 'pillar-1#question-1#best-practice-1',
         isAIAssociated: false,
         hidden: false,
-      }),
-    ]);
+      })
+    );
   });
 
   it('should not save scan findings with empty mapped best practices', async () => {
@@ -415,19 +390,19 @@ describe('PrepareFindingsAssociations Use Case', () => {
       getScannedFindingsUseCase,
       mapScanFindingsToBestPracticesUseCase,
       fakeAssessmentsRepository,
+      fakeFindingsRepository,
     } = setup();
-    const mockedScanFindings = [
-      ScanFindingMother.basic().withId('prowler#1').build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
+
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const scanFinding = ScanFindingMother.basic().build();
+    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([
+      scanFinding,
+    ]);
     const scanFindingsToBestPracticesMapping = [
       {
-        scanFinding: mockedScanFindings[0],
+        scanFinding,
         bestPractices: [],
       },
     ];
@@ -436,19 +411,20 @@ describe('PrepareFindingsAssociations Use Case', () => {
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
     await useCase.prepareFindingsAssociations(input);
 
-    expect(
-      fakeAssessmentsRepository.assessmentFindings[
-        '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-      ]
-    ).toBeUndefined();
+    const finding = await fakeFindingsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      findingId: scanFinding.id,
+    });
+    expect(finding).toBeUndefined();
   });
 
   it('should call StoreFindingsToAssociate with unmapped findings', async () => {
@@ -459,6 +435,10 @@ describe('PrepareFindingsAssociations Use Case', () => {
       storeFindingsToAssociateUseCase,
       fakeAssessmentsRepository,
     } = setup();
+
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('prowler#1').build(),
       ScanFindingMother.basic().withId('prowler#2').build(),
@@ -466,9 +446,6 @@ describe('PrepareFindingsAssociations Use Case', () => {
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
       mockedScanFindings
     );
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
     const scanFindingsToBestPracticesMapping = [
       {
         scanFinding: mockedScanFindings[0],
@@ -490,19 +467,21 @@ describe('PrepareFindingsAssociations Use Case', () => {
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     await useCase.prepareFindingsAssociations(input);
+
     expect(
       storeFindingsToAssociateUseCase.storeFindingsToAssociate
     ).toHaveBeenCalledExactlyOnceWith({
-      assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
-      organization: 'test.io',
-      scanningTool: ScanningTool.PROWLER,
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      scanningTool: input.scanningTool,
       scanFindings: [mockedScanFindings[0]],
     });
   });
@@ -516,10 +495,10 @@ describe('PrepareFindingsAssociations Use Case', () => {
       fakeAssessmentsRepository,
     } = setup();
 
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
-    fakeAssessmentsRepository.assessments[
-      '14270881-e4b0-4f89-8941-449eed22071d#test.io'
-    ] = AssessmentMother.basic().build();
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
       []
     );
@@ -529,19 +508,22 @@ describe('PrepareFindingsAssociations Use Case', () => {
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId('14270881-e4b0-4f89-8941-449eed22071d')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
       .withRegions(['us-east-1'])
       .withWorkflows(['workflow-1'])
       .withScanningTool(ScanningTool.PROWLER)
       .build();
+
     const result = await useCase.prepareFindingsAssociations(input);
+
     expect(result).toEqual(URIs);
   });
 
   describe('formatPillarsForAssessmentUpdate', () => {
     it('should format pillars using mapped scanned findings to best practices', () => {
       const { useCase } = setup();
+
       const rawPillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -555,11 +537,10 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ])
           .build(),
       ];
+      const scanFinding = ScanFindingMother.basic().build();
       const scanFindingsToBestPractices = [
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
+          scanFinding,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -570,20 +551,21 @@ describe('PrepareFindingsAssociations Use Case', () => {
         },
       ];
 
-      const formattedPillars = useCase.formatPillarsForAssessmentUpdate({
+      const result = useCase.formatPillarsForAssessmentUpdate({
         rawPillars,
         scanFindingsToBestPractices,
       });
-      expect(formattedPillars).toEqual([
+
+      expect(result).toEqual([
         expect.objectContaining({
-          id: 'pillar-1',
+          id: rawPillars[0].id,
           questions: [
             expect.objectContaining({
-              id: 'question-1',
+              id: rawPillars[0].questions[0].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-1',
-                  results: new Set(['scanningTool#1']),
+                  id: rawPillars[0].questions[0].bestPractices[0].id,
+                  results: new Set([scanFinding.id]),
                 }),
               ],
             }),
@@ -594,6 +576,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     it('should format pillars with no mapped best practices', () => {
       const { useCase } = setup();
+
       const rawPillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -616,19 +599,20 @@ describe('PrepareFindingsAssociations Use Case', () => {
         },
       ];
 
-      const formattedPillars = useCase.formatPillarsForAssessmentUpdate({
+      const result = useCase.formatPillarsForAssessmentUpdate({
         rawPillars,
         scanFindingsToBestPractices,
       });
-      expect(formattedPillars).toEqual([
+
+      expect(result).toEqual([
         expect.objectContaining({
-          id: 'pillar-1',
+          id: rawPillars[0].id,
           questions: [
             expect.objectContaining({
-              id: 'question-1',
+              id: rawPillars[0].questions[0].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-1',
+                  id: rawPillars[0].questions[0].bestPractices[0].id,
                   results: new Set([]),
                 }),
               ],
@@ -640,6 +624,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     it('should handle multiple mapped best practices for a single scan finding', () => {
       const { useCase } = setup();
+
       const rawPillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -654,11 +639,10 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ])
           .build(),
       ];
+      const scanFinding = ScanFindingMother.basic().build();
       const scanFindingsToBestPractices = [
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
+          scanFinding,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -674,24 +658,25 @@ describe('PrepareFindingsAssociations Use Case', () => {
         },
       ];
 
-      const formattedPillars = useCase.formatPillarsForAssessmentUpdate({
+      const result = useCase.formatPillarsForAssessmentUpdate({
         rawPillars,
         scanFindingsToBestPractices,
       });
-      expect(formattedPillars).toEqual([
+
+      expect(result).toEqual([
         expect.objectContaining({
-          id: 'pillar-1',
+          id: rawPillars[0].id,
           questions: [
             expect.objectContaining({
-              id: 'question-1',
+              id: rawPillars[0].questions[0].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-1',
-                  results: new Set(['scanningTool#1']),
+                  id: rawPillars[0].questions[0].bestPractices[0].id,
+                  results: new Set([scanFinding.id]),
                 }),
                 expect.objectContaining({
-                  id: 'best-practice-2',
-                  results: new Set(['scanningTool#1']),
+                  id: rawPillars[0].questions[0].bestPractices[1].id,
+                  results: new Set([scanFinding.id]),
                 }),
               ],
             }),
@@ -702,6 +687,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     it('should handle multiple scan findings for a single best practice', () => {
       const { useCase } = setup();
+
       const rawPillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -715,11 +701,15 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ])
           .build(),
       ];
+      const scanFinding = ScanFindingMother.basic()
+        .withId('scanningTool#1')
+        .build();
+      const scanFinding2 = ScanFindingMother.basic()
+        .withId('scanningTool#2')
+        .build();
       const scanFindingsToBestPractices = [
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
+          scanFinding,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -729,9 +719,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ],
         },
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#2')
-            .build(),
+          scanFinding: scanFinding2,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -742,20 +730,21 @@ describe('PrepareFindingsAssociations Use Case', () => {
         },
       ];
 
-      const formattedPillars = useCase.formatPillarsForAssessmentUpdate({
+      const result = useCase.formatPillarsForAssessmentUpdate({
         rawPillars,
         scanFindingsToBestPractices,
       });
-      expect(formattedPillars).toEqual([
+
+      expect(result).toEqual([
         expect.objectContaining({
-          id: 'pillar-1',
+          id: rawPillars[0].id,
           questions: [
             expect.objectContaining({
-              id: 'question-1',
+              id: rawPillars[0].questions[0].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-1',
-                  results: new Set(['scanningTool#1', 'scanningTool#2']),
+                  id: rawPillars[0].questions[0].bestPractices[0].id,
+                  results: new Set([scanFinding.id, scanFinding2.id]),
                 }),
               ],
             }),
@@ -766,6 +755,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
 
     it('should handle multiple scan findings with different best practices', () => {
       const { useCase } = setup();
+
       const rawPillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -785,11 +775,16 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ])
           .build(),
       ];
+
+      const scanFinding = ScanFindingMother.basic()
+        .withId('scanningTool#1')
+        .build();
+      const scanFinding2 = ScanFindingMother.basic()
+        .withId('scanningTool#2')
+        .build();
       const scanFindingsToBestPractices = [
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
+          scanFinding,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -799,9 +794,7 @@ describe('PrepareFindingsAssociations Use Case', () => {
           ],
         },
         {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#2')
-            .build(),
+          scanFinding: scanFinding2,
           bestPractices: [
             {
               pillarId: 'pillar-1',
@@ -812,29 +805,30 @@ describe('PrepareFindingsAssociations Use Case', () => {
         },
       ];
 
-      const formattedPillars = useCase.formatPillarsForAssessmentUpdate({
+      const result = useCase.formatPillarsForAssessmentUpdate({
         rawPillars,
         scanFindingsToBestPractices,
       });
-      expect(formattedPillars).toEqual([
+
+      expect(result).toEqual([
         expect.objectContaining({
-          id: 'pillar-1',
+          id: rawPillars[0].id,
           questions: [
             expect.objectContaining({
-              id: 'question-1',
+              id: rawPillars[0].questions[0].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-1',
-                  results: new Set(['scanningTool#1']),
+                  id: rawPillars[0].questions[0].bestPractices[0].id,
+                  results: new Set([scanFinding.id]),
                 }),
               ],
             }),
             expect.objectContaining({
-              id: 'question-2',
+              id: rawPillars[0].questions[1].id,
               bestPractices: [
                 expect.objectContaining({
-                  id: 'best-practice-2',
-                  results: new Set(['scanningTool#2']),
+                  id: rawPillars[0].questions[1].bestPractices[0].id,
+                  results: new Set([scanFinding2.id]),
                 }),
               ],
             }),
@@ -848,26 +842,33 @@ describe('PrepareFindingsAssociations Use Case', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const getScannedFindingsUseCase = { getScannedFindings: vi.fn() };
-  const mapScanFindingsToBestPracticesUseCase = {
-    mapScanFindingsToBestPractices: vi.fn(),
-  };
-  const storeFindingsToAssociateUseCase = { storeFindingsToAssociate: vi.fn() };
+
+  const getScannedFindingsUseCase = { getScannedFindings: vitest.fn() };
   register(tokenGetScannedFindingsUseCase, {
     useValue: getScannedFindingsUseCase,
   });
-  register(tokenMapScanFindingsToBestPracticesUseCase, {
-    useValue: mapScanFindingsToBestPracticesUseCase,
-  });
+
+  const storeFindingsToAssociateUseCase = {
+    storeFindingsToAssociate: vitest.fn(),
+  };
   register(tokenStoreFindingsToAssociateUseCase, {
     useValue: storeFindingsToAssociateUseCase,
   });
+
+  const mapScanFindingsToBestPracticesUseCase = {
+    mapScanFindingsToBestPractices: vitest.fn(),
+  };
+  register(tokenMapScanFindingsToBestPracticesUseCase, {
+    useValue: mapScanFindingsToBestPracticesUseCase,
+  });
+
   return {
+    useCase: new PrepareFindingsAssociationsUseCaseImpl(),
     getScannedFindingsUseCase,
-    mapScanFindingsToBestPracticesUseCase,
     storeFindingsToAssociateUseCase,
+    mapScanFindingsToBestPracticesUseCase,
     fakeQuestionSetService: inject(tokenFakeQuestionSetService),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
-    useCase: new PrepareFindingsAssociationsUseCaseImpl(),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
   };
 };

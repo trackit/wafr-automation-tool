@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Assessment, Milestone, MilestoneSummary, User } from '@backend/models';
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
@@ -28,7 +27,7 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     milestoneId: number;
-  }): Promise<Milestone> {
+  }): Promise<Milestone | undefined> {
     // No-op for fake implementation
     return {} as Milestone;
   }

@@ -1,5 +1,4 @@
 import {
-  MilestoneNotFoundError,
   tokenAssessmentsRepository,
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
@@ -7,8 +6,13 @@ import {
 import type { Milestone } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
+import {
+  AssessmentExportRegionNotSetError,
+  AssessmentNotFoundError,
+  MilestoneNotFoundError,
+  OrganizationNotFoundError,
+} from '../../errors';
 import { assertOrganizationHasExportRole } from '../../services';
-import { ConflictError, NotFoundError } from '../Errors';
 
 export interface GetMilestoneUseCaseArgs {
   assessmentId: string;
@@ -31,45 +35,39 @@ export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
   public async getMilestone(args: GetMilestoneUseCaseArgs): Promise<Milestone> {
     const { organizationDomain, assessmentId, region, milestoneId } = args;
     const [organization, assessment] = await Promise.all([
-      this.organizationRepository.get({
-        organizationDomain,
-      }),
+      this.organizationRepository.get(organizationDomain),
       this.assessmentsRepository.get({
         assessmentId,
-        organization: organizationDomain,
+        organizationDomain,
       }),
     ]);
     if (!organization) {
-      throw new NotFoundError(
-        `Organization with domain ${organizationDomain} not found`
-      );
-    } else if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${organizationDomain}`
-      );
+      throw new OrganizationNotFoundError({ domain: organizationDomain });
+    }
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
     const milestonesRegion = region ?? assessment.exportRegion;
     if (!milestonesRegion) {
-      throw new ConflictError(
-        `Assessment with id ${assessmentId} has no export region set`
-      );
+      throw new AssessmentExportRegionNotSetError({ assessmentId });
     }
     assertOrganizationHasExportRole(organization);
-    return await this.wellArchitectedToolService
-      .getMilestone({
-        roleArn: organization.assessmentExportRoleArn,
-        assessment,
-        region: milestonesRegion,
+    const milestone = await this.wellArchitectedToolService.getMilestone({
+      roleArn: organization.assessmentExportRoleArn,
+      assessment,
+      region: milestonesRegion,
+      milestoneId,
+    });
+    if (!milestone) {
+      throw new MilestoneNotFoundError({
+        assessmentId,
         milestoneId,
-      })
-      .catch((error) => {
-        if (error instanceof MilestoneNotFoundError) {
-          throw new NotFoundError(
-            `Milestone with id ${milestoneId} not found for assessment ${assessmentId}`
-          );
-        }
-        throw error;
       });
+    }
+    return milestone;
   }
 }
 

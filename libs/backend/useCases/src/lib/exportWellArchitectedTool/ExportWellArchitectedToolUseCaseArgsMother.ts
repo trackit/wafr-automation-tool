@@ -12,7 +12,7 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
   public static basic(): ExportWellArchitectedToolUseCaseArgsMother {
     return new ExportWellArchitectedToolUseCaseArgsMother({
       user: UserMother.basic().build(),
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
     });
   }
 

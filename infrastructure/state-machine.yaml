@@ -343,7 +343,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Item:
                 PK:
-                  S: '{% $states.input.organization %}'
+                  S: '{% $states.input.organizationDomain %}'
                 SK:
                   S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
                 id:
@@ -351,7 +351,7 @@ Resources:
                 createdBy:
                   S: '{% $states.input.createdBy %}'
                 organization:
-                  S: '{% $states.input.organization %}'
+                  S: '{% $states.input.organizationDomain %}'
                 name:
                   S: '{% $states.input.name %}'
                 regions:
@@ -370,7 +370,7 @@ Resources:
                   S: '{% $states.input.createdAt %}'
             Assign:
               assessmentId: '{% $states.input.assessmentId %}'
-              organization: '{% $states.input.organization %}'
+              organizationDomain: '{% $states.input.organizationDomain %}'
               regions: '{% $states.input.regions %}'
               roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
@@ -381,7 +381,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $states.input.assessmentId %}'
-                  organization: '{% $states.input.organization %}'
+                  organizationDomain: '{% $states.input.organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           ScanningTools:
             Type: Parallel
@@ -478,7 +478,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           PrepareFindingsAssociationsUpdateStep:
             Type: Task
@@ -487,7 +487,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: '{% $organization %}'
+                  S: '{% $organizationDomain %}'
                 SK:
                   S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
@@ -501,7 +501,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           Prepare Findings Associations:
             Type: Parallel
@@ -513,7 +513,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'prowler'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -525,7 +525,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'cloud-custodian'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -537,7 +537,7 @@ Resources:
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
                       assessmentId: '{% $assessmentId %}'
-                      organization: '{% $organization %}'
+                      organizationDomain: '{% $organizationDomain %}'
                       scanningTool: 'cloudsploit'
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
@@ -550,7 +550,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           AssociateFindingsChunkToBestPracticesUpdateStep:
             Type: Task
@@ -559,7 +559,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: '{% $organization %}'
+                  S: '{% $organizationDomain %}'
                 SK:
                   S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
@@ -574,7 +574,7 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           PromptMap:
             Type: Map
@@ -589,7 +589,7 @@ Resources:
                   Resource: !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                   Arguments:
                     assessmentId: '{% $assessmentId %}'
-                    organization: '{% $organization %}'
+                    organizationDomain: '{% $organizationDomain %}'
                     findingsChunkURI: '{% $states.input %}'
                   End: true
                   Retry:
@@ -605,21 +605,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           ComputeGraphData:
             Type: Task
             Resource: !GetAtt ComputeGraphDataFunction.Arn
             Arguments:
               assessmentId: '{% $assessmentId %}'
-              organization: '{% $organization %}'
+              organizationDomain: '{% $organizationDomain %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
             Next: 'FinishUpdateStep'
           FinishUpdateStep:
@@ -629,7 +629,7 @@ Resources:
               TableName: !Ref DynamoDBArn
               Key:
                 PK:
-                  S: '{% $organization %}'
+                  S: '{% $organizationDomain %}'
                 SK:
                   S: "{% 'ASSESSMENT#' & $assessmentId %}"
               UpdateExpression: SET step = :newStep
@@ -643,21 +643,21 @@ Resources:
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
             Arguments:
               assessmentId: '{% $assessmentId %}'
-              organization: '{% $organization %}'
+              organizationDomain: '{% $organizationDomain %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
                 Next: CleanupOnError
                 Output:
                   assessmentId: '{% $assessmentId %}'
-                  organization: '{% $organization %}'
+                  organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
             End: true
           CleanupOnError:

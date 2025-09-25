@@ -1,21 +1,19 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-export class StartAssessmentAdapterEventMother {
-  private data: operations['startAssessment']['requestBody']['content']['application/json'];
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+type StartAssessmentBody =
+  operations['startAssessment']['requestBody']['content']['application/json'];
 
-  private constructor(
-    data: operations['startAssessment']['requestBody']['content']['application/json']
-  ) {
-    this.data = data;
+export class StartAssessmentAdapterEventMother {
+  private body: StartAssessmentBody;
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
+
+  private constructor(body: StartAssessmentBody) {
+    this.body = body;
   }
 
   public static basic(): StartAssessmentAdapterEventMother {
@@ -25,31 +23,25 @@ export class StartAssessmentAdapterEventMother {
     });
   }
 
-  public withName(
-    name: operations['startAssessment']['requestBody']['content']['application/json']['name']
-  ): StartAssessmentAdapterEventMother {
-    this.data.name = name;
+  public withName(name: string): StartAssessmentAdapterEventMother {
+    this.body.name = name;
     return this;
   }
 
-  public withRegions(
-    regions: operations['startAssessment']['requestBody']['content']['application/json']['regions']
-  ): StartAssessmentAdapterEventMother {
-    this.data.regions = regions;
+  public withRegions(regions?: string[]): StartAssessmentAdapterEventMother {
+    this.body.regions = regions;
     return this;
   }
 
-  public withRoleArn(
-    roleArn: operations['startAssessment']['requestBody']['content']['application/json']['roleArn']
-  ): StartAssessmentAdapterEventMother {
-    this.data.roleArn = roleArn;
+  public withRoleArn(roleArn: string): StartAssessmentAdapterEventMother {
+    this.body.roleArn = roleArn;
     return this;
   }
 
   public withWorkflows(
-    workflows: operations['startAssessment']['requestBody']['content']['application/json']['workflows']
+    workflows?: string[]
   ): StartAssessmentAdapterEventMother {
-    this.data.workflows = workflows;
+    this.body.workflows = workflows;
     return this;
   }
 
@@ -62,7 +54,7 @@ export class StartAssessmentAdapterEventMother {
 
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
-      .withBody(JSON.stringify(this.data))
+      .withBody(JSON.stringify(this.body))
       .withUserClaims({
         sub: this.user.id,
         email: this.user.email,

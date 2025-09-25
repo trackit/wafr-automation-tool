@@ -1,4 +1,4 @@
-import type { BestPracticeBody, User } from '@backend/models';
+import { type BestPracticeBody, type User, UserMother } from '@backend/models';
 
 import type { UpdateBestPracticeUseCaseArgs } from './UpdateBestPracticeUseCase';
 
@@ -11,12 +11,8 @@ export class UpdateBestPracticeUseCaseArgsMother {
 
   public static basic(): UpdateBestPracticeUseCaseArgsMother {
     return new UpdateBestPracticeUseCaseArgsMother({
-      assessmentId: 'assessment-id',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      user: UserMother.basic().build(),
       pillarId: '0',
       questionId: '0',
       bestPracticeId: '0',

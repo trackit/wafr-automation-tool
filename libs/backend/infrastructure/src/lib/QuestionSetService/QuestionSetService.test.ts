@@ -3,7 +3,7 @@ import { reset } from '@shared/di-container';
 
 import { QuestionSetService, RawQuestionSet } from './QuestionSetService';
 
-describe('QuestionSet Infrastructure', () => {
+describe('QuestionSetService', () => {
   describe('get', () => {
     it('should get the lastest version of the question set', async () => {
       const { questionSetService } = setup();
@@ -38,6 +38,7 @@ describe('QuestionSet Infrastructure', () => {
           ],
         },
       ];
+
       expect(questionSet.pillars).toEqual(questionSetData);
       expect(questionSet.version).toEqual('questions_05072025');
     });

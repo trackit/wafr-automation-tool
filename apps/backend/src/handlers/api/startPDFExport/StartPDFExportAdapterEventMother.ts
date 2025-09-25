@@ -1,22 +1,20 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
 
-type StartPDFExportParameters = operations['exportToPDF']['parameters']['path'];
+type StartPDFExportParameters =
+  operations['startPDFExport']['parameters']['path'];
 
 type StartPDFExportBody =
-  operations['exportToPDF']['requestBody']['content']['application/json'];
+  operations['startPDFExport']['requestBody']['content']['application/json'];
 
 export class StartPDFExportAdapterEventMother {
   private pathParameters: StartPDFExportParameters;
   private body: StartPDFExportBody;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
     pathParameters: StartPDFExportParameters,
@@ -29,7 +27,7 @@ export class StartPDFExportAdapterEventMother {
   public static basic(): StartPDFExportAdapterEventMother {
     return new StartPDFExportAdapterEventMother(
       {
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       },
       {
         versionName: 'version-name',
@@ -38,14 +36,14 @@ export class StartPDFExportAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: StartPDFExportParameters['assessmentId']
+    assessmentId: string
   ): StartPDFExportAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withVersionName(
-    versionName: StartPDFExportBody['versionName']
+    versionName: string
   ): StartPDFExportAdapterEventMother {
     this.body.versionName = versionName;
     return this;

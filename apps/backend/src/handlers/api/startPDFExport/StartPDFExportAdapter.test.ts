@@ -4,6 +4,7 @@ import { tokenStartPDFExportUseCase } from '@backend/useCases';
 import { register, reset } from '@shared/di-container';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
+import * as parseApiEventModule from '../../../utils/api/parseApiEvent/parseApiEvent';
 import { StartPDFExportAdapter } from './StartPDFExportAdapter';
 import { StartPDFExportAdapterEventMother } from './StartPDFExportAdapterEventMother';
 
@@ -27,24 +28,20 @@ describe('startPDFExport adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 status code with an invalid json body', async () => {
-      const { adapter } = setup();
+    it('should call parseApiEvent with the correct parameters', async () => {
+      const { adapter, parseSpy } = setup();
 
-      const event = APIGatewayProxyEventMother.basic().withBody('{').build();
+      const event = StartPDFExportAdapterEventMother.basic().build();
 
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
-    });
+      await adapter.handle(event);
 
-    it('should return a 400 status code with an invalid body', async () => {
-      const { adapter } = setup();
-
-      const event = APIGatewayProxyEventMother.basic()
-        .withBody(JSON.stringify({ invalid: 'body' }))
-        .build();
-
-      const response = await adapter.handle(event);
-      expect(response.statusCode).toBe(400);
+      expect(parseSpy).toHaveBeenCalledWith(
+        event,
+        expect.objectContaining({
+          pathSchema: expect.anything(),
+          bodySchema: expect.anything(),
+        })
+      );
     });
   });
 
@@ -52,25 +49,23 @@ describe('startPDFExport adapter', () => {
     it('should call useCase with path parameters and user', async () => {
       const { adapter, useCase } = setup();
 
+      const user = UserMother.basic().build();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const versionName = 'version-name';
+
       const event = StartPDFExportAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
-        .withVersionName('version-name')
-        .withUser(
-          UserMother.basic()
-            .withId('user-id')
-            .withEmail('user-id@test.io')
-            .build()
-        )
+        .withAssessmentId(assessmentId)
+        .withVersionName(versionName)
+        .withUser(user)
         .build();
 
       await adapter.handle(event);
 
       expect(useCase.startPDFExport).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
-        versionName: 'version-name',
-        user: expect.objectContaining({
-          organizationDomain: 'test.io',
-        }),
+        assessmentId,
+        versionName,
+        user,
       });
     });
 
@@ -89,10 +84,11 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
+  const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
+
   const useCase = { startPDFExport: vitest.fn() };
   useCase.startPDFExport.mockResolvedValueOnce(Promise.resolve());
   register(tokenStartPDFExportUseCase, { useValue: useCase });
 
-  const adapter = new StartPDFExportAdapter();
-  return { useCase, adapter };
+  return { parseSpy, useCase, adapter: new StartPDFExportAdapter() };
 };

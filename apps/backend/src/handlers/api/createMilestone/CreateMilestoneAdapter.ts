@@ -1,22 +1,21 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenCreateMilestoneUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
-import { parseJsonObject } from '@shared/utils';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const CreateMilestonePathSchema = z.object({
   assessmentId: z.string().uuid(),
 }) satisfies ZodType<operations['createMilestone']['parameters']['path']>;
 
 const CreateMilestoneBodySchema = z.object({
-  region: z.string().optional(),
-  name: z.string(),
+  region: z.string().nonempty().optional(),
+  name: z.string().nonempty(),
 }) satisfies ZodType<
   operations['createMilestone']['requestBody']['content']['application/json']
 >;
@@ -24,41 +23,28 @@ const CreateMilestoneBodySchema = z.object({
 export class CreateMilestoneAdapter {
   private readonly useCase = inject(tokenCreateMilestoneUseCase);
 
-  private parseBody(
-    body?: string
-  ): operations['createMilestone']['requestBody']['content']['application/json'] {
-    const parsedBody = parseJsonObject(body);
-    return CreateMilestoneBodySchema.parse(parsedBody);
-  }
-
   public async handle(
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
       func: this.processRequest.bind(this),
+      statusCode: 200,
     });
   }
 
   private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
-    const { pathParameters, body } = event;
-    if (!body) {
-      throw new BadRequestError('Request body is required');
-    }
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: CreateMilestonePathSchema,
+      bodySchema: CreateMilestoneBodySchema,
+    });
 
-    try {
-      const parsedPath = CreateMilestonePathSchema.parse(pathParameters);
-      const parsedBody = this.parseBody(body);
-      await this.useCase.createMilestone({
-        user: getUserFromEvent(event),
-        ...parsedPath,
-        ...parsedBody,
-      });
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid request query: ${e.message}`);
-      }
-      throw e;
-    }
+    const user = getUserFromEvent(event);
+
+    await this.useCase.createMilestone({
+      ...pathParameters,
+      ...body,
+      user,
+    });
   }
 }

@@ -99,8 +99,8 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
         });
         console.error('Error starting PDF export:', e);
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: ['assessments', assessmentId, 'exports', 'pdf'],
         });
         enqueueSnackbar({
@@ -156,8 +156,8 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
       });
       console.error('Error deleting PDF export', e);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ['assessments', assessmentId, 'exports', 'pdf'],
       });
       enqueueSnackbar({

@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 import {
   registerTestInfrastructure,
   tokenFakeObjectsStorage,
@@ -24,6 +26,17 @@ describe('AssociateFindingsToBestPractices adapter', () => {
           .withFindingsChunkURI('s3://test/prowler_0.json')
           .build();
       await expect(adapter.handle(event)).resolves.not.toThrow();
+    });
+
+    it('should throw with invalid assessmentId', async () => {
+      const { adapter } = setup();
+
+      const event =
+        AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
+          .withAssessmentId('invalid-uuid')
+          .build();
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
     });
 
     it('should throw with invalid args', async () => {
@@ -102,15 +115,9 @@ describe('AssociateFindingsToBestPractices adapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call AssociateFindingsToBestPractices with args', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase, fakeObjectsStorage } = setup();
 
-      const event =
-        AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
-          .withAssessmentId('assessment-id')
-          .withOrganization('test.io')
-          .withFindingsChunkURI('s3://findings-bucket/prowler_0.json')
-          .build();
       const findings = [
         FindingMother.basic().withId('prowler#1').build(),
         FindingMother.basic().withId('prowler#2').build(),
@@ -119,12 +126,19 @@ describe('AssociateFindingsToBestPractices adapter', () => {
         'prowler_0.json': JSON.stringify(findings),
       };
 
+      const event =
+        AssociateFindingsChunkToBestPracticesAdapterEventMother.basic()
+          .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+          .withOrganizationDomain('test.io')
+          .withFindingsChunkURI('s3://findings-bucket/prowler_0.json')
+          .build();
+
       await adapter.handle(event);
       expect(
         useCase.associateFindingsToBestPractices
       ).toHaveBeenCalledExactlyOnceWith({
-        assessmentId: 'assessment-id',
-        organization: 'test.io',
+        assessmentId: event.assessmentId,
+        organizationDomain: event.organizationDomain,
         scanningTool: ScanningTool.PROWLER,
         findings,
       });
@@ -135,12 +149,13 @@ describe('AssociateFindingsToBestPractices adapter', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   const useCase = { associateFindingsToBestPractices: vitest.fn() };
   register(tokenAssociateFindingsToBestPracticesUseCase, { useValue: useCase });
-  const adapter = new AssociateFindingsChunkToBestPracticesAdapter();
+
   return {
     useCase,
-    adapter,
+    adapter: new AssociateFindingsChunkToBestPracticesAdapter(),
     fakeObjectsStorage: inject(tokenFakeObjectsStorage),
   };
 };

@@ -20,6 +20,10 @@ import {
   tokenFeatureToggleRepository,
 } from './FeatureToggleRepository';
 import {
+  tokenFakeFindingsRepository,
+  tokenFindingsRepository,
+} from './FindingsRepository';
+import {
   tokenFakeFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
@@ -60,6 +64,9 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenAssessmentsRepository, {
     useFactory: () => inject(tokenFakeAssessmentsRepository),
+  });
+  register(tokenFindingsRepository, {
+    useFactory: () => inject(tokenFakeFindingsRepository),
   });
   register(tokenAIService, {
     useFactory: () => inject(tokenFakeAIService),

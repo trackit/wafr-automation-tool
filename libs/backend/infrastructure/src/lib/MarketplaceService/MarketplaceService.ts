@@ -12,11 +12,9 @@ import {
   MarketplaceMeteringClient,
 } from '@aws-sdk/client-marketplace-metering';
 
-import { Organization } from '@backend/models';
 import type { MarketplacePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { InfrastructureError } from '../../Errors';
 import { tokenLogger } from '../Logger';
 
 export enum PricingDimension {
@@ -37,100 +35,64 @@ export class MarketplaceService implements MarketplacePort {
   );
 
   public async hasMonthlySubscription(args: {
-    organization: Organization;
+    accountId: string;
   }): Promise<boolean> {
-    const { organization } = args;
-
-    if (!organization.accountId) {
-      this.logger.warn('Account ID is missing in organization');
-      return false;
-    }
+    const { accountId } = args;
     const command = new GetEntitlementsCommand({
       ProductCode: this.monthlySubscriptionProductCode,
       Filter: {
-        CUSTOMER_AWS_ACCOUNT_ID: [organization.accountId],
+        CUSTOMER_AWS_ACCOUNT_ID: [accountId],
         DIMENSION: [PricingDimension.Monthly],
       },
     });
-    try {
-      const response = await this.entitlementClient.send(command);
-      if (response.$metadata.httpStatusCode !== 200) {
-        throw new InfrastructureError({
-          message: `Failed to get entitlements: ${response.$metadata.httpStatusCode}`,
-        });
-      }
-      this.logger.info(
-        `Get entitlements for customer: ${organization.accountId}`
-      );
-      if (response.Entitlements?.[0]?.ExpirationDate) {
-        return new Date(response.Entitlements[0].ExpirationDate) > new Date();
-      }
-      return false;
-    } catch (error) {
-      this.logger.error(`Failed to get entitlements for customer: ${error}`);
-      throw error;
+
+    const response = await this.entitlementClient.send(command);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`Get entitlements for customer: ${accountId}`);
+    if (response.Entitlements?.[0]?.ExpirationDate) {
+      return new Date(response.Entitlements[0].ExpirationDate) > new Date();
+    }
+    return false;
   }
 
   public async hasUnitBasedSubscription(args: {
-    organization: Organization;
+    unitBasedAgreementId: string;
   }): Promise<boolean> {
-    const { organization } = args;
-
-    if (!organization.unitBasedAgreementId) {
-      this.logger.warn('Unit-based agreement ID is missing in organization');
-      return false;
-    }
-
+    const { unitBasedAgreementId } = args;
     const cmd = new DescribeAgreementCommand({
-      agreementId: organization.unitBasedAgreementId,
+      agreementId: unitBasedAgreementId,
     });
-    try {
-      const res = await this.agreementClient.send(cmd);
-      if (res.$metadata.httpStatusCode !== 200) {
-        throw new InfrastructureError({
-          message: `Failed to get entitlements: ${res.$metadata.httpStatusCode}`,
-        });
-      }
-      this.logger.info(
-        `DescribeAgreement for ${organization.unitBasedAgreementId}:`,
-        res
-      );
-      return res.status === AgreementStatus.ACTIVE;
-    } catch (err) {
-      this.logger.error(`Error fetching agreement: ${err}`);
-      throw err;
+
+    const response = await this.agreementClient.send(cmd);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`DescribeAgreement for ${unitBasedAgreementId}`);
+    return response.status === AgreementStatus.ACTIVE;
   }
 
-  public async consumeReviewUnit(args: {
-    organization: Organization;
-  }): Promise<void> {
-    const { organization } = args;
+  public async consumeReviewUnit(args: { accountId: string }): Promise<void> {
+    const { accountId } = args;
 
     const cmd = new BatchMeterUsageCommand({
       ProductCode: this.unitBasedProductCode,
       UsageRecords: [
         {
-          CustomerAWSAccountId: organization.accountId,
+          CustomerAWSAccountId: accountId,
           Dimension: PricingDimension.UnitBased,
           Quantity: 1,
           Timestamp: new Date(),
         },
       ],
     });
-    try {
-      const res = await this.meteringClient.send(cmd);
-      if (res.$metadata.httpStatusCode !== 200) {
-        throw new InfrastructureError({
-          message: `RegisterUsage failed: ${res.$metadata.httpStatusCode}`,
-        });
-      }
-      this.logger.info(`RegisterUsage for ${organization.accountId}:`, res);
-    } catch (err) {
-      this.logger.error(`Error fetching metering: ${err}`);
-      throw err;
+
+    const response = await this.meteringClient.send(cmd);
+    if (response.$metadata.httpStatusCode !== 200) {
+      throw new Error(JSON.stringify(response));
     }
+    this.logger.info(`RegisterUsage for ${accountId}`);
   }
 }
 

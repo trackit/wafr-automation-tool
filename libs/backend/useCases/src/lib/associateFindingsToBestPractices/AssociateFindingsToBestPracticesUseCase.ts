@@ -1,18 +1,20 @@
 import {
   tokenAssessmentsRepository,
+  tokenFindingsRepository,
   tokenFindingToBestPracticesAssociationService,
   tokenLogger,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import type { Finding, ScanningTool } from '@backend/models';
+import type { Assessment, Finding, ScanningTool } from '@backend/models';
 import { FindingToBestPracticesAssociation } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
+import { assertBestPracticeExists } from '../../services/asserts';
 
 export type AssociateFindingsToBestPracticesUseCaseArgs = {
   assessmentId: string;
-  organization: string;
+  organizationDomain: string;
   scanningTool: ScanningTool;
   findings: Finding[];
 };
@@ -31,21 +33,22 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
     tokenFindingToBestPracticesAssociationService
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async storeFindings(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     findingsAssociations: FindingToBestPracticesAssociation[];
   }): Promise<void> {
-    const { assessmentId, organization, findingsAssociations } = args;
+    const { assessmentId, organizationDomain, findingsAssociations } = args;
     await Promise.all(
       findingsAssociations
         .filter(({ bestPractices }) => bestPractices.length > 0)
         .map((association) =>
-          this.assessmentsRepository.saveFinding({
+          this.findingsRepository.save({
             assessmentId,
-            organization,
+            organizationDomain,
             finding: {
               ...association.finding,
               bestPractices: association.bestPractices
@@ -62,11 +65,11 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   }
 
   public async addFindingsToBestPractices(args: {
-    assessmentId: string;
-    organization: string;
+    assessment: Assessment;
+    organizationDomain: string;
     findingsAssociations: FindingToBestPracticesAssociation[];
   }): Promise<void> {
-    const { assessmentId, organization, findingsAssociations } = args;
+    const { assessment, organizationDomain, findingsAssociations } = args;
     const bestPracticesFindingIds = findingsAssociations.reduce(
       (acc, associations) => {
         for (const bestPractice of associations.bestPractices) {
@@ -80,12 +83,19 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
       },
       new Map<string, Set<string>>()
     );
+
     await Promise.all(
       Array.from(bestPracticesFindingIds.entries()).map(([key, findingIds]) => {
         const [pillarId, questionId, bestPracticeId] = key.split('#');
-        return this.assessmentsRepository.addBestPracticeFindings({
-          assessmentId,
-          organization,
+        assertBestPracticeExists({
+          assessment,
+          pillarId,
+          questionId,
+          bestPracticeId,
+        });
+        return this.assessmentsRepository.saveBestPracticeFindings({
+          assessmentId: assessment.id,
+          organizationDomain,
           pillarId,
           questionId,
           bestPracticeId,
@@ -96,24 +106,24 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   }
 
   public async storeFindingsAssociations(args: {
-    assessmentId: string;
-    organization: string;
+    assessment: Assessment;
+    organizationDomain: string;
     scanningTool: ScanningTool;
     findingsAssociations: FindingToBestPracticesAssociation[];
   }): Promise<void> {
-    const { assessmentId, organization, findingsAssociations } = args;
+    const { assessment, organizationDomain, findingsAssociations } = args;
     this.logger.info(
-      `Storing findings associations for assessment ${assessmentId} and organization ${organization}`
+      `Storing findings associations for assessment ${assessment.id} and organization ${organizationDomain}`
     );
     await Promise.all([
       this.storeFindings({
-        assessmentId,
-        organization,
+        assessmentId: assessment.id,
+        organizationDomain,
         findingsAssociations,
       }),
       this.addFindingsToBestPractices({
-        assessmentId,
-        organization,
+        assessment,
+        organizationDomain,
         findingsAssociations,
       }),
     ]);
@@ -122,19 +132,20 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   public async associateFindingsToBestPractices(
     args: AssociateFindingsToBestPracticesUseCaseArgs
   ): Promise<void> {
-    const { assessmentId, organization, scanningTool, findings } = args;
+    const { assessmentId, organizationDomain, scanningTool, findings } = args;
     const assessment = await this.assessmentsRepository.get({
-      assessmentId: args.assessmentId,
-      organization: args.organization,
+      assessmentId,
+      organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${assessmentId} not found for organization ${organization}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
     }
-    const { pillars } = await this.questionSetService.get();
+    const { pillars } = this.questionSetService.get();
     this.logger.info(
-      `Associating findings to best practices for assessment ${assessmentId} and organization ${organization}`
+      `Associating findings to best practices for assessment ${assessmentId} and organization ${organizationDomain}`
     );
     const findingsAssociations =
       await this.findingToBestPracticesAssociationService.associateFindingsToBestPractices(
@@ -145,8 +156,8 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
         }
       );
     await this.storeFindingsAssociations({
-      assessmentId,
-      organization,
+      assessment,
+      organizationDomain,
       scanningTool,
       findingsAssociations,
     });

@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-import type { User } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 import type { operations } from '@shared/api-schema';
 
 import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEventMother';
@@ -10,10 +10,7 @@ type GeneratePDFExportURLParameters =
 
 export class GeneratePDFExportURLAdapterEventMother {
   private pathParameters: GeneratePDFExportURLParameters;
-  private user: Pick<User, 'id' | 'email'> = {
-    id: 'user-id',
-    email: 'user-id@test.io',
-  };
+  private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(pathParameters: GeneratePDFExportURLParameters) {
     this.pathParameters = pathParameters;
@@ -21,20 +18,20 @@ export class GeneratePDFExportURLAdapterEventMother {
 
   public static basic(): GeneratePDFExportURLAdapterEventMother {
     return new GeneratePDFExportURLAdapterEventMother({
-      assessmentId: 'assessment-id',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       fileExportId: 'file-export-id',
     });
   }
 
   public withAssessmentId(
-    assessmentId: GeneratePDFExportURLParameters['assessmentId']
+    assessmentId: string
   ): GeneratePDFExportURLAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withFileExportId(
-    fileExportId: GeneratePDFExportURLParameters['fileExportId']
+    fileExportId: string
   ): GeneratePDFExportURLAdapterEventMother {
     this.pathParameters.fileExportId = fileExportId;
     return this;

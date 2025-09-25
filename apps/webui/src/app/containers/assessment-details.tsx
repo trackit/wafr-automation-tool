@@ -208,11 +208,11 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       if (!isMilestone) {
         console.log('Mutation settled, refetching data');
         // Always refetch after error or success to ensure data is in sync with server
-        queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+        await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
       }
     },
   });
@@ -287,10 +287,10 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
@@ -387,10 +387,10 @@ export function AssessmentDetails() {
         }
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
   });
 
@@ -398,12 +398,12 @@ export function AssessmentDetails() {
     mutationFn: () => rescanAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowRescanModal(false);
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', id] });
-      refetch();
-      navigate(`/`);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await refetch();
+      void navigate(`/`);
     },
   });
 
@@ -412,9 +412,9 @@ export function AssessmentDetails() {
     onMutate: async () => {
       setShowCancelModal(false);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
-      navigate(`/`);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      void navigate(`/`);
     },
   });
 
@@ -489,7 +489,7 @@ export function AssessmentDetails() {
         }
       }
     }
-  }, [pillars, selectedPillar?.id, activeQuestion?.id]);
+  }, [pillars, selectedPillar?.id, activeQuestion?.id, selectedPillar]);
 
   // Set question from the selected indices
   useEffect(() => {

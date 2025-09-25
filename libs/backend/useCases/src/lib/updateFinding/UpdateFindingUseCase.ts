@@ -1,13 +1,8 @@
-import {
-  EmptyUpdateBodyError,
-  FindingNotFoundError,
-  tokenAssessmentsRepository,
-  tokenLogger,
-} from '@backend/infrastructure';
+import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
 import type { FindingBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NoContentError, NotFoundError } from '../Errors';
+import { FindingNotFoundError } from '../../errors';
 
 export type UpdateFindingUseCaseArgs = {
   assessmentId: string;
@@ -21,26 +16,32 @@ export interface UpdateFindingUseCase {
 }
 
 export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
-  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async updateFinding(args: UpdateFindingUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, user, findingBody } = args;
-    await this.assessmentsRepository
-      .updateFinding({
+    const { organizationDomain } = user;
+
+    const finding = await this.findingsRepository.get({
+      assessmentId,
+      organizationDomain,
+      findingId,
+    });
+    if (!finding) {
+      throw new FindingNotFoundError({
         assessmentId,
-        organization: user.organizationDomain,
+        organizationDomain,
         findingId,
-        findingBody,
-      })
-      .catch((error) => {
-        if (error instanceof FindingNotFoundError) {
-          throw new NotFoundError(error.message);
-        } else if (error instanceof EmptyUpdateBodyError) {
-          throw new NoContentError('No content to update for finding');
-        }
-        throw error;
       });
+    }
+
+    await this.findingsRepository.update({
+      assessmentId,
+      organizationDomain: user.organizationDomain,
+      findingId,
+      findingBody,
+    });
     this.logger.info(
       `Finding ${findingId} for assessment ${assessmentId} in organization ${user.organizationDomain} updated successfully`
     );

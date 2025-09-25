@@ -1,12 +1,13 @@
 import {
   tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
+  tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors';
 
 export type DeleteAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -22,20 +23,21 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
     tokenAssessmentsStateMachine
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   private async deleteAssessmentFromRepository(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization } = args;
-    await this.assessmentsRepository.deleteFindings({
+    const { assessmentId, organizationDomain } = args;
+    await this.findingsRepository.deleteAll({
       assessmentId,
-      organization,
+      organizationDomain,
     });
     await this.assessmentsRepository.delete({
       assessmentId,
-      organization,
+      organizationDomain,
     });
   }
 
@@ -44,20 +46,20 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.user.organizationDomain,
+      });
     }
-
     await this.assessmentsStateMachine.cancelAssessment(
       assessment.executionArn
     );
     await this.deleteAssessmentFromRepository({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     this.logger.info(`Assessment#${args.assessmentId} deleted successfully`);
   }

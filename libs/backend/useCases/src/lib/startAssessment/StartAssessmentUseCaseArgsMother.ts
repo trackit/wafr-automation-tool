@@ -1,4 +1,4 @@
-import { User } from '@backend/models';
+import { User, UserMother } from '@backend/models';
 
 import type { StartAssessmentUseCaseArgs } from './StartAssessmentUseCase';
 
@@ -13,11 +13,7 @@ export class StartAssessmentUseCaseArgsMother {
     return new StartAssessmentUseCaseArgsMother({
       name: 'Basic Assessment',
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
-      user: {
-        id: 'user-id',
-        organizationDomain: 'test.io',
-        email: 'user-id@test.io',
-      },
+      user: UserMother.basic().build(),
     });
   }
 
