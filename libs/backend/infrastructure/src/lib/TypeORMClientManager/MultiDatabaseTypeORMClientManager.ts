@@ -10,8 +10,8 @@ import {
   TypeORMConfig,
 } from '../config/typeorm';
 
-class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
-  private clients: Record<string, DataSource> = {};
+export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
+  public clients: Record<string, DataSource> = {};
   private baseConfigCreator: Promise<TypeORMConfig> = inject(
     tokenTypeORMConfigCreator
   );
@@ -32,7 +32,7 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     this.isInitialized = true;
   }
 
-  private toDatabaseName(identifier: string): string {
+  public toDatabaseName(identifier: string): string {
     return `database_${identifier.replace(/[^A-Za-z_0-9]/g, '_')}`;
   }
 
