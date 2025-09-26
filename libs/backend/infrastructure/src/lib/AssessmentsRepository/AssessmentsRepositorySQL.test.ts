@@ -23,7 +23,6 @@ import {
 import { tokenIdGenerator } from '../IdGenerator';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
 
@@ -39,16 +38,12 @@ beforeAll(async () => {
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
-});
-
-afterAll(async () => {
-  const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
 
-describe('AssessmentsRepositoryDynamoDB', () => {
+describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
-    it('should save an assessment to DynamoDB', async () => {
+    it('should save an assessment', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
@@ -206,7 +201,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         offset: 1,
       };
       const nextToken =
-        AssessmentsRepositoryDynamoDB.encodeNextToken(nextTokenAssessment);
+        AssessmentsRepositorySQL.encodeNextToken(nextTokenAssessment);
 
       const fetchedAssessments = await repository.getAll({
         organization: 'organization1',

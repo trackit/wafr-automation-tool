@@ -1,27 +1,14 @@
-import {
-  Column,
-  CreateDateColumn,
-  DataSource,
-  Entity,
-  PrimaryColumn,
-} from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { TypeORMClientManager } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { tokenTypeORMConfigCreator, TypeORMConfig } from '../config/typeorm';
-
-@Entity('tenants')
-export class Tenant {
-  @PrimaryColumn('varchar')
-  id!: string;
-
-  @Column('varchar', { unique: true })
-  databaseName!: string;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-}
+import {
+  Tenant,
+  tenantsTypeORMConfig,
+  tokenTypeORMConfigCreator,
+  TypeORMConfig,
+} from '../config/typeorm';
 
 class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   private clients: Record<string, DataSource> = {};
@@ -39,17 +26,10 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     this.baseConfig = baseConfig;
     this.clients.default = new DataSource({
       ...baseConfig,
-      entities: [Tenant],
+      ...tenantsTypeORMConfig,
     });
+    await this.clients.default.initialize();
     this.isInitialized = true;
-  }
-
-  public async initializeDefaultDatabase(): Promise<DataSource> {
-    const client = await this.getClient();
-    await client.query(
-      'CREATE TABLE IF NOT EXISTS "tenants" (id varchar PRIMARY KEY, "databaseName" varchar UNIQUE NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now());'
-    );
-    return client;
   }
 
   private toDatabaseName(identifier: string): string {
@@ -58,7 +38,7 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
 
   public async getClient(id?: string): Promise<DataSource> {
     id = id ?? 'default';
-    if (!this.baseConfig) {
+    if (!this.isInitialized || !this.baseConfig) {
       throw new Error(
         'TypeORMClientManager not initialized. Call initialize() first.'
       );
@@ -79,6 +59,7 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     const clients = Object.values(this.clients);
     await Promise.all(
       clients.map(async (client) => {
+        if (!client.isInitialized) await client.initialize();
         const entities = client.entityMetadatas;
         const tableNames = entities.map((entity) => `"${entity.tableName}"`);
         if (tableNames.length === 0) return;
@@ -96,7 +77,6 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
         }
       })
     );
-    this.clients = {};
   }
 
   private async createDatabase(id: string): Promise<void> {
@@ -106,7 +86,9 @@ class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
       .getRepository(Tenant)
       .findOneBy({ id });
     if (!databaseAlreadyExists) {
-      await defaultClient.query(`CREATE DATABASE "${databaseName}";`);
+      await defaultClient
+        .query(`CREATE DATABASE "${databaseName}";`)
+        .catch(() => null); // Ignore errors, database might already exist
       await defaultClient.getRepository(Tenant).save({ id, databaseName });
     }
   }

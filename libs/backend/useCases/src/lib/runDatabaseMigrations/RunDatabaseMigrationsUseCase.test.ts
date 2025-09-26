@@ -6,24 +6,27 @@ import { inject, reset } from '@shared/di-container';
 
 import { RunDatabaseMigrationsUseCaseImpl } from './RunDatabaseMigrationsUseCase';
 
+beforeAll(async () => {
+  reset();
+  registerTestInfrastructure();
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.initialize();
+});
+
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
-});
-
-afterAll(async () => {
-  const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
 
 describe('RunDatabaseMigrationUseCase', () => {
-  it('should initialize default database', async () => {
+  it('should run migrations for default database', async () => {
     const { useCase, clientManager } = setup();
-    vi.spyOn(clientManager, 'initializeDefaultDatabase');
+    await clientManager.initialize();
+    const mainClient = await clientManager.getClient();
+    vi.spyOn(mainClient, 'runMigrations').mockResolvedValue([]);
     await useCase.runDatabaseMigrations();
-    expect(
-      clientManager.initializeDefaultDatabase
-    ).toHaveBeenCalledExactlyOnceWith();
+    expect(mainClient.runMigrations).toHaveBeenCalledExactlyOnceWith();
   });
 
   it('should run migrations for all tenants', async () => {
@@ -36,6 +39,20 @@ describe('RunDatabaseMigrationUseCase', () => {
     await useCase.runDatabaseMigrations();
     expect(client1.runMigrations).toHaveBeenCalledExactlyOnceWith();
     expect(client2.runMigrations).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('should run migrations for default database before tenants', async () => {
+    const { useCase, clientManager } = setup();
+    await clientManager.initialize();
+    const mainClient = await clientManager.getClient();
+    const client1 = await clientManager.createClient('organization1');
+    const client2 = await clientManager.createClient('organization2');
+    const mainSpy = vi.spyOn(mainClient, 'runMigrations').mockResolvedValue([]);
+    const spy1 = vi.spyOn(client1, 'runMigrations').mockResolvedValue([]);
+    const spy2 = vi.spyOn(client2, 'runMigrations').mockResolvedValue([]);
+    await useCase.runDatabaseMigrations();
+    expect(mainSpy).toHaveBeenCalledBefore(spy1);
+    expect(mainSpy).toHaveBeenCalledBefore(spy2);
   });
 });
 

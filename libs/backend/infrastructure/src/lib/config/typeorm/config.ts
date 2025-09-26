@@ -6,6 +6,7 @@ import { assertIsDefined } from '@shared/utils';
 
 import { tokenSecretsManager } from '../../SecretsManager';
 import { entities } from './entities';
+import { tenantsEntities } from './tenantsEntities';
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
 
@@ -26,6 +27,15 @@ export const testTypeORMConfig: TypeORMConfig = {
   synchronize: true,
   logging: true,
   migrations: [],
+};
+
+export const tenantsTypeORMConfig: Pick<
+  TypeORMConfig,
+  'database' | 'entities' | 'migrations'
+> = {
+  database: 'postgres',
+  entities: tenantsEntities,
+  migrations: [path.join(__dirname, 'tenantsMigrations/*.js')], // In production, we use the compiled js files
 };
 
 export const tokenTypeORMConfigCreator = createInjectionToken<

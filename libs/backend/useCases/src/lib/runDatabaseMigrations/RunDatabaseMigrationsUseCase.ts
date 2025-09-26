@@ -17,7 +17,8 @@ export class RunDatabaseMigrationsUseCaseImpl
 
   public async runDatabaseMigrations(): Promise<void> {
     await this.clientManager.initialize();
-    const mainDataSource = await this.clientManager.initializeDefaultDatabase();
+    const mainDataSource = await this.clientManager.getClient();
+    await mainDataSource.runMigrations();
 
     const tenantRepo = mainDataSource.getRepository(Tenant);
     const tenants = await tenantRepo.find();
