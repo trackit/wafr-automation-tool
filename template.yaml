@@ -122,6 +122,7 @@ Resources:
         PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:

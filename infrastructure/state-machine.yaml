@@ -56,6 +56,8 @@ Parameters:
     Description: Security group IDs to attach to Lambdas for VPC access
   DBHost:
     Type: String
+  DBCredentialsSecretArn:
+    Type: String
 
 Globals:
   Function:
@@ -74,6 +76,7 @@ Globals:
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
         DB_HOST: !Ref DBHost
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -420,9 +423,9 @@ Resources:
           PrepareFindingsAssociations:
             Type: Parallel
             Branches:
-              - StartAt: Prepare Prowler Findings Associations
+              - StartAt: PrepareProwlerFindingsAssociations
                 States:
-                  Prepare Prowler Findings Associations:
+                  PrepareProwlerFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
@@ -432,9 +435,9 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare Cloud Custodian Findings Associations
+              - StartAt: PrepareCloudCustodianFindingsAssociations
                 States:
-                  Prepare Cloud Custodian Findings Associations:
+                  PrepareCloudCustodianFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
@@ -444,9 +447,9 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare CloudSploit Findings Associations
+              - StartAt: PrepareCloudSploitFindingsAssociations
                 States:
-                  Prepare CloudSploit Findings Associations:
+                  PrepareCloudSploitFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:

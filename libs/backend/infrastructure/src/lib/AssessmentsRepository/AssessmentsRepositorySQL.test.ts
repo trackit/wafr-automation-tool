@@ -82,7 +82,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('00000000-0000-0000-0000-000000000000')
         .withOrganization('organization1')
         .withName('Test Assessment')
-        .withRegions(['us-west-1', 'us-west-2'])
+        .withRegions(['us-west-1'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
         .withFinished(true)
         .withWorkflows(['workflow-1', 'workflow-2'])
@@ -1329,6 +1329,8 @@ describe('AssessmentsRepositorySQL', () => {
             .withSeverities({})
             .build(),
         })
+        .withExecutionArn('old-execution-arn')
+        .withFinished(false)
         .build();
       await repository.save(assessment);
 
@@ -1363,6 +1365,8 @@ describe('AssessmentsRepositorySQL', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          executionArn: 'new-execution-arn',
+          finished: true,
         },
       });
 
@@ -1394,6 +1398,8 @@ describe('AssessmentsRepositorySQL', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          executionArn: 'new-execution-arn',
+          finished: true,
         })
       );
     });

@@ -173,7 +173,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
   });
 
   describe('getAssessmentStep', () => {
-    it('should return SCANNING_STARTED for Pass or ScanningTools state', async () => {
+    it('should return SCANNING_STARTED for Pass state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
@@ -182,6 +182,78 @@ describe('AssessmentsStateMachine Infrastructure', () => {
             timestamp: new Date(),
             type: undefined,
             id: 1,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
+    });
+
+    it('should return SCANNING_STARTED for ScanningTools state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'ScanningTools' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 2,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
+    });
+
+    it('should return SCANNING_STARTED for ProwlerScan state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'ProwlerScan' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 2,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
+    });
+
+    it('should return SCANNING_STARTED for PrepareCustodian state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'PrepareCustodian' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 2,
+          },
+        ],
+      });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
+    });
+
+    it('should return SCANNING_STARTED for CloudSploitScan state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'CloudSploitScan' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 2,
           },
         ],
       });
@@ -209,7 +281,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       expect(step).toBe(AssessmentStep.PREPARING_ASSOCIATIONS);
     });
 
-    it('should return ASSOCIATING_FINDINGS for PromptMap or ComputeGraphData state', async () => {
+    it('should return ASSOCIATING_FINDINGS for PromptMap state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
@@ -221,11 +293,14 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
-      let step = await assessmentsStateMachineSfn.getAssessmentStep(
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
-      sfnClientMock.reset();
+    });
+
+    it('should return ASSOCIATING_FINDINGS for ComputeGraphData state', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
@@ -236,18 +311,18 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
-      step = await assessmentsStateMachineSfn.getAssessmentStep(
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
 
-    it('should return FINISHED for Cleanup state', async () => {
+    it('should return ASSOCIATING_FINDINGS for AssociateFindingsChunkToBestPractices state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
-            stateEnteredEventDetails: { name: 'Cleanup' },
+            stateEnteredEventDetails: { name: 'AssociateFindingsChunkToBestPractices' },
             timestamp: new Date(),
             type: undefined,
             id: 5,
@@ -257,25 +332,19 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
-      expect(step).toBe(AssessmentStep.FINISHED);
+      expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
 
-    it('should return ERRORED for CleanupOnError state', async () => {
+    it('should return SCANNING_STARTED if no known state but execution is RUNNING', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
-      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
-        events: [
-          {
-            stateEnteredEventDetails: { name: 'CleanupOnError' },
-            timestamp: new Date(),
-            type: undefined,
-            id: 6,
-          },
-        ],
-      });
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({ events: [] });
+      sfnClientMock
+        .on(DescribeExecutionCommand)
+        .resolves({ status: ExecutionStatus.RUNNING });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
-      expect(step).toBe(AssessmentStep.ERRORED);
+      expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
 
     it('should return FINISHED if execution status is SUCCEEDED and no known state', async () => {
@@ -307,7 +376,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
-            stateEnteredEventDetails: { name: 'Cleanup' },
+            stateEnteredEventDetails: { name: 'ComputeGraphData' },
             timestamp: new Date(),
             type: undefined,
             id: 5,
@@ -329,7 +398,7 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
-      expect(step).toBe(AssessmentStep.FINISHED);
+      expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
   });
 });

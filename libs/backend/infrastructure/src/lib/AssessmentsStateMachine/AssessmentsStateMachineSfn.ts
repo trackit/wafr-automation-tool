@@ -28,36 +28,41 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     const historyResponse = await this.client.send(
       new GetExecutionHistoryCommand({
         executionArn,
-        maxResults: 10,
+        maxResults: 100,
         reverseOrder: true,
       })
     );
     const events = historyResponse.events || [];
 
-    const knownStepToAssessmentStep: Record<string, AssessmentStep> = {
+    const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
       Pass: AssessmentStep.SCANNING_STARTED,
       ScanningTools: AssessmentStep.SCANNING_STARTED,
+      ProwlerScan: AssessmentStep.SCANNING_STARTED,
+      PrepareCustodian: AssessmentStep.SCANNING_STARTED,
+      CloudSploitScan: AssessmentStep.SCANNING_STARTED,
       PrepareFindingsAssociations: AssessmentStep.PREPARING_ASSOCIATIONS,
       PromptMap: AssessmentStep.ASSOCIATING_FINDINGS,
+      AssociateFindingsChunkToBestPractices:
+        AssessmentStep.ASSOCIATING_FINDINGS,
       ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
-      Cleanup: AssessmentStep.FINISHED,
-      CleanupOnError: AssessmentStep.ERRORED,
     };
-
     for (const event of events) {
       const stateName = event.stateEnteredEventDetails?.name;
-      if (stateName && knownStepToAssessmentStep[stateName]) {
-        return knownStepToAssessmentStep[stateName];
+      if (stateName && knownStateToAssessmentStep[stateName]) {
+        return knownStateToAssessmentStep[stateName];
       }
     }
 
     const describeResponse = await this.client.send(
       new DescribeExecutionCommand({ executionArn })
     );
-
-    return describeResponse.status === ExecutionStatus.SUCCEEDED
-      ? AssessmentStep.FINISHED
-      : AssessmentStep.ERRORED;
+    if (describeResponse.status === ExecutionStatus.RUNNING) {
+      return AssessmentStep.SCANNING_STARTED;
+    }
+    if (describeResponse.status === ExecutionStatus.SUCCEEDED) {
+      return AssessmentStep.FINISHED;
+    }
+    return AssessmentStep.ERRORED;
   }
 
   public async startAssessment(

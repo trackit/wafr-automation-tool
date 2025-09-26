@@ -2,9 +2,7 @@ import { Organization } from '@backend/models';
 import { OrganizationRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
-export class FakeOrganizationRepositoryDynamoDB
-  implements OrganizationRepository
-{
+export class FakeOrganizationRepository implements OrganizationRepository {
   public organizations: Record<string, Organization> = {};
 
   async save(args: { organization: Organization }): Promise<void> {
@@ -20,7 +18,7 @@ export class FakeOrganizationRepositoryDynamoDB
 }
 
 export const tokenFakeOrganizationRepository =
-  createInjectionToken<FakeOrganizationRepositoryDynamoDB>(
+  createInjectionToken<FakeOrganizationRepository>(
     'FakeOrganizationRepository',
-    { useClass: FakeOrganizationRepositoryDynamoDB }
+    { useClass: FakeOrganizationRepository }
   );

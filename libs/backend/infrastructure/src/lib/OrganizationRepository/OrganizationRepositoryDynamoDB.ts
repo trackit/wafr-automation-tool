@@ -65,11 +65,6 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   }
 }
 
-export const tokenOrganizationRepository =
-  createInjectionToken<OrganizationRepository>('OrganizationRepository', {
-    useClass: OrganizationRepositoryDynamoDB,
-  });
-
 export const tokenDynamoDBOrganizationTableName = createInjectionToken<string>(
   'DynamoDBOrganizationTableName',
   {
