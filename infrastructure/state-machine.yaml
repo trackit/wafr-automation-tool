@@ -97,6 +97,8 @@ Resources:
       MemorySize: 1024
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -133,6 +135,8 @@ Resources:
       Timeout: 900
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -175,6 +179,8 @@ Resources:
         Name: CleanupFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -224,6 +230,8 @@ Resources:
         Name: PrepareCustodianFunction
       Timeout: 600
       Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -254,6 +262,8 @@ Resources:
         Name: ComputeGraphDataFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
