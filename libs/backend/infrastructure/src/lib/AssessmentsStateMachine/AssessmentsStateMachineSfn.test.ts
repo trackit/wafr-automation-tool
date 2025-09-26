@@ -185,6 +185,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -202,6 +205,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
             id: 2,
           },
         ],
+      });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
@@ -221,6 +227,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -238,6 +247,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
             id: 2,
           },
         ],
+      });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
@@ -257,6 +269,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -274,6 +289,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
             id: 2,
           },
         ],
+      });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
@@ -293,6 +311,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -311,6 +332,9 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -322,12 +346,17 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
-            stateEnteredEventDetails: { name: 'AssociateFindingsChunkToBestPractices' },
+            stateEnteredEventDetails: {
+              name: 'AssociateFindingsChunkToBestPractices',
+            },
             timestamp: new Date(),
             type: undefined,
             id: 5,
           },
         ],
+      });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
@@ -395,10 +424,34 @@ describe('AssessmentsStateMachine Infrastructure', () => {
           },
         ],
       });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.RUNNING,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
+    });
+
+    it('should return ERRORED if execution status is FAILED even with known states in history', async () => {
+      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateEnteredEventDetails: { name: 'Pass' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 1,
+          },
+        ],
+      });
+      sfnClientMock
+        .on(DescribeExecutionCommand)
+        .resolves({ status: ExecutionStatus.FAILED });
+      const step = await assessmentsStateMachineSfn.getAssessmentStep(
+        'arn:aws:states:stateMachine'
+      );
+      expect(step).toBe(AssessmentStep.ERRORED);
     });
   });
 });

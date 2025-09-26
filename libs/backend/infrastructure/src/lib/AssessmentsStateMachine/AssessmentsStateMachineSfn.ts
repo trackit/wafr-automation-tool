@@ -25,15 +25,24 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   public async getAssessmentStep(
     executionArn: string
   ): Promise<AssessmentStep> {
-    const historyResponse = await this.client.send(
-      new GetExecutionHistoryCommand({
-        executionArn,
-        maxResults: 100,
-        reverseOrder: true,
-      })
-    );
+    const [describeResponse, historyResponse] = await Promise.all([
+      this.client.send(new DescribeExecutionCommand({ executionArn })),
+      this.client.send(
+        new GetExecutionHistoryCommand({
+          executionArn,
+          maxResults: 100,
+          reverseOrder: true,
+        })
+      ),
+    ]);
     const events = historyResponse.events || [];
 
+    if (describeResponse.status === ExecutionStatus.FAILED) {
+      return AssessmentStep.ERRORED;
+    }
+    if (describeResponse.status === ExecutionStatus.SUCCEEDED) {
+      return AssessmentStep.FINISHED;
+    }
     const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
       Pass: AssessmentStep.SCANNING_STARTED,
       ScanningTools: AssessmentStep.SCANNING_STARTED,
@@ -52,15 +61,8 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
         return knownStateToAssessmentStep[stateName];
       }
     }
-
-    const describeResponse = await this.client.send(
-      new DescribeExecutionCommand({ executionArn })
-    );
     if (describeResponse.status === ExecutionStatus.RUNNING) {
       return AssessmentStep.SCANNING_STARTED;
-    }
-    if (describeResponse.status === ExecutionStatus.SUCCEEDED) {
-      return AssessmentStep.FINISHED;
     }
     return AssessmentStep.ERRORED;
   }
