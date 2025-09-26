@@ -1,7 +1,6 @@
 import {
   AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   FindingCommentMother,
   FindingMother,
@@ -24,7 +23,6 @@ import {
 import { tokenIdGenerator } from '../IdGenerator';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { AssessmentsRepositoryDynamoDB } from './AssessmentsRepositoryDynamoDB';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './GetBestPracticeFindingsAssessmentsRepositoryArgsMother';
 
@@ -32,6 +30,7 @@ beforeAll(async () => {
   reset();
   registerTestInfrastructure();
   const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
 });
@@ -39,16 +38,12 @@ beforeAll(async () => {
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
-});
-
-afterAll(async () => {
-  const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
 
-describe('AssessmentsRepositoryDynamoDB', () => {
+describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
-    it('should save an assessment to DynamoDB', async () => {
+    it('should save an assessment', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
@@ -87,9 +82,9 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withId('00000000-0000-0000-0000-000000000000')
         .withOrganization('organization1')
         .withName('Test Assessment')
-        .withRegions(['us-west-1', 'us-west-2'])
+        .withRegions(['us-west-1'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 
@@ -206,7 +201,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         offset: 1,
       };
       const nextToken =
-        AssessmentsRepositoryDynamoDB.encodeNextToken(nextTokenAssessment);
+        AssessmentsRepositorySQL.encodeNextToken(nextTokenAssessment);
 
       const fetchedAssessments = await repository.getAll({
         organization: 'organization1',
@@ -1334,6 +1329,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
             .withSeverities({})
             .build(),
         })
+        .withExecutionArn('old-execution-arn')
+        .withFinished(false)
         .build();
       await repository.save(assessment);
 
@@ -1368,6 +1365,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          executionArn: 'new-execution-arn',
+          finished: true,
         },
       });
 
@@ -1399,6 +1398,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          executionArn: 'new-execution-arn',
+          finished: true,
         })
       );
     });

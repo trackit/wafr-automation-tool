@@ -2,9 +2,8 @@ import type { Pillar } from '../Pillar';
 import type { ScanningTool } from '../ScanningTool';
 import {
   type Assessment,
-  type AssessmentFileExports,
+  AssessmentFileExports,
   type AssessmentGraphData,
-  AssessmentStep,
 } from './Assessment';
 
 export class AssessmentMother {
@@ -34,9 +33,9 @@ export class AssessmentMother {
       rawGraphData: {},
       regions: [],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
-      step: AssessmentStep.FINISHED,
       workflows: [],
       fileExports: {},
+      finished: false,
     });
   }
 
@@ -107,13 +106,13 @@ export class AssessmentMother {
     return this;
   }
 
-  public withStep(step: AssessmentStep): AssessmentMother {
-    this.data.step = step;
+  public withWorkflows(workflows: string[]): AssessmentMother {
+    this.data.workflows = workflows;
     return this;
   }
 
-  public withWorkflows(workflows: string[]): AssessmentMother {
-    this.data.workflows = workflows;
+  public withFinished(finished: boolean): AssessmentMother {
+    this.data.finished = finished;
     return this;
   }
 

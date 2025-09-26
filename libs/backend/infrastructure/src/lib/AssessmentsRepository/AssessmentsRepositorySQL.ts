@@ -50,6 +50,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     entity: EntityTarget<T>,
     organization: string
   ): Promise<Repository<T>> {
+    if (!this.clientManager.isInitialized) {
+      await this.clientManager.initialize();
+    }
     const dataSource = await this.clientManager.getClient(organization);
     return dataSource.getRepository(entity);
   }
@@ -124,10 +127,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       regions: e.regions ?? [],
       exportRegion: e.exportRegion ?? undefined,
       roleArn: e.roleArn,
-      step: e.step,
       workflows: e.workflows ?? [],
       error: e.error ?? undefined,
       pillars: (e.pillars ?? []).map((p) => this.toDomainPillar(p)),
+      finished: e.finished,
     };
   }
 
@@ -664,17 +667,19 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     if (assessmentBody.graphData !== undefined)
       entity.graphData = assessmentBody.graphData;
     if (assessmentBody.error !== undefined) entity.error = assessmentBody.error;
-    if (assessmentBody.step !== undefined) entity.step = assessmentBody.step;
     if (assessmentBody.rawGraphData !== undefined)
       entity.rawGraphData = assessmentBody.rawGraphData;
     if (assessmentBody.questionVersion !== undefined)
       entity.questionVersion = assessmentBody.questionVersion;
     if (assessmentBody.exportRegion !== undefined)
       entity.exportRegion = assessmentBody.exportRegion;
-
+    if (assessmentBody.executionArn !== undefined)
+      entity.executionArn = assessmentBody.executionArn;
     if (assessmentBody.pillars !== undefined) {
       entity.pillars = assessmentBody.pillars as PillarEntity[];
     }
+    if (assessmentBody.finished !== undefined)
+      entity.finished = assessmentBody.finished;
 
     await repo.save(entity);
     this.logger.info(`Assessment updated: ${assessmentId}`);

@@ -134,7 +134,6 @@ describe('getAssessments adapter', () => {
         roleArn: assessment.roleArn,
         workflows: assessment.workflows,
         createdAt: assessment.createdAt.toISOString(),
-        step: assessment.step,
         error: assessment.error,
       });
     });

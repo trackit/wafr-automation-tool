@@ -1,7 +1,6 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -130,7 +129,6 @@ describe('getAssessment adapter', () => {
         })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
-        .withStep(AssessmentStep.FINISHED)
         .withWorkflows([])
         .build();
       useCase.getAssessment.mockResolvedValue(assessment);
@@ -168,15 +166,13 @@ describe('getAssessment adapter', () => {
             ],
           },
         ],
-        graphData: assessment.graphData,
-        id: assessment.id,
-        name: assessment.name,
-        organization: assessment.organization,
-        questionVersion: assessment.questionVersion,
-        regions: assessment.regions,
-        roleArn: assessment.roleArn,
-        step: assessment.step,
-        workflows: assessment.workflows,
+        id: 'assessment-id',
+        name: 'assessment name',
+        organization: 'test.io',
+        questionVersion: '1.0.0',
+        regions: ['us-west-2'],
+        roleArn: 'role-arn',
+        workflows: [],
       });
     });
 

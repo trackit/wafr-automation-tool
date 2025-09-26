@@ -54,8 +54,9 @@ describe('RescanAssessmentUseCase', () => {
     expect(findings).toBeUndefined();
   });
 
-  it('should delete assessment', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+  it('should update executionArn to new value', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
+      setup();
 
     const user = UserMother.basic().build();
 
@@ -64,6 +65,10 @@ describe('RescanAssessmentUseCase', () => {
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
+    fakeAssessmentsStateMachine.startAssessment = vitest
+      .fn()
+      .mockResolvedValue('new-test-arn');
+
     const input = RescanAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
       .withUser(user)
@@ -71,10 +76,11 @@ describe('RescanAssessmentUseCase', () => {
 
     await useCase.rescanAssessment(input);
 
-    const assessments = await fakeAssessmentsRepository.getAll({
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    expect(assessments.assessments).toEqual([]);
+    expect(updatedAssessment?.executionArn).toBe('new-test-arn');
   });
 
   it('should cancel old state machine execution', async () => {

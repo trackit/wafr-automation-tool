@@ -32,9 +32,7 @@ Parameters:
     Description: Security group IDs to attach to Lambdas for VPC access
   DBHost:
     Type: String
-  DBUsername:
-    Type: String
-  DBPassword:
+  DBCredentialsSecretArn:
     Type: String
 
 Globals:
@@ -51,8 +49,7 @@ Globals:
         STATE_MACHINE_ARN: !Ref StateMachineArn
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
         DB_HOST: !Ref DBHost
-        DB_USERNAME: !Ref DBUsername
-        DB_PASSWORD: !Ref DBPassword
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -149,22 +146,25 @@ Resources:
       IdentityPoolId: !Ref IdentityPool
       Roles:
         authenticated: !GetAtt CognitoAuthenticatedRole.Arn
-  
+
   MigrationRunnerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${MigrationRunnerFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-  
+
   MigrationRunnerFunction:
     Type: AWS::Serverless::Function
     Properties:
       Timeout: 900
+      ReservedConcurrentExecutions: 1
       CodeUri: ../apps/backend/src/handlers/migrationRunner
       Tags:
         Name: MigrationRunnerFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -174,7 +174,58 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+  
+  CreateOrganizationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CreateOrganizationFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
 
+  CreateOrganizationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/createOrganization
+      Tags:
+        Name: CreateOrganizationFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  
+  ResetAuroraLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ResetAuroraFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  ResetAuroraFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/resetAurora
+      Tags:
+        Name: ResetAuroraFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
 
   Api:
     Type: AWS::Serverless::Api
@@ -208,6 +259,8 @@ Resources:
         Name: StartAssessmentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -257,6 +310,8 @@ Resources:
         Name: GetAssessmentsFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         GetAssessments:
           Type: Api
@@ -288,6 +343,8 @@ Resources:
         Name: GetAssessmentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         RetrieveProcessStep:
           Type: Api
@@ -319,6 +376,8 @@ Resources:
         Name: DeleteAssessmentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -355,6 +414,8 @@ Resources:
         Name: UpdateAssessmentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateAssessment:
           Type: Api
@@ -386,6 +447,8 @@ Resources:
         Name: RescanAssessmentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -445,6 +508,14 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
+        - PolicyName: SecretsManagerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DBCredentialsSecretArn
         - PolicyName: BedrockPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -794,6 +865,8 @@ Resources:
         Name: UpdatePillarFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdatePillar:
           Type: Api
@@ -825,6 +898,8 @@ Resources:
         Name: UpdateQuestionFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateQuestion:
           Type: Api
@@ -856,6 +931,8 @@ Resources:
         Name: GetBestPracticeFindingsFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -896,6 +973,8 @@ Resources:
         Name: UpdateBestPracticeFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateBestPractice:
           Type: Api
@@ -927,6 +1006,8 @@ Resources:
         Name: UpdateFindingFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateFinding:
           Type: Api
@@ -958,6 +1039,8 @@ Resources:
         Name: AddCommentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         AddComment:
           Type: Api
@@ -992,6 +1075,8 @@ Resources:
         Name: UpdateCommentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateComment:
           Type: Api
@@ -1023,6 +1108,8 @@ Resources:
         Name: DeleteCommentFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         DeleteComment:
           Type: Api
@@ -1030,6 +1117,47 @@ Resources:
             RestApiId: !Ref Api
             Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
             Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  
+  GetAssessmentStepLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentStepFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  GetAssessmentStepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getAssessmentStep
+      Tags:
+        Name: GetAssessmentStepFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: states:DescribeExecution
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
+            - Effect: Allow
+              Action: states:GetExecutionHistory
+              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
+      Events:
+        GetAssessmentStep:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/step
+            Method: GET
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

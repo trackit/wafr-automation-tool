@@ -16,7 +16,9 @@ export class RunDatabaseMigrationsUseCaseImpl
   private readonly logger = inject(tokenLogger);
 
   public async runDatabaseMigrations(): Promise<void> {
-    const mainDataSource = await this.clientManager.initializeDefaultDatabase();
+    await this.clientManager.initialize();
+    const mainDataSource = await this.clientManager.getClient();
+    await mainDataSource.runMigrations();
 
     const tenantRepo = mainDataSource.getRepository(Tenant);
     const tenants = await tenantRepo.find();

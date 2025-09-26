@@ -7,7 +7,7 @@ import {
   tokenMarketplaceService,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
-import { Assessment, AssessmentStep, User } from '@backend/models';
+import { Assessment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -113,7 +113,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
         domain: user.organizationDomain,
       });
     }
-    await this.stateMachine.startAssessment({
+    const executionId = await this.stateMachine.startAssessment({
       name,
       regions,
       workflows,
@@ -132,9 +132,8 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdAt: new Date(),
       createdBy: user.id,
       organization: user.organizationDomain,
-      executionArn: '',
+      executionArn: executionId,
       rawGraphData: {},
-      step: AssessmentStep.SCANNING_STARTED,
     };
     await this.assessmentRepository.save(assessment);
     return { assessmentId };

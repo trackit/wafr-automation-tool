@@ -1,3 +1,3 @@
 export * from './config';
 export * from './entities';
-export * from './TypeORMClientManager';
+export * from './tenantsEntities';

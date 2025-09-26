@@ -55,14 +55,12 @@ describe('AssessmentsList', () => {
       {
         id: '1',
         name: 'Test Assessment 1',
-        step: 'FINISHED',
         roleArn: 'arn:aws:iam::123456789012:role/test-role',
         createdAt: '2024-01-01T00:00:00Z',
       },
       {
         id: '2',
         name: 'Test Assessment 2',
-        step: 'SCANNING_STARTED',
         roleArn: 'arn:aws:iam::098765432109:role/test-role',
         createdAt: '2024-01-02T00:00:00Z',
       },

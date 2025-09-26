@@ -15,7 +15,10 @@ import {
   testDynamoDbConfig,
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
-import { testTypeORMConfig, tokenTypeORMConfig } from './config/typeorm/config';
+import {
+  testTypeORMConfig,
+  tokenTypeORMConfigCreator,
+} from './config/typeorm/config';
 import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,
@@ -49,6 +52,7 @@ import {
   tokenFakeQuestionSetService,
   tokenQuestionSetService,
 } from './QuestionSetService';
+import { tokenFakeSecretsManager, tokenSecretsManager } from './SecretsManager';
 import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
@@ -58,7 +62,9 @@ export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
-  register(tokenTypeORMConfig, { useValue: testTypeORMConfig });
+  register(tokenTypeORMConfigCreator, {
+    useFactory: async () => Promise.resolve(testTypeORMConfig),
+  });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
   register(tokenAssessmentsStateMachine, {
@@ -102,5 +108,8 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenCognitoService, {
     useFactory: () => inject(tokenFakeCognitoService),
+  });
+  register(tokenSecretsManager, {
+    useFactory: () => inject(tokenFakeSecretsManager),
   });
 };

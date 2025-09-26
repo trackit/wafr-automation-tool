@@ -56,6 +56,8 @@ Parameters:
     Description: Security group IDs to attach to Lambdas for VPC access
   DBHost:
     Type: String
+  DBCredentialsSecretArn:
+    Type: String
 
 Globals:
   Function:
@@ -74,6 +76,7 @@ Globals:
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
         DB_HOST: !Ref DBHost
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -94,6 +97,8 @@ Resources:
       MemorySize: 1024
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -130,6 +135,8 @@ Resources:
       Timeout: 900
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -172,6 +179,8 @@ Resources:
         Name: CleanupFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -221,6 +230,8 @@ Resources:
         Name: PrepareCustodianFunction
       Timeout: 600
       Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -251,6 +262,8 @@ Resources:
         Name: ComputeGraphDataFunction
       Policies:
         - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -320,53 +333,6 @@ Resources:
               roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
             Next: ScanningTools
-          # CreateAssessment:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:putItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Item:
-          #       PK:
-          #         S: '{% $states.input.organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
-          #       id:
-          #         S: '{% $states.input.assessmentId %}'
-          #       createdBy:
-          #         S: '{% $states.input.createdBy %}'
-          #       organization:
-          #         S: '{% $states.input.organization %}'
-          #       name:
-          #         S: '{% $states.input.name %}'
-          #       regions:
-          #         L: '{% $states.input.regions %}'
-          #       roleArn:
-          #         S: '{% $states.input.roleArn %}'
-          #       workflows:
-          #         L: '{% $states.input.workflows %}'
-          #       step:
-          #         S: 'SCANNING_STARTED'
-          #       rawGraphData:
-          #         M: {}
-          #       executionArn:
-          #         S: '{% $states.context.Execution.Id %}'
-          #       createdAt:
-          #         S: '{% $states.input.createdAt %}'
-          #   Assign:
-          #     assessmentId: '{% $states.input.assessmentId %}'
-          #     organization: '{% $states.input.organization %}'
-          #     regions: '{% $states.input.regions %}'
-          #     roleArn: '{% $states.input.roleArn %}'
-          #     workflows: '{% $states.input.workflows %}'
-          #   Next: ScanningTools
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $states.input.assessmentId %}'
-          #         organization: '{% $states.input.organization %}'
-          #         error: '{% $states.errorOutput %}'
           ScanningTools:
             Type: Parallel
             Branches:
@@ -455,7 +421,7 @@ Resources:
                               - Name: ROLE_ARN
                                 Value: '{% $roleArn %}'
                     End: true
-            Next: Prepare Findings Associations
+            Next: PrepareFindingsAssociations
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -464,35 +430,12 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
-          # PrepareFindingsAssociationsUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'PREPARING_ASSOCIATIONS'
-          #   Next: Prepare Findings Associations
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
-          Prepare Findings Associations:
+          PrepareFindingsAssociations:
             Type: Parallel
             Branches:
-              - StartAt: Prepare Prowler Findings Associations
+              - StartAt: PrepareProwlerFindingsAssociations
                 States:
-                  Prepare Prowler Findings Associations:
+                  PrepareProwlerFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
@@ -502,9 +445,9 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare Cloud Custodian Findings Associations
+              - StartAt: PrepareCloudCustodianFindingsAssociations
                 States:
-                  Prepare Cloud Custodian Findings Associations:
+                  PrepareCloudCustodianFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
@@ -514,9 +457,9 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-              - StartAt: Prepare CloudSploit Findings Associations
+              - StartAt: PrepareCloudSploitFindingsAssociations
                 States:
-                  Prepare CloudSploit Findings Associations:
+                  PrepareCloudSploitFindingsAssociations:
                     Type: Task
                     Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
                     Arguments:
@@ -536,30 +479,6 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
-          # AssociateFindingsChunkToBestPracticesUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'ASSOCIATING_FINDINGS'
-          #   Next: PromptMap
-          #   Output: '{% $states.input %}'
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
           PromptMap:
             Type: Map
             MaxConcurrency: 5
@@ -606,29 +525,6 @@ Resources:
                   organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
             Next: Cleanup
-          # FinishUpdateStep:
-          #   Type: Task
-          #   Resource: arn:aws:states:::dynamodb:updateItem
-          #   Arguments:
-          #     TableName: !Ref DynamoDBArn
-          #     Key:
-          #       PK:
-          #         S: '{% $organization %}'
-          #       SK:
-          #         S: "{% 'ASSESSMENT#' & $assessmentId %}"
-          #     UpdateExpression: SET step = :newStep
-          #     ExpressionAttributeValues:
-          #       ':newStep':
-          #         S: 'FINISHED'
-          #   Next: Cleanup
-          #   Catch:
-          #     - ErrorEquals:
-          #         - States.ALL
-          #       Next: CleanupOnError
-          #       Output:
-          #         assessmentId: '{% $assessmentId %}'
-          #         organization: '{% $organization %}'
-          #         error: '{% $states.errorOutput %}'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn

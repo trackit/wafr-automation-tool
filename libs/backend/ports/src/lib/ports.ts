@@ -13,5 +13,6 @@ export * from './ObjectsStorage';
 export * from './OrganizationRepository';
 export * from './PDFServicePort';
 export * from './QuestionSetPort';
+export * from './SecretsManager';
 export * from './TypeORMClientManager';
 export * from './WellArchitectedToolPort';

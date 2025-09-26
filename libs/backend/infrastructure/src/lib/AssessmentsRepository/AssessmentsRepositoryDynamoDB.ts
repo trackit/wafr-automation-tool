@@ -38,6 +38,290 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly client = inject(tokenDynamoDBDocument);
   private readonly logger = inject(tokenLogger);
   private readonly tableName = inject(tokenDynamoDBAssessmentTableName);
+  private readonly batchSize = inject(tokenDynamoDBAssessmentBatchSize);
+
+  private getAssessmentPK(organization: string): string {
+    return organization;
+  }
+
+  private getAssessmentSK(assessmentId: string): string {
+    return `ASSESSMENT#${assessmentId}`;
+  }
+
+  private getFindingPK(args: {
+    assessmentId: string;
+    organization: string;
+  }): string {
+    return `${args.organization}#${args.assessmentId}#FINDINGS`;
+  }
+
+  public static getBestPracticeCustomId(args: {
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): string {
+    return `${args.pillarId}#${args.questionId}#${args.bestPracticeId}`;
+  }
+
+  private toDynamoDBBestPracticeItem(bestPractice: BestPractice): BestPractice {
+    return {
+      description: bestPractice.description,
+      id: bestPractice.id,
+      label: bestPractice.label,
+      primaryId: bestPractice.primaryId,
+      results:
+        bestPractice.results.size > 0
+          ? bestPractice.results
+          : new Set<string>(['']), // Dirty hack because DynamoDB does not allow empty sets
+      risk: bestPractice.risk,
+      checked: bestPractice.checked,
+    };
+  }
+
+  private toDynamoDBQuestionItem(question: Question): DynamoDBQuestion {
+    return {
+      bestPractices: question.bestPractices.reduce(
+        (bestPractices, bestPractice) => ({
+          ...bestPractices,
+          [bestPractice.id]: this.toDynamoDBBestPracticeItem(bestPractice),
+        }),
+        {}
+      ),
+      disabled: question.disabled,
+      id: question.id,
+      label: question.label,
+      none: question.none,
+      primaryId: question.primaryId,
+    };
+  }
+
+  private toDynamoDBPillarItem(pillar: Pillar): DynamoDBPillar {
+    return {
+      disabled: pillar.disabled,
+      id: pillar.id,
+      label: pillar.label,
+      primaryId: pillar.primaryId,
+      questions: pillar.questions.reduce(
+        (questions, question) => ({
+          ...questions,
+          [question.id]: this.toDynamoDBQuestionItem(question),
+        }),
+        {}
+      ),
+    };
+  }
+
+  private toDynamoDBAssessmentItem(assessment: Assessment): DynamoDBAssessment {
+    return {
+      PK: this.getAssessmentPK(assessment.organization),
+      SK: this.getAssessmentSK(assessment.id),
+      createdAt: assessment.createdAt.toISOString(),
+      createdBy: assessment.createdBy,
+      executionArn: assessment.executionArn,
+      pillars: assessment.pillars?.reduce(
+        (pillars, pillar) => ({
+          ...pillars,
+          [pillar.id]: this.toDynamoDBPillarItem(pillar),
+        }),
+        {}
+      ),
+      graphData: assessment.graphData,
+      id: assessment.id,
+      name: assessment.name,
+      organization: assessment.organization,
+      questionVersion: assessment.questionVersion,
+      rawGraphData: assessment.rawGraphData,
+      regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
+      roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
+      error: assessment.error,
+    };
+  }
+
+  private toDynamoDBAssessmentBody(
+    assessmentBody: AssessmentBody
+  ): Record<string, unknown> {
+    return {
+      ...assessmentBody,
+      ...(assessmentBody.pillars && {
+        pillars: assessmentBody.pillars.reduce(
+          (pillars, pillar) => ({
+            ...pillars,
+            [pillar.id]: this.toDynamoDBPillarItem(pillar),
+          }),
+          {}
+        ),
+      }),
+    };
+  }
+
+  private toDynamoDBFindingItem(
+    finding: Finding,
+    args: {
+      assessmentId: string;
+      organization: string;
+    }
+  ): DynamoDBFinding {
+    const { assessmentId, organization } = args;
+    return {
+      PK: this.getFindingPK({
+        assessmentId,
+        organization,
+      }),
+      SK: finding.id,
+      bestPractices: finding.bestPractices,
+      hidden: finding.hidden,
+      id: finding.id,
+      isAIAssociated: finding.isAIAssociated,
+      metadata: { eventCode: finding.metadata?.eventCode },
+      remediation: finding.remediation,
+      resources: finding.resources,
+      riskDetails: finding.riskDetails,
+      severity: finding.severity,
+      statusCode: finding.statusCode,
+      statusDetail: finding.statusDetail,
+      ...(finding.comments && {
+        comments: Object.fromEntries(
+          finding.comments.map((comment) => [
+            comment.id,
+            this.toDynamoDBFindingComment(comment),
+          ])
+        ),
+      }),
+    };
+  }
+
+  private fromDynamoDBBestPracticeItem(item: BestPractice): BestPractice {
+    return {
+      description: item.description,
+      id: item.id,
+      label: item.label,
+      primaryId: item.primaryId,
+      results: new Set([...item.results].filter((result) => result !== '')), // Filter out empty strings due to our dirty hack
+      risk: item.risk,
+      checked: item.checked,
+    };
+  }
+
+  private fromDynamoDBQuestionItem(item: DynamoDBQuestion): Question {
+    return {
+      bestPractices: Object.values(item.bestPractices).map((bestPractice) =>
+        this.fromDynamoDBBestPracticeItem(bestPractice)
+      ),
+      disabled: item.disabled,
+      id: item.id,
+      label: item.label,
+      none: item.none,
+      primaryId: item.primaryId,
+    };
+  }
+
+  private fromDynamoDBPillarItem(item: DynamoDBPillar): Pillar {
+    return {
+      disabled: item.disabled,
+      id: item.id,
+      label: item.label,
+      primaryId: item.primaryId,
+      questions: Object.values(item.questions).map((question) =>
+        this.fromDynamoDBQuestionItem(question)
+      ),
+    };
+  }
+
+  private fromDynamoDBAssessmentItem(
+    item: DynamoDBAssessment | undefined
+  ): Assessment | undefined {
+    if (!item) return undefined;
+    const assessment = item;
+    return {
+      createdAt: new Date(assessment.createdAt),
+      createdBy: assessment.createdBy,
+      executionArn: assessment.executionArn,
+      ...(assessment.pillars && {
+        pillars: Object.values(assessment.pillars).map((pillar) =>
+          this.fromDynamoDBPillarItem(pillar)
+        ),
+      }),
+      graphData: assessment.graphData,
+      id: assessment.id,
+      name: assessment.name,
+      organization: assessment.organization,
+      questionVersion: assessment.questionVersion,
+      rawGraphData: assessment.rawGraphData,
+      regions: assessment.regions,
+      exportRegion: assessment.exportRegion,
+      roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
+      error: assessment.error,
+      finished: Boolean(assessment.finished),
+    };
+  }
+
+  private fromDynamoDBFindingItem(
+    item: DynamoDBFinding | undefined
+  ): Finding | undefined {
+    if (!item) return undefined;
+    const finding = item;
+    return {
+      bestPractices: finding.bestPractices,
+      hidden: finding.hidden,
+      id: finding.SK,
+      isAIAssociated: finding.isAIAssociated,
+      metadata: finding.metadata,
+      remediation: finding.remediation,
+      resources: finding.resources,
+      riskDetails: finding.riskDetails,
+      severity: finding.severity,
+      statusCode: finding.statusCode,
+      statusDetail: finding.statusDetail,
+      comments: finding.comments
+        ? Object.values(finding.comments).map((comment) =>
+            this.fromDynamoDBFindingComment(comment)
+          )
+        : undefined,
+    };
+  }
+
+  private toDynamoDBFindingComment(
+    comment: FindingComment
+  ): DynamoDBFindingComment {
+    return {
+      id: comment.id,
+      authorId: comment.authorId,
+      text: comment.text,
+      createdAt: comment.createdAt.toISOString(),
+    };
+  }
+
+  private fromDynamoDBFindingComment(
+    comment: DynamoDBFindingComment
+  ): FindingComment {
+    return {
+      id: comment.id,
+      authorId: comment.authorId,
+      text: comment.text,
+      createdAt: new Date(comment.createdAt),
+    };
+  }
+
+  public static encodeNextToken(
+    nextToken?: Record<string, unknown>
+  ): string | undefined {
+    if (!nextToken) return undefined;
+    return Buffer.from(JSON.stringify(nextToken)).toString('base64');
+  }
+
+  public static decodeNextToken(
+    nextToken?: string
+  ): Record<string, unknown> | undefined {
+    if (!nextToken) return undefined;
+    try {
+      return JSON.parse(Buffer.from(nextToken, 'base64').toString('utf8'));
+    } catch {
+      throw new InvalidNextTokenError();
+    }
+  }
 
   public async save(assessment: Assessment): Promise<void> {
     const params = {

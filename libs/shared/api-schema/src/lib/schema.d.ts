@@ -70,6 +70,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve the current step for a specific assessment
+         * @description Fetches the current step in the assessment process.
+         *
+         */
+        get: operations["getAssessmentStep"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/milestones": {
         parameters: {
             query?: never;
@@ -389,11 +410,6 @@ export interface components {
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
             createdAt?: string;
-            /**
-             * @description Current step in the assessment process
-             * @enum {string}
-             */
-            step?: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
             error?: components["schemas"]["AssessmentError"];
         };
         AssessmentContent: components["schemas"]["Assessment"] & {
@@ -804,6 +820,56 @@ export interface operations {
                 content?: never;
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAssessmentStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The current step for the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Current step in the assessment process
+                         * @enum {string}
+                         */
+                        step: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
             400: {
                 headers: {
                     [name: string]: unknown;

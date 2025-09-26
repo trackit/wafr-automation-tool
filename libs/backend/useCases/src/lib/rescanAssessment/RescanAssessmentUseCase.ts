@@ -4,7 +4,7 @@ import {
   tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import type { User } from '@backend/models';
+import { type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -26,21 +26,6 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
-  private async deleteAssessmentFromRepository(args: {
-    assessmentId: string;
-    organizationDomain: string;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain } = args;
-    await this.findingsRepository.deleteAll({
-      assessmentId,
-      organizationDomain,
-    });
-    await this.assessmentsRepository.delete({
-      assessmentId,
-      organizationDomain,
-    });
-  }
-
   public async rescanAssessment(
     args: RescanAssessmentUseCaseArgs
   ): Promise<void> {
@@ -58,12 +43,12 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     await this.assessmentsStateMachine.cancelAssessment(
       assessment.executionArn
     );
-    await this.deleteAssessmentFromRepository({
+    await this.findingsRepository.deleteAll({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,
     });
 
-    await this.assessmentsStateMachine.startAssessment({
+    const executionId = await this.assessmentsStateMachine.startAssessment({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,
       createdAt: new Date(),
@@ -72,6 +57,13 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       regions: assessment.regions,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
+    });
+    await this.assessmentsRepository.update({
+      assessmentId: args.assessmentId,
+      organizationDomain: args.user.organizationDomain,
+      assessmentBody: {
+        executionArn: executionId,
+      },
     });
     this.logger.info(
       `Assessment#${args.assessmentId} rescan started successfully`

@@ -1,9 +1,13 @@
 import {
+  DescribeExecutionCommand,
+  ExecutionStatus,
+  GetExecutionHistoryCommand,
   SFNClient,
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 
+import { AssessmentStep } from '@backend/models';
 import type {
   AssessmentsStateMachine,
   AssessmentsStateMachineStartAssessmentArgs,
@@ -18,22 +22,77 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly stateMachineArn = inject(tokenStateMachineArn);
   private readonly logger = inject(tokenLogger);
 
+  public async getAssessmentStep(
+    executionArn: string
+  ): Promise<AssessmentStep> {
+    const [describeResponse, historyResponse] = await Promise.all([
+      this.client.send(new DescribeExecutionCommand({ executionArn })),
+      this.client.send(
+        new GetExecutionHistoryCommand({
+          executionArn,
+          maxResults: 100,
+          reverseOrder: true,
+        })
+      ),
+    ]);
+    const events = historyResponse.events || [];
+
+    if (describeResponse.status === ExecutionStatus.FAILED) {
+      return AssessmentStep.ERRORED;
+    }
+    if (describeResponse.status === ExecutionStatus.SUCCEEDED) {
+      return AssessmentStep.FINISHED;
+    }
+    const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
+      Pass: AssessmentStep.SCANNING_STARTED,
+      ScanningTools: AssessmentStep.SCANNING_STARTED,
+      ProwlerScan: AssessmentStep.SCANNING_STARTED,
+      PrepareCustodian: AssessmentStep.SCANNING_STARTED,
+      CloudSploitScan: AssessmentStep.SCANNING_STARTED,
+      PrepareFindingsAssociations: AssessmentStep.PREPARING_ASSOCIATIONS,
+      PromptMap: AssessmentStep.ASSOCIATING_FINDINGS,
+      AssociateFindingsChunkToBestPractices:
+        AssessmentStep.ASSOCIATING_FINDINGS,
+      ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
+    };
+    for (const event of events) {
+      const stateName = event.stateEnteredEventDetails?.name;
+      if (stateName && knownStateToAssessmentStep[stateName]) {
+        return knownStateToAssessmentStep[stateName];
+      }
+    }
+    if (describeResponse.status === ExecutionStatus.RUNNING) {
+      return AssessmentStep.SCANNING_STARTED;
+    }
+    return AssessmentStep.ERRORED;
+  }
+
   public async startAssessment(
-    startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs
-  ): Promise<void> {
+    assessment: AssessmentsStateMachineStartAssessmentArgs
+  ): Promise<string> {
+    const input = {
+      assessmentId: assessment.assessmentId,
+      name: assessment.name,
+      regions: assessment.regions,
+      roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
+      createdAt: assessment.createdAt,
+      createdBy: assessment.createdBy,
+      organization: assessment.organization,
+    };
     const command = new StartExecutionCommand({
       input: JSON.stringify(startAssessmentInput),
       stateMachineArn: this.stateMachineArn,
     });
 
     const response = await this.client.send(command);
-    if (response.$metadata.httpStatusCode !== 200) {
-      throw new Error(JSON.stringify(response));
+    if (response.$metadata.httpStatusCode !== 200 || !response.executionArn) {
+      throw new Error(
+        `Failed to start assessment: ${response.$metadata.httpStatusCode}`
+      );
     }
-    this.logger.info(
-      `Started Assessment#${startAssessmentInput.assessmentId}`,
-      startAssessmentInput
-    );
+    this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
+    return response.executionArn;
   }
 
   public async cancelAssessment(executionId: string): Promise<void> {

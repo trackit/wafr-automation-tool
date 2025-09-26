@@ -7,7 +7,6 @@ import {
   tokenObjectsStorage,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
-import { AssessmentStep } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
@@ -68,7 +67,6 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       assessmentBody: {
-        step: AssessmentStep.ERRORED,
         error: args.error
           ? {
               error: args.error.Error,
@@ -86,9 +84,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     await this.assessmentsRepository.update({
       assessmentId: args.assessmentId,
       organizationDomain: args.organizationDomain,
-      assessmentBody: {
-        step: AssessmentStep.FINISHED,
-      },
+      assessmentBody: { finished: true },
     });
     const organization = await this.organizationRepository.get(
       args.organizationDomain
