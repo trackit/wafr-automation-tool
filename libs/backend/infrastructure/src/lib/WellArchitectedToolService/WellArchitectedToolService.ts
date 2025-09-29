@@ -1,4 +1,3 @@
-import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import {
   Answer,
   AnswerSummary,
@@ -37,12 +36,12 @@ import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
 import { tokenQuestionSetService } from '../QuestionSetService';
-import { tokenSTSClient } from '../STSClientService';
+import { tokenSTSService } from '../STSService';
 
 export const WAFRLens = 'wellarchitected';
 
 export class WellArchitectedToolService implements WellArchitectedToolPort {
-  private readonly stsClient = inject(tokenSTSClient);
+  private readonly stsService = inject(tokenSTSService);
   private readonly logger = inject(tokenLogger);
   private readonly wellArchitectedClientConstructor = inject(
     tokenWellArchitectedClientConstructor
@@ -53,20 +52,15 @@ export class WellArchitectedToolService implements WellArchitectedToolPort {
     roleArn: string,
     region: string
   ): Promise<WellArchitectedClient> {
-    const credentials = await this.stsClient.send(
-      new AssumeRoleCommand({
-        RoleArn: roleArn,
-        RoleSessionName: 'WAFR-Automation-Tool',
-      })
-    );
-    if (!credentials.Credentials) {
+    const credentials = await this.stsService.assumeRole({ roleArn });
+    if (!credentials) {
       throw new Error(`Failed to assume role: ${roleArn}`);
     }
     return this.wellArchitectedClientConstructor({
       credentials: {
-        accessKeyId: credentials.Credentials.AccessKeyId!,
-        secretAccessKey: credentials.Credentials.SecretAccessKey!,
-        sessionToken: credentials.Credentials.SessionToken!,
+        accessKeyId: credentials.accessKeyId!,
+        secretAccessKey: credentials.secretAccessKey!,
+        sessionToken: credentials.sessionToken!,
       },
       region,
     });

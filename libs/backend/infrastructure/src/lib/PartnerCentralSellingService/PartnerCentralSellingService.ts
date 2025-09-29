@@ -6,7 +6,6 @@ import {
   PartnerCentralSellingClientConfig,
   RelatedEntityType,
 } from '@aws-sdk/client-partnercentral-selling';
-import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 
 import {
   AceIntegration,
@@ -18,7 +17,7 @@ import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenDebug } from '../config/debug';
 import { tokenIdGenerator } from '../IdGenerator';
-import { tokenSTSClient } from '../STSClientService';
+import { tokenSTSService } from '../STSService';
 
 type AssociateOpportunityArgs = {
   client: PartnerCentralSellingClient;
@@ -29,7 +28,7 @@ type AssociateOpportunityArgs = {
 };
 
 export class PartnerCentralSellingService implements PartnerCentralSellingPort {
-  private readonly stsClient = inject(tokenSTSClient);
+  private readonly stsService = inject(tokenSTSService);
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly debug = inject(tokenDebug);
   private readonly partnerCentralSellingClientConstructor = inject(
@@ -39,20 +38,15 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
   public async createPartnerCentralSellingClient(
     roleArn: string
   ): Promise<PartnerCentralSellingClient> {
-    const credentials = await this.stsClient.send(
-      new AssumeRoleCommand({
-        RoleArn: roleArn,
-        RoleSessionName: 'WAFR-Automation-Tool',
-      })
-    );
-    if (!credentials.Credentials) {
-      throw new Error('Failed to assume role');
+    const credentials = await this.stsService.assumeRole({ roleArn });
+    if (!credentials) {
+      throw new Error(`Failed to assume role: ${roleArn}`);
     }
     return this.partnerCentralSellingClientConstructor({
       credentials: {
-        accessKeyId: credentials.Credentials.AccessKeyId!,
-        secretAccessKey: credentials.Credentials.SecretAccessKey!,
-        sessionToken: credentials.Credentials.SessionToken!,
+        accessKeyId: credentials.accessKeyId!,
+        secretAccessKey: credentials.secretAccessKey!,
+        sessionToken: credentials.sessionToken!,
       },
       region: 'us-east-1',
     });

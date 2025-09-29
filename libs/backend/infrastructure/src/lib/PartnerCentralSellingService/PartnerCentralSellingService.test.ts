@@ -17,7 +17,7 @@ import { inject, register, reset } from '@shared/di-container';
 
 import { tokenDebug } from '../config/debug';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import { tokenSTSClient } from '../STSClientService';
+import { tokenSTSClient } from '../STSService';
 import {
   PartnerCentralSellingService,
   tokenPartnerCentralSellingClientConstructor,
@@ -316,7 +316,7 @@ const setup = (debug = false) => {
     partnerCentralSellingClient
   );
   const stsClientMock = mockClient(inject(tokenSTSClient));
-  
+
   return {
     partnerCentralSellingService: new PartnerCentralSellingService(),
     stsClientMock,

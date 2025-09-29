@@ -29,7 +29,7 @@ import { inject, register, reset } from '@shared/di-container';
 import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 import { tokenFakeQuestionSetService } from '../QuestionSetService';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import { tokenSTSClient } from '../STSClientService';
+import { tokenSTSClient } from '../STSService';
 import {
   tokenWellArchitectedClientConstructor,
   WAFRLens,

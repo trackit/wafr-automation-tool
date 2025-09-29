@@ -22,7 +22,17 @@ const todayStart = () => {
 const formSchema = z.object({
   companyName: z.string().min(1).max(120),
   duns: z.string().regex(/^[0-9]{9}$/, 'DUNS must be 9 digits'),
-  industry: z.string().pipe(z.nativeEnum(Industry)).or(z.undefined()),
+  industry: z
+    .string()
+    .pipe(
+      z.nativeEnum(Industry, {
+        errorMap: () => ({ message: 'Select an industry' }),
+      })
+    )
+    .or(z.undefined())
+    .refine((val) => val !== undefined, {
+      message: 'Select an industry',
+    }),
   city: z.string().max(255).optional().or(z.literal('')),
   companyWebsiteUrl: z.string().min(4).max(255).url(),
   monthlyRecurringRevenue: z
@@ -42,7 +52,17 @@ const formSchema = z.object({
       },
       { message: 'Target close date cannot be in the past' }
     ),
-  country: z.string().pipe(z.nativeEnum(CountryCode)).or(z.undefined()),
+  country: z
+    .string()
+    .pipe(
+      z.nativeEnum(CountryCode, {
+        errorMap: () => ({ message: 'Select a country' }),
+      })
+    )
+    .or(z.undefined())
+    .refine((val) => val !== undefined, {
+      message: 'Select a country',
+    }),
   postalCode: z.string().max(20),
   streetAddress: z.string().max(255).optional().or(z.literal('')),
 });
@@ -88,21 +108,26 @@ export function NewAceOpportunity({
   }
 
   const countryValue = watch('country');
-  const [visibleCountry, setVisibleCountry] = useState(
-    () => regionNames?.of(countryValue as string) ?? ''
-  );
-
+  const [visibleCountry, setVisibleCountry] = useState<string>('');
   useEffect(() => {
-    setVisibleCountry(regionNames?.of(countryValue as string) ?? '');
+    if (!countryValue) {
+      setVisibleCountry('');
+      return;
+    }
+
+    setVisibleCountry(
+      regionNames?.of(countryValue as string) ?? countryValue ?? ''
+    );
   }, [countryValue]);
 
   const handleCountryBlur = (text: string) => {
-    const v = text.trim();
+    const v = (text ?? '').trim();
     if (!v) {
       setValue('country', undefined, {
         shouldValidate: true,
         shouldDirty: true,
       });
+      setVisibleCountry('');
       return;
     }
     let match =
@@ -182,7 +207,9 @@ export function NewAceOpportunity({
                 errors.industry ? 'select-error' : ''
               }`}
               {...register('industry')}
+              defaultValue=""
             >
+              <option value="">Select an industry</option>
               {Object.values(Industry).map((i) => (
                 <option key={i} value={i}>
                   {i}

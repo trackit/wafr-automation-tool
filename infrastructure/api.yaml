@@ -28,6 +28,12 @@ Parameters:
     Type: String
   MonthlySubscriptionProductCode:
     Type: String
+  Debug:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
 
 Globals:
   Function:
@@ -43,6 +49,7 @@ Globals:
         DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
+        DEBUG: !Ref Debug
 
 Resources:
   UserPool:
