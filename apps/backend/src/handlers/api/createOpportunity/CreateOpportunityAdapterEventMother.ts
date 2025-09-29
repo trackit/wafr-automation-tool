@@ -8,9 +8,8 @@ import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEv
 type CreateOpportunityParameters =
   operations['createOpportunity']['parameters']['path'];
 
-type CreateOpportunityBody = NonNullable<
-  operations['createOpportunity']['requestBody']
->['content']['application/json'];
+type CreateOpportunityBody =
+  operations['createOpportunity']['requestBody']['content']['application/json'];
 
 export class CreateOpportunityAdapterEventMother {
   private pathParameters: CreateOpportunityParameters;
