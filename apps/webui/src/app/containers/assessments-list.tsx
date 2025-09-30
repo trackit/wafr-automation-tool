@@ -284,7 +284,7 @@ function AssessmentsList() {
                 </div>
               </div>
             </div>
-          ))
+          )),
         )}
       </div>
       {!isLoading && hasNextPage && (

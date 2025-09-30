@@ -19,7 +19,7 @@ export type AssociateFindingsChunkToBestPracticesOutput = void;
 
 export class AssociateFindingsChunkToBestPracticesAdapter {
   private readonly useCase = inject(
-    tokenAssociateFindingsToBestPracticesUseCase
+    tokenAssociateFindingsToBestPracticesUseCase,
   );
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
@@ -43,7 +43,7 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
     const fetchedFindings = await this.objectsStorage.get(key);
     if (!fetchedFindings) {
       throw new Error(
-        `Findings to associate not found for URI: ${findingsChunkURI}`
+        `Findings to associate not found for URI: ${findingsChunkURI}`,
       );
     }
     const findings = parseJsonArray(fetchedFindings) as unknown as Finding[];
@@ -54,7 +54,7 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
   }
 
   public async handle(
-    event: Record<string, unknown>
+    event: Record<string, unknown>,
   ): Promise<AssociateFindingsChunkToBestPracticesOutput> {
     const { assessmentId, organizationDomain, findingsChunkURI } =
       AssociateFindingsChunkToBestPracticesInputSchema.parse(event);

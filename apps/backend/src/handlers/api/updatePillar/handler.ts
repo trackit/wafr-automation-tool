@@ -5,5 +5,5 @@ import { UpdatePillarAdapter } from './UpdatePillarAdapter';
 const adapter = new UpdatePillarAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

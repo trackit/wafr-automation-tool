@@ -24,21 +24,21 @@ export class GeneratePDFExportURLAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GeneratePDFExportURLAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withFileExportId(
-    fileExportId: string
+    fileExportId: string,
   ): GeneratePDFExportURLAdapterEventMother {
     this.pathParameters.fileExportId = fileExportId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GeneratePDFExportURLAdapterEventMother {
     this.user = user;
     return this;

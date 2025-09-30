@@ -24,7 +24,7 @@ export class UpdateFindingAdapter {
   private readonly useCase = inject(tokenUpdateFindingUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -34,7 +34,7 @@ export class UpdateFindingAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['updateFinding']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateFindingPathSchema,

@@ -11,7 +11,7 @@ export class BestPracticeNotFoundError extends UseCaseError {
       questionId: string;
       bestPracticeId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const {
       assessmentId,
@@ -37,7 +37,7 @@ export class BestPracticeEmptyUpdateBodyError extends UseCaseError {
       questionId: string;
       bestPracticeId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const {
       assessmentId,

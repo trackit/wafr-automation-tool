@@ -28,7 +28,7 @@ function highlightText(text: string, search: string) {
   try {
     const regex = new RegExp(
       `(${search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
-      'gi'
+      'gi',
     );
     return text.replace(regex, '<mark>$1</mark>');
   } catch {

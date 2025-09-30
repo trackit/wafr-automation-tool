@@ -30,7 +30,7 @@ describe('CreateOpportunity adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
 

@@ -54,7 +54,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
                   <div className="flex items-center gap-1">
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
                     {header.column.getIsSorted() === 'asc' ? (
                       <ChevronUp className="h-4 w-4" />

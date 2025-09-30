@@ -18,7 +18,7 @@ export class GetAssessmentAdapter {
   private readonly useCase = inject(tokenGetAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -28,7 +28,7 @@ export class GetAssessmentAdapter {
   }
 
   private toGetAssessmentResponse(
-    assessment: Assessment
+    assessment: Assessment,
   ): operations['getAssessment']['responses'][200]['content']['application/json'] {
     return {
       createdAt: assessment.createdAt.toISOString(),
@@ -70,7 +70,7 @@ export class GetAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {

@@ -24,7 +24,7 @@ export class CreateMilestoneAdapter {
   private readonly useCase = inject(tokenCreateMilestoneUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

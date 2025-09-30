@@ -57,7 +57,7 @@ describe('parseApiEvent', () => {
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parseQueryFromEvent(event, schema)).toThrow(
-        QueryMissingError
+        QueryMissingError,
       );
     });
 
@@ -88,7 +88,7 @@ describe('parseApiEvent', () => {
       const schema = z.object({ name: z.string() });
       const payload = Buffer.from(
         JSON.stringify({ name: 'bob' }),
-        'utf8'
+        'utf8',
       ).toString('base64');
       const event = APIGatewayProxyEventMother.basic()
         .withBody(payload)
@@ -149,7 +149,10 @@ describe('parseApiEvent', () => {
         .build();
 
       expect(() =>
-        parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
+        parseApiEvent(event, {
+          pathSchema: PathSchema,
+          bodySchema: BodySchema,
+        }),
       ).toThrow(ParametersValidationError);
     });
 
@@ -162,7 +165,10 @@ describe('parseApiEvent', () => {
         .build();
 
       expect(() =>
-        parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
+        parseApiEvent(event, {
+          pathSchema: PathSchema,
+          bodySchema: BodySchema,
+        }),
       ).toThrow(ParametersJSONParseError);
     });
 
@@ -170,16 +176,16 @@ describe('parseApiEvent', () => {
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parseApiEvent(event, { pathSchema: PathSchema })).toThrow(
-        PathMissingError
+        PathMissingError,
       );
 
       expect(() => parseApiEvent(event, { bodySchema: BodySchema })).toThrow(
-        BodyMissingError
+        BodyMissingError,
       );
 
       const QuerySchema = z.object({ q: z.string() });
       expect(() => parseApiEvent(event, { querySchema: QuerySchema })).toThrow(
-        QueryMissingError
+        QueryMissingError,
       );
     });
   });

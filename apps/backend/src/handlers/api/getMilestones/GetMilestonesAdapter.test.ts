@@ -31,7 +31,7 @@ describe('getMilestones adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -149,7 +149,7 @@ const setup = () => {
 
   const useCase = { getMilestones: vitest.fn() };
   useCase.getMilestones.mockResolvedValueOnce(
-    Promise.resolve({ milestones: [], nextToken: undefined })
+    Promise.resolve({ milestones: [], nextToken: undefined }),
   );
   register(tokenGetMilestonesUseCase, { useValue: useCase });
 

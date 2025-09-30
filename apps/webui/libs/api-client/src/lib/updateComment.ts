@@ -19,7 +19,7 @@ export const updateComment = async ({
     operations['updateComment']['responses']['200']['content']
   >(
     `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
-    commentDto
+    commentDto,
   );
 };
 

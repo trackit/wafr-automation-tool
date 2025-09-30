@@ -16,21 +16,21 @@ export class AssociateFindingsChunkToBestPracticesAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): AssociateFindingsChunkToBestPracticesAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): AssociateFindingsChunkToBestPracticesAdapterEventMother {
     this.data.organizationDomain = organizationDomain;
     return this;
   }
 
   public withFindingsChunkURI(
-    findingsChunkURI: string
+    findingsChunkURI: string,
   ): AssociateFindingsChunkToBestPracticesAdapterEventMother {
     this.data.findingsChunkURI = findingsChunkURI;
     return this;

@@ -38,7 +38,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const { assessmentId, findingId, organizationDomain, comment } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     if (finding) {
       if (!finding.comments) {
@@ -68,7 +68,7 @@ export class FakeFindingsRepository implements FindingRepository {
   }
 
   public async getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{
     findings: Finding[];
     nextToken?: string;
@@ -92,8 +92,8 @@ export class FakeFindingsRepository implements FindingRepository {
               pillarId,
               questionId,
               bestPracticeId,
-            })
-          )
+            }),
+          ),
         )
         .filter((finding) => {
           if (!searchTerm) return true;
@@ -127,20 +127,20 @@ export class FakeFindingsRepository implements FindingRepository {
     const { assessmentId, organizationDomain, findingId, commentId } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     if (!finding) {
       throw new Error();
     }
     finding.comments = finding.comments?.filter(
-      (comment) => comment.id !== commentId
+      (comment) => comment.id !== commentId,
     );
   }
 
   private updateBody<T extends keyof Finding>(
     finding: Finding,
     field: T,
-    value: Finding[T]
+    value: Finding[T],
   ): void {
     finding[field] = value;
   }
@@ -159,7 +159,7 @@ export class FakeFindingsRepository implements FindingRepository {
       this.updateBody(
         finding as Finding,
         field as keyof Finding,
-        value as Finding[keyof Finding]
+        value as Finding[keyof Finding],
       );
     }
   }
@@ -180,10 +180,10 @@ export class FakeFindingsRepository implements FindingRepository {
     } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     const comment = finding?.comments?.find(
-      (comment) => comment.id === commentId
+      (comment) => comment.id === commentId,
     );
     if (!comment) {
       throw new Error('Comment not found');

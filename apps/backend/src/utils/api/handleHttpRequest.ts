@@ -13,7 +13,7 @@ const ErrorTypeResponseCode: Record<BasicErrorType, number> = {
 
 const buildResponse = (
   statusCode: number,
-  body: unknown = {}
+  body: unknown = {},
 ): APIGatewayProxyResult => ({
   statusCode,
   body: JSON.stringify(body),

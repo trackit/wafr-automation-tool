@@ -18,7 +18,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
 
   private constructor(
     queryStringParameters: GetBestPracticeFindingsQueryStringParameters,
-    pathParameters: GetBestPracticeFindingsPathParameters
+    pathParameters: GetBestPracticeFindingsPathParameters,
   ) {
     this.queryStringParameters = queryStringParameters;
     this.pathParameters = pathParameters;
@@ -32,7 +32,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
         pillarId: 'pillar-id',
         questionId: 'question-id',
         bestPracticeId: 'best-practice-id',
-      }
+      },
     );
   }
 
@@ -42,56 +42,56 @@ export class GetBestPracticeFindingsAdapterEventMother {
   }
 
   public withSearch(
-    search?: string
+    search?: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.queryStringParameters.search = search;
     return this;
   }
 
   public withShowHidden(
-    showHidden?: boolean
+    showHidden?: boolean,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.queryStringParameters.showHidden = showHidden;
     return this;
   }
 
   public withNextToken(
-    nextToken?: string
+    nextToken?: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.queryStringParameters.nextToken = nextToken;
     return this;
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withPillarId(
-    pillarId: string
+    pillarId: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(
-    questionId: string
+    questionId: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: string
+    bestPracticeId: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.bestPracticeId = bestPracticeId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.user = user;
     return this;
@@ -102,7 +102,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
       Object.entries(this.queryStringParameters).map(([key, value]) => [
         key,
         value === undefined ? undefined : String(value),
-      ])
+      ]),
     );
     return APIGatewayProxyEventMother.basic()
       .withPathParameters(this.pathParameters)

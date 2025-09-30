@@ -18,7 +18,7 @@ export class DeletePDFExportAdapter {
   private readonly useCase = inject(tokenDeletePDFExportUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

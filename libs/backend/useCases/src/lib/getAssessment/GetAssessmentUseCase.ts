@@ -17,7 +17,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async getAssessment(
-    args: GetAssessmentUseCaseArgs
+    args: GetAssessmentUseCaseArgs,
   ): Promise<Assessment> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,

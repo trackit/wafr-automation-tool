@@ -21,7 +21,7 @@ export class UpdateBestPracticeUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateBestPracticeUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -38,21 +38,21 @@ export class UpdateBestPracticeUseCaseArgsMother {
   }
 
   public withQuestionId(
-    questionId: string
+    questionId: string,
   ): UpdateBestPracticeUseCaseArgsMother {
     this.data.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: string
+    bestPracticeId: string,
   ): UpdateBestPracticeUseCaseArgsMother {
     this.data.bestPracticeId = bestPracticeId;
     return this;
   }
 
   public withBestPracticeBody(
-    bestPracticeBody: BestPracticeBody
+    bestPracticeBody: BestPracticeBody,
   ): UpdateBestPracticeUseCaseArgsMother {
     this.data.bestPracticeBody = bestPracticeBody;
     return this;

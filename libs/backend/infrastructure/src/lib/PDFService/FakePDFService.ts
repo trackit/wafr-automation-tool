@@ -14,5 +14,5 @@ export class FakePDFService implements PDFServicePort {
 
 export const tokenFakePDFService = createInjectionToken<FakePDFService>(
   'FakePDFService',
-  { useClass: FakePDFService }
+  { useClass: FakePDFService },
 );

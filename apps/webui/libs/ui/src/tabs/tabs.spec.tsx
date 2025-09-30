@@ -15,7 +15,7 @@ describe('Tabs', () => {
         onChange={() => {
           console.log('clicked');
         }}
-      />
+      />,
     );
     expect(baseElement).toBeTruthy();
   });

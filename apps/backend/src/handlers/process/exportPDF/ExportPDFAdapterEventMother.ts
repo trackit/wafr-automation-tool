@@ -25,7 +25,7 @@ export class ExportPDFAdapterEventMother {
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): ExportPDFAdapterEventMother {
     this.params.organizationDomain = organizationDomain;
     return this;

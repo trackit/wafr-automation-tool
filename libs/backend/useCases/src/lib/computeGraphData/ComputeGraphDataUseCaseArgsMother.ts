@@ -15,14 +15,14 @@ export class ComputeGraphDataUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ComputeGraphDataUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): ComputeGraphDataUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;

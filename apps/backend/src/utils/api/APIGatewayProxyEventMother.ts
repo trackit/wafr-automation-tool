@@ -63,14 +63,14 @@ export class APIGatewayProxyEventMother {
   }
 
   public withBody(
-    body: APIGatewayProxyEvent['body']
+    body: APIGatewayProxyEvent['body'],
   ): APIGatewayProxyEventMother {
     this.data.body = body;
     return this;
   }
 
   public withHeaders(
-    headers: APIGatewayProxyEvent['headers']
+    headers: APIGatewayProxyEvent['headers'],
   ): APIGatewayProxyEventMother {
     this.data.headers = headers;
     return this;
@@ -85,14 +85,14 @@ export class APIGatewayProxyEventMother {
   }
 
   public withPathParameters(
-    pathParameters: APIGatewayProxyEvent['pathParameters']
+    pathParameters: APIGatewayProxyEvent['pathParameters'],
   ): APIGatewayProxyEventMother {
     this.data.pathParameters = pathParameters;
     return this;
   }
 
   public withQueryStringParameters(
-    queryStringParameters: APIGatewayProxyEvent['queryStringParameters']
+    queryStringParameters: APIGatewayProxyEvent['queryStringParameters'],
   ): APIGatewayProxyEventMother {
     this.data.queryStringParameters = queryStringParameters;
     return this;

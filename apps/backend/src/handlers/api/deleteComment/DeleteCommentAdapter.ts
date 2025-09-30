@@ -19,7 +19,7 @@ export class DeleteCommentAdapter {
   private readonly useCase = inject(tokenDeleteCommentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

@@ -23,7 +23,7 @@ export class UpdateAssessmentAdapter {
   private readonly useCase = inject(tokenUpdateAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -33,7 +33,7 @@ export class UpdateAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['updateAssessment']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateAssessmentPathSchema,

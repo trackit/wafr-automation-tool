@@ -17,7 +17,7 @@ export class UpdateBestPracticeAdapterEventMother {
 
   private constructor(
     pathParameters: UpdateBestPracticePathParameters,
-    body: UpdateBestPracticeBody
+    body: UpdateBestPracticeBody,
   ) {
     this.pathParameters = pathParameters;
     this.body = body;
@@ -33,12 +33,12 @@ export class UpdateBestPracticeAdapterEventMother {
       },
       {
         checked: true,
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateBestPracticeAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -50,28 +50,28 @@ export class UpdateBestPracticeAdapterEventMother {
   }
 
   public withQuestionId(
-    questionId: string
+    questionId: string,
   ): UpdateBestPracticeAdapterEventMother {
     this.pathParameters.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: string
+    bestPracticeId: string,
   ): UpdateBestPracticeAdapterEventMother {
     this.pathParameters.bestPracticeId = bestPracticeId;
     return this;
   }
 
   public withBody(
-    body: UpdateBestPracticeBody
+    body: UpdateBestPracticeBody,
   ): UpdateBestPracticeAdapterEventMother {
     this.body = body;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): UpdateBestPracticeAdapterEventMother {
     this.user = user;
     return this;

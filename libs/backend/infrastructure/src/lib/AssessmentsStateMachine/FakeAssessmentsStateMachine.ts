@@ -14,5 +14,5 @@ export class FakeAssessmentsStateMachine implements AssessmentsStateMachine {
 export const tokenFakeAssessmentsStateMachine =
   createInjectionToken<FakeAssessmentsStateMachine>(
     'FakeAssessmentsStateMachine',
-    { useClass: FakeAssessmentsStateMachine }
+    { useClass: FakeAssessmentsStateMachine },
   );

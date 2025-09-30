@@ -31,7 +31,7 @@ describe('getMilestone adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -126,7 +126,7 @@ const setup = () => {
 
   const useCase = { getMilestone: vitest.fn() };
   useCase.getMilestone.mockResolvedValueOnce(
-    Promise.resolve(MilestoneMother.basic().build())
+    Promise.resolve(MilestoneMother.basic().build()),
   );
   register(tokenGetMilestoneUseCase, { useValue: useCase });
 

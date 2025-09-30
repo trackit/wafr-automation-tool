@@ -43,7 +43,7 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
       findingBody,
     });
     this.logger.info(
-      `Finding ${findingId} for assessment ${assessmentId} in organization ${user.organizationDomain} updated successfully`
+      `Finding ${findingId} for assessment ${assessmentId} in organization ${user.organizationDomain} updated successfully`,
     );
   }
 }

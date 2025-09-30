@@ -41,19 +41,19 @@ describe('PartnerCentralSelling Infrastructure', () => {
 
       const client =
         await partnerCentralSellingService.createPartnerCentralSellingClient(
-          roleArn
+          roleArn,
         );
 
       expect(client).instanceOf(PartnerCentralSellingClient);
 
       expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
       expect(
-        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input,
       ).toEqual(
         expect.objectContaining({
           RoleArn: roleArn,
           RoleSessionName: 'WAFR-Automation-Tool',
-        })
+        }),
       );
     });
 
@@ -66,7 +66,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
       });
 
       await expect(
-        partnerCentralSellingService.createPartnerCentralSellingClient(roleArn)
+        partnerCentralSellingService.createPartnerCentralSellingClient(roleArn),
       ).rejects.toThrow(Error);
     });
   });
@@ -82,7 +82,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
         .withId('assessment-id')
         .withName('assessment-name')
         .withWAFRWorkloadArn(
-          'arn:aws:wellarchitected:us-west-2:12345678912:workload/abcd123456789'
+          'arn:aws:wellarchitected:us-west-2:12345678912:workload/abcd123456789',
         )
         .build();
 
@@ -141,16 +141,16 @@ describe('PartnerCentralSelling Infrastructure', () => {
         });
       expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
       expect(
-        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input,
       ).toEqual(
         expect.objectContaining({
           RoleArn: 'aceIntegrationTestRoleArn',
           RoleSessionName: 'WAFR-Automation-Tool',
-        })
+        }),
       );
       expect(returnedOpportunityId).toBe('opportunity-abc-123');
       const createCalls = partnerCentralSellingClientMock.commandCalls(
-        CreateOpportunityCommand
+        CreateOpportunityCommand,
       );
       expect(createCalls).toHaveLength(1);
       const createInput = createCalls[0].args[0].input;
@@ -180,7 +180,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
             CustomerUseCase: expect.any(String),
             Title: `WAFR - testCompany`,
             CustomerBusinessProblem: expect.stringContaining(
-              'testOrganization performed a well-architected framework'
+              'testOrganization performed a well-architected framework',
             ),
             ExpectedCustomerSpend: expect.arrayContaining([
               expect.objectContaining({
@@ -191,7 +191,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
               }),
             ]),
             AdditionalComments: expect.stringContaining(
-              'arn:aws:wellarchitected'
+              'arn:aws:wellarchitected',
             ),
           }),
           OpportunityType: 'Net New Business',
@@ -205,10 +205,10 @@ describe('PartnerCentralSelling Infrastructure', () => {
           LifeCycle: expect.objectContaining({
             TargetCloseDate: '2097-01-01',
           }),
-        })
+        }),
       );
       const assocCalls = partnerCentralSellingClientMock.commandCalls(
-        AssociateOpportunityCommand
+        AssociateOpportunityCommand,
       );
       expect(assocCalls).toHaveLength(aceIntegration.solutions.length);
       const assocInputs = assocCalls.map((c) => c.args[0].input);
@@ -220,7 +220,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
             RelatedEntityType: 'Solutions',
             RelatedEntityIdentifier: 'aceIntegrationTestSolution',
           }),
-        ])
+        ]),
       );
     });
     it('should rethrow when CreateOpportunityCommand fails', async () => {
@@ -234,7 +234,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
         .withId('assessment-id')
         .withName('assessment-name')
         .withWAFRWorkloadArn(
-          'arn:aws:wellarchitected:us-west-2:12345678912:workload/abcd123456789'
+          'arn:aws:wellarchitected:us-west-2:12345678912:workload/abcd123456789',
         )
         .build();
 
@@ -293,7 +293,7 @@ describe('PartnerCentralSelling Infrastructure', () => {
           opportunityDetails,
           accountId,
           customerBusinessProblem,
-        })
+        }),
       ).rejects.toThrow('CreateOpportunityCommand failed');
     });
   });
@@ -313,7 +313,7 @@ const setup = (debug = false) => {
   });
 
   const partnerCentralSellingClientMock = mockClient(
-    partnerCentralSellingClient
+    partnerCentralSellingClient,
   );
   const stsClientMock = mockClient(inject(tokenSTSClient));
 

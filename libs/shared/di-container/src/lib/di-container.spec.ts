@@ -126,7 +126,7 @@ describe('di-container', () => {
         register(NumberGetterToken, { useValue: new OneGetter() });
 
         expect(() =>
-          register(NumberGetterToken, { useValue: new OneGetter() })
+          register(NumberGetterToken, { useValue: new OneGetter() }),
         ).toThrowError();
       });
     });

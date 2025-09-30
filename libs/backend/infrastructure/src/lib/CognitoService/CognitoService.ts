@@ -53,7 +53,7 @@ export const tokenCognitoService = createInjectionToken<CognitoPort>(
   'CognitoService',
   {
     useClass: CognitoService,
-  }
+  },
 );
 
 export const tokenCognitoClient =
@@ -64,7 +64,7 @@ export const tokenCognitoClient =
         new CognitoIdentityProviderClient({
           region: process.env.AWS_REGION,
         }),
-    }
+    },
   );
 
 export const tokenCognitoUserPoolId = createInjectionToken<string>(
@@ -75,5 +75,5 @@ export const tokenCognitoUserPoolId = createInjectionToken<string>(
       assertIsDefined(tableName, 'COGNITO_USER_POOL_ID is not defined');
       return tableName;
     },
-  }
+  },
 );

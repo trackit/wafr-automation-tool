@@ -26,7 +26,7 @@ export class UpdatePillarAdapter {
   private readonly useCase = inject(tokenUpdatePillarUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

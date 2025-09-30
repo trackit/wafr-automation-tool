@@ -18,5 +18,5 @@ export const tokenFakeAIService = createInjectionToken<FakeAIService>(
   'FakeAIService',
   {
     useClass: FakeAIService,
-  }
+  },
 );

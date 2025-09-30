@@ -15,7 +15,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps}>
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     await waitFor(() => {
@@ -28,7 +28,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps} open={false}>
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     await waitFor(() => {
@@ -41,7 +41,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps}>
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     fireEvent.keyDown(document.body, { key: 'Escape', code: 'Escape' });
@@ -55,7 +55,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps} className="custom-class">
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     await waitFor(() => {
@@ -70,7 +70,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps} notCentered>
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     await waitFor(() => {
@@ -85,7 +85,7 @@ describe('Modal', () => {
     render(
       <Modal {...defaultProps}>
         <div>Test Content</div>
-      </Modal>
+      </Modal>,
     );
 
     await waitFor(() => {

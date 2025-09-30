@@ -1,7 +1,7 @@
 import { paths } from '@shared/api-schema';
 
 export function ErrorPage(
-  data: paths['/assessments/{assessmentId}']['get']['responses']['200']['content']['application/json']
+  data: paths['/assessments/{assessmentId}']['get']['responses']['200']['content']['application/json'],
 ) {
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-4">

@@ -26,7 +26,7 @@ export class FakeObjectsStorage implements ObjectsStorage {
 
   public async list(prefix: string): Promise<string[]> {
     const objects = Object.keys(this.objects).filter((object) =>
-      object.startsWith(prefix)
+      object.startsWith(prefix),
     );
     return objects;
   }
@@ -57,5 +57,5 @@ export const tokenFakeObjectsStorage = createInjectionToken<FakeObjectsStorage>(
   'FakeObjectsStorage',
   {
     useClass: FakeObjectsStorage,
-  }
+  },
 );

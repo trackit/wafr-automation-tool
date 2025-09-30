@@ -24,14 +24,14 @@ export class CleanupUseCaseArgsMother {
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): CleanupUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;
   }
 
   public withError(
-    error: StateMachineError | undefined
+    error: StateMachineError | undefined,
   ): CleanupUseCaseArgsMother {
     this.data.error = error;
     return this;

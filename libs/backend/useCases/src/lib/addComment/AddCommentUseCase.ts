@@ -25,7 +25,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
   private readonly logger = inject(tokenLogger);
 
   public async addComment(
-    args: AddCommentUseCaseArgs
+    args: AddCommentUseCaseArgs,
   ): Promise<FindingComment> {
     const { assessmentId, findingId, text, user } = args;
     const { organizationDomain } = user;
@@ -68,7 +68,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
       comment,
     });
     this.logger.info(
-      `User ${user.id} added comment ${comment.id} to finding ${findingId} in assessment ${assessmentId}`
+      `User ${user.id} added comment ${comment.id} to finding ${findingId} in assessment ${assessmentId}`,
     );
     return comment;
   }
@@ -78,5 +78,5 @@ export const tokenAddCommentUseCase = createInjectionToken<AddCommentUseCase>(
   'AddCommentUseCase',
   {
     useClass: AddCommentUseCaseImpl,
-  }
+  },
 );

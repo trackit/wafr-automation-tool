@@ -5,5 +5,5 @@ import { UpdateBestPracticeAdapter } from './UpdateBestPracticeAdapter';
 const adapter = new UpdateBestPracticeAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

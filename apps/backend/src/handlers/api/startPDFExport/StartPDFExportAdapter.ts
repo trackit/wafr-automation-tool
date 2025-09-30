@@ -23,7 +23,7 @@ export class StartPDFExportAdapter {
   private readonly useCase = inject(tokenStartPDFExportUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

@@ -23,7 +23,7 @@ export class GetMilestonesAdapter {
   private readonly useCase = inject(tokenGetMilestonesUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -33,7 +33,7 @@ export class GetMilestonesAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getMilestones']['responses']['200']['content']['application/json']
   > {

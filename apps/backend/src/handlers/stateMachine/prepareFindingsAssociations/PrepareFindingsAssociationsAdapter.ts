@@ -21,7 +21,7 @@ export class PrepareFindingsAssociationsAdapter {
   private readonly useCase = inject(tokenPrepareFindingsAssociationsUseCase);
 
   public async handle(
-    event: Record<string, unknown>
+    event: Record<string, unknown>,
   ): Promise<PrepareFindingsAssociationsOutput> {
     const parsedInput = PrepareFindingsAssociationsInputSchema.parse(event);
     return this.useCase.prepareFindingsAssociations(parsedInput);

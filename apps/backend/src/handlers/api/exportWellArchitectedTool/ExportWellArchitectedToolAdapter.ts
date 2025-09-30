@@ -27,7 +27,7 @@ export class ExportWellArchitectedToolAdapter {
   private readonly useCase = inject(tokenExportWellArchitectedToolUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

@@ -123,7 +123,7 @@ describe('MarketplaceService', () => {
       await expect(
         marketplaceService.consumeReviewUnit({
           accountId: 'accountId',
-        })
+        }),
       ).resolves.toBeUndefined();
     });
 
@@ -137,7 +137,7 @@ describe('MarketplaceService', () => {
       await expect(
         marketplaceService.consumeReviewUnit({
           accountId: 'accountId',
-        })
+        }),
       ).rejects.toThrowError();
     });
   });
@@ -148,13 +148,13 @@ const setup = () => {
   registerTestInfrastructure();
 
   const marketplaceAgreementClient = mockClient(
-    inject(tokenMarketplaceAgreementClient)
+    inject(tokenMarketplaceAgreementClient),
   );
   const marketplaceEntitlementServiceClient = mockClient(
-    inject(tokenMarketplaceEntitlementServiceClient)
+    inject(tokenMarketplaceEntitlementServiceClient),
   );
   const marketplaceMeteringClient = mockClient(
-    inject(tokenMarketplaceMeteringClient)
+    inject(tokenMarketplaceMeteringClient),
   );
 
   return {

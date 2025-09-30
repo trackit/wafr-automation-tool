@@ -16,7 +16,7 @@ export class ComputeGraphDataAdapter {
   private readonly useCase = inject(tokenComputeGraphDataUseCase);
 
   public async handle(
-    event: Record<string, unknown>
+    event: Record<string, unknown>,
   ): Promise<ComputeGraphDataOutput> {
     const input = ComputeGraphDataInputSchema.parse(event);
     return await this.useCase.computeGraphData(input);

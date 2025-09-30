@@ -24,7 +24,7 @@ export class GetMilestoneAdapter {
   private readonly useCase = inject(tokenGetMilestoneUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -34,7 +34,7 @@ export class GetMilestoneAdapter {
   }
 
   private toGetMilestoneResponse(
-    milestone: Milestone
+    milestone: Milestone,
   ): operations['getMilestone']['responses']['200']['content']['application/json'] {
     return {
       ...milestone,
@@ -55,7 +55,7 @@ export class GetMilestoneAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getMilestone']['responses']['200']['content']['application/json']
   > {

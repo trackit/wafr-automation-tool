@@ -38,7 +38,7 @@ describe('getAssessment adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -76,7 +76,7 @@ describe('getAssessment adapter', () => {
       expect(useCase.getAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 

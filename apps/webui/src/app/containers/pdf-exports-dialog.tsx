@@ -78,7 +78,7 @@ function PDFExportsDialog({ assessmentId }: { assessmentId: string }) {
             }
             return highestVersionName;
           },
-          null
+          null,
         );
         const majorVersion = highestVersionName?.match(/(\d+)\.\d+/)?.[1];
         const versionName = majorVersion

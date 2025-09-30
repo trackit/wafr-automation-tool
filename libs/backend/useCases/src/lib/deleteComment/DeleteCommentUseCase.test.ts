@@ -30,7 +30,7 @@ describe('DeleteCommentUseCase', () => {
       .build();
 
     await expect(useCase.deleteComment(input)).rejects.toThrow(
-      FindingNotFoundError
+      FindingNotFoundError,
     );
   });
 
@@ -58,7 +58,7 @@ describe('DeleteCommentUseCase', () => {
       .build();
 
     await expect(useCase.deleteComment(input)).rejects.toThrow(
-      FindingCommentNotFoundError
+      FindingCommentNotFoundError,
     );
   });
 
@@ -87,7 +87,7 @@ describe('DeleteCommentUseCase', () => {
       .build();
 
     await expect(useCase.deleteComment(input)).rejects.toThrow(
-      FindingCommentForbiddenError
+      FindingCommentForbiddenError,
     );
   });
 
@@ -121,7 +121,7 @@ describe('DeleteCommentUseCase', () => {
     expect(updatedFinding).toBeDefined();
     expect(updatedFinding?.comments).toBeDefined();
     expect(
-      updatedFinding?.comments?.find((c) => c.id === comment.id)
+      updatedFinding?.comments?.find((c) => c.id === comment.id),
     ).toBeUndefined();
   });
 });

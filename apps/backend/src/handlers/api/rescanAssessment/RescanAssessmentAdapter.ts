@@ -17,7 +17,7 @@ export class RescanAssessmentAdapter {
   private readonly useCase = inject(tokenRescanAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -27,7 +27,7 @@ export class RescanAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['rescanAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
       pathSchema: RescanAssessmentPathSchema,

@@ -7,7 +7,7 @@ export class OrganizationNotFoundError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -23,7 +23,7 @@ export class OrganizationSubscriptionNotFoundError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -39,7 +39,7 @@ export class OrganizationExportRoleNotSetError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -55,7 +55,7 @@ export class OrganizationNoActiveSubscriptionError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -71,7 +71,7 @@ export class OrganizationAccountIdNotSetError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -87,7 +87,7 @@ export class OrganizationUnitBasedAgreementIdNotSetError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({
@@ -103,7 +103,7 @@ export class OrganizationAceDetailsNotFoundError extends UseCaseError {
     args: {
       domain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { domain } = args;
     super({

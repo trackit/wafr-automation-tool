@@ -22,7 +22,7 @@ export class StartAssessmentAdapter {
   private readonly useCase = inject(tokenStartAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -32,7 +32,7 @@ export class StartAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['startAssessment']['responses'][201]['content']['application/json']
   > {

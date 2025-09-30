@@ -19,8 +19,8 @@
     "lint": "nx run-many -t lint",
     "lint:fix": "nx run-many -t lint --fix",
     "test": "nx run-many -t test",
-    "format": "nx format:write",
-    "format:check": "nx format:check",
+    "format": "nx format:write --all",
+    "format:check": "nx format:check --all",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts --empty-objects-unknown"
   },
   "nx": {

@@ -88,7 +88,7 @@ const AIBadge = ({ className }: { className?: string }) => {
 
 const highlightText = (
   text: string | null | undefined,
-  searchQuery: string
+  searchQuery: string,
 ) => {
   if (!text || !searchQuery) return text || undefined;
   const regex = new RegExp(`(${searchQuery})`, 'gi');
@@ -119,7 +119,7 @@ function FindingItem({
   showCommentsFor: components['schemas']['Finding'] | null;
   onComment: (
     finding: components['schemas']['Finding'] | null,
-    e: React.MouseEvent<HTMLButtonElement>
+    e: React.MouseEvent<HTMLButtonElement>,
   ) => void;
   commentBtnRefs: RefObject<{ [id: string]: HTMLButtonElement | null }>;
 }) {
@@ -212,7 +212,7 @@ function FindingItem({
             <div className="break-all">
               {highlightText(
                 resource.name || resource.uid || 'N/A',
-                searchQuery
+                searchQuery,
               )}
             </div>
           </div>
@@ -275,7 +275,7 @@ function FindingsDetails({
   setBestPractice,
 }: FindingsDetailsProps & {
   setBestPractice: (
-    bestPractice: components['schemas']['BestPractice'] | null
+    bestPractice: components['schemas']['BestPractice'] | null,
   ) => void;
 }) {
   const queryClient = useQueryClient();
@@ -293,7 +293,7 @@ function FindingsDetails({
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
   const [deletingCommentIds, setDeletingCommentIds] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
   const [username, setUsername] = useState('');
 
@@ -312,7 +312,7 @@ function FindingsDetails({
 
   function handleCommentClick(
     e: React.MouseEvent<HTMLButtonElement>,
-    finding: components['schemas']['Finding'] | null
+    finding: components['schemas']['Finding'] | null,
   ) {
     if (!containerRef.current) return;
     if (!finding) {
@@ -360,7 +360,7 @@ function FindingsDetails({
           100,
           debouncedSearchQuery,
           showHidden,
-          pageParam
+          pageParam,
         ),
       getNextPageParam: (lastPage) => lastPage.nextToken,
       initialPageParam: '',
@@ -421,7 +421,7 @@ function FindingsDetails({
 
       // Create a deep copy of the data
       const newData = JSON.parse(
-        JSON.stringify(previousData)
+        JSON.stringify(previousData),
       ) as components['schemas']['BestPracticeExtra'];
 
       // Update the finding's hidden status
@@ -434,7 +434,7 @@ function FindingsDetails({
                 ...finding,
                 hidden: hidden ?? finding.hidden,
               }
-            : finding
+            : finding,
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type
@@ -446,7 +446,7 @@ function FindingsDetails({
         // Update the cache with our optimistic value
         queryClient.setQueryData(
           ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          updatedData
+          updatedData,
         );
       }
 
@@ -458,7 +458,7 @@ function FindingsDetails({
       if (context?.previousData) {
         queryClient.setQueryData(
           ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          context.previousData
+          context.previousData,
         );
       }
     },
@@ -519,7 +519,7 @@ function FindingsDetails({
         if (!current || current.id !== context.findingId || !current.comments)
           return current;
         const comments = current.comments.filter(
-          (comment) => comment.id !== context.tempId
+          (comment) => comment.id !== context.tempId,
         );
         return {
           ...current,
@@ -533,7 +533,7 @@ function FindingsDetails({
         if (!current || current.id !== context.findingId || !current.comments)
           return current;
         const comments = current.comments.map((existing) =>
-          existing.id === context.tempId ? comment : existing
+          existing.id === context.tempId ? comment : existing,
         );
         return {
           ...current,
@@ -596,7 +596,7 @@ function FindingsDetails({
                   ...existing,
                   text: context.previousText,
                 }
-              : existing
+              : existing,
           );
           return {
             ...current,
@@ -720,7 +720,7 @@ function FindingsDetails({
       setCommentPos((prev) =>
         prev
           ? { y, maxHeight: availableBelow, minHeight: prev.minHeight }
-          : prev
+          : prev,
       );
     };
 

@@ -22,7 +22,7 @@ describe('UpdateFindingUseCase', () => {
       .build();
 
     await expect(useCase.updateFinding(input)).rejects.toThrow(
-      FindingNotFoundError
+      FindingNotFoundError,
     );
   });
 

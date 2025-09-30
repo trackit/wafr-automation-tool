@@ -17,7 +17,7 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ExportWellArchitectedToolUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -29,7 +29,7 @@ export class ExportWellArchitectedToolUseCaseArgsMother {
   }
 
   public withRegion(
-    region?: string
+    region?: string,
   ): ExportWellArchitectedToolUseCaseArgsMother {
     this.data.region = region;
     return this;

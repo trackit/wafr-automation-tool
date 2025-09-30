@@ -31,7 +31,7 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly partnerCentralSellingService = inject(
-    tokenPartnerCentralSellingService
+    tokenPartnerCentralSellingService,
   );
 
   public extractAccountId(roleArn: string | undefined): string {
@@ -41,7 +41,7 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   }
 
   public async createOpportunity(
-    args: CreateOpportunityUseCaseArgs
+    args: CreateOpportunityUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -60,7 +60,7 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
       });
     }
     const organization = await this.organizationRepository.get(
-      args.user.organizationDomain
+      args.user.organizationDomain,
     );
     if (!organization) {
       throw new OrganizationNotFoundError({
@@ -94,7 +94,7 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
       assessmentBody: { opportunityId: opportunityId },
     });
     this.logger.info(
-      `Assigned opportunity ${opportunityId} to assessment ${assessment.id}`
+      `Assigned opportunity ${opportunityId} to assessment ${assessment.id}`,
     );
   }
 }

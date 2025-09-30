@@ -38,7 +38,7 @@ describe('AssessmentsStateMachineSfn', () => {
       await assessmentsStateMachineSfn.startAssessment(input);
 
       const startExecutionCalls = sfnClientMock.commandCalls(
-        StartExecutionCommand
+        StartExecutionCommand,
       );
       expect(startExecutionCalls).toHaveLength(1);
       const startExecutionCall = startExecutionCalls[0];
@@ -66,7 +66,7 @@ describe('AssessmentsStateMachineSfn', () => {
       });
 
       await expect(
-        assessmentsStateMachineSfn.startAssessment(input)
+        assessmentsStateMachineSfn.startAssessment(input),
       ).rejects.toThrow(Error);
     });
 
@@ -94,12 +94,12 @@ describe('AssessmentsStateMachineSfn', () => {
       await assessmentsStateMachineSfn.startAssessment(input);
 
       const startExecutionCalls = sfnClientMock.commandCalls(
-        StartExecutionCommand
+        StartExecutionCommand,
       );
       expect(startExecutionCalls).toHaveLength(1);
       const startExecutionCall = startExecutionCalls[0];
       expect(
-        JSON.parse(startExecutionCall.args[0].input.input ?? '{}')
+        JSON.parse(startExecutionCall.args[0].input.input ?? '{}'),
       ).toEqual(
         expect.objectContaining({
           name,
@@ -109,7 +109,7 @@ describe('AssessmentsStateMachineSfn', () => {
           createdAt: input.createdAt.toISOString(),
           createdBy,
           organizationDomain,
-        })
+        }),
       );
     });
   });
@@ -130,7 +130,7 @@ describe('AssessmentsStateMachineSfn', () => {
       expect(stopExecutionCalls).toHaveLength(1);
       const stopExecutionCall = stopExecutionCalls[0];
       expect(stopExecutionCall.args[0].input.executionArn).toEqual(
-        executionArn
+        executionArn,
       );
     });
 
@@ -142,7 +142,7 @@ describe('AssessmentsStateMachineSfn', () => {
       });
 
       await expect(
-        assessmentsStateMachineSfn.cancelAssessment('execution-arn')
+        assessmentsStateMachineSfn.cancelAssessment('execution-arn'),
       ).rejects.toThrow(Error);
     });
   });

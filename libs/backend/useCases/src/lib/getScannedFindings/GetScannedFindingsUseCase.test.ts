@@ -17,7 +17,7 @@ describe('GetScannedFindingsUseCase', () => {
     const input = GetScannedFindingsUseCaseArgsMother.basic().build();
 
     await expect(useCase.getScannedFindings(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 

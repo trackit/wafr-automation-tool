@@ -17,7 +17,7 @@ function acceptsEmptyObject<T>(schema: ZodType<T>): boolean {
 
 export function parsePathFromEvent<P>(
   event: APIGatewayProxyEvent,
-  schema: ZodType<P>
+  schema: ZodType<P>,
 ): P {
   const raw = event.pathParameters ?? undefined;
   if (raw == null) {
@@ -28,7 +28,7 @@ export function parsePathFromEvent<P>(
 
 export function parseQueryFromEvent<Q>(
   event: APIGatewayProxyEvent,
-  schema: ZodType<Q>
+  schema: ZodType<Q>,
 ): Q {
   const raw = event.queryStringParameters ?? undefined;
   if (raw == null) {
@@ -38,14 +38,14 @@ export function parseQueryFromEvent<Q>(
     throw new QueryMissingError();
   }
   const cleaned = Object.fromEntries(
-    Object.entries(raw).filter(([, v]) => v != null)
+    Object.entries(raw).filter(([, v]) => v != null),
   );
   return schema.parse(cleaned);
 }
 
 export function parseBodyFromEvent<B>(
   event: APIGatewayProxyEvent,
-  schema: ZodType<B>
+  schema: ZodType<B>,
 ): B {
   const rawBody =
     event.body == null || event.body === '{}'
@@ -71,7 +71,7 @@ export function parseApiEvent<
   B extends ZodType | undefined,
 >(
   event: APIGatewayProxyEvent,
-  schemas: { pathSchema?: P; querySchema?: Q; bodySchema?: B }
+  schemas: { pathSchema?: P; querySchema?: Q; bodySchema?: B },
 ): {
   pathParameters: InferOrUndefined<P>;
   queryStringParameters: InferOrUndefined<Q>;

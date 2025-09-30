@@ -5,5 +5,5 @@ import { DeleteCommentAdapter } from './DeleteCommentAdapter';
 const adapter = new DeleteCommentAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

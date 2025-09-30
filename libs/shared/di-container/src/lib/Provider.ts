@@ -18,14 +18,14 @@ export type ClassProvider<T> = {
 };
 
 export const isValueProvider = <T>(
-  provider: Provider<T>
+  provider: Provider<T>,
 ): provider is ValueProvider<T> =>
   (provider as ValueProvider<T>).useValue !== undefined;
 export const isFactoryProvider = <T>(
-  provider: Provider<T>
+  provider: Provider<T>,
 ): provider is FactoryProvider<T> =>
   (provider as FactoryProvider<T>).useFactory !== undefined;
 export const isClassProvider = <T>(
-  provider: Provider<T>
+  provider: Provider<T>,
 ): provider is ClassProvider<T> =>
   (provider as ClassProvider<T>).useClass !== undefined;

@@ -6,11 +6,11 @@ export function createAWSMilestone(
   {
     assessmentId,
   }: paths['/assessments/{assessmentId}/exports/create-milestone']['post']['parameters']['path'],
-  requestBody: paths['/assessments/{assessmentId}/exports/create-milestone']['post']['requestBody']['content']['application/json']
+  requestBody: paths['/assessments/{assessmentId}/exports/create-milestone']['post']['requestBody']['content']['application/json'],
 ) {
   return apiClient.post(
     `/assessments/${assessmentId}/exports/create-milestone`,
-    requestBody
+    requestBody,
   );
 }
 

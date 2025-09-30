@@ -34,7 +34,7 @@ export class GetBestPracticeFindingsUseCaseImpl
   private readonly findingsRepository = inject(tokenFindingsRepository);
 
   public async getBestPracticeFindings(
-    args: GetBestPracticeFindingsUseCaseArgs
+    args: GetBestPracticeFindingsUseCaseArgs,
   ): Promise<{
     findings: Finding[];
     nextToken?: string;
@@ -88,5 +88,5 @@ export const tokenGetBestPracticeFindingsUseCase =
     'GetBestPracticeFindingsUseCase',
     {
       useClass: GetBestPracticeFindingsUseCaseImpl,
-    }
+    },
   );

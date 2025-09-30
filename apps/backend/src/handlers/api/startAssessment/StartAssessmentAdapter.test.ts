@@ -29,7 +29,7 @@ describe('startAssessment adapter', () => {
         event,
         expect.objectContaining({
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -65,7 +65,7 @@ describe('startAssessment adapter', () => {
           regions,
           roleArn,
           workflows,
-        })
+        }),
       );
     });
 

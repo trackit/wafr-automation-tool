@@ -41,7 +41,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
-    tokenFeatureToggleRepository
+    tokenFeatureToggleRepository,
   );
   private readonly logger = inject(tokenLogger);
   private readonly debug = inject(tokenDebug);
@@ -78,13 +78,13 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       },
     });
     this.logger.info(
-      `Updating assessment ${assessment.id} with error ${args.error?.Error} caused by ${args.error?.Cause}`
+      `Updating assessment ${assessment.id} with error ${args.error?.Error} caused by ${args.error?.Cause}`,
     );
   }
 
   public async cleanupSuccessful(args: CleanupUseCaseArgs) {
     const organization = await this.organizationRepository.get(
-      args.organizationDomain
+      args.organizationDomain,
     );
     if (!organization) {
       throw new OrganizationNotFoundError({ domain: args.organizationDomain });
@@ -94,7 +94,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       organization.freeAssessmentsLeft > 0
     ) {
       this.logger.info(
-        `Consume free assessment for ${args.organizationDomain}`
+        `Consume free assessment for ${args.organizationDomain}`,
       );
       organization.freeAssessmentsLeft--;
       await this.organizationRepository.save(organization);
@@ -102,7 +102,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     }
     if (!this.featureToggleRepository.marketplaceIntegration()) {
       this.logger.info(
-        `Marketplace integration is disabled, not consuming any subscription`
+        `Marketplace integration is disabled, not consuming any subscription`,
       );
       return;
     }
@@ -125,7 +125,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       });
       if (perUnit) {
         this.logger.info(
-          `Consume review unit for ${args.organizationDomain} because it is not a monthly subscription`
+          `Consume review unit for ${args.organizationDomain} because it is not a monthly subscription`,
         );
         await this.marketplaceService.consumeReviewUnit({
           accountId: organization.accountId,
@@ -141,7 +141,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   public async cleanup(args: CleanupUseCaseArgs): Promise<void> {
     if (!this.debug) {
       const listObjects = await this.objectsStorage.list(
-        `assessments/${args.assessmentId}`
+        `assessments/${args.assessmentId}`,
       );
       this.logger.info(`Deleting assessment: ${listObjects}`);
       if (listObjects.length !== 0) {
@@ -168,5 +168,5 @@ export const tokenCleanupUseCase = createInjectionToken<CleanupUseCase>(
   'CleanupUseCase',
   {
     useClass: CleanupUseCaseImpl,
-  }
+  },
 );

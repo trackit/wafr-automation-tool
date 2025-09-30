@@ -16,7 +16,8 @@ export class ParametersValidationError extends HandlerError {
     const count = err.issues.length;
     const previews = err.issues
       .map(
-        (i) => `${ParametersValidationError.pathToString(i.path)}: ${i.message}`
+        (i) =>
+          `${ParametersValidationError.pathToString(i.path)}: ${i.message}`,
       )
       .join('; ');
     super({

@@ -16,21 +16,21 @@ export class GetMilestonesUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetMilestonesUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withRegion(
-    region: string | undefined
+    region: string | undefined,
   ): GetMilestonesUseCaseArgsMother {
     this.data.region = region;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): GetMilestonesUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;

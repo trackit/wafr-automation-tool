@@ -25,7 +25,7 @@ export default function CreateAWSMilestoneDialog({
         },
         {
           name: data.name,
-        }
+        },
       );
     },
     onMutate: () => {

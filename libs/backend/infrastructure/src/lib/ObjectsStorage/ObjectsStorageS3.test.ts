@@ -31,7 +31,7 @@ describe('ObjectsStorageS3', () => {
       });
 
       await expect(
-        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'),
       ).resolves.toBe(objectContent);
     });
 
@@ -43,11 +43,11 @@ describe('ObjectsStorageS3', () => {
           name: 'NoSuchKey',
           $fault: 'client',
           $metadata: { httpStatusCode: 404 },
-        })
+        }),
       );
 
       await expect(
-        objectsStorage.get('non-existent-assessment-id')
+        objectsStorage.get('non-existent-assessment-id'),
       ).resolves.toBeNull();
     });
 
@@ -59,11 +59,11 @@ describe('ObjectsStorageS3', () => {
           name: 'InternalError',
           $fault: 'server',
           $metadata: { httpStatusCode: 500 },
-        })
+        }),
       );
 
       await expect(
-        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        objectsStorage.get('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'),
       ).rejects.toThrow(Error);
     });
   });
@@ -256,7 +256,7 @@ describe('ObjectsStorageS3', () => {
         objectsStorage.put({
           key: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
           body: 'object-content',
-        })
+        }),
       ).rejects.toThrow(Error);
     });
   });
@@ -269,7 +269,7 @@ describe('ObjectsStorageS3', () => {
       const keyName = 'key';
 
       const { bucket, key } = objectsStorage.parseURI(
-        `s3://${bucketName}/${keyName}`
+        `s3://${bucketName}/${keyName}`,
       );
       expect(bucket).toEqual(bucketName);
       expect(key).toEqual(keyName);
@@ -291,7 +291,7 @@ describe('ObjectsStorageS3', () => {
       });
 
       const assessmentObjectKey = ObjectsStorageS3.getAssessmentsPath(
-        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+        '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       );
       await objectsStorage.delete(assessmentObjectKey);
 
@@ -312,7 +312,7 @@ describe('ObjectsStorageS3', () => {
         $metadata: { httpStatusCode: 204 },
       });
       await objectsStorage.delete(
-        ObjectsStorageS3.getAssessmentsPath('assessment-id')
+        ObjectsStorageS3.getAssessmentsPath('assessment-id'),
       );
 
       const deleteExecutionCalls =
@@ -333,7 +333,7 @@ describe('ObjectsStorageS3', () => {
       });
 
       await expect(
-        objectsStorage.delete('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        objectsStorage.delete('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'),
       ).rejects.toThrow(Error);
     });
   });

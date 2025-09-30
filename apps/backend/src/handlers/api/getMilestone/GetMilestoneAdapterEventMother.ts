@@ -18,7 +18,7 @@ export class GetMilestoneAdapterEventMother {
 
   private constructor(
     pathParameters: GetMilestonePathParameters,
-    queryStringParameters: GetMilestoneQueryStringParameters
+    queryStringParameters: GetMilestoneQueryStringParameters,
   ) {
     this.pathParameters = pathParameters;
     this.queryStringParameters = queryStringParameters;
@@ -30,26 +30,26 @@ export class GetMilestoneAdapterEventMother {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         milestoneId: '1',
       },
-      {}
+      {},
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetMilestoneAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withMilestoneId(
-    milestoneId: string | number
+    milestoneId: string | number,
   ): GetMilestoneAdapterEventMother {
     this.pathParameters.milestoneId = milestoneId.toString();
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): GetMilestoneAdapterEventMother {
     this.user.email = `${this.user.id}@${organizationDomain}`;
     return this;
@@ -61,7 +61,7 @@ export class GetMilestoneAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GetMilestoneAdapterEventMother {
     this.user = user;
     return this;
@@ -72,7 +72,7 @@ export class GetMilestoneAdapterEventMother {
       Object.entries(this.queryStringParameters).map(([key, value]) => [
         key,
         value === undefined ? undefined : String(value),
-      ])
+      ]),
     );
     return APIGatewayProxyEventMother.basic()
       .withUserClaims({ sub: this.user.id, email: this.user.email })

@@ -31,7 +31,7 @@ describe('updateComment adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 

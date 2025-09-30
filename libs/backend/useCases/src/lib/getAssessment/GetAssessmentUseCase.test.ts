@@ -16,7 +16,7 @@ describe('GetAssessmentUseCase', () => {
     const input = GetAssessmentUseCaseArgsMother.basic().build();
 
     await expect(useCase.getAssessment(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 

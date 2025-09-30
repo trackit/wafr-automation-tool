@@ -113,7 +113,7 @@ describe('AssessmentsList', () => {
 
     await waitFor(() => {
       expect(getAssessments).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'test' })
+        expect.objectContaining({ search: 'test' }),
       );
     });
   });
@@ -154,7 +154,7 @@ describe('AssessmentsList', () => {
     // Check if confirmation modal appears
     expect(screen.getByText('Delete Assessment')).toBeInTheDocument();
     expect(
-      screen.getByText('Are you sure you want to delete this assessment?')
+      screen.getByText('Are you sure you want to delete this assessment?'),
     ).toBeInTheDocument();
   });
 

@@ -26,7 +26,7 @@ export class UpdateQuestionAdapter {
   private readonly useCase = inject(tokenUpdateQuestionUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

@@ -36,7 +36,7 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly lambdaService = inject(tokenLambdaService);
   private readonly lambdaStartPDFExportArn = inject(
-    tokenStartPDFExportLambdaArn
+    tokenStartPDFExportLambdaArn,
   );
 
   public async startPDFExport(args: StartPDFExportUseCaseArgs): Promise<void> {
@@ -122,5 +122,5 @@ export const tokenStartPDFExportLambdaArn = createInjectionToken<string>(
       assertIsDefined(lambdaArn, 'PDF_EXPORT_LAMBDA_ARN is not defined');
       return lambdaArn;
     },
-  }
+  },
 );

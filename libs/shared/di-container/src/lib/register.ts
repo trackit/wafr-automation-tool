@@ -10,7 +10,7 @@ import {
 
 export const register = <T = unknown>(
   token: DIToken<T>,
-  provider: Provider<T>
+  provider: Provider<T>,
 ): void => {
   if (container.isRegistered(token.symbol)) {
     throw new Error(`Token ${token.symbol.toString()} is already registered.`);

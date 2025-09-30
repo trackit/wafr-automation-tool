@@ -28,7 +28,7 @@ export class UpdateBestPracticeAdapter {
   private readonly useCase = inject(tokenUpdateBestPracticeUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

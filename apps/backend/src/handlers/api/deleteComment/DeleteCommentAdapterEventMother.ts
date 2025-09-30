@@ -26,7 +26,7 @@ export class DeleteCommentAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): DeleteCommentAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -43,7 +43,7 @@ export class DeleteCommentAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): DeleteCommentAdapterEventMother {
     this.user = user;
     return this;

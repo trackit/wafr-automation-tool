@@ -73,7 +73,7 @@ describe('UpdateBestPracticeUseCase', () => {
             ],
           }),
         ],
-      })
+      }),
     );
   });
 
@@ -83,7 +83,7 @@ describe('UpdateBestPracticeUseCase', () => {
     const input = UpdateBestPracticeUseCaseArgsMother.basic().build();
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -107,7 +107,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .build();
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      PillarNotFoundError
+      PillarNotFoundError,
     );
   });
 
@@ -132,7 +132,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .build();
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      QuestionNotFoundError
+      QuestionNotFoundError,
     );
   });
 
@@ -158,7 +158,7 @@ describe('UpdateBestPracticeUseCase', () => {
       .build();
 
     await expect(useCase.updateBestPractice(input)).rejects.toThrow(
-      BestPracticeNotFoundError
+      BestPracticeNotFoundError,
     );
   });
 });

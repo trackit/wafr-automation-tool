@@ -47,7 +47,7 @@ describe('UpdatePillarUseCase', () => {
     const input = UpdatePillarUseCaseArgsMother.basic().build();
 
     await expect(useCase.updatePillar(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -69,7 +69,7 @@ describe('UpdatePillarUseCase', () => {
       .build();
 
     await expect(useCase.updatePillar(input)).rejects.toThrow(
-      PillarNotFoundError
+      PillarNotFoundError,
     );
   });
 });

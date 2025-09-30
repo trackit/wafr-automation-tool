@@ -17,7 +17,7 @@ export class DeleteAssessmentAdapter {
   private readonly useCase = inject(tokenDeleteAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -27,7 +27,7 @@ export class DeleteAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['deleteAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
       pathSchema: DeleteAssessmentPathSchema,

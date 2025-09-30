@@ -12,7 +12,7 @@ export function assertPillarExists(args: {
 }): Pillar {
   const { assessment, pillarId } = args;
   const pillar = assessment.pillars?.find(
-    (pillar) => pillar.id === pillarId.toString()
+    (pillar) => pillar.id === pillarId.toString(),
   );
   if (!pillar) {
     throw new PillarNotFoundError({
@@ -35,7 +35,7 @@ export function assertQuestionExists(args: {
     pillarId,
   });
   const question = pillar.questions.find(
-    (question) => question.id === questionId
+    (question) => question.id === questionId,
   );
   if (!question) {
     throw new QuestionNotFoundError({
@@ -61,7 +61,7 @@ export function assertBestPracticeExists(args: {
     questionId,
   });
   const bestPractice = question.bestPractices.find(
-    (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    (bestPractice) => bestPractice.id === bestPracticeId.toString(),
   );
   if (!bestPractice) {
     throw new BestPracticeNotFoundError({

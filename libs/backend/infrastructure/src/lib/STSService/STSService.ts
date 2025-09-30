@@ -42,7 +42,7 @@ export class STSService implements STSPort {
         return null;
       }
       this.logger.info(
-        `Assumed role ${roleArn} until ${c.Expiration.toISOString()}`
+        `Assumed role ${roleArn} until ${c.Expiration.toISOString()}`,
       );
       return {
         accessKeyId: c.AccessKeyId,

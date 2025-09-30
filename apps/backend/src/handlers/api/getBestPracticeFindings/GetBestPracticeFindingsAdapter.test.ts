@@ -44,7 +44,7 @@ describe('getBestPracticeFindings adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -123,7 +123,7 @@ describe('getBestPracticeFindings adapter', () => {
           pillarId,
           questionId,
           bestPracticeId,
-        })
+        }),
       );
     });
 
@@ -152,7 +152,7 @@ describe('getBestPracticeFindings adapter', () => {
           searchTerm,
           showHidden,
           nextToken,
-        })
+        }),
       );
     });
 
@@ -223,7 +223,7 @@ describe('getBestPracticeFindings adapter', () => {
               authorEmail: 'test-user@test.io',
             },
           ],
-        })
+        }),
       );
     });
 
