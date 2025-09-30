@@ -18,9 +18,12 @@ const UpdateBestPracticePathSchema = z.object({
 
 const UpdateBestPracticeBodySchema = z
   .object({
-    checked: z.boolean().optional(),
+    checked: z.boolean(),
   })
-  .strict() satisfies ZodType<
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateBestPractice']['requestBody']['content']['application/json']
 >;
 
