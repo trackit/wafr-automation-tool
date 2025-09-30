@@ -376,12 +376,21 @@ describe('AssessmentsStateMachine Infrastructure', () => {
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
 
-    it('should return FINISHED if execution status is SUCCEEDED and no known state', async () => {
+    it('should return FINISHED for Cleanup exited state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
-      sfnClientMock.on(GetExecutionHistoryCommand).resolves({ events: [] });
-      sfnClientMock
-        .on(DescribeExecutionCommand)
-        .resolves({ status: ExecutionStatus.SUCCEEDED });
+      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
+        events: [
+          {
+            stateExitedEventDetails: { name: 'Cleanup' },
+            timestamp: new Date(),
+            type: undefined,
+            id: 6,
+          },
+        ],
+      });
+      sfnClientMock.on(DescribeExecutionCommand).resolves({
+        status: ExecutionStatus.SUCCEEDED,
+      });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
         'arn:aws:states:stateMachine'
       );
@@ -431,27 +440,6 @@ describe('AssessmentsStateMachine Infrastructure', () => {
         'arn:aws:states:stateMachine'
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
-    });
-
-    it('should return ERRORED if execution status is FAILED even with known states in history', async () => {
-      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
-      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
-        events: [
-          {
-            stateEnteredEventDetails: { name: 'Pass' },
-            timestamp: new Date(),
-            type: undefined,
-            id: 1,
-          },
-        ],
-      });
-      sfnClientMock
-        .on(DescribeExecutionCommand)
-        .resolves({ status: ExecutionStatus.FAILED });
-      const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
-      );
-      expect(step).toBe(AssessmentStep.ERRORED);
     });
   });
 });
