@@ -179,10 +179,15 @@ function AssessmentsList() {
                     {assessment.name}
                   </div>
                   <div className="flex flex-row items-center gap-1 flex-1 flex-grow justify-end">
-                    <StatusBadge
-                      status={assessmentSteps[assessment.id!] || 'UNKNOWN'}
-                      className="badge-sm flex-shrink-0 "
-                    />
+                    {assessmentSteps[assessment.id!] ? (
+                      <StatusBadge
+                        status={assessmentSteps[assessment.id!]}
+                        className="badge-sm flex-shrink-0 "
+                      />
+                    ) : (
+                      <span className="loading loading-dots loading-xs text-base-content"></span>
+                    )}
+
                     <div
                       className="dropdown dropdown-end"
                       onClick={(e) => {
