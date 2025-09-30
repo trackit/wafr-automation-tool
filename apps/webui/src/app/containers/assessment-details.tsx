@@ -811,8 +811,7 @@ export function AssessmentDetails() {
         text: 'Preparing prompts',
         loading: step === 'PREPARING_ASSOCIATIONS',
         completed:
-          step !== 'PREPARING_ASSOCIATIONS' &&
-          step !== 'SCANNING_STARTED',
+          step !== 'PREPARING_ASSOCIATIONS' && step !== 'SCANNING_STARTED',
       },
       {
         text: 'Invoking LLMs',

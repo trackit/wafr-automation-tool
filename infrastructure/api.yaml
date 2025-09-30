@@ -174,7 +174,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   CreateOrganizationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -200,7 +200,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   ResetAuroraLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -919,7 +919,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   GetAssessmentStepLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:

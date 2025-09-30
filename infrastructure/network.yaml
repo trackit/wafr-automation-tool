@@ -328,7 +328,7 @@ Resources:
         - !Ref PrivateSubnetB
       SecurityGroupIds:
         - !Ref InterfaceEndpointSecurityGroup
-  
+
   BedrockInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
