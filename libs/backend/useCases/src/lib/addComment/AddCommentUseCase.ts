@@ -44,16 +44,16 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
     }
 
     // Backward compatibility: if finding has no comments field, create an empty object
-    if (!finding.comments) {
-      await this.findingsRepository.update({
-        assessmentId,
-        organizationDomain,
-        findingId,
-        findingBody: {
-          comments: [],
-        },
-      });
-    }
+    // if (!finding.comments) {
+    //   await this.findingsRepository.update({
+    //     assessmentId,
+    //     organizationDomain,
+    //     findingId,
+    //     findingBody: {
+    //       comments: [],
+    //     },
+    //   });
+    // }
 
     const comment: FindingComment = {
       id: this.idGenerator.generate(),
