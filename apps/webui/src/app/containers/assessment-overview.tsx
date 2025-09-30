@@ -62,7 +62,7 @@ function AssessmentOverview({
 }) {
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   // Consolidated useMemo for all data processing
@@ -77,7 +77,19 @@ function AssessmentOverview({
           .sort((a, b) => (b[1] as number) - (a[1] as number))
           .map(([name, value]) => ({ name, value: value as number }))
       : [];
+    const topN = 3;
+    const top = regions.slice(0, topN);
+    const rest = regions.slice(topN);
+    const othersSum = rest.reduce((s, r) => s + r.value, 0);
+    const processedRegions = [...top];
+    if (othersSum > 0) {
+      processedRegions.push({ name: 'Other', value: othersSum });
+    }
 
+    const totalRegionsCount = processedRegions.reduce(
+      (sum, item) => sum + item.value,
+      0
+    );
     // Process severities data
     const severities = graphData.severities
       ? Object.entries(graphData.severities)
@@ -98,19 +110,20 @@ function AssessmentOverview({
 
     return {
       regions,
+      processedRegions,
       severities,
       resourceTypes,
-      totalRegionsCount: regions.reduce((sum, item) => sum + item.value, 0),
+      totalRegionsCount,
       totalSeveritiesCount: severities.reduce(
         (sum, item) => sum + item.value,
-        0,
+        0
       ),
     };
   }, [assessment]);
 
   // Extract processed data
   const {
-    regions: assessmentRegions = [],
+    processedRegions: assessmentProcessedRegions = [],
     severities: assessmentSeverities = [],
     resourceTypes: assessmentResourceTypes = [],
     totalRegionsCount = 0,
@@ -121,7 +134,7 @@ function AssessmentOverview({
   useMemo(() => {
     if (assessmentResourceTypes.length > 0) {
       setEnabledResourceTypes(
-        new Set(assessmentResourceTypes.map((rt) => rt.name)),
+        new Set(assessmentResourceTypes.map((rt) => rt.name))
       );
     }
   }, [assessmentResourceTypes]);
@@ -129,7 +142,7 @@ function AssessmentOverview({
   // Get filtered resource types for charts
   const filteredResourceTypes = useMemo(() => {
     return assessmentResourceTypes.filter((rt) =>
-      enabledResourceTypes.has(rt.name),
+      enabledResourceTypes.has(rt.name)
     );
   }, [assessmentResourceTypes, enabledResourceTypes]);
 
@@ -265,7 +278,7 @@ function AssessmentOverview({
                       content={({ payload }) => (
                         <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
                           {payload?.map((entry, index) => {
-                            const item = assessmentRegions[index];
+                            const item = assessmentProcessedRegions[index];
                             const percentage =
                               totalRegionsCount > 0
                                 ? (
@@ -301,7 +314,7 @@ function AssessmentOverview({
                       )}
                     />
                     <Pie
-                      data={assessmentRegions || []}
+                      data={assessmentProcessedRegions || []}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -310,14 +323,12 @@ function AssessmentOverview({
                       paddingAngle={5}
                       dataKey="value"
                     >
-                      {assessmentRegions
-                        ? assessmentRegions.map((_item, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={getChartColorByIndex(index)}
-                            />
-                          ))
-                        : []}
+                      {assessmentProcessedRegions.map((_, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={getChartColorByIndex(index)}
+                        />
+                      ))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
