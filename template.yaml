@@ -33,6 +33,10 @@ Parameters:
     Default: 10
 
 Conditions:
+  IsDebug:
+    Fn::Equals:
+      - !Ref Debug
+      - 'true'
   CreateBackups:
     Fn::Equals:
       - !Ref Debug
@@ -50,6 +54,7 @@ Resources:
       Parameters:
         Owner: !Ref Owner
         Project: !Ref Project
+        Debug: !Ref Debug
         StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
         StateMachineName:
           !Select [
@@ -140,7 +145,7 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
-      DeletionProtectionEnabled: true
+      DeletionProtectionEnabled: !If [IsDebug, false, true]
   BackupRole:
     Condition: CreateBackups
     Type: AWS::IAM::Role
@@ -202,7 +207,7 @@ Resources:
       KeySchema:
         - AttributeName: PK
           KeyType: HASH
-      DeletionProtectionEnabled: true
+      DeletionProtectionEnabled: !If [IsDebug, false, true]
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:

@@ -9,6 +9,12 @@ Parameters:
     Type: String
   ParentStackName:
     Type: String
+  Debug:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StateMachineArn:
     Type: String
   StateMachineName:
@@ -28,12 +34,12 @@ Parameters:
     Type: String
   MonthlySubscriptionProductCode:
     Type: String
-  Debug:
-    Type: String
-    Default: true
-    AllowedValues:
-      - true
-      - false
+
+Conditions:
+  IsDebug:
+    Fn::Equals:
+      - !Ref Debug
+      - 'true'
 
 Globals:
   Function:
@@ -74,7 +80,7 @@ Resources:
           StringAttributeConstraints:
             MaxLength: 320
             MinLength: 3
-      DeletionProtection: ACTIVE
+      DeletionProtection: !If [IsDebug, 'INACTIVE', 'ACTIVE']
   UserPoolUser:
     Type: AWS::Cognito::UserPoolUser
     Properties:
