@@ -12,7 +12,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetBestPracticeFindingsPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
   bestPracticeId: z.string().nonempty(),
@@ -24,7 +24,7 @@ const GetBestPracticeFindingsQueryArgsSchema = z.object({
   limit: z.coerce.number().int().min(1).optional(),
   search: z.string().nonempty().optional(),
   showHidden: z.coerce.boolean().optional(),
-  nextToken: z.string().nonempty().trim().base64().optional(),
+  nextToken: z.base64().nonempty().trim().optional(),
 }) satisfies ZodType<
   operations['getBestPracticeFindings']['parameters']['query']
 >;

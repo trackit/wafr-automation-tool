@@ -2,7 +2,6 @@ import { components } from '@shared/api-schema';
 
 type Question = components['schemas']['Question'];
 type Pillar = components['schemas']['Pillar'];
-type AssessmentContent = components['schemas']['AssessmentContent'];
 
 /**
  * Calculates whether a question is completed based on its best practices

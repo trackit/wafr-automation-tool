@@ -690,7 +690,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
-        expect.objectContaining({ id: question.id, disabled: true, none: true })
+        expect.objectContaining({
+          id: question.id,
+          disabled: true,
+          none: true,
+        })
       );
     });
 

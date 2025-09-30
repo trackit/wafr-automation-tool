@@ -10,13 +10,13 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetMilestonesPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['getMilestones']['parameters']['path']>;
 
 const GetMilestonesQuerySchema = z.object({
   region: z.string().nonempty().optional(),
   limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
-  nextToken: z.string().trim().nonempty().base64().optional(),
+  nextToken: z.base64().trim().nonempty().optional(),
 }) satisfies ZodType<operations['getMilestones']['parameters']['query']>;
 
 export class GetMilestonesAdapter {

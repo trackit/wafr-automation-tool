@@ -106,7 +106,7 @@ function AssessmentOverview({
         0
       ),
     };
-  }, [assessment?.graphData]);
+  }, [assessment]);
 
   // Extract processed data
   const {
@@ -311,7 +311,7 @@ function AssessmentOverview({
                       dataKey="value"
                     >
                       {assessmentRegions
-                        ? assessmentRegions.map((item, index) => (
+                        ? assessmentRegions.map((_item, index) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={getChartColorByIndex(index)}

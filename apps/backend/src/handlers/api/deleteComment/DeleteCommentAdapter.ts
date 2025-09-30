@@ -10,9 +10,9 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const DeleteCommentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   findingId: z.string().nonempty(),
-  commentId: z.string().uuid(),
+  commentId: z.uuid(),
 }) satisfies ZodType<operations['deleteComment']['parameters']['path']>;
 
 export class DeleteCommentAdapter {

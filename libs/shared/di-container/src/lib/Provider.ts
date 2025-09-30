@@ -1,6 +1,6 @@
 import { FactoryFunction } from './FactoryFunction';
 
-export type Provider<T = any> =
+export type Provider<T> =
   | ClassProvider<T>
   | FactoryProvider<T>
   | ValueProvider<T>;

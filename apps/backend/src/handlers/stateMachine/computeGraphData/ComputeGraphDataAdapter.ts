@@ -4,7 +4,7 @@ import { tokenComputeGraphDataUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 const ComputeGraphDataInputSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   organizationDomain: z.string().nonempty(),
 });
 

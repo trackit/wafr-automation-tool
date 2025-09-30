@@ -26,7 +26,7 @@ const ProwlerFindingSchema = z.object({
   metadata: z.object({
     event_code: z.string().optional(),
   }),
-  severity: z.nativeEnum(SeverityType).optional(),
+  severity: z.enum(SeverityType).optional(),
   status_code: z.string().optional(),
   status_detail: z.string().optional(),
 });

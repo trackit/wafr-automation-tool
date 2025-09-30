@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 interface DataTableProps<T> {
   data: T[];
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T>[];
 }
 
 export function DataTable<T>({ data, columns }: DataTableProps<T>) {

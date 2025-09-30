@@ -19,7 +19,7 @@ import {
 describe('parseApiEvent', () => {
   describe('parsePathFromEvent', () => {
     it('should parse required path when present', () => {
-      const schema = z.object({ assessmentId: z.string().uuid() });
+      const schema = z.object({ assessmentId: z.uuid() });
       const event = APIGatewayProxyEventMother.basic()
         .withPathParameters({
           assessmentId: '123e4567-e89b-12d3-a456-426614174000',
@@ -33,7 +33,7 @@ describe('parseApiEvent', () => {
     });
 
     it('should throw PathMissingError when required path is missing', () => {
-      const schema = z.object({ assessmentId: z.string().uuid() });
+      const schema = z.object({ assessmentId: z.uuid() });
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parsePathFromEvent(event, schema)).toThrow(PathMissingError);
@@ -115,7 +115,7 @@ describe('parseApiEvent', () => {
   });
 
   describe('integration', () => {
-    const PathSchema = z.object({ assessmentId: z.string().uuid() });
+    const PathSchema = z.object({ assessmentId: z.uuid() });
     const BodySchema = z.object({
       name: z.string(),
       region: z.string().optional(),

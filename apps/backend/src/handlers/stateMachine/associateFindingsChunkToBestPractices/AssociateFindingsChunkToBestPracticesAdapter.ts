@@ -7,7 +7,7 @@ import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 
 export const AssociateFindingsChunkToBestPracticesInputSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   organizationDomain: z.string().nonempty(),
   findingsChunkURI: z.string().nonempty(),
 });
@@ -31,7 +31,7 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
     }
     const [chunkFileNameWithoutExtension] = chunkFileName.split('.');
     const [scanningTool] = chunkFileNameWithoutExtension.split('_');
-    return z.nativeEnum(ScanningTool).parse(scanningTool);
+    return z.enum(ScanningTool).parse(scanningTool);
   }
 
   public async fetchFindingsToAssociate(findingsChunkURI: string): Promise<{
@@ -58,9 +58,8 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
   ): Promise<AssociateFindingsChunkToBestPracticesOutput> {
     const { assessmentId, organizationDomain, findingsChunkURI } =
       AssociateFindingsChunkToBestPracticesInputSchema.parse(event);
-    const { scanningTool, findings } = await this.fetchFindingsToAssociate(
-      findingsChunkURI
-    );
+    const { scanningTool, findings } =
+      await this.fetchFindingsToAssociate(findingsChunkURI);
     await this.useCase.associateFindingsToBestPractices({
       assessmentId,
       organizationDomain,

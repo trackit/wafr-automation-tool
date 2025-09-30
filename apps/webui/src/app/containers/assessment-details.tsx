@@ -639,8 +639,8 @@ export function AssessmentDetails() {
                   info.row.original.risk === 'High'
                     ? 'badge-error'
                     : info.row.original.risk === 'Medium'
-                    ? 'badge-warning'
-                    : 'badge-success'
+                      ? 'badge-warning'
+                      : 'badge-success'
                 }`}
               >
                 {info.row.original.risk}
