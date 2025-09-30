@@ -58,7 +58,6 @@ Resources:
           ]
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
-        OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         ParentStackName: !Ref AWS::StackName
@@ -115,7 +114,6 @@ Resources:
         Subnet: !GetAtt Network.Outputs.PublicSubnetEcsId
         SecurityGroup: !GetAtt Network.Outputs.EcsSecurityGroupId
         LogRetentionInDays: !Ref LogRetentionInDays
-        OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         GenAIMaxRetries: !Ref GenAIMaxRetries

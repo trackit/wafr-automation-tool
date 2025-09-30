@@ -15,8 +15,6 @@ Parameters:
     AllowedValues:
       - true
       - false
-  OrganizationTableArn:
-    Type: String
   S3BucketName:
     Type: String
   ECSCluster:
@@ -72,7 +70,6 @@ Globals:
       Variables:
         DEBUG: !Ref Debug
         S3_BUCKET: !Ref S3BucketName
-        ORGANIZATION_TABLE: !Ref OrganizationTableArn
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
         DB_HOST: !Ref DBHost
@@ -183,12 +180,6 @@ Resources:
             SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-              Resource:
-                - !Ref OrganizationTableArn
             - Effect: Allow
               Action:
                 - s3:DeleteObject
