@@ -39,6 +39,7 @@ import {
 } from '../../lib/assessment-utils';
 import AssessmentOverview from './assessment-overview';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import CreateOpportunityDialog from './create-opportunity-dialog';
 import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
@@ -917,6 +918,13 @@ export function AssessmentDetails() {
                     <ListAWSMilestonesDialog
                       assessmentId={id ?? ''}
                       disabled={!assessmentData?.exportRegion}
+                    />
+                  </li>
+                  <li>
+                    <CreateOpportunityDialog
+                      assessmentId={id ?? ''}
+                      hasOpportunityId={!!assessmentData?.opportunityId}
+                      hasWafrWorkloadArn={!!assessmentData?.wafrWorkloadArn}
                     />
                   </li>
                 </>

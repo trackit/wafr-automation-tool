@@ -136,6 +136,8 @@ describe('getAssessments adapter', () => {
         createdAt: assessment.createdAt.toISOString(),
         step: assessment.step,
         error: assessment.error,
+        opportunityId: assessment.opportunityId,
+        wafrWorkloadArn: assessment.wafrWorkloadArn,
       });
     });
   });

@@ -11,6 +11,8 @@ export * from './Logger';
 export * from './MarketplacePort';
 export * from './ObjectsStorage';
 export * from './OrganizationRepository';
+export * from './PartnerCentralSellingPort';
 export * from './PDFServicePort';
 export * from './QuestionSetPort';
+export * from './STSPort';
 export * from './WellArchitectedToolPort';

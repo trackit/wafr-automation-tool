@@ -97,3 +97,19 @@ export class OrganizationUnitBasedAgreementIdNotSetError extends UseCaseError {
     });
   }
 }
+
+export class OrganizationAceDetailsNotFoundError extends UseCaseError {
+  public constructor(
+    args: {
+      domain: string;
+    },
+    description?: string
+  ) {
+    const { domain } = args;
+    super({
+      type: BasicErrorType.NOT_FOUND,
+      message: `No ace details found for organization ${domain}`,
+      description,
+    });
+  }
+}

@@ -1,4 +1,10 @@
-import { Calendar, Computer, Earth, Server } from 'lucide-react';
+import {
+  Calendar,
+  Computer,
+  Earth,
+  LayoutDashboard,
+  Server,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Bar,
@@ -26,6 +32,7 @@ import {
   calculateOverallCompletion,
   calculatePillarCompletion,
   extractAccountId,
+  formatACEOpportunity,
   formatDate,
   formatRegions,
   formatWorkflowInfo,
@@ -205,6 +212,10 @@ function AssessmentOverview({
             <div className="text-sm text-base-content flex flex-row gap-2 items-center">
               <Computer className="w-5 h-5" />
               Workflow: {formatWorkflowInfo(assessment.workflows)}
+            </div>
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+              <LayoutDashboard className="w-5 h-5" />
+              ACE Opportunity: {formatACEOpportunity(assessment.opportunityId)}
             </div>
           </div>
         </div>

@@ -20,6 +20,8 @@ export interface Assessment {
   workflows: string[];
   error?: AssessmentError;
   fileExports?: AssessmentFileExports;
+  wafrWorkloadArn?: string;
+  opportunityId?: string;
 }
 
 export interface AssessmentGraphData {
@@ -52,6 +54,8 @@ export interface AssessmentBody {
   questionVersion?: string;
   exportRegion?: string;
   fileExports?: AssessmentFileExports;
+  wafrWorkloadArn?: string;
+  opportunityId?: string;
 }
 
 export enum AssessmentFileExportType {

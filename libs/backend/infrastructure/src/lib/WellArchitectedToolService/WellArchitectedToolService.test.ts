@@ -29,8 +29,8 @@ import { inject, register, reset } from '@shared/di-container';
 import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 import { tokenFakeQuestionSetService } from '../QuestionSetService';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { tokenSTSClient } from '../STSService';
 import {
-  tokenSTSClient,
   tokenWellArchitectedClientConstructor,
   WAFRLens,
   WellArchitectedToolService,
@@ -110,6 +110,8 @@ describe('WellArchitectedToolService', () => {
 
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: 'workload-id',
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 200 },
       });
 
@@ -119,7 +121,11 @@ describe('WellArchitectedToolService', () => {
           assessment,
           user
         )
-      ).resolves.toEqual('workload-id');
+      ).resolves.toEqual({
+        workloadId: 'workload-id',
+        workloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
+      });
     });
 
     it('should throw an error if the workload creation fails', async () => {
@@ -143,6 +149,8 @@ describe('WellArchitectedToolService', () => {
 
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: 'workload-id',
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 500 },
       });
 
@@ -173,7 +181,9 @@ describe('WellArchitectedToolService', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: `wafr-assessment-name-${assessment.id}`,
+            WorkloadArn:
+              'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -189,7 +199,11 @@ describe('WellArchitectedToolService', () => {
           assessment,
           user
         )
-      ).resolves.toEqual('workload-id');
+      ).resolves.toEqual({
+        workloadId: 'workload-id',
+        workloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
+      });
     });
   });
 
@@ -461,7 +475,9 @@ describe('WellArchitectedToolService', () => {
         WorkloadSummaries: [
           {
             WorkloadId: 'workload-id',
-            WorkloadName: `wafr-assessment-name-${assessment.id}`,
+            WorkloadArn:
+              'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
+            WorkloadName: `wafr-${assessment.name}-${assessment.id}`,
           },
         ],
         $metadata: { httpStatusCode: 200 },
@@ -758,6 +774,8 @@ describe('WellArchitectedToolService', () => {
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: 'workload-id',
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
@@ -840,6 +858,8 @@ describe('WellArchitectedToolService', () => {
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: workloadId,
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
@@ -936,6 +956,8 @@ describe('WellArchitectedToolService', () => {
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: workloadId,
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({
@@ -1013,6 +1035,8 @@ describe('WellArchitectedToolService', () => {
       });
       wellArchitectedClientMock.on(CreateWorkloadCommand).resolves({
         WorkloadId: workloadId,
+        WorkloadArn:
+          'arn:aws:wellarchitected:us-west-2:123456789012:workload/workload-id',
         $metadata: { httpStatusCode: 200 },
       });
       wellArchitectedClientMock.on(GetLensReviewCommand).resolves({

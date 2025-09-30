@@ -8,6 +8,7 @@ import {
   Computer,
   Earth,
   EllipsisVertical,
+  LayoutDashboard,
   RefreshCw,
   Search,
   Server,
@@ -24,7 +25,9 @@ import {
 } from '@webui/api-client';
 import { ConfirmationModal, StatusBadge } from '@webui/ui';
 
+import { formatACEOpportunity } from '../../lib/assessment-utils';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import CreateOpportunityDialog from './create-opportunity-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
@@ -187,7 +190,7 @@ function AssessmentsList() {
                       </div>
                       <ul
                         tabIndex={0}
-                        className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                        className="dropdown-content menu bg-base-100 rounded-box z-50 w-60 p-2 shadow-sm"
                       >
                         <li>
                           <button
@@ -223,6 +226,13 @@ function AssessmentsList() {
                         </li>
                         <li>
                           <PDFExportsDialog assessmentId={assessment.id!} />
+                        </li>
+                        <li>
+                          <CreateOpportunityDialog
+                            assessmentId={assessment.id!}
+                            hasOpportunityId={!!assessment.opportunityId}
+                            hasWafrWorkloadArn={!!assessment.wafrWorkloadArn}
+                          />
                         </li>
                         <li className="m-1"></li>
                         <li>
@@ -265,6 +275,11 @@ function AssessmentsList() {
                         ? assessment.workflows.join(', ')
                         : ' -'
                       : assessment.workflows || ' -'}
+                  </div>
+                  <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+                    <LayoutDashboard className="w-5 h-5" />
+                    ACE Opportunity:{' '}
+                    {formatACEOpportunity(assessment.opportunityId)}
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import {
   registerTestInfrastructure,
+  tokenDebug,
   tokenFakeAssessmentsRepository,
   tokenFakeFeatureToggleRepository,
   tokenFakeFindingsRepository,
@@ -21,7 +22,7 @@ import {
   OrganizationNotFoundError,
   OrganizationUnitBasedAgreementIdNotSetError,
 } from '../../errors';
-import { CleanupUseCaseImpl, tokenDebug } from './CleanupUseCase';
+import { CleanupUseCaseImpl } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
 
 describe('CleanupUseCase', () => {

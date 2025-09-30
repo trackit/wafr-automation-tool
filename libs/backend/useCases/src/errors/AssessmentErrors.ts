@@ -127,3 +127,20 @@ export class AssessmentFileExportAlreadyExistsError extends UseCaseError {
     });
   }
 }
+
+export class AssessmentOpportunityAlreadyLinkedError extends UseCaseError {
+  constructor(
+    args: {
+      assessmentId: string;
+      opportunityId: string;
+    },
+    description?: string
+  ) {
+    const { assessmentId, opportunityId } = args;
+    super({
+      type: BasicErrorType.CONFLICT,
+      message: `Assessment with id ${assessmentId} is linked already to opportunity ${opportunityId}`,
+      description,
+    });
+  }
+}

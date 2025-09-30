@@ -924,6 +924,83 @@ paths:
           description: The comment has been successfully deleted
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
+  '/assessments/{assessmentId}/opportunities':
+    post:
+      operationId: createOpportunity
+      tags:
+        - Assessments
+      summary: Create an opportunity for specific assessment
+      description: |
+        Add an ACE opportunity to the assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - companyName
+                - duns
+                - industry
+                - customerType
+                - companyWebsiteUrl
+                - customerCountry
+                - customerPostalCode
+                - monthlyRecurringRevenue
+                - targetCloseDate
+              properties:
+                companyName:
+                  type: string
+                  description: The name of the customer company.
+                duns:
+                  type: string
+                  description: The data universal number system of the company.
+                industry:
+                  type: string
+                  description: The industry of the cutomer.
+                customerType:
+                  type: string
+                  description: The type of the customer ('customer' or 'internal workload').
+                  enum:
+                    - INTERNAL_WORKLOAD
+                    - CUSTOMER
+                companyWebsiteUrl:
+                  type: string
+                  description: The website of the customer company.
+                customerCountry:
+                  type: string
+                  description: The country code of the customer
+                customerPostalCode:
+                  type: string
+                  description: The postal code of the customer
+                monthlyRecurringRevenue:
+                  type: string
+                  description: The estimated AWS monthly recurring revenue.
+                targetCloseDate:
+                  type: string
+                  description: The target close date (when the opportunity launches and starts to incur AWS usage).
+                customerCity:
+                  type: string
+                  description: The city of the customer.
+                customerAddress:
+                  type: string
+                  description: The address of the customer.
+      responses:
+        '200':
+          description: The opportunity has been successfully added
+        '400':
+          description: Invalid request body or a issue occurred while trying to retrieve the organization or email of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
 components:
   schemas:
     Assessment:
@@ -954,6 +1031,12 @@ components:
         roleArn:
           type: string
           description: Role ARN associated with the assessment
+        wafrWorkloadArn:
+          type: string
+          description: Well-Architected Tool workload ARN
+        opportunityId:
+          type: string
+          description: ACE Opportunity linked to the assessment
         workflows:
           type: array
           items:

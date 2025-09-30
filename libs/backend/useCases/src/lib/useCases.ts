@@ -3,6 +3,7 @@ export * from './associateFindingsToBestPractices';
 export * from './cleanup';
 export * from './computeGraphData';
 export * from './createMilestone';
+export * from './createOpportunity';
 export * from './deleteAssessment';
 export * from './deleteComment';
 export * from './deletePDFExport';

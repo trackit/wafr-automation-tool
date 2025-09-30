@@ -29,6 +29,8 @@ export interface DynamoDBAssessment {
   workflows: string[];
   error?: DynamoDBAssessmentError;
   fileExports?: DynamoDBAssessmentFileExports;
+  wafrWorkloadArn?: string;
+  opportunityId?: string;
 }
 
 export interface DynamoDBAssessmentGraphData {

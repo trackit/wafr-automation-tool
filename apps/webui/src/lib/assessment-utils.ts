@@ -121,3 +121,12 @@ export function formatDate(dateString: string | undefined): string {
 export function formatRegions(regions: string[] | undefined): string {
   return regions?.join(', ') || 'Global';
 }
+
+/**
+ * Formats opportunityId for display
+ */
+export function formatACEOpportunity(
+  opportunityId: string | undefined
+): string {
+  return opportunityId ?? 'Not Linked';
+}

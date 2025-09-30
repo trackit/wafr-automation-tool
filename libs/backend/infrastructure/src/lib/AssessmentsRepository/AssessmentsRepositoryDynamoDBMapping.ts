@@ -95,6 +95,8 @@ export function toDynamoDBAssessmentItem(
     step: assessment.step,
     workflows: assessment.workflows,
     error: assessment.error,
+    wafrWorkloadArn: assessment.wafrWorkloadArn,
+    opportunityId: assessment.opportunityId,
     ...(assessment.fileExports && {
       fileExports: Object.fromEntries(
         Object.entries(assessment.fileExports).map(([k, v]) => [
@@ -222,6 +224,8 @@ export function fromDynamoDBAssessmentItem(
     step: assessment.step,
     workflows: assessment.workflows,
     error: assessment.error,
+    opportunityId: assessment.opportunityId,
+    wafrWorkloadArn: assessment.wafrWorkloadArn,
     ...(assessment.fileExports && {
       fileExports: Object.fromEntries(
         Object.entries(assessment.fileExports).map(([k, v]) => [
