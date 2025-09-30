@@ -78,10 +78,10 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
       workflows: assessment.workflows,
       createdAt: assessment.createdAt,
       createdBy: assessment.createdBy,
-      organization: assessment.organization,
+      organizationDomain: assessment.organizationDomain,
     };
     const command = new StartExecutionCommand({
-      input: JSON.stringify(startAssessmentInput),
+      input: JSON.stringify(input),
       stateMachineArn: this.stateMachineArn,
     });
 

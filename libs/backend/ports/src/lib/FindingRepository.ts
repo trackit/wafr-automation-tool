@@ -23,6 +23,14 @@ export interface FindingRepository {
     organizationDomain: string;
     finding: Finding;
   }): Promise<void>;
+  saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void>;
   saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -35,12 +43,10 @@ export interface FindingRepository {
     organizationDomain: string;
     findingId: string;
   }): Promise<Finding | undefined>;
-
   getAll(args: {
     assessmentId: string;
     organizationDomain: string;
   }): Promise<Finding[]>;
-
   getBestPracticeFindings(
     args: AssessmentsRepositoryGetBestPracticeFindingsArgs
   ): Promise<{

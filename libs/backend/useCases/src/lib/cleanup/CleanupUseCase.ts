@@ -81,11 +81,6 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
   }
 
   public async cleanupSuccessful(args: CleanupUseCaseArgs) {
-    await this.assessmentsRepository.update({
-      assessmentId: args.assessmentId,
-      organizationDomain: args.organizationDomain,
-      assessmentBody: { finished: true },
-    });
     const organization = await this.organizationRepository.get(
       args.organizationDomain
     );
@@ -139,6 +134,11 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
         });
       }
     }
+    await this.assessmentsRepository.update({
+      assessmentId: args.assessmentId,
+      organizationDomain: args.organizationDomain,
+      assessmentBody: { finished: true },
+    });
   }
 
   public async cleanup(args: CleanupUseCaseArgs): Promise<void> {

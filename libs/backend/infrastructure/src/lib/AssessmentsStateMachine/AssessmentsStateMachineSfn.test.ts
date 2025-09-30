@@ -130,7 +130,7 @@ describe('AssessmentsStateMachineSfn', () => {
         workflows: [],
         regions: [],
         createdBy: 'test-user',
-        organization: 'test.io',
+        organizationDomain: 'test.io',
       };
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),

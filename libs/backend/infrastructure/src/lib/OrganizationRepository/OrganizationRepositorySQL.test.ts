@@ -22,13 +22,13 @@ describe('OrganizationRepositorySQL', () => {
   describe('save', () => {
     it('should save an organization to SQL', async () => {
       const { repository } = setup();
+
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
         .build();
-      await repository.save({ organization });
-      const savedOrganization = await repository.get({
-        organizationDomain: organization.domain,
-      });
+      await repository.save(organization);
+
+      const savedOrganization = await repository.get(organization.domain);
       expect(savedOrganization).toEqual(organization);
     });
   });
@@ -36,21 +36,20 @@ describe('OrganizationRepositorySQL', () => {
   describe('get', () => {
     it('should get an organization by domain', async () => {
       const { repository } = setup();
+
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
         .build();
-      await repository.save({ organization });
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+      await repository.save(organization);
+
+      const fetchedOrganization = await repository.get('test.io');
       expect(fetchedOrganization).toEqual(organization);
     });
 
     it('should return undefined if organization does not exist', async () => {
       const { repository } = setup();
-      const fetchedOrganization = await repository.get({
-        organizationDomain: 'test.io',
-      });
+
+      const fetchedOrganization = await repository.get('test.io');
       expect(fetchedOrganization).toBeUndefined();
     });
   });
@@ -59,5 +58,6 @@ describe('OrganizationRepositorySQL', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return { repository: new OrganizationRepositorySQL() };
 };

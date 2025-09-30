@@ -34,6 +34,8 @@ Parameters:
     Type: String
   DBCredentialsSecretArn:
     Type: String
+  S3BucketName:
+    Type: String
 
 Globals:
   Function:
@@ -174,7 +176,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   CreateOrganizationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -200,7 +202,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   ResetAuroraLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -568,14 +570,11 @@ Resources:
       Tags:
         Name: ExportAssessmentToPDFFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:PutObject
@@ -605,13 +604,11 @@ Resources:
       Tags:
         Name: StartPDFExportFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
@@ -678,12 +675,9 @@ Resources:
       Tags:
         Name: ListPDFExportsFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         ListPDFExports:
           Type: Api
@@ -743,13 +737,11 @@ Resources:
       Tags:
         Name: GeneratePDFExportURLFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:GetObject
@@ -820,13 +812,11 @@ Resources:
       Tags:
         Name: DeletePDFExportFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:DeleteObject
@@ -1126,7 +1116,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
-  
+
   GetAssessmentStepLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:

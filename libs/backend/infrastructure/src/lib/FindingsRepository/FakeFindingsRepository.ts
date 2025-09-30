@@ -8,10 +8,12 @@ import type {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
   FindingRepository,
 } from '@backend/ports';
-import { createInjectionToken } from '@shared/di-container';
-import { getBestPracticeCustomId } from '@shared/utils';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { tokenFakeAssessmentsRepository } from '../infrastructure';
 
 export class FakeFindingsRepository implements FindingRepository {
+  private fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
   public findings: Record<string, Finding[]> = {};
 
   public async save(args: {
@@ -27,6 +29,52 @@ export class FakeFindingsRepository implements FindingRepository {
     }
 
     this.findings[key].push(finding);
+  }
+
+  public async saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const pillar = assessment?.pillars?.find(
+      (pillar) => pillar.id === pillarId.toString()
+    );
+    const question = pillar?.questions.find(
+      (question) => question.id === questionId.toString()
+    );
+    const bestPractice = question?.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+    );
+    if (!bestPractice) {
+      throw new Error();
+    }
+    for (const findingId of bestPracticeFindingIds) {
+      const finding = await this.get({
+        assessmentId,
+        organizationDomain,
+        findingId,
+      });
+      if (!finding) {
+        throw new Error();
+      }
+      finding.bestPractices.push(bestPractice);
+      bestPractice.findings.push(finding);
+    }
   }
 
   public async saveComment(args: {
@@ -84,16 +132,23 @@ export class FakeFindingsRepository implements FindingRepository {
       showHidden,
     } = args;
     const key = `${assessmentId}#${organizationDomain}`;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+    if (!bestPractice) {
+      throw new Error();
+    }
+
     const findings =
       this.findings[key]
         ?.filter((finding) =>
-          finding.bestPractices.includes(
-            getBestPracticeCustomId({
-              pillarId,
-              questionId,
-              bestPracticeId,
-            })
-          )
+          bestPractice.findings.find((bp) => bp.id === finding.id)
         )
         .filter((finding) => {
           if (!searchTerm) return true;

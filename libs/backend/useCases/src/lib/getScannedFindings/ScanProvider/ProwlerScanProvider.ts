@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
+import { tokenLogger } from '@backend/infrastructure';
 import { ScanFinding, SeverityType } from '@backend/models';
+import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 
 import { ScanProvider } from './ScanProvider';
@@ -31,7 +33,11 @@ const ProwlerFindingSchema = z.object({
   status_detail: z.string().optional(),
 });
 
+type ProwlerFinding = z.infer<typeof ProwlerFindingSchema>;
+
 export class ProwlerScanProvider extends ScanProvider {
+  private readonly logger = inject(tokenLogger);
+
   static getScanKey(assessmentId: string): string {
     return `assessments/${assessmentId}/scans/prowler/json-ocsf/output.ocsf.json`;
   }
@@ -45,7 +51,34 @@ export class ProwlerScanProvider extends ScanProvider {
     }
     const jsonOutput = parseJsonArray(scanOutput);
     const parsedFindings = ProwlerFindingSchema.array().parse(jsonOutput);
-    return parsedFindings.map((prowlerFinding) => ({
+    const invalidFindings: ProwlerFinding[] = [];
+    const validFindings = parsedFindings.filter(
+      (
+        prowlerFinding
+      ): prowlerFinding is ProwlerFinding & {
+        risk_details: string;
+        status_code: string;
+        status_detail: string;
+      } => {
+        const hasRequiredFields =
+          prowlerFinding.risk_details !== undefined &&
+          prowlerFinding.status_code !== undefined &&
+          prowlerFinding.status_detail !== undefined;
+        if (!hasRequiredFields) {
+          invalidFindings.push(prowlerFinding);
+        }
+        return hasRequiredFields;
+      }
+    );
+
+    if (invalidFindings.length > 0) {
+      this.logger.warn('Dropping Prowler findings missing required fields', {
+        assessmentId: this.assessmentId,
+        invalidFindingsCount: invalidFindings.length,
+        invalidFindings: invalidFindings,
+      });
+    }
+    return validFindings.map((prowlerFinding) => ({
       resources:
         prowlerFinding.resources?.map((resource) => ({
           name: resource.name,
@@ -60,11 +93,7 @@ export class ProwlerScanProvider extends ScanProvider {
         },
       }),
       riskDetails: prowlerFinding.risk_details,
-      metadata: {
-        ...(prowlerFinding.metadata.event_code && {
-          eventCode: prowlerFinding.metadata.event_code,
-        }),
-      },
+      eventCode: prowlerFinding.metadata.event_code,
       severity: prowlerFinding.severity ?? SeverityType.Unknown,
       statusCode: prowlerFinding.status_code,
       statusDetail: prowlerFinding.status_detail,

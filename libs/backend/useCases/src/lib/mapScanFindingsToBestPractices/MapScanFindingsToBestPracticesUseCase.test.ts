@@ -40,15 +40,15 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
     const mockedScanFindings = [
       ScanFindingMother.basic()
         .withId('tool#1')
-        .withMetadata({ eventCode: 'eventCode1' })
+        .withEventCode('eventCode1')
         .build(),
       ScanFindingMother.basic()
         .withId('tool#2')
-        .withMetadata({ eventCode: 'eventCode2' })
+        .withEventCode('eventCode2')
         .build(),
       ScanFindingMother.basic()
         .withId('tool#3')
-        .withMetadata({ eventCode: 'eventCode3' })
+        .withEventCode('eventCode3')
         .build(),
     ];
 

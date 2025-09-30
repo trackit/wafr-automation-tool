@@ -87,7 +87,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      ..withFinished(true)
+      .withFinished(true)
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

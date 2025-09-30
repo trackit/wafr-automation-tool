@@ -2,6 +2,7 @@ import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
   tokenFakeAssessmentsStateMachine,
+  tokenFakeFindingsRepository,
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
@@ -10,88 +11,82 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
 import { GetAssessmentStepUseCaseImpl } from './GetAssessmentStepUseCase';
 import { GetAssessmentStepUseCaseArgsMother } from './GetAssessmentStepUseCaseArgsMother';
 
 describe('GetAssessmentStepUseCase', () => {
-  it('should throw a NotFoundError if assessment does not exist', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments = {};
-    fakeAssessmentsRepository.assessmentFindings = {};
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
+    const { useCase } = setup();
 
     const input = GetAssessmentStepUseCaseArgsMother.basic().build();
     await expect(useCase.getAssessmentStep(input)).rejects.toThrow(
-      NotFoundError
-    );
-  });
-
-  it('should throw a NotFoundError if assessment exist for another organization', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
-
-    fakeAssessmentsRepository.assessments['assessment-id#other-org.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('other-org.io')
-        .build();
-
-    const input = GetAssessmentStepUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('test.io')
-      .build();
-    await expect(useCase.getAssessmentStep(input)).rejects.toThrow(
-      NotFoundError
+      AssessmentNotFoundError
     );
   });
 
   it('should pass the executionArn to the state machine', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
-      setup();
+    const {
+      useCase,
+      fakeAssessmentsRepository,
+      fakeAssessmentsStateMachine,
+      fakeFindingsRepository,
+    } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .withExecutionArn('execution-arn')
-        .build();
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic().build(),
-    ];
+    const assessment = AssessmentMother.basic()
+      .withExecutionArn('execution-arn')
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const finding = FindingMother.basic().build();
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding,
+    });
+
     fakeAssessmentsStateMachine.getAssessmentStep = vi
       .fn()
       .mockResolvedValue(AssessmentStep.PREPARING_ASSOCIATIONS);
 
     const input = GetAssessmentStepUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganization(assessment.organization)
       .build();
     await useCase.getAssessmentStep(input);
 
     expect(fakeAssessmentsStateMachine.getAssessmentStep).toHaveBeenCalledWith(
-      'execution-arn'
+      assessment.executionArn
     );
   });
 
   it('should return the assessment step from the state machine', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeAssessmentsStateMachine } =
-      setup();
+    const {
+      useCase,
+      fakeAssessmentsRepository,
+      fakeAssessmentsStateMachine,
+      fakeFindingsRepository,
+    } = setup();
 
-    fakeAssessmentsRepository.assessments['assessment-id#test.io'] =
-      AssessmentMother.basic()
-        .withId('assessment-id')
-        .withOrganization('test.io')
-        .build();
-    fakeAssessmentsRepository.assessmentFindings['assessment-id#test.io'] = [
-      FindingMother.basic().build(),
-    ];
+    const assessment = AssessmentMother.basic()
+      .withExecutionArn('execution-arn')
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const finding = FindingMother.basic().build();
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding,
+    });
+
     fakeAssessmentsStateMachine.getAssessmentStep = vi
       .fn()
       .mockResolvedValue(AssessmentStep.PREPARING_ASSOCIATIONS);
 
     const input = GetAssessmentStepUseCaseArgsMother.basic()
-      .withAssessmentId('assessment-id')
-      .withOrganization('test.io')
+      .withAssessmentId(assessment.id)
+      .withOrganization(assessment.organization)
       .build();
     const assessmentStep = await useCase.getAssessmentStep(input);
 
@@ -102,9 +97,11 @@ describe('GetAssessmentStepUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+
   return {
     useCase: new GetAssessmentStepUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeAssessmentsStateMachine: inject(tokenFakeAssessmentsStateMachine),
+    fakeFindingsRepository: inject(tokenFakeFindingsRepository),
   };
 };

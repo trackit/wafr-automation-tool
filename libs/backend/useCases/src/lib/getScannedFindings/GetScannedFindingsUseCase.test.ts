@@ -67,7 +67,7 @@ describe('GetScannedFindingsUseCase', () => {
           id: 'prowler#1',
           riskDetails: 'some risk details',
           statusDetail: 'some status detail',
-          metadata: { eventCode: 'event-code' },
+          eventCode: 'event-code',
           remediation: {
             desc: 'remediation description',
             references: ['https://example.com'],

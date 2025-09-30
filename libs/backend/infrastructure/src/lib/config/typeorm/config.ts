@@ -4,11 +4,14 @@ import type { DataSourceOptions } from 'typeorm';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { tokenSecretsManager } from '../../SecretsManager';
-import { entities } from './entities';
+import { assessmentsEntities } from '../../AssessmentsRepository/AssessmentsRepositorySQLEntities';
+import { findingEntities } from '../../FindingsRepository/FindingsRepositorySQLEntities';
+import { tokenSecretsManager } from '../../infrastructure';
 import { tenantsEntities } from './tenantsEntities';
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
+
+const entities = [...assessmentsEntities, ...findingEntities];
 
 export const defaultTypeORMConfig: TypeORMConfig = {
   type: 'postgres',

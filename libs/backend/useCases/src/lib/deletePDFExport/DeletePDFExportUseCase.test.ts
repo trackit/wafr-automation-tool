@@ -6,7 +6,6 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
   UserMother,
 } from '@backend/models';
@@ -35,9 +34,7 @@ describe('deletePDFExport UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -53,9 +50,7 @@ describe('deletePDFExport UseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    expect(
-      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]
-    ).toStrictEqual([]);
+    expect(updatedAssessment?.fileExports).toStrictEqual([]);
 
     const updatedObject = await fakeObjectsStorage.get(objectKey);
     expect(updatedObject).toBeNull();
@@ -78,9 +73,7 @@ describe('deletePDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [],
-      })
+      .withFileExports([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -105,9 +98,7 @@ describe('deletePDFExport UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -134,9 +125,7 @@ describe('deletePDFExport UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 

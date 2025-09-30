@@ -1,7 +1,6 @@
 export * from './addComment';
 export * from './associateFindingsToBestPractices';
 export * from './cleanup';
-export * from './computeGraphData';
 export * from './createMilestone';
 export * from './createOrganization';
 export * from './deleteAssessment';

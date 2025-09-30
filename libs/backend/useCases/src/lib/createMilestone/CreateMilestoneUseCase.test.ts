@@ -70,6 +70,8 @@ describe('CreateMilestoneUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 
+    const input = CreateMilestoneUseCaseArgsMother.basic().build();
+
     await expect(useCase.createMilestone(input)).rejects.toThrow(
       AssessmentNotFoundError
     );
@@ -150,8 +152,8 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
-      .withPillars([])
+      .withFinished(false)
+      .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 

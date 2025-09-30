@@ -4,7 +4,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentFileExportMother,
-  AssessmentFileExportType,
   AssessmentMother,
   UserMother,
 } from '@backend/models';
@@ -23,9 +22,7 @@ describe('listPDFExports UseCase', () => {
     const fileExport = AssessmentFileExportMother.basic().build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      })
+      .withFileExports([fileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 

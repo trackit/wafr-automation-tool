@@ -195,8 +195,14 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     const findings = [
-      FindingMother.basic().withId('prowler#1').build(),
-      FindingMother.basic().withId('prowler#2').build(),
+      FindingMother.basic()
+        .withId('prowler#1')
+        .withIsAIAssociated(true)
+        .build(),
+      FindingMother.basic()
+        .withId('prowler#2')
+        .withIsAIAssociated(true)
+        .build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -245,9 +251,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     });
     const bestPractice =
       updatedAssessment?.pillars?.[0].questions[0].bestPractices[0];
-    expect(bestPractice?.results).toEqual(
-      new Set([findings[0].id, findings[1].id])
-    );
+    expect(bestPractice?.findings).toEqual(findings);
   });
 
   it('should update all best practices results with findings associations', async () => {
@@ -277,8 +281,14 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     const findings = [
-      FindingMother.basic().withId('prowler#1').build(),
-      FindingMother.basic().withId('prowler#2').build(),
+      FindingMother.basic()
+        .withId('prowler#1')
+        .withIsAIAssociated(true)
+        .build(),
+      FindingMother.basic()
+        .withId('prowler#2')
+        .withIsAIAssociated(true)
+        .build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -334,10 +344,8 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       updatedAssessment?.pillars?.[0].questions[0].bestPractices[0];
     const bestPractice2 =
       updatedAssessment?.pillars?.[0].questions[0].bestPractices[1];
-    expect(bestPractice1?.results).toEqual(new Set([findings[0].id]));
-    expect(bestPractice2?.results).toEqual(
-      new Set([findings[0].id, findings[1].id])
-    );
+    expect(bestPractice1?.findings).toEqual([findings[0]]);
+    expect(bestPractice2?.findings).toEqual([findings[0], findings[1]]);
   });
 });
 

@@ -5,9 +5,7 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
   UserMother,
 } from '@backend/models';
@@ -34,11 +32,9 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -56,6 +52,7 @@ describe('generatePDFExportURL UseCase', () => {
     const { useCase } = setup();
 
     const input = GeneratePDFExportURLUseCaseArgsMother.basic().build();
+
     await expect(useCase.generatePDFExportURL(input)).rejects.toThrow(
       AssessmentNotFoundError
     );
@@ -91,9 +88,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -117,9 +112,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 

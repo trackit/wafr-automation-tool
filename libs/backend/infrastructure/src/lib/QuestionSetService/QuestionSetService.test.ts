@@ -25,7 +25,7 @@ describe('QuestionSetService', () => {
                   label: 'best-practice-label',
                   risk: SeverityType.High,
                   description: 'best-practice-description',
-                  results: new Set(),
+                  findings: [],
                   checked: false,
                 },
               ],

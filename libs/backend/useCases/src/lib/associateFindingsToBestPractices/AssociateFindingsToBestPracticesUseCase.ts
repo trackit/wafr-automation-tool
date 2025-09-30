@@ -51,12 +51,6 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
             organizationDomain,
             finding: {
               ...association.finding,
-              bestPractices: association.bestPractices
-                .map(
-                  ({ pillarId, questionId, bestPracticeId }) =>
-                    `${pillarId}#${questionId}#${bestPracticeId}`
-                )
-                .join(','),
               isAIAssociated: true,
             },
           })
@@ -93,7 +87,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
           questionId,
           bestPracticeId,
         });
-        return this.assessmentsRepository.saveBestPracticeFindings({
+        return this.findingsRepository.saveBestPracticeFindings({
           assessmentId: assessment.id,
           organizationDomain,
           pillarId,

@@ -240,30 +240,6 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         )
       ).toThrowError();
     });
-
-    it('should handle findings with missing riskDetails and statusDetail', () => {
-      const { findingToBestPracticesAssociationServiceGenAI } = setup();
-      const findings = [
-        FindingMother.basic()
-          .withId('prowler#3')
-          .withRiskDetails(undefined)
-          .withStatusDetail(undefined)
-          .build(),
-      ];
-
-      const result =
-        findingToBestPracticesAssociationServiceGenAI.formatScanningToolFindings(
-          findings
-        );
-
-      expect(result).toEqual([
-        {
-          id: 'prowler#3',
-          riskDetails: 'Unknown',
-          statusDetail: 'Unknown',
-        },
-      ]);
-    });
   });
 
   describe('formatAIAssociations', () => {

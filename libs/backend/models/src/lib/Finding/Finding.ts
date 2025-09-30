@@ -1,23 +1,21 @@
+import { BestPractice } from '../models';
+
 export interface Finding extends ScanFinding {
   hidden: boolean;
   isAIAssociated: boolean;
-  bestPractices: string;
+  bestPractices: BestPractice[];
   comments?: FindingComment[];
 }
 
 export interface ScanFinding {
   id: string;
-  metadata?: FindingMetadata;
-  remediation?: FindingRemediation;
-  resources?: FindingResource[];
-  riskDetails?: string;
-  severity?: SeverityType;
-  statusCode?: string;
-  statusDetail?: string;
-}
-
-export interface FindingMetadata {
   eventCode?: string;
+  remediation?: FindingRemediation;
+  resources: FindingResource[];
+  riskDetails: string;
+  severity: SeverityType;
+  statusCode: string;
+  statusDetail: string;
 }
 
 export interface FindingRemediation {
@@ -56,5 +54,4 @@ export interface FindingCommentBody {
 
 export interface FindingBody {
   hidden?: boolean;
-  comments?: FindingComment[];
 }

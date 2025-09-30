@@ -1,25 +1,22 @@
 import type { SeverityType } from '../Finding';
 import type { Pillar } from '../Pillar';
-import type { ScanningTool } from '../ScanningTool';
 
 export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn: string;
   pillars?: Pillar[];
-  graphData?: AssessmentGraphData;
   id: string;
   name: string;
   organization: string;
   questionVersion?: string;
-  rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>;
   regions: string[];
   exportRegion?: string;
   roleArn: string;
   workflows: string[];
   error?: AssessmentError;
-  fileExports?: AssessmentFileExports;
   finished: boolean;
+  fileExports: AssessmentFileExport[];
 }
 
 export interface AssessmentGraphData {
@@ -44,24 +41,16 @@ export interface AssessmentError {
 
 export interface AssessmentBody {
   name?: string;
-  graphData?: AssessmentGraphData;
   error?: AssessmentError;
-  rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
-  pillars?: Pillar[];
+  finished?: boolean;
   questionVersion?: string;
   exportRegion?: string;
-  fileExports?: AssessmentFileExports;
   executionArn?: string;
-  finished?: boolean;
 }
 
 export enum AssessmentFileExportType {
   PDF = 'pdf',
 }
-
-export type AssessmentFileExports = Partial<
-  Record<AssessmentFileExportType, AssessmentFileExport[]>
->;
 
 export enum AssessmentFileExportStatus {
   NOT_STARTED = 'NOT_STARTED',
@@ -73,6 +62,7 @@ export enum AssessmentFileExportStatus {
 export interface AssessmentFileExport {
   id: string;
   status: AssessmentFileExportStatus;
+  type: AssessmentFileExportType;
   error?: string;
   versionName: string;
   objectKey?: string;

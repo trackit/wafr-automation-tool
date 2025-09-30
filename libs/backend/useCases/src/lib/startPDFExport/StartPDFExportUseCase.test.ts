@@ -6,9 +6,7 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
   UserMother,
 } from '@backend/models';
@@ -41,7 +39,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -60,16 +58,14 @@ describe('startPDFExport UseCase', () => {
     });
     const fileExportId = 'fake-id-0';
     expect(updatedAssessment).toMatchObject({
-      fileExports: {
-        [AssessmentFileExportType.PDF]: [
-          AssessmentFileExportMother.basic()
-            .withId(fileExportId)
-            .withStatus(AssessmentFileExportStatus.NOT_STARTED)
-            .withVersionName('version-name')
-            .withCreatedAt(date)
-            .build(),
-        ],
-      },
+      fileExports: [
+        AssessmentFileExportMother.basic()
+          .withId(fileExportId)
+          .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+          .withVersionName('version-name')
+          .withCreatedAt(date)
+          .build(),
+      ],
     });
     expect(fakeLambdaService.asyncInvokeLambda).toHaveBeenCalledExactlyOnceWith(
       {
@@ -99,7 +95,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -121,7 +117,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .withFinished(false)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -142,7 +138,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

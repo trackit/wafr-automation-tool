@@ -58,7 +58,7 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
 
     const mapping = await this.getMapping();
     return scanFindings.map((finding) => {
-      const eventCode = finding.metadata?.eventCode;
+      const eventCode = finding.eventCode;
       const eventCodeBestPractices =
         eventCode && mapping[eventCode] ? mapping[eventCode] : [];
 

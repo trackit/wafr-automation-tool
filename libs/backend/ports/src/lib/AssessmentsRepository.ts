@@ -2,23 +2,23 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
+  Pillar,
   PillarBody,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 
 export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
-  saveBestPracticeFindings(args: {
+  saveFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
+    data: AssessmentFileExport;
+  }): Promise<void>;
+  savePillars(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillars: Pillar[];
   }): Promise<void>;
 
   get(args: {
@@ -38,6 +38,11 @@ export interface AssessmentsRepository {
   delete(args: {
     assessmentId: string;
     organizationDomain: string;
+  }): Promise<void>;
+  deleteFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    id: string;
   }): Promise<void>;
 
   update(args: {
@@ -66,22 +71,9 @@ export interface AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
   }): Promise<void>;
-  updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void>;
   updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
-  }): Promise<void>;
-  deleteFileExport(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    type: AssessmentFileExportType;
-    id: string;
   }): Promise<void>;
 }

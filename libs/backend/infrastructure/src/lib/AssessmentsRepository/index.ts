@@ -1,3 +1,2 @@
-export * from './AssessmentsRepositoryDynamoDB';
-export * from './AssessmentsRepositorySQL';
+export * from './AssessmentsRepository';
 export * from './FakeAssessmentsRepository';

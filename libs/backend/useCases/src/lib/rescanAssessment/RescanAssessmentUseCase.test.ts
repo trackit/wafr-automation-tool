@@ -89,9 +89,11 @@ describe('RescanAssessmentUseCase', () => {
 
     const user = UserMother.basic().build();
 
+    const executionArn = 'old-test-arn';
+
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withExecutionArn('old-test-arn')
+      .withExecutionArn(executionArn)
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -104,7 +106,7 @@ describe('RescanAssessmentUseCase', () => {
 
     expect(
       fakeAssessmentsStateMachine.cancelAssessment
-    ).toHaveBeenCalledExactlyOnceWith(assessment.executionArn);
+    ).toHaveBeenCalledExactlyOnceWith(executionArn);
   });
 
   it('should start a new state machine execution with old parameters', async () => {

@@ -1,4 +1,4 @@
-import { SeverityType } from '../Finding';
+import { Finding, SeverityType } from '../Finding';
 import type { BestPractice } from './BestPractice';
 
 export class BestPracticeMother {
@@ -14,7 +14,7 @@ export class BestPracticeMother {
       id: 'best-practice-id',
       label: 'Best Practice Label',
       primaryId: 'primary-id',
-      results: new Set([]),
+      findings: [],
       risk: SeverityType.Medium,
       checked: true,
     });
@@ -40,8 +40,8 @@ export class BestPracticeMother {
     return this;
   }
 
-  public withResults(results: Set<string>): BestPracticeMother {
-    this.data.results = results;
+  public withFindings(findings: Finding[]): BestPracticeMother {
+    this.data.findings = findings;
     return this;
   }
 

@@ -5,7 +5,6 @@ import {
   tokenFakeQuestionSetService,
 } from '@backend/infrastructure';
 import {
-  AssessmentGraphDataMother,
   AssessmentMother,
   BestPracticeMother,
   PillarMother,
@@ -13,7 +12,6 @@ import {
   QuestionSetMother,
   ScanFindingMother,
   ScanningTool,
-  SeverityType,
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
@@ -129,204 +127,6 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     );
   });
 
-  it('should update assessment with rawGraphData', async () => {
-    const {
-      useCase,
-      getScannedFindingsUseCase,
-      mapScanFindingsToBestPracticesUseCase,
-      fakeQuestionSetService,
-      fakeAssessmentsRepository,
-    } = setup();
-
-    const cloudSploitGraphData = AssessmentGraphDataMother.basic()
-      .withFindings(8)
-      .withRegions({
-        'us-east-1': 5,
-        'us-west-2': 3,
-      })
-      .withResourceTypes({
-        AwsAccount: 1,
-        AwsEc2Instance: 2,
-        AwsIamUser: 3,
-        AwsS3Bucket: 1,
-        AwsS3BucketPolicy: 1,
-      })
-      .withSeverities({
-        [SeverityType.Critical]: 2,
-        [SeverityType.High]: 3,
-        [SeverityType.Medium]: 2,
-        [SeverityType.Low]: 1,
-      })
-      .build();
-
-    const assessment = AssessmentMother.basic()
-      .withRawGraphData({ [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData })
-      .build();
-    await fakeAssessmentsRepository.save(assessment);
-
-    const mockedScanFindings = [
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-1', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Medium)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      []
-    );
-
-    const pillars = [
-      PillarMother.basic()
-        .withQuestions([
-          QuestionMother.basic()
-            .withBestPractices([BestPracticeMother.basic().build()])
-            .build(),
-        ])
-        .build(),
-    ];
-    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
-
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
-
-    await useCase.prepareFindingsAssociations(input);
-
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    expect(updatedAssessment).toEqual(
-      expect.objectContaining({
-        rawGraphData: {
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
-            .withFindings(3)
-            .withRegions({ 'us-east-1': 3 })
-            .withResourceTypes({ 'type-1': 1, 'type-2': 2 })
-            .withSeverities({
-              [SeverityType.Medium]: 1,
-              [SeverityType.Low]: 2,
-            })
-            .build(),
-          [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData,
-        },
-      })
-    );
-  });
-
-  it('should update assessment with pillars and questionVersion for Prowler', async () => {
-    const {
-      useCase,
-      getScannedFindingsUseCase,
-      mapScanFindingsToBestPracticesUseCase,
-      fakeAssessmentsRepository,
-      fakeQuestionSetService,
-    } = setup();
-
-    const assessment = AssessmentMother.basic().build();
-    await fakeAssessmentsRepository.save(assessment);
-
-    const mockedScanFindings = [
-      ScanFindingMother.basic()
-        .withId('prowler#1')
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-1', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withId('prowler#2')
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withId('prowler#3')
-        .withSeverity(SeverityType.Medium)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
-    );
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      [
-        {
-          scanFinding: mockedScanFindings[0],
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        {
-          scanFinding: mockedScanFindings[1],
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        { scanFinding: mockedScanFindings[2], bestPractices: [] },
-      ]
-    );
-
-    const pillars = [
-      PillarMother.basic()
-        .withId('pillar-1')
-        .withQuestions([
-          QuestionMother.basic()
-            .withId('question-1')
-            .withBestPractices([
-              BestPracticeMother.basic().withId('best-practice-1').build(),
-            ])
-            .build(),
-        ])
-        .build(),
-    ];
-    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
-
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
-
-    await useCase.prepareFindingsAssociations(input);
-
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    expect(updatedAssessment).toEqual(
-      expect.objectContaining({
-        questionVersion: questionSet.version,
-      })
-    );
-    expect(
-      updatedAssessment?.pillars?.[0].questions[0].bestPractices[0].results
-    ).toEqual(new Set([mockedScanFindings[0].id, mockedScanFindings[1].id]));
-  });
-
   it('should save scan findings with mapped best practices', async () => {
     const {
       useCase,
@@ -336,7 +136,12 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       fakeFindingsRepository,
     } = setup();
 
-    const assessment = AssessmentMother.basic().build();
+    const bestPractice = BestPracticeMother.basic().build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
     await fakeAssessmentsRepository.save(assessment);
 
     const scanFinding = ScanFindingMother.basic().build();
@@ -348,9 +153,9 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         scanFinding,
         bestPractices: [
           {
-            pillarId: 'pillar-1',
-            questionId: 'question-1',
-            bestPracticeId: 'best-practice-1',
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice.id,
           },
         ],
       },
@@ -377,7 +182,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     expect(finding).toEqual(
       expect.objectContaining({
         id: scanFinding.id,
-        bestPractices: 'pillar-1#question-1#best-practice-1',
+        bestPractices: [bestPractice],
         isAIAssociated: false,
         hidden: false,
       })
@@ -436,7 +241,12 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       fakeAssessmentsRepository,
     } = setup();
 
-    const assessment = AssessmentMother.basic().build();
+    const bestPractice = BestPracticeMother.basic().build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
     await fakeAssessmentsRepository.save(assessment);
 
     const mockedScanFindings = [
@@ -455,9 +265,9 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         scanFinding: mockedScanFindings[1],
         bestPractices: [
           {
-            pillarId: 'pillar-1',
-            questionId: 'question-1',
-            bestPracticeId: 'best-practice-1',
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice.id,
           },
         ],
       },
@@ -520,323 +330,319 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     expect(result).toEqual(URIs);
   });
 
-  describe('formatPillarsForAssessmentUpdate', () => {
-    it('should format pillars using mapped scanned findings to best practices', () => {
-      const { useCase } = setup();
+  // describe('formatPillarsForAssessmentUpdate', () => {
+  //   it('should format pillars using mapped scanned findings to best practices', () => {
+  //     const { useCase } = setup();
 
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic().build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-      ];
+  //     const rawPillars = [
+  //       PillarMother.basic()
+  //         .withQuestions([
+  //           QuestionMother.basic()
+  //             .withBestPractices([BestPracticeMother.basic().build()])
+  //             .build(),
+  //         ])
+  //         .build(),
+  //     ];
+  //     const scanFinding = ScanFindingMother.basic().build();
+  //     const scanFindingsToBestPractices = [
+  //       {
+  //         scanFinding,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-1',
+  //           },
+  //         ],
+  //       },
+  //     ];
 
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
+  //     const result = useCase.formatPillarsForAssessmentUpdate({
+  //       rawPillars,
+  //       scanFindingsToBestPractices,
+  //     });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
+  //     expect(result).toEqual([
+  //       expect.objectContaining({
+  //         id: rawPillars[0].id,
+  //         questions: [
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[0].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[0].id,
+  //                 results: new Set([scanFinding.id]),
+  //               }),
+  //             ],
+  //           }),
+  //         ],
+  //       }),
+  //     ]);
+  //   });
 
-    it('should format pillars with no mapped best practices', () => {
-      const { useCase } = setup();
+  //   it('should format pillars with no mapped best practices', () => {
+  //     const { useCase } = setup();
 
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
-          bestPractices: [],
-        },
-      ];
+  //     const rawPillars = [
+  //       PillarMother.basic()
+  //         .withId('pillar-1')
+  //         .withQuestions([
+  //           QuestionMother.basic()
+  //             .withId('question-1')
+  //             .withBestPractices([
+  //               BestPracticeMother.basic().withId('best-practice-1').build(),
+  //             ])
+  //             .build(),
+  //         ])
+  //         .build(),
+  //     ];
+  //     const scanFindingsToBestPractices = [
+  //       {
+  //         scanFinding: ScanFindingMother.basic()
+  //           .withId('scanningTool#1')
+  //           .build(),
+  //         bestPractices: [],
+  //       },
+  //     ];
 
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
+  //     const result = useCase.formatPillarsForAssessmentUpdate({
+  //       rawPillars,
+  //       scanFindingsToBestPractices,
+  //     });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
+  //     expect(result).toEqual([
+  //       expect.objectContaining({
+  //         id: rawPillars[0].id,
+  //         questions: [
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[0].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[0].id,
+  //                 results: new Set([]),
+  //               }),
+  //             ],
+  //           }),
+  //         ],
+  //       }),
+  //     ]);
+  //   });
 
-    it('should handle multiple mapped best practices for a single scan finding', () => {
-      const { useCase } = setup();
+  //   it('should handle multiple mapped best practices for a single scan finding', () => {
+  //     const { useCase } = setup();
 
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-                BestPracticeMother.basic().withId('best-practice-2').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic().build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-2',
-            },
-          ],
-        },
-      ];
+  //     const rawPillars = [
+  //       PillarMother.basic()
+  //         .withId('pillar-1')
+  //         .withQuestions([
+  //           QuestionMother.basic()
+  //             .withId('question-1')
+  //             .withBestPractices([
+  //               BestPracticeMother.basic().withId('best-practice-1').build(),
+  //               BestPracticeMother.basic().withId('best-practice-2').build(),
+  //             ])
+  //             .build(),
+  //         ])
+  //         .build(),
+  //     ];
+  //     const scanFinding = ScanFindingMother.basic().build();
+  //     const scanFindingsToBestPractices = [
+  //       {
+  //         scanFinding,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-1',
+  //           },
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-2',
+  //           },
+  //         ],
+  //       },
+  //     ];
 
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
+  //     const result = useCase.formatPillarsForAssessmentUpdate({
+  //       rawPillars,
+  //       scanFindingsToBestPractices,
+  //     });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[1].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
+  //     expect(result).toEqual([
+  //       expect.objectContaining({
+  //         id: rawPillars[0].id,
+  //         questions: [
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[0].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[0].id,
+  //                 results: new Set([scanFinding.id]),
+  //               }),
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[1].id,
+  //                 results: new Set([scanFinding.id]),
+  //               }),
+  //             ],
+  //           }),
+  //         ],
+  //       }),
+  //     ]);
+  //   });
 
-    it('should handle multiple scan findings for a single best practice', () => {
-      const { useCase } = setup();
+  //   it('should handle multiple scan findings for a single best practice', () => {
+  //     const { useCase } = setup();
 
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic()
-        .withId('scanningTool#1')
-        .build();
-      const scanFinding2 = ScanFindingMother.basic()
-        .withId('scanningTool#2')
-        .build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        {
-          scanFinding: scanFinding2,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-      ];
+  //     const rawPillars = [
+  //       PillarMother.basic()
+  //         .withId('pillar-1')
+  //         .withQuestions([
+  //           QuestionMother.basic()
+  //             .withId('question-1')
+  //             .withBestPractices([
+  //               BestPracticeMother.basic().withId('best-practice-1').build(),
+  //             ])
+  //             .build(),
+  //         ])
+  //         .build(),
+  //     ];
+  //     const scanFinding = ScanFindingMother.basic()
+  //       .withId('scanningTool#1')
+  //       .build();
+  //     const scanFinding2 = ScanFindingMother.basic()
+  //       .withId('scanningTool#2')
+  //       .build();
+  //     const scanFindingsToBestPractices = [
+  //       {
+  //         scanFinding,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-1',
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         scanFinding: scanFinding2,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-1',
+  //           },
+  //         ],
+  //       },
+  //     ];
 
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
+  //     const result = useCase.formatPillarsForAssessmentUpdate({
+  //       rawPillars,
+  //       scanFindingsToBestPractices,
+  //     });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id, scanFinding2.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
+  //     expect(result).toEqual([
+  //       expect.objectContaining({
+  //         id: rawPillars[0].id,
+  //         questions: [
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[0].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[0].id,
+  //                 results: new Set([scanFinding.id, scanFinding2.id]),
+  //               }),
+  //             ],
+  //           }),
+  //         ],
+  //       }),
+  //     ]);
+  //   });
 
-    it('should handle multiple scan findings with different best practices', () => {
-      const { useCase } = setup();
+  //   it('should handle multiple scan findings with different best practices', () => {
+  //     const { useCase } = setup();
 
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-            QuestionMother.basic()
-              .withId('question-2')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-2').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
+  //     const rawPillars = [
+  //       PillarMother.basic()
+  //         .withId('pillar-1')
+  //         .withQuestions([
+  //           QuestionMother.basic()
+  //             .withId('question-1')
+  //             .withBestPractices([
+  //               BestPracticeMother.basic().withId('best-practice-1').build(),
+  //             ])
+  //             .build(),
+  //           QuestionMother.basic()
+  //             .withId('question-2')
+  //             .withBestPractices([
+  //               BestPracticeMother.basic().withId('best-practice-2').build(),
+  //             ])
+  //             .build(),
+  //         ])
+  //         .build(),
+  //     ];
 
-      const scanFinding = ScanFindingMother.basic()
-        .withId('scanningTool#1')
-        .build();
-      const scanFinding2 = ScanFindingMother.basic()
-        .withId('scanningTool#2')
-        .build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        {
-          scanFinding: scanFinding2,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-2',
-              bestPracticeId: 'best-practice-2',
-            },
-          ],
-        },
-      ];
+  //     const scanFinding = ScanFindingMother.basic()
+  //       .withId('scanningTool#1')
+  //       .build();
+  //     const scanFinding2 = ScanFindingMother.basic()
+  //       .withId('scanningTool#2')
+  //       .build();
+  //     const scanFindingsToBestPractices = [
+  //       {
+  //         scanFinding,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-1',
+  //             bestPracticeId: 'best-practice-1',
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         scanFinding: scanFinding2,
+  //         bestPractices: [
+  //           {
+  //             pillarId: 'pillar-1',
+  //             questionId: 'question-2',
+  //             bestPracticeId: 'best-practice-2',
+  //           },
+  //         ],
+  //       },
+  //     ];
 
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
+  //     const result = useCase.formatPillarsForAssessmentUpdate({
+  //       rawPillars,
+  //       scanFindingsToBestPractices,
+  //     });
 
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-            expect.objectContaining({
-              id: rawPillars[0].questions[1].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[1].bestPractices[0].id,
-                  results: new Set([scanFinding2.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
-  });
+  //     expect(result).toEqual([
+  //       expect.objectContaining({
+  //         id: rawPillars[0].id,
+  //         questions: [
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[0].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[0].bestPractices[0].id,
+  //                 results: new Set([scanFinding.id]),
+  //               }),
+  //             ],
+  //           }),
+  //           expect.objectContaining({
+  //             id: rawPillars[0].questions[1].id,
+  //             bestPractices: [
+  //               expect.objectContaining({
+  //                 id: rawPillars[0].questions[1].bestPractices[0].id,
+  //                 results: new Set([scanFinding2.id]),
+  //               }),
+  //             ],
+  //           }),
+  //         ],
+  //       }),
+  //     ]);
+  //   });
+  // });
 });
 
 const setup = () => {

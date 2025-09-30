@@ -38,7 +38,9 @@ export class ListPDFExportsUseCaseImpl implements ListPDFExportsUseCase {
       });
     }
 
-    const fileExports = assessment.fileExports?.[AssessmentFileExportType.PDF];
+    const fileExports = assessment.fileExports?.filter(
+      (fileExport) => fileExport.type === AssessmentFileExportType.PDF
+    );
     if (!fileExports) {
       return [];
     }

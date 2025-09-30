@@ -3,44 +3,26 @@ import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 import type {
   Assessment,
   AssessmentBody,
-  AssessmentGraphData,
-  BestPractice,
+  AssessmentFileExport,
   BestPracticeBody,
-  Finding,
-  FindingBody,
-  FindingComment,
-  FindingCommentBody,
   Pillar,
   PillarBody,
-  Question,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
-import {
-  AssessmentsRepository,
-  AssessmentsRepositoryGetBestPracticeFindingsArgs,
-} from '@backend/ports';
-import { createInjectionToken, inject } from '@shared/di-container';
+import { AssessmentsRepository } from '@backend/ports';
+import { inject } from '@shared/di-container';
+import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
-import {
-  AssessmentNotFoundError,
-  BestPracticeNotFoundError,
-  EmptyUpdateBodyError,
-  FindingNotFoundError,
-  InvalidNextTokenError,
-  PillarNotFoundError,
-  QuestionNotFoundError,
-} from '../../Errors';
+import { tokenLogger } from '../Logger';
+import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import {
   AssessmentEntity,
   BestPracticeEntity,
-  FindingCommentEntity,
-  FindingEntity,
+  FileExportEntity,
   PillarEntity,
   QuestionEntity,
-} from '../config/typeorm';
-import { tokenLogger } from '../Logger';
-import { tokenTypeORMClientManager } from '../TypeORMClientManager';
+} from './AssessmentsRepositorySQLEntities';
+import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -57,157 +39,82 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     return dataSource.getRepository(entity);
   }
 
-  public static encodeNextToken(
-    next?: Record<string, unknown>
-  ): string | undefined {
-    if (!next) return undefined;
-    return Buffer.from(JSON.stringify(next)).toString('base64');
-  }
-
-  public static decodeNextToken(
-    nextToken?: string
-  ): Record<string, unknown> | undefined {
-    if (!nextToken) return undefined;
-    try {
-      return JSON.parse(Buffer.from(nextToken, 'base64').toString('utf8'));
-    } catch {
-      throw new InvalidNextTokenError();
-    }
-  }
-
-  private toDomainBestPractice(e: BestPracticeEntity): BestPractice {
-    return {
-      id: e.id,
-      description: e.description,
-      label: e.label,
-      primaryId: e.primaryId,
-      results: e.results ?? new Set<string>(),
-      risk: e.risk,
-      checked: e.checked,
-    };
-  }
-
-  private toDomainQuestion(e: QuestionEntity): Question {
-    return {
-      id: e.id,
-      disabled: e.disabled,
-      label: e.label,
-      none: e.none,
-      primaryId: e.primaryId,
-      bestPractices: (e.bestPractices ?? []).map((bp) =>
-        this.toDomainBestPractice(bp)
-      ),
-    };
-  }
-
-  private toDomainPillar(e: PillarEntity): Pillar {
-    return {
-      id: e.id,
-      disabled: e.disabled,
-      label: e.label,
-      primaryId: e.primaryId,
-      questions: (e.questions ?? []).map((q) => this.toDomainQuestion(q)),
-    };
-  }
-
-  private toDomainAssessment(
-    e: AssessmentEntity,
-    organization: string
-  ): Assessment {
-    return {
-      id: e.id,
-      organization,
-      createdBy: e.createdBy,
-      executionArn: e.executionArn,
-      createdAt: e.createdAt,
-      graphData: e.graphData,
-      name: e.name,
-      questionVersion: e.questionVersion,
-      rawGraphData: e.rawGraphData ?? {},
-      regions: e.regions ?? [],
-      exportRegion: e.exportRegion ?? undefined,
-      roleArn: e.roleArn,
-      workflows: e.workflows ?? [],
-      error: e.error ?? undefined,
-      pillars: (e.pillars ?? []).map((p) => this.toDomainPillar(p)),
-      finished: e.finished,
-    };
-  }
-
-  private toDomainFindingComment(e: FindingCommentEntity): FindingComment {
-    return {
-      id: e.id,
-      authorId: e.authorId,
-      text: e.text,
-      createdAt: e.createdAt,
-    };
-  }
-
-  private toDomainFinding(e: FindingEntity): Finding {
-    return {
-      id: e.id,
-      hidden: e.hidden,
-      isAIAssociated: e.isAIAssociated,
-      bestPractices: e.bestPractices,
-      metadata: e.metadata,
-      remediation: e.remediation,
-      resources: e.resources,
-      riskDetails: e.riskDetails,
-      severity: e.severity,
-      statusCode: e.statusCode,
-      statusDetail: e.statusDetail,
-      comments: (e.comments ?? []).map((c) => this.toDomainFindingComment(c)),
-    };
-  }
-
   public async save(assessment: Assessment): Promise<void> {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
 
     const entity = repo.create(assessment);
-    try {
-      await repo.save(entity);
-      this.logger.info(`Assessment saved: ${assessment.id}`);
-    } catch (error) {
-      this.logger.error(`Failed to save assessment: ${error}`, assessment);
-      throw error;
-    }
+
+    await repo.save(entity);
+    this.logger.info(`Assessment saved: ${assessment.id}`);
   }
 
-  public async saveFinding(args: {
+  public async savePillars(args: {
     assessmentId: string;
-    organization: string;
-    finding: Finding;
+    organizationDomain: string;
+    pillars: Pillar[];
   }): Promise<void> {
-    const { assessmentId, organization, finding } = args;
-    const repo = await this.repo(FindingEntity, organization);
+    const { assessmentId, organizationDomain, pillars } = args;
+    const repo = await this.repo(PillarEntity, organizationDomain);
+
+    const entities = pillars.map((pillar) => ({
+      assessmentId,
+      ...pillar,
+    }));
+
+    await repo.save(entities);
+    this.logger.info(`Pillars saved for assessment ${assessmentId}`);
+  }
+
+  public async saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    data: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, data } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
 
     const entity = repo.create({
-      ...finding,
+      ...data,
       assessmentId,
-      comments: finding.comments,
     });
 
-    try {
-      await repo.save(entity);
-      this.logger.info(
-        `Finding saved: ${finding.id} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to save finding: ${error}`, args);
-      throw error;
+    await repo.save(entity);
+  }
+
+  public async get(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<Assessment | undefined> {
+    const { assessmentId, organizationDomain } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    const entity = await repo.findOne({
+      where: { id: assessmentId },
+      relations: {
+        pillars: {
+          questions: {
+            bestPractices: true,
+          },
+        },
+        fileExports: true,
+      },
+    });
+    if (!entity) {
+      return undefined;
     }
+    return entity ? toDomainAssessment(entity, organizationDomain) : undefined;
   }
 
   public async getAll(args: {
-    organization: string;
+    organizationDomain: string;
     limit?: number;
     search?: string;
     nextToken?: string;
   }): Promise<{ assessments: Assessment[]; nextToken?: string }> {
-    const { organization, limit = 20, search, nextToken } = args;
-    const repo = await this.repo(AssessmentEntity, organization);
+    const { organizationDomain, limit = 20, search, nextToken } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
 
-    const decoded = AssessmentsRepositorySQL.decodeNextToken(nextToken) as
+    const decoded = decodeNextToken(nextToken) as
       | { offset?: number }
       | undefined;
     const offset = decoded?.offset ?? 0;
@@ -226,203 +133,94 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     }
 
     const [entities, total] = await qb.getManyAndCount();
-    const items = entities.map((e) => this.toDomainAssessment(e, organization));
+    const items = entities.map((e) =>
+      toDomainAssessment(e, organizationDomain)
+    );
 
     const nextOffset = offset + items.length;
     const nextTk =
-      nextOffset < total
-        ? AssessmentsRepositorySQL.encodeNextToken({ offset: nextOffset })
-        : undefined;
+      nextOffset < total ? encodeNextToken({ offset: nextOffset }) : undefined;
 
     return { assessments: items, nextToken: nextTk };
   }
 
-  public async get(args: {
+  public async delete(args: {
     assessmentId: string;
-    organization: string;
-  }): Promise<Assessment | undefined> {
-    const { assessmentId, organization } = args;
-    const repo = await this.repo(AssessmentEntity, organization);
-    const entity = await repo.findOne({
-      where: { id: assessmentId },
-      relations: { pillars: { questions: { bestPractices: true } } },
-    });
-    return entity ? this.toDomainAssessment(entity, organization) : undefined;
-  }
-
-  public async getFinding(args: {
-    assessmentId: string;
-    organization: string;
-    findingId: string;
-  }): Promise<Finding | undefined> {
-    const { assessmentId, organization, findingId } = args;
-    const repo = await this.repo(FindingEntity, organization);
-    const entity = await repo.findOne({
-      where: { id: findingId, assessmentId },
-      relations: { comments: true },
-    });
-    return entity ? this.toDomainFinding(entity) : undefined;
-  }
-
-  private async loadAssessmentOrThrow(
-    assessmentId: string,
-    organization: string
-  ): Promise<AssessmentEntity> {
-    const assessment = await this.get({ assessmentId, organization });
-    if (!assessment) {
-      this.logger.error(
-        `Attempted operation on non-existing assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-    }
-    return assessment as AssessmentEntity;
-  }
-
-  public async getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
-  ): Promise<{ findings: Finding[]; nextToken?: string }> {
-    const {
-      assessmentId,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      limit = 100,
-      searchTerm = '',
-      showHidden = false,
-      nextToken,
-    } = args;
-
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-    const assessmentWithPillars = await this.get({
-      assessmentId,
-      organization,
-    });
-    this.assertBestPracticeExists({
-      assessment: assessmentWithPillars as Assessment,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-    });
-
-    const repo = await this.repo(FindingEntity, organization);
-    const decoded = AssessmentsRepositorySQL.decodeNextToken(nextToken) as
-      | { offset?: number }
-      | undefined;
-    const offset = decoded?.offset ?? 0;
-
-    const customId = `${pillarId}#${questionId}#${bestPracticeId}`;
-
-    const qb = repo
-      .createQueryBuilder('f')
-      .where('f.assessmentId = :assessmentId', { assessmentId })
-      .andWhere('f.bestPractices LIKE :bp', { bp: `%${customId}%` })
-      .orderBy('f.id', 'ASC')
-      .skip(offset)
-      .take(limit);
-
-    if (!showHidden) qb.andWhere('f.hidden = :hidden', { hidden: false });
-    if (searchTerm && searchTerm.trim()) {
-      qb.andWhere('(f.riskDetails ILIKE :term OR f.statusDetail ILIKE :term)', {
-        term: `%${searchTerm}%`,
-      });
-    }
-
-    const [entities, total] = await qb.getManyAndCount();
-    const items = entities.map((e) => this.toDomainFinding(e));
-
-    const nextOffset = offset + items.length;
-    const nextTk =
-      nextOffset < total
-        ? AssessmentsRepositorySQL.encodeNextToken({ offset: nextOffset })
-        : undefined;
-
-    return { findings: items, nextToken: nextTk };
-  }
-
-  public async addFindingComment(args: {
-    assessmentId: string;
-    organization: string;
-    findingId: string;
-    comment: FindingComment;
+    organizationDomain: string;
   }): Promise<void> {
-    const { assessmentId, organization, findingId, comment } = args;
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({ assessmentId, organization, findingId });
-    }
+    const { assessmentId, organizationDomain } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
 
-    const commentsRepo = await this.repo(FindingCommentEntity, organization);
-    const entity = commentsRepo.create({
-      ...comment,
-      findingId: findingId,
-      assessmentId,
-    });
-    try {
-      await commentsRepo.save(entity);
-      this.logger.info(
-        `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to add comment to finding: ${error}`, args);
-      throw error;
-    }
+    await repo.delete({ id: assessmentId });
+    this.logger.info(`Assessment deleted: ${assessmentId}`);
   }
 
-  public assertBestPracticeExists(args: {
-    assessment: Assessment;
-    organization: string;
+  public async deleteFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    id: string;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, id } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
+
+    await repo.delete({ id, assessmentId });
+    this.logger.info(
+      `File export with id ${id} deleted successfully for assessment ${assessmentId}`
+    );
+  }
+
+  public async update(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    assessmentBody: AssessmentBody;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, assessmentBody } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    await repo.update({ id: assessmentId }, assessmentBody);
+    this.logger.info(`Assessment updated: ${assessmentId}`);
+  }
+
+  public async updatePillar(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    pillarBody: PillarBody;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, pillarId, pillarBody } = args;
+    const repo = await this.repo(PillarEntity, organizationDomain);
+
+    await repo.update({ id: pillarId, assessmentId }, pillarBody);
+    this.logger.info(
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`
+    );
+  }
+
+  public async updateQuestion(args: {
+    assessmentId: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
-    bestPracticeId: string;
-  }): void {
-    const { assessment, pillarId, questionId, bestPracticeId } = args;
-    const pillar = assessment.pillars?.find(
-      (p) => p.id === pillarId.toString()
+    questionBody: QuestionBody;
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      questionBody,
+    } = args;
+    const repo = await this.repo(QuestionEntity, organizationDomain);
+
+    await repo.update({ id: questionId, pillarId, assessmentId }, questionBody);
+    this.logger.info(
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`
     );
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
-    const question = pillar.questions.find(
-      (q) => q.id === questionId.toString()
-    );
-    if (!question) {
-      throw new QuestionNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-      });
-    }
-    const bestPractice = question.bestPractices.find(
-      (bp) => bp.id === bestPracticeId.toString()
-    );
-    if (!bestPractice) {
-      throw new BestPracticeNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-        bestPracticeId,
-      });
-    }
   }
 
   public async updateBestPractice(args: {
     assessmentId: string;
-    organization: string;
+    organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -430,454 +228,36 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }): Promise<void> {
     const {
       assessmentId,
-      organization,
+      organizationDomain,
       pillarId,
       questionId,
       bestPracticeId,
       bestPracticeBody,
     } = args;
+    const repo = await this.repo(BestPracticeEntity, organizationDomain);
 
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-
-    if (Object.keys(bestPracticeBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for best practice: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-    }
-
-    const repo = await this.repo(BestPracticeEntity, organization);
-    const bp = await repo.findOne({
-      where: { id: bestPracticeId, questionId, pillarId, assessmentId },
-    });
-    if (!bp) {
-      this.logger.error(
-        `Best practice not found: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-      throw new BestPracticeNotFoundError({
-        assessmentId,
-        organization,
-        pillarId,
-        questionId,
-        bestPracticeId,
-      });
-    }
-
-    if (typeof bestPracticeBody.checked === 'boolean') {
-      bp.checked = bestPracticeBody.checked;
-    }
-
-    await repo.save(bp);
-  }
-
-  public async addBestPracticeFindings(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void> {
-    const {
-      assessmentId,
-      organization,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-
-    const repo = await this.repo(BestPracticeEntity, organization);
-    const bp = await repo.findOne({
-      where: { id: bestPracticeId, questionId, pillarId, assessmentId },
-    });
-    if (!bp) {
-      this.logger.error(
-        `Best practice not found when adding results: ${assessmentId}#${pillarId}#${questionId}#${bestPracticeId}`
-      );
-      throw new BestPracticeNotFoundError({
-        assessmentId,
-        organization,
-        pillarId,
-        questionId,
-        bestPracticeId,
-      });
-    }
-
-    const existing = bp.results ?? new Set<string>();
-    for (const id of bestPracticeFindingIds) existing.add(id);
-    bp.results = existing;
-
-    await repo.save(bp);
-  }
-
-  public assertPillarExists(args: {
-    assessment: Assessment;
-    pillarId: string;
-  }): void {
-    const { assessment, pillarId } = args;
-    const pillar = assessment.pillars?.find(
-      (p) => p.id === pillarId.toString()
+    await repo.update(
+      { id: bestPracticeId, questionId, pillarId, assessmentId },
+      bestPracticeBody
     );
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
-  }
-
-  public async updatePillar(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
-    pillarBody: PillarBody;
-  }): Promise<void> {
-    const { assessmentId, organization, pillarId, pillarBody } = args;
-
-    const assessment: Assessment = {
-      ...(await this.loadAssessmentOrThrow(assessmentId, organization)),
-      organization,
-    };
-
-    this.assertPillarExists({ assessment, pillarId });
-
-    if (Object.keys(pillarBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for pillar: ${assessmentId}#${pillarId}`
-      );
-    }
-
-    const repo = await this.repo(PillarEntity, organization);
-    const pillar = await repo.findOne({
-      where: { id: pillarId, assessmentId },
-    });
-    if (!pillar)
-      throw new PillarNotFoundError({ assessmentId, organization, pillarId });
-
-    if (typeof pillarBody.disabled === 'boolean')
-      pillar.disabled = pillarBody.disabled;
-
-    await repo.save(pillar);
-  }
-
-  public async delete(args: {
-    assessmentId: string;
-    organization: string;
-  }): Promise<void> {
-    const { assessmentId, organization } = args;
-
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-
-    const repo = await this.repo(AssessmentEntity, organization);
-    try {
-      await repo.delete({ id: assessmentId });
-      this.logger.info(`Assessment deleted: ${assessmentId}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete assessment: ${error}`, args);
-      throw error;
-    }
-  }
-
-  public async deleteFindings(args: {
-    assessmentId: string;
-    organization: string;
-  }): Promise<void> {
-    const { assessmentId, organization } = args;
-
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-
-    const repo = await this.repo(FindingEntity, organization);
-    try {
-      await repo.delete({ assessmentId });
-      this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
-    } catch (error) {
-      this.logger.error(`Failed to delete findings: ${error}`, args);
-      throw error;
-    }
-  }
-
-  public async deleteFindingComment(args: {
-    assessmentId: string;
-    organization: string;
-    findingId: string;
-    commentId: string;
-  }): Promise<void> {
-    const { assessmentId, organization, findingId, commentId } = args;
-
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({ assessmentId, organization, findingId });
-    }
-
-    const repo = await this.repo(FindingCommentEntity, organization);
-    try {
-      await repo.delete({ id: commentId, findingId: finding.id });
-      this.logger.info(
-        `Finding comment deleted: ${finding.id} for assessment: ${assessmentId}`
-      );
-    } catch (error) {
-      this.logger.error(`Failed to delete finding comment: ${error}`, args);
-      throw error;
-    }
-  }
-
-  public async update(args: {
-    assessmentId: string;
-    organization: string;
-    assessmentBody: AssessmentBody;
-  }): Promise<void> {
-    const { assessmentId, organization, assessmentBody } = args;
-
-    await this.loadAssessmentOrThrow(assessmentId, organization);
-
-    if (Object.keys(assessmentBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for assessment ${assessmentId} for organization ${organization}`
-      );
-    }
-
-    const repo = await this.repo(AssessmentEntity, organization);
-    const entity = await repo.findOne({
-      where: { id: assessmentId },
-      relations: { pillars: { questions: { bestPractices: true } } },
-    });
-    if (!entity)
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-
-    if (assessmentBody.name !== undefined) entity.name = assessmentBody.name;
-    if (assessmentBody.graphData !== undefined)
-      entity.graphData = assessmentBody.graphData;
-    if (assessmentBody.error !== undefined) entity.error = assessmentBody.error;
-    if (assessmentBody.rawGraphData !== undefined)
-      entity.rawGraphData = assessmentBody.rawGraphData;
-    if (assessmentBody.questionVersion !== undefined)
-      entity.questionVersion = assessmentBody.questionVersion;
-    if (assessmentBody.exportRegion !== undefined)
-      entity.exportRegion = assessmentBody.exportRegion;
-    if (assessmentBody.executionArn !== undefined)
-      entity.executionArn = assessmentBody.executionArn;
-    if (assessmentBody.pillars !== undefined) {
-      entity.pillars = assessmentBody.pillars as PillarEntity[];
-    }
-    if (assessmentBody.finished !== undefined)
-      entity.finished = assessmentBody.finished;
-
-    await repo.save(entity);
-    this.logger.info(`Assessment updated: ${assessmentId}`);
-  }
-
-  public async updateFinding(args: {
-    assessmentId: string;
-    organization: string;
-    findingId: string;
-    findingBody: FindingBody;
-  }): Promise<void> {
-    const { assessmentId, organization, findingId, findingBody } = args;
-
-    const repo = await this.repo(FindingEntity, organization);
-    const entity = await repo.findOne({
-      where: { id: findingId, assessmentId },
-    });
-    if (!entity) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({ assessmentId, organization, findingId });
-    }
-
-    if (Object.keys(findingBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for finding ${findingId} in assessment ${assessmentId}`
-      );
-    }
-
-    if (typeof findingBody.hidden === 'boolean')
-      entity.hidden = findingBody.hidden;
-    if (findingBody.comments !== undefined) {
-      const commentsRepo = await this.repo(FindingCommentEntity, organization);
-      await commentsRepo.delete({ findingId: entity.id });
-      const replacements = (findingBody.comments as FindingComment[]).map((c) =>
-        commentsRepo.create({ ...c, findingId: entity.id })
-      );
-      await commentsRepo.save(replacements);
-      entity.comments = replacements;
-    }
-
-    await repo.save(entity);
     this.logger.info(
-      `Finding updated: ${findingId} for assessment: ${assessmentId}`
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`
     );
   }
 
-  public async updateFindingComment(args: {
+  public async updateFileExport(args: {
     assessmentId: string;
-    organization: string;
-    findingId: string;
-    commentId: string;
-    commentBody: FindingCommentBody;
+    organizationDomain: string;
+    data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organization, findingId, commentId, commentBody } =
-      args;
+    const { assessmentId, organizationDomain, data } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
 
-    const finding = await this.getFinding({
-      assessmentId,
-      organization,
-      findingId,
-    });
-    if (!finding) {
-      this.logger.error(
-        `Finding with findingId ${findingId} not found for assessment ${assessmentId} in organization ${organization}`
-      );
-      throw new FindingNotFoundError({ assessmentId, organization, findingId });
-    }
-
-    const repo = await this.repo(FindingCommentEntity, organization);
-    const entity = await repo.findOne({ where: { id: commentId, findingId } });
-    if (!entity) {
-      this.logger.error(
-        `Comment ${commentId} not found in finding ${findingId}`
-      );
-      throw new Error(`Comment ${commentId} not found`);
-    }
-
-    if (commentBody.text !== undefined) entity.text = commentBody.text;
-
-    await repo.save(entity);
+    await repo.update({ id: data.id, assessmentId }, { ...data });
     this.logger.info(
-      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
-    );
-  }
-
-  private assertQuestionExists(args: {
-    assessment: Assessment;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-  }): void {
-    const { assessment, pillarId, questionId } = args;
-    const pillar = assessment.pillars?.find((p) => p.id === pillarId);
-    if (!pillar) {
-      throw new PillarNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-      });
-    }
-    const question = pillar.questions.find((q) => q.id === questionId);
-    if (!question) {
-      throw new QuestionNotFoundError({
-        assessmentId: assessment.id,
-        organization: assessment.organization,
-        pillarId,
-        questionId,
-      });
-    }
-  }
-
-  public async updateQuestion(args: {
-    assessmentId: string;
-    organization: string;
-    pillarId: string;
-    questionId: string;
-    questionBody: QuestionBody;
-  }): Promise<void> {
-    const { assessmentId, organization, pillarId, questionId, questionBody } =
-      args;
-
-    const assessment: Assessment = {
-      ...(await this.loadAssessmentOrThrow(assessmentId, organization)),
-      organization,
-    };
-    this.assertQuestionExists({
-      assessment,
-      organization,
-      pillarId,
-      questionId,
-    });
-
-    if (Object.keys(questionBody).length === 0) {
-      this.logger.error(
-        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
-      );
-      throw new EmptyUpdateBodyError(
-        `Nothing to update for question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization}`
-      );
-    }
-
-    const repo = await this.repo(QuestionEntity, organization);
-    const question = await repo.findOne({
-      where: { id: questionId, pillarId, assessmentId },
-    });
-    if (!question)
-      throw new QuestionNotFoundError({
-        assessmentId,
-        organization,
-        pillarId,
-        questionId,
-      });
-
-    if (typeof questionBody.disabled === 'boolean')
-      question.disabled = questionBody.disabled;
-    if (typeof questionBody.none === 'boolean')
-      question.none = questionBody.none;
-
-    await repo.save(question);
-    this.logger.info(
-      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organization ${organization} updated successfully`
-    );
-  }
-
-  public async updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organization: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void> {
-    const { assessmentId, organization, scanningTool, graphData } = args;
-
-    const repo = await this.repo(AssessmentEntity, organization);
-    const entity = await repo.findOne({
-      where: { id: assessmentId },
-    });
-    if (!entity)
-      throw new AssessmentNotFoundError({ assessmentId, organization });
-
-    const raw = (entity.rawGraphData ?? {}) as Partial<
-      Record<ScanningTool, AssessmentGraphData>
-    >;
-    raw[scanningTool] = graphData;
-    entity.rawGraphData = raw;
-
-    await repo.save(entity);
-    this.logger.info(
-      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+      `${data.type.toUpperCase()} file with id ${
+        data.id
+      } export updated successfully for assessment ${assessmentId}`
     );
   }
 }
-
-export const tokenAssessmentsRepository =
-  createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {
-    useClass: AssessmentsRepositorySQL,
-  });

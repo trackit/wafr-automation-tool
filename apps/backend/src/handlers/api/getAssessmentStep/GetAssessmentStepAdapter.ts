@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodError, ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 import { tokenGetAssessmentStepUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -7,7 +7,7 @@ import { inject } from '@shared/di-container';
 
 import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
 import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
-import { BadRequestError } from '../../../utils/api/HttpError';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetAssessmentStepArgsSchema = z.object({
   assessmentId: z.string().uuid(),
@@ -31,25 +31,17 @@ export class GetAssessmentStepAdapter {
   ): Promise<
     operations['getAssessmentStep']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = event;
-    if (!pathParameters) {
-      throw new BadRequestError('Missing path parameters');
-    }
+    const { pathParameters } = parseApiEvent(event, {
+      pathSchema: GetAssessmentStepArgsSchema,
+    });
 
-    try {
-      const { assessmentId } =
-        GetAssessmentStepArgsSchema.parse(pathParameters);
-      return {
-        step: await this.useCase.getAssessmentStep({
-          assessmentId,
-          user: getUserFromEvent(event),
-        }),
-      };
-    } catch (e) {
-      if (e instanceof ZodError) {
-        throw new BadRequestError(`Invalid path parameters: ${e.message}`);
-      }
-      throw e;
-    }
+    const user = getUserFromEvent(event);
+
+    return {
+      step: await this.useCase.getAssessmentStep({
+        ...pathParameters,
+        user,
+      }),
+    };
   }
 }

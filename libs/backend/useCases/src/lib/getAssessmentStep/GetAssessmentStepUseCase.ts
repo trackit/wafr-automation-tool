@@ -5,7 +5,7 @@ import {
 import type { AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { NotFoundError } from '../Errors';
+import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
 
 export type GetAssessmentStepUseCaseArgs = {
   assessmentId: string;
@@ -27,12 +27,13 @@ export class GetAssessmentStepUseCaseImpl implements GetAssessmentStepUseCase {
   ): Promise<AssessmentStep> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
-      organization: args.user.organizationDomain,
+      organizationDomain: args.user.organizationDomain,
     });
     if (!assessment) {
-      throw new NotFoundError(
-        `Assessment with id ${args.assessmentId} not found for organization ${args.user.organizationDomain}`
-      );
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.user.organizationDomain,
+      });
     }
     return this.stateMachine.getAssessmentStep(assessment.executionArn);
   }

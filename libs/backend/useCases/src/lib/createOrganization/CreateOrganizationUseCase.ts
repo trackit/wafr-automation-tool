@@ -31,7 +31,7 @@ export class CreateOrganizationUseCaseImpl
   }
 
   private async saveOrganization(organization: Organization): Promise<void> {
-    await this.organizationRepository.save({ organization });
+    await this.organizationRepository.save(organization);
     this.logger.info(
       `Organization successfully created: ${organization.domain}`
     );

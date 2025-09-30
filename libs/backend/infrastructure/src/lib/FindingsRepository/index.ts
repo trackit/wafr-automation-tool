@@ -1,2 +1,2 @@
 export * from './FakeFindingsRepository';
-export * from './FindingsRepositoryDynamoDB';
+export * from './FindingsRepository';

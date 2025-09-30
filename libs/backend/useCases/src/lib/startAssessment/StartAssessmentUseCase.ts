@@ -6,6 +6,7 @@ import {
   tokenLogger,
   tokenMarketplaceService,
   tokenOrganizationRepository,
+  tokenQuestionSetService,
 } from '@backend/infrastructure';
 import { Assessment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -33,6 +34,7 @@ export interface StartAssessmentUseCase {
 
 export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
+  private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly assessmentRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
@@ -123,6 +125,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdBy: user.id,
       organizationDomain: user.organizationDomain,
     });
+
+    const questionSet = this.questionSetService.get();
+
     const assessment: Assessment = {
       id: assessmentId,
       name,
@@ -133,7 +138,10 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdBy: user.id,
       organization: user.organizationDomain,
       executionArn: executionId,
-      rawGraphData: {},
+      fileExports: [],
+      questionVersion: questionSet.version,
+      pillars: questionSet.pillars,
+      finished: false,
     };
     await this.assessmentRepository.save(assessment);
     return { assessmentId };

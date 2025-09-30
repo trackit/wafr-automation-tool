@@ -66,6 +66,7 @@ Resources:
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
         DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+        S3BucketName: !Ref S3Bucket
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -123,48 +124,6 @@ Resources:
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
         DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
-  DynamoDB:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Ref AWS::StackName
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: DynamoDB
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: PK
-          AttributeType: S
-        - AttributeName: SK
-          AttributeType: S
-      KeySchema:
-        - AttributeName: PK
-          KeyType: HASH
-        - AttributeName: SK
-          KeyType: RANGE
-      DeletionProtectionEnabled: true
-  OrganizationTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub '${AWS::StackName}-organization'
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: OrganizationTable
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: PK
-          AttributeType: S
-      KeySchema:
-        - AttributeName: PK
-          KeyType: HASH
-      DeletionProtectionEnabled: false
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -189,7 +148,6 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref AWS::StackName
 
-  # Cluster Aurora PG Serverless v2
   AuroraCluster:
     Type: AWS::RDS::DBCluster
     Properties:
@@ -214,7 +172,6 @@ Resources:
         - Key: Name
           Value: AuroraCluster
 
-  # Instance serverless v2 rattachée au cluster
   AuroraInstanceWriter:
     Type: AWS::RDS::DBInstance
     Properties:
@@ -229,6 +186,44 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: AuroraInstanceWriter
+
+  JumpInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+
+  JumpInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref JumpInstanceRole]
+
+  JumpInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-06a974f9b8a97ecf2
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref JumpInstanceProfile
+      SubnetId: !GetAtt Network.Outputs.PrivateSubnetAId
+      SecurityGroupIds:
+        - !GetAtt Network.Outputs.JumpSecurityGroupId
+      SourceDestCheck: true
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: SsmJump
 
 Outputs:
   ApiEndpoint:
@@ -249,3 +244,6 @@ Outputs:
   CloudFrontDistributionId:
     Description: CloudFront Distribution ID
     Value: !GetAtt Frontend.Outputs.DistributionId
+  JumpInstanceId:
+    Description: EC2 instance id for SSM jump
+    Value: !Ref JumpInstance
