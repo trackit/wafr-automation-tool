@@ -65,6 +65,7 @@ describe('updateBestPractice adapter', () => {
       expect(response.statusCode).toBe(400);
     });
   });
+
   describe('useCase and return value', () => {
     it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();

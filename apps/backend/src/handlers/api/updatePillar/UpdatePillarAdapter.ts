@@ -16,9 +16,12 @@ const UpdatePillarPathSchema = z.object({
 
 const UpdatePillarBodySchema = z
   .object({
-    disabled: z.boolean().optional(),
+    disabled: z.boolean(),
   })
-  .strict() satisfies ZodType<
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updatePillar']['requestBody']['content']['application/json']
 >;
 

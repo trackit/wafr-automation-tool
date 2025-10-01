@@ -14,9 +14,14 @@ const UpdateFindingPathSchema = z.object({
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
-const UpdateFindingBodySchema = z.object({
-  hidden: z.boolean().optional(),
-}) satisfies ZodType<
+const UpdateFindingBodySchema = z
+  .object({
+    hidden: z.boolean(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateFinding']['requestBody']['content']['application/json']
 >;
 

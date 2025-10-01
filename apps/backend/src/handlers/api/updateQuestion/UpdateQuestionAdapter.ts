@@ -15,10 +15,15 @@ const UpdateQuestionPathSchema = z.object({
   questionId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateQuestion']['parameters']['path']>;
 
-const UpdateQuestionBodySchema = z.object({
-  none: z.boolean().optional(),
-  disabled: z.boolean().optional(),
-}) satisfies ZodType<
+const UpdateQuestionBodySchema = z
+  .object({
+    none: z.boolean(),
+    disabled: z.boolean(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateQuestion']['requestBody']['content']['application/json']
 >;
 
