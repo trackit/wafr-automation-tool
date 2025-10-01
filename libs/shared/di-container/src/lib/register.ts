@@ -8,9 +8,9 @@ import {
   Provider,
 } from './Provider';
 
-export const register = <T = unknown>(
+export const register = <T = any>(
   token: DIToken<T>,
-  provider: Provider<T>,
+  provider: Provider<T>
 ): void => {
   if (container.isRegistered(token.symbol)) {
     throw new Error(`Token ${token.symbol.toString()} is already registered.`);

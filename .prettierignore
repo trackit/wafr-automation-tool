@@ -6,6 +6,7 @@
 .aws-sam
 
 libs/shared/api-schema/src/lib/schema.d.ts
+libs/shared/di-container
 
 pnpm-*.yaml
 
