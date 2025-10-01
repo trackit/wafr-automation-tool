@@ -275,14 +275,13 @@ function AssessmentOverview({
                       wrapperStyle={{ fontSize: '12px' }}
                       verticalAlign="top"
                       align="center"
-                      content={({ payload }) => (
+                      content={() => (
                         <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
-                          {payload?.map((entry, index) => {
-                            const item = assessmentProcessedRegions[index];
+                          {assessmentProcessedRegions?.map((entry, index) => {
                             const percentage =
                               totalRegionsCount > 0
                                 ? (
-                                    ((item?.value || 0) / totalRegionsCount) *
+                                    ((entry.value || 0) / totalRegionsCount) *
                                     100
                                   ).toFixed(1)
                                 : '0.0';
@@ -300,12 +299,13 @@ function AssessmentOverview({
                                   style={{
                                     width: 10,
                                     height: 10,
-                                    backgroundColor: entry.color,
+                                    backgroundColor:
+                                      getChartColorByIndex(index),
                                     borderRadius: 2,
                                   }}
                                 />
                                 <span style={{ fontSize: '12px' }}>
-                                  {entry.value} ({percentage}%)
+                                  {entry.name} ({percentage}%)
                                 </span>
                               </div>
                             );
