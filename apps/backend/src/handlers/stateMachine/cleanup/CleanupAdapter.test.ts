@@ -47,7 +47,7 @@ describe('cleanup adapter', () => {
           assessmentId: event.assessmentId,
           organizationDomain: event.organizationDomain,
           error: event.error,
-        })
+        }),
       );
     });
   });

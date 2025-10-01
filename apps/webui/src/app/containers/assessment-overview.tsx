@@ -62,7 +62,7 @@ function AssessmentOverview({
 }) {
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Consolidated useMemo for all data processing
@@ -103,10 +103,10 @@ function AssessmentOverview({
       totalRegionsCount: regions.reduce((sum, item) => sum + item.value, 0),
       totalSeveritiesCount: severities.reduce(
         (sum, item) => sum + item.value,
-        0
+        0,
       ),
     };
-  }, [assessment?.graphData]);
+  }, [assessment]);
 
   // Extract processed data
   const {
@@ -121,7 +121,7 @@ function AssessmentOverview({
   useMemo(() => {
     if (assessmentResourceTypes.length > 0) {
       setEnabledResourceTypes(
-        new Set(assessmentResourceTypes.map((rt) => rt.name))
+        new Set(assessmentResourceTypes.map((rt) => rt.name)),
       );
     }
   }, [assessmentResourceTypes]);
@@ -129,7 +129,7 @@ function AssessmentOverview({
   // Get filtered resource types for charts
   const filteredResourceTypes = useMemo(() => {
     return assessmentResourceTypes.filter((rt) =>
-      enabledResourceTypes.has(rt.name)
+      enabledResourceTypes.has(rt.name),
     );
   }, [assessmentResourceTypes, enabledResourceTypes]);
 
@@ -311,7 +311,7 @@ function AssessmentOverview({
                       dataKey="value"
                     >
                       {assessmentRegions
-                        ? assessmentRegions.map((item, index) => (
+                        ? assessmentRegions.map((_item, index) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={getChartColorByIndex(index)}

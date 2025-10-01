@@ -19,7 +19,7 @@ export class UpdateFindingUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateFindingUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;

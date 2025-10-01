@@ -18,7 +18,7 @@ export class StartPDFExportAdapterEventMother {
 
   private constructor(
     pathParameters: StartPDFExportParameters,
-    body: StartPDFExportBody
+    body: StartPDFExportBody,
   ) {
     this.pathParameters = pathParameters;
     this.body = body;
@@ -31,26 +31,26 @@ export class StartPDFExportAdapterEventMother {
       },
       {
         versionName: 'version-name',
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): StartPDFExportAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withVersionName(
-    versionName: string
+    versionName: string,
   ): StartPDFExportAdapterEventMother {
     this.body.versionName = versionName;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): StartPDFExportAdapterEventMother {
     this.user = user;
     return this;

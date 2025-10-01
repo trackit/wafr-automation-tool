@@ -17,7 +17,7 @@ export class ListPDFExportsUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ListPDFExportsUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;

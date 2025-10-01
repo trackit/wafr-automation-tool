@@ -28,7 +28,7 @@ afterEach(async () => {
   const tableName = inject(tokenDynamoDBAssessmentTableName);
 
   const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName })
+    new ScanCommand({ TableName: tableName }),
   );
 
   await Promise.all(
@@ -40,9 +40,9 @@ afterEach(async () => {
             PK: item.PK,
             SK: item.SK,
           },
-        })
+        }),
       );
-    })
+    }),
   );
 });
 
@@ -55,7 +55,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withCreatedAt(new Date('2023-01-01T00:00:00Z'))
         .withCreatedBy('user1')
         .withExecutionArn(
-          'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1'
+          'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1',
         )
         .withPillars([
           PillarMother.basic()
@@ -135,8 +135,8 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
+          'scanningTool#1',
+        ),
       ).toBe(true);
     });
 
@@ -170,13 +170,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
+          'scanningTool#1',
+        ),
       ).toBe(true);
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2'
-        )
+          'scanningTool#2',
+        ),
       ).toBe(true);
     });
 
@@ -219,13 +219,13 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1'
-        )
+          'scanningTool#1',
+        ),
       ).toBe(true);
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2'
-        )
+          'scanningTool#2',
+        ),
       ).toBe(true);
     });
   });
@@ -582,7 +582,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
-        })
+        }),
       );
     });
 
@@ -619,10 +619,10 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(updatedAssessment1).toEqual(
-        expect.objectContaining({ name: 'New Name' })
+        expect.objectContaining({ name: 'New Name' }),
       );
       expect(updatedAssessment2).toEqual(
-        expect.objectContaining({ name: 'Old Name' })
+        expect.objectContaining({ name: 'Old Name' }),
       );
     });
   });
@@ -647,7 +647,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           pillarBody: {
             disabled: true,
           },
-        })
+        }),
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -690,7 +690,11 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
 
       expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
-        expect.objectContaining({ id: question.id, disabled: true, none: true })
+        expect.objectContaining({
+          id: question.id,
+          disabled: true,
+          none: true,
+        }),
       );
     });
 
@@ -746,14 +750,14 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           id: question1.id,
           disabled: true,
           none: true,
-        })
+        }),
       );
       expect(updatedAssessment2?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({
           id: question2.id,
           disabled: false,
           none: false,
-        })
+        }),
       );
     });
   });
@@ -786,7 +790,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           bestPracticeBody: {
             checked: true,
           },
-        })
+        }),
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -794,7 +798,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
-          .checked
+          .checked,
       ).toBe(true);
     });
   });

@@ -98,7 +98,7 @@ export const lightenColor = (color: string, percent: number): string => {
   return rgbToHex(
     Math.min(255, Math.round(r * factor)),
     Math.min(255, Math.round(g * factor)),
-    Math.min(255, Math.round(b * factor))
+    Math.min(255, Math.round(b * factor)),
   );
 };
 
@@ -111,7 +111,7 @@ export const darkenColor = (color: string, percent: number): string => {
   return rgbToHex(
     Math.max(0, Math.round(r * factor)),
     Math.max(0, Math.round(g * factor)),
-    Math.max(0, Math.round(b * factor))
+    Math.max(0, Math.round(b * factor)),
   );
 };
 

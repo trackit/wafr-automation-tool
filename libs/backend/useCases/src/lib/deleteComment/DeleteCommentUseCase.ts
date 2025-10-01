@@ -64,7 +64,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
       commentId,
     });
     this.logger.info(
-      `Delete comment for finding ${findingId} in assessment ${assessmentId} by user ${user.id}`
+      `Delete comment for finding ${findingId} in assessment ${assessmentId} by user ${user.id}`,
     );
   }
 }

@@ -30,7 +30,7 @@ describe('App', () => {
         <MemoryRouter>
           <App />
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
     expect(baseElement).toBeTruthy();
   });

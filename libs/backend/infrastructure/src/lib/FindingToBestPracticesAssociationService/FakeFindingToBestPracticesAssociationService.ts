@@ -23,5 +23,5 @@ export class FakeFindingToBestPracticesAssociationService
 export const tokenFakeFindingToBestPracticesAssociationService =
   createInjectionToken<FakeFindingToBestPracticesAssociationService>(
     'FakeFindingToBestPracticesAssociationService',
-    { useClass: FakeFindingToBestPracticesAssociationService }
+    { useClass: FakeFindingToBestPracticesAssociationService },
   );

@@ -5,5 +5,5 @@ import { GetMilestonesAdapter } from './GetMilestonesAdapter';
 const adapter = new GetMilestonesAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

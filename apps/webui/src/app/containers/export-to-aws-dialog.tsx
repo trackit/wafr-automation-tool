@@ -27,7 +27,7 @@ function ExportToAWSDialog({
         },
         {
           region: data.region,
-        }
+        },
       );
     },
     onMutate: () => {

@@ -51,12 +51,12 @@ export class PDFService implements PDFServicePort {
     });
 
     const filtered = findings.filter(
-      (f) => f.severity !== undefined && allowed.includes(f.severity)
+      (f) => f.severity !== undefined && allowed.includes(f.severity),
     );
 
     const order = allowed;
     filtered.sort(
-      (a, b) => order.indexOf(a.severity!) - order.indexOf(b.severity!)
+      (a, b) => order.indexOf(a.severity!) - order.indexOf(b.severity!),
     );
 
     const buffer = await this.renderToBuffer(
@@ -64,7 +64,7 @@ export class PDFService implements PDFServicePort {
         assessmentName: assessment.name,
         versionName,
         findings: filtered,
-      })
+      }),
     );
     this.logger.info(`Exporting assessment ${assessment.id} to PDF done`);
     return buffer;
@@ -81,12 +81,12 @@ export const tokenPDFRenderToBuffer = createInjectionToken(
   'PDFRenderToBuffer',
   {
     useValue: renderToBuffer,
-  }
+  },
 );
 
 export const tokenPDFService = createInjectionToken<PDFServicePort>(
   'PDFService',
   {
     useClass: PDFService,
-  }
+  },
 );

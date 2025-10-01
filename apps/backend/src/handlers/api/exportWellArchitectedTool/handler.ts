@@ -5,5 +5,5 @@ import { ExportWellArchitectedToolAdapter } from './ExportWellArchitectedToolAda
 const adapter = new ExportWellArchitectedToolAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

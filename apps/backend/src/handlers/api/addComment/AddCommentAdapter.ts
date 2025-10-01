@@ -11,7 +11,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const AddCommentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['addComment']['parameters']['path']>;
 
@@ -25,7 +25,7 @@ export class AddCommentAdapter {
   private readonly useCase = inject(tokenAddCommentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -36,7 +36,7 @@ export class AddCommentAdapter {
 
   private toAddCommentResponse(
     user: User,
-    comment: FindingComment
+    comment: FindingComment,
   ): operations['addComment']['responses'][200]['content']['application/json'] {
     return {
       ...comment,
@@ -46,7 +46,7 @@ export class AddCommentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['addComment']['responses'][200]['content']['application/json']
   > {

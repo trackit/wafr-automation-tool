@@ -22,7 +22,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
 
   private mergeCounters(
     a: Record<string, number>,
-    b: Record<string, number>
+    b: Record<string, number>,
   ): Record<string, number> {
     const result: Record<string, number> = { ...a };
     for (const key in b) {
@@ -32,7 +32,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
   }
 
   public async computeGraphData(
-    args: ComputeGraphDataUseCaseArgs
+    args: ComputeGraphDataUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -46,27 +46,27 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
     }
 
     this.logger.info(
-      `Computing graph data for assessment with id ${args.assessmentId}`
+      `Computing graph data for assessment with id ${args.assessmentId}`,
     );
     const assessmentGraphData = AssessmentGraphDataMother.basic().build();
     for (const scanningToolData of Object.values(assessment.rawGraphData)) {
       assessmentGraphData.regions = this.mergeCounters(
         assessmentGraphData.regions,
-        scanningToolData.regions
+        scanningToolData.regions,
       );
       assessmentGraphData.resourceTypes = this.mergeCounters(
         assessmentGraphData.resourceTypes,
-        scanningToolData.resourceTypes
+        scanningToolData.resourceTypes,
       );
       assessmentGraphData.severities = this.mergeCounters(
         assessmentGraphData.severities,
-        scanningToolData.severities
+        scanningToolData.severities,
       );
       assessmentGraphData.findings += scanningToolData.findings;
     }
 
     this.logger.info(
-      `Updating graph data for assessment with id ${args.assessmentId}`
+      `Updating graph data for assessment with id ${args.assessmentId}`,
     );
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,

@@ -46,7 +46,7 @@ describe('CleanupUseCase', () => {
       expect(
         fakeObjectsStorage.objects[
           'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test'
-        ]
+        ],
       ).toBeUndefined();
     });
 
@@ -69,7 +69,7 @@ describe('CleanupUseCase', () => {
       expect(
         fakeObjectsStorage.objects[
           'assessments/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed/test'
-        ]
+        ],
       ).toBeDefined();
     });
   });
@@ -81,7 +81,7 @@ describe('CleanupUseCase', () => {
       const input = CleanupUseCaseArgsMother.basic().build();
 
       await expect(useCase.cleanupError(input)).rejects.toThrow(
-        AssessmentNotFoundError
+        AssessmentNotFoundError,
       );
     });
 
@@ -178,7 +178,7 @@ describe('CleanupUseCase', () => {
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
-        OrganizationNotFoundError
+        OrganizationNotFoundError,
       );
     });
 
@@ -205,7 +205,7 @@ describe('CleanupUseCase', () => {
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
-        OrganizationAccountIdNotSetError
+        OrganizationAccountIdNotSetError,
       );
     });
 
@@ -232,7 +232,7 @@ describe('CleanupUseCase', () => {
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
-        OrganizationUnitBasedAgreementIdNotSetError
+        OrganizationUnitBasedAgreementIdNotSetError,
       );
     });
 
@@ -277,7 +277,7 @@ describe('CleanupUseCase', () => {
       await useCase.cleanupSuccessful(input);
 
       expect(
-        fakeMarketplaceService.hasMonthlySubscription
+        fakeMarketplaceService.hasMonthlySubscription,
       ).not.toHaveBeenCalled();
     });
 
@@ -339,9 +339,9 @@ describe('CleanupUseCase', () => {
       await useCase.cleanupSuccessful(input);
 
       expect(
-        fakeMarketplaceService.consumeReviewUnit
+        fakeMarketplaceService.consumeReviewUnit,
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ accountId: organization.accountId })
+        expect.objectContaining({ accountId: organization.accountId }),
       );
     });
   });

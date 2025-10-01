@@ -19,5 +19,5 @@ export class FakeOrganizationRepositoryDynamoDB
 export const tokenFakeOrganizationRepository =
   createInjectionToken<FakeOrganizationRepositoryDynamoDB>(
     'FakeOrganizationRepository',
-    { useClass: FakeOrganizationRepositoryDynamoDB }
+    { useClass: FakeOrganizationRepositoryDynamoDB },
   );

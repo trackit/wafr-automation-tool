@@ -47,7 +47,7 @@ export default function ListAWSMilestonesDialog({
   const handleMilestoneClick = (milestoneId: number) => {
     window.open(
       `/assessments/${assessmentId}/milestones/${milestoneId}`,
-      '_blank'
+      '_blank',
     );
     setOpen(false); // Close the dialog after navigation
   };
@@ -169,8 +169,8 @@ export default function ListAWSMilestonesDialog({
                   {isFetchingNextPage
                     ? 'Loading more...'
                     : hasNextPage
-                    ? 'Load More'
-                    : 'Nothing more to load'}
+                      ? 'Load More'
+                      : 'Nothing more to load'}
                 </button>
               </div>
             )}

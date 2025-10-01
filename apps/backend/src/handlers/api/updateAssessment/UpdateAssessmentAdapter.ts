@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateAssessmentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['updateAssessment']['parameters']['path']>;
 
 const UpdateAssessmentBodySchema = z.object({
@@ -23,7 +23,7 @@ export class UpdateAssessmentAdapter {
   private readonly useCase = inject(tokenUpdateAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -33,7 +33,7 @@ export class UpdateAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['updateAssessment']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateAssessmentPathSchema,

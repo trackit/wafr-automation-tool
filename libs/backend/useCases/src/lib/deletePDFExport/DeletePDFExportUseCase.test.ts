@@ -54,7 +54,7 @@ describe('deletePDFExport UseCase', () => {
       organizationDomain: assessment.organization,
     });
     expect(
-      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]
+      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF],
     ).toStrictEqual([]);
 
     const updatedObject = await fakeObjectsStorage.get(objectKey);
@@ -67,7 +67,7 @@ describe('deletePDFExport UseCase', () => {
     const input = DeletePDFExportUseCaseArgsMother.basic().build();
 
     await expect(useCase.deletePDFExport(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -91,7 +91,7 @@ describe('deletePDFExport UseCase', () => {
       .build();
 
     await expect(useCase.deletePDFExport(input)).rejects.toThrow(
-      AssessmentFileExportNotFoundError
+      AssessmentFileExportNotFoundError,
     );
   });
 
@@ -117,7 +117,7 @@ describe('deletePDFExport UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.deletePDFExport(input)).rejects.toThrow(
-      AssessmentFileExportNotFinishedError
+      AssessmentFileExportNotFinishedError,
     );
   });
 

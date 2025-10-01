@@ -30,7 +30,7 @@ export interface GetMilestonesUseCase {
 
 export class GetMilestonesUseCaseImpl implements GetMilestonesUseCase {
   private readonly wellArchitectedToolService = inject(
-    tokenWellArchitectedToolService
+    tokenWellArchitectedToolService,
   );
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);

@@ -39,7 +39,7 @@ export class OpportunityDetailsMother {
   }
 
   public withCustomerType(
-    customerType: CustomerType
+    customerType: CustomerType,
   ): OpportunityDetailsMother {
     this.data.customerType = customerType;
     return this;
@@ -76,7 +76,7 @@ export class OpportunityDetailsMother {
   }
 
   public withCustomerAddress(
-    address: string | undefined
+    address: string | undefined,
   ): OpportunityDetailsMother {
     this.data.customerAddress = address;
     return this;

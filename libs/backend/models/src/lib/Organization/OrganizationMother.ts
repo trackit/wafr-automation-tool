@@ -34,28 +34,28 @@ export class OrganizationMother {
   }
 
   public withAssessmentExportRoleArn(
-    assessmentExportRoleArn: string | undefined
+    assessmentExportRoleArn: string | undefined,
   ): OrganizationMother {
     this.data.assessmentExportRoleArn = assessmentExportRoleArn;
     return this;
   }
 
   public withUnitBasedAgreementId(
-    unitBasedAgreementId: string | undefined
+    unitBasedAgreementId: string | undefined,
   ): OrganizationMother {
     this.data.unitBasedAgreementId = unitBasedAgreementId;
     return this;
   }
 
   public withFreeAssessmentsLeft(
-    freeAssessmentsLeft: number
+    freeAssessmentsLeft: number,
   ): OrganizationMother {
     this.data.freeAssessmentsLeft = freeAssessmentsLeft;
     return this;
   }
 
   public withAceIntegration(
-    aceIntegration: AceIntegration | undefined
+    aceIntegration: AceIntegration | undefined,
   ): OrganizationMother {
     this.data.aceIntegration = aceIntegration;
     return this;
@@ -72,7 +72,7 @@ export class OrganizationMother {
   }
 
   public withOpportunityTeamMembers(
-    members: { firstName: string; lastName: string; email: string }[]
+    members: { firstName: string; lastName: string; email: string }[],
   ): OrganizationMother {
     this.getAceIntegration().opportunityTeamMembers = members;
     return this;

@@ -56,19 +56,19 @@ describe('WellArchitectedToolService', () => {
       const client =
         await wellArchitectedToolService.createWellArchitectedClient(
           roleArn,
-          region
+          region,
         );
 
       expect(client).instanceOf(WellArchitectedClient);
 
       expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
       expect(
-        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input,
       ).toEqual(
         expect.objectContaining({
           RoleArn: roleArn,
           RoleSessionName: 'WAFR-Automation-Tool',
-        })
+        }),
       );
     });
 
@@ -83,7 +83,7 @@ describe('WellArchitectedToolService', () => {
       });
 
       await expect(
-        wellArchitectedToolService.createWellArchitectedClient(roleArn, region)
+        wellArchitectedToolService.createWellArchitectedClient(roleArn, region),
       ).rejects.toThrow(Error);
     });
   });
@@ -119,8 +119,8 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedToolService.createWorkload(
           wellArchitectedClient,
           assessment,
-          user
-        )
+          user,
+        ),
       ).resolves.toEqual({
         workloadId: 'workload-id',
         workloadArn:
@@ -158,8 +158,8 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedToolService.createWorkload(
           wellArchitectedClient,
           assessment,
-          user
-        )
+          user,
+        ),
       ).rejects.toThrow(Error);
     });
 
@@ -197,8 +197,8 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedToolService.createWorkload(
           wellArchitectedClient,
           assessment,
-          user
-        )
+          user,
+        ),
       ).resolves.toEqual({
         workloadId: 'workload-id',
         workloadArn:
@@ -225,10 +225,10 @@ describe('WellArchitectedToolService', () => {
       await expect(
         wellArchitectedToolService.getWorkloadLensReview(
           wellArchitectedClient,
-          'workload-id'
-        )
+          'workload-id',
+        ),
       ).resolves.toEqual(
-        expect.objectContaining({ PillarReviewSummaries: [] })
+        expect.objectContaining({ PillarReviewSummaries: [] }),
       );
 
       const lensReviewCalls =
@@ -238,7 +238,7 @@ describe('WellArchitectedToolService', () => {
         expect.objectContaining({
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
-        })
+        }),
       );
     });
 
@@ -256,8 +256,8 @@ describe('WellArchitectedToolService', () => {
       await expect(
         wellArchitectedToolService.getWorkloadLensReview(
           wellArchitectedClient,
-          'workload-id'
-        )
+          'workload-id',
+        ),
       ).rejects.toThrow(Error);
 
       const lensReviewCalls =
@@ -267,7 +267,7 @@ describe('WellArchitectedToolService', () => {
         expect.objectContaining({
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
-        })
+        }),
       );
     });
   });
@@ -301,8 +301,8 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedToolService.listWorkloadPillarAnswers(
           wellArchitectedClient,
           'workload-id',
-          'pillar-id'
-        )
+          'pillar-id',
+        ),
       ).resolves.toEqual([anwerSummary]);
 
       const listPillarAnswersCalls =
@@ -313,7 +313,7 @@ describe('WellArchitectedToolService', () => {
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
           PillarId: 'pillar-id',
-        })
+        }),
       );
     });
 
@@ -332,8 +332,8 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedToolService.listWorkloadPillarAnswers(
           wellArchitectedClient,
           'workload-id',
-          'pillar-id'
-        )
+          'pillar-id',
+        ),
       ).rejects.toThrow(Error);
 
       const listPillarAnswersCalls =
@@ -344,7 +344,7 @@ describe('WellArchitectedToolService', () => {
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
           PillarId: 'pillar-id',
-        })
+        }),
       );
     });
   });
@@ -369,8 +369,8 @@ describe('WellArchitectedToolService', () => {
           'workload-id',
           'question-id',
           [],
-          question
-        )
+          question,
+        ),
       ).resolves.toBeUndefined();
 
       const updateAnswersCalls =
@@ -383,7 +383,7 @@ describe('WellArchitectedToolService', () => {
           QuestionId: 'question-id',
           SelectedChoices: [],
           IsApplicable: true,
-        })
+        }),
       );
     });
 
@@ -406,8 +406,8 @@ describe('WellArchitectedToolService', () => {
           'workload-id',
           'question-id',
           [],
-          question
-        )
+          question,
+        ),
       ).rejects.toThrow(Error);
 
       const updateAnswersCalls =
@@ -420,7 +420,7 @@ describe('WellArchitectedToolService', () => {
           QuestionId: 'question-id',
           SelectedChoices: [],
           IsApplicable: true,
-        })
+        }),
       );
     });
   });
@@ -527,12 +527,12 @@ describe('WellArchitectedToolService', () => {
 
       expect(stsClientMock.commandCalls(AssumeRoleCommand)).toHaveLength(1);
       expect(
-        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input
+        stsClientMock.commandCalls(AssumeRoleCommand)[0].args[0].input,
       ).toEqual(
         expect.objectContaining({
           RoleArn: 'arn:aws:iam::123456789012:role/test-role',
           RoleSessionName: 'WAFR-Automation-Tool',
-        })
+        }),
       );
 
       const listWorkloadsCalls =
@@ -556,7 +556,7 @@ describe('WellArchitectedToolService', () => {
           WorkloadId: 'workload-id',
           LensAlias: WAFRLens,
           PillarId: 'pillar-id',
-        })
+        }),
       );
 
       const updateAnswerCalls =
@@ -580,8 +580,8 @@ describe('WellArchitectedToolService', () => {
           wellArchitectedClient,
           'workload-id',
           [],
-          [workflowPillar]
-        )
+          [workflowPillar],
+        ),
       ).rejects.toThrow(Error);
     });
 
@@ -597,8 +597,8 @@ describe('WellArchitectedToolService', () => {
           wellArchitectedClient,
           'workload-id',
           [],
-          [workflowPillar]
-        )
+          [workflowPillar],
+        ),
       ).rejects.toThrow(Error);
     });
 
@@ -626,7 +626,7 @@ describe('WellArchitectedToolService', () => {
         wellArchitectedClient,
         'workload-id',
         assessmentPillarList,
-        [workflowPillar]
+        [workflowPillar],
       );
 
       const listPillarAnswersCalls =
@@ -643,8 +643,8 @@ describe('WellArchitectedToolService', () => {
           wellArchitectedClient,
           'workload-id',
           [answerSummary],
-          []
-        )
+          [],
+        ),
       ).rejects.toThrow(Error);
     });
 
@@ -661,8 +661,8 @@ describe('WellArchitectedToolService', () => {
           wellArchitectedClient,
           'workload-id',
           [answerSummary],
-          []
-        )
+          [],
+        ),
       ).rejects.toThrow(Error);
     });
 
@@ -683,7 +683,7 @@ describe('WellArchitectedToolService', () => {
       const selectedChoiceList =
         wellArchitectedToolService.getAnswerSelectedChoiceList(
           answerChoiceList,
-          questionData
+          questionData,
         );
       expect(selectedChoiceList).toEqual(['none-choice-id']);
     });
@@ -696,8 +696,8 @@ describe('WellArchitectedToolService', () => {
       expect(() =>
         wellArchitectedToolService.getSelectedBestPracticeList(
           [answerChoice],
-          []
-        )
+          [],
+        ),
       ).toThrow(Error);
     });
 
@@ -712,8 +712,8 @@ describe('WellArchitectedToolService', () => {
       expect(() =>
         wellArchitectedToolService.getSelectedBestPracticeList(
           [answerChoice],
-          []
-        )
+          [],
+        ),
       ).toThrow(Error);
     });
 
@@ -736,7 +736,7 @@ describe('WellArchitectedToolService', () => {
       const selectedChoiceList =
         wellArchitectedToolService.getSelectedBestPracticeList(
           [answerChoice],
-          questionBestPracticeList
+          questionBestPracticeList,
         );
       expect(selectedChoiceList).toEqual([]);
     });
@@ -803,7 +803,7 @@ describe('WellArchitectedToolService', () => {
         user,
       });
       const createWorkloadCalls = wellArchitectedClientMock.commandCalls(
-        CreateWorkloadCommand
+        CreateWorkloadCommand,
       );
       expect(createWorkloadCalls.length).toBe(1);
       expect(createWorkloadCalls[0].args[0].input).toEqual(
@@ -811,7 +811,7 @@ describe('WellArchitectedToolService', () => {
           WorkloadName: `wafr-assessment-name-${assessment.id}`,
           Environment: WorkloadEnvironment.PRODUCTION,
           AwsRegions: assessment.regions,
-        })
+        }),
       );
     });
 
@@ -913,7 +913,7 @@ describe('WellArchitectedToolService', () => {
           QuestionId: question.primaryId,
           SelectedChoices: [bestPractice.primaryId],
           IsApplicable: true,
-        })
+        }),
       );
     });
 
@@ -986,14 +986,14 @@ describe('WellArchitectedToolService', () => {
       });
 
       const createMilestoneCalls = wellArchitectedClientMock.commandCalls(
-        CreateMilestoneCommand
+        CreateMilestoneCommand,
       );
       expect(createMilestoneCalls.length).toBe(1);
       expect(createMilestoneCalls[0].args[0].input).toEqual(
         expect.objectContaining({
           WorkloadId: workloadId,
           MilestoneName: milestoneName,
-        })
+        }),
       );
     });
 
@@ -1063,7 +1063,7 @@ describe('WellArchitectedToolService', () => {
           region: 'us-west-2',
           name: 'Milestone Name',
           user,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
   });
@@ -1195,7 +1195,7 @@ describe('WellArchitectedToolService', () => {
         expect.objectContaining({
           WorkloadId: 'workload-id',
           MilestoneNumber: 1,
-        })
+        }),
       );
     });
 
@@ -1235,7 +1235,7 @@ describe('WellArchitectedToolService', () => {
           assessment,
           region,
           milestoneId,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
 
@@ -1285,7 +1285,7 @@ describe('WellArchitectedToolService', () => {
           assessment,
           region,
           milestoneId,
-        })
+        }),
       ).resolves.toBeUndefined();
     });
 
@@ -1340,7 +1340,7 @@ describe('WellArchitectedToolService', () => {
           assessment,
           region,
           milestoneId,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
   });
@@ -1487,7 +1487,7 @@ describe('WellArchitectedToolService', () => {
       });
 
       const listMilestonesCalls = wellArchitectedClientMock.commandCalls(
-        ListMilestonesCommand
+        ListMilestonesCommand,
       );
       expect(listMilestonesCalls.length).toBe(1);
     });
@@ -1603,7 +1603,7 @@ describe('WellArchitectedToolService', () => {
           roleArn,
           assessment,
           region,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
 
@@ -1650,7 +1650,7 @@ describe('WellArchitectedToolService', () => {
           roleArn,
           assessment,
           region,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
 
@@ -1703,7 +1703,7 @@ describe('WellArchitectedToolService', () => {
           roleArn,
           assessment,
           region,
-        })
+        }),
       ).rejects.toThrow(Error);
     });
   });

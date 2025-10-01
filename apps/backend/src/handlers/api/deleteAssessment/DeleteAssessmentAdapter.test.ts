@@ -30,7 +30,7 @@ describe('deleteAssessment adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -70,7 +70,7 @@ describe('deleteAssessment adapter', () => {
       expect(useCase.deleteAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 

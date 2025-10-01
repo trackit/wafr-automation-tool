@@ -20,7 +20,7 @@ export interface DeleteAssessmentUseCase {
 
 export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
   private readonly assessmentsStateMachine = inject(
-    tokenAssessmentsStateMachine
+    tokenAssessmentsStateMachine,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
@@ -42,7 +42,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
   }
 
   public async deleteAssessment(
-    args: DeleteAssessmentUseCaseArgs
+    args: DeleteAssessmentUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -55,7 +55,7 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
       });
     }
     await this.assessmentsStateMachine.cancelAssessment(
-      assessment.executionArn
+      assessment.executionArn,
     );
     await this.deleteAssessmentFromRepository({
       assessmentId: args.assessmentId,

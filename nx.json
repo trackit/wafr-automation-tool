@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "dev",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -55,7 +56,7 @@
   "generators": {
     "@nx/react": {
       "application": {
-        "babel": true,
+        "compiler": "swc",
         "style": "tailwind",
         "linter": "eslint",
         "bundler": "vite"

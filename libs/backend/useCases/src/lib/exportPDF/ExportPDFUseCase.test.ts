@@ -32,7 +32,7 @@ describe('exportPDF UseCase', () => {
 
     const pdfContent = 'test-pdf-content';
     vi.spyOn(fakePDFService, 'exportAssessment').mockResolvedValueOnce(
-      Buffer.from(pdfContent)
+      Buffer.from(pdfContent),
     );
 
     const assessmentFileExport = AssessmentFileExportMother.basic()
@@ -78,7 +78,7 @@ describe('exportPDF UseCase', () => {
 
     const input = ExportPDFUseCaseArgsMother.basic().build();
     await expect(useCase.exportPDF(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -93,7 +93,7 @@ describe('exportPDF UseCase', () => {
       .withOrganizationDomain(assessment.organization)
       .build();
     await expect(useCase.exportPDF(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -110,7 +110,7 @@ describe('exportPDF UseCase', () => {
       .withOrganizationDomain(assessment.organization)
       .build();
     await expect(useCase.exportPDF(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -128,7 +128,7 @@ describe('exportPDF UseCase', () => {
       .withOrganizationDomain(assessment.organization)
       .build();
     await expect(useCase.exportPDF(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 });

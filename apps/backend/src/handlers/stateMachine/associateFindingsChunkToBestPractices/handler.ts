@@ -6,6 +6,6 @@ import {
 const adapter = new AssociateFindingsChunkToBestPracticesAdapter();
 
 export const main = async (
-  event: Record<string, unknown>
+  event: Record<string, unknown>,
 ): Promise<AssociateFindingsChunkToBestPracticesOutput> =>
   await adapter.handle(event);

@@ -26,7 +26,7 @@ export type StartAssessmentUseCaseArgs = {
 
 export interface StartAssessmentUseCase {
   startAssessment(
-    args: StartAssessmentUseCaseArgs
+    args: StartAssessmentUseCaseArgs,
   ): Promise<{ assessmentId: string }>;
 }
 
@@ -35,16 +35,16 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly marketplaceService = inject(tokenMarketplaceService);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
-    tokenFeatureToggleRepository
+    tokenFeatureToggleRepository,
   );
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly logger = inject(tokenLogger);
 
   public async canStartAssessment(
-    args: StartAssessmentUseCaseArgs
+    args: StartAssessmentUseCaseArgs,
   ): Promise<boolean> {
     const organization = await this.organizationRepository.get(
-      args.user.organizationDomain
+      args.user.organizationDomain,
     );
     if (!organization) {
       throw new OrganizationNotFoundError({
@@ -57,13 +57,13 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       organization.freeAssessmentsLeft > 0
     ) {
       this.logger.info(
-        `User ${args.user.id} has ${organization.freeAssessmentsLeft} free assessments left`
+        `User ${args.user.id} has ${organization.freeAssessmentsLeft} free assessments left`,
       );
       return true;
     }
     if (!this.featureToggleRepository.marketplaceIntegration()) {
       this.logger.info(
-        `Marketplace integration is disabled, not checking for subscription`
+        `Marketplace integration is disabled, not checking for subscription`,
       );
       return true;
     }
@@ -98,7 +98,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   }
 
   public async startAssessment(
-    args: StartAssessmentUseCaseArgs
+    args: StartAssessmentUseCaseArgs,
   ): Promise<{ assessmentId: string }> {
     const { name, user, roleArn } = args;
     const assessmentId = this.idGenerator.generate();

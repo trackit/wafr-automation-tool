@@ -33,12 +33,12 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           regions: [],
           workflows: [],
-        })
+        }),
       );
     });
 
@@ -60,7 +60,7 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           name: input.name,
@@ -71,7 +71,7 @@ describe('StartAssessmentUseCase', () => {
           assessmentId: expect.any(String),
           createdBy: user.id,
           organizationDomain: user.organizationDomain,
-        })
+        }),
       );
     });
 
@@ -86,11 +86,11 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           workflows: ['workflow-1', 'workflow-2'],
-        })
+        }),
       );
     });
   });
@@ -120,9 +120,9 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: input.name })
+        expect.objectContaining({ name: input.name }),
       );
       expect(organization.freeAssessmentsLeft).toEqual(1);
     });
@@ -157,12 +157,12 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeMarketplaceService.hasMonthlySubscription
+        fakeMarketplaceService.hasMonthlySubscription,
       ).not.toHaveBeenCalled();
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: input.name })
+        expect.objectContaining({ name: input.name }),
       );
     });
 
@@ -200,12 +200,12 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeMarketplaceService.hasUnitBasedSubscription
+        fakeMarketplaceService.hasUnitBasedSubscription,
       ).not.toHaveBeenCalled();
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: input.name })
+        expect.objectContaining({ name: input.name }),
       );
     });
 
@@ -243,9 +243,9 @@ describe('StartAssessmentUseCase', () => {
       await useCase.startAssessment(input);
 
       expect(
-        fakeAssessmentsStateMachine.startAssessment
+        fakeAssessmentsStateMachine.startAssessment,
       ).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ name: input.name })
+        expect.objectContaining({ name: input.name }),
       );
     });
 
@@ -275,7 +275,7 @@ describe('StartAssessmentUseCase', () => {
         .build();
 
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
-        OrganizationNoActiveSubscriptionError
+        OrganizationNoActiveSubscriptionError,
       );
     });
 
@@ -305,7 +305,7 @@ describe('StartAssessmentUseCase', () => {
         .build();
 
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
-        OrganizationAccountIdNotSetError
+        OrganizationAccountIdNotSetError,
       );
     });
 
@@ -335,7 +335,7 @@ describe('StartAssessmentUseCase', () => {
         .build();
 
       await expect(useCase.startAssessment(input)).rejects.toThrowError(
-        OrganizationUnitBasedAgreementIdNotSetError
+        OrganizationUnitBasedAgreementIdNotSetError,
       );
     });
   });

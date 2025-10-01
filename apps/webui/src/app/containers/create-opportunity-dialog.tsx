@@ -60,7 +60,7 @@ function CreateOpportunityDialog({
           targetCloseDate: data.targetCloseDate,
           customerCity: data.city ?? '',
           customerAddress: data.streetAddress ?? '',
-        }
+        },
       );
       await Promise.all([
         queryClient.invalidateQueries({

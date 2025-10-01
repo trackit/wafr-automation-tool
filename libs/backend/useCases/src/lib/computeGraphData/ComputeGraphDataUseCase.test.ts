@@ -21,7 +21,7 @@ describe('ComputeGraphDataUseCase', () => {
     const input = ComputeGraphDataUseCaseArgsMother.basic().build();
 
     await expect(useCase.computeGraphData(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -105,7 +105,7 @@ describe('ComputeGraphDataUseCase', () => {
             Medium: 45,
           },
         })
-        .build()
+        .build(),
     );
   });
 });

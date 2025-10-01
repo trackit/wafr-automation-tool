@@ -41,13 +41,13 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
     const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+      (pillar) => pillar.id === pillarId.toString(),
     );
     const question = pillar?.questions.find(
-      (question) => question.id === questionId.toString()
+      (question) => question.id === questionId.toString(),
     );
     const bestPractice = question?.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
     );
     if (!bestPractice) {
       throw new Error();
@@ -108,7 +108,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   private updateAssessmentBody<T extends keyof Assessment>(
     assessment: Assessment,
     field: T,
-    value: Assessment[T]
+    value: Assessment[T],
   ): void {
     assessment[field] = value;
   }
@@ -125,7 +125,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       this.updateAssessmentBody(
         assessment,
         key as keyof Assessment,
-        value as Assessment[keyof Assessment]
+        value as Assessment[keyof Assessment],
       );
     }
   }
@@ -140,7 +140,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
     const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+      (pillar) => pillar.id === pillarId.toString(),
     );
     if (!pillar) {
       throw new Error();
@@ -151,7 +151,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   private updateQuestionBody<T extends keyof QuestionBody>(
     question: QuestionBody,
     field: T,
-    value: QuestionBody[T]
+    value: QuestionBody[T],
   ): void {
     question[field] = value;
   }
@@ -174,13 +174,13 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       this.assessments[`${assessmentId}#${organizationDomain}`];
     const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
     const question = pillar?.questions.find(
-      (question) => question.id === questionId
+      (question) => question.id === questionId,
     );
     for (const [key, value] of Object.entries(questionBody)) {
       this.updateQuestionBody(
         question as Question,
         key as keyof QuestionBody,
-        value as QuestionBody[keyof QuestionBody]
+        value as QuestionBody[keyof QuestionBody],
       );
     }
   }
@@ -203,13 +203,13 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
     const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+      (pillar) => pillar.id === pillarId.toString(),
     );
     const question = pillar?.questions.find(
-      (question) => question.id === questionId.toString()
+      (question) => question.id === questionId.toString(),
     );
     const bestPractice = question?.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
     );
     if (!bestPractice) {
       throw new Error();
@@ -248,7 +248,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       fileExports[type] = [];
     }
     const fileExportIndex = fileExports[type].findIndex(
-      (fileExport) => fileExport.id === data.id
+      (fileExport) => fileExport.id === data.id,
     );
     if (fileExportIndex === -1) {
       fileExports[type].push(data);
@@ -275,7 +275,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       fileExports[type] = [];
     }
     fileExports[type] = fileExports[type].filter(
-      (fileExport) => fileExport.id !== id
+      (fileExport) => fileExport.id !== id,
     );
   }
 }

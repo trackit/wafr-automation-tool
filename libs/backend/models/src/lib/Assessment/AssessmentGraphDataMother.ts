@@ -22,21 +22,21 @@ export class AssessmentGraphDataMother {
   }
 
   public withRegions(
-    regions: Record<string, number>
+    regions: Record<string, number>,
   ): AssessmentGraphDataMother {
     this.data.regions = regions;
     return this;
   }
 
   public withResourceTypes(
-    resourceTypes: Record<string, number>
+    resourceTypes: Record<string, number>,
   ): AssessmentGraphDataMother {
     this.data.resourceTypes = resourceTypes;
     return this;
   }
 
   public withSeverities(
-    severities: Record<string, number>
+    severities: Record<string, number>,
   ): AssessmentGraphDataMother {
     this.data.severities = severities;
     return this;

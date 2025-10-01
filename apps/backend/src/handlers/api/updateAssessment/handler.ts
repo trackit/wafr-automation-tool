@@ -5,5 +5,5 @@ import { UpdateAssessmentAdapter } from './UpdateAssessmentAdapter';
 const adapter = new UpdateAssessmentAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

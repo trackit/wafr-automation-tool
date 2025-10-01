@@ -20,14 +20,14 @@ export class GetScannedFindingsUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetScannedFindingsUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): GetScannedFindingsUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;
@@ -39,14 +39,14 @@ export class GetScannedFindingsUseCaseArgsMother {
   }
 
   public withWorkflows(
-    workflows: string[]
+    workflows: string[],
   ): GetScannedFindingsUseCaseArgsMother {
     this.data.workflows = workflows;
     return this;
   }
 
   public withScanningTool(
-    scanningTool: ScanningTool
+    scanningTool: ScanningTool,
   ): GetScannedFindingsUseCaseArgsMother {
     this.data.scanningTool = scanningTool;
     return this;

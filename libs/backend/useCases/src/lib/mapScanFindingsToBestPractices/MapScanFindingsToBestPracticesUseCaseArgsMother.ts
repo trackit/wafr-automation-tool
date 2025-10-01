@@ -18,14 +18,14 @@ export class MapScanFindingsToBestPracticesUseCaseArgsMother {
   }
 
   public withScanFindings(
-    scanFindings: ScanFinding[]
+    scanFindings: ScanFinding[],
   ): MapScanFindingsToBestPracticesUseCaseArgsMother {
     this.data.scanFindings = scanFindings;
     return this;
   }
 
   public withPillars(
-    pillars: Pillar[]
+    pillars: Pillar[],
   ): MapScanFindingsToBestPracticesUseCaseArgsMother {
     this.data.pillars = pillars;
     return this;

@@ -11,7 +11,7 @@ export type GetAssessmentsUseCaseArgs = {
 
 export interface GetAssessmentsUseCase {
   getAssessments(
-    args: GetAssessmentsUseCaseArgs
+    args: GetAssessmentsUseCaseArgs,
   ): Promise<{ assessments: Assessment[]; nextToken?: string }>;
 }
 
@@ -19,7 +19,7 @@ export class GetAssessmentsUseCaseImpl implements GetAssessmentsUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async getAssessments(
-    args: GetAssessmentsUseCaseArgs
+    args: GetAssessmentsUseCaseArgs,
   ): Promise<{ assessments: Assessment[]; nextToken?: string }> {
     const { user, ...remaining } = args;
     return await this.assessmentsRepository.getAll({

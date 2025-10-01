@@ -5,5 +5,5 @@ import { CreateOpportunityAdapter } from './CreateOpportunityAdapter';
 const adapter = new CreateOpportunityAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

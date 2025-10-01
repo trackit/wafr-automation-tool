@@ -12,7 +12,7 @@ export class AssessmentNotFoundError extends UseCaseError {
       assessmentId: string;
       organizationDomain: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, organizationDomain } = args;
     super({
@@ -28,7 +28,7 @@ export class AssessmentNotFinishedError extends UseCaseError {
     args: {
       assessmentId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId } = args;
     super({
@@ -44,7 +44,7 @@ export class AssessmentExportRegionNotSetError extends UseCaseError {
     args: {
       assessmentId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId } = args;
     super({
@@ -62,7 +62,7 @@ export class AssessmentFileExportNotFoundError extends UseCaseError {
       fileExportId: string;
       fileExportType: AssessmentFileExportType;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, fileExportId, fileExportType } = args;
     super({
@@ -80,7 +80,7 @@ export class AssessmentFileExportNotFinishedError extends UseCaseError {
       fileExportId: string;
       fileExportType: AssessmentFileExportType;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, fileExportId, fileExportType } = args;
     super({
@@ -99,7 +99,7 @@ export class AssessmentFileExportFieldNotFoundError extends UseCaseError {
       fileExportType: AssessmentFileExportType;
       fieldName: keyof AssessmentFileExport;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, fileExportId, fileExportType, fieldName } = args;
     super({
@@ -117,7 +117,7 @@ export class AssessmentFileExportAlreadyExistsError extends UseCaseError {
       fileExportType: AssessmentFileExportType;
       versionName: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, fileExportType, versionName } = args;
     super({
@@ -134,7 +134,7 @@ export class AssessmentOpportunityAlreadyLinkedError extends UseCaseError {
       assessmentId: string;
       opportunityId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, opportunityId } = args;
     super({

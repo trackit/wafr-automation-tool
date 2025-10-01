@@ -4,7 +4,7 @@ import { tokenComputeGraphDataUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 const ComputeGraphDataInputSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   organizationDomain: z.string().nonempty(),
 });
 
@@ -16,7 +16,7 @@ export class ComputeGraphDataAdapter {
   private readonly useCase = inject(tokenComputeGraphDataUseCase);
 
   public async handle(
-    event: Record<string, unknown>
+    event: Record<string, unknown>,
   ): Promise<ComputeGraphDataOutput> {
     const input = ComputeGraphDataInputSchema.parse(event);
     return await this.useCase.computeGraphData(input);

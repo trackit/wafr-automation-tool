@@ -19,7 +19,7 @@ export class DeleteCommentUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): DeleteCommentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;

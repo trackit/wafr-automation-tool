@@ -19,7 +19,7 @@ afterEach(async () => {
   const tableName = inject(tokenDynamoDBOrganizationTableName);
 
   const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName })
+    new ScanCommand({ TableName: tableName }),
   );
 
   await Promise.all(
@@ -30,9 +30,9 @@ afterEach(async () => {
           Key: {
             PK: item.PK,
           },
-        })
+        }),
       );
-    })
+    }),
   );
 });
 

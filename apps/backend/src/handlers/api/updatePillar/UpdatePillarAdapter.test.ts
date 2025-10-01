@@ -30,7 +30,7 @@ describe('updatePillar adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -74,7 +74,7 @@ describe('updatePillar adapter', () => {
           assessmentId,
           pillarId,
           pillarBody,
-        })
+        }),
       );
     });
 

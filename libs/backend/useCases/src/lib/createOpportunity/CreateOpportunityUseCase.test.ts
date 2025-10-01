@@ -69,7 +69,7 @@ describe('CreateOpportunity UseCase', () => {
     await expect(useCase.createOpportunity(input)).resolves.toBeUndefined();
 
     expect(
-      fakePartnerCentralSellingService.createOpportunity
+      fakePartnerCentralSellingService.createOpportunity,
     ).toHaveBeenCalledExactlyOnceWith({
       assessment,
       organizationName: organization.name,
@@ -94,7 +94,7 @@ describe('CreateOpportunity UseCase', () => {
       .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -114,7 +114,7 @@ describe('CreateOpportunity UseCase', () => {
       .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      OrganizationNotFoundError
+      OrganizationNotFoundError,
     );
   });
 
@@ -143,7 +143,7 @@ describe('CreateOpportunity UseCase', () => {
       .build();
 
     await expect(useCase.createOpportunity(input)).rejects.toThrow(
-      AssessmentOpportunityAlreadyLinkedError
+      AssessmentOpportunityAlreadyLinkedError,
     );
   });
 
@@ -183,7 +183,7 @@ const setup = () => {
   return {
     useCase: new CreateOpportunityUseCaseImpl(),
     fakePartnerCentralSellingService: inject(
-      tokenFakePartnerCentralSellingService
+      tokenFakePartnerCentralSellingService,
     ),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),

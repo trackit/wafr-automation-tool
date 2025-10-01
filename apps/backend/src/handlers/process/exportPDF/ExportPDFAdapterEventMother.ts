@@ -13,8 +13,8 @@ export class ExportPDFAdapterEventMother {
 
   public static basic(): ExportPDFAdapterEventMother {
     return new ExportPDFAdapterEventMother({
-      assessmentId: 'assessment-id',
-      organizationDomain: 'organization-domain',
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'test.io',
       fileExportId: 'file-export-id',
     });
   }
@@ -25,7 +25,7 @@ export class ExportPDFAdapterEventMother {
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): ExportPDFAdapterEventMother {
     this.params.organizationDomain = organizationDomain;
     return this;

@@ -57,7 +57,7 @@ describe('CreateMilestoneUseCase', () => {
     await useCase.createMilestone(input);
 
     expect(
-      fakeWellArchitectedToolService.createMilestone
+      fakeWellArchitectedToolService.createMilestone,
     ).toHaveBeenCalledExactlyOnceWith({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
@@ -73,7 +73,7 @@ describe('CreateMilestoneUseCase', () => {
     const input = CreateMilestoneUseCaseArgsMother.basic().build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -103,7 +103,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -133,7 +133,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -163,7 +163,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -186,7 +186,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      OrganizationNotFoundError
+      OrganizationNotFoundError,
     );
   });
 
@@ -217,7 +217,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      OrganizationExportRoleNotSetError
+      OrganizationExportRoleNotSetError,
     );
   });
 
@@ -248,7 +248,7 @@ describe('CreateMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.createMilestone(input)).rejects.toThrow(
-      AssessmentExportRegionNotSetError
+      AssessmentExportRegionNotSetError,
     );
   });
 });
@@ -258,7 +258,7 @@ const setup = () => {
   registerTestInfrastructure();
 
   const fakeWellArchitectedToolService = inject(
-    tokenFakeWellArchitectedToolService
+    tokenFakeWellArchitectedToolService,
   );
   vitest.spyOn(fakeWellArchitectedToolService, 'createMilestone');
   const useCase = new CreateMilestoneUseCaseImpl();

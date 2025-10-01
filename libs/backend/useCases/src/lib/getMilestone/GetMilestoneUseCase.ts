@@ -27,7 +27,7 @@ export interface GetMilestoneUseCase {
 
 export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
   private readonly wellArchitectedToolService = inject(
-    tokenWellArchitectedToolService
+    tokenWellArchitectedToolService,
   );
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);

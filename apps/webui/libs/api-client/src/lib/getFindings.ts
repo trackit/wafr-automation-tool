@@ -10,7 +10,7 @@ export const getFindings = async (
   limit: number | undefined = undefined,
   search: string | undefined = undefined,
   showHidden: boolean | undefined = undefined,
-  nextToken: string | undefined = undefined
+  nextToken: string | undefined = undefined,
 ) => {
   const params = new URLSearchParams();
   if (limit) params.set('limit', limit.toString());
@@ -21,6 +21,6 @@ export const getFindings = async (
   return apiClient.get<
     paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
   >(
-    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`
+    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
   );
 };

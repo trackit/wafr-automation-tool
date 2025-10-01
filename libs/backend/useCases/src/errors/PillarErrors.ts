@@ -9,7 +9,7 @@ export class PillarNotFoundError extends UseCaseError {
       organizationDomain: string;
       pillarId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, organizationDomain, pillarId } = args;
     super({

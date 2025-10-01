@@ -10,7 +10,7 @@ export class QuestionNotFoundError extends UseCaseError {
       pillarId: string;
       questionId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, organizationDomain, pillarId, questionId } = args;
     super({

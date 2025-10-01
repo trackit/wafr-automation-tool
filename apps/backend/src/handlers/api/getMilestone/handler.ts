@@ -5,5 +5,5 @@ import { GetMilestoneAdapter } from './GetMilestoneAdapter';
 const adapter = new GetMilestoneAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

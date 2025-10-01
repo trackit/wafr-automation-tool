@@ -39,14 +39,14 @@ export class StartAssessmentAdapterEventMother {
   }
 
   public withWorkflows(
-    workflows?: string[]
+    workflows?: string[],
   ): StartAssessmentAdapterEventMother {
     this.body.workflows = workflows;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): StartAssessmentAdapterEventMother {
     this.user = user;
     return this;

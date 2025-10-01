@@ -10,9 +10,9 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateCommentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   findingId: z.string().nonempty(),
-  commentId: z.string().uuid(),
+  commentId: z.uuid(),
 }) satisfies ZodType<operations['updateComment']['parameters']['path']>;
 
 const UpdateCommentBodySchema = z.object({
@@ -25,7 +25,7 @@ export class UpdateCommentAdapter {
   private readonly useCase = inject(tokenUpdateCommentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

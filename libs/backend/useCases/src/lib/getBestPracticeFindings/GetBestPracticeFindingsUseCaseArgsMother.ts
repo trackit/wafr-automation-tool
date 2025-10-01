@@ -24,28 +24,28 @@ export class GetBestPracticeFindingsUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withPillarId(
-    pillarId: string
+    pillarId: string,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(
-    questionId: string
+    questionId: string,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: string
+    bestPracticeId: string,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.bestPracticeId = bestPracticeId;
     return this;
@@ -57,28 +57,28 @@ export class GetBestPracticeFindingsUseCaseArgsMother {
   }
 
   public withLimit(
-    limit: NonNullable<GetBestPracticeFindingsUseCaseArgs['limit']>
+    limit: NonNullable<GetBestPracticeFindingsUseCaseArgs['limit']>,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.limit = limit;
     return this;
   }
 
   public withNextToken(
-    nextToken: NonNullable<GetBestPracticeFindingsUseCaseArgs['nextToken']>
+    nextToken: NonNullable<GetBestPracticeFindingsUseCaseArgs['nextToken']>,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.nextToken = nextToken;
     return this;
   }
 
   public withSearchTerm(
-    searchTerm: NonNullable<GetBestPracticeFindingsUseCaseArgs['searchTerm']>
+    searchTerm: NonNullable<GetBestPracticeFindingsUseCaseArgs['searchTerm']>,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.searchTerm = searchTerm;
     return this;
   }
 
   public withShowHidden(
-    showHidden: NonNullable<GetBestPracticeFindingsUseCaseArgs['showHidden']>
+    showHidden: NonNullable<GetBestPracticeFindingsUseCaseArgs['showHidden']>,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.showHidden = showHidden;
     return this;

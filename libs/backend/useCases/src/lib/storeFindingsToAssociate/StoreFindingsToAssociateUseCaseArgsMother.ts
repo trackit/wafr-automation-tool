@@ -19,28 +19,28 @@ export class StoreFindingsToAssociateUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): StoreFindingsToAssociateUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): StoreFindingsToAssociateUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;
   }
 
   public withScanningTool(
-    scanningTool: ScanningTool
+    scanningTool: ScanningTool,
   ): StoreFindingsToAssociateUseCaseArgsMother {
     this.data.scanningTool = scanningTool;
     return this;
   }
 
   public withScanFindings(
-    scanFindings: ScanFinding[]
+    scanFindings: ScanFinding[],
   ): StoreFindingsToAssociateUseCaseArgsMother {
     this.data.scanFindings = scanFindings;
     return this;

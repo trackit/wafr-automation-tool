@@ -25,7 +25,7 @@ describe('UpdateQuestionUseCase', () => {
     const input = UpdateQuestionUseCaseArgsMother.basic().build();
 
     await expect(useCase.updateQuestion(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -48,7 +48,7 @@ describe('UpdateQuestionUseCase', () => {
       .build();
 
     await expect(useCase.updateQuestion(input)).rejects.toThrow(
-      PillarNotFoundError
+      PillarNotFoundError,
     );
   });
 
@@ -72,7 +72,7 @@ describe('UpdateQuestionUseCase', () => {
       .build();
 
     await expect(useCase.updateQuestion(input)).rejects.toThrow(
-      QuestionNotFoundError
+      QuestionNotFoundError,
     );
   });
 
@@ -114,7 +114,7 @@ describe('UpdateQuestionUseCase', () => {
         id: question.id,
         disabled: true,
         none: true,
-      })
+      }),
     );
   });
 });

@@ -9,7 +9,7 @@ export class FindingNotFoundError extends UseCaseError {
       organizationDomain: string;
       findingId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, findingId, organizationDomain } = args;
     super({
@@ -28,7 +28,7 @@ export class FindingCommentNotFoundError extends UseCaseError {
       findingId: string;
       commentId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, findingId, organizationDomain, commentId } = args;
     super({
@@ -47,7 +47,7 @@ export class FindingCommentForbiddenError extends UseCaseError {
       userEmail: string;
       actionType: 'delete' | 'update';
     },
-    description?: string
+    description?: string,
   ) {
     const { findingId, commentId, userEmail, actionType } = args;
     super({

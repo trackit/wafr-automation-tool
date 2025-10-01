@@ -13,7 +13,7 @@ const ProwlerFindingSchema = z.object({
         uid: z.string().optional(),
         type: z.string().optional(),
         region: z.string().optional(),
-      })
+      }),
     )
     .optional(),
   remediation: z
@@ -26,7 +26,7 @@ const ProwlerFindingSchema = z.object({
   metadata: z.object({
     event_code: z.string().optional(),
   }),
-  severity: z.nativeEnum(SeverityType).optional(),
+  severity: z.enum(SeverityType).optional(),
   status_code: z.string().optional(),
   status_detail: z.string().optional(),
 });
@@ -38,7 +38,7 @@ export class ProwlerScanProvider extends ScanProvider {
 
   protected override async fetchFindings(): Promise<Omit<ScanFinding, 'id'>[]> {
     const scanOutput = await this.objectsStorage.get(
-      ProwlerScanProvider.getScanKey(this.assessmentId)
+      ProwlerScanProvider.getScanKey(this.assessmentId),
     );
     if (!scanOutput) {
       return [];

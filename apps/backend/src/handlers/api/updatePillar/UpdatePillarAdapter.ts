@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdatePillarPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   pillarId: z.string().nonempty(),
 }) satisfies ZodType<operations['updatePillar']['parameters']['path']>;
 
@@ -26,7 +26,7 @@ export class UpdatePillarAdapter {
   private readonly useCase = inject(tokenUpdatePillarUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

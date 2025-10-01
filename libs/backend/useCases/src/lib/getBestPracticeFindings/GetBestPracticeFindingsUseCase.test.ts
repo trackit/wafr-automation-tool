@@ -30,7 +30,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
     const input = GetBestPracticeFindingsUseCaseArgsMother.basic().build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -54,7 +54,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      PillarNotFoundError
+      PillarNotFoundError,
     );
   });
 
@@ -79,7 +79,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      QuestionNotFoundError
+      QuestionNotFoundError,
     );
   });
 
@@ -105,7 +105,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      BestPracticeNotFoundError
+      BestPracticeNotFoundError,
     );
   });
 
@@ -161,7 +161,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
           pillarId: pillar.id,
           questionId: question.id,
           bestPracticeId: bestPractice.id,
-        })
+        }),
       )
       .withId('finding-id')
       .build();
@@ -176,7 +176,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
           pillarId: pillar.id,
           questionId: question.id,
           bestPracticeId: bestPractice.id,
-        })
+        }),
       )
       .withId('other-finding-id')
       .build();
@@ -191,7 +191,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
           pillarId: pillar.id,
           questionId: question.id,
           bestPracticeId: bestPractice.id,
-        })
+        }),
       )
       .withId('another-finding-id')
       .build();

@@ -18,7 +18,7 @@ import {
 } from './AssessmentsRepositoryDynamoDBModels';
 
 export function toDynamoDBBestPracticeItem(
-  bestPractice: BestPractice
+  bestPractice: BestPractice,
 ): BestPractice {
   return {
     description: bestPractice.description,
@@ -41,7 +41,7 @@ export function toDynamoDBQuestionItem(question: Question): DynamoDBQuestion {
         ...bestPractices,
         [bestPractice.id]: toDynamoDBBestPracticeItem(bestPractice),
       }),
-      {}
+      {},
     ),
     disabled: question.disabled,
     id: question.id,
@@ -62,13 +62,13 @@ export function toDynamoDBPillarItem(pillar: Pillar): DynamoDBPillar {
         ...questions,
         [question.id]: toDynamoDBQuestionItem(question),
       }),
-      {}
+      {},
     ),
   };
 }
 
 export function toDynamoDBAssessmentItem(
-  assessment: Assessment
+  assessment: Assessment,
 ): DynamoDBAssessment {
   return {
     PK: getAssessmentPK(assessment.organization),
@@ -81,7 +81,7 @@ export function toDynamoDBAssessmentItem(
         ...pillars,
         [pillar.id]: toDynamoDBPillarItem(pillar),
       }),
-      {}
+      {},
     ),
     graphData: assessment.graphData,
     id: assessment.id,
@@ -105,16 +105,16 @@ export function toDynamoDBAssessmentItem(
             (v as AssessmentFileExport[]).map((fileExport) => [
               fileExport.id,
               toDynamoDBFileExportItem(fileExport),
-            ])
+            ]),
           ),
-        ])
+        ]),
       ) as DynamoDBAssessmentFileExports,
     }),
   };
 }
 
 export function toDynamoDBFileExportItem(
-  assessmentFileExport: AssessmentFileExport
+  assessmentFileExport: AssessmentFileExport,
 ): DynamoDBAssessmentFileExport {
   return {
     ...assessmentFileExport,
@@ -123,7 +123,7 @@ export function toDynamoDBFileExportItem(
 }
 
 export function toDynamoDBAssessmentBody(
-  assessmentBody: AssessmentBody
+  assessmentBody: AssessmentBody,
 ): Record<string, unknown> {
   return {
     ...assessmentBody,
@@ -133,7 +133,7 @@ export function toDynamoDBAssessmentBody(
           ...pillars,
           [pillar.id]: toDynamoDBPillarItem(pillar),
         }),
-        {}
+        {},
       ),
     }),
     ...(assessmentBody.fileExports && {
@@ -144,9 +144,9 @@ export function toDynamoDBAssessmentBody(
             (v as AssessmentFileExport[]).map((fileExport) => [
               fileExport.id,
               toDynamoDBFileExportItem(fileExport),
-            ])
+            ]),
           ),
-        ])
+        ]),
       ),
     }),
   };
@@ -167,7 +167,7 @@ export function fromDynamoDBBestPracticeItem(item: BestPractice): BestPractice {
 export function fromDynamoDBQuestionItem(item: DynamoDBQuestion): Question {
   return {
     bestPractices: Object.values(item.bestPractices).map((bestPractice) =>
-      fromDynamoDBBestPracticeItem(bestPractice)
+      fromDynamoDBBestPracticeItem(bestPractice),
     ),
     disabled: item.disabled,
     id: item.id,
@@ -184,13 +184,13 @@ export function fromDynamoDBPillarItem(item: DynamoDBPillar): Pillar {
     label: item.label,
     primaryId: item.primaryId,
     questions: Object.values(item.questions).map((question) =>
-      fromDynamoDBQuestionItem(question)
+      fromDynamoDBQuestionItem(question),
     ),
   };
 }
 
 export function fromDynamoDBFileExportItem(
-  item: DynamoDBAssessmentFileExport
+  item: DynamoDBAssessmentFileExport,
 ): AssessmentFileExport {
   return {
     ...item,
@@ -199,7 +199,7 @@ export function fromDynamoDBFileExportItem(
 }
 
 export function fromDynamoDBAssessmentItem(
-  item: DynamoDBAssessment | undefined
+  item: DynamoDBAssessment | undefined,
 ): Assessment | undefined {
   if (!item) return undefined;
   const assessment = item;
@@ -209,7 +209,7 @@ export function fromDynamoDBAssessmentItem(
     executionArn: assessment.executionArn,
     ...(assessment.pillars && {
       pillars: Object.values(assessment.pillars).map((pillar) =>
-        fromDynamoDBPillarItem(pillar)
+        fromDynamoDBPillarItem(pillar),
       ),
     }),
     graphData: assessment.graphData,
@@ -231,9 +231,9 @@ export function fromDynamoDBAssessmentItem(
         Object.entries(assessment.fileExports).map(([k, v]) => [
           k,
           Object.values(v as Record<string, DynamoDBAssessmentFileExport>).map(
-            (item) => fromDynamoDBFileExportItem(item)
+            (item) => fromDynamoDBFileExportItem(item),
           ),
-        ])
+        ]),
       ) as AssessmentFileExports,
     }),
   };

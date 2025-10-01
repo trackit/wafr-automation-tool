@@ -87,7 +87,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Best practice findings updated successfully for assessment ${assessmentId}`
+      `Best practice findings updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -158,7 +158,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     const formattedNextToken = encodeNextToken(result.LastEvaluatedKey);
     const assessments: Assessment[] =
       result.Items?.map((item) =>
-        fromDynamoDBAssessmentItem(item as DynamoDBAssessment)
+        fromDynamoDBAssessmentItem(item as DynamoDBAssessment),
       ).filter((assessment): assessment is Assessment => Boolean(assessment)) ??
       [];
     return {
@@ -232,7 +232,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -269,7 +269,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`,
     );
   }
 
@@ -310,7 +310,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -336,7 +336,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`
+      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -369,7 +369,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     this.logger.info(
       `${type.toUpperCase()} file with id ${
         data.id
-      } export updated successfully for assessment ${assessmentId}`
+      } export updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -396,7 +396,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `${type.toUpperCase()} file export with id ${id} deleted successfully for assessment ${assessmentId}`
+      `${type.toUpperCase()} file export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
   }
 }
