@@ -657,7 +657,7 @@ export function AssessmentDetails() {
           }
         },
       }),
-      columnHelper.accessor((row) => row.results?.length || 0, {
+      columnHelper.accessor((row) => row.findingAmount, {
         id: 'failedFindings',
         header: ({ column }) => (
           <button
@@ -671,14 +671,14 @@ export function AssessmentDetails() {
         cell: (info) => {
           return (
             <div className="m-4 mt-3 font-bold text-center">
-              {info.row.original.results?.length ? (
+              {info.row.original.findingAmount > 0 ? (
                 <button
                   className="btn btn-link text-error h-[20px]"
                   onClick={() => {
                     setBestPractice(info.row.original);
                   }}
                 >
-                  {info.row.original.results?.length || '0'}
+                  {info.row.original.findingAmount}
                 </button>
               ) : (
                 <div className="text-base-content/50 text-center">-</div>
@@ -727,7 +727,7 @@ export function AssessmentDetails() {
       label: 'None of the above',
       risk: 'Unknown',
       checked: activeQuestion?.none || false,
-      results: [],
+      findingAmount: 0,
       description: '',
       name: 'resolve',
     });

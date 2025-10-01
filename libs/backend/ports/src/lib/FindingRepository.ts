@@ -54,6 +54,14 @@ export interface FindingRepository {
     nextToken?: string;
   }>;
 
+  countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number>;
+
   deleteAll(args: {
     assessmentId: string;
     organizationDomain: string;

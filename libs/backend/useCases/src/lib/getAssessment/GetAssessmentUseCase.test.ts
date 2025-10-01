@@ -31,9 +31,10 @@ describe('GetAssessmentUseCase', () => {
       .withOrganizationDomain(assessment.organization)
       .build();
 
-    const returnedAssessment = await useCase.getAssessment(input);
+    const result = await useCase.getAssessment(input);
 
-    expect(returnedAssessment).toEqual(assessment);
+    expect(result.assessment).toEqual(assessment);
+    expect(result.bestPracticesFindingsAmount).toEqual({});
   });
 });
 

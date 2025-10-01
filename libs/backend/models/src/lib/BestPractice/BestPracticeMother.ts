@@ -1,4 +1,4 @@
-import { Finding, SeverityType } from '../Finding';
+import { SeverityType } from '../Finding';
 import type { BestPractice } from './BestPractice';
 
 export class BestPracticeMother {
@@ -14,7 +14,6 @@ export class BestPracticeMother {
       id: 'best-practice-id',
       label: 'Best Practice Label',
       primaryId: 'primary-id',
-      findings: [],
       risk: SeverityType.Medium,
       checked: true,
     });
@@ -37,11 +36,6 @@ export class BestPracticeMother {
 
   public withPrimaryId(primaryId: string): BestPracticeMother {
     this.data.primaryId = primaryId;
-    return this;
-  }
-
-  public withFindings(findings: Finding[]): BestPracticeMother {
-    this.data.findings = findings;
     return this;
   }
 

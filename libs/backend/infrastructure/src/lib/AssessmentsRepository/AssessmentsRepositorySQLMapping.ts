@@ -20,7 +20,6 @@ export function toDomainBestPractice(e: BestPracticeEntity): BestPractice {
     description: e.description,
     label: e.label,
     primaryId: e.primaryId,
-    findings: e.findings ?? [],
     risk: e.risk,
     checked: e.checked,
   };

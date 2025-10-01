@@ -52,6 +52,7 @@ Globals:
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
+      Ipv6AllowedForDualStack: true
 
 Resources:
   UserPool:

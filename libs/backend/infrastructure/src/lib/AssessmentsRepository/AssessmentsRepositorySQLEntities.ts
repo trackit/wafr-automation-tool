@@ -2,8 +2,6 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
@@ -19,8 +17,6 @@ import {
   Question,
   SeverityType,
 } from '@backend/models';
-
-import { FindingEntity } from '../FindingsRepository/FindingsRepositorySQLEntities';
 
 @Entity('assessments')
 export class AssessmentEntity implements Omit<Assessment, 'organization'> {
@@ -168,22 +164,6 @@ export class BestPracticeEntity implements BestPractice {
 
   @Column('varchar')
   primaryId!: string;
-
-  @ManyToMany(() => FindingEntity, (f) => f.bestPractices)
-  @JoinTable({
-    name: 'findingBestPractices',
-    joinColumns: [
-      { name: 'bp_assessment_id', referencedColumnName: 'assessmentId' },
-      { name: 'bp_question_id', referencedColumnName: 'questionId' },
-      { name: 'bp_pillar_id', referencedColumnName: 'pillarId' },
-      { name: 'bp_id', referencedColumnName: 'id' },
-    ],
-    inverseJoinColumns: [
-      { name: 'finding_assessment_id', referencedColumnName: 'assessmentId' },
-      { name: 'finding_id', referencedColumnName: 'id' },
-    ],
-  })
-  findings!: FindingEntity[];
 
   @Column('varchar')
   risk!: SeverityType;

@@ -46,7 +46,7 @@ export class GetMilestoneAdapter {
           ...question,
           bestPractices: question.bestPractices.map((bestPractice) => ({
             ...bestPractice,
-            findingAmmount: bestPractice.findings.length,
+            findingAmount: 0,
           })),
         })),
       })),

@@ -29,6 +29,9 @@ export class FindingsRepositorySQL implements FindingRepository {
     entity: EntityTarget<T>,
     organization: string
   ): Promise<Repository<T>> {
+    if (!this.clientManager.isInitialized) {
+      await this.clientManager.initialize();
+    }
     const dataSource = await this.clientManager.getClient(organization);
     return dataSource.getRepository(entity);
   }
@@ -210,7 +213,7 @@ export class FindingsRepositorySQL implements FindingRepository {
       .leftJoinAndSelect('f.bestPractices', 'bp')
       .where('f.assessmentId = :assessmentId', { assessmentId })
       .andWhere('f.id IN (:...ids)', { ids })
-      .orderBy('f.id', 'ASC')
+      .orderBy('f.severity', 'ASC')
       .getMany();
 
     const nextTk = hasMore
@@ -221,6 +224,34 @@ export class FindingsRepositorySQL implements FindingRepository {
       findings: entities.map((e) => toDomainFinding(e)),
       nextToken: nextTk,
     };
+  }
+
+  public async countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const qb = repo
+      .createQueryBuilder('f')
+      .innerJoin('f.bestPractices', 'bp')
+      .where('f.assessmentId = :assessmentId', { assessmentId })
+      .andWhere('bp.id = :bestPracticeId', { bestPracticeId })
+      .andWhere('bp.questionId = :questionId', { questionId })
+      .andWhere('bp.pillarId = :pillarId', { pillarId })
+      .select('COUNT(f.id)', 'count');
+
+    return parseInt((await qb.getRawOne())?.count) || 0;
   }
 
   public async deleteAll(args: {

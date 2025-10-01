@@ -85,7 +85,6 @@ export class QuestionSetService implements QuestionSetPort {
             ...{ ...rawBestPractice, primaryId: undefined },
             id: bestPracticeId,
             primaryId: rawBestPractice.primaryId,
-            findings: [],
             checked: false,
           });
         }

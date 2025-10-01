@@ -22,6 +22,12 @@ Resources:
         - Key: Name
           Value: VPC
 
+  VpcIpv6Cidr:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AmazonProvidedIpv6CidrBlock: true
+
   PublicSubnetEcs:
     Type: AWS::EC2::Subnet
     Properties:
@@ -67,6 +73,42 @@ Resources:
         - Key: Name
           Value: PrivateSubnetB
 
+  PublicSubnetEcsIpv6:
+    Type: AWS::EC2::SubnetCidrBlock
+    DependsOn: VpcIpv6Cidr
+    Properties:
+      SubnetId: !Ref PublicSubnetEcs
+      Ipv6CidrBlock: !Select
+        - 2
+        - !Cidr
+          - !Select [0, !GetAtt VPC.Ipv6CidrBlocks]
+          - 256
+          - 64
+
+  PrivateSubnetAIpv6:
+    Type: AWS::EC2::SubnetCidrBlock
+    DependsOn: VpcIpv6Cidr
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      Ipv6CidrBlock: !Select
+        - 0
+        - !Cidr
+          - !Select [0, !GetAtt VPC.Ipv6CidrBlocks]
+          - 256
+          - 64
+
+  PrivateSubnetBIpv6:
+    Type: AWS::EC2::SubnetCidrBlock
+    DependsOn: VpcIpv6Cidr
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      Ipv6CidrBlock: !Select
+        - 1
+        - !Cidr
+          - !Select [0, !GetAtt VPC.Ipv6CidrBlocks]
+          - 256
+          - 64
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -77,6 +119,11 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: InternetGateway
+
+  EgressOnlyInternetGateway:
+    Type: AWS::EC2::EgressOnlyInternetGateway
+    Properties:
+      VpcId: !Ref VPC
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -102,6 +149,13 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicIPv6DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationIpv6CidrBlock: ::/0
       GatewayId: !Ref InternetGateway
 
   PublicSubnetRouteTableAssoc:
@@ -146,6 +200,20 @@ Resources:
       SubnetId: !Ref PrivateSubnetB
       RouteTableId: !Ref PrivateRouteTableB
 
+  PrivateAIPv6DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableA
+      DestinationIpv6CidrBlock: ::/0
+      EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGateway
+
+  PrivateBIPv6DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableB
+      DestinationIpv6CidrBlock: ::/0
+      EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGateway
+
   AuroraDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -169,6 +237,8 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
+        - IpProtocol: -1
+          CidrIpv6: ::/0
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -207,6 +277,8 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
+        - IpProtocol: -1
+          CidrIpv6: ::/0
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -223,6 +295,8 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
+        - IpProtocol: -1
+          CidrIpv6: ::/0
       Tags:
         - Key: Project
           Value: !Ref Project
@@ -252,6 +326,8 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
+        - IpProtocol: -1
+          CidrIpv6: ::/0
       Tags:
         - Key: Project
           Value: !Ref Project

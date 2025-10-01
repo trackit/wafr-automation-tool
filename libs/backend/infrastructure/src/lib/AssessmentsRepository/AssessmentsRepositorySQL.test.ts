@@ -28,6 +28,10 @@ beforeAll(async () => {
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
+});
+
+afterAll(async () => {
+  const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
 
@@ -57,7 +61,6 @@ describe('AssessmentsRepositorySQL', () => {
                     .withLabel('Best Practice 1')
                     .withPrimaryId('bp1-primary')
                     .withRisk(SeverityType.Medium)
-                    .withFindings([])
                     .withChecked(true)
                     .build(),
                 ])

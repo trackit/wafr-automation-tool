@@ -161,7 +161,7 @@ Resources:
       ManageMasterUserPassword: true
       ServerlessV2ScalingConfiguration:
         MinCapacity: 0
-        MaxCapacity: 1
+        MaxCapacity: 5
       Tags:
         - Key: Project
           Value: !Ref Project

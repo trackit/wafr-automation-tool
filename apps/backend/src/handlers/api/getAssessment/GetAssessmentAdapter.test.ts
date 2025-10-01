@@ -4,7 +4,6 @@ import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
-  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { tokenGetAssessmentUseCase } from '@backend/useCases';
@@ -97,7 +96,6 @@ describe('getAssessment adapter', () => {
                     .withDescription('best practice description')
                     .withId('best-practice-id')
                     .withLabel('best practice')
-                    .withResults(new Set(['prowler#1', 'prowler#2']))
                     .withRisk(SeverityType.Medium)
                     .withChecked(true)
                     .build(),
@@ -110,28 +108,18 @@ describe('getAssessment adapter', () => {
             ])
             .build(),
         ])
-        .withGraphData({
-          findings: 2,
-          regions: { 'us-west-2': 2 },
-          resourceTypes: { type: 2 },
-          severities: { [SeverityType.Medium]: 2 },
-        })
+
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: {
-            findings: 2,
-            regions: { 'us-west-2': 2 },
-            resourceTypes: { type: 2 },
-            severities: { [SeverityType.Medium]: 2 },
-          },
-        })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
         .withWorkflows([])
         .build();
-      useCase.getAssessment.mockResolvedValue(assessment);
+      useCase.getAssessment.mockResolvedValue({
+        assessment,
+        bestPracticesFindingsAmount: {},
+      });
 
       const event = GetAssessmentAdapterEventMother.basic()
         .withAssessmentId(assessment.id)
@@ -153,7 +141,7 @@ describe('getAssessment adapter', () => {
                     description: 'best practice description',
                     id: 'best-practice-id',
                     label: 'best practice',
-                    results: ['prowler#1', 'prowler#2'],
+                    findingAmount: 1,
                     risk: SeverityType.Medium,
                     checked: true,
                   },
@@ -182,7 +170,10 @@ describe('getAssessment adapter', () => {
       const event = GetAssessmentAdapterEventMother.basic().build();
 
       const assessment = AssessmentMother.basic().build();
-      useCase.getAssessment.mockResolvedValue(assessment);
+      useCase.getAssessment.mockResolvedValue({
+        assessment,
+        bestPracticesFindingsAmount: {},
+      });
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);

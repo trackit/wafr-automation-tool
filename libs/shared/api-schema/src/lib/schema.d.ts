@@ -523,7 +523,7 @@ export interface components {
             risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description: string;
             checked: boolean;
-            findingAmmount: number;
+            findingAmount: number;
         };
         BestPracticeDto: {
             checked?: boolean;

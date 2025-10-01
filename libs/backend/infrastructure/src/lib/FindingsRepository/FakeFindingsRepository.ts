@@ -73,7 +73,6 @@ export class FakeFindingsRepository implements FindingRepository {
         throw new Error();
       }
       finding.bestPractices.push(bestPractice);
-      bestPractice.findings.push(finding);
     }
   }
 
@@ -148,7 +147,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const findings =
       this.findings[key]
         ?.filter((finding) =>
-          bestPractice.findings.find((bp) => bp.id === finding.id)
+          finding.bestPractices.find((bp) => bp.id === bestPractice.id)
         )
         .filter((finding) => {
           if (!searchTerm) return true;
@@ -163,6 +162,40 @@ export class FakeFindingsRepository implements FindingRepository {
       findings,
       nextToken: undefined, // No pagination in this fake implementation
     };
+  }
+
+  public async countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const key = `${assessmentId}#${organizationDomain}`;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+    if (!bestPractice) {
+      throw new Error();
+    }
+
+    const findings = this.findings[key]?.filter((finding) =>
+      finding.bestPractices.find((bp) => bp.id === bestPractice.id)
+    );
+    return findings.length;
   }
 
   public async deleteAll(args: {

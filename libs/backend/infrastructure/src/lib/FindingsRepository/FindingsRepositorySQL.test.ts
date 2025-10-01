@@ -23,6 +23,7 @@ beforeAll(async () => {
   reset();
   registerTestInfrastructure();
   const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
 });
@@ -903,6 +904,83 @@ describe('FindingsRepositoryDynamoDB', () => {
       expect(firstFindings).not.toEqual(secondFindings);
       expect(firstFindings.length).toBe(1);
       expect(secondFindings.length).toBe(1);
+    });
+  });
+
+  describe('countBestPracticeFindings', () => {
+    it('should return the number of findings for a best practice', async () => {
+      const { repository, assessmentsRepository } = setup();
+
+      const bestPractice = BestPracticeMother.basic().build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await assessmentsRepository.save(assessment);
+
+      const finding1 = FindingMother.basic()
+        .withBestPractices([bestPractice])
+        .withId('tool#1')
+        .build();
+      await repository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic()
+        .withBestPractices([bestPractice])
+        .withId('tool#2')
+        .build();
+      await repository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding2,
+      });
+
+      await repository.saveBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
+        bestPracticeFindingIds: new Set([finding1.id, finding2.id]),
+      });
+      finding1.bestPractices = [bestPractice];
+      finding2.bestPractices = [bestPractice];
+
+      const count = await repository.countBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
+      });
+
+      expect(count).toBe(2);
+    });
+
+    it('should return 0 if no findings exist', async () => {
+      const { repository, assessmentsRepository } = setup();
+
+      const bestPractice = BestPracticeMother.basic().build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await assessmentsRepository.save(assessment);
+
+      const count = await repository.countBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
+      });
+
+      expect(count).toBe(0);
     });
   });
 

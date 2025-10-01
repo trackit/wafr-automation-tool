@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -27,7 +28,20 @@ export class FindingEntity implements Finding {
   @PrimaryColumn('varchar')
   id!: string;
 
-  @ManyToMany(() => BestPracticeEntity, (bp) => bp.findings)
+  @ManyToMany(() => BestPracticeEntity)
+  @JoinTable({
+    name: 'findingBestPractices',
+    joinColumns: [
+      { name: 'finding_assessment_id', referencedColumnName: 'assessmentId' },
+      { name: 'finding_id', referencedColumnName: 'id' },
+    ],
+    inverseJoinColumns: [
+      { name: 'bp_assessment_id', referencedColumnName: 'assessmentId' },
+      { name: 'bp_question_id', referencedColumnName: 'questionId' },
+      { name: 'bp_pillar_id', referencedColumnName: 'pillarId' },
+      { name: 'bp_id', referencedColumnName: 'id' },
+    ],
+  })
   bestPractices!: BestPracticeEntity[];
 
   @Column('boolean')
@@ -96,16 +110,16 @@ export class FindingResourceEntity implements FindingResource {
   findingId!: string;
 
   @Column('varchar')
-  name!: string;
+  name?: string;
 
   @Column('varchar')
   region!: string;
 
   @Column('varchar')
-  type!: string;
+  type?: string;
 
   @Column('varchar')
-  uid!: string;
+  uid?: string;
 
   @ManyToOne(() => FindingEntity, (f) => f.comments, { onDelete: 'CASCADE' })
   @JoinColumn([

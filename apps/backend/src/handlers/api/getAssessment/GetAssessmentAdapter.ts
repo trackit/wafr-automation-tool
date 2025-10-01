@@ -2,7 +2,10 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z, ZodType } from 'zod';
 
 import type { Assessment } from '@backend/models';
-import { tokenGetAssessmentUseCase } from '@backend/useCases';
+import {
+  BestPracticesFindingCounts,
+  tokenGetAssessmentUseCase,
+} from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';
 
@@ -27,9 +30,11 @@ export class GetAssessmentAdapter {
     });
   }
 
-  private toGetAssessmentResponse(
-    assessment: Assessment
-  ): operations['getAssessment']['responses'][200]['content']['application/json'] {
+  private toGetAssessmentResponse(args: {
+    assessment: Assessment;
+    bestPracticesFindingsAmount: BestPracticesFindingCounts;
+  }): operations['getAssessment']['responses'][200]['content']['application/json'] {
+    const { assessment, bestPracticesFindingsAmount } = args;
     return {
       createdAt: assessment.createdAt.toISOString(),
       createdBy: assessment.createdBy,
@@ -45,7 +50,10 @@ export class GetAssessmentAdapter {
               label: bestPractice.label,
               risk: bestPractice.risk,
               checked: bestPractice.checked,
-              findingAmmount: bestPractice.findings.length,
+              findingAmount:
+                bestPracticesFindingsAmount[pillar.id]?.[question.id]?.[
+                  bestPractice.id
+                ],
             })),
             disabled: question.disabled,
             id: question.id,
@@ -77,11 +85,11 @@ export class GetAssessmentAdapter {
 
     const user = getUserFromEvent(event);
 
-    const assessment = await this.useCase.getAssessment({
+    const result = await this.useCase.getAssessment({
       organizationDomain: user.organizationDomain,
       assessmentId,
     });
 
-    return this.toGetAssessmentResponse(assessment);
+    return this.toGetAssessmentResponse(result);
   }
 }

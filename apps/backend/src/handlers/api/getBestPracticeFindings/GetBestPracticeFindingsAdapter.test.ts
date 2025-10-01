@@ -165,10 +165,9 @@ describe('getBestPracticeFindings adapter', () => {
       const findings = [
         FindingMother.basic()
           .withId('scanning-tool#1')
-          .withBestPractices('0#0#0')
           .withHidden(false)
           .withIsAIAssociated(false)
-          .withMetadata({ eventCode: 'event-code' })
+          .withEventCode('event-code')
           .withRemediation({
             desc: 'remediation description',
             references: ['ref1'],
