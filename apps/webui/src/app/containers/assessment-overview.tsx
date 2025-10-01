@@ -78,9 +78,10 @@ function AssessmentOverview({
           .map(([name, value]) => ({ name, value: value as number }))
       : [];
     const topN = 3;
+    const top = regions.slice(0, topN);
     const rest = regions.slice(topN);
     const othersSum = rest.reduce((s, r) => s + r.value, 0);
-    const processedRegions = [...regions.slice(0, topN)];
+    const processedRegions = top;
     if (othersSum > 0) {
       processedRegions.push({ name: 'Other', value: othersSum });
     }
