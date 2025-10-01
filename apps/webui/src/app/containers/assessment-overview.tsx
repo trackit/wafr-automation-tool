@@ -62,7 +62,7 @@ function AssessmentOverview({
 }) {
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Consolidated useMemo for all data processing
@@ -88,7 +88,7 @@ function AssessmentOverview({
 
     const totalRegionsCount = processedRegions.reduce(
       (sum, item) => sum + item.value,
-      0
+      0,
     );
     // Process severities data
     const severities = graphData.severities
@@ -116,7 +116,7 @@ function AssessmentOverview({
       totalRegionsCount,
       totalSeveritiesCount: severities.reduce(
         (sum, item) => sum + item.value,
-        0
+        0,
       ),
     };
   }, [assessment]);
@@ -134,7 +134,7 @@ function AssessmentOverview({
   useMemo(() => {
     if (assessmentResourceTypes.length > 0) {
       setEnabledResourceTypes(
-        new Set(assessmentResourceTypes.map((rt) => rt.name))
+        new Set(assessmentResourceTypes.map((rt) => rt.name)),
       );
     }
   }, [assessmentResourceTypes]);
@@ -142,7 +142,7 @@ function AssessmentOverview({
   // Get filtered resource types for charts
   const filteredResourceTypes = useMemo(() => {
     return assessmentResourceTypes.filter((rt) =>
-      enabledResourceTypes.has(rt.name)
+      enabledResourceTypes.has(rt.name),
     );
   }, [assessmentResourceTypes, enabledResourceTypes]);
 
