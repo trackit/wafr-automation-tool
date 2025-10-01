@@ -13,7 +13,7 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useCallback,useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 
@@ -71,17 +71,24 @@ function AssessmentsList() {
   };
 
   // Store assessment steps in local state
-  const [assessmentSteps, setAssessmentSteps] = useState<Record<string, string>>({});
+  const [assessmentSteps, setAssessmentSteps] = useState<
+    Record<string, string>
+  >({});
 
-  const fetchStep = useCallback(async (id: string) => {
-    if (assessmentSteps[id]) return;
-    const step = await getAssessmentStep(id);
-    setAssessmentSteps(prev => ({ ...prev, [id]: step }));
-  }, [assessmentSteps]);
+  const fetchStep = useCallback(
+    async (id: string) => {
+      if (assessmentSteps[id]) return;
+      const step = await getAssessmentStep(id);
+      setAssessmentSteps((prev) => ({ ...prev, [id]: step }));
+    },
+    [assessmentSteps]
+  );
 
   useEffect(() => {
     if (!data?.pages) return;
-    const ids = data.pages.flatMap(page => page.assessments?.map(a => a.id).filter(Boolean) ?? []);
+    const ids = data.pages.flatMap(
+      (page) => page.assessments?.map((a) => a.id).filter(Boolean) ?? []
+    );
     for (const id of ids) {
       if (!id || assessmentSteps[id]) continue;
       fetchStep(id);
@@ -186,10 +193,15 @@ function AssessmentsList() {
                     {assessment.name}
                   </div>
                   <div className="flex flex-row items-center gap-1 flex-1 flex-grow justify-end">
-                    <StatusBadge
-                      status={assessmentSteps[assessment.id!] || 'UNKNOWN'}
-                      className="badge-sm flex-shrink-0 "
-                    />
+                    {assessmentSteps[assessment.id!] ? (
+                      <StatusBadge
+                        status={assessmentSteps[assessment.id!]}
+                        className="badge-sm flex-shrink-0 "
+                      />
+                    ) : (
+                      <span className="loading loading-dots loading-xs text-base-content"></span>
+                    )}
+
                     <div
                       className="dropdown dropdown-end"
                       onClick={(e) => {

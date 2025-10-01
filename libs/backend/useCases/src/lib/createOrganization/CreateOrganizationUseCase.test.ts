@@ -24,9 +24,7 @@ afterEach(async () => {
 describe('CreateOrganizationUseCase', () => {
   it('should create a database', async () => {
     const { useCase, clientManager } = setup();
-    const org = OrganizationMother.basic()
-      .withDomain('organization1')
-      .build();
+    const org = OrganizationMother.basic().withDomain('organization1').build();
     const createClientSpy = vitest.spyOn(clientManager, 'createClient');
     await useCase.createOrganization(org);
     expect(createClientSpy).toHaveBeenCalledWith('organization1');
@@ -34,9 +32,7 @@ describe('CreateOrganizationUseCase', () => {
 
   it('should save the organization into the repository', async () => {
     const { useCase, fakeOrganizationRepository } = setup();
-    const org = OrganizationMother.basic()
-      .withDomain('organization1')
-      .build();
+    const org = OrganizationMother.basic().withDomain('organization1').build();
     await useCase.createOrganization(org);
     expect(fakeOrganizationRepository.organizations.organization1).toEqual(org);
   });

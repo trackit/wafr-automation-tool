@@ -25,24 +25,15 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   public async getAssessmentStep(
     executionArn: string
   ): Promise<AssessmentStep> {
-    const [describeResponse, historyResponse] = await Promise.all([
-      this.client.send(new DescribeExecutionCommand({ executionArn })),
-      this.client.send(
-        new GetExecutionHistoryCommand({
-          executionArn,
-          maxResults: 100,
-          reverseOrder: true,
-        })
-      ),
-    ]);
+    const historyResponse = await this.client.send(
+      new GetExecutionHistoryCommand({
+        executionArn,
+        maxResults: 100,
+        reverseOrder: true,
+      })
+    );
     const events = historyResponse.events || [];
 
-    if (describeResponse.status === ExecutionStatus.FAILED) {
-      return AssessmentStep.ERRORED;
-    }
-    if (describeResponse.status === ExecutionStatus.SUCCEEDED) {
-      return AssessmentStep.FINISHED;
-    }
     const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
       Pass: AssessmentStep.SCANNING_STARTED,
       ScanningTools: AssessmentStep.SCANNING_STARTED,
@@ -54,13 +45,22 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
       AssociateFindingsChunkToBestPractices:
         AssessmentStep.ASSOCIATING_FINDINGS,
       ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
+      CleanupOnError: AssessmentStep.ERRORED,
     };
     for (const event of events) {
       const stateName = event.stateEnteredEventDetails?.name;
+      const stateExitedName = event.stateExitedEventDetails?.name;
+      if (stateExitedName === 'Cleanup') {
+        return AssessmentStep.FINISHED;
+      }
       if (stateName && knownStateToAssessmentStep[stateName]) {
         return knownStateToAssessmentStep[stateName];
       }
     }
+
+    const describeResponse = await this.client.send(
+      new DescribeExecutionCommand({ executionArn })
+    );
     if (describeResponse.status === ExecutionStatus.RUNNING) {
       return AssessmentStep.SCANNING_STARTED;
     }

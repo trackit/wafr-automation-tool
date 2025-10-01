@@ -392,6 +392,19 @@ Resources:
       SecurityGroupIds:
         - !Ref InterfaceEndpointSecurityGroup
 
+  BedrockInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.bedrock-runtime
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      SecurityGroupIds:
+        - !Ref InterfaceEndpointSecurityGroup
+
 Outputs:
   VpcId:
     Description: VPC Id
