@@ -25,7 +25,7 @@ describe('AddCommentUseCase', () => {
       .build();
 
     await expect(useCase.addComment(input)).rejects.toThrow(
-      FindingNotFoundError
+      FindingNotFoundError,
     );
   });
 
@@ -62,7 +62,7 @@ describe('AddCommentUseCase', () => {
             text: input.text,
           }),
         ],
-      })
+      }),
     );
   });
 
@@ -96,7 +96,7 @@ describe('AddCommentUseCase', () => {
     expect(findingWithComment).toBeDefined();
     expect(findingWithComment?.comments).toBeDefined();
     expect(
-      findingWithComment?.comments?.find((c) => c.id === comment.id)
+      findingWithComment?.comments?.find((c) => c.id === comment.id),
     ).toBeDefined();
   });
 });

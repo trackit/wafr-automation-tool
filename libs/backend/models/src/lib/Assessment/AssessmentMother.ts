@@ -86,7 +86,7 @@ export class AssessmentMother {
   }
 
   public withRawGraphData(
-    rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>
+    rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>,
   ): AssessmentMother {
     this.data.rawGraphData = rawGraphData;
     return this;
@@ -123,14 +123,14 @@ export class AssessmentMother {
   }
 
   public withOpportunityId(
-    opportunityId: string | undefined
+    opportunityId: string | undefined,
   ): AssessmentMother {
     this.data.opportunityId = opportunityId;
     return this;
   }
 
   public withWAFRWorkloadArn(
-    wafrWorkloadArn: string | undefined
+    wafrWorkloadArn: string | undefined,
   ): AssessmentMother {
     this.data.wafrWorkloadArn = wafrWorkloadArn;
     return this;

@@ -24,7 +24,7 @@ export class UpdateBestPracticeUseCaseImpl
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async updateBestPractice(
-    args: UpdateBestPracticeUseCaseArgs
+    args: UpdateBestPracticeUseCaseArgs,
   ): Promise<void> {
     const {
       user,

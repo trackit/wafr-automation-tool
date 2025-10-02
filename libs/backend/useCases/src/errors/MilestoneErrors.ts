@@ -8,7 +8,7 @@ export class MilestoneNotFoundError extends UseCaseError {
       assessmentId: string;
       milestoneId: number;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, milestoneId } = args;
     super({

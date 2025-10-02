@@ -39,7 +39,7 @@ describe('generatePDFExportURL adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
   });

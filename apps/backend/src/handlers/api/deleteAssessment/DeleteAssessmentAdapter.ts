@@ -10,14 +10,14 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const DeleteAssessmentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['deleteAssessment']['parameters']['path']>;
 
 export class DeleteAssessmentAdapter {
   private readonly useCase = inject(tokenDeleteAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -27,7 +27,7 @@ export class DeleteAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['deleteAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
       pathSchema: DeleteAssessmentPathSchema,

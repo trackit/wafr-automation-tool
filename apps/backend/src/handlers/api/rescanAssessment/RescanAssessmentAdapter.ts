@@ -10,14 +10,14 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const RescanAssessmentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['rescanAssessment']['parameters']['path']>;
 
 export class RescanAssessmentAdapter {
   private readonly useCase = inject(tokenRescanAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -27,7 +27,7 @@ export class RescanAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['rescanAssessment']['responses']['200']['content']> {
     const { pathParameters } = parseApiEvent(event, {
       pathSchema: RescanAssessmentPathSchema,

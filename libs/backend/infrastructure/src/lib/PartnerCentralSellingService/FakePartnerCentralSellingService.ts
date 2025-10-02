@@ -24,5 +24,5 @@ export class FakePartnerCentralSellingService
 export const tokenFakePartnerCentralSellingService =
   createInjectionToken<FakePartnerCentralSellingService>(
     'FakePartnerCentralSellingService',
-    { useClass: FakePartnerCentralSellingService }
+    { useClass: FakePartnerCentralSellingService },
   );

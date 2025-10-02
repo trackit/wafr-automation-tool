@@ -29,13 +29,13 @@ export interface CreateMilestoneUseCase {
 export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
   private readonly logger = inject(tokenLogger);
   private readonly wellArchitectedToolService = inject(
-    tokenWellArchitectedToolService
+    tokenWellArchitectedToolService,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
 
   public async createMilestone(
-    args: CreateMilestoneUseCaseArgs
+    args: CreateMilestoneUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -49,7 +49,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
     }
     assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get(
-      args.user.organizationDomain
+      args.user.organizationDomain,
     );
     if (!organization) {
       throw new OrganizationNotFoundError({
@@ -66,7 +66,7 @@ export class CreateMilestoneUseCaseImpl implements CreateMilestoneUseCase {
       user: args.user,
     });
     this.logger.info(
-      `Create Milestone for assessment ${assessment.id} to the Well Architected Tool finished`
+      `Create Milestone for assessment ${assessment.id} to the Well Architected Tool finished`,
     );
   }
 }

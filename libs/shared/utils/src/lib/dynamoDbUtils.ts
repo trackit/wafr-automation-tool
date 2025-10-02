@@ -24,14 +24,14 @@ export function getBestPracticeCustomId(args: {
 }
 
 export function encodeNextToken(
-  nextToken?: Record<string, unknown>
+  nextToken?: Record<string, unknown>,
 ): string | undefined {
   if (!nextToken) return undefined;
   return Buffer.from(JSON.stringify(nextToken)).toString('base64');
 }
 
 export function decodeNextToken(
-  nextToken?: string
+  nextToken?: string,
 ): Record<string, unknown> | undefined {
   if (!nextToken) return undefined;
   return parseJsonObject(Buffer.from(nextToken, 'base64').toString('utf8'));
@@ -65,7 +65,7 @@ export function buildUpdateExpression(args: {
     const attributeName = `#${key.replace(/-/g, '_')}`;
     const attributeValue = `:${key.replace(/-/g, '_')}`;
     updateExpressions.push(
-      `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`
+      `${args.UpdateExpressionPath ?? ''}${attributeName} = ${attributeValue}`,
     );
     expressionAttributeValues[attributeValue] = value;
     expressionAttributeNames[attributeName] = key;

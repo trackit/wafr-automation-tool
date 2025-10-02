@@ -30,7 +30,7 @@ describe('updateAssessment adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -82,7 +82,7 @@ describe('updateAssessment adapter', () => {
         expect.objectContaining({
           assessmentId,
           assessmentBody,
-        })
+        }),
       );
     });
 

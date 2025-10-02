@@ -32,7 +32,7 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
   public async deletePDFExport(
-    args: DeletePDFExportUseCaseArgs
+    args: DeletePDFExportUseCaseArgs,
   ): Promise<void> {
     const { assessmentId, fileExportId, user } = args;
 
@@ -80,7 +80,7 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
       id: fileExportId,
     });
     this.logger.info(
-      `PDF export with id ${fileExportId} deleted for assessment ${assessmentId}`
+      `PDF export with id ${fileExportId} deleted for assessment ${assessmentId}`,
     );
   }
 }

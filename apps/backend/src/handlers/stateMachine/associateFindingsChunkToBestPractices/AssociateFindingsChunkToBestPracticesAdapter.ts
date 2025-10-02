@@ -7,7 +7,7 @@ import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 
 export const AssociateFindingsChunkToBestPracticesInputSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   organizationDomain: z.string().nonempty(),
   findingsChunkURI: z.string().nonempty(),
 });
@@ -19,7 +19,7 @@ export type AssociateFindingsChunkToBestPracticesOutput = void;
 
 export class AssociateFindingsChunkToBestPracticesAdapter {
   private readonly useCase = inject(
-    tokenAssociateFindingsToBestPracticesUseCase
+    tokenAssociateFindingsToBestPracticesUseCase,
   );
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
@@ -31,7 +31,7 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
     }
     const [chunkFileNameWithoutExtension] = chunkFileName.split('.');
     const [scanningTool] = chunkFileNameWithoutExtension.split('_');
-    return z.nativeEnum(ScanningTool).parse(scanningTool);
+    return z.enum(ScanningTool).parse(scanningTool);
   }
 
   public async fetchFindingsToAssociate(findingsChunkURI: string): Promise<{
@@ -43,7 +43,7 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
     const fetchedFindings = await this.objectsStorage.get(key);
     if (!fetchedFindings) {
       throw new Error(
-        `Findings to associate not found for URI: ${findingsChunkURI}`
+        `Findings to associate not found for URI: ${findingsChunkURI}`,
       );
     }
     const findings = parseJsonArray(fetchedFindings) as unknown as Finding[];
@@ -54,13 +54,12 @@ export class AssociateFindingsChunkToBestPracticesAdapter {
   }
 
   public async handle(
-    event: Record<string, unknown>
+    event: Record<string, unknown>,
   ): Promise<AssociateFindingsChunkToBestPracticesOutput> {
     const { assessmentId, organizationDomain, findingsChunkURI } =
       AssociateFindingsChunkToBestPracticesInputSchema.parse(event);
-    const { scanningTool, findings } = await this.fetchFindingsToAssociate(
-      findingsChunkURI
-    );
+    const { scanningTool, findings } =
+      await this.fetchFindingsToAssociate(findingsChunkURI);
     await this.useCase.associateFindingsToBestPractices({
       assessmentId,
       organizationDomain,

@@ -23,7 +23,7 @@ const OrganizationSchema = z.object({
           email: z.string(),
           firstName: z.string(),
           lastName: z.string(),
-        })
+        }),
       ),
       solutions: z.array(z.string()),
     })
@@ -51,7 +51,7 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   }
 
   public async get(
-    organizationDomain: string
+    organizationDomain: string,
   ): Promise<Organization | undefined> {
     const params = {
       TableName: this.tableName,
@@ -85,5 +85,5 @@ export const tokenDynamoDBOrganizationTableName = createInjectionToken<string>(
       assertIsDefined(tableName, 'ORGANIZATION_TABLE is not defined');
       return tableName;
     },
-  }
+  },
 );

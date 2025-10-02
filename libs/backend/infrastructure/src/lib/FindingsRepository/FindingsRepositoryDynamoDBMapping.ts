@@ -11,7 +11,7 @@ export function toDynamoDBFindingItem(
   args: {
     assessmentId: string;
     organizationDomain: string;
-  }
+  },
 ): DynamoDBFinding {
   const { assessmentId, organizationDomain } = args;
   return {
@@ -36,14 +36,14 @@ export function toDynamoDBFindingItem(
         finding.comments.map((comment) => [
           comment.id,
           toDynamoDBFindingComment(comment),
-        ])
+        ]),
       ),
     }),
   };
 }
 
 export function fromDynamoDBFindingItem(
-  item: DynamoDBFinding | undefined
+  item: DynamoDBFinding | undefined,
 ): Finding | undefined {
   if (!item) return undefined;
   const finding = item;
@@ -61,14 +61,14 @@ export function fromDynamoDBFindingItem(
     statusDetail: finding.statusDetail,
     comments: finding.comments
       ? Object.values(finding.comments).map((comment) =>
-          fromDynamoDBFindingComment(comment)
+          fromDynamoDBFindingComment(comment),
         )
       : undefined,
   };
 }
 
 export function toDynamoDBFindingComment(
-  comment: FindingComment
+  comment: FindingComment,
 ): DynamoDBFindingComment {
   return {
     id: comment.id,
@@ -79,7 +79,7 @@ export function toDynamoDBFindingComment(
 }
 
 export function fromDynamoDBFindingComment(
-  comment: DynamoDBFindingComment
+  comment: DynamoDBFindingComment,
 ): FindingComment {
   return {
     id: comment.id,

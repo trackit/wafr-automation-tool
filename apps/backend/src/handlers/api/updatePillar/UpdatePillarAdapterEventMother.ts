@@ -17,7 +17,7 @@ export class UpdatePillarAdapterEventMother {
 
   private constructor(
     pathParameters: UpdatePillarPathParameters,
-    body: UpdatePillarBody
+    body: UpdatePillarBody,
   ) {
     this.pathParameters = pathParameters;
     this.body = body;
@@ -31,12 +31,12 @@ export class UpdatePillarAdapterEventMother {
       },
       {
         disabled: false,
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdatePillarAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -53,7 +53,7 @@ export class UpdatePillarAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): UpdatePillarAdapterEventMother {
     this.user = user;
     return this;

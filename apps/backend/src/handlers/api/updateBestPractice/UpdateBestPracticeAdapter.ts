@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateBestPracticePathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
   bestPracticeId: z.string().nonempty(),
@@ -31,7 +31,7 @@ export class UpdateBestPracticeAdapter {
   private readonly useCase = inject(tokenUpdateBestPracticeUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

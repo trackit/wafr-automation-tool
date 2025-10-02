@@ -8,11 +8,11 @@ export function exportToAWS(
   }: paths['/assessments/{assessmentId}/exports/well-architected-tool']['post']['parameters']['path'],
   requestBody: NonNullable<
     paths['/assessments/{assessmentId}/exports/well-architected-tool']['post']['requestBody']
-  >['content']['application/json']
+  >['content']['application/json'],
 ) {
   return apiClient.post(
     `/assessments/${assessmentId}/exports/well-architected-tool`,
-    requestBody
+    requestBody,
   );
 }
 

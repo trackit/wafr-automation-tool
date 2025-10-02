@@ -31,7 +31,7 @@ export interface PrepareFindingsAssociationsUseCaseArgs {
 
 export interface PrepareFindingsAssociationsUseCase {
   prepareFindingsAssociations(
-    args: PrepareFindingsAssociationsUseCaseArgs
+    args: PrepareFindingsAssociationsUseCaseArgs,
   ): Promise<string[]>;
 }
 
@@ -42,17 +42,17 @@ export class PrepareFindingsAssociationsUseCaseImpl
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly getScannedFindingsUseCase = inject(
-    tokenGetScannedFindingsUseCase
+    tokenGetScannedFindingsUseCase,
   );
   private readonly mapScanFindingsToBestPracticesUseCase = inject(
-    tokenMapScanFindingsToBestPracticesUseCase
+    tokenMapScanFindingsToBestPracticesUseCase,
   );
   private readonly storeFindingsToAssociateUseCase = inject(
-    tokenStoreFindingsToAssociateUseCase
+    tokenStoreFindingsToAssociateUseCase,
   );
 
   private formatScanningToolGraphData(
-    findings: ScanFinding[]
+    findings: ScanFinding[],
   ): AssessmentGraphData {
     return {
       findings: findings.length,
@@ -74,7 +74,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
             return resourceTypesAcc;
           }, resourceTypes);
         },
-        {}
+        {},
       ),
       severities: findings.reduce<Partial<Record<SeverityType, number>>>(
         (severities, finding) => {
@@ -83,7 +83,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
             (severities[finding.severity] ?? 0) + 1;
           return severities;
         },
-        {}
+        {},
       ),
     };
   }
@@ -104,14 +104,14 @@ export class PrepareFindingsAssociationsUseCaseImpl
                 (bp) =>
                   bp.bestPracticeId === bestPractice.id &&
                   bp.questionId === question.id &&
-                  bp.pillarId === pillar.id
-              )
+                  bp.pillarId === pillar.id,
+              ),
             )
             .map(({ scanFinding }) => scanFinding);
           return {
             ...bestPractice,
             results: new Set(
-              scanFindingsMatchingBestPractice.map(({ id }) => id)
+              scanFindingsMatchingBestPractice.map(({ id }) => id),
             ),
           };
         }),
@@ -136,7 +136,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
           .join(', '),
         hidden: false,
         comments: [],
-      })
+      }),
     );
     await Promise.all(
       findings.map((finding) =>
@@ -144,13 +144,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
           assessmentId,
           organizationDomain,
           finding,
-        })
-      )
+        }),
+      ),
     );
   }
 
   public async prepareFindingsAssociations(
-    args: PrepareFindingsAssociationsUseCaseArgs
+    args: PrepareFindingsAssociationsUseCaseArgs,
   ): Promise<string[]> {
     const { assessmentId, scanningTool, organizationDomain } = args;
     const assessment = await this.assessmentsRepository.get({
@@ -171,7 +171,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
         {
           pillars: questionSet.pillars,
           scanFindings,
-        }
+        },
       );
     const updates = [
       this.assessmentsRepository.updateRawGraphDataForScanningTool({
@@ -193,7 +193,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
             }),
             questionVersion: questionSet.version,
           },
-        })
+        }),
       );
     }
     await Promise.all(updates);
@@ -201,12 +201,12 @@ export class PrepareFindingsAssociationsUseCaseImpl
     const mappedScanFindingsToBestPractices =
       scanFindingsToBestPractices.filter(
         (scanFindingToBestPractices) =>
-          scanFindingToBestPractices.bestPractices.length > 0
+          scanFindingToBestPractices.bestPractices.length > 0,
       );
     const nonMappedScanFindings = scanFindingsToBestPractices
       .filter(
         (scanFindingToBestPractices) =>
-          scanFindingToBestPractices.bestPractices.length === 0
+          scanFindingToBestPractices.bestPractices.length === 0,
       )
       .map(({ scanFinding }) => scanFinding);
     const [findingsChunksURIs] = await Promise.all([
@@ -232,5 +232,5 @@ export const tokenPrepareFindingsAssociationsUseCase =
     'PrepareFindingsAssociationsUseCase',
     {
       useClass: PrepareFindingsAssociationsUseCaseImpl,
-    }
+    },
   );

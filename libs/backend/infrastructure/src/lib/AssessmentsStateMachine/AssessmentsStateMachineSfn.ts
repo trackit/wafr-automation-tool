@@ -19,7 +19,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly logger = inject(tokenLogger);
 
   public async startAssessment(
-    startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs
+    startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs,
   ): Promise<void> {
     const command = new StartExecutionCommand({
       input: JSON.stringify(startAssessmentInput),
@@ -32,7 +32,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     }
     this.logger.info(
       `Started Assessment#${startAssessmentInput.assessmentId}`,
-      startAssessmentInput
+      startAssessmentInput,
     );
   }
 
@@ -64,5 +64,5 @@ export const tokenStateMachineArn = createInjectionToken<string>(
       assertIsDefined(stateMachineArn, 'STATE_MACHINE_ARN is not defined');
       return stateMachineArn;
     },
-  }
+  },
 );

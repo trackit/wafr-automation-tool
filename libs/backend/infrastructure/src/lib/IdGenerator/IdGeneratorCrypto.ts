@@ -11,5 +11,5 @@ export const tokenIdGenerator = createInjectionToken<IdGenerator>(
   'IdGenerator',
   {
     useClass: IdGeneratorCrypto,
-  }
+  },
 );

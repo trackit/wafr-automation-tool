@@ -29,7 +29,7 @@ describe('rescanAssessment adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -66,7 +66,7 @@ describe('rescanAssessment adapter', () => {
       expect(useCase.rescanAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 

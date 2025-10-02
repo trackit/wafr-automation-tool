@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { z, ZodError, type ZodTypeAny } from 'zod';
+import z, { ZodError, type ZodType } from 'zod';
 
 import { JSONParseError, parseJsonObject } from '@shared/utils';
 
@@ -11,48 +11,48 @@ import {
   QueryMissingError,
 } from '../../../errors';
 
-function acceptsEmptyObject(schema: ZodTypeAny): boolean {
+function acceptsEmptyObject<T>(schema: ZodType<T>): boolean {
   return schema.safeParse({}).success;
 }
 
-export function parsePathFromEvent<P extends ZodTypeAny>(
+export function parsePathFromEvent<P>(
   event: APIGatewayProxyEvent,
-  schema: P
-): z.infer<P> {
+  schema: ZodType<P>,
+): P {
   const raw = event.pathParameters ?? undefined;
   if (raw == null) {
     throw new PathMissingError();
   }
-  return schema.parse(raw) as z.infer<P>;
+  return schema.parse(raw);
 }
 
-export function parseQueryFromEvent<Q extends ZodTypeAny>(
+export function parseQueryFromEvent<Q>(
   event: APIGatewayProxyEvent,
-  schema: Q
-): z.infer<Q> {
+  schema: ZodType<Q>,
+): Q {
   const raw = event.queryStringParameters ?? undefined;
   if (raw == null) {
     if (acceptsEmptyObject(schema)) {
-      return schema.parse({}) as z.infer<Q>;
+      return schema.parse({});
     }
     throw new QueryMissingError();
   }
   const cleaned = Object.fromEntries(
-    Object.entries(raw).filter(([, v]) => v != null)
+    Object.entries(raw).filter(([, v]) => v != null),
   );
-  return schema.parse(cleaned) as z.infer<Q>;
+  return schema.parse(cleaned);
 }
 
-export function parseBodyFromEvent<B extends ZodTypeAny>(
+export function parseBodyFromEvent<B>(
   event: APIGatewayProxyEvent,
-  schema: B
-): z.infer<B> {
+  schema: ZodType<B>,
+): B {
   const rawBody =
     event.body == null || event.body === '{}'
       ? undefined
       : event.isBase64Encoded
-      ? Buffer.from(event.body, 'base64').toString('utf8')
-      : event.body;
+        ? Buffer.from(event.body, 'base64').toString('utf8')
+        : event.body;
 
   if (rawBody == null) {
     if (acceptsEmptyObject(schema)) {
@@ -61,24 +61,24 @@ export function parseBodyFromEvent<B extends ZodTypeAny>(
     throw new BodyMissingError();
   }
 
-  return schema.parse(parseJsonObject(rawBody)) as z.infer<B>;
+  return schema.parse(parseJsonObject(rawBody));
 }
 
-type InferOrUndef<S extends ZodTypeAny | undefined> = S extends ZodTypeAny
+type InferOrUndefined<S extends ZodType | undefined> = S extends ZodType
   ? z.infer<S>
   : undefined;
 
 export function parseApiEvent<
-  P extends ZodTypeAny | undefined,
-  Q extends ZodTypeAny | undefined,
-  B extends ZodTypeAny | undefined
+  P extends ZodType | undefined,
+  Q extends ZodType | undefined,
+  B extends ZodType | undefined,
 >(
   event: APIGatewayProxyEvent,
-  schemas: { pathSchema?: P; querySchema?: Q; bodySchema?: B }
+  schemas: { pathSchema?: P; querySchema?: Q; bodySchema?: B },
 ): {
-  pathParameters: InferOrUndef<P>;
-  queryStringParameters: InferOrUndef<Q>;
-  body: InferOrUndef<B>;
+  pathParameters: InferOrUndefined<P>;
+  queryStringParameters: InferOrUndefined<Q>;
+  body: InferOrUndefined<B>;
 } {
   try {
     const pathParameters = schemas.pathSchema
@@ -92,9 +92,9 @@ export function parseApiEvent<
       : undefined;
 
     return {
-      pathParameters: pathParameters as InferOrUndef<P>,
-      queryStringParameters: queryStringParameters as InferOrUndef<Q>,
-      body: body as InferOrUndef<B>,
+      pathParameters: pathParameters as InferOrUndefined<P>,
+      queryStringParameters: queryStringParameters as InferOrUndefined<Q>,
+      body: body as InferOrUndefined<B>,
     };
   } catch (e) {
     if (e instanceof ZodError) {

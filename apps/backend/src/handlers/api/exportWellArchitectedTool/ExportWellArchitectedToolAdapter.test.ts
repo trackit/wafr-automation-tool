@@ -31,7 +31,7 @@ describe('exportWellArchitectedTool adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 

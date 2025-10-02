@@ -51,7 +51,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
 
     await this.client.put(params);
     this.logger.info(
-      `Finding saved: ${finding.id} for assessment: ${assessmentId}`
+      `Finding saved: ${finding.id} for assessment: ${assessmentId}`,
     );
   }
 
@@ -77,7 +77,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
+      `Comment added to finding: ${findingId} for assessment: ${assessmentId}`,
     );
   }
 
@@ -101,7 +101,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
     const result = await this.client.get(params);
     const dynamoFinding = result.Item as DynamoDBFinding | undefined;
     this.logger.info(
-      `Finding get: ${findingId} for assessment: ${assessmentId}`
+      `Finding get: ${findingId} for assessment: ${assessmentId}`,
     );
     return fromDynamoDBFindingItem(dynamoFinding);
   }
@@ -132,7 +132,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
   }
 
   private buildGetBestPracticeFindingsQuery(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): QueryCommandInput {
     const {
       assessmentId,
@@ -176,7 +176,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
   }
 
   public async getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{ findings: Finding[]; nextToken?: string }> {
     const {
       assessmentId,
@@ -204,7 +204,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
       params.ExclusiveStartKey = result.LastEvaluatedKey;
     } while (params.ExclusiveStartKey && items.length < limit);
     this.logger.info(
-      `Findings best practices get: ${assessmentId} for organizationDomain: ${organizationDomain} with pillarId: ${pillarId} and questionId: ${questionId} and bestPracticeId: ${bestPracticeId}`
+      `Findings best practices get: ${assessmentId} for organizationDomain: ${organizationDomain} with pillarId: ${pillarId} and questionId: ${questionId} and bestPracticeId: ${bestPracticeId}`,
     );
     return {
       findings: items.map((item) => fromDynamoDBFindingItem(item) as Finding),
@@ -278,7 +278,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Comment successfully deleted: ${commentId} for finding: ${findingId} in assessment: ${assessmentId}`
+      `Comment successfully deleted: ${commentId} for finding: ${findingId} in assessment: ${assessmentId}`,
     );
   }
 
@@ -304,7 +304,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
               findingBody.comments.map((comment) => [
                 comment.id,
                 toDynamoDBFindingComment(comment),
-              ])
+              ]),
             ),
           }),
         },
@@ -313,7 +313,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Finding  successfully updated: ${findingId} for assessment: ${assessmentId}`
+      `Finding  successfully updated: ${findingId} for assessment: ${assessmentId}`,
     );
   }
 
@@ -352,7 +352,7 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
 
     await this.client.update(params);
     this.logger.info(
-      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
+      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`,
     );
   }
 }
@@ -361,5 +361,5 @@ export const tokenFindingsRepository = createInjectionToken<FindingRepository>(
   'FindingRepository',
   {
     useClass: FindingsRepositoryDynamoDB,
-  }
+  },
 );

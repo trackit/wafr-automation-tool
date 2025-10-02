@@ -36,7 +36,7 @@ export class GetScannedFindingsUseCaseImpl
   };
 
   public async getScannedFindings(
-    args: GetScannedFindingsArgs
+    args: GetScannedFindingsArgs,
   ): Promise<ScanFinding[]> {
     const {
       assessmentId,
@@ -59,7 +59,7 @@ export class GetScannedFindingsUseCaseImpl
       assessmentId,
       workflows,
       regions,
-      scanningTool
+      scanningTool,
     );
     return scanProvider.getScannedFindings();
   }

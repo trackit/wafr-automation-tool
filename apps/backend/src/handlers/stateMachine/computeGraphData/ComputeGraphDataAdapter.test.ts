@@ -57,7 +57,7 @@ describe('ComputeGraphDataAdapter', () => {
         expect.objectContaining({
           assessmentId: event.assessmentId,
           organizationDomain: event.organizationDomain,
-        })
+        }),
       );
     });
   });

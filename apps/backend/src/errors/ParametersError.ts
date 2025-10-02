@@ -1,11 +1,11 @@
-import { ZodError } from 'zod';
+import z, { ZodError } from 'zod';
 
 import { BasicErrorType } from '@shared/utils';
 
 import { HandlerError } from './HandlerError';
 
 export class ParametersValidationError extends HandlerError {
-  private static pathToString(path?: (string | number)[]): string {
+  private static pathToString(path?: PropertyKey[]): string {
     if (!path?.length) return '(root)';
     return path
       .map((p) => (typeof p === 'number' ? `[${p}]` : String(p)))
@@ -16,13 +16,14 @@ export class ParametersValidationError extends HandlerError {
     const count = err.issues.length;
     const previews = err.issues
       .map(
-        (i) => `${ParametersValidationError.pathToString(i.path)}: ${i.message}`
+        (i) =>
+          `${ParametersValidationError.pathToString(i.path)}: ${i.message}`,
       )
       .join('; ');
     super({
       type: BasicErrorType.BAD_REQUEST,
       message: `Validation failed with ${count} error(s): ${previews}`,
-      description: description ?? JSON.stringify(err.format(), null, 2),
+      description: description ?? JSON.stringify(z.treeifyError(err), null, 2),
     });
   }
 }

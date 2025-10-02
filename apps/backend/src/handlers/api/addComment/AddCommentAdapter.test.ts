@@ -31,7 +31,7 @@ describe('addComment adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -100,7 +100,7 @@ const setup = () => {
 
   const useCase = { addComment: vitest.fn() };
   useCase.addComment.mockResolvedValueOnce(
-    Promise.resolve(FindingCommentMother.basic().build())
+    Promise.resolve(FindingCommentMother.basic().build()),
   );
   register(tokenAddCommentUseCase, { useValue: useCase });
 

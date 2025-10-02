@@ -32,11 +32,11 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly debug = inject(tokenDebug);
   private readonly partnerCentralSellingClientConstructor = inject(
-    tokenPartnerCentralSellingClientConstructor
+    tokenPartnerCentralSellingClientConstructor,
   );
 
   public async createPartnerCentralSellingClient(
-    roleArn: string
+    roleArn: string,
   ): Promise<PartnerCentralSellingClient> {
     const credentials = await this.stsService.assumeRole({ roleArn });
     if (!credentials) {
@@ -85,7 +85,7 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
     customerBusinessProblem: string;
   }): Promise<string> {
     const client = await this.createPartnerCentralSellingClient(
-      aceIntegration.roleArn
+      aceIntegration.roleArn,
     );
     const catalog: string = !this.debug ? 'AWS' : 'Sandbox';
     const opportunityTeamMembers: Contact[] =
@@ -94,7 +94,7 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
           Email: member.email,
           FirstName: member.firstName,
           LastName: member.lastName,
-        })
+        }),
       );
 
     const command = new CreateOpportunityCommand({
@@ -157,7 +157,7 @@ export const tokenPartnerCentralSellingService =
     'PartnerCentralSellingService',
     {
       useClass: PartnerCentralSellingService,
-    }
+    },
   );
 
 export const tokenPartnerCentralSellingClientConstructor = createInjectionToken<

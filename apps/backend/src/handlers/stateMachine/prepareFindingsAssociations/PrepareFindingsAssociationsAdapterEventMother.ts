@@ -20,35 +20,35 @@ export class PrepareFindingsAssociationsAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.assessmentId = assessmentId;
     return this;
   }
 
   public withScanningTool(
-    scanningTool: ScanningTool
+    scanningTool: ScanningTool,
   ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.scanningTool = scanningTool;
     return this;
   }
 
   public withRegions(
-    regions: string[]
+    regions: string[],
   ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.regions = regions;
     return this;
   }
 
   public withWorkflows(
-    workflows: string[]
+    workflows: string[],
   ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.workflows = workflows;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): PrepareFindingsAssociationsAdapterEventMother {
     this.input.organizationDomain = organizationDomain;
     return this;

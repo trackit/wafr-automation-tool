@@ -284,7 +284,7 @@ function AssessmentsList() {
                 </div>
               </div>
             </div>
-          ))
+          )),
         )}
       </div>
       {!isLoading && hasNextPage && (
@@ -297,8 +297,8 @@ function AssessmentsList() {
             {isFetchingNextPage
               ? 'Loading more...'
               : hasNextPage
-              ? 'Load More'
-              : 'Nothing more to load'}
+                ? 'Load More'
+                : 'Nothing more to load'}
           </button>
         </div>
       )}

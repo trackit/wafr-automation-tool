@@ -30,7 +30,7 @@ describe('updateBestPractice adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -92,7 +92,7 @@ describe('updateBestPractice adapter', () => {
           questionId,
           bestPracticeId,
           bestPracticeBody,
-        })
+        }),
       );
     });
 

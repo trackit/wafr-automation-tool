@@ -26,7 +26,7 @@ const createTables = async () => {
           { AttributeName: 'PK', AttributeType: 'S' },
           { AttributeName: 'SK', AttributeType: 'S' },
         ],
-      })
+      }),
     ),
     dynamodb.send(
       new CreateTableCommand({
@@ -34,7 +34,7 @@ const createTables = async () => {
         BillingMode: 'PAY_PER_REQUEST', // on‑demand
         KeySchema: [{ AttributeName: 'PK', KeyType: 'HASH' }],
         AttributeDefinitions: [{ AttributeName: 'PK', AttributeType: 'S' }],
-      })
+      }),
     ),
   ]);
 };

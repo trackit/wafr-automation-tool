@@ -28,7 +28,7 @@ const FindingIdToBestPracticeIdAssociationsSchema = z.array(
   z.object({
     findingId: z.string(),
     bestPracticeId: z.string(),
-  })
+  }),
 ) satisfies ZodType<FindingIdToBestPracticeIdAssociation[]>;
 
 type FindingIdToBestPracticeIdAssociations = z.infer<
@@ -41,7 +41,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
   private readonly aiService = inject(tokenAIService);
   private readonly logger = inject(tokenLogger);
   private readonly maxRetries = inject(
-    tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries
+    tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
   );
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
@@ -54,10 +54,10 @@ export class FindingToBestPracticesAssociationServiceGenAI
   } | null> {
     const [staticPrompt, dynamicPrompt] = await Promise.all([
       this.objectsStorage.get(
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
+        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey,
       ),
       this.objectsStorage.get(
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
+        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey,
       ),
     ]);
     if (!staticPrompt || !dynamicPrompt) {
@@ -104,14 +104,14 @@ export class FindingToBestPracticesAssociationServiceGenAI
       (updatedPrompt, [key, value]) =>
         updatedPrompt.replace(
           new RegExp(`{{${key}}}`, 'g'), // Replace all occurrences
-          typeof value === 'string' ? value : JSON.stringify(value)
+          typeof value === 'string' ? value : JSON.stringify(value),
         ),
-      prompt
+      prompt,
     );
   }
 
   public flattenBestPracticesWithPillarAndQuestionFromPillars(
-    pillars: Pillar[]
+    pillars: Pillar[],
   ): (BestPractice & { pillar: Pillar; question: Question })[] {
     return pillars.flatMap((pillar) =>
       pillar.questions.flatMap((question) =>
@@ -119,8 +119,8 @@ export class FindingToBestPracticesAssociationServiceGenAI
           ...bestPractice,
           pillar,
           question,
-        }))
-      )
+        })),
+      ),
     );
   }
 
@@ -140,7 +140,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
         questionLabel: question.label,
         bestPracticeLabel: bestPractice.label,
         bestPracticeDescription: bestPractice.description,
-      })
+      }),
     );
   }
 
@@ -187,11 +187,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
               (bp) =>
                 bp.id === bestPracticeId &&
                 bp.pillar.id === pillarId &&
-                bp.question.id === questionId
+                bp.question.id === questionId,
             );
             if (!existingBestPractice) {
               throw new Error(
-                `Best practice not found for association: ${association.findingId}-${association.bestPracticeId}`
+                `Best practice not found for association: ${association.findingId}-${association.bestPracticeId}`,
               );
             }
             return {
@@ -208,7 +208,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
         this.logger.warn(
           `Failed to process finding ${finding.id}: ${
             error instanceof Error ? error.message : 'Unknown error'
-          }`
+          }`,
         );
         failed.push(finding);
       }
@@ -230,7 +230,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
     }
     this.logger.info(
       `Associating findings to best practices for scanning tool: ${scanningTool}`,
-      { findings }
+      { findings },
     );
 
     const successfulAssociations: FindingToBestPracticesAssociation[] = [];
@@ -273,7 +273,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
             {
               successfulIds: successful.map((a) => a.finding.id),
               failedIds: failed.map((f) => f.id),
-            }
+            },
           );
         }
       } catch (error) {
@@ -289,17 +289,17 @@ export class FindingToBestPracticesAssociationServiceGenAI
 
     if (successfulAssociations.length === 0) {
       throw new Error(
-        `Failed to associate all findings to best practices after ${this.maxRetries} retries`
+        `Failed to associate all findings to best practices after ${this.maxRetries} retries`,
       );
     } else if (remainingFindings.length > 0) {
       this.logger.warn(
         `Failed to associate ${remainingFindings.length} findings to best practices after ${this.maxRetries} retries`,
-        { failedFindingIds: remainingFindings.map((f) => f.id) }
+        { failedFindingIds: remainingFindings.map((f) => f.id) },
       );
     }
 
     this.logger.info(
-      `Successfully associated ${successfulAssociations.length} out of ${findings.length} findings to best practices`
+      `Successfully associated ${successfulAssociations.length} out of ${findings.length} findings to best practices`,
     );
 
     return successfulAssociations;
@@ -311,7 +311,7 @@ export const tokenFindingToBestPracticesAssociationService =
     'FindingToBestPracticesAssociationService',
     {
       useClass: FindingToBestPracticesAssociationServiceGenAI,
-    }
+    },
   );
 
 export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
@@ -326,5 +326,5 @@ export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
           .positive('GEN_AI_MAX_RETRIES must be a positive number')
           .parse(genAIMaxRetries);
       },
-    }
+    },
   );

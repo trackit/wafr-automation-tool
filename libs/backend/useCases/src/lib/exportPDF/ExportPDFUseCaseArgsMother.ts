@@ -21,7 +21,7 @@ export class ExportPDFUseCaseArgsMother {
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): ExportPDFUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;

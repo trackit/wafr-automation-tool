@@ -30,7 +30,7 @@ describe('updateQuestion adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -89,7 +89,7 @@ describe('updateQuestion adapter', () => {
           pillarId,
           questionId,
           questionBody,
-        })
+        }),
       );
     });
 

@@ -27,7 +27,7 @@ const formSchema = z.object({
     .pipe(
       z.nativeEnum(Industry, {
         errorMap: () => ({ message: 'Select an industry' }),
-      })
+      }),
     )
     .or(z.undefined())
     .refine((val) => val !== undefined, {
@@ -43,21 +43,21 @@ const formSchema = z.object({
     .string()
     .regex(
       /^[1-9][0-9]{3}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/,
-      'Date must be YYYY-MM-DD'
+      'Date must be YYYY-MM-DD',
     )
     .refine(
       (val) => {
         const d = new Date(val + 'T00:00:00');
         return !isNaN(d.getTime()) && d >= todayStart();
       },
-      { message: 'Target close date cannot be in the past' }
+      { message: 'Target close date cannot be in the past' },
     ),
   country: z
     .string()
     .pipe(
       z.nativeEnum(CountryCode, {
         errorMap: () => ({ message: 'Select a country' }),
-      })
+      }),
     )
     .or(z.undefined())
     .refine((val) => val !== undefined, {
@@ -116,7 +116,7 @@ export function NewAceOpportunity({
     }
 
     setVisibleCountry(
-      regionNames?.of(countryValue as string) ?? countryValue ?? ''
+      regionNames?.of(countryValue as string) ?? countryValue ?? '',
     );
   }, [countryValue]);
 
@@ -135,7 +135,7 @@ export function NewAceOpportunity({
         (c) =>
           normalize(c.name) === normalize(v) ||
           c.code.toLowerCase() === v.toLowerCase() ||
-          normalize(`${c.name} (${c.code})`) === normalize(v)
+          normalize(`${c.name} (${c.code})`) === normalize(v),
       ) ?? null;
     if (!match) {
       match =

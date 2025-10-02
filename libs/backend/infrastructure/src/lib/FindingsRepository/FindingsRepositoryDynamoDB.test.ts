@@ -20,7 +20,7 @@ afterEach(async () => {
   const tableName = inject(tokenDynamoDBAssessmentTableName);
 
   const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName })
+    new ScanCommand({ TableName: tableName }),
   );
 
   await Promise.all(
@@ -32,9 +32,9 @@ afterEach(async () => {
             PK: item.PK,
             SK: item.SK,
           },
-        })
+        }),
       );
-    })
+    }),
   );
 });
 
@@ -110,7 +110,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       expect(findingWithComment).toEqual(
         expect.objectContaining({
           comments: [comment],
-        })
+        }),
       );
     });
   });
@@ -276,7 +276,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([
@@ -315,7 +315,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([expect.objectContaining({ id: finding1.id })]);
@@ -331,7 +331,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([]);
@@ -369,7 +369,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId('pillar1')
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([expect.objectContaining({ id: finding1.id })]);
@@ -420,7 +420,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
           .withSearchTerm('searchterm')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([
@@ -470,7 +470,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
           .withLimit(2)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([
@@ -512,7 +512,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
           .withShowHidden(true)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([
@@ -552,7 +552,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId('question1')
           .withBestPracticeId('bp1')
           .withLimit(1)
-          .build()
+          .build(),
       );
       expect(nextToken).toBeDefined();
     });
@@ -589,7 +589,7 @@ describe('FindingsRepositoryDynamoDB', () => {
             .withQuestionId('question1')
             .withBestPracticeId('bp1')
             .withLimit(1)
-            .build()
+            .build(),
         );
       const { findings: secondFindings } =
         await repository.getBestPracticeFindings(
@@ -600,7 +600,7 @@ describe('FindingsRepositoryDynamoDB', () => {
             .withQuestionId('question1')
             .withBestPracticeId('bp1')
             .withNextToken(nextToken as string)
-            .build()
+            .build(),
         );
 
       expect(firstFindings).not.toEqual(secondFindings);
@@ -716,7 +716,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       expect(findingWithComment).toEqual(
         expect.objectContaining({
           comments: [],
-        })
+        }),
       );
     });
   });
@@ -751,7 +751,7 @@ describe('FindingsRepositoryDynamoDB', () => {
         expect.objectContaining({
           id: finding.id,
           hidden: true,
-        })
+        }),
       );
     });
 
@@ -841,7 +841,7 @@ describe('FindingsRepositoryDynamoDB', () => {
               text: 'new-comment-text',
             }),
           ],
-        })
+        }),
       );
     });
   });

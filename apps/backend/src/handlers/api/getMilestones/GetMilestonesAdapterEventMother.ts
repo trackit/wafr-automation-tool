@@ -18,7 +18,7 @@ export class GetMilestonesAdapterEventMother {
 
   private constructor(
     pathParameters: GetMilestonesPathParameters,
-    queryStringParameters: GetMilestonesQueryStringParameters
+    queryStringParameters: GetMilestonesQueryStringParameters,
   ) {
     this.pathParameters = pathParameters;
     this.queryStringParameters = queryStringParameters;
@@ -29,19 +29,19 @@ export class GetMilestonesAdapterEventMother {
       {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       },
-      {}
+      {},
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetMilestonesAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): GetMilestonesAdapterEventMother {
     this.user.email = `${this.user.id}@${organizationDomain}`;
     return this;
@@ -63,7 +63,7 @@ export class GetMilestonesAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GetMilestonesAdapterEventMother {
     this.user = user;
     return this;
@@ -74,7 +74,7 @@ export class GetMilestonesAdapterEventMother {
       Object.entries(this.queryStringParameters).map(([key, value]) => [
         key,
         value === undefined ? undefined : String(value),
-      ])
+      ]),
     );
     return APIGatewayProxyEventMother.basic()
       .withUserClaims({ sub: this.user.id, email: this.user.email })

@@ -18,7 +18,7 @@ export class CreateOpportunityAdapterEventMother {
 
   private constructor(
     params: CreateOpportunityParameters,
-    body: CreateOpportunityBody
+    body: CreateOpportunityBody,
   ) {
     this.pathParameters = params;
     this.body = body;
@@ -41,24 +41,24 @@ export class CreateOpportunityAdapterEventMother {
         targetCloseDate: '2097-01-01',
         customerCity: 'City',
         customerAddress: 'street',
-      }
+      },
     );
   }
   public withAssessmentId(
-    assessmentId: CreateOpportunityParameters['assessmentId']
+    assessmentId: CreateOpportunityParameters['assessmentId'],
   ): CreateOpportunityAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): CreateOpportunityAdapterEventMother {
     this.user = user;
     return this;
   }
   public withCompanyName(
-    companyName: string
+    companyName: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.companyName = companyName;
     return this;
@@ -75,56 +75,56 @@ export class CreateOpportunityAdapterEventMother {
   }
 
   public withCustomerType(
-    customerType: CustomerType
+    customerType: CustomerType,
   ): CreateOpportunityAdapterEventMother {
     this.body.customerType = customerType;
     return this;
   }
 
   public withCompanyWebsiteUrl(
-    companyWebsiteUrl: string
+    companyWebsiteUrl: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.companyWebsiteUrl = companyWebsiteUrl;
     return this;
   }
 
   public withCustomerCountry(
-    customerCountry: string
+    customerCountry: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.customerCountry = customerCountry;
     return this;
   }
 
   public withCustomerPostalCode(
-    customerPostalCode: string
+    customerPostalCode: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.customerPostalCode = customerPostalCode;
     return this;
   }
 
   public withMonthlyRecurringRevenue(
-    monthlyRecurringRevenue: string
+    monthlyRecurringRevenue: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.monthlyRecurringRevenue = monthlyRecurringRevenue;
     return this;
   }
 
   public withTargetCloseDate(
-    targetCloseDate: string
+    targetCloseDate: string,
   ): CreateOpportunityAdapterEventMother {
     this.body.targetCloseDate = targetCloseDate;
     return this;
   }
 
   public withCustomerCity(
-    customerCity: string | undefined
+    customerCity: string | undefined,
   ): CreateOpportunityAdapterEventMother {
     this.body.customerCity = customerCity;
     return this;
   }
 
   public withCustomerAddress(
-    customerAddress: string | undefined
+    customerAddress: string | undefined,
   ): CreateOpportunityAdapterEventMother {
     this.body.customerAddress = customerAddress;
     return this;

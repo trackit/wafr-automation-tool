@@ -16,7 +16,7 @@ export const deleteComment = async ({
   return apiClient.delete<
     operations['deleteComment']['responses']['200']['content']
   >(
-    `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`
+    `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
   );
 };
 

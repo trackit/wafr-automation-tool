@@ -24,7 +24,7 @@ describe('StoreFindingsToAssociateUseCase', () => {
     const input = StoreFindingsToAssociateUseCaseArgsMother.basic().build();
 
     await expect(useCase.storeFindingsToAssociate(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -51,7 +51,7 @@ describe('StoreFindingsToAssociateUseCase', () => {
         assessmentId: assessment.id,
         scanningTool: input.scanningTool,
         chunkIndex: 0,
-      })
+      }),
     );
     expect(object).toBeDefined();
     const findings = JSON.parse(object ?? '');
@@ -61,14 +61,14 @@ describe('StoreFindingsToAssociateUseCase', () => {
         id: input.scanFindings[0].id,
         isAIAssociated: true,
         hidden: false,
-      })
+      }),
     );
     expect(findings[1]).toEqual(
       expect.objectContaining({
         id: input.scanFindings[1].id,
         isAIAssociated: true,
         hidden: false,
-      })
+      }),
     );
   });
 
@@ -96,14 +96,14 @@ describe('StoreFindingsToAssociateUseCase', () => {
         assessmentId: assessment.id,
         scanningTool: input.scanningTool,
         chunkIndex: 0,
-      })
+      }),
     );
     const object1 = await fakeObjectsStorage.get(
       StoreFindingsToAssociateUseCaseImpl.getFindingsChunkPath({
         assessmentId: assessment.id,
         scanningTool: input.scanningTool,
         chunkIndex: 1,
-      })
+      }),
     );
     expect(object0).toBeDefined();
     expect(object1).toBeDefined();
@@ -112,13 +112,13 @@ describe('StoreFindingsToAssociateUseCase', () => {
     expect(findings0).toHaveLength(2);
     expect(findings1).toHaveLength(1);
     expect(findings0[0]).toEqual(
-      expect.objectContaining({ id: input.scanFindings[0].id })
+      expect.objectContaining({ id: input.scanFindings[0].id }),
     );
     expect(findings0[1]).toEqual(
-      expect.objectContaining({ id: input.scanFindings[1].id })
+      expect.objectContaining({ id: input.scanFindings[1].id }),
     );
     expect(findings1[0]).toEqual(
-      expect.objectContaining({ id: input.scanFindings[2].id })
+      expect.objectContaining({ id: input.scanFindings[2].id }),
     );
   });
 

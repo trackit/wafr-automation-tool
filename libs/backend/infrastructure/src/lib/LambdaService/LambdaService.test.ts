@@ -24,7 +24,7 @@ describe('LambdaService', () => {
         lambdaService.asyncInvokeLambda({
           lambdaArn,
           payload: JSON.stringify({ test: 'payload' }),
-        })
+        }),
       ).resolves.toBeUndefined();
 
       const executionCalls = lambdaClientMock.commandCalls(InvokeCommand);
@@ -45,7 +45,7 @@ describe('LambdaService', () => {
         new ResourceNotFoundException({
           $metadata: { httpStatusCode: 404 },
           message: 'Resource not found',
-        })
+        }),
       );
 
       await expect(
@@ -53,7 +53,7 @@ describe('LambdaService', () => {
           lambdaArn:
             'arn:aws:lambda:us-west-2:123456789012:function:test-lambda',
           payload: JSON.stringify({ test: 'payload' }),
-        })
+        }),
       ).rejects.toThrow(ResourceNotFoundException);
     });
   });

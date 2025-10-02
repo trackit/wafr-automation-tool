@@ -29,7 +29,7 @@ export class CreateOpportunityUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -41,7 +41,7 @@ export class CreateOpportunityUseCaseArgsMother {
   }
 
   public withCompanyName(
-    companyName: string
+    companyName: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.companyName = companyName;
     return this;
@@ -58,35 +58,35 @@ export class CreateOpportunityUseCaseArgsMother {
   }
 
   public withCustomerType(
-    customerType: CustomerType
+    customerType: CustomerType,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerType = customerType;
     return this;
   }
 
   public withCompanyWebsiteUrl(
-    companyWebsiteUrl: string
+    companyWebsiteUrl: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.companyWebsiteUrl = companyWebsiteUrl;
     return this;
   }
 
   public withCustomerCountry(
-    customerCountry: CountryCode
+    customerCountry: CountryCode,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerCountry = customerCountry;
     return this;
   }
 
   public withCustomerPostalCode(
-    customerPostalCode: string
+    customerPostalCode: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerPostalCode = customerPostalCode;
     return this;
   }
 
   public withMonthlyRecurringRevenue(
-    monthlyRecurringRevenue: string
+    monthlyRecurringRevenue: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.monthlyRecurringRevenue =
       monthlyRecurringRevenue;
@@ -94,21 +94,21 @@ export class CreateOpportunityUseCaseArgsMother {
   }
 
   public withTargetCloseDate(
-    targetCloseDate: string
+    targetCloseDate: string,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.targetCloseDate = targetCloseDate;
     return this;
   }
 
   public withCustomerCity(
-    customerCity: string | undefined
+    customerCity: string | undefined,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerCity = customerCity;
     return this;
   }
 
   public withCustomerAddress(
-    customerAddress: string | undefined
+    customerAddress: string | undefined,
   ): CreateOpportunityUseCaseArgsMother {
     this.data.opportunityDetails.customerAddress = customerAddress;
     return this;

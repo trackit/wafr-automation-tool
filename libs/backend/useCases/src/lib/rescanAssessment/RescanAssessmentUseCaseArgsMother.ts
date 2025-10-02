@@ -17,7 +17,7 @@ export class RescanAssessmentUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): RescanAssessmentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;

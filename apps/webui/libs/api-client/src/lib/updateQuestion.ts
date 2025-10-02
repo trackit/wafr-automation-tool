@@ -22,6 +22,6 @@ export const updateQuestion = async ({
     {
       none,
       disabled,
-    }
+    },
   );
 };

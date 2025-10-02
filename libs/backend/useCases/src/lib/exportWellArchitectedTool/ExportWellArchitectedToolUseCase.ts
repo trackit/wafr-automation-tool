@@ -31,13 +31,13 @@ export class ExportWellArchitectedToolUseCaseImpl
 {
   private readonly logger = inject(tokenLogger);
   private readonly wellArchitectedToolService = inject(
-    tokenWellArchitectedToolService
+    tokenWellArchitectedToolService,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
 
   public async exportAssessment(
-    args: ExportWellArchitectedToolUseCaseArgs
+    args: ExportWellArchitectedToolUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -51,7 +51,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     }
     assertAssessmentIsReadyForExport(assessment, args.region);
     const organization = await this.organizationRepository.get(
-      args.user.organizationDomain
+      args.user.organizationDomain,
     );
     if (!organization) {
       throw new OrganizationNotFoundError({
@@ -71,7 +71,7 @@ export class ExportWellArchitectedToolUseCaseImpl
     if (!assessment.exportRegion) {
       assessmentBody.exportRegion = args.region;
       this.logger.info(
-        `Updating export region for assessment ${assessment.id} to ${args.region}`
+        `Updating export region for assessment ${assessment.id} to ${args.region}`,
       );
     }
     await this.assessmentsRepository.update({
@@ -80,7 +80,7 @@ export class ExportWellArchitectedToolUseCaseImpl
       assessmentBody,
     });
     this.logger.info(
-      `Export for assessment ${assessment.id} to the Well Architected Tool finished`
+      `Export for assessment ${assessment.id} to the Well Architected Tool finished`,
     );
   }
 }
@@ -90,5 +90,5 @@ export const tokenExportWellArchitectedToolUseCase =
     'ExportWellArchitectedToolUseCase',
     {
       useClass: ExportWellArchitectedToolUseCaseImpl,
-    }
+    },
   );

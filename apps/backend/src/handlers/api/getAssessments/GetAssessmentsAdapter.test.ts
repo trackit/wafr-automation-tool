@@ -34,7 +34,7 @@ describe('getAssessments adapter', () => {
         event,
         expect.objectContaining({
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -153,7 +153,7 @@ const setup = () => {
   useCase.getAssessments.mockResolvedValueOnce(
     Promise.resolve({
       assessments: [],
-    })
+    }),
   );
   register(tokenGetAssessmentsUseCase, { useValue: useCase });
 

@@ -25,13 +25,13 @@ export enum PricingDimension {
 export class MarketplaceService implements MarketplacePort {
   private readonly meteringClient = inject(tokenMarketplaceMeteringClient);
   private readonly entitlementClient = inject(
-    tokenMarketplaceEntitlementServiceClient
+    tokenMarketplaceEntitlementServiceClient,
   );
   private readonly agreementClient = inject(tokenMarketplaceAgreementClient);
   private readonly logger = inject(tokenLogger);
   private readonly unitBasedProductCode = inject(tokenUnitBasedProductCode);
   private readonly monthlySubscriptionProductCode = inject(
-    tokenMonthlySubscriptionProductCode
+    tokenMonthlySubscriptionProductCode,
   );
 
   public async hasMonthlySubscription(args: {
@@ -100,7 +100,7 @@ export const tokenMarketplaceService = createInjectionToken<MarketplacePort>(
   'MarketplaceService',
   {
     useClass: MarketplaceService,
-  }
+  },
 );
 
 export const tokenMarketplaceMeteringClient =
@@ -119,7 +119,7 @@ export const tokenMarketplaceEntitlementServiceClient =
         new MarketplaceEntitlementServiceClient({
           region: 'us-east-1', // Service only supports us-east-1
         }),
-    }
+    },
   );
 
 export const tokenMarketplaceAgreementClient =
@@ -130,7 +130,7 @@ export const tokenMarketplaceAgreementClient =
         new MarketplaceAgreementClient({
           region: 'us-east-1', // Service only supports us-east-1
         }),
-    }
+    },
   );
 
 export const tokenUnitBasedProductCode = createInjectionToken<

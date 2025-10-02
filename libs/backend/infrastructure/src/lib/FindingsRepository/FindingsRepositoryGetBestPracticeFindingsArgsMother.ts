@@ -22,35 +22,35 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: AssessmentsRepositoryGetBestPracticeFindingsArgs['assessmentId']
+    assessmentId: AssessmentsRepositoryGetBestPracticeFindingsArgs['assessmentId'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain']
+    organizationDomain: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;
   }
 
   public withPillarId(
-    pillarId: AssessmentsRepositoryGetBestPracticeFindingsArgs['pillarId']
+    pillarId: AssessmentsRepositoryGetBestPracticeFindingsArgs['pillarId'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.pillarId = pillarId;
     return this;
   }
 
   public withQuestionId(
-    questionId: AssessmentsRepositoryGetBestPracticeFindingsArgs['questionId']
+    questionId: AssessmentsRepositoryGetBestPracticeFindingsArgs['questionId'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.questionId = questionId;
     return this;
   }
 
   public withBestPracticeId(
-    bestPracticeId: AssessmentsRepositoryGetBestPracticeFindingsArgs['bestPracticeId']
+    bestPracticeId: AssessmentsRepositoryGetBestPracticeFindingsArgs['bestPracticeId'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.bestPracticeId = bestPracticeId;
     return this;
@@ -59,7 +59,7 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   public withLimit(
     limit: NonNullable<
       AssessmentsRepositoryGetBestPracticeFindingsArgs['limit']
-    >
+    >,
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.limit = limit;
     return this;
@@ -68,7 +68,7 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   public withNextToken(
     nextToken: NonNullable<
       AssessmentsRepositoryGetBestPracticeFindingsArgs['nextToken']
-    >
+    >,
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.nextToken = nextToken;
     return this;
@@ -77,7 +77,7 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   public withSearchTerm(
     searchTerm: NonNullable<
       AssessmentsRepositoryGetBestPracticeFindingsArgs['searchTerm']
-    >
+    >,
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.searchTerm = searchTerm;
     return this;
@@ -86,7 +86,7 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
   public withShowHidden(
     showHidden: NonNullable<
       AssessmentsRepositoryGetBestPracticeFindingsArgs['showHidden']
-    >
+    >,
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.showHidden = showHidden;
     return this;

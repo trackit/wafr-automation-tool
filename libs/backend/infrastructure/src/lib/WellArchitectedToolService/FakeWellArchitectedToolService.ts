@@ -50,5 +50,5 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
 export const tokenFakeWellArchitectedToolService =
   createInjectionToken<FakeWellArchitectedToolService>(
     'FakeWellArchitectedToolService',
-    { useClass: FakeWellArchitectedToolService }
+    { useClass: FakeWellArchitectedToolService },
   );

@@ -15,14 +15,14 @@ export class ComputeGraphDataAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ComputeGraphDataAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): ComputeGraphDataAdapterEventMother {
     this.data.organizationDomain = organizationDomain;
     return this;

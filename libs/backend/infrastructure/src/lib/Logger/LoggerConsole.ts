@@ -44,7 +44,7 @@ export class LoggerConsole implements Logger {
 
   private transformErrorToJSON(
     obj: unknown,
-    seen: WeakSet<object> = new WeakSet()
+    seen: WeakSet<object> = new WeakSet(),
   ): unknown {
     if (obj && typeof obj === 'object') {
       const ref = obj as object;
@@ -62,7 +62,7 @@ export class LoggerConsole implements Logger {
 
       if (Array.isArray(obj)) {
         return (obj as unknown[]).map((item) =>
-          this.transformErrorToJSON(item, seen)
+          this.transformErrorToJSON(item, seen),
         );
       }
 
@@ -71,7 +71,7 @@ export class LoggerConsole implements Logger {
       >((acc, key) => {
         acc[key] = this.transformErrorToJSON(
           (obj as Record<string, unknown>)[key],
-          seen
+          seen,
         );
         return acc;
       }, {});

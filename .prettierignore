@@ -4,4 +4,10 @@
 /.nx/cache
 /.nx/workspace-data
 .aws-sam
+
 libs/shared/api-schema/src/lib/schema.d.ts
+libs/shared/di-container
+
+pnpm-*.yaml
+
+*.md

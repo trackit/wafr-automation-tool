@@ -4,7 +4,7 @@ import { tokenExportPDFUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 export const ExportPDFSchema = z.object({
-  assessmentId: z.string(),
+  assessmentId: z.uuid(),
   organizationDomain: z.string(),
   fileExportId: z.string(),
 });

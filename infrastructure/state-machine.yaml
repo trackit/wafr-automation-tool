@@ -108,7 +108,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: 'es2020'
+        Target: es2024
         Minify: false
         Sourcemap: true
         EntryPoints:
@@ -156,7 +156,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: 'es2020'
+        Target: es2024
         Minify: false
         Sourcemap: true
         EntryPoints:
@@ -214,7 +214,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: 'es2020'
+        Target: es2024
         Minify: false
         Sourcemap: true
         EntryPoints:
@@ -243,7 +243,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: 'es2020'
+        Target: es2024
         Minify: false
         Sourcemap: true
         EntryPoints:
@@ -273,7 +273,7 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Format: cjs
-        Target: 'es2020'
+        Target: es2024
         Minify: false
         Sourcemap: true
         EntryPoints:

@@ -42,7 +42,7 @@ export interface FindingRepository {
   }): Promise<Finding[]>;
 
   getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{
     findings: Finding[];
     nextToken?: string;

@@ -1,4 +1,4 @@
-import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
+import { tokenFindingsRepository } from '@backend/infrastructure';
 import type { FindingCommentBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -22,7 +22,6 @@ export interface UpdateCommentUseCase {
 
 export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
-  private readonly logger = inject(tokenLogger);
 
   public async updateComment(args: UpdateCommentUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, commentId, user, commentBody } = args;

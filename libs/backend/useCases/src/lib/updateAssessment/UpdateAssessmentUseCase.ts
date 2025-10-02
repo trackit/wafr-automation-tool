@@ -22,7 +22,7 @@ export class UpdateAssessmentUseCaseImpl implements UpdateAssessmentUseCase {
   private readonly logger = inject(tokenLogger);
 
   public async updateAssessment(
-    args: UpdateAssessmentUseCaseArgs
+    args: UpdateAssessmentUseCaseArgs,
   ): Promise<void> {
     const { organizationDomain, assessmentId, assessmentBody } = args;
 

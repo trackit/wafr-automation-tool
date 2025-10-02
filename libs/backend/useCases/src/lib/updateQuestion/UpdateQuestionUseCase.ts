@@ -52,7 +52,7 @@ export class UpdateQuestionUseCaseImpl implements UpdateQuestionUseCase {
       questionBody,
     });
     this.logger.info(
-      `Question#${args.assessmentId} from Assessment#${args.assessmentId} in organization#${args.user.organizationDomain} updated successfully`
+      `Question#${args.assessmentId} from Assessment#${args.assessmentId} in organization#${args.user.organizationDomain} updated successfully`,
     );
   }
 }

@@ -8,10 +8,10 @@ import {
 
 export class FeatureToggleRepository implements FeatureTogglePort {
   private readonly marketplaceUnitBasedProductCode = inject(
-    tokenUnitBasedProductCode
+    tokenUnitBasedProductCode,
   );
   private readonly marketplaceMonthlySubscriptionProductCode = inject(
-    tokenMonthlySubscriptionProductCode
+    tokenMonthlySubscriptionProductCode,
   );
 
   public marketplaceIntegration(): boolean {

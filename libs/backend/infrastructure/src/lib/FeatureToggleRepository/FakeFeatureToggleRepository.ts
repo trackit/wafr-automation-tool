@@ -13,5 +13,5 @@ export const tokenFakeFeatureToggleRepository =
     'FakeFeatureToggleRepository',
     {
       useClass: FakeFeatureToggleRepository,
-    }
+    },
   );

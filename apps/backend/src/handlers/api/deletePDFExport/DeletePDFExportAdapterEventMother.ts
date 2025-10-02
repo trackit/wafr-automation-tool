@@ -24,21 +24,21 @@ export class DeletePDFExportAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): DeletePDFExportAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withFileExportId(
-    fileExportId: string
+    fileExportId: string,
   ): DeletePDFExportAdapterEventMother {
     this.pathParameters.fileExportId = fileExportId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): DeletePDFExportAdapterEventMother {
     this.user = user;
     return this;

@@ -15,7 +15,7 @@ export type ListPDFExportsUseCaseArgs = {
 
 export interface ListPDFExportsUseCase {
   listPDFExports(
-    args: ListPDFExportsUseCaseArgs
+    args: ListPDFExportsUseCaseArgs,
   ): Promise<AssessmentFileExport[]>;
 }
 
@@ -23,7 +23,7 @@ export class ListPDFExportsUseCaseImpl implements ListPDFExportsUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async listPDFExports(
-    args: ListPDFExportsUseCaseArgs
+    args: ListPDFExportsUseCaseArgs,
   ): Promise<AssessmentFileExport[]> {
     const { assessmentId, user } = args;
 
@@ -43,7 +43,7 @@ export class ListPDFExportsUseCaseImpl implements ListPDFExportsUseCase {
       return [];
     }
     return fileExports.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
   }
 }

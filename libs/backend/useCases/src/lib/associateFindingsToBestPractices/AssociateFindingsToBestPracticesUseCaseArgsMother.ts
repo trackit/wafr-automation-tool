@@ -19,28 +19,28 @@ export class AssociateFindingsToBestPracticesUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;
   }
 
   public withScanningTool(
-    scanningTool: ScanningTool
+    scanningTool: ScanningTool,
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
     this.data.scanningTool = scanningTool;
     return this;
   }
 
   public withFindings(
-    findings: Finding[]
+    findings: Finding[],
   ): AssociateFindingsToBestPracticesUseCaseArgsMother {
     this.data.findings = findings;
     return this;

@@ -16,14 +16,14 @@ export class UpdateAssessmentUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateAssessmentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organization: string
+    organization: string,
   ): UpdateAssessmentUseCaseArgsMother {
     this.data.organizationDomain = organization;
     return this;

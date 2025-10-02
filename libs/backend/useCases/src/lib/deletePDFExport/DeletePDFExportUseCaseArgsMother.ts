@@ -18,14 +18,14 @@ export class DeletePDFExportUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): DeletePDFExportUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withFileExportId(
-    fileExportId: string
+    fileExportId: string,
   ): DeletePDFExportUseCaseArgsMother {
     this.data.fileExportId = fileExportId;
     return this;

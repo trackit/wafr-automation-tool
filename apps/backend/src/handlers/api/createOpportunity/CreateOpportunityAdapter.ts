@@ -12,16 +12,16 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const CreateOpportunityPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['createOpportunity']['parameters']['path']>;
 
 const CreateOpportunityBodySchema = z.object({
   companyName: z.string(),
   duns: z.string(),
-  industry: z.string().pipe(z.nativeEnum(Industry)),
-  customerType: z.nativeEnum(CustomerType),
+  industry: z.enum(Industry),
+  customerType: z.enum(CustomerType),
   companyWebsiteUrl: z.string(),
-  customerCountry: z.string().pipe(z.nativeEnum(CountryCode)),
+  customerCountry: z.enum(CountryCode),
   customerPostalCode: z.string(),
   monthlyRecurringRevenue: z.string(),
   targetCloseDate: z.string(),
@@ -35,7 +35,7 @@ export class CreateOpportunityAdapter {
   private readonly useCase = inject(tokenCreateOpportunityUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -52,12 +52,7 @@ export class CreateOpportunityAdapter {
 
     await this.useCase.createOpportunity({
       ...pathParameters,
-      opportunityDetails: {
-        ...body,
-        customerType: body.customerType as CustomerType,
-        customerCountry: body.customerCountry as CountryCode,
-        industry: body.industry as Industry,
-      },
+      opportunityDetails: body,
       user: getUserFromEvent(event),
     });
   }

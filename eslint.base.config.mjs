@@ -1,5 +1,4 @@
 import nx from '@nx/eslint-plugin';
-import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import pluginImport from 'eslint-plugin-import';
 import pluginPromise from 'eslint-plugin-promise';
@@ -15,7 +14,6 @@ export default [
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     plugins: {
-      '@typescript-eslint': tseslint,
       promise: pluginPromise,
       'simple-import-sort': simpleImportSort,
       import: pluginImport,

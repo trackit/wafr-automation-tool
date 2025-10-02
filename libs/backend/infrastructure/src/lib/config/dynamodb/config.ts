@@ -23,14 +23,14 @@ export const tokenDynamoDBConfig = createInjectionToken<DynamoDBClientConfig>(
   'DynamoDBConfig',
   {
     useValue: defaultDynamoDbConfig,
-  }
+  },
 );
 
 export const tokenDynamoDBClient = createInjectionToken<DynamoDBClient>(
   'DynamoDBClient',
   {
     useFactory: () => new DynamoDBClient(inject(tokenDynamoDBConfig)),
-  }
+  },
 );
 
 export const tokenDynamoDBDocument = createInjectionToken<DynamoDBDocument>(
@@ -43,7 +43,7 @@ export const tokenDynamoDBDocument = createInjectionToken<DynamoDBDocument>(
           convertEmptyValues: true,
         },
       }),
-  }
+  },
 );
 
 export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
@@ -54,10 +54,10 @@ export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
       assertIsDefined(tableName, 'DDB_TABLE is not defined');
       return tableName;
     },
-  }
+  },
 );
 
 export const tokenDynamoDBAssessmentBatchSize = createInjectionToken<number>(
   'DynamoDBAssessmentBatchSize',
-  { useValue: 25 } // Default batch size for DynamoDB operations
+  { useValue: 25 }, // Default batch size for DynamoDB operations
 );

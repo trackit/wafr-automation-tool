@@ -23,7 +23,7 @@ export class UpdateQuestionUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateQuestionUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
