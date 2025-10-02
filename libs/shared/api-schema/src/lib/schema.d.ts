@@ -502,7 +502,7 @@ export interface components {
         };
         CommentDto: {
             /** @description Text of the comment */
-            text: string;
+            text?: string;
         };
         Pillar: {
             id: string;
