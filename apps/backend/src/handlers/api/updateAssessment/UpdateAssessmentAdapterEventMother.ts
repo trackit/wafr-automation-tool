@@ -54,7 +54,7 @@ export class UpdateAssessmentAdapterEventMother {
   }
 
   public withBody(
-    body: UpdateAssessmentBody
+    body: UpdateAssessmentBody,
   ): UpdateAssessmentAdapterEventMother {
     this.body = body;
     return this;
