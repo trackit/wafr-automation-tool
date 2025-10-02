@@ -12,12 +12,12 @@ Font.register({
   family: 'Inter',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50yjIw2boKoduKmMEVuLyfMZg.ttf',
+      src: './assets/Inter-regular.ttf',
       fontStyle: 'normal',
       fontWeight: 'normal',
     },
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
+      src: './assets/Inter-bold.ttf',
       fontStyle: 'normal',
       fontWeight: 'bold',
     },

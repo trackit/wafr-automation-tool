@@ -79,7 +79,7 @@ export function FindingsPage({
           Well Architected Review Program: {assessmentName}
         </Text>
         <Image
-          src="https://trackit.io/wp-content/uploads/2023/02/AWS-Badge-Advanced-Services.png"
+          src="./assets/AWS-Badge-Advanced-Services.png"
           style={styles.headerRightImage}
         />
       </View>
@@ -87,7 +87,7 @@ export function FindingsPage({
       <View>
         <Text style={styles.title}>{assessmentName} review</Text>
         <Image
-          src="https://trackit.io/wp-content/uploads/2023/09/Untitled-design.png"
+          src="./assets/TrackIt-logo.png"
           style={styles.logo}
         />
       </View>
@@ -98,7 +98,7 @@ export function FindingsPage({
 
       <View style={styles.footerContainer} fixed>
         <Image
-          src="https://trackit.io/wp-content/uploads/2023/09/Untitled-design.png"
+          src="./assets/TrackIt-logo.png"
           style={styles.footerLogo}
         />
         <Text
