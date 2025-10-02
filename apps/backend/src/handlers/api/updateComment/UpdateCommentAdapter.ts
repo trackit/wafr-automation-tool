@@ -15,9 +15,14 @@ const UpdateCommentPathSchema = z.object({
   commentId: z.uuid(),
 }) satisfies ZodType<operations['updateComment']['parameters']['path']>;
 
-const UpdateCommentBodySchema = z.object({
-  text: z.string().nonempty(),
-}) satisfies ZodType<
+const UpdateCommentBodySchema = z
+  .object({
+    text: z.string().nonempty(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateComment']['requestBody']['content']['application/json']
 >;
 

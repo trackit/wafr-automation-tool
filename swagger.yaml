@@ -1198,9 +1198,6 @@ components:
           description: ISO-formatted date of when the comment was created
     CommentDto:
       type: object
-      additionalProperties: false
-      required:
-        - text
       properties:
         text:
           type: string

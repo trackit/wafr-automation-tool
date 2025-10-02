@@ -13,9 +13,14 @@ const UpdateAssessmentPathSchema = z.object({
   assessmentId: z.uuid(),
 }) satisfies ZodType<operations['updateAssessment']['parameters']['path']>;
 
-const UpdateAssessmentBodySchema = z.object({
-  name: z.string().nonempty().optional(),
-}) satisfies ZodType<
+const UpdateAssessmentBodySchema = z
+  .object({
+    name: z.string().nonempty(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateAssessment']['requestBody']['content']['application/json']
 >;
 

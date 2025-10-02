@@ -68,6 +68,11 @@ export class UpdateCommentAdapterEventMother {
     return this;
   }
 
+  public withBody(body: UpdateCommentBody): UpdateCommentAdapterEventMother {
+    this.body = body;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
       .withPathParameters(this.pathParameters)

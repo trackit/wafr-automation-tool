@@ -71,6 +71,11 @@ export class UpdateQuestionAdapterEventMother {
     return this;
   }
 
+  public withBody(body: UpdateQuestionBody): UpdateQuestionAdapterEventMother {
+    this.body = body;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
       .withPathParameters(this.pathParameters)

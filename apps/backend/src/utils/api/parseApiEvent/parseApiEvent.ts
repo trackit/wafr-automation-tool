@@ -55,6 +55,9 @@ export function parseBodyFromEvent<B>(
         : event.body;
 
   if (rawBody == null) {
+    if (acceptsEmptyObject(schema)) {
+      return schema.parse({}) as z.infer<B>;
+    }
     throw new BodyMissingError();
   }
 

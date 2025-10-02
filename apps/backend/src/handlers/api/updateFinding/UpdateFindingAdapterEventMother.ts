@@ -59,6 +59,11 @@ export class UpdateFindingAdapterEventMother {
     return this;
   }
 
+  public withBody(body: UpdateFindingBody): UpdateFindingAdapterEventMother {
+    this.body = body;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
       .withBody(JSON.stringify(this.body))

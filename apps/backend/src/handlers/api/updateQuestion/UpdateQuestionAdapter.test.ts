@@ -53,6 +53,17 @@ describe('updateQuestion adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return a 400 status code with empty body parameters', async () => {
+      const { adapter } = setup();
+
+      const event = UpdateQuestionAdapterEventMother.basic()
+        .withBody({})
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
   });
   describe('useCase and return value', () => {
     it('should call useCase with the correct parameters', async () => {

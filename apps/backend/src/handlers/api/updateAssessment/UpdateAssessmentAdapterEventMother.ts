@@ -53,6 +53,13 @@ export class UpdateAssessmentAdapterEventMother {
     return this;
   }
 
+  public withBody(
+    body: UpdateAssessmentBody,
+  ): UpdateAssessmentAdapterEventMother {
+    this.body = body;
+    return this;
+  }
+
   public build(): APIGatewayProxyEvent {
     return APIGatewayProxyEventMother.basic()
       .withBody(JSON.stringify(this.body))
