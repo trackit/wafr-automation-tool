@@ -34,6 +34,10 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
+  DynamoDBArn:
+    Type: String
+  OrganizationTableArn:
+    Type: String
 
 Globals:
   Function:
@@ -49,6 +53,8 @@ Globals:
         STATE_MACHINE_ARN: !Ref StateMachineArn
         DB_HOST: !Ref DBHost
         DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
+        DDB_TABLE: !Ref DynamoDBArn
+        ORGANIZATION_TABLE: !Ref OrganizationTableArn
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -239,6 +245,15 @@ Resources:
         - AWSLambdaVPCAccessExecutionRole
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Scan
+                - dynamodb:Query
+              Resource:
+                - !Ref DynamoDBArn
+                - !Ref OrganizationTableArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
