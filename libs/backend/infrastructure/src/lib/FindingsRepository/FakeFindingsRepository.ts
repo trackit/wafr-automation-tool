@@ -33,6 +33,19 @@ export class FakeFindingsRepository implements FindingRepository {
     this.findings[key].push(finding);
   }
 
+  public async saveAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    findings: Finding[];
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, findings } = args;
+    await Promise.all(
+      findings.map((finding) =>
+        this.save({ assessmentId, organizationDomain, finding })
+      )
+    );
+  }
+
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -73,6 +86,9 @@ export class FakeFindingsRepository implements FindingRepository {
       });
       if (!finding) {
         throw new Error();
+      }
+      if (!finding.bestPractices) {
+        finding.bestPractices = [];
       }
       finding.bestPractices.push(bestPractice);
     }
@@ -167,7 +183,7 @@ export class FakeFindingsRepository implements FindingRepository {
   }): Promise<Finding[]> {
     const { assessmentId, organizationDomain } = args;
     const key = `${assessmentId}#${organizationDomain}`;
-    return this.findings[key];
+    return this.findings[key] ?? [];
   }
 
   public async getBestPracticeFindings(
@@ -203,7 +219,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const findings =
       this.findings[key]
         ?.filter((finding) =>
-          finding.bestPractices.find((bp) => bp.id === bestPractice.id)
+          finding.bestPractices?.find((bp) => bp.id === bestPractice.id)
         )
         .filter((finding) => {
           if (!searchTerm) return true;
@@ -389,7 +405,7 @@ export class FakeFindingsRepository implements FindingRepository {
     }
 
     const findings = this.findings[key]?.filter((finding) =>
-      finding.bestPractices.find((bp) => bp.id === bestPractice.id)
+      finding.bestPractices?.find((bp) => bp.id === bestPractice.id)
     );
     return findings.length;
   }

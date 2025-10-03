@@ -25,6 +25,11 @@ export interface FindingRepository {
     organizationDomain: string;
     finding: Finding;
   }): Promise<void>;
+  saveAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    findings: Finding[];
+  }): Promise<void>;
   saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;

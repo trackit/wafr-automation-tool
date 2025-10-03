@@ -75,6 +75,27 @@ export class FindingsRepositorySQL implements FindingRepository {
     });
   }
 
+  public async saveAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    findings: Finding[];
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, findings } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const entities = repo.create(
+      findings.map((finding) => ({
+        ...finding,
+        assessmentId,
+      }))
+    );
+
+    await repo.save(entities);
+    this.logger.info(
+      `${findings.length} findings saved for assessment: ${assessmentId}`
+    );
+  }
+
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;

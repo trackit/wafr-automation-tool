@@ -40,7 +40,7 @@ afterAll(async () => {
 
 describe('FindingsRepositoryDynamoDB', () => {
   describe('save', () => {
-    it('should save a finding by scanningTool for an assessment by ID and organization', async () => {
+    it('should save a finding for an assessment by ID and organization', async () => {
       const { repository } = setup();
 
       const finding = FindingMother.basic()
@@ -77,6 +77,40 @@ describe('FindingsRepositoryDynamoDB', () => {
       });
 
       expect(savedFinding).toEqual(finding);
+    });
+  });
+
+  describe('saveAll', () => {
+    it('should save several findings for an assessment by ID and organization', async () => {
+      const { repository } = setup();
+      const findings = [
+        FindingMother.basic().withId('scanningTool#1').build(),
+        FindingMother.basic().withId('scanningTool#2').build(),
+        FindingMother.basic().withId('scanningTool#3').build(),
+      ];
+      await repository.saveAll({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        findings,
+      });
+      const savedFinding1 = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        findingId: 'scanningTool#1',
+      });
+      const savedFinding2 = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        findingId: 'scanningTool#2',
+      });
+      const savedFinding3 = await repository.get({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+        findingId: 'scanningTool#3',
+      });
+      expect(savedFinding1).toEqual(findings[0]);
+      expect(savedFinding2).toEqual(findings[1]);
+      expect(savedFinding3).toEqual(findings[2]);
     });
   });
 

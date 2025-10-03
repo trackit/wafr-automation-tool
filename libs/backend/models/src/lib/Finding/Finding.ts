@@ -23,7 +23,7 @@ export type FindingAggregationResult<TFields extends FindingAggregationFields> =
 export interface Finding extends ScanFinding {
   hidden: boolean;
   isAIAssociated: boolean;
-  bestPractices: BestPractice[];
+  bestPractices?: BestPractice[];
   comments?: FindingComment[];
 }
 

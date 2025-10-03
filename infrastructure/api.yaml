@@ -224,6 +224,31 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  MigrateDynamoLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${MigrateDynamoFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  MigrateDynamoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/process/migrateDynamo
+      Tags:
+        Name: MigrateDynamoFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: 'es2020'
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   Api:
     Type: AWS::Serverless::Api
     Properties:
