@@ -26,3 +26,4 @@ copy_folder libs/backend/infrastructure/src/lib/PDFService/assets Api/ExportAsse
 build_files libs/backend/infrastructure/src/lib/config/typeorm/tenantsMigrations/*.ts Api/MigrationRunnerFunction/tenantsMigrations/
 build_files libs/backend/infrastructure/src/lib/config/typeorm/migrations/*.ts Api/MigrationRunnerFunction/migrations/
 build_files libs/backend/infrastructure/src/lib/config/typeorm/migrations/*.ts Api/CreateOrganizationFunction/migrations/
+build_files libs/backend/infrastructure/src/lib/config/typeorm/migrations/*.ts Api/MigrateDynamoFunction/migrations/
