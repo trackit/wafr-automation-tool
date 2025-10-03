@@ -152,13 +152,12 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${MigrationRunnerFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-
   MigrationRunnerFunction:
     Type: AWS::Serverless::Function
     Properties:
       Timeout: 900
       ReservedConcurrentExecutions: 1
-      CodeUri: ../apps/backend/src/handlers/migrationRunner
+      CodeUri: ../apps/backend/src/handlers/process/migrationRunner
       Tags:
         Name: MigrationRunnerFunction
       Policies:
@@ -180,11 +179,10 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${CreateOrganizationFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-
   CreateOrganizationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../apps/backend/src/handlers/createOrganization
+      CodeUri: ../apps/backend/src/handlers/process/createOrganization
       Tags:
         Name: CreateOrganizationFunction
       Policies:
@@ -206,11 +204,10 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${ResetAuroraFunction}'
       RetentionInDays: !Ref LogRetentionInDays
-
   ResetAuroraFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../apps/backend/src/handlers/resetAurora
+      CodeUri: ../apps/backend/src/handlers/process/resetAurora
       Tags:
         Name: ResetAuroraFunction
       Policies:
