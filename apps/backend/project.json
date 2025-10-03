@@ -13,7 +13,7 @@
       }
     },
     "build": {
-      "command": "sh apps/backend/build.sh",
+      "command": "sh scripts/backend/build.sh",
       "options": {
         "cwd": "."
       }
