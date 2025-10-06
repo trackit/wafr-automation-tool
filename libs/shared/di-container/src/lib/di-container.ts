@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 
 export { createInjectionToken, DIToken } from './DIToken';
-export { FactoryFunction } from './FactoryFunction';
+export type { FactoryFunction } from './FactoryFunction';
 export { inject } from './inject';
-export {
+export type {
   ClassProvider,
   FactoryProvider,
   Provider,

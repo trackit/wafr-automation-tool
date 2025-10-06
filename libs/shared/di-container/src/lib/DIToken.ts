@@ -1,6 +1,6 @@
-import { InjectionToken } from 'tsyringe';
+import type { InjectionToken } from 'tsyringe';
 
-import { Provider } from './Provider';
+import type { Provider } from './Provider';
 
 export class DIToken<T> {
   public symbol: InjectionToken<T>;

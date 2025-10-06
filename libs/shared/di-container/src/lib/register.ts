@@ -5,7 +5,7 @@ import {
   isClassProvider,
   isFactoryProvider,
   isValueProvider,
-  Provider,
+  type Provider,
 } from './Provider';
 
 export const register = <T = any>(
