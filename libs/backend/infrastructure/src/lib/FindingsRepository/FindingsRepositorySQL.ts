@@ -2,6 +2,8 @@ import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 
 import {
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
@@ -18,6 +20,7 @@ import { tokenLogger, tokenTypeORMClientManager } from '../infrastructure';
 import {
   FindingCommentEntity,
   FindingEntity,
+  FindingResourceEntity,
 } from './FindingsRepositorySQLEntities';
 import { toDomainFinding } from './FindingsRepositorySQLMapping';
 
@@ -42,17 +45,34 @@ export class FindingsRepositorySQL implements FindingRepository {
     finding: Finding;
   }): Promise<void> {
     const { assessmentId, organizationDomain, finding } = args;
-    const repo = await this.repo(FindingEntity, organizationDomain);
+    const findingRepo = await this.repo(FindingEntity, organizationDomain);
 
-    const entity = repo.create({
-      ...finding,
-      assessmentId,
+    const { resources = [], ...findingData } = finding;
+
+    await findingRepo.manager.transaction(async (trx) => {
+      const trxFindingRepo = trx.getRepository(FindingEntity);
+      const trxResourceRepo = trx.getRepository(FindingResourceEntity);
+
+      const findingEntity = trxFindingRepo.create({
+        ...findingData,
+        assessmentId,
+      });
+      await trxFindingRepo.save(findingEntity);
+
+      const findingResources = resources.map((resource) => {
+        const resourceEntity = trxResourceRepo.create({
+          ...resource,
+          assessmentId,
+          findingId: findingEntity.id,
+        });
+        return resourceEntity;
+      });
+      await trxResourceRepo.save(findingResources);
+
+      this.logger.info(
+        `Finding saved: ${finding.id} for assessment: ${assessmentId}`
+      );
     });
-
-    await repo.save(entity);
-    this.logger.info(
-      `Finding saved: ${finding.id} for assessment: ${assessmentId}`
-    );
   }
 
   public async saveBestPracticeFindings(args: {

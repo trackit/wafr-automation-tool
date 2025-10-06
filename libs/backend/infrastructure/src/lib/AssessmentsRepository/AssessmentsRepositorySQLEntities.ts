@@ -1,10 +1,12 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Unique,
 } from 'typeorm';
 
 import {
@@ -19,6 +21,8 @@ import {
 } from '@backend/models';
 
 @Entity('assessments')
+@Unique('uq_assessments_uuid', ['id'])
+@Index('ix_assessments_uuid', ['id'])
 export class AssessmentEntity implements Omit<Assessment, 'organization'> {
   @PrimaryColumn('uuid')
   id!: string;
@@ -26,10 +30,10 @@ export class AssessmentEntity implements Omit<Assessment, 'organization'> {
   @Column('varchar')
   createdBy!: string;
 
-  @Column('varchar')
-  executionArn!: string;
+  @Column('varchar', { nullable: true })
+  executionArn?: string;
 
-  @Column('timestamptz')
+  @Column('timestamptz', { default: () => 'now()' })
   createdAt!: Date;
 
   @Column('varchar')
@@ -68,6 +72,8 @@ export class AssessmentEntity implements Omit<Assessment, 'organization'> {
 }
 
 @Entity('pillars')
+@Unique('uq_pillars_assessment', ['assessmentId', 'id'])
+@Index('ix_pillars_assessment', ['assessmentId', 'id'])
 export class PillarEntity implements Omit<Pillar, 'organization'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -81,7 +87,7 @@ export class PillarEntity implements Omit<Pillar, 'organization'> {
   @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
   assessment!: AssessmentEntity;
 
-  @Column('boolean')
+  @Column('boolean', { default: false })
   disabled!: boolean;
 
   @Column('varchar')
@@ -97,6 +103,8 @@ export class PillarEntity implements Omit<Pillar, 'organization'> {
 }
 
 @Entity('questions')
+@Unique('uq_questions_assessment', ['assessmentId', 'pillarId', 'id'])
+@Index('ix_questions_pillar', ['assessmentId', 'pillarId', 'id'])
 export class QuestionEntity implements Question {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -116,13 +124,13 @@ export class QuestionEntity implements Question {
   ])
   pillar!: PillarEntity;
 
-  @Column('boolean')
+  @Column('boolean', { default: false })
   disabled!: boolean;
 
   @Column('varchar')
   label!: string;
 
-  @Column('boolean')
+  @Column('boolean', { default: false })
   none!: boolean;
 
   @Column('varchar')
@@ -133,6 +141,8 @@ export class QuestionEntity implements Question {
 }
 
 @Entity('bestPractices')
+@Unique('uq_bp_assessment', ['assessmentId', 'questionId', 'pillarId', 'id'])
+@Index('ix_bp_question', ['assessmentId', 'questionId', 'pillarId', 'id'])
 export class BestPracticeEntity implements BestPractice {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -156,7 +166,7 @@ export class BestPracticeEntity implements BestPractice {
   ])
   question!: QuestionEntity;
 
-  @Column('varchar')
+  @Column('text')
   description!: string;
 
   @Column('varchar')
@@ -165,14 +175,16 @@ export class BestPracticeEntity implements BestPractice {
   @Column('varchar')
   primaryId!: string;
 
-  @Column('varchar')
+  @Column({ type: 'enum', enum: SeverityType })
   risk!: SeverityType;
 
-  @Column('boolean')
+  @Column('boolean', { default: false })
   checked!: boolean;
 }
 
 @Entity('fileExports')
+@Unique('uq_fileExports_assessment', ['assessmentId', 'id'])
+@Index('ix_fileExports_assessment', ['assessmentId', 'id'])
 export class FileExportEntity implements AssessmentFileExport {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -180,16 +192,16 @@ export class FileExportEntity implements AssessmentFileExport {
   @PrimaryColumn('varchar')
   id!: string;
 
-  @Column('varchar')
+  @Column({ type: 'enum', enum: AssessmentFileExportType })
   type!: AssessmentFileExportType;
 
-  @ManyToOne(() => AssessmentEntity, (assessment) => assessment.pillars, {
+  @ManyToOne(() => AssessmentEntity, (assessment) => assessment.fileExports, {
     onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
   assessment!: AssessmentEntity;
 
-  @Column('varchar')
+  @Column({ type: 'enum', enum: AssessmentFileExportStatus })
   status!: AssessmentFileExportStatus;
 
   @Column('varchar', { nullable: true })
@@ -201,7 +213,7 @@ export class FileExportEntity implements AssessmentFileExport {
   @Column('varchar', { nullable: true })
   objectKey?: string;
 
-  @Column('timestamptz')
+  @Column('timestamptz', { default: () => 'now()' })
   createdAt!: Date;
 }
 

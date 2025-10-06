@@ -15,10 +15,7 @@ import {
   testDynamoDbConfig,
   tokenDynamoDBConfig,
 } from './config/dynamodb/config';
-import {
-  testTypeORMConfig,
-  tokenTypeORMConfigCreator,
-} from './config/typeorm/config';
+import { testTypeORMConfig, tokenTypeORMConfigCreator } from './config/typeorm';
 import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,

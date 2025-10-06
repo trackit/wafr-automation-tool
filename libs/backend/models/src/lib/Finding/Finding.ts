@@ -40,7 +40,7 @@ export interface ScanFinding {
 
 export interface FindingRemediation {
   desc: string;
-  references?: string[];
+  references: string[];
 }
 
 export interface FindingResource {

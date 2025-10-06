@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -8,6 +9,8 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
 import {
@@ -21,6 +24,8 @@ import {
 import { BestPracticeEntity } from '../AssessmentsRepository/AssessmentsRepositorySQLEntities';
 
 @Entity('findings')
+@Unique('uq_findings_pk', ['assessmentId', 'id'])
+@Index('ix_findings_assessment_id', ['assessmentId', 'id'])
 export class FindingEntity implements Finding {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -50,36 +55,41 @@ export class FindingEntity implements Finding {
   @Column('boolean')
   isAIAssociated!: boolean;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   eventCode?: string;
 
-  @Column('varchar')
+  @Column('text')
   riskDetails!: string;
 
-  @Column('varchar')
+  @Column({ type: 'enum', enum: SeverityType })
   severity!: SeverityType;
 
   @Column('varchar')
   statusCode!: string;
 
-  @Column('varchar')
+  @Column('text')
   statusDetail!: string;
 
-  @OneToOne(() => FindingRemediationEntity, (c) => c.finding, {
+  @OneToOne(() => FindingRemediationEntity, (rem) => rem.finding, {
     cascade: true,
+    nullable: true,
   })
   remediation?: FindingRemediationEntity;
 
-  @OneToMany(() => FindingResourceEntity, (c) => c.finding, {
+  @OneToMany(() => FindingResourceEntity, (res) => res.finding, {
     cascade: true,
   })
   resources!: FindingResourceEntity[];
 
-  @OneToMany(() => FindingCommentEntity, (c) => c.finding, { cascade: true })
-  comments?: FindingCommentEntity[];
+  @OneToMany(() => FindingCommentEntity, (com) => com.finding, {
+    cascade: true,
+  })
+  comments!: FindingCommentEntity[];
 }
 
 @Entity('findingRemediations')
+@Unique('uq_findingRemediations_pk', ['assessmentId', 'findingId'])
+@Index('ix_findingRemediations_fk', ['assessmentId', 'findingId'])
 export class FindingRemediationEntity implements FindingRemediation {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -87,13 +97,13 @@ export class FindingRemediationEntity implements FindingRemediation {
   @PrimaryColumn('varchar')
   findingId!: string;
 
-  @Column('varchar')
+  @Column('text')
   desc!: string;
 
   @Column({ type: 'jsonb', nullable: false, default: [] })
-  references?: string[];
+  references!: string[];
 
-  @ManyToOne(() => FindingEntity, (f) => f.comments, { onDelete: 'CASCADE' })
+  @OneToOne(() => FindingEntity, (f) => f.remediation, { onDelete: 'CASCADE' })
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
@@ -102,26 +112,31 @@ export class FindingRemediationEntity implements FindingRemediation {
 }
 
 @Entity('findingResources')
+@Unique('uq_findingResources_pk', ['id'])
+@Index('ix_findingResources_fk', ['assessmentId', 'findingId'])
 export class FindingResourceEntity implements FindingResource {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column('uuid')
   assessmentId!: string;
 
-  @PrimaryColumn('varchar')
+  @Column('varchar')
   findingId!: string;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   name?: string;
 
-  @Column('varchar')
-  region!: string;
+  @Column('varchar', { nullable: true })
+  region?: string;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   type?: string;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   uid?: string;
 
-  @ManyToOne(() => FindingEntity, (f) => f.comments, { onDelete: 'CASCADE' })
+  @ManyToOne(() => FindingEntity, (f) => f.resources, { onDelete: 'CASCADE' })
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
@@ -130,8 +145,10 @@ export class FindingResourceEntity implements FindingResource {
 }
 
 @Entity('findingComments')
+@Unique('uq_findingComments_pk', ['id'])
+@Index('ix_findingComments_fk', ['assessmentId', 'findingId'])
 export class FindingCommentEntity implements FindingComment {
-  @PrimaryColumn('varchar')
+  @PrimaryColumn('uuid')
   id!: string;
 
   @Column('uuid')

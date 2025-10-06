@@ -89,7 +89,7 @@ export class ProwlerScanProvider extends ScanProvider {
       ...(prowlerFinding.remediation && {
         remediation: {
           desc: prowlerFinding.remediation?.desc,
-          references: prowlerFinding.remediation?.references,
+          references: prowlerFinding.remediation?.references ?? [],
         },
       }),
       riskDetails: prowlerFinding.risk_details,
