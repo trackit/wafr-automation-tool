@@ -91,7 +91,7 @@ function AssessmentsList() {
     );
     for (const id of ids) {
       if (!id || assessmentSteps[id]) continue;
-      fetchStep(id);
+      void fetchStep(id);
     }
   }, [data, fetchStep, assessmentSteps]);
 

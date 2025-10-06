@@ -10,6 +10,7 @@ export * from './exportPDF';
 export * from './exportWellArchitectedTool';
 export * from './generatePDFExportURL';
 export * from './getAssessment';
+export * from './getAssessmentGraph';
 export * from './getAssessments';
 export * from './getAssessmentStep';
 export * from './getBestPracticeFindings';

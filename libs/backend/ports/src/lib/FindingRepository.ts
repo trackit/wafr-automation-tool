@@ -1,5 +1,7 @@
 import {
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
@@ -54,6 +56,16 @@ export interface FindingRepository {
     nextToken?: string;
   }>;
 
+  aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>>;
+
+  countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<number>;
   countBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;

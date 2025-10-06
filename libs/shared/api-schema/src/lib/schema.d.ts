@@ -70,6 +70,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve the graph of findings for a specific assessment
+         * @description Fetches the graph of findings for a specific assessment.
+         *
+         */
+        get: operations["getAssessmentGraph"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/step": {
         parameters: {
             query?: never;
@@ -417,17 +438,19 @@ export interface components {
             pillars?: components["schemas"]["Pillar"][];
             /** @description The version of questions that were used for the assessment */
             questionVersion?: string;
-            /** @description Processed data from the scanning tools */
-            graphData?: {
+        };
+        AssessmentGraph: {
+            /** @description Severity levels where findings were found */
+            severity: Record<string, unknown>;
+            /** @description Resource types where findings were found */
+            resources: {
                 /** @description Regions where findings were found */
-                regions?: Record<string, unknown>;
+                region: Record<string, unknown>;
                 /** @description Resource types where findings were found */
-                resourceTypes?: Record<string, unknown>;
-                /** @description Severity levels where findings were found */
-                severities?: Record<string, unknown>;
-                /** @description Total number of findings */
-                findings?: number;
+                type: Record<string, unknown>;
             };
+            /** @description Total number of findings */
+            findings: number;
         };
         /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
@@ -814,6 +837,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAssessmentGraph: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve the graph of findings for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The graph of findings for the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentGraph"];
+                };
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
             400: {

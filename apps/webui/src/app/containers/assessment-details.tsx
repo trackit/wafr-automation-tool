@@ -951,153 +951,156 @@ export function AssessmentDetails() {
 
       {selectedPillar?.id === 'overview' && !isMilestone && assessmentData ? (
         <AssessmentOverview assessment={assessmentData} />
-      ) : null}
+      ) : (
+        <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
+          {isFullPillar(selectedPillar) && selectedPillar.disabled && (
+            <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
+              <h3 className="text-center font-medium text-xl  flex-1">
+                This pillar is disabled
+              </h3>
+            </div>
+          )}
+          {isFullPillar(selectedPillar) &&
+            !selectedPillar.disabled &&
+            selectedPillar.questions && (
+              <>
+                <VerticalMenu
+                  items={(selectedPillar.questions || [])
+                    .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
+                    .map((question, index) => {
+                      // Find the latest question data from the cache
+                      const latestQuestion =
+                        pillars
+                          ?.find((p) => p.id === selectedPillar.id)
+                          ?.questions?.find((q) => q.id === question.id) ||
+                        question;
 
-      <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
-        {isFullPillar(selectedPillar) && selectedPillar.disabled && (
-          <div className="flex flex-row gap-2 items-center justify-between p-8 w-full">
-            <h3 className="text-center font-medium text-xl  flex-1">
-              This pillar is disabled
-            </h3>
-          </div>
-        )}
-        {isFullPillar(selectedPillar) &&
-          !selectedPillar.disabled &&
-          selectedPillar.questions && (
-            <>
-              <VerticalMenu
-                items={(selectedPillar.questions || [])
-                  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
-                  .map((question, index) => {
-                    // Find the latest question data from the cache
-                    const latestQuestion =
-                      pillars
-                        ?.find((p) => p.id === selectedPillar.id)
-                        ?.questions?.find((q) => q.id === question.id) ||
-                      question;
+                      return {
+                        text: question.label || '',
+                        id: question.id || `question-${index}`,
+                        active: activeQuestionIndex === index,
+                        onClick: () => setActiveQuestionIndex(index),
+                        completed:
+                          latestQuestion.bestPractices?.every(
+                            (bestPractice) =>
+                              bestPractice.risk !== 'High' ||
+                              bestPractice.checked === true
+                          ) ?? false,
+                        started:
+                          latestQuestion.bestPractices?.some(
+                            (bestPractice) => bestPractice.checked
+                          ) ?? false,
+                        error: latestQuestion.none,
+                        disabled: latestQuestion.disabled,
+                      };
+                    })}
+                />
 
-                    return {
-                      text: question.label || '',
-                      id: question.id || `question-${index}`,
-                      active: activeQuestionIndex === index,
-                      onClick: () => setActiveQuestionIndex(index),
-                      completed:
-                        latestQuestion.bestPractices?.every(
-                          (bestPractice) =>
-                            bestPractice.risk !== 'High' ||
-                            bestPractice.checked === true
-                        ) ?? false,
-                      started:
-                        latestQuestion.bestPractices?.some(
-                          (bestPractice) => bestPractice.checked
-                        ) ?? false,
-                      error: latestQuestion.none,
-                      disabled: latestQuestion.disabled,
-                    };
-                  })}
-              />
-
-              <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
-                <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
-                  <h3 className="text-center font-medium text-lg text-primary flex-1">
-                    <span className="font-medium">
-                      {isFullPillar(selectedPillar) && selectedPillar.questions
-                        ? `${activeQuestionIndex + 1} / ${
-                            selectedPillar.questions.length
-                          }`
-                        : ''}
-                    </span>
-                    {'. '}
-                    <span className="font-light">{activeQuestion?.label}</span>
-                  </h3>
-                  <div>
-                    {!isLastQuestion && !isMilestone && (
-                      <div
-                        tabIndex={0}
-                        role="button"
-                        className="btn btn-ghost btn-xs p-1"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleNextQuestion();
-                        }}
-                      >
-                        <ChevronRight className="w-4 h-4 text-base-content/80" />
-                      </div>
-                    )}
-                    {!isMilestone && (
-                      <div
-                        className="dropdown dropdown-end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
+                <div className="flex-1 bg-primary/5 px-8 py-4 flex flex-col gap-4">
+                  <div className="bg-base-100 p-4 py-2 rounded-lg flex flex-row gap-2 items-center justify-between">
+                    <h3 className="text-center font-medium text-lg text-primary flex-1">
+                      <span className="font-medium">
+                        {isFullPillar(selectedPillar) &&
+                        selectedPillar.questions
+                          ? `${activeQuestionIndex + 1} / ${
+                              selectedPillar.questions.length
+                            }`
+                          : ''}
+                      </span>
+                      {'. '}
+                      <span className="font-light">
+                        {activeQuestion?.label}
+                      </span>
+                    </h3>
+                    <div>
+                      {!isLastQuestion && !isMilestone && (
                         <div
                           tabIndex={0}
                           role="button"
                           className="btn btn-ghost btn-xs p-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleNextQuestion();
+                          }}
                         >
-                          <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                          <ChevronRight className="w-4 h-4 text-base-content/80" />
                         </div>
-                        <ul
-                          tabIndex={0}
-                          className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                      )}
+                      {!isMilestone && (
+                        <div
+                          className="dropdown dropdown-end"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
                         >
-                          <li>
-                            <button
-                              className={`flex flex-row gap-2 w-full text-left ${
-                                activeQuestion?.disabled
-                                  ? 'text-base-content'
-                                  : 'text-error'
-                              }`}
-                              onClick={() => {
-                                handleDisabledQuestion(
-                                  activeQuestion?.id || '',
-                                  !activeQuestion?.disabled
-                                );
-                              }}
-                            >
-                              {activeQuestion?.disabled ? (
-                                <>
-                                  <CircleCheck className="w-4 h-4" /> Enable
-                                  this question
-                                </>
-                              ) : (
-                                <>
-                                  <CircleMinus className="w-4 h-4" /> Disable
-                                  this question
-                                </>
-                              )}
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                          <div
+                            tabIndex={0}
+                            role="button"
+                            className="btn btn-ghost btn-xs p-1"
+                          >
+                            <EllipsisVertical className="w-4 h-4 text-base-content/80" />
+                          </div>
+                          <ul
+                            tabIndex={0}
+                            className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-sm"
+                          >
+                            <li>
+                              <button
+                                className={`flex flex-row gap-2 w-full text-left ${
+                                  activeQuestion?.disabled
+                                    ? 'text-base-content'
+                                    : 'text-error'
+                                }`}
+                                onClick={() => {
+                                  handleDisabledQuestion(
+                                    activeQuestion?.id || '',
+                                    !activeQuestion?.disabled
+                                  );
+                                }}
+                              >
+                                {activeQuestion?.disabled ? (
+                                  <>
+                                    <CircleCheck className="w-4 h-4" /> Enable
+                                    this question
+                                  </>
+                                ) : (
+                                  <>
+                                    <CircleMinus className="w-4 h-4" /> Disable
+                                    this question
+                                  </>
+                                )}
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  {activeQuestion?.disabled && (
+                    <div className="flex flex-row gap-2 items-center justify-between p-8">
+                      <h3 className="text-center font-medium text-xl  flex-1">
+                        This question is disabled
+                      </h3>
+                    </div>
+                  )}
+                  {!activeQuestion?.disabled && (
+                    <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                      {activeQuestion && (
+                        <DataTable
+                          key={`${selectedPillar?.id}-${activeQuestion.id}`}
+                          data={tableData}
+                          columns={columns}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
-                {activeQuestion?.disabled && (
-                  <div className="flex flex-row gap-2 items-center justify-between p-8">
-                    <h3 className="text-center font-medium text-xl  flex-1">
-                      This question is disabled
-                    </h3>
-                  </div>
-                )}
-                {!activeQuestion?.disabled && (
-                  <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                    {activeQuestion && (
-                      <DataTable
-                        key={`${selectedPillar?.id}-${activeQuestion.id}`}
-                        data={tableData}
-                        columns={columns}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-      </div>
+              </>
+            )}
+        </div>
+      )}
     </>
   );
 

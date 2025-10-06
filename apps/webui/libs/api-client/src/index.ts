@@ -7,6 +7,7 @@ export * from './lib/deletePDFExport';
 export * from './lib/exportToAWS';
 export * from './lib/generatePDFExportURL';
 export * from './lib/getAssessment';
+export * from './lib/getAssessmentGraph';
 export * from './lib/getAssessments';
 export * from './lib/getAssessmentStep';
 export * from './lib/getFindings';

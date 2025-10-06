@@ -394,7 +394,7 @@ function FindingsDetails({
           ...(hidden ? { hidden } : {}),
         },
       }),
-    onMutate: async ({ findingId, hidden }) => {
+    onMutate: async () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: [
@@ -405,62 +405,6 @@ function FindingsDetails({
           bestPractice.id,
         ],
       });
-
-      // Snapshot the previous value
-      const previousData = queryClient.getQueryData([
-        'findings',
-        assessmentId,
-        pillarId,
-        questionId,
-        bestPractice.id,
-      ]) as components['schemas']['BestPracticeExtra'] | undefined;
-
-      if (!previousData?.results) {
-        return { previousData };
-      }
-
-      // Create a deep copy of the data
-      const newData = JSON.parse(
-        JSON.stringify(previousData)
-      ) as components['schemas']['BestPracticeExtra'];
-
-      // Update the finding's hidden status
-      if (newData.results) {
-        const findings = newData.results as components['schemas']['Finding'][];
-
-        const updatedFindings = findings.map((finding) =>
-          finding.id === findingId
-            ? {
-                ...finding,
-                hidden: hidden ?? finding.hidden,
-              }
-            : finding
-        );
-
-        // Create a new object that explicitly matches BestPracticeExtra type
-        const updatedData = {
-          ...newData,
-          results: updatedFindings,
-        } as unknown as components['schemas']['BestPracticeExtra'];
-
-        // Update the cache with our optimistic value
-        queryClient.setQueryData(
-          ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          updatedData
-        );
-      }
-
-      // Return a context object with the snapshotted value
-      return { previousData };
-    },
-    onError: (_err, _variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          context.previousData
-        );
-      }
     },
     onSettled: async () => {
       // Always refetch after error or success to ensure data is in sync with server
