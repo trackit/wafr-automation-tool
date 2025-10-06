@@ -58,7 +58,7 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
     ) {
       throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
     }
-    
+
     const foundAssessmentExport = assessment.fileExports?.find(
       (assessmentExport) => assessmentExport.versionName === versionName
     );

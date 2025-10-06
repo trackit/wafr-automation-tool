@@ -28,21 +28,9 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
 
-  public async getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
-    assessment: Assessment;
-    bestPracticesFindingsAmount: BestPracticesFindingCounts;
-  }> {
-    const assessment = await this.assessmentsRepository.get({
-      assessmentId: args.assessmentId,
-      organizationDomain: args.organizationDomain,
-    });
-    if (!assessment) {
-      throw new AssessmentNotFoundError({
-        assessmentId: args.assessmentId,
-        organizationDomain: args.organizationDomain,
-      });
-    }
-
+  private async getBestPracticeFindings(
+    assessment: Assessment
+  ): Promise<BestPracticesFindingCounts> {
     const pillars = assessment.pillars ?? [];
 
     const bestPracticeDescriptors = pillars.flatMap((pillar) =>
@@ -64,19 +52,17 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       questionId: string;
       bestPracticeId: string;
     }): string => `${pillarId}:${questionId}:${bestPracticeId}`;
-
     const countResults = await Promise.all(
       bestPracticeDescriptors.map((descriptor) =>
         this.findingsRepository.countBestPracticeFindings({
-          assessmentId: args.assessmentId,
-          organizationDomain: args.organizationDomain,
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
           pillarId: descriptor.pillarId,
           questionId: descriptor.questionId,
           bestPracticeId: descriptor.bestPracticeId,
         })
       )
     );
-
     const countsByBestPractice = new Map<string, number>(
       bestPracticeDescriptors.map((descriptor, index) => [
         countKey(descriptor),
@@ -84,33 +70,53 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       ])
     );
 
-    const bestPracticesFindingsAmount =
-      pillars.reduce<BestPracticesFindingCounts>((accumulator, pillar) => {
-        if (!accumulator[pillar.id]) {
-          accumulator[pillar.id] = {};
+    return pillars.reduce<BestPracticesFindingCounts>((accumulator, pillar) => {
+      if (!accumulator[pillar.id]) {
+        accumulator[pillar.id] = {};
+      }
+      const pillarCounts = accumulator[pillar.id];
+
+      pillar.questions.forEach((question) => {
+        if (!pillarCounts[question.id]) {
+          pillarCounts[question.id] = {};
         }
-        const pillarCounts = accumulator[pillar.id];
+        const questionCounts = pillarCounts[question.id];
 
-        pillar.questions.forEach((question) => {
-          if (!pillarCounts[question.id]) {
-            pillarCounts[question.id] = {};
-          }
-          const questionCounts = pillarCounts[question.id];
-
-          question.bestPractices.forEach((bestPractice) => {
-            questionCounts[bestPractice.id] =
-              countsByBestPractice.get(
-                countKey({
-                  pillarId: pillar.id,
-                  questionId: question.id,
-                  bestPracticeId: bestPractice.id,
-                })
-              ) ?? 0;
-          });
+        question.bestPractices.forEach((bestPractice) => {
+          questionCounts[bestPractice.id] =
+            countsByBestPractice.get(
+              countKey({
+                pillarId: pillar.id,
+                questionId: question.id,
+                bestPracticeId: bestPractice.id,
+              })
+            ) ?? 0;
         });
+      });
 
-        return accumulator;
-      }, {});
+      return accumulator;
+    }, {});
+  }
+
+  public async getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
+    assessment: Assessment;
+    bestPracticesFindingsAmount: BestPracticesFindingCounts;
+  }> {
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId: args.assessmentId,
+      organizationDomain: args.organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.organizationDomain,
+      });
+    }
+
+    const bestPracticesFindingsAmount = await this.getBestPracticeFindings(
+      assessment
+    );
+
     return {
       assessment,
       bestPracticesFindingsAmount,

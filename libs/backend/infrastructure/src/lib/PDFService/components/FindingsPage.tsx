@@ -86,10 +86,7 @@ export function FindingsPage({
 
       <View>
         <Text style={styles.title}>{assessmentName} review</Text>
-        <Image
-          src="./assets/TrackIt-logo.png"
-          style={styles.logo}
-        />
+        <Image src="./assets/TrackIt-logo.png" style={styles.logo} />
       </View>
 
       {findings.map((finding, i) => (
@@ -97,10 +94,7 @@ export function FindingsPage({
       ))}
 
       <View style={styles.footerContainer} fixed>
-        <Image
-          src="./assets/TrackIt-logo.png"
-          style={styles.footerLogo}
-        />
+        <Image src="./assets/TrackIt-logo.png" style={styles.footerLogo} />
         <Text
           style={styles.pageNumber}
           render={({ pageNumber }) => `${pageNumber - 1}`}
