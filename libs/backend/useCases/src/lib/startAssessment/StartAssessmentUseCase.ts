@@ -101,31 +101,14 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     return false;
   }
 
-  public async startAssessment(
+  private async createAssessment(
     args: StartAssessmentUseCaseArgs
-  ): Promise<{ assessmentId: string }> {
+  ): Promise<Assessment> {
     const { name, user, roleArn } = args;
     const assessmentId = this.idGenerator.generate();
     const workflows =
       args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
     const regions = args.regions ?? [];
-
-    if (!(await this.canStartAssessment(args))) {
-      throw new OrganizationNoActiveSubscriptionError({
-        domain: user.organizationDomain,
-      });
-    }
-    const executionId = await this.stateMachine.startAssessment({
-      name,
-      regions,
-      workflows,
-      roleArn,
-      assessmentId,
-      createdAt: new Date(),
-      createdBy: user.id,
-      organizationDomain: user.organizationDomain,
-    });
-
     const questionSet = this.questionSetService.get();
 
     const assessment: Assessment = {
@@ -137,14 +120,48 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdAt: new Date(),
       createdBy: user.id,
       organization: user.organizationDomain,
-      executionArn: executionId,
       fileExports: [],
       questionVersion: questionSet.version,
       pillars: questionSet.pillars,
       finished: false,
     };
     await this.assessmentRepository.save(assessment);
-    return { assessmentId };
+    return assessment;
+  }
+
+  public async startAssessment(
+    args: StartAssessmentUseCaseArgs
+  ): Promise<{ assessmentId: string }> {
+    const { user } = args;
+
+    if (!(await this.canStartAssessment(args))) {
+      throw new OrganizationNoActiveSubscriptionError({
+        domain: user.organizationDomain,
+      });
+    }
+
+    const assessment = await this.createAssessment(args);
+
+    const executionId = await this.stateMachine.startAssessment({
+      name: assessment.name,
+      regions: assessment.regions,
+      workflows: assessment.workflows,
+      roleArn: assessment.roleArn,
+      assessmentId: assessment.id,
+      createdAt: assessment.createdAt,
+      createdBy: assessment.createdBy,
+      organizationDomain: assessment.organization,
+    });
+
+    await this.assessmentRepository.update({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      assessmentBody: {
+        executionArn: executionId,
+      },
+    });
+
+    return { assessmentId: assessment.id };
   }
 }
 

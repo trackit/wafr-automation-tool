@@ -54,9 +54,11 @@ export class DeleteAssessmentUseCaseImpl implements DeleteAssessmentUseCase {
         organizationDomain: args.user.organizationDomain,
       });
     }
-    await this.assessmentsStateMachine.cancelAssessment(
-      assessment.executionArn
-    );
+    if (assessment.executionArn) {
+      await this.assessmentsStateMachine.cancelAssessment(
+        assessment.executionArn
+      );
+    }
     await this.deleteAssessmentFromRepository({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,

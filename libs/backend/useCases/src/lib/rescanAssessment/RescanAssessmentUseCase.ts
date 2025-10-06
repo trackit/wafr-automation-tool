@@ -40,9 +40,11 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       });
     }
 
-    await this.assessmentsStateMachine.cancelAssessment(
-      assessment.executionArn
-    );
+    if (assessment.executionArn) {
+      await this.assessmentsStateMachine.cancelAssessment(
+        assessment.executionArn
+      );
+    }
     await this.findingsRepository.deleteAll({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,

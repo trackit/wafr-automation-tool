@@ -4,7 +4,7 @@ import type { Pillar } from '../Pillar';
 export interface Assessment {
   createdAt: Date;
   createdBy: string;
-  executionArn: string;
+  executionArn?: string;
   pillars?: Pillar[];
   id: string;
   name: string;

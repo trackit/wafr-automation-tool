@@ -2,7 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
 } from '@backend/infrastructure';
-import type { AssessmentStep, User } from '@backend/models';
+import { AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
@@ -34,6 +34,9 @@ export class GetAssessmentStepUseCaseImpl implements GetAssessmentStepUseCase {
         assessmentId: args.assessmentId,
         organizationDomain: args.user.organizationDomain,
       });
+    }
+    if (!assessment.executionArn) {
+      return AssessmentStep.SCANNING_STARTED;
     }
     return this.stateMachine.getAssessmentStep(assessment.executionArn);
   }
