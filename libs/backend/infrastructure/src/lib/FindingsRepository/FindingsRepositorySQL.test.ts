@@ -907,6 +907,272 @@ describe('FindingsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('aggregateAll', () => {
+    it('aggregates counts for severity and resource regions', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const organizationDomain = 'organization1';
+
+      const finding1 = FindingMother.basic()
+        .withId('tool#1')
+        .withSeverity(SeverityType.High)
+        .withResources([
+          {
+            name: 'resource-1',
+            type: 'AWS::S3::Bucket',
+            uid: 'resource-uid-1',
+            region: 'us-east-1',
+          },
+          {
+            name: 'resource-2',
+            type: 'AWS::EC2::Instance1',
+            uid: 'resource-uid-2',
+            region: 'us-east-2',
+          },
+        ])
+        .build();
+
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic()
+        .withId('tool#2')
+        .withSeverity(SeverityType.Medium)
+        .withResources([
+          {
+            name: 'resource-3',
+            type: 'AWS::S3::Bucket',
+            uid: 'resource-uid-3',
+            region: 'us-east-1',
+          },
+        ])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding2,
+      });
+
+      const finding3 = FindingMother.basic()
+        .withId('tool#3')
+        .withSeverity(SeverityType.Medium)
+        .withResources([])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding3,
+      });
+
+      const result = await repository.aggregateAll({
+        assessmentId,
+        organizationDomain,
+        fields: {
+          severity: true,
+          resources: {
+            region: true,
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        severity: {
+          high: 1,
+          medium: 2,
+        },
+        resources: {
+          region: {
+            'us-east-1': 2,
+            'us-east-2': 1,
+          },
+        },
+      });
+    });
+
+    it('shoud be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+
+      const finding1 = FindingMother.basic()
+        .withId('tool#1')
+        .withSeverity(SeverityType.High)
+        .withResources([
+          {
+            name: 'resource-1',
+            type: 'AWS::S3::Bucket',
+            uid: 'resource-uid-1',
+            region: 'us-east-1',
+          },
+          {
+            name: 'resource-2',
+            type: 'AWS::EC2::Instance1',
+            uid: 'resource-uid-2',
+            region: 'us-east-2',
+          },
+        ])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization1',
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic()
+        .withId('tool#2')
+        .withSeverity(SeverityType.Medium)
+        .withResources([
+          {
+            name: 'resource-3',
+            type: 'AWS::S3::Bucket',
+            uid: 'resource-uid-3',
+            region: 'us-east-1',
+          },
+        ])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization1',
+        finding: finding2,
+      });
+
+      const finding3 = FindingMother.basic()
+        .withId('tool#3')
+        .withSeverity(SeverityType.Medium)
+        .withResources([])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization2',
+        finding: finding3,
+      });
+
+      const result = await repository.aggregateAll({
+        assessmentId,
+        organizationDomain: 'organization1',
+        fields: {
+          severity: true,
+          resources: {
+            region: true,
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        severity: {
+          high: 1,
+          medium: 1,
+        },
+        resources: {
+          region: {
+            'us-east-1': 2,
+            'us-east-2': 1,
+          },
+        },
+      });
+    });
+
+    it('should return empty aggregation if no findings exist', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+
+      const result = await repository.aggregateAll({
+        assessmentId,
+        organizationDomain: 'organization1',
+        fields: {
+          severity: true,
+          resources: {
+            region: true,
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        severity: {},
+        resources: {
+          region: {},
+        },
+      });
+    });
+  });
+
+  describe('countAll', () => {
+    it('should count all findings', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const organizationDomain = 'organization1';
+
+      const finding1 = FindingMother.basic().withId('tool#1').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic().withId('tool#2').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding2,
+      });
+
+      const finding3 = FindingMother.basic().withId('tool#3').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain,
+        finding: finding3,
+      });
+
+      const count = await repository.countAll({
+        assessmentId,
+        organizationDomain,
+      });
+      expect(count).toBe(3);
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+
+      const finding1 = FindingMother.basic().withId('tool#1').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization1',
+        finding: finding1,
+      });
+
+      const finding2 = FindingMother.basic().withId('tool#2').build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization2',
+        finding: finding2,
+      });
+
+      const count = await repository.countAll({
+        assessmentId,
+        organizationDomain: 'organization1',
+      });
+      expect(count).toBe(1);
+    });
+
+    it('should return 0 if no findings exist', async () => {
+      const { repository } = setup();
+
+      const count = await repository.countAll({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+      expect(count).toBe(0);
+    });
+  });
+
   describe('countBestPracticeFindings', () => {
     it('should return the number of findings for a best practice', async () => {
       const { repository, assessmentsRepository } = setup();
