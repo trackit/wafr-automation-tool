@@ -82,6 +82,7 @@ describe('getAssessment adapter', () => {
       const { adapter, useCase, date } = setup();
 
       const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withCreatedAt(date)
         .withCreatedBy('user-id')
         .withPillars([
@@ -118,7 +119,13 @@ describe('getAssessment adapter', () => {
         .build();
       useCase.getAssessment.mockResolvedValue({
         assessment,
-        bestPracticesFindingsAmount: {},
+        bestPracticesFindingsAmount: {
+          'pillar-id': {
+            'question-id': {
+              'best-practice-id': 1,
+            },
+          },
+        },
       });
 
       const event = GetAssessmentAdapterEventMother.basic()
@@ -154,7 +161,7 @@ describe('getAssessment adapter', () => {
             ],
           },
         ],
-        id: 'assessment-id',
+        id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         name: 'assessment name',
         organization: 'test.io',
         questionVersion: '1.0.0',

@@ -144,10 +144,13 @@ describe('CleanupUseCase', () => {
 
   describe('cleanupSuccessful', () => {
     it('should throw a OrganizationNotFoundError if the organization doesn’t exist', async () => {
-      const { useCase } = setup();
+      const { useCase, fakeAssessmentsRepository } = setup();
+
+      const assessment = AssessmentMother.basic().build();
+      await fakeAssessmentsRepository.save(assessment);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withOrganizationDomain('test.io')
+        .withOrganizationDomain(assessment.organization)
         .build();
 
       await expect(useCase.cleanupSuccessful(input)).rejects.toThrow(
@@ -160,6 +163,7 @@ describe('CleanupUseCase', () => {
         useCase,
         fakeOrganizationRepository,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic()
@@ -168,12 +172,17 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
         .mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withAssessmentId(assessment.id)
         .withOrganizationDomain(organization.domain)
         .build();
 
@@ -187,6 +196,7 @@ describe('CleanupUseCase', () => {
         useCase,
         fakeOrganizationRepository,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic()
@@ -195,12 +205,17 @@ describe('CleanupUseCase', () => {
         .build();
       await fakeOrganizationRepository.save(organization);
 
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
         .mockReturnValue(true);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withAssessmentId(assessment.id)
         .withOrganizationDomain(organization.domain)
         .build();
 
@@ -239,17 +254,23 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
         .mockReturnValue(false);
 
       const input = CleanupUseCaseArgsMother.basic()
-        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withAssessmentId(assessment.id)
         .withOrganizationDomain(organization.domain)
         .build();
 
