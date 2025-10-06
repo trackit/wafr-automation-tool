@@ -35,6 +35,13 @@ export class GetAssessmentStepUseCaseImpl implements GetAssessmentStepUseCase {
         organizationDomain: args.user.organizationDomain,
       });
     }
+    // Avoid interacting with state machine if we already know the assessment is finished or errored
+    if (assessment.finished) {
+      return AssessmentStep.FINISHED;
+    }
+    if (assessment.error) {
+      return AssessmentStep.ERRORED;
+    }
     if (!assessment.executionArn) {
       return AssessmentStep.SCANNING_STARTED;
     }
