@@ -21,7 +21,7 @@ import {
   SeverityType,
 } from '@backend/models';
 
-import { BestPracticeEntity } from '../AssessmentsRepository/AssessmentsRepositorySQLEntities';
+import { BestPracticeEntity } from './assessmentsEntities';
 
 @Entity('findings')
 @Unique('uq_findings_pk', ['assessmentId', 'id'])

@@ -4,7 +4,7 @@ import { Organization } from '@backend/models';
 import { OrganizationRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 
-import { OrganizationEntity } from '../config/typeorm/tenantsEntities';
+import { OrganizationEntity } from '../config/typeorm';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 

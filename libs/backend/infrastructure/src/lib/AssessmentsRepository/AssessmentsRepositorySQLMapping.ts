@@ -12,7 +12,7 @@ import {
   FileExportEntity,
   PillarEntity,
   QuestionEntity,
-} from './AssessmentsRepositorySQLEntities';
+} from '../config/typeorm';
 
 export function toDomainBestPractice(e: BestPracticeEntity): BestPractice {
   return {

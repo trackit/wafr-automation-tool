@@ -4,11 +4,11 @@ import { TypeORMClientManager } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
+  Tenant,
   tenantsTypeORMConfig,
   tokenTypeORMConfigCreator,
   TypeORMConfig,
 } from '../config/typeorm';
-import { Tenant } from '../config/typeorm/tenantsEntities';
 
 export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   public clients: Record<string, DataSource> = {};

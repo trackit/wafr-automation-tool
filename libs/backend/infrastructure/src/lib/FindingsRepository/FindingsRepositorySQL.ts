@@ -15,13 +15,13 @@ import {
 import { inject } from '@shared/di-container';
 import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
-import { BestPracticeEntity } from '../AssessmentsRepository/AssessmentsRepositorySQLEntities';
-import { tokenLogger, tokenTypeORMClientManager } from '../infrastructure';
 import {
+  BestPracticeEntity,
   FindingCommentEntity,
   FindingEntity,
   FindingResourceEntity,
-} from './FindingsRepositorySQLEntities';
+} from '../config/typeorm';
+import { tokenLogger, tokenTypeORMClientManager } from '../infrastructure';
 import { toDomainFinding } from './FindingsRepositorySQLMapping';
 
 export class FindingsRepositorySQL implements FindingRepository {

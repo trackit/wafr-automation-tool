@@ -1,21 +1,13 @@
-import path, { dirname } from 'path';
+import path from 'path';
 import type { DataSourceOptions } from 'typeorm';
 
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
-import { assessmentsEntities } from '../../AssessmentsRepository/AssessmentsRepositorySQLEntities';
-import { findingEntities } from '../../FindingsRepository/FindingsRepositorySQLEntities';
 import { tokenSecretsManager } from '../../infrastructure';
-import { tenantsEntities } from './tenantsEntities';
-import { fileURLToPath } from 'url';
+import { entities, tenantsEntities } from './entities';
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
-
-const entities = [...assessmentsEntities, ...findingEntities];
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export const defaultTypeORMConfig: TypeORMConfig = {
   type: 'postgres',

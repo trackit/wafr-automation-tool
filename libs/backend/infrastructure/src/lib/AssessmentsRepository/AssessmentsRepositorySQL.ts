@@ -13,15 +13,15 @@ import { AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
-import { tokenLogger } from '../Logger';
-import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import {
   AssessmentEntity,
   BestPracticeEntity,
   FileExportEntity,
   PillarEntity,
   QuestionEntity,
-} from './AssessmentsRepositorySQLEntities';
+} from '../config/typeorm';
+import { tokenLogger } from '../Logger';
+import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {

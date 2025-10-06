@@ -11,7 +11,7 @@ import {
   FindingEntity,
   FindingRemediationEntity,
   FindingResourceEntity,
-} from './FindingsRepositorySQLEntities';
+} from '../config/typeorm';
 
 export function toDomainFindingComment(
   e: FindingCommentEntity
@@ -45,7 +45,6 @@ export function toDomainFindingRemediation(
 }
 
 export function toDomainFinding(e: FindingEntity): Finding {
-  console.log(e);
   return {
     id: e.id,
     hidden: e.hidden,
