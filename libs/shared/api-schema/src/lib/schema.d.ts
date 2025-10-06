@@ -407,30 +407,30 @@ export interface components {
     schemas: {
         Assessment: {
             /** @description Unique identifier of the assessment */
-            id?: string;
+            id: string;
             /** @description Name or title of the assessment */
-            name?: string;
+            name: string;
             /** @description User who created the assessment */
-            createdBy?: string;
+            createdBy: string;
             /** @description Organization associated with the assessment */
-            organization?: string;
+            organization: string;
             /**
              * @description List of regions to scan
              *     If empty, all regions will be scanned
              */
-            regions?: string[];
+            regions: string[];
             /** @description Region where the assessment is exported */
             exportRegion?: string;
             /** @description Role ARN associated with the assessment */
-            roleArn?: string;
+            roleArn: string;
             /** @description Well-Architected Tool workload ARN */
             wafrWorkloadArn?: string;
             /** @description ACE Opportunity linked to the assessment */
             opportunityId?: string;
             /** @description Workflows associated with the assessment */
-            workflows?: string[];
+            workflows: string[];
             /** @description ISO-formatted date when the assessment was created */
-            createdAt?: string;
+            createdAt: string;
             /** @description ISO-formatted date when the assessment has finished scanning and processing */
             finishedAt?: string;
             error?: components["schemas"]["AssessmentError"];
@@ -459,8 +459,8 @@ export interface components {
         };
         /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
-            error?: string;
-            cause?: string;
+            error: string;
+            cause: string;
         } | null;
         AssessmentDto: {
             name?: string;
@@ -468,7 +468,7 @@ export interface components {
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
             /** @description Unique identifier of the finding */
-            id?: string;
+            id: string;
             /** @description Severity level of the finding (e.g., Low, Medium, High) */
             severity?: string;
             /** @description The status of the finding (e.g., MANUAL, FAIL) */
@@ -476,7 +476,7 @@ export interface components {
             /** @description Explanation or additional details about the finding's status */
             statusDetail?: string;
             /** @description Whether the finding is hidden or not */
-            hidden?: boolean;
+            hidden: boolean;
             /** @description List of resources related to the finding */
             resources?: {
                 /** @description ARN or unique identifier of the resource */
@@ -498,7 +498,7 @@ export interface components {
             /** @description Explanation of the risk associated with the finding */
             riskDetails?: string;
             /** @description Tells whether the finding is associated with an AI or manually */
-            isAIAssociated?: boolean;
+            isAIAssociated: boolean;
             comments?: components["schemas"]["Comment"][];
         };
         FindingDto: {
@@ -554,8 +554,8 @@ export interface components {
             results: string[];
         };
         /** @description Enhanced best practice information, including associated findings */
-        BestPracticeExtra: components["schemas"]["BestPractice"] & {
-            results?: components["schemas"]["Finding"][];
+        BestPracticeExtra: WithRequired<components["schemas"]["BestPractice"], "results"> & {
+            results: components["schemas"]["Finding"][];
         };
         BestPracticeDto: {
             checked?: boolean;
@@ -657,7 +657,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        assessments?: components["schemas"]["Assessment"][];
+                        assessments: components["schemas"]["Assessment"][];
                         /**
                          * @description Token for pagination. If there are more assessments than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
@@ -721,7 +721,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description The unique ID of the newly created assessment */
-                        assessmentId?: string;
+                        assessmentId: string;
                     };
                 };
             };
@@ -1486,7 +1486,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        items?: components["schemas"]["Finding"][];
+                        items: components["schemas"]["Finding"][];
                         /**
                          * @description Token for pagination. If there are more findings than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
@@ -1865,3 +1865,6 @@ export interface operations {
         };
     };
 }
+type WithRequired<T, K extends keyof T> = T & {
+    [P in K]-?: T[P];
+};

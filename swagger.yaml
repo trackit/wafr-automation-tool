@@ -91,6 +91,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - assessments
                 properties:
                   assessments:
                     type: array
@@ -152,6 +154,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - assessmentId
                 properties:
                   assessmentId:
                     type: string
@@ -739,6 +743,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - items
                 properties:
                   items:
                     type: array
@@ -1070,6 +1076,16 @@ components:
   schemas:
     Assessment:
       type: object
+      required:
+        - id
+        - name
+        - createdBy
+        - organization
+        - regions
+        - roleArn
+        - workflows
+        - createdAt
+        - step
       properties:
         id:
           type: string
@@ -1158,6 +1174,9 @@ components:
       type: object
       nullable: true
       description: Error details if an issue occurred during the assessment process.
+      required:
+        - error
+        - cause
       properties:
         error:
           type: string
@@ -1172,6 +1191,10 @@ components:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'
       additionalProperties: false
+      required:
+        - id
+        - hidden
+        - isAIAssociated
       properties:
         id:
           type: string
@@ -1360,6 +1383,8 @@ components:
             type: string
     BestPracticeExtra:
       type: object
+      required:
+        - results
       description: 'Enhanced best practice information, including associated findings'
       allOf:
         - $ref: '#/components/schemas/BestPractice'
