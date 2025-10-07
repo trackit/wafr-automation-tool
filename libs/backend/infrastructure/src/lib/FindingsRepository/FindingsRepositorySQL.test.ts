@@ -3,6 +3,7 @@ import {
   BestPracticeMother,
   FindingCommentMother,
   FindingMother,
+  FindingResourceMother,
   PillarMother,
   QuestionMother,
   SeverityType,
@@ -79,31 +80,87 @@ describe('FindingsRepositoryDynamoDB', () => {
   describe('saveAll', () => {
     it('should save several findings for an assessment by ID and organization', async () => {
       const { repository } = setup();
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const organizationDomain = 'organization1';
+
       const findings = [
         FindingMother.basic().withId('scanningTool#1').build(),
         FindingMother.basic().withId('scanningTool#2').build(),
         FindingMother.basic().withId('scanningTool#3').build(),
       ];
       await repository.saveAll({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
+        assessmentId,
+        organizationDomain,
         findings,
       });
+
       const savedFinding1 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        findingId: 'scanningTool#1',
+        assessmentId,
+        organizationDomain,
+        findingId: findings[0].id,
       });
       const savedFinding2 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        findingId: 'scanningTool#2',
+        assessmentId,
+        organizationDomain,
+        findingId: findings[1].id,
       });
       const savedFinding3 = await repository.get({
-        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        organizationDomain: 'organization1',
-        findingId: 'scanningTool#3',
+        assessmentId,
+        organizationDomain,
+        findingId: findings[2].id,
       });
+      expect(savedFinding1).toEqual(findings[0]);
+      expect(savedFinding2).toEqual(findings[1]);
+      expect(savedFinding3).toEqual(findings[2]);
+    });
+
+    it('should save several finding with resources for an assessment by ID and organization', async () => {
+      const { repository } = setup();
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const organizationDomain = 'organization1';
+
+      const findings = [
+        FindingMother.basic()
+          .withId('scanningTool#1')
+          .withResources([
+            FindingResourceMother.basic().withUid('resource-uid-1').build(),
+          ])
+          .build(),
+        FindingMother.basic()
+          .withId('scanningTool#2')
+          .withResources([
+            FindingResourceMother.basic().withUid('resource-uid-2').build(),
+          ])
+          .build(),
+        FindingMother.basic()
+          .withId('scanningTool#3')
+          .withResources([
+            FindingResourceMother.basic().withUid('resource-uid-3').build(),
+          ])
+          .build(),
+      ];
+      await repository.saveAll({
+        assessmentId,
+        organizationDomain,
+        findings,
+      });
+
+      const savedFinding1 = await repository.get({
+        assessmentId,
+        organizationDomain,
+        findingId: findings[0].id,
+      });
+      const savedFinding2 = await repository.get({
+        assessmentId,
+        organizationDomain,
+        findingId: findings[1].id,
+      });
+      const savedFinding3 = await repository.get({
+        assessmentId,
+        organizationDomain,
+        findingId: findings[2].id,
+      });
+
       expect(savedFinding1).toEqual(findings[0]);
       expect(savedFinding2).toEqual(findings[1]);
       expect(savedFinding3).toEqual(findings[2]);
@@ -938,7 +995,7 @@ describe('FindingsRepositoryDynamoDB', () => {
   });
 
   describe('aggregateAll', () => {
-    it('aggregates counts for severity and resource regions', async () => {
+    it('should aggregates counts for severity and resource regions', async () => {
       const { repository } = setup();
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
@@ -1128,6 +1185,44 @@ describe('FindingsRepositoryDynamoDB', () => {
           region: {},
         },
       });
+    });
+
+    it('should return empty aggregation if no fields are provided', async () => {
+      const { repository } = setup();
+
+      const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+
+      const finding1 = FindingMother.basic()
+        .withId('tool#1')
+        .withSeverity(SeverityType.High)
+        .withResources([
+          {
+            name: 'resource-1',
+            type: 'AWS::S3::Bucket',
+            uid: 'resource-uid-1',
+            region: 'us-east-1',
+          },
+          {
+            name: 'resource-2',
+            type: 'AWS::EC2::Instance1',
+            uid: 'resource-uid-2',
+            region: 'us-east-2',
+          },
+        ])
+        .build();
+      await repository.save({
+        assessmentId,
+        organizationDomain: 'organization1',
+        finding: finding1,
+      });
+
+      const result = await repository.aggregateAll({
+        assessmentId,
+        organizationDomain: 'organization1',
+        fields: {},
+      });
+
+      expect(result).toEqual({});
     });
   });
 
