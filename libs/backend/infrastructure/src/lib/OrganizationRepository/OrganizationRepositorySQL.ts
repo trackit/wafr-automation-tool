@@ -30,7 +30,7 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
   }
 
   public async get(
-    organizationDomain: string
+    organizationDomain: string,
   ): Promise<Organization | undefined> {
     const repo = await this.repo();
 

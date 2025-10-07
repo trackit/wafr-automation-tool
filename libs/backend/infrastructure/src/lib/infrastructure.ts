@@ -2,6 +2,7 @@ export * from './AIService';
 export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './CognitoService';
+export * from './config/debug';
 export * from './config/dynamodb/config'; // TODO remove this line after migration
 export * from './config/typeorm';
 export * from './FeatureToggleRepository';
@@ -13,6 +14,7 @@ export * from './Logger';
 export * from './MarketplaceService';
 export * from './ObjectsStorage';
 export * from './OrganizationRepository';
+export * from './PartnerCentralSellingService';
 export * from './PDFService';
 export * from './QuestionSetService';
 export * from './registerTestInfrastructure';

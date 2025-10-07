@@ -18,7 +18,7 @@ describe('DeleteAssessmentUseCase', () => {
     const input = DeleteAssessmentUseCaseArgsMother.basic().build();
 
     await expect(useCase.deleteAssessment(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -96,7 +96,7 @@ describe('DeleteAssessmentUseCase', () => {
     await useCase.deleteAssessment(input);
 
     expect(
-      fakeAssessmentsStateMachine.cancelAssessment
+      fakeAssessmentsStateMachine.cancelAssessment,
     ).toHaveBeenCalledExactlyOnceWith(assessment.executionArn);
   });
 });

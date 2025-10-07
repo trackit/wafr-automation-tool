@@ -35,7 +35,7 @@ export class GeneratePDFExportURLUseCaseImpl
   private readonly objectsStorage = inject(tokenObjectsStorage);
 
   public async generatePDFExportURL(
-    args: GeneratePDFExportURLUseCaseArgs
+    args: GeneratePDFExportURLUseCaseArgs,
   ): Promise<string> {
     const { assessmentId, fileExportId, user } = args;
 
@@ -51,7 +51,7 @@ export class GeneratePDFExportURLUseCaseImpl
     }
 
     const assessmentExport = assessment.fileExports?.find(
-      (assessmentExport) => assessmentExport.id === fileExportId
+      (assessmentExport) => assessmentExport.id === fileExportId,
     );
     if (!assessmentExport) {
       throw new AssessmentFileExportNotFoundError({
@@ -81,7 +81,7 @@ export class GeneratePDFExportURLUseCaseImpl
       expiresInSeconds: 60 * 60, // 1 hour
     });
     this.logger.info(
-      `Successfully generated pre-signed URL for PDF export with id ${fileExportId} for assessment ${assessmentId}`
+      `Successfully generated pre-signed URL for PDF export with id ${fileExportId} for assessment ${assessmentId}`,
     );
     return presignedURL;
   }
@@ -92,5 +92,5 @@ export const tokenGeneratePDFExportURLUseCase =
     'GeneratePDFExportURLUseCase',
     {
       useClass: GeneratePDFExportURLUseCaseImpl,
-    }
+    },
   );

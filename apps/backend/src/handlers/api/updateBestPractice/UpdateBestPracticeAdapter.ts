@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateBestPracticePathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
   bestPracticeId: z.string().nonempty(),
@@ -18,9 +18,12 @@ const UpdateBestPracticePathSchema = z.object({
 
 const UpdateBestPracticeBodySchema = z
   .object({
-    checked: z.boolean().optional(),
+    checked: z.boolean(),
   })
-  .strict() satisfies ZodType<
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateBestPractice']['requestBody']['content']['application/json']
 >;
 
@@ -28,7 +31,7 @@ export class UpdateBestPracticeAdapter {
   private readonly useCase = inject(tokenUpdateBestPracticeUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

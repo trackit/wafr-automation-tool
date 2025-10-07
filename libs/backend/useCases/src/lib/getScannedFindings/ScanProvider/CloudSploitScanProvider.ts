@@ -22,7 +22,7 @@ export class CloudSploitScanProvider extends ScanProvider {
   }
 
   private mapCloudSploitFindings(
-    findings: z.infer<typeof CloudSploitFindingSchema>[]
+    findings: z.infer<typeof CloudSploitFindingSchema>[],
   ): Omit<ScanFinding, 'id'>[] {
     return findings.map((finding) => ({
       resources: [
@@ -40,7 +40,7 @@ export class CloudSploitScanProvider extends ScanProvider {
 
   protected override async fetchFindings(): Promise<Omit<ScanFinding, 'id'>[]> {
     const scanOutput = await this.objectsStorage.get(
-      CloudSploitScanProvider.getScanKey(this.assessmentId)
+      CloudSploitScanProvider.getScanKey(this.assessmentId),
     );
     if (!scanOutput) {
       return [];
@@ -49,14 +49,14 @@ export class CloudSploitScanProvider extends ScanProvider {
     const parsedFindings = CloudSploitFindingSchema.array().parse(jsonOutput);
     const cloudSploitFindingsFilteredByRegion = parsedFindings.filter(
       (finding) =>
-        this.regions.length === 0 || this.regions.includes(finding.region)
+        this.regions.length === 0 || this.regions.includes(finding.region),
     );
     const cloudSploitFindingsFilteredByFailedStatus =
       cloudSploitFindingsFilteredByRegion.filter(
-        (finding) => finding.status === 'FAIL'
+        (finding) => finding.status === 'FAIL',
       );
     return this.mapCloudSploitFindings(
-      cloudSploitFindingsFilteredByFailedStatus
+      cloudSploitFindingsFilteredByFailedStatus,
     );
   }
 }

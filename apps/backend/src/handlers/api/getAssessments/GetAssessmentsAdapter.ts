@@ -14,7 +14,7 @@ const GetAssessmentsQuerySchema = z
   .object({
     limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
     search: z.string().nonempty().optional(),
-    nextToken: z.string().trim().nonempty().base64().optional(),
+    nextToken: z.base64().trim().nonempty().optional(),
   })
   .strict() satisfies ZodType<
   operations['getAssessments']['parameters']['query']
@@ -24,7 +24,7 @@ export class GetAssessmentsAdapter {
   private readonly useCase = inject(tokenGetAssessmentsUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -34,7 +34,7 @@ export class GetAssessmentsAdapter {
   }
 
   public convertToAPIAssessment(
-    assessment: Assessment[]
+    assessment: Assessment[],
   ): operations['getAssessments']['responses'][200]['content']['application/json']['assessments'] {
     return assessment.map((assessment) => ({
       id: assessment.id,
@@ -45,6 +45,8 @@ export class GetAssessmentsAdapter {
       exportRegion: assessment.exportRegion,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
+      wafrWorkloadArn: assessment.wafrWorkloadArn,
+      opportunityId: assessment.opportunityId,
       createdAt: assessment.createdAt.toISOString(),
       ...(assessment.error && {
         error: {
@@ -56,7 +58,7 @@ export class GetAssessmentsAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getAssessments']['responses'][200]['content']['application/json']
   > {

@@ -19,7 +19,7 @@ import {
 describe('parseApiEvent', () => {
   describe('parsePathFromEvent', () => {
     it('should parse required path when present', () => {
-      const schema = z.object({ assessmentId: z.string().uuid() });
+      const schema = z.object({ assessmentId: z.uuid() });
       const event = APIGatewayProxyEventMother.basic()
         .withPathParameters({
           assessmentId: '123e4567-e89b-12d3-a456-426614174000',
@@ -33,7 +33,7 @@ describe('parseApiEvent', () => {
     });
 
     it('should throw PathMissingError when required path is missing', () => {
-      const schema = z.object({ assessmentId: z.string().uuid() });
+      const schema = z.object({ assessmentId: z.uuid() });
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parsePathFromEvent(event, schema)).toThrow(PathMissingError);
@@ -57,7 +57,7 @@ describe('parseApiEvent', () => {
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parseQueryFromEvent(event, schema)).toThrow(
-        QueryMissingError
+        QueryMissingError,
       );
     });
 
@@ -88,7 +88,7 @@ describe('parseApiEvent', () => {
       const schema = z.object({ name: z.string() });
       const payload = Buffer.from(
         JSON.stringify({ name: 'bob' }),
-        'utf8'
+        'utf8',
       ).toString('base64');
       const event = APIGatewayProxyEventMother.basic()
         .withBody(payload)
@@ -115,7 +115,7 @@ describe('parseApiEvent', () => {
   });
 
   describe('integration', () => {
-    const PathSchema = z.object({ assessmentId: z.string().uuid() });
+    const PathSchema = z.object({ assessmentId: z.uuid() });
     const BodySchema = z.object({
       name: z.string(),
       region: z.string().optional(),
@@ -149,7 +149,10 @@ describe('parseApiEvent', () => {
         .build();
 
       expect(() =>
-        parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
+        parseApiEvent(event, {
+          pathSchema: PathSchema,
+          bodySchema: BodySchema,
+        }),
       ).toThrow(ParametersValidationError);
     });
 
@@ -162,7 +165,10 @@ describe('parseApiEvent', () => {
         .build();
 
       expect(() =>
-        parseApiEvent(event, { pathSchema: PathSchema, bodySchema: BodySchema })
+        parseApiEvent(event, {
+          pathSchema: PathSchema,
+          bodySchema: BodySchema,
+        }),
       ).toThrow(ParametersJSONParseError);
     });
 
@@ -170,16 +176,16 @@ describe('parseApiEvent', () => {
       const event = APIGatewayProxyEventMother.basic().build();
 
       expect(() => parseApiEvent(event, { pathSchema: PathSchema })).toThrow(
-        PathMissingError
+        PathMissingError,
       );
 
       expect(() => parseApiEvent(event, { bodySchema: BodySchema })).toThrow(
-        BodyMissingError
+        BodyMissingError,
       );
 
       const QuerySchema = z.object({ q: z.string() });
       expect(() => parseApiEvent(event, { querySchema: QuerySchema })).toThrow(
-        QueryMissingError
+        QueryMissingError,
       );
     });
   });

@@ -13,7 +13,7 @@ import {
 export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   public clients: Record<string, DataSource> = {};
   private baseConfigCreator: Promise<TypeORMConfig> = inject(
-    tokenTypeORMConfigCreator
+    tokenTypeORMConfigCreator,
   );
   private baseConfig: TypeORMConfig | null = null;
   public isInitialized = false;
@@ -40,7 +40,7 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     id = id ?? 'default';
     if (!this.isInitialized || !this.baseConfig) {
       throw new Error(
-        'TypeORMClientManager not initialized. Call initialize() first.'
+        'TypeORMClientManager not initialized. Call initialize() first.',
       );
     }
     if (!this.clients[id]) {
@@ -64,7 +64,7 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
         const tableNames = entities.map((entity) => `"${entity.tableName}"`);
         if (tableNames.length === 0) return;
         await client.query(`TRUNCATE TABLE ${tableNames.join(', ')} CASCADE;`);
-      })
+      }),
     );
   }
 
@@ -75,7 +75,7 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
         if (client.isInitialized) {
           await client.destroy();
         }
-      })
+      }),
     );
   }
 

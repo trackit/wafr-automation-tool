@@ -51,7 +51,7 @@ describe('CognitoService', () => {
         $metadata: { httpStatusCode: 500 },
       });
       await expect(
-        service.getUserById({ userId: 'test-user' })
+        service.getUserById({ userId: 'test-user' }),
       ).rejects.toThrow(Error);
     });
 
@@ -63,7 +63,7 @@ describe('CognitoService', () => {
         $metadata: { httpStatusCode: 200 },
       });
       await expect(
-        service.getUserById({ userId: 'test-user' })
+        service.getUserById({ userId: 'test-user' }),
       ).rejects.toThrow(Error);
     });
   });

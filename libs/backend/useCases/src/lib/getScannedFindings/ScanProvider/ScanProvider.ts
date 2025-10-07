@@ -11,7 +11,7 @@ export class ScanProvider {
     protected readonly assessmentId: string,
     protected readonly workflows: string[],
     protected readonly regions: string[],
-    protected readonly scanningTool: string
+    protected readonly scanningTool: string,
   ) {}
 
   protected async fetchFindings(): Promise<Omit<ScanFinding, 'id'>[]> {
@@ -19,7 +19,7 @@ export class ScanProvider {
   }
 
   private mapFindingsWithoutNonWorkflowsResources(
-    findings: ScanFinding[]
+    findings: ScanFinding[],
   ): ScanFinding[] {
     if (this.workflows.length === 0) {
       return findings;
@@ -33,11 +33,11 @@ export class ScanProvider {
       const filteredResources = finding.resources.filter(
         (resource) =>
           this.workflows.some((workflow) =>
-            resource.name?.toLowerCase()?.includes(workflow)
+            resource.name?.toLowerCase()?.includes(workflow),
           ) ||
           this.workflows.some((workflow) =>
-            resource.uid?.toLowerCase()?.includes(workflow)
-          )
+            resource.uid?.toLowerCase()?.includes(workflow),
+          ),
       );
       return {
         ...finding,
@@ -47,7 +47,7 @@ export class ScanProvider {
   }
 
   private isFindingMatchingWorkflows(
-    finding: Omit<ScanFinding, 'id'>
+    finding: Omit<ScanFinding, 'id'>,
   ): boolean {
     if (this.workflows.length === 0) {
       return true;
@@ -57,17 +57,17 @@ export class ScanProvider {
       finding.resources?.some(
         (resource) =>
           this.workflows.some((workflow) =>
-            resource.name?.toLowerCase()?.includes(workflow)
+            resource.name?.toLowerCase()?.includes(workflow),
           ) ||
           this.workflows.some((workflow) =>
-            resource.uid?.toLowerCase()?.includes(workflow)
-          )
+            resource.uid?.toLowerCase()?.includes(workflow),
+          ),
       ) ||
       this.workflows.some((workflow) =>
-        finding.riskDetails?.toLowerCase()?.includes(workflow)
+        finding.riskDetails?.toLowerCase()?.includes(workflow),
       ) ||
       this.workflows.some((workflow) =>
-        finding.statusDetail?.toLowerCase()?.includes(workflow)
+        finding.statusDetail?.toLowerCase()?.includes(workflow),
       )
     );
   }
@@ -77,7 +77,7 @@ export class ScanProvider {
       !!finding.resources?.some(
         (resource) =>
           resource.name?.toLowerCase()?.includes(SELF_MADE_SIGNATURE) ||
-          resource.uid?.toLowerCase()?.includes(SELF_MADE_SIGNATURE)
+          resource.uid?.toLowerCase()?.includes(SELF_MADE_SIGNATURE),
       ) ||
       !!finding.riskDetails?.toLowerCase()?.includes(SELF_MADE_SIGNATURE) ||
       !!finding.statusDetail?.toLowerCase()?.includes(SELF_MADE_SIGNATURE)
@@ -85,7 +85,7 @@ export class ScanProvider {
   }
 
   private mergeFindingsByStatusAndRiskDetails(
-    findings: ScanFinding[]
+    findings: ScanFinding[],
   ): ScanFinding[] {
     const findingsByStatusAndRiskDetails = new Map<string, ScanFinding>();
     for (const finding of findings) {
@@ -109,7 +109,7 @@ export class ScanProvider {
     const filteredFindings = findings.filter(
       (finding) =>
         this.isFindingMatchingWorkflows(finding) &&
-        !this.isSelfMadeFinding(finding)
+        !this.isSelfMadeFinding(finding),
     );
     const identifiedFindings = filteredFindings.map((finding, index) => ({
       ...finding,
@@ -118,7 +118,7 @@ export class ScanProvider {
     const findingsWithoutNonWorkflowsResources =
       this.mapFindingsWithoutNonWorkflowsResources(identifiedFindings);
     return this.mergeFindingsByStatusAndRiskDetails(
-      findingsWithoutNonWorkflowsResources
+      findingsWithoutNonWorkflowsResources,
     );
   }
 }

@@ -32,9 +32,7 @@ export function toDomainQuestion(e: QuestionEntity): Question {
     label: e.label,
     none: e.none,
     primaryId: e.primaryId,
-    bestPractices: (e.bestPractices ?? []).map((bp) =>
-      toDomainBestPractice(bp)
-    ),
+    bestPractices: e.bestPractices.map((bp) => toDomainBestPractice(bp)),
   };
 }
 
@@ -62,7 +60,7 @@ export function toDomainFileExport(e: FileExportEntity): AssessmentFileExport {
 
 export function toDomainAssessment(
   e: AssessmentEntity,
-  organizationDomain: string
+  organizationDomain: string,
 ): Assessment {
   return {
     id: e.id,
@@ -80,7 +78,7 @@ export function toDomainAssessment(
     ...(e.error && { error: e.error }),
     pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
     fileExports: (e.fileExports ?? []).map((fileExport) =>
-      toDomainFileExport(fileExport)
+      toDomainFileExport(fileExport),
     ),
   };
 }

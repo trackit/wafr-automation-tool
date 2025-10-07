@@ -55,7 +55,7 @@ describe('ThemeSwitcher', () => {
     expect(screen.getByRole('checkbox')).toBeTruthy();
     expect(screen.getByRole('checkbox')).toHaveAttribute(
       'value',
-      THEME_KEYS.DARK
+      THEME_KEYS.DARK,
     );
     // Check for both sun and moon icons
     const svgs = document.querySelectorAll('svg');
@@ -75,7 +75,7 @@ describe('ThemeSwitcher', () => {
     render(<ThemeSwitcher />);
 
     expect(document.documentElement.getAttribute('data-theme')).toBe(
-      THEME_KEYS.LIGHT
+      THEME_KEYS.LIGHT,
     );
   });
 
@@ -91,7 +91,7 @@ describe('ThemeSwitcher', () => {
     render(<ThemeSwitcher />);
 
     expect(document.documentElement.getAttribute('data-theme')).toBe(
-      THEME_KEYS.DARK
+      THEME_KEYS.DARK,
     );
   });
 

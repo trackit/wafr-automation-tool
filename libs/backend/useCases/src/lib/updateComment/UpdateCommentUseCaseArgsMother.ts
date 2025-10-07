@@ -26,7 +26,7 @@ export class UpdateCommentUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateCommentUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
@@ -43,7 +43,7 @@ export class UpdateCommentUseCaseArgsMother {
   }
 
   public withCommentBody(
-    commentBody: FindingCommentBody
+    commentBody: FindingCommentBody,
   ): UpdateCommentUseCaseArgsMother {
     this.data.commentBody = commentBody;
     return this;

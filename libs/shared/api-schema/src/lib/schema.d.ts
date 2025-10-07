@@ -406,6 +406,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/opportunities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an opportunity for specific assessment
+         * @description Add an ACE opportunity to the assessment.
+         *
+         */
+        post: operations["createOpportunity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -427,6 +448,10 @@ export interface components {
             exportRegion?: string;
             /** @description Role ARN associated with the assessment */
             roleArn?: string;
+            /** @description Well-Architected Tool workload ARN */
+            wafrWorkloadArn?: string;
+            /** @description ACE Opportunity linked to the assessment */
+            opportunityId?: string;
             /** @description Workflows associated with the assessment */
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
@@ -516,7 +541,7 @@ export interface components {
         };
         CommentDto: {
             /** @description Text of the comment */
-            text: string;
+            text?: string;
         };
         Pillar: {
             id: string;
@@ -1777,6 +1802,78 @@ export interface operations {
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createOpportunity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The name of the customer company. */
+                    companyName: string;
+                    /** @description The data universal number system of the company. */
+                    duns: string;
+                    /** @description The industry of the cutomer. */
+                    industry: string;
+                    /**
+                     * @description The type of the customer ('customer' or 'internal workload').
+                     * @enum {string}
+                     */
+                    customerType: "INTERNAL_WORKLOAD" | "CUSTOMER";
+                    /** @description The website of the customer company. */
+                    companyWebsiteUrl: string;
+                    /** @description The country code of the customer */
+                    customerCountry: string;
+                    /** @description The postal code of the customer */
+                    customerPostalCode: string;
+                    /** @description The estimated AWS monthly recurring revenue. */
+                    monthlyRecurringRevenue: string;
+                    /** @description The target close date (when the opportunity launches and starts to incur AWS usage). */
+                    targetCloseDate: string;
+                    /** @description The city of the customer. */
+                    customerCity?: string;
+                    /** @description The address of the customer. */
+                    customerAddress?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The opportunity has been successfully added */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or a issue occurred while trying to retrieve the organization or email of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

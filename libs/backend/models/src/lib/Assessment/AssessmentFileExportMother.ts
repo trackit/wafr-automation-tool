@@ -29,7 +29,7 @@ export class AssessmentFileExportMother {
   }
 
   public withStatus(
-    status: AssessmentFileExportStatus
+    status: AssessmentFileExportStatus,
   ): AssessmentFileExportMother {
     this.data.status = status;
     return this;

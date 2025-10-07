@@ -79,12 +79,12 @@ describe('MultiDatabaseTypeORMClientManager', () => {
       const defaultClientManager = await clientManager.getClient();
       const result = await defaultClientManager.query(
         `SELECT datname FROM pg_database WHERE datname = '${clientManager.toDatabaseName(
-          'organization1'
-        )}';`
+          'organization1',
+        )}';`,
       );
       expect(result).toHaveLength(1);
       expect(result[0].datname).toBe(
-        clientManager.toDatabaseName('organization1')
+        clientManager.toDatabaseName('organization1'),
       );
     });
   });
@@ -94,7 +94,7 @@ describe('MultiDatabaseTypeORMClientManager', () => {
       const { clientManager } = setup();
       await clientManager.initialize();
       const destroySpies = Object.values(clientManager.clients).map((client) =>
-        vi.spyOn(client, 'destroy')
+        vi.spyOn(client, 'destroy'),
       );
       await clientManager.closeConnections();
       for (const spy of destroySpies) {

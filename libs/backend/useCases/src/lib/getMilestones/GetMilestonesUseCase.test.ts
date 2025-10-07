@@ -80,7 +80,7 @@ describe('GetMilestonesUseCase', () => {
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -104,7 +104,7 @@ describe('GetMilestonesUseCase', () => {
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
-      OrganizationExportRoleNotSetError
+      OrganizationExportRoleNotSetError,
     );
   });
 
@@ -120,7 +120,7 @@ describe('GetMilestonesUseCase', () => {
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
-      OrganizationNotFoundError
+      OrganizationNotFoundError,
     );
   });
 
@@ -146,7 +146,7 @@ describe('GetMilestonesUseCase', () => {
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
-      AssessmentExportRegionNotSetError
+      AssessmentExportRegionNotSetError,
     );
   });
 });

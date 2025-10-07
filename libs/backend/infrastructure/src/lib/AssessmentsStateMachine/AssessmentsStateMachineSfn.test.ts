@@ -43,7 +43,7 @@ describe('AssessmentsStateMachineSfn', () => {
       await assessmentsStateMachineSfn.startAssessment(input);
 
       const startExecutionCalls = sfnClientMock.commandCalls(
-        StartExecutionCommand
+        StartExecutionCommand,
       );
       expect(startExecutionCalls).toHaveLength(1);
       const startExecutionCall = startExecutionCalls[0];
@@ -71,7 +71,7 @@ describe('AssessmentsStateMachineSfn', () => {
       });
 
       await expect(
-        assessmentsStateMachineSfn.startAssessment(input)
+        assessmentsStateMachineSfn.startAssessment(input),
       ).rejects.toThrow(Error);
     });
 
@@ -100,12 +100,12 @@ describe('AssessmentsStateMachineSfn', () => {
       await assessmentsStateMachineSfn.startAssessment(input);
 
       const startExecutionCalls = sfnClientMock.commandCalls(
-        StartExecutionCommand
+        StartExecutionCommand,
       );
       expect(startExecutionCalls).toHaveLength(1);
       const startExecutionCall = startExecutionCalls[0];
       expect(
-        JSON.parse(startExecutionCall.args[0].input.input ?? '{}')
+        JSON.parse(startExecutionCall.args[0].input.input ?? '{}'),
       ).toEqual(
         expect.objectContaining({
           name,
@@ -115,7 +115,7 @@ describe('AssessmentsStateMachineSfn', () => {
           createdAt: input.createdAt.toISOString(),
           createdBy,
           organizationDomain,
-        })
+        }),
       );
     });
 
@@ -137,9 +137,8 @@ describe('AssessmentsStateMachineSfn', () => {
         $metadata: { httpStatusCode: 200 },
         executionArn: 'execution-arn',
       });
-      const executionArn = await assessmentsStateMachineSfn.startAssessment(
-        input
-      );
+      const executionArn =
+        await assessmentsStateMachineSfn.startAssessment(input);
       expect(executionArn).toEqual('execution-arn');
     });
   });
@@ -160,7 +159,7 @@ describe('AssessmentsStateMachineSfn', () => {
       expect(stopExecutionCalls).toHaveLength(1);
       const stopExecutionCall = stopExecutionCalls[0];
       expect(stopExecutionCall.args[0].input.executionArn).toEqual(
-        executionArn
+        executionArn,
       );
     });
 
@@ -172,7 +171,7 @@ describe('AssessmentsStateMachineSfn', () => {
       });
 
       await expect(
-        assessmentsStateMachineSfn.cancelAssessment('execution-arn')
+        assessmentsStateMachineSfn.cancelAssessment('execution-arn'),
       ).rejects.toThrow(Error);
     });
   });
@@ -194,7 +193,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -215,7 +214,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -236,7 +235,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -257,7 +256,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -278,7 +277,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -299,7 +298,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.PREPARING_ASSOCIATIONS);
     });
@@ -320,7 +319,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
@@ -341,7 +340,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
@@ -364,7 +363,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
@@ -376,7 +375,7 @@ describe('AssessmentsStateMachineSfn', () => {
         .on(DescribeExecutionCommand)
         .resolves({ status: ExecutionStatus.RUNNING });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.SCANNING_STARTED);
     });
@@ -397,7 +396,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.SUCCEEDED,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.FINISHED);
     });
@@ -409,7 +408,7 @@ describe('AssessmentsStateMachineSfn', () => {
         .on(DescribeExecutionCommand)
         .resolves({ status: ExecutionStatus.FAILED });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.ERRORED);
     });
@@ -442,7 +441,7 @@ describe('AssessmentsStateMachineSfn', () => {
         status: ExecutionStatus.RUNNING,
       });
       const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine'
+        'arn:aws:states:stateMachine',
       );
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });

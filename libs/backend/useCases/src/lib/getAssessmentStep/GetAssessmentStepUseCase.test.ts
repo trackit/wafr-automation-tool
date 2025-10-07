@@ -21,7 +21,7 @@ describe('GetAssessmentStepUseCase', () => {
 
     const input = GetAssessmentStepUseCaseArgsMother.basic().build();
     await expect(useCase.getAssessmentStep(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -56,7 +56,7 @@ describe('GetAssessmentStepUseCase', () => {
     await useCase.getAssessmentStep(input);
 
     expect(fakeAssessmentsStateMachine.getAssessmentStep).toHaveBeenCalledWith(
-      assessment.executionArn
+      assessment.executionArn,
     );
   });
 

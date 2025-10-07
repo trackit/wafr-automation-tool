@@ -21,5 +21,5 @@ export const tokenFakeCognitoService = createInjectionToken<FakeCognitoService>(
   'FakeCognitoService',
   {
     useClass: FakeCognitoService,
-  }
+  },
 );

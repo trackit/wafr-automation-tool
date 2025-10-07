@@ -18,14 +18,14 @@ export class GeneratePDFExportURLUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GeneratePDFExportURLUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withFileExportId(
-    fileExportId: string
+    fileExportId: string,
   ): GeneratePDFExportURLUseCaseArgsMother {
     this.data.fileExportId = fileExportId;
     return this;

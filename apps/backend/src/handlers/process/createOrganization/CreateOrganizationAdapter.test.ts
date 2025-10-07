@@ -9,7 +9,7 @@ describe('CreateOrganizationAdapter', () => {
   it('should throw if domain is not provided', async () => {
     const { adapter } = setup();
     await expect(
-      adapter.handle({} as unknown as Organization)
+      adapter.handle({} as unknown as Organization),
     ).rejects.toThrow();
   });
 
@@ -48,7 +48,7 @@ describe('CreateOrganizationAdapter', () => {
       .build();
     await adapter.handle(organization);
     expect(useCase.createOrganization).toHaveBeenCalledExactlyOnceWith(
-      organization
+      organization,
     );
   });
 });

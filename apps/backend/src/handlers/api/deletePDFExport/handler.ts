@@ -5,5 +5,5 @@ import { DeletePDFExportAdapter } from './DeletePDFExportAdapter';
 const adapter = new DeletePDFExportAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

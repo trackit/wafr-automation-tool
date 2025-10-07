@@ -18,7 +18,7 @@ describe('RescanAssessmentUseCase', () => {
     const input = RescanAssessmentUseCaseArgsMother.basic().build();
 
     await expect(useCase.rescanAssessment(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -105,7 +105,7 @@ describe('RescanAssessmentUseCase', () => {
     await useCase.rescanAssessment(input);
 
     expect(
-      fakeAssessmentsStateMachine.cancelAssessment
+      fakeAssessmentsStateMachine.cancelAssessment,
     ).toHaveBeenCalledExactlyOnceWith(executionArn);
   });
 
@@ -137,7 +137,7 @@ describe('RescanAssessmentUseCase', () => {
     await useCase.rescanAssessment(input);
 
     expect(
-      fakeAssessmentsStateMachine.startAssessment
+      fakeAssessmentsStateMachine.startAssessment,
     ).toHaveBeenCalledExactlyOnceWith({
       name: assessment.name,
       regions: assessment.regions,

@@ -55,7 +55,7 @@ describe('GetAssessmentGraphAdapter', () => {
       expect(useCase.getAssessmentGraph).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 

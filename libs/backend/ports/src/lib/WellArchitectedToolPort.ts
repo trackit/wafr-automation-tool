@@ -11,7 +11,7 @@ export interface WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     user: User;
-  }): Promise<string>;
+  }): Promise<{ workloadId: string; workloadArn: string }>;
   createMilestone(args: {
     roleArn: string;
     assessment: Assessment;

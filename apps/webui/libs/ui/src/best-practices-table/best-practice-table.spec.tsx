@@ -86,7 +86,7 @@ describe('BestPracticeTable', () => {
 
     expect(screen.getByTestId('custom-header')).toBeInTheDocument();
     expect(screen.getByTestId('custom-header')).toHaveTextContent(
-      'Custom Header'
+      'Custom Header',
     );
   });
 });

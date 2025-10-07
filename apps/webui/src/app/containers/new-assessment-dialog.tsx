@@ -18,7 +18,7 @@ function NewAssessmentDialog() {
       workflows?: string[];
     }) => {
       const response = (await postAssessment(
-        data
+        data,
       )) as paths['/assessments']['post']['responses']['201']['content']['application/json'];
       if (!response.assessmentId) {
         console.error('Assessment ID is missing from response');

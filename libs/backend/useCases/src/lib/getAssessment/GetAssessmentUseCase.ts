@@ -29,7 +29,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
 
   private async getBestPracticeFindings(
-    assessment: Assessment
+    assessment: Assessment,
   ): Promise<BestPracticesFindingCounts> {
     const pillars = assessment.pillars ?? [];
 
@@ -39,8 +39,8 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
           pillarId: pillar.id,
           questionId: question.id,
           bestPracticeId: bestPractice.id,
-        }))
-      )
+        })),
+      ),
     );
 
     const countKey = ({
@@ -60,14 +60,14 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
           pillarId: descriptor.pillarId,
           questionId: descriptor.questionId,
           bestPracticeId: descriptor.bestPracticeId,
-        })
-      )
+        }),
+      ),
     );
     const countsByBestPractice = new Map<string, number>(
       bestPracticeDescriptors.map((descriptor, index) => [
         countKey(descriptor),
         countResults[index] ?? 0,
-      ])
+      ]),
     );
 
     return pillars.reduce<BestPracticesFindingCounts>((accumulator, pillar) => {
@@ -89,7 +89,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
                 pillarId: pillar.id,
                 questionId: question.id,
                 bestPracticeId: bestPractice.id,
-              })
+              }),
             ) ?? 0;
         });
       });
@@ -113,9 +113,8 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       });
     }
 
-    const bestPracticesFindingsAmount = await this.getBestPracticeFindings(
-      assessment
-    );
+    const bestPracticesFindingsAmount =
+      await this.getBestPracticeFindings(assessment);
 
     return {
       assessment,

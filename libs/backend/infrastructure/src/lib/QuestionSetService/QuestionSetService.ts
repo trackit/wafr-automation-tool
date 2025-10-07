@@ -56,7 +56,7 @@ export class QuestionSetService implements QuestionSetPort {
 
   private formatQuestionSet(
     rawQuestionSet: RawQuestionSet,
-    version: string
+    version: string,
   ): QuestionSet {
     const questionSet: QuestionSet = { pillars: [], version };
     for (const [pillarId, rawPillar] of Object.entries(rawQuestionSet)) {
@@ -68,7 +68,7 @@ export class QuestionSetService implements QuestionSetPort {
         questions: [],
       };
       for (const [questionId, rawQuestion] of Object.entries(
-        rawPillar.questions
+        rawPillar.questions,
       )) {
         const question: Question = {
           bestPractices: [],
@@ -79,7 +79,7 @@ export class QuestionSetService implements QuestionSetPort {
           primaryId: rawQuestion.primaryId,
         };
         for (const [bestPracticeId, rawBestPractice] of Object.entries(
-          rawQuestion.bestPractices
+          rawQuestion.bestPractices,
         )) {
           question.bestPractices.push({
             ...{ ...rawBestPractice, primaryId: undefined },
@@ -105,5 +105,5 @@ export const tokenQuestionSetService = createInjectionToken<QuestionSetPort>(
   'QuestionSetService',
   {
     useClass: QuestionSetService,
-  }
+  },
 );

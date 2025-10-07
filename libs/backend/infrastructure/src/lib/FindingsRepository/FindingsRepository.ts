@@ -7,5 +7,5 @@ export const tokenFindingsRepository = createInjectionToken<FindingRepository>(
   'FindingRepository',
   {
     useClass: FindingsRepositorySQL,
-  }
+  },
 );

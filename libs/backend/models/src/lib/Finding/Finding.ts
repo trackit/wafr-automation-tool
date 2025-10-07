@@ -4,16 +4,16 @@ type AggregationFieldSelection<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>
     ? AggregationFieldSelection<U>
     : T[K] extends object
-    ? AggregationFieldSelection<T[K]>
-    : true;
+      ? AggregationFieldSelection<T[K]>
+      : true;
 };
 
 type AggregationFieldResult<T> = {
   [K in keyof T]: NonNullable<T[K]> extends true
     ? Record<string, number>
     : NonNullable<T[K]> extends object
-    ? AggregationFieldResult<NonNullable<T[K]>>
-    : never;
+      ? AggregationFieldResult<NonNullable<T[K]>>
+      : never;
 };
 
 export type FindingAggregationFields = AggregationFieldSelection<Finding>;

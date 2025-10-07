@@ -14,7 +14,7 @@ export class GetAssessmentsAdapterEventMother {
   private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
   private constructor(
-    queryStringParameters: GetAssessmentsQueryStringParameters
+    queryStringParameters: GetAssessmentsQueryStringParameters,
   ) {
     this.queryStringParameters = queryStringParameters;
   }
@@ -39,7 +39,7 @@ export class GetAssessmentsAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GetAssessmentsAdapterEventMother {
     this.user = user;
     return this;
@@ -50,7 +50,7 @@ export class GetAssessmentsAdapterEventMother {
       Object.entries(this.queryStringParameters).map(([key, value]) => [
         key,
         value === undefined ? undefined : String(value),
-      ])
+      ]),
     );
     return APIGatewayProxyEventMother.basic()
       .withQueryStringParameters(queryStringParameters)

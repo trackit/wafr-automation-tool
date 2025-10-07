@@ -279,7 +279,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       expect(findingWithComment).toEqual(
         expect.objectContaining({
           comments: [comment],
-        })
+        }),
       );
     });
   });
@@ -464,7 +464,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId(pillar.id)
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([finding1, finding2]);
@@ -521,7 +521,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId(pillar.id)
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
-          .build()
+          .build(),
       );
       expect(findings).toEqual([finding1]);
     });
@@ -544,7 +544,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId(pillar.id)
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([]);
@@ -601,7 +601,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withPillarId(pillar.id)
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([finding1]);
@@ -676,7 +676,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
           .withSearchTerm('searchterm')
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([finding2, finding3]);
@@ -747,7 +747,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
           .withLimit(2)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([finding1, finding2]);
@@ -805,7 +805,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
           .withShowHidden(true)
-          .build()
+          .build(),
       );
 
       expect(findings).toEqual([finding1, finding2]);
@@ -861,7 +861,7 @@ describe('FindingsRepositoryDynamoDB', () => {
           .withQuestionId(question.id)
           .withBestPracticeId(bestPractice.id)
           .withLimit(1)
-          .build()
+          .build(),
       );
       expect(nextToken).toBeDefined();
     });
@@ -917,7 +917,7 @@ describe('FindingsRepositoryDynamoDB', () => {
             .withQuestionId(question.id)
             .withBestPracticeId(bestPractice.id)
             .withLimit(1)
-            .build()
+            .build(),
         );
       const { findings: secondFindings } =
         await repository.getBestPracticeFindings(
@@ -928,7 +928,7 @@ describe('FindingsRepositoryDynamoDB', () => {
             .withQuestionId(question.id)
             .withBestPracticeId(bestPractice.id)
             .withNextToken(nextToken as string)
-            .build()
+            .build(),
         );
 
       expect(firstFindings).not.toEqual(secondFindings);
@@ -1387,7 +1387,7 @@ describe('FindingsRepositoryDynamoDB', () => {
       expect(findingWithComment).toEqual(
         expect.objectContaining({
           comments: [],
-        })
+        }),
       );
     });
   });
@@ -1422,7 +1422,7 @@ describe('FindingsRepositoryDynamoDB', () => {
         expect.objectContaining({
           id: finding.id,
           hidden: true,
-        })
+        }),
       );
     });
 
@@ -1512,7 +1512,7 @@ describe('FindingsRepositoryDynamoDB', () => {
               text: 'new-comment-text',
             }),
           ],
-        })
+        }),
       );
     });
   });

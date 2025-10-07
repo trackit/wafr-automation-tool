@@ -17,7 +17,7 @@ export class UpdateQuestionAdapterEventMother {
 
   private constructor(
     pathParameters: UpdateQuestionPathParameters,
-    body: UpdateQuestionBody
+    body: UpdateQuestionBody,
   ) {
     this.pathParameters = pathParameters;
     this.body = body;
@@ -33,12 +33,12 @@ export class UpdateQuestionAdapterEventMother {
       {
         disabled: false,
         none: false,
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateQuestionAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -65,9 +65,14 @@ export class UpdateQuestionAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): UpdateQuestionAdapterEventMother {
     this.user = user;
+    return this;
+  }
+
+  public withBody(body: UpdateQuestionBody): UpdateQuestionAdapterEventMother {
+    this.body = body;
     return this;
   }
 

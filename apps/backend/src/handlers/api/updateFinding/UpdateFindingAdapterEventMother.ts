@@ -17,7 +17,7 @@ export class UpdateFindingAdapterEventMother {
 
   private constructor(
     pathParameters: UpdateFindingPathParameters,
-    body: UpdateFindingBody
+    body: UpdateFindingBody,
   ) {
     this.pathParameters = pathParameters;
     this.body = body;
@@ -31,12 +31,12 @@ export class UpdateFindingAdapterEventMother {
       },
       {
         hidden: false,
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateFindingAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -53,9 +53,14 @@ export class UpdateFindingAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): UpdateFindingAdapterEventMother {
     this.user = user;
+    return this;
+  }
+
+  public withBody(body: UpdateFindingBody): UpdateFindingAdapterEventMother {
+    this.body = body;
     return this;
   }
 

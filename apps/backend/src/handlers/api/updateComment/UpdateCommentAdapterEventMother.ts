@@ -20,7 +20,7 @@ export class UpdateCommentAdapterEventMother {
 
   private constructor(
     params: UpdateCommentParameters,
-    body: UpdateCommentBody
+    body: UpdateCommentBody,
   ) {
     this.pathParameters = params;
     this.body = body;
@@ -35,12 +35,12 @@ export class UpdateCommentAdapterEventMother {
       },
       {
         text: 'comment-text',
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): UpdateCommentAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
@@ -62,9 +62,14 @@ export class UpdateCommentAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): UpdateCommentAdapterEventMother {
     this.user = user;
+    return this;
+  }
+
+  public withBody(body: UpdateCommentBody): UpdateCommentAdapterEventMother {
+    this.body = body;
     return this;
   }
 

@@ -24,14 +24,14 @@ export class DeleteAssessmentAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): DeleteAssessmentAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): DeleteAssessmentAdapterEventMother {
     this.user = user;
     return this;

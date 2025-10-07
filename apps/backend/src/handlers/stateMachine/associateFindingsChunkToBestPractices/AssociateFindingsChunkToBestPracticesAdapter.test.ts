@@ -45,7 +45,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
       await expect(
         adapter.handle({
           invalid: 'event',
-        })
+        }),
       ).rejects.toThrow();
     });
   });
@@ -64,7 +64,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
       const { adapter } = setup();
 
       expect(() =>
-        adapter.parseScanningToolFromURI('invalid-uri')
+        adapter.parseScanningToolFromURI('invalid-uri'),
       ).toThrowError();
     });
   });
@@ -81,7 +81,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
       fakeObjectsStorage.get = vi
         .fn()
         .mockResolvedValue(
-          JSON.stringify([FindingMother.basic().withId('prowler#1').build()])
+          JSON.stringify([FindingMother.basic().withId('prowler#1').build()]),
         );
       await adapter.handle(event);
 
@@ -96,7 +96,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
         FindingMother.basic().withId('prowler#2').build(),
       ];
       vi.spyOn(fakeObjectsStorage, 'get').mockResolvedValue(
-        JSON.stringify(findings)
+        JSON.stringify(findings),
       );
 
       const event =
@@ -105,7 +105,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
           .build();
 
       const result = await adapter.fetchFindingsToAssociate(
-        event.findingsChunkURI
+        event.findingsChunkURI,
       );
       expect(result).toEqual({
         scanningTool: ScanningTool.PROWLER,
@@ -115,7 +115,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
   });
 
   describe('useCase', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase, fakeObjectsStorage } = setup();
 
       const findings = [
@@ -135,7 +135,7 @@ describe('AssociateFindingsToBestPractices adapter', () => {
 
       await adapter.handle(event);
       expect(
-        useCase.associateFindingsToBestPractices
+        useCase.associateFindingsToBestPractices,
       ).toHaveBeenCalledExactlyOnceWith({
         assessmentId: event.assessmentId,
         organizationDomain: event.organizationDomain,

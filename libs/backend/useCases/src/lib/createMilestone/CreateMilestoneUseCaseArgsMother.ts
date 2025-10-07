@@ -18,7 +18,7 @@ export class CreateMilestoneUseCaseArgsMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): CreateMilestoneUseCaseArgsMother {
     this.data.assessmentId = assessmentId;
     return this;

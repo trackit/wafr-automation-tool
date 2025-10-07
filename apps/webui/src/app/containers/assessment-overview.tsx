@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Computer, Earth, Server } from 'lucide-react';
+import {
+  Calendar,
+  Computer,
+  Earth,
+  LayoutDashboard,
+  Server,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Bar,
@@ -28,6 +34,7 @@ import {
   calculateOverallCompletion,
   calculatePillarCompletion,
   extractAccountId,
+  formatACEOpportunity,
   formatDate,
   formatRegions,
   formatWorkflowInfo,
@@ -66,7 +73,7 @@ function AssessmentOverview({
 }) {
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const assessmentId = assessment?.id;
@@ -89,7 +96,19 @@ function AssessmentOverview({
     const regions = Object.entries(assessmentGraph.resources.region)
       .sort((a, b) => (b[1] as number) - (a[1] as number))
       .map(([name, value]) => ({ name, value: value as number }));
+    const topN = 3;
+    const top = regions.slice(0, topN);
+    const rest = regions.slice(topN);
+    const othersSum = rest.reduce((s, r) => s + r.value, 0);
+    const processedRegions = top;
+    if (othersSum > 0) {
+      processedRegions.push({ name: 'Other', value: othersSum });
+    }
 
+    const totalRegionsCount = processedRegions.reduce(
+      (sum, item) => sum + item.value,
+      0,
+    );
     // Process severities data
     const severities = Object.entries(assessmentGraph.severity)
       .sort((a, b) => SEVERITIES.indexOf(a[0]) - SEVERITIES.indexOf(b[0]))
@@ -106,19 +125,20 @@ function AssessmentOverview({
 
     return {
       regions,
+      processedRegions,
       severities,
       resourceTypes,
-      totalRegionsCount: regions.reduce((sum, item) => sum + item.value, 0),
+      totalRegionsCount,
       totalSeveritiesCount: severities.reduce(
         (sum, item) => sum + item.value,
-        0
+        0,
       ),
     };
   }, [assessmentGraph]);
 
   // Extract processed data
   const {
-    regions: assessmentRegions = [],
+    processedRegions: assessmentProcessedRegions = [],
     severities: assessmentSeverities = [],
     resourceTypes: assessmentResourceTypes = [],
     totalRegionsCount = 0,
@@ -129,7 +149,7 @@ function AssessmentOverview({
   useMemo(() => {
     if (assessmentResourceTypes.length > 0) {
       setEnabledResourceTypes(
-        new Set(assessmentResourceTypes.map((rt) => rt.name))
+        new Set(assessmentResourceTypes.map((rt) => rt.name)),
       );
     }
   }, [assessmentResourceTypes]);
@@ -137,7 +157,7 @@ function AssessmentOverview({
   // Get filtered resource types for charts
   const filteredResourceTypes = useMemo(() => {
     return assessmentResourceTypes.filter((rt) =>
-      enabledResourceTypes.has(rt.name)
+      enabledResourceTypes.has(rt.name),
     );
   }, [assessmentResourceTypes, enabledResourceTypes]);
 
@@ -221,6 +241,10 @@ function AssessmentOverview({
               <Computer className="w-5 h-5" />
               Workflow: {formatWorkflowInfo(assessment.workflows)}
             </div>
+            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
+              <LayoutDashboard className="w-5 h-5" />
+              ACE Opportunity: {formatACEOpportunity(assessment.opportunityId)}
+            </div>
           </div>
         </div>
         <div className="flex gap-6 w-full md:w-1/2">
@@ -275,12 +299,11 @@ function AssessmentOverview({
                         align="center"
                         content={({ payload }) => (
                           <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
-                            {payload?.map((entry, index) => {
-                              const item = assessmentRegions[index];
+                            {assessmentProcessedRegions?.map((entry, index) => {
                               const percentage =
                                 totalRegionsCount > 0
                                   ? (
-                                      ((item?.value || 0) / totalRegionsCount) *
+                                      ((entry.value || 0) / totalRegionsCount) *
                                       100
                                     ).toFixed(1)
                                   : '0.0';
@@ -298,7 +321,8 @@ function AssessmentOverview({
                                     style={{
                                       width: 10,
                                       height: 10,
-                                      backgroundColor: entry.color,
+                                      backgroundColor:
+                                        getChartColorByIndex(index),
                                       borderRadius: 2,
                                     }}
                                   />
@@ -312,7 +336,7 @@ function AssessmentOverview({
                         )}
                       />
                       <Pie
-                        data={assessmentRegions || []}
+                        data={assessmentProcessedRegions}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -321,14 +345,12 @@ function AssessmentOverview({
                         paddingAngle={5}
                         dataKey="value"
                       >
-                        {assessmentRegions
-                          ? assessmentRegions.map((item, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={getChartColorByIndex(index)}
-                              />
-                            ))
-                          : []}
+                        {assessmentProcessedRegions.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={getChartColorByIndex(index)}
+                          />
+                        ))}
                       </Pie>
                       <Tooltip />
                     </PieChart>

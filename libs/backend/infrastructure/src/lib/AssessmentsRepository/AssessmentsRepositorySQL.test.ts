@@ -44,7 +44,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withCreatedAt(new Date('2023-01-01T00:00:00Z'))
         .withCreatedBy('user1')
         .withExecutionArn(
-          'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1'
+          'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1',
         )
         .withPillars([
           PillarMother.basic()
@@ -396,7 +396,7 @@ describe('AssessmentsRepositorySQL', () => {
           questionVersion: '1.0',
           executionArn: 'new-execution-arn',
           finished: true,
-        })
+        }),
       );
     });
 
@@ -433,10 +433,10 @@ describe('AssessmentsRepositorySQL', () => {
       });
 
       expect(updatedAssessment1).toEqual(
-        expect.objectContaining({ name: 'New Name' })
+        expect.objectContaining({ name: 'New Name' }),
       );
       expect(updatedAssessment2).toEqual(
-        expect.objectContaining({ name: 'Old Name' })
+        expect.objectContaining({ name: 'Old Name' }),
       );
     });
   });
@@ -461,7 +461,7 @@ describe('AssessmentsRepositorySQL', () => {
           pillarBody: {
             disabled: true,
           },
-        })
+        }),
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -504,7 +504,11 @@ describe('AssessmentsRepositorySQL', () => {
       });
 
       expect(updatedAssessment?.pillars?.[0]?.questions?.[0]).toEqual(
-        expect.objectContaining({ id: question.id, disabled: true, none: true })
+        expect.objectContaining({
+          id: question.id,
+          disabled: true,
+          none: true,
+        }),
       );
     });
 
@@ -560,14 +564,14 @@ describe('AssessmentsRepositorySQL', () => {
           id: question1.id,
           disabled: true,
           none: true,
-        })
+        }),
       );
       expect(updatedAssessment2?.pillars?.[0]?.questions?.[0]).toEqual(
         expect.objectContaining({
           id: question2.id,
           disabled: false,
           none: false,
-        })
+        }),
       );
     });
   });
@@ -600,7 +604,7 @@ describe('AssessmentsRepositorySQL', () => {
           bestPracticeBody: {
             checked: true,
           },
-        })
+        }),
       ).resolves.not.toThrow();
       const updatedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -608,7 +612,7 @@ describe('AssessmentsRepositorySQL', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
-          .checked
+          .checked,
       ).toBe(true);
     });
   });

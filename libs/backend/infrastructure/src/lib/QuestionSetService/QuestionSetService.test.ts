@@ -69,7 +69,7 @@ const setup = () => {
           },
         },
       } as RawQuestionSet,
-    })
+    }),
   );
   return {
     questionSetService: new QuestionSetService(),

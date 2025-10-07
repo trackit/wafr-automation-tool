@@ -14,14 +14,14 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetAssessmentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['getAssessment']['parameters']['path']>;
 
 export class GetAssessmentAdapter {
   private readonly useCase = inject(tokenGetAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -70,11 +70,13 @@ export class GetAssessmentAdapter {
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
       error: assessment.error,
+      wafrWorkloadArn: assessment.wafrWorkloadArn,
+      opportunityId: assessment.opportunityId,
     };
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {

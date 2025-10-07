@@ -19,14 +19,14 @@ export class CleanupAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: CleanupInput['assessmentId']
+    assessmentId: CleanupInput['assessmentId'],
   ): CleanupAdapterEventMother {
     this.data.assessmentId = assessmentId;
     return this;
   }
 
   public withOrganizationDomain(
-    organizationDomain: CleanupInput['organizationDomain']
+    organizationDomain: CleanupInput['organizationDomain'],
   ): CleanupAdapterEventMother {
     this.data.organizationDomain = organizationDomain;
     return this;

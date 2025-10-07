@@ -40,7 +40,7 @@ describe('listPDFExports UseCase', () => {
 
     const input = ListPDFExportsUseCaseArgsMother.basic().build();
     await expect(useCase.listPDFExports(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 });

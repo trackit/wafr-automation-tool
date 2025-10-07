@@ -21,10 +21,10 @@ describe('ConfirmationModal', () => {
       expect(screen.getByText('Test Title')).toBeInTheDocument();
       expect(screen.getByText('Test Message')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /cancel/i })
+        screen.getByRole('button', { name: /cancel/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /confirm/i })
+        screen.getByRole('button', { name: /confirm/i }),
       ).toBeInTheDocument();
     });
   });
@@ -36,10 +36,10 @@ describe('ConfirmationModal', () => {
       expect(screen.queryByText('Test Title')).not.toBeInTheDocument();
       expect(screen.queryByText('Test Message')).not.toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: /cancel/i })
+        screen.queryByRole('button', { name: /cancel/i }),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: /confirm/i })
+        screen.queryByRole('button', { name: /confirm/i }),
       ).not.toBeInTheDocument();
     });
   });

@@ -147,7 +147,7 @@ export const tokenObjectsStorage = createInjectionToken<ObjectsStorage>(
   'ObjectsStorage',
   {
     useClass: ObjectsStorageS3,
-  }
+  },
 );
 
 export const tokenClientS3 = createInjectionToken<S3Client>('ClientS3', {

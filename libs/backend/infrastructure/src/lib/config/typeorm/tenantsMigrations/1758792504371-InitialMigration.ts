@@ -11,6 +11,7 @@ export class InitialMigration1758792504371 implements MigrationInterface {
 
       CREATE TABLE "organizations" (
         "domain" varchar PRIMARY KEY,
+        "name" varchar NOT NULL,
         "accountId" varchar,
         "assessmentExportRoleArn" varchar,
         "unitBasedAgreementId" varchar,

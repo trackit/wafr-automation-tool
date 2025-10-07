@@ -7,6 +7,9 @@ export class OrganizationEntity implements Organization {
   @PrimaryColumn('varchar')
   domain!: string;
 
+  @Column('varchar')
+  name!: string;
+
   @Column('varchar', { nullable: true })
   accountId?: string;
 

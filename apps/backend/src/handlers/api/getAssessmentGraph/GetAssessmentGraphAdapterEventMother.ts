@@ -23,14 +23,14 @@ export class GetAssessmentGraphAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): GetAssessmentGraphAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): GetAssessmentGraphAdapterEventMother {
     this.user = user;
     return this;

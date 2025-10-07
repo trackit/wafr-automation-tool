@@ -30,7 +30,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
   private async repo<T extends ObjectLiteral>(
     entity: EntityTarget<T>,
-    organization: string
+    organization: string,
   ): Promise<Repository<T>> {
     if (!this.clientManager.isInitialized) {
       await this.clientManager.initialize();
@@ -128,13 +128,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     if (search && search.trim()) {
       qb.andWhere(
         '(a.name ILIKE :term OR a.roleArn ILIKE :term OR a.id::text ILIKE :term)',
-        { term: `%${search}%` }
+        { term: `%${search}%` },
       );
     }
 
     const [entities, total] = await qb.getManyAndCount();
     const items = entities.map((e) =>
-      toDomainAssessment(e, organizationDomain)
+      toDomainAssessment(e, organizationDomain),
     );
 
     const nextOffset = offset + items.length;
@@ -165,7 +165,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await repo.delete({ id, assessmentId });
     this.logger.info(
-      `File export with id ${id} deleted successfully for assessment ${assessmentId}`
+      `File export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -192,7 +192,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await repo.update({ id: pillarId, assessmentId }, pillarBody);
     this.logger.info(
-      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -214,7 +214,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await repo.update({ id: questionId, pillarId, assessmentId }, questionBody);
     this.logger.info(
-      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`,
     );
   }
 
@@ -238,10 +238,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     await repo.update(
       { id: bestPracticeId, questionId, pillarId, assessmentId },
-      bestPracticeBody
+      bestPracticeBody,
     );
     this.logger.info(
-      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`,
     );
   }
 
@@ -257,7 +257,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     this.logger.info(
       `${data.type.toUpperCase()} file with id ${
         data.id
-      } export updated successfully for assessment ${assessmentId}`
+      } export updated successfully for assessment ${assessmentId}`,
     );
   }
 }

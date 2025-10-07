@@ -25,7 +25,7 @@ describe('getAssessment adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GetAssessmentAdapterEventMother.basic().build();
@@ -36,11 +36,11 @@ describe('getAssessment adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -49,7 +49,7 @@ describe('getAssessment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = GetAssessmentAdapterEventMother.basic()
@@ -61,7 +61,7 @@ describe('getAssessment adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
@@ -74,7 +74,7 @@ describe('getAssessment adapter', () => {
       expect(useCase.getAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 
@@ -109,13 +109,19 @@ describe('getAssessment adapter', () => {
             ])
             .build(),
         ])
-
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
         .withWorkflows([])
+        .withWAFRWorkloadArn('wafr-workload-arn')
+        .withOpportunityId('O1234567')
+        .build();
+      useCase.getAssessment.mockResolvedValue(assessment);
+
+      const event = GetAssessmentAdapterEventMother.basic()
+        .withAssessmentId(assessment.id)
         .build();
       useCase.getAssessment.mockResolvedValue({
         assessment,
@@ -127,10 +133,6 @@ describe('getAssessment adapter', () => {
           },
         },
       });
-
-      const event = GetAssessmentAdapterEventMother.basic()
-        .withAssessmentId(assessment.id)
-        .build();
 
       const response = await adapter.handle(event);
       expect(JSON.parse(response.body)).toEqual({
@@ -161,13 +163,15 @@ describe('getAssessment adapter', () => {
             ],
           },
         ],
-        id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        name: 'assessment name',
-        organization: 'test.io',
-        questionVersion: '1.0.0',
-        regions: ['us-west-2'],
-        roleArn: 'role-arn',
-        workflows: [],
+        id: assessment.id,
+        name: assessment.name,
+        organization: assessment.organization,
+        questionVersion: assessment.questionVersion,
+        regions: assessment.regions,
+        roleArn: assessment.roleArn,
+        workflows: assessment.workflows,
+        wafrWorkloadArn: assessment.wafrWorkloadArn,
+        opportunityId: assessment.opportunityId,
       });
     });
 

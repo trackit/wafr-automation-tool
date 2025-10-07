@@ -4,7 +4,7 @@ import { apiClient } from './client';
 
 export function getMilestones(
   pathParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['path'],
-  queryParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['query'] = {}
+  queryParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['query'] = {},
 ) {
   const { assessmentId } = pathParams;
   const { region, limit = 10, nextToken } = queryParams;

@@ -23,7 +23,7 @@ describe('getAssessments adapter', () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GetAssessmentsAdapterEventMother.basic().build();
@@ -34,7 +34,7 @@ describe('getAssessments adapter', () => {
         event,
         expect.objectContaining({
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
@@ -84,7 +84,7 @@ describe('getAssessments adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const user = UserMother.basic().build();
@@ -135,6 +135,8 @@ describe('getAssessments adapter', () => {
         workflows: assessment.workflows,
         createdAt: assessment.createdAt.toISOString(),
         error: assessment.error,
+        opportunityId: assessment.opportunityId,
+        wafrWorkloadArn: assessment.wafrWorkloadArn,
       });
     });
   });
@@ -150,7 +152,7 @@ const setup = () => {
   useCase.getAssessments.mockResolvedValueOnce(
     Promise.resolve({
       assessments: [],
-    })
+    }),
   );
   register(tokenGetAssessmentsUseCase, { useValue: useCase });
 

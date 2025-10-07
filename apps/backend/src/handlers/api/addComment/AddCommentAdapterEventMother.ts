@@ -31,7 +31,7 @@ export class AddCommentAdapterEventMother {
       },
       {
         text: 'comment-text',
-      }
+      },
     );
   }
 
@@ -51,7 +51,7 @@ export class AddCommentAdapterEventMother {
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): AddCommentAdapterEventMother {
     this.user = user;
     return this;

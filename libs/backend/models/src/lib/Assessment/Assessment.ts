@@ -17,6 +17,8 @@ export interface Assessment {
   error?: AssessmentError;
   finished: boolean;
   fileExports: AssessmentFileExport[];
+  wafrWorkloadArn?: string;
+  opportunityId?: string;
 }
 
 export interface AssessmentGraphData {
@@ -46,6 +48,9 @@ export interface AssessmentBody {
   questionVersion?: string;
   exportRegion?: string;
   executionArn?: string;
+  fileExports?: AssessmentFileExport[];
+  wafrWorkloadArn?: string;
+  opportunityId?: string;
 }
 
 export enum AssessmentFileExportType {

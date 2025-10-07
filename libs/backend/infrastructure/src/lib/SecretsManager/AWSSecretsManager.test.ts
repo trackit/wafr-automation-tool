@@ -19,8 +19,8 @@ describe('AWSSecretsManager Infrastructure', () => {
       });
       await expect(
         secretsManager.getSecretValue(
-          'arn:aws:secretsmanager:region:123456789012:secret:mysecret'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:mysecret',
+        ),
       ).resolves.toBe('my-secret-value');
     });
 
@@ -31,8 +31,8 @@ describe('AWSSecretsManager Infrastructure', () => {
       });
       await expect(
         secretsManager.getSecretValue(
-          'arn:aws:secretsmanager:region:123456789012:secret:mysecret'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:mysecret',
+        ),
       ).rejects.toThrowError();
     });
 
@@ -43,12 +43,12 @@ describe('AWSSecretsManager Infrastructure', () => {
           name: 'InternalError',
           $fault: 'server',
           $metadata: { httpStatusCode: 500 },
-        })
+        }),
       );
       await expect(
         secretsManager.getSecretValue(
-          'arn:aws:secretsmanager:region:123456789012:secret:mysecret'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:mysecret',
+        ),
       ).rejects.toThrowError();
     });
   });
@@ -66,8 +66,8 @@ describe('AWSSecretsManager Infrastructure', () => {
       });
       await expect(
         secretsManager.getDatabaseCredentialsSecret(
-          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials',
+        ),
       ).resolves.toEqual({
         username: 'dbuser',
         password: 'dbpassword',
@@ -82,8 +82,8 @@ describe('AWSSecretsManager Infrastructure', () => {
       });
       await expect(
         secretsManager.getDatabaseCredentialsSecret(
-          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials',
+        ),
       ).rejects.toThrowError();
     });
 
@@ -98,8 +98,8 @@ describe('AWSSecretsManager Infrastructure', () => {
       });
       await expect(
         secretsManager.getDatabaseCredentialsSecret(
-          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials'
-        )
+          'arn:aws:secretsmanager:region:123456789012:secret:dbcredentials',
+        ),
       ).rejects.toThrowError();
     });
   });
@@ -110,7 +110,7 @@ const setup = () => {
   registerTestInfrastructure();
   const secretsManager = new AWSSecretsManager();
   const secretsManagerClientMock = mockClient(
-    inject(tokenSecretsManagerClient)
+    inject(tokenSecretsManagerClient),
   );
   return {
     secretsManager,

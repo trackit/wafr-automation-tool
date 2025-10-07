@@ -14,5 +14,5 @@ export const tokenFakeLambdaService = createInjectionToken(
   'FakeLambdaService',
   {
     useClass: FakeLambdaService,
-  }
+  },
 );

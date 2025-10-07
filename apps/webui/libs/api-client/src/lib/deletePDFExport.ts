@@ -7,7 +7,7 @@ export function deletePDFExport({
   fileExportId,
 }: operations['deletePDFExport']['parameters']['path']): Promise<void> {
   return apiClient.delete(
-    `/assessments/${assessmentId}/exports/pdf/${fileExportId}`
+    `/assessments/${assessmentId}/exports/pdf/${fileExportId}`,
   );
 }
 

@@ -20,7 +20,7 @@ export function parseJsonObject(jsonString?: string): Record<string, unknown> {
     throw new JSONParseError(
       `Failed to parse JSON: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 }
@@ -36,7 +36,7 @@ export function parseJsonArray(jsonString?: string): unknown[] {
     throw new JSONParseError(
       `Failed to parse JSON: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 }

@@ -19,7 +19,7 @@ describe('updateComment adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = UpdateCommentAdapterEventMother.basic().build();
@@ -31,11 +31,11 @@ describe('updateComment adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -44,7 +44,7 @@ describe('updateComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = UpdateCommentAdapterEventMother.basic()
@@ -55,7 +55,7 @@ describe('updateComment adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid commentId', async () => {
+    it('should return a 400 status code with invalid commentId', async () => {
       const { adapter } = setup();
 
       const event = UpdateCommentAdapterEventMother.basic()
@@ -65,9 +65,20 @@ describe('updateComment adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return a 400 status code with empty body parameters', async () => {
+      const { adapter } = setup();
+
+      const event = UpdateCommentAdapterEventMother.basic()
+        .withBody({})
+        .build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const user = UserMother.basic().build();

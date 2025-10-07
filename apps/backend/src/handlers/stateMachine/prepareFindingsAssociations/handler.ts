@@ -6,5 +6,5 @@ import {
 const adapter = new PrepareFindingsAssociationsAdapter();
 
 export const main = async (
-  event: Record<string, unknown>
+  event: Record<string, unknown>,
 ): Promise<PrepareFindingsAssociationsOutput> => adapter.handle(event);

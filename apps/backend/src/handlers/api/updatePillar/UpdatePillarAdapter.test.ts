@@ -18,7 +18,7 @@ describe('updatePillar adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = UpdatePillarAdapterEventMother.basic().build();
@@ -30,11 +30,11 @@ describe('updatePillar adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           bodySchema: expect.anything(),
-        })
+        }),
       );
     });
 
-    it('should return a 400 without path parameters', async () => {
+    it('should return a 400 status code without path parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -43,7 +43,7 @@ describe('updatePillar adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = UpdatePillarAdapterEventMother.basic()
@@ -53,9 +53,19 @@ describe('updatePillar adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should return a 400 status code with empty body parameters', async () => {
+      const { adapter } = setup();
+
+      const event = UpdatePillarAdapterEventMother.basic().withBody({}).build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(400);
+    });
   });
+
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
@@ -74,7 +84,7 @@ describe('updatePillar adapter', () => {
           assessmentId,
           pillarId,
           pillarBody,
-        })
+        }),
       );
     });
 

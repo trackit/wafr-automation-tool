@@ -12,6 +12,7 @@ import {
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
+import { getBestPracticeCustomId } from '@shared/utils';
 
 import {
   AssessmentNotFoundError,
@@ -29,7 +30,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
     const input = GetBestPracticeFindingsUseCaseArgsMother.basic().build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -53,7 +54,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      PillarNotFoundError
+      PillarNotFoundError,
     );
   });
 
@@ -78,7 +79,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      QuestionNotFoundError
+      QuestionNotFoundError,
     );
   });
 
@@ -104,7 +105,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     await expect(useCase.getBestPracticeFindings(input)).rejects.toThrow(
-      BestPracticeNotFoundError
+      BestPracticeNotFoundError,
     );
   });
 

@@ -29,7 +29,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       .build();
 
     await expect(
-      useCase.associateFindingsToBestPractices(input)
+      useCase.associateFindingsToBestPractices(input),
     ).rejects.toThrow(AssessmentNotFoundError);
   });
 
@@ -69,7 +69,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     ];
     vitest.spyOn(
       findingToBestPracticesAssociationService,
-      'associateFindingsToBestPractices'
+      'associateFindingsToBestPractices',
     );
     vitest.spyOn(questionSetService, 'get').mockReturnValue({
       pillars,
@@ -79,7 +79,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await useCase.associateFindingsToBestPractices(input);
 
     expect(
-      findingToBestPracticesAssociationService.associateFindingsToBestPractices
+      findingToBestPracticesAssociationService.associateFindingsToBestPractices,
     ).toHaveBeenCalledWith({
       findings: input.findings,
       scanningTool: input.scanningTool,
@@ -132,7 +132,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     vitest
       .spyOn(
         findingToBestPracticesAssociationService,
-        'associateFindingsToBestPractices'
+        'associateFindingsToBestPractices',
       )
       .mockResolvedValue([
         {
@@ -219,7 +219,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     vitest
       .spyOn(
         findingToBestPracticesAssociationService,
-        'associateFindingsToBestPractices'
+        'associateFindingsToBestPractices',
       )
       .mockResolvedValue([
         {
@@ -308,7 +308,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     vitest
       .spyOn(
         findingToBestPracticesAssociationService,
-        'associateFindingsToBestPractices'
+        'associateFindingsToBestPractices',
       )
       .mockResolvedValue([
         {
@@ -370,7 +370,7 @@ const setup = () => {
     useCase: new AssociateFindingsToBestPracticesUseCaseImpl(),
     questionSetService: inject(tokenQuestionSetService),
     findingToBestPracticesAssociationService: inject(
-      tokenFindingToBestPracticesAssociationService
+      tokenFindingToBestPracticesAssociationService,
     ),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeFindingsRepository: inject(tokenFakeFindingsRepository),

@@ -55,7 +55,7 @@ describe('GetAssessmentStepAdapter', () => {
       expect(useCase.getAssessmentStep).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-        })
+        }),
       );
     });
 
@@ -79,7 +79,7 @@ describe('GetAssessmentStepAdapter', () => {
         })
         .build();
       useCase.getAssessmentStep.mockResolvedValue(
-        AssessmentStep.PREPARING_ASSOCIATIONS
+        AssessmentStep.PREPARING_ASSOCIATIONS,
       );
 
       const response = await adapter.handle(event);

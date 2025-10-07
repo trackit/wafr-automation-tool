@@ -5,5 +5,5 @@ import { GetAssessmentGraphAdapter } from './GetAssessmentGraphAdapter';
 const adapter = new GetAssessmentGraphAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

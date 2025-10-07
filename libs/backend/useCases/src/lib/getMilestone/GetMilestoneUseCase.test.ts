@@ -84,7 +84,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -110,7 +110,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
-      OrganizationExportRoleNotSetError
+      OrganizationExportRoleNotSetError,
     );
   });
 
@@ -128,7 +128,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
-      OrganizationNotFoundError
+      OrganizationNotFoundError,
     );
   });
 
@@ -163,7 +163,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
-      MilestoneNotFoundError
+      MilestoneNotFoundError,
     );
   });
 
@@ -189,7 +189,7 @@ describe('GetMilestoneUseCase', () => {
       .build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
-      AssessmentExportRegionNotSetError
+      AssessmentExportRegionNotSetError,
     );
   });
 });

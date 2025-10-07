@@ -2,7 +2,6 @@ import { components } from '@shared/api-schema';
 
 type Question = components['schemas']['Question'];
 type Pillar = components['schemas']['Pillar'];
-type AssessmentContent = components['schemas']['AssessmentContent'];
 
 /**
  * Calculates whether a question is completed based on its best practices
@@ -34,7 +33,7 @@ export function calculatePillarCompletion(pillar: Pillar): number {
   }
 
   const completedQuestions = questions.filter((q) =>
-    isQuestionCompleted(q)
+    isQuestionCompleted(q),
   ).length;
   return Math.round((completedQuestions / totalQuestions) * 100);
 }
@@ -71,7 +70,7 @@ export function calculateOverallCompletion(pillars?: Pillar[]): number {
  * Calculates the completed questions count for a specific pillar
  */
 export function calculateCompletedQuestionsCount(
-  questions: Question[]
+  questions: Question[],
 ): number {
   let completedCount = 0;
 
@@ -99,7 +98,7 @@ export function extractAccountId(roleArn: string | undefined): string {
  * Formats workflow information for display
  */
 export function formatWorkflowInfo(
-  workflows: string[] | string | undefined
+  workflows: string[] | string | undefined,
 ): string {
   if (Array.isArray(workflows)) {
     return workflows.length ? workflows.join(', ') : '-';
@@ -120,4 +119,13 @@ export function formatDate(dateString: string | undefined): string {
  */
 export function formatRegions(regions: string[] | undefined): string {
   return regions?.join(', ') || 'Global';
+}
+
+/**
+ * Formats opportunityId for display
+ */
+export function formatACEOpportunity(
+  opportunityId: string | undefined,
+): string {
+  return opportunityId ?? 'Not Linked';
 }

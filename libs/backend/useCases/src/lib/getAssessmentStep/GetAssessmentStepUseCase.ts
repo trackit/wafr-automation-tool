@@ -14,7 +14,7 @@ export type GetAssessmentStepUseCaseArgs = {
 
 export interface GetAssessmentStepUseCase {
   getAssessmentStep(
-    args: GetAssessmentStepUseCaseArgs
+    args: GetAssessmentStepUseCaseArgs,
   ): Promise<AssessmentStep>;
 }
 
@@ -23,7 +23,7 @@ export class GetAssessmentStepUseCaseImpl implements GetAssessmentStepUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
 
   public async getAssessmentStep(
-    args: GetAssessmentStepUseCaseArgs
+    args: GetAssessmentStepUseCaseArgs,
   ): Promise<AssessmentStep> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,

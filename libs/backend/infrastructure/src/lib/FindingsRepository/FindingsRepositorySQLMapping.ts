@@ -14,7 +14,7 @@ import {
 } from '../config/typeorm';
 
 export function toDomainFindingComment(
-  e: FindingCommentEntity
+  e: FindingCommentEntity,
 ): FindingComment {
   return {
     id: e.id,
@@ -25,7 +25,7 @@ export function toDomainFindingComment(
 }
 
 export function toDomainFindingResource(
-  e: FindingResourceEntity
+  e: FindingResourceEntity,
 ): FindingResource {
   return {
     name: e.name,
@@ -36,7 +36,7 @@ export function toDomainFindingResource(
 }
 
 export function toDomainFindingRemediation(
-  e: FindingRemediationEntity
+  e: FindingRemediationEntity,
 ): FindingRemediation {
   return {
     desc: e.desc,
@@ -50,7 +50,7 @@ export function toDomainFinding(e: FindingEntity): Finding {
     hidden: e.hidden,
     isAIAssociated: e.isAIAssociated,
     bestPractices: (e.bestPractices ?? []).map((bp) =>
-      toDomainBestPractice(bp)
+      toDomainBestPractice(bp),
     ),
     eventCode: e.eventCode,
     remediation: e.remediation

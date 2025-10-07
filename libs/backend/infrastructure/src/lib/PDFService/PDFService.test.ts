@@ -49,7 +49,7 @@ describe('PDFService Infrastructure', () => {
         pdfService.exportAssessment({
           assessment,
           versionName,
-        })
+        }),
       ).resolves.toStrictEqual(Buffer.from(pdfContent));
 
       expect(AssessmentDocument).toHaveBeenCalledExactlyOnceWith({
@@ -58,7 +58,7 @@ describe('PDFService Infrastructure', () => {
         findings: [finding1, finding2],
       });
       expect(renderToBuffer).toHaveBeenCalledExactlyOnceWith(
-        assessmentDocumentElement
+        assessmentDocumentElement,
       );
     });
   });

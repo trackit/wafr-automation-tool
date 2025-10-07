@@ -20,14 +20,14 @@ export interface RescanAssessmentUseCase {
 
 export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
   private readonly assessmentsStateMachine = inject(
-    tokenAssessmentsStateMachine
+    tokenAssessmentsStateMachine,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async rescanAssessment(
-    args: RescanAssessmentUseCaseArgs
+    args: RescanAssessmentUseCaseArgs,
   ): Promise<void> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
@@ -42,7 +42,7 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
 
     if (assessment.executionArn) {
       await this.assessmentsStateMachine.cancelAssessment(
-        assessment.executionArn
+        assessment.executionArn,
       );
     }
     await this.findingsRepository.deleteAll({
@@ -68,7 +68,7 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       },
     });
     this.logger.info(
-      `Assessment#${args.assessmentId} rescan started successfully`
+      `Assessment#${args.assessmentId} rescan started successfully`,
     );
   }
 }

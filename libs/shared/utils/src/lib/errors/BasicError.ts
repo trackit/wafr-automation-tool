@@ -1,4 +1,4 @@
-export enum BasicErrorTypes {
+export enum BasicErrorType {
   NOT_FOUND = 'NOT_FOUND',
   FORBIDDEN = 'FORBIDDEN',
   CONFLICT = 'CONFLICT',
@@ -7,14 +7,14 @@ export enum BasicErrorTypes {
 
 export type BasicErrorArgs = {
   code?: string;
-  type: BasicErrorTypes;
+  type: BasicErrorType;
   message: string;
   description?: string;
 };
 
 export abstract class BasicError extends Error {
   readonly code: string;
-  readonly type: BasicErrorTypes;
+  readonly type: BasicErrorType;
   readonly description?: string;
 
   protected constructor(params: BasicErrorArgs) {

@@ -146,7 +146,7 @@ describe('AssessmentDetails', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (getAssessment as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockAssessment
+      mockAssessment,
     );
     (
       getAssessmentStep as unknown as ReturnType<typeof vi.fn>
@@ -163,7 +163,7 @@ describe('AssessmentDetails', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i }),
       ).toBeInTheDocument();
     });
 
@@ -186,7 +186,7 @@ describe('AssessmentDetails', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i }),
       ).toBeInTheDocument();
     });
 
@@ -232,7 +232,7 @@ describe('AssessmentDetails', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('An error occurred while running the assessment.')
+        screen.getByText('An error occurred while running the assessment.'),
       ).toBeInTheDocument();
     });
   });
@@ -246,7 +246,7 @@ describe('AssessmentDetails', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i }),
       ).toBeInTheDocument();
     });
 
@@ -268,7 +268,7 @@ describe('AssessmentDetails', () => {
         'pillar-1',
         'question-1',
         'practice-1',
-        true
+        true,
       );
     });
   });
@@ -318,14 +318,14 @@ describe('AssessmentDetails', () => {
     };
 
     (getAssessment as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      assessmentWithResults
+      assessmentWithResults,
     );
 
     render(<AssessmentDetails />, { wrapper });
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Assessment Test Assessment/i })
+        screen.getByRole('heading', { name: /Assessment Test Assessment/i }),
       ).toBeInTheDocument();
     });
 

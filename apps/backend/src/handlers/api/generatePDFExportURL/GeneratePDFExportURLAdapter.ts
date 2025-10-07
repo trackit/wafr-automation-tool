@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GeneratePDFExportURLPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   fileExportId: z.string().nonempty(),
 }) satisfies ZodType<operations['generatePDFExportURL']['parameters']['path']>;
 
@@ -18,7 +18,7 @@ export class GeneratePDFExportURLAdapter {
   private readonly useCase = inject(tokenGeneratePDFExportURLUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -28,7 +28,7 @@ export class GeneratePDFExportURLAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['generatePDFExportURL']['responses']['200']['content']['application/json']
   > {

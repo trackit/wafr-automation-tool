@@ -28,8 +28,8 @@ const MappingSchema = z.record(
       pillar: z.string(),
       question: z.string(),
       bestPractice: z.string(),
-    })
-  )
+    }),
+  ),
 );
 
 export class MapScanFindingsToBestPracticesUseCaseImpl
@@ -41,7 +41,7 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
 
   private async getMapping(): Promise<z.infer<typeof MappingSchema>> {
     const rawMapping = await this.objectsStorage.get(
-      MapScanFindingsToBestPracticesUseCaseImpl.mappingKey
+      MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
     );
     if (!rawMapping) {
       this.logger.info('No mapping found, continuing with an empty one');
@@ -67,13 +67,13 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
         bestPractices: eventCodeBestPractices
           .map((mappingEntry) => {
             const pillar = pillars.find(
-              (p) => p.primaryId === mappingEntry.pillar
+              (p) => p.primaryId === mappingEntry.pillar,
             );
             const question = pillar?.questions.find(
-              (q) => q.primaryId === mappingEntry.question
+              (q) => q.primaryId === mappingEntry.question,
             );
             const bestPractice = question?.bestPractices.find(
-              (bp) => bp.primaryId === mappingEntry.bestPractice
+              (bp) => bp.primaryId === mappingEntry.bestPractice,
             );
             if (!pillar || !question || !bestPractice) {
               return null;
@@ -95,5 +95,5 @@ export const tokenMapScanFindingsToBestPracticesUseCase =
     'MapScanFindingsToBestPracticesUseCase',
     {
       useClass: MapScanFindingsToBestPracticesUseCaseImpl,
-    }
+    },
   );

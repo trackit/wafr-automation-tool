@@ -32,7 +32,7 @@ describe('PrepareFindingsAssociationsAdapter', () => {
       await expect(
         adapter.handle({
           invalid: 'arg',
-        } as unknown as PrepareFindingsAssociationsInput)
+        } as unknown as PrepareFindingsAssociationsInput),
       ).rejects.toThrow();
     });
 

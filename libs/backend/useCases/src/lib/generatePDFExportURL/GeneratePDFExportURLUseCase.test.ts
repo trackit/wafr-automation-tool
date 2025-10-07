@@ -44,7 +44,7 @@ describe('generatePDFExportURL UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.generatePDFExportURL(input)).resolves.toStrictEqual(
-      'https://fake-storage.com/object-key?expiresInSeconds=3600'
+      'https://fake-storage.com/object-key?expiresInSeconds=3600',
     );
   });
 
@@ -54,7 +54,7 @@ describe('generatePDFExportURL UseCase', () => {
     const input = GeneratePDFExportURLUseCaseArgsMother.basic().build();
 
     await expect(useCase.generatePDFExportURL(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -74,7 +74,7 @@ describe('generatePDFExportURL UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.generatePDFExportURL(input)).rejects.toThrow(
-      AssessmentFileExportNotFoundError
+      AssessmentFileExportNotFoundError,
     );
   });
 
@@ -98,7 +98,7 @@ describe('generatePDFExportURL UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.generatePDFExportURL(input)).rejects.toThrow(
-      AssessmentFileExportNotFinishedError
+      AssessmentFileExportNotFinishedError,
     );
   });
 
@@ -122,7 +122,7 @@ describe('generatePDFExportURL UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.generatePDFExportURL(input)).rejects.toThrow(
-      AssessmentFileExportFieldNotFoundError
+      AssessmentFileExportFieldNotFoundError,
     );
   });
 });

@@ -26,7 +26,7 @@ export class RunDatabaseMigrationsUseCaseImpl
     this.logger.log(`Migrating ${tenants.length} tenants`);
     for (const tenant of tenants) {
       this.logger.log(
-        `\n➡️  Migrating tenant ${tenant.id} (${tenant.databaseName})`
+        `\n➡️  Migrating tenant ${tenant.id} (${tenant.databaseName})`,
       );
       const tenantDataSource = await this.clientManager.getClient(tenant.id);
       const results = await tenantDataSource.runMigrations().catch((error) => {
@@ -35,7 +35,7 @@ export class RunDatabaseMigrationsUseCaseImpl
       });
       if (results) {
         this.logger.log(
-          `✅ Tenant ${tenant.id}: applied ${results.length} migrations`
+          `✅ Tenant ${tenant.id}: applied ${results.length} migrations`,
         );
       }
     }
@@ -49,5 +49,5 @@ export const tokenRunDatabaseMigrationsUseCase =
     'RunDatabaseMigrationsUseCase',
     {
       useClass: RunDatabaseMigrationsUseCaseImpl,
-    }
+    },
   );

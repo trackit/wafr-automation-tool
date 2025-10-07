@@ -19,7 +19,7 @@ describe('getMilestones adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GetMilestonesAdapterEventMother.basic().build();
@@ -31,11 +31,11 @@ describe('getMilestones adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -44,7 +44,7 @@ describe('getMilestones adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = GetMilestonesAdapterEventMother.basic()
@@ -55,7 +55,7 @@ describe('getMilestones adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid limit', async () => {
+    it('should return a 400 status code with invalid limit', async () => {
       const { adapter } = setup();
 
       const event = GetMilestonesAdapterEventMother.basic()
@@ -66,7 +66,7 @@ describe('getMilestones adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid nextToken', async () => {
+    it('should return a 400 status code with invalid nextToken', async () => {
       const { adapter } = setup();
 
       const event = GetMilestonesAdapterEventMother.basic()
@@ -78,7 +78,7 @@ describe('getMilestones adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const user = UserMother.basic().build();
@@ -149,7 +149,7 @@ const setup = () => {
 
   const useCase = { getMilestones: vitest.fn() };
   useCase.getMilestones.mockResolvedValueOnce(
-    Promise.resolve({ milestones: [], nextToken: undefined })
+    Promise.resolve({ milestones: [], nextToken: undefined }),
   );
   register(tokenGetMilestonesUseCase, { useValue: useCase });
 

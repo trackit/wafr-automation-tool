@@ -5,5 +5,5 @@ import { GetAssessmentStepAdapter } from './GetAssessmentStepAdapter';
 const adapter = new GetAssessmentStepAdapter();
 
 export const main = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => adapter.handle(event);

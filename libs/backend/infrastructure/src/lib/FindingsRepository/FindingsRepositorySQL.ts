@@ -30,7 +30,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   private async repo<T extends ObjectLiteral>(
     entity: EntityTarget<T>,
-    organization: string
+    organization: string,
   ): Promise<Repository<T>> {
     if (!this.clientManager.isInitialized) {
       await this.clientManager.initialize();
@@ -70,7 +70,7 @@ export class FindingsRepositorySQL implements FindingRepository {
       await trxResourceRepo.save(findingResources);
 
       this.logger.info(
-        `Finding saved: ${finding.id} for assessment: ${assessmentId}`
+        `Finding saved: ${finding.id} for assessment: ${assessmentId}`,
       );
     });
   }
@@ -87,12 +87,12 @@ export class FindingsRepositorySQL implements FindingRepository {
       findings.map((finding) => ({
         ...finding,
         assessmentId,
-      }))
+      })),
     );
 
     await repo.save(entities);
     this.logger.info(
-      `${findings.length} findings saved for assessment: ${assessmentId}`
+      `${findings.length} findings saved for assessment: ${assessmentId}`,
     );
   }
 
@@ -126,7 +126,7 @@ export class FindingsRepositorySQL implements FindingRepository {
           bp_id: bestPracticeId,
           finding_assessment_id: assessmentId,
           finding_id: fid,
-        }))
+        })),
       )
       .orIgnore()
       .execute();
@@ -149,7 +149,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
     await repo.save(entity);
     this.logger.info(
-      `Comment added to finding: ${findingId} for assessment: ${assessmentId}`
+      `Comment added to finding: ${findingId} for assessment: ${assessmentId}`,
     );
   }
 
@@ -193,7 +193,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   }
 
   public async getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{ findings: Finding[]; nextToken?: string }> {
     const {
       assessmentId,
@@ -219,7 +219,7 @@ export class FindingsRepositorySQL implements FindingRepository {
       .where('f.assessmentId = :assessmentId', { assessmentId })
       .andWhere(
         'bp.assessmentId = :assessmentId AND bp.id = :bestPracticeId AND bp.questionId = :questionId AND bp.pillarId = :pillarId',
-        { assessmentId, bestPracticeId, questionId, pillarId }
+        { assessmentId, bestPracticeId, questionId, pillarId },
       );
 
     if (!showHidden) {
@@ -228,7 +228,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     if (searchTerm && searchTerm.trim()) {
       baseQb.andWhere(
         '(f.riskDetails ILIKE :term OR f.statusDetail ILIKE :term)',
-        { term: `%${searchTerm}%` }
+        { term: `%${searchTerm}%` },
       );
     }
 
@@ -269,7 +269,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   private flattenAggregationFields(
     fields: Record<string, unknown>,
-    prefix: string[] = []
+    prefix: string[] = [],
   ): string[][] {
     if (!fields) {
       return [];
@@ -291,7 +291,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   private assignAggregationResult(
     target: Record<string, unknown>,
     path: string[],
-    counts: Record<string, number>
+    counts: Record<string, number>,
   ): void {
     const [lastKey] = path.slice(-1);
     if (!lastKey) {
@@ -314,7 +314,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   private async computeAggregationForPath(
     repo: Repository<FindingEntity>,
     assessmentId: string,
-    path: string[]
+    path: string[],
   ): Promise<Record<string, number>> {
     if (path.length === 0) {
       return {};
@@ -364,7 +364,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     const repo = await this.repo(FindingEntity, organizationDomain);
 
     const fieldPaths = this.flattenAggregationFields(
-      fields as Record<string, unknown>
+      fields as Record<string, unknown>,
     );
     if (fieldPaths.length === 0) {
       return {} as FindingAggregationResult<TFields>;
@@ -376,10 +376,10 @@ export class FindingsRepositorySQL implements FindingRepository {
         const counts = await this.computeAggregationForPath(
           repo,
           assessmentId,
-          path
+          path,
         );
         this.assignAggregationResult(aggregations, path, counts);
-      })
+      }),
     );
     return aggregations as FindingAggregationResult<TFields>;
   }
@@ -449,7 +449,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
     await repo.delete({ id: commentId, findingId: findingId });
     this.logger.info(
-      `Finding comment deleted: ${findingId} for assessment: ${assessmentId}`
+      `Finding comment deleted: ${findingId} for assessment: ${assessmentId}`,
     );
   }
 
@@ -464,7 +464,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
     await repo.update({ id: findingId, assessmentId }, findingBody);
     this.logger.info(
-      `Finding successfully updated: ${findingId} for assessment: ${assessmentId}`
+      `Finding successfully updated: ${findingId} for assessment: ${assessmentId}`,
     );
   }
 
@@ -486,7 +486,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
     await repo.update({ id: commentId, findingId }, commentBody);
     this.logger.info(
-      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`
+      `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`,
     );
   }
 }

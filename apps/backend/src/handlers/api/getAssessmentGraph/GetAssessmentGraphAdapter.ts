@@ -17,7 +17,7 @@ export class GetAssessmentGraphAdapter {
   private readonly useCase = inject(tokenGetAssessmentGraphUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -27,7 +27,7 @@ export class GetAssessmentGraphAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getAssessmentGraph']['responses'][200]['content']['application/json']
   > {

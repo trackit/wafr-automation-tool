@@ -26,7 +26,7 @@ export class AWSSecretsManager implements SecretsManager {
   }
 
   public async getDatabaseCredentialsSecret(
-    secretId: string
+    secretId: string,
   ): Promise<DBCredentials> {
     const secretValue = await this.getSecretValue(secretId);
     return DBCredentialsSchema.parse(parseJsonObject(secretValue));
@@ -37,7 +37,7 @@ export const tokenSecretsManager = createInjectionToken<SecretsManager>(
   'SecretsManager',
   {
     useClass: AWSSecretsManager,
-  }
+  },
 );
 
 export const tokenSecretsManagerClient =

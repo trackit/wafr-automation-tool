@@ -44,6 +44,10 @@ import {
   tokenFakeOrganizationRepository,
   tokenOrganizationRepository,
 } from './OrganizationRepository';
+import {
+  tokenFakePartnerCentralSellingService,
+  tokenPartnerCentralSellingService,
+} from './PartnerCentralSellingService';
 import { tokenFakePDFService, tokenPDFService } from './PDFService';
 import {
   tokenFakeQuestionSetService,
@@ -108,5 +112,8 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenSecretsManager, {
     useFactory: () => inject(tokenFakeSecretsManager),
+  });
+  register(tokenPartnerCentralSellingService, {
+    useFactory: () => inject(tokenFakePartnerCentralSellingService),
   });
 };

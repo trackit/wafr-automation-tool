@@ -19,7 +19,7 @@ describe('getMilestone adapter', () => {
       expect(response.statusCode).not.toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GetMilestoneAdapterEventMother.basic().build();
@@ -31,11 +31,11 @@ describe('getMilestone adapter', () => {
         expect.objectContaining({
           pathSchema: expect.anything(),
           querySchema: expect.anything(),
-        })
+        }),
       );
     });
 
-    it('should return a 400 without parameters', async () => {
+    it('should return a 400 status code without parameters', async () => {
       const { adapter } = setup();
 
       const event = APIGatewayProxyEventMother.basic().build();
@@ -44,7 +44,7 @@ describe('getMilestone adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid assessmentId', async () => {
+    it('should return a 400 status code with invalid assessmentId', async () => {
       const { adapter } = setup();
 
       const event = GetMilestoneAdapterEventMother.basic()
@@ -55,7 +55,7 @@ describe('getMilestone adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should return a 400 with invalid milestoneId', async () => {
+    it('should return a 400 status code with invalid milestoneId', async () => {
       const { adapter } = setup();
 
       const event = GetMilestoneAdapterEventMother.basic()
@@ -82,7 +82,7 @@ describe('getMilestone adapter', () => {
     });
   });
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const user = UserMother.basic().build();
@@ -126,7 +126,7 @@ const setup = () => {
 
   const useCase = { getMilestone: vitest.fn() };
   useCase.getMilestone.mockResolvedValueOnce(
-    Promise.resolve(MilestoneMother.basic().build())
+    Promise.resolve(MilestoneMother.basic().build()),
   );
   register(tokenGetMilestoneUseCase, { useValue: useCase });
 

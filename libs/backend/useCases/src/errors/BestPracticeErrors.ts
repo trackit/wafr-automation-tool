@@ -1,4 +1,4 @@
-import { BasicErrorTypes } from '@shared/utils';
+import { BasicErrorType } from '@shared/utils';
 
 import { UseCaseError } from './UseCaseError';
 
@@ -11,7 +11,7 @@ export class BestPracticeNotFoundError extends UseCaseError {
       questionId: string;
       bestPracticeId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const {
       assessmentId,
@@ -21,7 +21,7 @@ export class BestPracticeNotFoundError extends UseCaseError {
       bestPracticeId,
     } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `Best practice with id ${bestPracticeId} not found for assessment with id ${assessmentId} for organization with domain ${organizationDomain} and pillar with id ${pillarId} and question with id ${questionId}`,
       description,
     });
@@ -37,7 +37,7 @@ export class BestPracticeEmptyUpdateBodyError extends UseCaseError {
       questionId: string;
       bestPracticeId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const {
       assessmentId,
@@ -47,7 +47,7 @@ export class BestPracticeEmptyUpdateBodyError extends UseCaseError {
       bestPracticeId,
     } = args;
     super({
-      type: BasicErrorTypes.CONFLICT,
+      type: BasicErrorType.CONFLICT,
       message: `Nothing to update for best practice with id ${bestPracticeId} in assessment with id ${assessmentId} for organization with domain ${organizationDomain} and pillar with id ${pillarId} and question with id ${questionId}`,
       description,
     });

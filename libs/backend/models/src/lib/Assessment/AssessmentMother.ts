@@ -93,9 +93,23 @@ export class AssessmentMother {
   }
 
   public withFileExports(
-    fileExports: AssessmentFileExport[]
+    fileExports: AssessmentFileExport[],
   ): AssessmentMother {
     this.data.fileExports = fileExports;
+    return this;
+  }
+
+  public withOpportunityId(
+    opportunityId: string | undefined,
+  ): AssessmentMother {
+    this.data.opportunityId = opportunityId;
+    return this;
+  }
+
+  public withWAFRWorkloadArn(
+    wafrWorkloadArn: string | undefined,
+  ): AssessmentMother {
+    this.data.wafrWorkloadArn = wafrWorkloadArn;
     return this;
   }
 

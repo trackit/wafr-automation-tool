@@ -103,7 +103,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       const result =
         findingToBestPracticesAssociationServiceGenAI.flattenBestPracticesWithPillarAndQuestionFromPillars(
-          pillars
+          pillars,
         );
 
       expect(result).toEqual([
@@ -164,7 +164,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       const result =
         findingToBestPracticesAssociationServiceGenAI.formatQuestionSet(
-          pillars
+          pillars,
         );
 
       expect(result).toEqual([
@@ -211,7 +211,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       const result =
         findingToBestPracticesAssociationServiceGenAI.formatScanningToolFindings(
-          findings
+          findings,
         );
 
       expect(result).toEqual([
@@ -236,8 +236,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
       expect(() =>
         findingToBestPracticesAssociationServiceGenAI.formatScanningToolFindings(
-          findings
-        )
+          findings,
+        ),
       ).toThrowError();
     });
   });
@@ -449,7 +449,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             findingId: 'prowler#2',
             bestPracticeId: 'pillar-1#question-1#bp2',
           },
-        ]).slice(1) // Skip first bracket because of prefill
+        ]).slice(1), // Skip first bracket because of prefill
       );
       const result =
         await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
@@ -457,7 +457,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
+          },
         );
       expect(result).toEqual([
         {
@@ -527,7 +527,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#1',
               bestPracticeId: 'pillar-1#question-1#bp1',
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         );
 
       const result =
@@ -536,7 +536,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
+          },
         );
       expect(aiService.converse).toHaveBeenCalledTimes(2);
       expect(result).toEqual([
@@ -591,7 +591,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ];
       vi.spyOn(aiService, 'converse')
         .mockResolvedValueOnce(
-          JSON.stringify([{ invalid: 0, format: 1 }]).slice(1) // Skip first bracket because of prefill
+          JSON.stringify([{ invalid: 0, format: 1 }]).slice(1), // Skip first bracket because of prefill
         )
         .mockResolvedValueOnce(
           JSON.stringify([
@@ -599,7 +599,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#1',
               bestPracticeId: 'pillar-1#question-1#bp1',
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         );
 
       const result =
@@ -608,7 +608,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
+          },
         );
       expect(aiService.converse).toHaveBeenCalledTimes(2);
       expect(result).toEqual([
@@ -637,7 +637,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings: [],
             pillars: [],
-          }
+          },
         );
       expect(result).toEqual([]);
     });
@@ -702,7 +702,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#2',
               bestPracticeId: 'pillar-1#question-1#invalid-bp', // invalid - will cause retry
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         )
         .mockResolvedValueOnce(
           JSON.stringify([
@@ -710,7 +710,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#2',
               bestPracticeId: 'pillar-1#question-1#bp2', // valid on retry
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         );
 
       const result =
@@ -719,7 +719,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
+          },
         );
 
       expect(aiService.converse).toHaveBeenCalledTimes(2);
@@ -797,7 +797,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#2',
               bestPracticeId: 'pillar-1#question-1#invalid-bp',
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         )
         .mockResolvedValue(
           JSON.stringify([
@@ -805,7 +805,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
               findingId: 'prowler#2',
               bestPracticeId: 'pillar-1#question-1#invalid-bp',
             },
-          ]).slice(1) // Skip first bracket because of prefill
+          ]).slice(1), // Skip first bracket because of prefill
         );
 
       const result =
@@ -814,7 +814,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
+          },
         );
 
       // Should return only the successful finding
@@ -870,8 +870,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
             scanningTool: ScanningTool.PROWLER,
             findings,
             pillars,
-          }
-        )
+          },
+        ),
       ).rejects.toThrowError();
       expect(aiService.converse).toHaveBeenCalledTimes(maxRetries);
     });
@@ -889,7 +889,7 @@ const setup = () => {
   return {
     aiService: inject(tokenAIService),
     maxRetries: inject(
-      tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries
+      tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
     ),
     fakeObjectsStorage: inject(tokenFakeObjectsStorage),
     findingToBestPracticesAssociationServiceGenAI,

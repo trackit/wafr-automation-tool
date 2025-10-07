@@ -30,7 +30,7 @@ describe('UpdateCommentUseCase', () => {
       .build();
 
     await expect(useCase.updateComment(input)).rejects.toThrow(
-      FindingNotFoundError
+      FindingNotFoundError,
     );
   });
 
@@ -56,7 +56,7 @@ describe('UpdateCommentUseCase', () => {
       .build();
 
     await expect(useCase.updateComment(input)).rejects.toThrow(
-      FindingCommentNotFoundError
+      FindingCommentNotFoundError,
     );
   });
 
@@ -84,7 +84,7 @@ describe('UpdateCommentUseCase', () => {
       .build();
 
     await expect(useCase.updateComment(input)).rejects.toThrow(
-      FindingCommentForbiddenError
+      FindingCommentForbiddenError,
     );
   });
 

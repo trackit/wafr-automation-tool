@@ -8,7 +8,7 @@ import {
 
 export function assertAssessmentIsReadyForExport(
   assessment: Assessment,
-  exportRegion?: string
+  exportRegion?: string,
 ): asserts assessment is Assessment & {
   pillars: Pillar;
   finished: true;
@@ -28,7 +28,7 @@ export function assertAssessmentIsReadyForExport(
 }
 
 export function assertOrganizationHasExportRole(
-  organization: Organization
+  organization: Organization,
 ): asserts organization is Organization & { assessmentExportRoleArn: string } {
   if (!organization.assessmentExportRoleArn) {
     throw new OrganizationExportRoleNotSetError({

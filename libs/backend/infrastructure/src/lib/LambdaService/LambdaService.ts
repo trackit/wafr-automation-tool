@@ -18,7 +18,7 @@ export class LambdaService implements LambdaServicePort {
         FunctionName: lambdaArn,
         Payload: payload,
         InvocationType: 'Event',
-      })
+      }),
     );
   }
 }
@@ -27,12 +27,12 @@ export const tokenLambdaClient = createInjectionToken<LambdaClient>(
   'LambdaClient',
   {
     useClass: LambdaClient,
-  }
+  },
 );
 
 export const tokenLambdaService = createInjectionToken<LambdaServicePort>(
   'LambdaService',
   {
     useClass: LambdaService,
-  }
+  },
 );

@@ -29,7 +29,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic().build();
 
     await expect(useCase.prepareFindingsAssociations(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -46,7 +46,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
 
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      []
+      [],
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
@@ -60,7 +60,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     await useCase.prepareFindingsAssociations(input);
 
     expect(
-      getScannedFindingsUseCase.getScannedFindings
+      getScannedFindingsUseCase.getScannedFindings,
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         assessmentId: assessment.id,
@@ -68,7 +68,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         scanningTool: input.scanningTool,
         regions: input.regions,
         workflows: input.workflows,
-      })
+      }),
     );
   });
 
@@ -89,10 +89,10 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       ScanFindingMother.basic().withId('prowler#2').build(),
     ];
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
+      mockedScanFindings,
     );
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      []
+      [],
     );
 
     const pillars = [
@@ -118,12 +118,12 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     await useCase.prepareFindingsAssociations(input);
 
     expect(
-      mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices
+      mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices,
     ).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         scanFindings: mockedScanFindings,
         pillars: pillars,
-      })
+      }),
     );
   });
 
@@ -161,7 +161,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       },
     ];
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      scanFindingsToBestPracticesMapping
+      scanFindingsToBestPracticesMapping,
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
@@ -185,7 +185,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         bestPractices: [bestPractice],
         isAIAssociated: false,
         hidden: false,
-      })
+      }),
     );
   });
 
@@ -212,7 +212,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       },
     ];
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      scanFindingsToBestPracticesMapping
+      scanFindingsToBestPracticesMapping,
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
@@ -254,7 +254,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       ScanFindingMother.basic().withId('prowler#2').build(),
     ];
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings
+      mockedScanFindings,
     );
     const scanFindingsToBestPracticesMapping = [
       {
@@ -273,7 +273,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       },
     ];
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      scanFindingsToBestPracticesMapping
+      scanFindingsToBestPracticesMapping,
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
@@ -287,7 +287,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     await useCase.prepareFindingsAssociations(input);
 
     expect(
-      storeFindingsToAssociateUseCase.storeFindingsToAssociate
+      storeFindingsToAssociateUseCase.storeFindingsToAssociate,
     ).toHaveBeenCalledExactlyOnceWith({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
@@ -310,11 +310,11 @@ describe('PrepareFindingsAssociationsUseCase', () => {
 
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
     mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      []
+      [],
     );
     const URIs = ['URI-1', 'URI-2'];
     storeFindingsToAssociateUseCase.storeFindingsToAssociate.mockResolvedValue(
-      URIs
+      URIs,
     );
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()

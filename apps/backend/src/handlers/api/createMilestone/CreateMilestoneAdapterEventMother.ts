@@ -20,7 +20,7 @@ export class CreateMilestoneAdapterEventMother {
 
   private constructor(
     params: CreateMilestoneParameters,
-    body: CreateMilestoneBody
+    body: CreateMilestoneBody,
   ) {
     this.pathParameters = params;
     this.body = body;
@@ -34,19 +34,19 @@ export class CreateMilestoneAdapterEventMother {
       {
         region: 'us-west-2',
         name: 'Milestone Name',
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): CreateMilestoneAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): CreateMilestoneAdapterEventMother {
     this.user = user;
     return this;

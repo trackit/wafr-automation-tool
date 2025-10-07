@@ -8,7 +8,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public response?: unknown
+    public response?: unknown,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -40,9 +40,9 @@ export class ApiClient {
         throw new ApiError(
           error.message,
           error.response?.status,
-          error.response?.data
+          error.response?.data,
         );
-      }
+      },
     );
   }
 
@@ -50,7 +50,7 @@ export class ApiClient {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     url: string,
-    data?: unknown
+    data?: unknown,
   ) {
     try {
       const response = await this.axiosInstance({
@@ -65,7 +65,7 @@ export class ApiClient {
       });
       if (error instanceof ApiError) throw error;
       throw new ApiError(
-        error instanceof Error ? error.message : 'An unknown error occurred'
+        error instanceof Error ? error.message : 'An unknown error occurred',
       );
     }
   }

@@ -11,25 +11,25 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const ListPDFExportsPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['listPDFExports']['parameters']['path']>;
 
 export class ListPDFExportsAdapter {
   private readonly useCase = inject(tokenListPDFExportsUseCase);
 
   private toAPIResponse(
-    assessmentFileExports: AssessmentFileExport[]
+    assessmentFileExports: AssessmentFileExport[],
   ): operations['listPDFExports']['responses'][200]['content']['application/json'] {
     return assessmentFileExports.map(
       ({ objectKey: _, ...assessmentFileExport }) => ({
         ...assessmentFileExport,
         createdAt: assessmentFileExport.createdAt.toISOString(),
-      })
+      }),
     );
   }
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -39,7 +39,7 @@ export class ListPDFExportsAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['listPDFExports']['responses'][200]['content']['application/json']
   > {

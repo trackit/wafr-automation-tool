@@ -31,7 +31,7 @@ export class GetMilestoneUseCaseArgsMother {
   }
 
   public withOrganizationDomain(
-    organizationDomain: string
+    organizationDomain: string,
   ): GetMilestoneUseCaseArgsMother {
     this.data.organizationDomain = organizationDomain;
     return this;

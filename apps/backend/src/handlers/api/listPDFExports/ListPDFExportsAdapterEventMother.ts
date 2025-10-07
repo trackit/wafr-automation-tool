@@ -23,14 +23,14 @@ export class ListPDFExportsAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ListPDFExportsAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): ListPDFExportsAdapterEventMother {
     this.user = user;
     return this;

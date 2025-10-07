@@ -16,7 +16,7 @@ describe('UpdateAssessmentUseCase', () => {
     const input = UpdateAssessmentUseCaseArgsMother.basic().build();
 
     await expect(useCase.updateAssessment(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -42,7 +42,7 @@ describe('UpdateAssessmentUseCase', () => {
       expect.objectContaining({
         id: assessment.id,
         name: input.assessmentBody.name,
-      })
+      }),
     );
   });
 });

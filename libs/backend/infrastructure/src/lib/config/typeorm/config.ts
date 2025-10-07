@@ -44,7 +44,7 @@ export const tokenTypeORMConfigCreator = createInjectionToken<
     const secretsManager = inject(tokenSecretsManager);
     const credentialsSecretValue =
       await secretsManager.getDatabaseCredentialsSecret(
-        inject(tokenDBCredentialsSecretArn)
+        inject(tokenDBCredentialsSecretArn),
       );
     return {
       ...defaultTypeORMConfig,
@@ -61,5 +61,5 @@ export const tokenDBCredentialsSecretArn = createInjectionToken<string>(
       assertIsDefined(arn, 'DB_CREDENTIALS_SECRET_ARN is not defined');
       return arn;
     },
-  }
+  },
 );

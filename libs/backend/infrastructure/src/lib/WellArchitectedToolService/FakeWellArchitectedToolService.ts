@@ -8,9 +8,9 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
     assessment: Assessment;
     region: string;
     user: User;
-  }): Promise<string> {
+  }): Promise<{ workloadId: string; workloadArn: string }> {
     // No-op for fake implementation
-    return '';
+    return { workloadId: '', workloadArn: '' };
   }
 
   public async createMilestone(_args: {
@@ -50,5 +50,5 @@ export class FakeWellArchitectedToolService implements WellArchitectedToolPort {
 export const tokenFakeWellArchitectedToolService =
   createInjectionToken<FakeWellArchitectedToolService>(
     'FakeWellArchitectedToolService',
-    { useClass: FakeWellArchitectedToolService }
+    { useClass: FakeWellArchitectedToolService },
   );

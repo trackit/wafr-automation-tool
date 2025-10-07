@@ -44,7 +44,7 @@ import {
 } from './MigrateDynamoAdapter';
 
 function toDynamoDBFindingComment(
-  comment: FindingComment
+  comment: FindingComment,
 ): DynamoDBFindingComment {
   return {
     id: comment.id,
@@ -59,7 +59,7 @@ function toDynamoDBFindingItem(
   args: {
     assessmentId: string;
     organizationDomain: string;
-  }
+  },
 ): DynamoDBFinding {
   const { assessmentId, organizationDomain } = args;
   return {
@@ -81,14 +81,14 @@ function toDynamoDBFindingItem(
         finding.comments.map((comment) => [
           comment.id,
           toDynamoDBFindingComment(comment),
-        ])
+        ]),
       ),
     }),
   };
 }
 
 export function toDynamoDBBestPracticeItem(
-  bestPractice: BestPractice
+  bestPractice: BestPractice,
 ): DynamoDBBestPractice {
   return {
     description: bestPractice.description,
@@ -108,7 +108,7 @@ export function toDynamoDBQuestionItem(question: Question): DynamoDBQuestion {
         ...bestPractices,
         [bestPractice.id]: toDynamoDBBestPracticeItem(bestPractice),
       }),
-      {}
+      {},
     ),
     disabled: question.disabled,
     id: question.id,
@@ -129,26 +129,26 @@ export function toDynamoDBPillarItem(pillar: Pillar): DynamoDBPillar {
         ...questions,
         [question.id]: toDynamoDBQuestionItem(question),
       }),
-      {}
+      {},
     ),
   };
 }
 
 export function toDynamoDBAssessmentItem(
-  assessment: Assessment
+  assessment: Assessment,
 ): DynamoDBAssessment {
   return {
     PK: assessment.organization,
     SK: `ASSESSMENT#${assessment.id}`,
     createdAt: assessment.createdAt.toISOString(),
     createdBy: assessment.createdBy,
-    executionArn: assessment.executionArn,
+    executionArn: assessment.executionArn || '',
     pillars: assessment.pillars?.reduce(
       (pillars, pillar) => ({
         ...pillars,
         [pillar.id]: toDynamoDBPillarItem(pillar),
       }),
-      {}
+      {},
     ),
     graphData: AssessmentGraphDataMother.basic().build(),
     id: assessment.id,
@@ -169,14 +169,14 @@ export function toDynamoDBAssessmentItem(
             toDynamoDBFileExportItem(fileExport);
           return fileExports;
         },
-        { [AssessmentFileExportType.PDF]: {} }
+        { [AssessmentFileExportType.PDF]: {} },
       ),
     }),
   };
 }
 
 export function toDynamoDBFileExportItem(
-  assessmentFileExport: AssessmentFileExport
+  assessmentFileExport: AssessmentFileExport,
 ): DynamoDBAssessmentFileExport {
   return {
     ...assessmentFileExport,
@@ -202,6 +202,7 @@ beforeAll(async () => {
       .withAssessmentExportRoleArn('test-arn')
       .withFreeAssessmentsLeft(2)
       .withUnitBasedAgreementId('test-agreement-id')
+      .withName('Organization 1')
       .build(),
     OrganizationMother.basic()
       .withAccountId('222222222222')
@@ -209,6 +210,7 @@ beforeAll(async () => {
       .withAssessmentExportRoleArn('test-arn-2')
       .withFreeAssessmentsLeft(3)
       .withUnitBasedAgreementId('test-agreement-id-2')
+      .withName('Organization 2')
       .build(),
   ];
 
@@ -448,7 +450,7 @@ afterAll(async () => {
             ...(hasSK ? { SK: item.SK } : {}),
           },
         });
-      })
+      }),
     );
   };
 
@@ -481,6 +483,7 @@ describe('migrateDynamo adapter', () => {
         assessmentExportRoleArn: 'test-arn',
         freeAssessmentsLeft: 2,
         unitBasedAgreementId: 'test-agreement-id',
+        name: 'Organization 1',
       });
 
       // Validate Org 2 Data
@@ -491,6 +494,7 @@ describe('migrateDynamo adapter', () => {
         assessmentExportRoleArn: 'test-arn-2',
         freeAssessmentsLeft: 3,
         unitBasedAgreementId: 'test-agreement-id-2',
+        name: 'Organization 2',
       });
     });
 
@@ -504,7 +508,9 @@ describe('migrateDynamo adapter', () => {
         organizationDomain: 'organization1',
       });
       expect(
-        org1Assessment1.assessments.sort((a, b) => a.name.localeCompare(b.name))
+        org1Assessment1.assessments.sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
       ).toEqual([
         expect.objectContaining({
           id: 'cd2b1fb1-2b04-4408-8754-5ec3f25e963c',
@@ -687,8 +693,8 @@ describe('migrateDynamo adapter', () => {
       });
       expect(
         org1Assessment1Finding1?.comments?.sort((a, b) =>
-          a.id.localeCompare(b.id)
-        )
+          a.id.localeCompare(b.id),
+        ),
       ).toEqual([
         expect.objectContaining({
           id: '9dac753b-7587-45d7-ba28-66645d7569e3',

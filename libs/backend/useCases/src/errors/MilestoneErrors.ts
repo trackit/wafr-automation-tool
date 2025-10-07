@@ -1,4 +1,4 @@
-import { BasicErrorTypes } from '@shared/utils';
+import { BasicErrorType } from '@shared/utils';
 
 import { UseCaseError } from './UseCaseError';
 
@@ -8,11 +8,11 @@ export class MilestoneNotFoundError extends UseCaseError {
       assessmentId: string;
       milestoneId: number;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, milestoneId } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `Milestone with id ${milestoneId} not found for assessment with id ${assessmentId}`,
       description,
     });

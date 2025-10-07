@@ -13,7 +13,7 @@ export class FakeSecretsManager implements SecretsManager {
   }
 
   public async getDatabaseCredentialsSecret(
-    _secretId: string
+    _secretId: string,
   ): Promise<DBCredentials> {
     return {
       username: 'fake',
@@ -26,5 +26,5 @@ export const tokenFakeSecretsManager = createInjectionToken<SecretsManager>(
   'FakeSecretsManager',
   {
     useClass: FakeSecretsManager,
-  }
+  },
 );

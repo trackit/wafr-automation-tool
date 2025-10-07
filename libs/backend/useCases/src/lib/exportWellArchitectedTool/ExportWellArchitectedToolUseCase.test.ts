@@ -55,7 +55,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
     await useCase.exportAssessment(input);
 
     expect(
-      fakeWellArchitectedToolService.exportAssessment
+      fakeWellArchitectedToolService.exportAssessment,
     ).toHaveBeenCalledExactlyOnceWith({
       roleArn: organization.assessmentExportRoleArn,
       assessment,
@@ -70,7 +70,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic().build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -98,7 +98,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
       .build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -120,7 +120,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
       .build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -141,7 +141,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
       .build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -164,7 +164,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
       .build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      AssessmentExportRegionNotSetError
+      AssessmentExportRegionNotSetError,
     );
   });
 
@@ -249,7 +249,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
       .build();
 
     await expect(useCase.exportAssessment(input)).rejects.toThrow(
-      OrganizationNotFoundError
+      OrganizationNotFoundError,
     );
   });
 });
@@ -259,7 +259,7 @@ const setup = () => {
   registerTestInfrastructure();
 
   const fakeWellArchitectedToolService = inject(
-    tokenFakeWellArchitectedToolService
+    tokenFakeWellArchitectedToolService,
   );
   vitest.spyOn(fakeWellArchitectedToolService, 'exportAssessment');
 

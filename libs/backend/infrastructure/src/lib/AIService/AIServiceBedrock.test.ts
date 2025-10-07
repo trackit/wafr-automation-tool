@@ -44,11 +44,11 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] }),
       ).resolves.toEqual(promptText);
 
       const converseStreamCalls = bedrockRuntimeClientMock.commandCalls(
-        ConverseStreamCommand
+        ConverseStreamCommand,
       );
       expect(converseStreamCalls).toHaveLength(1);
       const converseExecutionCall = converseStreamCalls[0];
@@ -64,7 +64,7 @@ describe('AIService Infrastructure', () => {
               ],
             },
           ],
-        })
+        }),
       );
     });
 
@@ -83,7 +83,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] }),
       ).rejects.toThrow(Error);
     });
 
@@ -98,7 +98,7 @@ describe('AIService Infrastructure', () => {
       });
 
       await expect(
-        aiServiceBedrock.converse({ prompt: [{ text: promptText }] })
+        aiServiceBedrock.converse({ prompt: [{ text: promptText }] }),
       ).rejects.toThrow(Error);
     });
   });
@@ -109,7 +109,7 @@ const setup = () => {
   registerTestInfrastructure();
 
   const bedrockRuntimeClientMock = mockClient(
-    inject(tokenClientBedrockRuntime)
+    inject(tokenClientBedrockRuntime),
   );
 
   return {

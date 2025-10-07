@@ -41,8 +41,8 @@ export class FakeFindingsRepository implements FindingRepository {
     const { assessmentId, organizationDomain, findings } = args;
     await Promise.all(
       findings.map((finding) =>
-        this.save({ assessmentId, organizationDomain, finding })
-      )
+        this.save({ assessmentId, organizationDomain, finding }),
+      ),
     );
   }
 
@@ -67,13 +67,13 @@ export class FakeFindingsRepository implements FindingRepository {
       organizationDomain,
     });
     const pillar = assessment?.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString()
+      (pillar) => pillar.id === pillarId.toString(),
     );
     const question = pillar?.questions.find(
-      (question) => question.id === questionId.toString()
+      (question) => question.id === questionId.toString(),
     );
     const bestPractice = question?.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString()
+      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
     );
     if (!bestPractice) {
       throw new Error();
@@ -103,7 +103,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const { assessmentId, findingId, organizationDomain, comment } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     if (finding) {
       if (!finding.comments) {
@@ -130,20 +130,20 @@ export class FakeFindingsRepository implements FindingRepository {
     const { assessmentId, organizationDomain, findingId, commentId } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     if (!finding) {
       throw new Error();
     }
     finding.comments = finding.comments?.filter(
-      (comment) => comment.id !== commentId
+      (comment) => comment.id !== commentId,
     );
   }
 
   private updateBody<T extends keyof Finding>(
     finding: Finding,
     field: T,
-    value: Finding[T]
+    value: Finding[T],
   ): void {
     finding[field] = value;
   }
@@ -162,7 +162,7 @@ export class FakeFindingsRepository implements FindingRepository {
       this.updateBody(
         finding as Finding,
         field as keyof Finding,
-        value as Finding[keyof Finding]
+        value as Finding[keyof Finding],
       );
     }
   }
@@ -187,7 +187,7 @@ export class FakeFindingsRepository implements FindingRepository {
   }
 
   public async getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{
     findings: Finding[];
     nextToken?: string;
@@ -219,7 +219,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const findings =
       this.findings[key]
         ?.filter((finding) =>
-          finding.bestPractices?.find((bp) => bp.id === bestPractice.id)
+          finding.bestPractices?.find((bp) => bp.id === bestPractice.id),
         )
         .filter((finding) => {
           if (!searchTerm) return true;
@@ -238,7 +238,7 @@ export class FakeFindingsRepository implements FindingRepository {
 
   private flattenAggregationFields(
     fields: Record<string, unknown>,
-    prefix: string[] = []
+    prefix: string[] = [],
   ): string[][] {
     if (!fields) {
       return [];
@@ -264,7 +264,7 @@ export class FakeFindingsRepository implements FindingRepository {
   private assignAggregationResult(
     target: Record<string, unknown>,
     path: string[],
-    counts: Record<string, number>
+    counts: Record<string, number>,
   ): void {
     const [lastKey] = path.slice(-1);
     if (!lastKey) {
@@ -288,7 +288,7 @@ export class FakeFindingsRepository implements FindingRepository {
 
   private countByPath(
     findings: Finding[],
-    path: string[]
+    path: string[],
   ): Record<string, number> {
     if (path.length === 0) {
       return {};
@@ -307,7 +307,7 @@ export class FakeFindingsRepository implements FindingRepository {
   private extractValuesForPath(
     source: unknown,
     path: string[],
-    depth: number
+    depth: number,
   ): unknown[] {
     if (depth >= path.length) {
       return [source];
@@ -319,7 +319,7 @@ export class FakeFindingsRepository implements FindingRepository {
 
     if (Array.isArray(source)) {
       return source.flatMap((item) =>
-        this.extractValuesForPath(item, path, depth)
+        this.extractValuesForPath(item, path, depth),
       );
     }
 
@@ -350,7 +350,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const findings = this.findings[key] ?? [];
 
     const fieldPaths = this.flattenAggregationFields(
-      fields as Record<string, unknown>
+      fields as Record<string, unknown>,
     );
     if (fieldPaths.length === 0) {
       return {} as FindingAggregationResult<TFields>;
@@ -405,7 +405,7 @@ export class FakeFindingsRepository implements FindingRepository {
     }
 
     const findings = this.findings[key]?.filter((finding) =>
-      finding.bestPractices?.find((bp) => bp.id === bestPractice.id)
+      finding.bestPractices?.find((bp) => bp.id === bestPractice.id),
     );
     return findings.length;
   }
@@ -426,10 +426,10 @@ export class FakeFindingsRepository implements FindingRepository {
     } = args;
     const key = `${assessmentId}#${organizationDomain}`;
     const finding = this.findings[key]?.find(
-      (finding) => finding.id === findingId
+      (finding) => finding.id === findingId,
     );
     const comment = finding?.comments?.find(
-      (comment) => comment.id === commentId
+      (comment) => comment.id === commentId,
     );
     if (!comment) {
       throw new Error('Comment not found');

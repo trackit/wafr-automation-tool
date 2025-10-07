@@ -27,11 +27,11 @@ describe('exportPDF adapter', () => {
   });
 
   describe('useCase and return value', () => {
-    it('should call useCase with correct parameters', async () => {
+    it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
 
       const event = ExportPDFAdapterEventMother.basic()
-        .withAssessmentId('assessment-id')
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganizationDomain('test.io')
         .withFileExportId('file-export-id')
         .build();
@@ -39,7 +39,7 @@ describe('exportPDF adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.exportPDF).toHaveBeenCalledWith({
-        assessmentId: 'assessment-id',
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'test.io',
         fileExportId: 'file-export-id',
       });

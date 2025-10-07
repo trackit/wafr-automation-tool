@@ -12,7 +12,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetBestPracticeFindingsPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
   bestPracticeId: z.string().nonempty(),
@@ -24,7 +24,7 @@ const GetBestPracticeFindingsQueryArgsSchema = z.object({
   limit: z.coerce.number().int().min(1).optional(),
   search: z.string().nonempty().optional(),
   showHidden: z.coerce.boolean().optional(),
-  nextToken: z.string().nonempty().trim().base64().optional(),
+  nextToken: z.base64().nonempty().trim().optional(),
 }) satisfies ZodType<
   operations['getBestPracticeFindings']['parameters']['query']
 >;
@@ -34,7 +34,7 @@ export class GetBestPracticeFindingsAdapter {
   private readonly cognitoService = inject(tokenCognitoService);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -44,17 +44,17 @@ export class GetBestPracticeFindingsAdapter {
   }
 
   private async toGetBestPracticeFindingsItemsResponse(
-    findings: Finding[]
+    findings: Finding[],
   ): Promise<
     operations['getBestPracticeFindings']['responses']['200']['content']['application/json']['items']
   > {
     const usersId = Array.from(
       new Set(
-        findings.flatMap((f) => (f.comments ?? []).map((c) => c.authorId))
-      )
+        findings.flatMap((f) => (f.comments ?? []).map((c) => c.authorId)),
+      ),
     );
     const users = await Promise.all(
-      usersId.map((userId) => this.cognitoService.getUserById({ userId }))
+      usersId.map((userId) => this.cognitoService.getUserById({ userId })),
     );
 
     return findings.map((finding) => ({
@@ -91,7 +91,7 @@ export class GetBestPracticeFindingsAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<
     operations['getBestPracticeFindings']['responses']['200']['content']['application/json']
   > {

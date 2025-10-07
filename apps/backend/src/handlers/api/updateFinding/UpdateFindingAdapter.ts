@@ -10,13 +10,18 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateFindingPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
-const UpdateFindingBodySchema = z.object({
-  hidden: z.boolean().optional(),
-}) satisfies ZodType<
+const UpdateFindingBodySchema = z
+  .object({
+    hidden: z.boolean(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateFinding']['requestBody']['content']['application/json']
 >;
 
@@ -24,7 +29,7 @@ export class UpdateFindingAdapter {
   private readonly useCase = inject(tokenUpdateFindingUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -34,7 +39,7 @@ export class UpdateFindingAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['updateFinding']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateFindingPathSchema,

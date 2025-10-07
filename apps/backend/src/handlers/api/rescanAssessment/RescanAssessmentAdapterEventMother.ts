@@ -23,14 +23,14 @@ export class RescanAssessmentAdapterEventMother {
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): RescanAssessmentAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): RescanAssessmentAdapterEventMother {
     this.user = user;
     return this;

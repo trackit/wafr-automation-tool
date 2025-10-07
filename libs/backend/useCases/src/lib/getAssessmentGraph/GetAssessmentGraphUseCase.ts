@@ -27,7 +27,7 @@ type AssessmentGraph = FindingAggregationResult<typeof GRAPH_FIELDS> & {
 
 export interface GetAssessmentGraphUseCase {
   getAssessmentGraph(
-    args: GetAssessmentGraphUseCaseArgs
+    args: GetAssessmentGraphUseCaseArgs,
   ): Promise<AssessmentGraph>;
 }
 
@@ -38,7 +38,7 @@ export class GetAssessmentGraphUseCaseImpl
   private readonly findingsRepository = inject(tokenFindingsRepository);
 
   public async getAssessmentGraph(
-    args: GetAssessmentGraphUseCaseArgs
+    args: GetAssessmentGraphUseCaseArgs,
   ): Promise<AssessmentGraph> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,

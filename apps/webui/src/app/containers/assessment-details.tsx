@@ -40,6 +40,7 @@ import {
 } from '../../lib/assessment-utils';
 import AssessmentOverview from './assessment-overview';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
+import CreateOpportunityDialog from './create-opportunity-dialog';
 import ErrorPage from './error-page';
 import ExportToAWSDialog from './export-to-aws-dialog';
 import FindingsDetails from './findings-details';
@@ -75,7 +76,7 @@ export function AssessmentDetails() {
     {
       id: 'overview',
       type: 'overview',
-    }
+    },
   );
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
@@ -147,7 +148,7 @@ export function AssessmentDetails() {
 
       // Create a deep copy of the data
       const newData = JSON.parse(
-        JSON.stringify(previousData)
+        JSON.stringify(previousData),
       ) as components['schemas']['AssessmentContent'];
 
       // Find and update the specific best practice using all IDs
@@ -182,7 +183,7 @@ export function AssessmentDetails() {
           (practice) =>
             practice.id === bestPracticeId
               ? { ...practice, status: checked }
-              : practice
+              : practice,
         );
         setActiveQuestion({
           ...activeQuestion,
@@ -202,11 +203,11 @@ export function AssessmentDetails() {
         // Find the current pillar and question in the previous data
         if (context.previousData.pillars) {
           const pillar = context.previousData.pillars.find(
-            (p) => p.id === selectedPillar?.id
+            (p) => p.id === selectedPillar?.id,
           );
           if (pillar) {
             const question = pillar.questions?.find(
-              (q) => q.id === activeQuestion?.id
+              (q) => q.id === activeQuestion?.id,
             );
             if (question) {
               setActiveQuestion(question);
@@ -252,7 +253,7 @@ export function AssessmentDetails() {
 
       // Create a deep copy of the data
       const newData = JSON.parse(
-        JSON.stringify(previousData)
+        JSON.stringify(previousData),
       ) as components['schemas']['AssessmentContent'];
 
       // Find and update the specific pillar
@@ -286,7 +287,7 @@ export function AssessmentDetails() {
         // Find the current pillar in the previous data
         if (context.previousData.pillars) {
           const pillar = context.previousData.pillars.find(
-            (p) => p.id === selectedPillar?.id
+            (p) => p.id === selectedPillar?.id,
           );
           if (pillar) {
             setSelectedPillar(pillar);
@@ -334,7 +335,7 @@ export function AssessmentDetails() {
 
       // Create a deep copy of the data
       const newData = JSON.parse(
-        JSON.stringify(previousData)
+        JSON.stringify(previousData),
       ) as components['schemas']['AssessmentContent'];
 
       // Find and update the specific question
@@ -381,11 +382,11 @@ export function AssessmentDetails() {
         // Find the current question in the previous data
         if (context.previousData.pillars) {
           const pillar = context.previousData.pillars.find(
-            (p) => p.id === selectedPillar?.id
+            (p) => p.id === selectedPillar?.id,
           );
           if (pillar) {
             const question = pillar.questions?.find(
-              (q) => q.id === activeQuestion?.id
+              (q) => q.id === activeQuestion?.id,
             );
             if (question) {
               setActiveQuestion(question);
@@ -435,7 +436,7 @@ export function AssessmentDetails() {
         none,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation, isMilestone]
+    [id, selectedPillar?.id, updateQuestionMutation, isMilestone],
   );
 
   const handleDisabledQuestion = useCallback(
@@ -448,7 +449,7 @@ export function AssessmentDetails() {
         disabled,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation, isMilestone]
+    [id, selectedPillar?.id, updateQuestionMutation, isMilestone],
   );
 
   const handleDisabledPillar = useCallback(
@@ -460,7 +461,7 @@ export function AssessmentDetails() {
         disabled,
       });
     },
-    [id, updatePillarMutation, isMilestone]
+    [id, updatePillarMutation, isMilestone],
   );
 
   // Add effect to update active question when pillar changes
@@ -489,7 +490,7 @@ export function AssessmentDetails() {
       const pillar = pillars.find((p) => p.id === selectedPillar.id);
       if (pillar) {
         const question = pillar.questions?.find(
-          (q) => q.id === activeQuestion.id
+          (q) => q.id === activeQuestion.id,
         );
         if (question) {
           setActiveQuestion(question);
@@ -551,7 +552,7 @@ export function AssessmentDetails() {
       activeQuestion?.id,
       updateStatusMutation,
       isMilestone,
-    ]
+    ],
   );
 
   const columnHelper = createColumnHelper<TableRow>();
@@ -580,12 +581,12 @@ export function AssessmentDetails() {
                 if (info.row.original.id === 'resolve') {
                   handleNoneQuestion(
                     activeQuestion?.id || '',
-                    e.target.checked
+                    e.target.checked,
                   );
                 } else {
                   handleUpdateStatus(
                     info.row.original.id || '',
-                    e.target.checked
+                    e.target.checked,
                   );
                 }
               }}
@@ -645,8 +646,8 @@ export function AssessmentDetails() {
                   info.row.original.risk === 'High'
                     ? 'badge-error'
                     : info.row.original.risk === 'Medium'
-                    ? 'badge-warning'
-                    : 'badge-success'
+                      ? 'badge-warning'
+                      : 'badge-success'
                 }`}
               >
                 {info.row.original.risk}
@@ -695,7 +696,7 @@ export function AssessmentDetails() {
       handleNoneQuestion,
       activeQuestion?.id,
       isMilestone,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -925,6 +926,13 @@ export function AssessmentDetails() {
                       disabled={!assessmentData?.exportRegion}
                     />
                   </li>
+                  <li>
+                    <CreateOpportunityDialog
+                      assessmentId={id ?? ''}
+                      hasOpportunityId={!!assessmentData?.opportunityId}
+                      hasWafrWorkloadArn={!!assessmentData?.wafrWorkloadArn}
+                    />
+                  </li>
                 </>
               )}
             </ul>
@@ -984,11 +992,11 @@ export function AssessmentDetails() {
                           latestQuestion.bestPractices?.every(
                             (bestPractice) =>
                               bestPractice.risk !== 'High' ||
-                              bestPractice.checked === true
+                              bestPractice.checked === true,
                           ) ?? false,
                         started:
                           latestQuestion.bestPractices?.some(
-                            (bestPractice) => bestPractice.checked
+                            (bestPractice) => bestPractice.checked,
                           ) ?? false,
                         error: latestQuestion.none,
                         disabled: latestQuestion.disabled,
@@ -1056,7 +1064,7 @@ export function AssessmentDetails() {
                                 onClick={() => {
                                   handleDisabledQuestion(
                                     activeQuestion?.id || '',
-                                    !activeQuestion?.disabled
+                                    !activeQuestion?.disabled,
                                   );
                                 }}
                               >

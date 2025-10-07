@@ -17,7 +17,7 @@ describe('GetAssessmentGraphUseCase', () => {
     const input = GetAssessmentGraphUseCaseArgsMother.basic().build();
 
     await expect(useCase.getAssessmentGraph(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -73,7 +73,7 @@ describe('GetAssessmentGraphUseCase', () => {
       GetAssessmentGraphUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
         .withOrganization(assessment.organization)
-        .build()
+        .build(),
     );
 
     expect(result).toEqual({
@@ -104,7 +104,7 @@ describe('GetAssessmentGraphUseCase', () => {
       GetAssessmentGraphUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
         .withOrganization(assessment.organization)
-        .build()
+        .build(),
     );
 
     expect(result).toEqual({

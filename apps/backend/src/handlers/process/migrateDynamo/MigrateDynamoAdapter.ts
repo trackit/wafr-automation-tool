@@ -139,7 +139,7 @@ export interface DynamoDBAssessmentFileExport {
 }
 
 export function fromDynamoDBBestPracticeItem(
-  item: DynamoDBBestPractice
+  item: DynamoDBBestPractice,
 ): BestPractice {
   return {
     description: item.description,
@@ -154,7 +154,7 @@ export function fromDynamoDBBestPracticeItem(
 export function fromDynamoDBQuestionItem(item: DynamoDBQuestion): Question {
   return {
     bestPractices: Object.values(item.bestPractices).map((bestPractice) =>
-      fromDynamoDBBestPracticeItem(bestPractice)
+      fromDynamoDBBestPracticeItem(bestPractice),
     ),
     disabled: item.disabled,
     id: item.id,
@@ -171,14 +171,14 @@ export function fromDynamoDBPillarItem(item: DynamoDBPillar): Pillar {
     label: item.label,
     primaryId: item.primaryId,
     questions: Object.values(item.questions).map((question) =>
-      fromDynamoDBQuestionItem(question)
+      fromDynamoDBQuestionItem(question),
     ),
   };
 }
 
 export function fromDynamoDBFileExportItem(
   item: DynamoDBAssessmentFileExport,
-  type: AssessmentFileExportType
+  type: AssessmentFileExportType,
 ): AssessmentFileExport {
   return {
     ...item,
@@ -188,19 +188,20 @@ export function fromDynamoDBFileExportItem(
 }
 
 export function fromDynamoDBAssessmentItem(
-  item: DynamoDBAssessment | undefined
+  item: DynamoDBAssessment | undefined,
 ): Assessment | undefined {
   if (!item) return undefined;
   const assessment = item;
+  if (!assessment.pillars) {
+    throw new Error('Assessment pillars are required');
+  }
   return {
     createdAt: new Date(assessment.createdAt),
     createdBy: assessment.createdBy,
     executionArn: assessment.executionArn,
-    ...(assessment.pillars && {
-      pillars: Object.values(assessment.pillars).map((pillar) =>
-        fromDynamoDBPillarItem(pillar)
-      ),
-    }),
+    pillars: Object.values(assessment.pillars).map((pillar) =>
+      fromDynamoDBPillarItem(pillar),
+    ),
     id: assessment.id,
     name: assessment.name,
     organization: assessment.organization,
@@ -216,17 +217,19 @@ export function fromDynamoDBAssessmentItem(
             Object.values(fileExportsByType).map((fileExport) =>
               fromDynamoDBFileExportItem(
                 fileExport,
-                type as AssessmentFileExportType
-              )
-            )
+                type as AssessmentFileExportType,
+              ),
+            ),
         )
       : [],
     finished: assessment.step === AssessmentStep.FINISHED,
+    opportunityId: assessment.opportunityId,
+    wafrWorkloadArn: assessment.wafrWorkloadArn,
   };
 }
 
 export function fromDynamoDBFindingComment(
-  comment: DynamoDBFindingComment
+  comment: DynamoDBFindingComment,
 ): FindingComment {
   return {
     id: comment.id,
@@ -251,7 +254,7 @@ export function fromDynamoDBFindingItem(item: DynamoDBFinding): Finding {
     statusDetail: finding.statusDetail,
     comments: finding.comments
       ? Object.values(finding.comments).map((comment) =>
-          fromDynamoDBFindingComment(comment)
+          fromDynamoDBFindingComment(comment),
         )
       : undefined,
   };
@@ -262,25 +265,27 @@ export class MigrateDynamoAdapter {
   private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly ddbClient = inject(tokenDynamoDBDocument);
   private readonly organizationsTableName = inject(
-    tokenDynamoDBOrganizationTableName
+    tokenDynamoDBOrganizationTableName,
   );
   private readonly assessmentsTableName = inject(
-    tokenDynamoDBAssessmentTableName
+    tokenDynamoDBAssessmentTableName,
   );
   private readonly runDatabaseMigrationsUseCase = inject(
-    tokenRunDatabaseMigrationsUseCase
+    tokenRunDatabaseMigrationsUseCase,
   );
   private readonly createOrganizationUseCase = inject(
-    tokenCreateOrganizationUseCase
+    tokenCreateOrganizationUseCase,
   );
   private readonly logger = inject(tokenLogger);
 
-  private async getOrganizations(): Promise<(Organization & { PK: string })[]> {
+  private async getOrganizations(): Promise<
+    (Organization & { PK: string; name?: string })[]
+  > {
     const result = await this.ddbClient.scan({
       TableName: this.organizationsTableName,
       Limit: 1000,
     });
-    return result.Items as (Organization & { PK: string })[];
+    return result.Items as (Organization & { PK: string; name?: string })[];
   }
 
   private async getAssessments(organization: string): Promise<Assessment[]> {
@@ -299,7 +304,7 @@ export class MigrateDynamoAdapter {
       assessments.push(
         ...((result.Items || []) as DynamoDBAssessment[])
           .map(fromDynamoDBAssessmentItem)
-          .filter((a): a is Assessment => !!a)
+          .filter((a): a is Assessment => !!a),
       );
       lastEvaluatedKey = result.LastEvaluatedKey;
     } while (lastEvaluatedKey);
@@ -352,7 +357,7 @@ export class MigrateDynamoAdapter {
                   return { pillarId, questionId, bestPracticeId };
                 })
             : [],
-        }))
+        })),
       );
       lastEvaluatedKey = result.LastEvaluatedKey;
     } while (lastEvaluatedKey);
@@ -377,7 +382,7 @@ export class MigrateDynamoAdapter {
       findings,
     });
     this.logger.info(
-      `Findings for assessment ${assessment.id} migrated successfully`
+      `Findings for assessment ${assessment.id} migrated successfully`,
     );
     const findingsByBestPractice = new Map<string, Set<string>>();
     for (const finding of findings) {
@@ -390,7 +395,7 @@ export class MigrateDynamoAdapter {
       }
     }
     this.logger.info(
-      `Linking findings for ${findingsByBestPractice.size} best practices`
+      `Linking findings for ${findingsByBestPractice.size} best practices`,
     );
     for (const [key, findingIds] of findingsByBestPractice) {
       this.logger.info(`Linking findings for best practice ${key}`);
@@ -406,7 +411,7 @@ export class MigrateDynamoAdapter {
       this.logger.info(`Findings for best practice ${key} linked successfully`);
     }
     this.logger.info(
-      `Best practices for assessment ${assessment.id} linked successfully`
+      `Best practices for assessment ${assessment.id} linked successfully`,
     );
   }
 
@@ -422,8 +427,11 @@ export class MigrateDynamoAdapter {
     this.logger.info(`Found ${organizations.length} organizations to migrate`);
     await Promise.all(
       organizations.map(({ PK: _PK, ...org }) =>
-        this.createOrganizationUseCase.createOrganization(org)
-      )
+        this.createOrganizationUseCase.createOrganization({
+          ...org,
+          name: org.name || org.domain,
+        }),
+      ),
     );
     this.logger.info('Organizations recreated successfully');
 

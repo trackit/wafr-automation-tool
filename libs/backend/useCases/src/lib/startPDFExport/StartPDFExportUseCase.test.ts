@@ -75,7 +75,7 @@ describe('startPDFExport UseCase', () => {
           organizationDomain: assessment.organization,
           fileExportId: fileExportId,
         }),
-      }
+      },
     );
   });
 
@@ -84,7 +84,7 @@ describe('startPDFExport UseCase', () => {
 
     const input = StartPDFExportUseCaseArgsMother.basic().build();
     await expect(useCase.startPDFExport(input)).rejects.toThrow(
-      AssessmentNotFoundError
+      AssessmentNotFoundError,
     );
   });
 
@@ -106,7 +106,7 @@ describe('startPDFExport UseCase', () => {
       .build();
 
     await expect(useCase.startPDFExport(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -127,7 +127,7 @@ describe('startPDFExport UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.startPDFExport(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 
@@ -148,7 +148,7 @@ describe('startPDFExport UseCase', () => {
       .withUser(user)
       .build();
     await expect(useCase.startPDFExport(input)).rejects.toThrow(
-      AssessmentNotFinishedError
+      AssessmentNotFinishedError,
     );
   });
 });

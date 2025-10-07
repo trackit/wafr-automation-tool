@@ -10,12 +10,17 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateAssessmentPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
 }) satisfies ZodType<operations['updateAssessment']['parameters']['path']>;
 
-const UpdateAssessmentBodySchema = z.object({
-  name: z.string().nonempty().optional(),
-}) satisfies ZodType<
+const UpdateAssessmentBodySchema = z
+  .object({
+    name: z.string().nonempty(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
   operations['updateAssessment']['requestBody']['content']['application/json']
 >;
 
@@ -23,7 +28,7 @@ export class UpdateAssessmentAdapter {
   private readonly useCase = inject(tokenUpdateAssessmentUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,
@@ -33,7 +38,7 @@ export class UpdateAssessmentAdapter {
   }
 
   private async processRequest(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<operations['updateAssessment']['responses']['200']['content']> {
     const { pathParameters, body } = parseApiEvent(event, {
       pathSchema: UpdateAssessmentPathSchema,

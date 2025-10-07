@@ -21,7 +21,7 @@ export type AssociateFindingsToBestPracticesUseCaseArgs = {
 
 export interface AssociateFindingsToBestPracticesUseCase {
   associateFindingsToBestPractices(
-    args: AssociateFindingsToBestPracticesUseCaseArgs
+    args: AssociateFindingsToBestPracticesUseCaseArgs,
   ): Promise<void>;
 }
 
@@ -30,7 +30,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
 {
   private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly findingToBestPracticesAssociationService = inject(
-    tokenFindingToBestPracticesAssociationService
+    tokenFindingToBestPracticesAssociationService,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
@@ -53,8 +53,8 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
               ...association.finding,
               isAIAssociated: true,
             },
-          })
-        )
+          }),
+        ),
     );
   }
 
@@ -75,7 +75,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
         }
         return acc;
       },
-      new Map<string, Set<string>>()
+      new Map<string, Set<string>>(),
     );
 
     await Promise.all(
@@ -95,7 +95,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
           bestPracticeId,
           bestPracticeFindingIds: findingIds,
         });
-      })
+      }),
     );
   }
 
@@ -107,7 +107,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   }): Promise<void> {
     const { assessment, organizationDomain, findingsAssociations } = args;
     this.logger.info(
-      `Storing findings associations for assessment ${assessment.id} and organization ${organizationDomain}`
+      `Storing findings associations for assessment ${assessment.id} and organization ${organizationDomain}`,
     );
     await this.storeFindings({
       assessmentId: assessment.id,
@@ -122,7 +122,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   }
 
   public async associateFindingsToBestPractices(
-    args: AssociateFindingsToBestPracticesUseCaseArgs
+    args: AssociateFindingsToBestPracticesUseCaseArgs,
   ): Promise<void> {
     const { assessmentId, organizationDomain, scanningTool, findings } = args;
     const assessment = await this.assessmentsRepository.get({
@@ -137,7 +137,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
     }
     const { pillars } = this.questionSetService.get();
     this.logger.info(
-      `Associating findings to best practices for assessment ${assessmentId} and organization ${organizationDomain}`
+      `Associating findings to best practices for assessment ${assessmentId} and organization ${organizationDomain}`,
     );
     const findingsAssociations =
       await this.findingToBestPracticesAssociationService.associateFindingsToBestPractices(
@@ -145,7 +145,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
           scanningTool,
           findings,
           pillars,
-        }
+        },
       );
     await this.storeFindingsAssociations({
       assessment,
@@ -161,5 +161,5 @@ export const tokenAssociateFindingsToBestPracticesUseCase =
     'AssociateFindingsToBestPracticesUseCase',
     {
       useClass: AssociateFindingsToBestPracticesUseCaseImpl,
-    }
+    },
   );

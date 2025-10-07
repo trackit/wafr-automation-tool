@@ -14,7 +14,7 @@ export type AssessmentsStateMachineStartAssessmentArgs = {
 export interface AssessmentsStateMachine {
   getAssessmentStep(executionId: string): Promise<AssessmentStep>;
   startAssessment(
-    args: AssessmentsStateMachineStartAssessmentArgs
+    args: AssessmentsStateMachineStartAssessmentArgs,
   ): Promise<string>;
   cancelAssessment(executionId: string): Promise<void>;
 }

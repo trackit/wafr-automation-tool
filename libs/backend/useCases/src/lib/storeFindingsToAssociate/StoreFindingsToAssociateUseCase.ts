@@ -19,7 +19,7 @@ export interface StoreFindingsToAssociateUseCaseArgs {
 
 export interface StoreFindingsToAssociateUseCase {
   storeFindingsToAssociate(
-    args: StoreFindingsToAssociateUseCaseArgs
+    args: StoreFindingsToAssociateUseCaseArgs,
   ): Promise<string[]>;
 }
 
@@ -29,7 +29,7 @@ export class StoreFindingsToAssociateUseCaseImpl
   private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly chunkSize = inject(
-    tokenStoreFindingsToAssociateUseCaseChunkSize
+    tokenStoreFindingsToAssociateUseCaseChunkSize,
   );
 
   static getFindingsChunkPath(args: {
@@ -56,13 +56,13 @@ export class StoreFindingsToAssociateUseCaseImpl
             chunkIndex: index,
           }),
           body: JSON.stringify(findings),
-        })
-      )
+        }),
+      ),
     );
   }
 
   public async storeFindingsToAssociate(
-    args: StoreFindingsToAssociateUseCaseArgs
+    args: StoreFindingsToAssociateUseCaseArgs,
   ): Promise<string[]> {
     const { assessmentId, organizationDomain, scanningTool, scanFindings } =
       args;
@@ -98,7 +98,7 @@ export const tokenStoreFindingsToAssociateUseCase =
     'StoreFindingsToAssociateUseCase',
     {
       useClass: StoreFindingsToAssociateUseCaseImpl,
-    }
+    },
   );
 
 export const tokenStoreFindingsToAssociateUseCaseChunkSize =
@@ -107,7 +107,7 @@ export const tokenStoreFindingsToAssociateUseCaseChunkSize =
       const chunkSize = process.env.AI_FINDINGS_ASSOCIATION_CHUNK_SIZE;
       assertIsDefined(
         chunkSize,
-        'AI_FINDINGS_ASSOCIATION_CHUNK_SIZE is not defined'
+        'AI_FINDINGS_ASSOCIATION_CHUNK_SIZE is not defined',
       );
       return z.coerce
         .number()

@@ -1,4 +1,4 @@
-import { BasicErrorTypes } from '@shared/utils';
+import { BasicErrorType } from '@shared/utils';
 
 import { UseCaseError } from './UseCaseError';
 
@@ -9,11 +9,11 @@ export class PillarNotFoundError extends UseCaseError {
       organizationDomain: string;
       pillarId: string;
     },
-    description?: string
+    description?: string,
   ) {
     const { assessmentId, organizationDomain, pillarId } = args;
     super({
-      type: BasicErrorTypes.NOT_FOUND,
+      type: BasicErrorType.NOT_FOUND,
       message: `Pillar with id ${pillarId} not found for assessment with id ${assessmentId} for organization with domain ${organizationDomain}`,
       description,
     });

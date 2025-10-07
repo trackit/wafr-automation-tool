@@ -23,14 +23,14 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly logger = inject(tokenLogger);
 
   public async getAssessmentStep(
-    executionArn: string
+    executionArn: string,
   ): Promise<AssessmentStep> {
     const historyResponse = await this.client.send(
       new GetExecutionHistoryCommand({
         executionArn,
         maxResults: 100,
         reverseOrder: true,
-      })
+      }),
     );
     const events = historyResponse.events || [];
 
@@ -59,7 +59,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     }
 
     const describeResponse = await this.client.send(
-      new DescribeExecutionCommand({ executionArn })
+      new DescribeExecutionCommand({ executionArn }),
     );
     if (describeResponse.status === ExecutionStatus.RUNNING) {
       return AssessmentStep.SCANNING_STARTED;
@@ -68,30 +68,21 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   }
 
   public async startAssessment(
-    assessment: AssessmentsStateMachineStartAssessmentArgs
+    startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs,
   ): Promise<string> {
-    const input = {
-      assessmentId: assessment.assessmentId,
-      name: assessment.name,
-      regions: assessment.regions,
-      roleArn: assessment.roleArn,
-      workflows: assessment.workflows,
-      createdAt: assessment.createdAt,
-      createdBy: assessment.createdBy,
-      organizationDomain: assessment.organizationDomain,
-    };
     const command = new StartExecutionCommand({
-      input: JSON.stringify(input),
+      input: JSON.stringify(startAssessmentInput),
       stateMachineArn: this.stateMachineArn,
     });
 
     const response = await this.client.send(command);
     if (response.$metadata.httpStatusCode !== 200 || !response.executionArn) {
-      throw new Error(
-        `Failed to start assessment: ${response.$metadata.httpStatusCode}`
-      );
+      throw new Error(JSON.stringify(response));
     }
-    this.logger.info(`Started Assessment#${assessment.assessmentId}`, input);
+    this.logger.info(
+      `Started Assessment#${startAssessmentInput.assessmentId}`,
+      startAssessmentInput,
+    );
     return response.executionArn;
   }
 
@@ -123,5 +114,5 @@ export const tokenStateMachineArn = createInjectionToken<string>(
       assertIsDefined(stateMachineArn, 'STATE_MACHINE_ARN is not defined');
       return stateMachineArn;
     },
-  }
+  },
 );

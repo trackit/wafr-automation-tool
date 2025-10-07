@@ -28,7 +28,7 @@ describe('generatePDFExportURL adapter', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it('should call parseApiEvent with correct parameters', async () => {
+    it('should call parseApiEvent with the correct parameters', async () => {
       const { adapter, parseSpy } = setup();
 
       const event = GeneratePDFExportURLAdapterEventMother.basic().build();
@@ -39,7 +39,7 @@ describe('generatePDFExportURL adapter', () => {
         event,
         expect.objectContaining({
           pathSchema: expect.anything(),
-        })
+        }),
       );
     });
   });

@@ -22,7 +22,7 @@ export class ExportWellArchitectedToolAdapterEventMother {
 
   private constructor(
     params: ExportWellArchitectedToolParameters,
-    body: ExportWellArchitectedToolBody
+    body: ExportWellArchitectedToolBody,
   ) {
     this.pathParameters = params;
     this.body = body;
@@ -35,26 +35,26 @@ export class ExportWellArchitectedToolAdapterEventMother {
       },
       {
         region: 'us-west-2',
-      }
+      },
     );
   }
 
   public withAssessmentId(
-    assessmentId: string
+    assessmentId: string,
   ): ExportWellArchitectedToolAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
     return this;
   }
 
   public withUser(
-    user: Pick<User, 'id' | 'email'>
+    user: Pick<User, 'id' | 'email'>,
   ): ExportWellArchitectedToolAdapterEventMother {
     this.user = user;
     return this;
   }
 
   public withRegion(
-    region?: string
+    region?: string,
   ): ExportWellArchitectedToolAdapterEventMother {
     this.body.region = region;
     return this;

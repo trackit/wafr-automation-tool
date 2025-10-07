@@ -10,7 +10,7 @@ import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
 import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const DeletePDFExportPathSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   fileExportId: z.string().nonempty(),
 }) satisfies ZodType<operations['listPDFExports']['parameters']['path']>;
 
@@ -18,7 +18,7 @@ export class DeletePDFExportAdapter {
   private readonly useCase = inject(tokenDeletePDFExportUseCase);
 
   public async handle(
-    event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent,
   ): Promise<APIGatewayProxyResult> {
     return handleHttpRequest({
       event,

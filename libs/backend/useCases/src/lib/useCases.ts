@@ -2,6 +2,7 @@ export * from './addComment';
 export * from './associateFindingsToBestPractices';
 export * from './cleanup';
 export * from './createMilestone';
+export * from './createOpportunity';
 export * from './createOrganization';
 export * from './deleteAssessment';
 export * from './deleteComment';

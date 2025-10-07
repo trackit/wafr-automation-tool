@@ -55,7 +55,7 @@ export interface FindingRepository {
     organizationDomain: string;
   }): Promise<Finding[]>;
   getBestPracticeFindings(
-    args: AssessmentsRepositoryGetBestPracticeFindingsArgs
+    args: AssessmentsRepositoryGetBestPracticeFindingsArgs,
   ): Promise<{
     findings: Finding[];
     nextToken?: string;

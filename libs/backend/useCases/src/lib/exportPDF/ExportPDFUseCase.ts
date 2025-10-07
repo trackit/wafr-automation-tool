@@ -57,7 +57,7 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     }
 
     const assessmentExport = assessment.fileExports?.find(
-      (assessmentExport) => assessmentExport.id === fileExportId
+      (assessmentExport) => assessmentExport.id === fileExportId,
     );
     if (!assessmentExport) {
       throw new AssessmentFileExportNotFoundError({
@@ -80,7 +80,7 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
         versionName: assessmentExport.versionName,
       });
       const filename = normalizeFilename(
-        `${assessment.name}_${assessmentExport.versionName}.pdf`
+        `${assessment.name}_${assessmentExport.versionName}.pdf`,
       );
       const objectKey = `assessments/${assessment.id}/exports/${filename}`;
       await this.objectsStorage.put({
@@ -91,12 +91,12 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
       assessmentExport.status = AssessmentFileExportStatus.COMPLETED;
       assessmentExport.objectKey = objectKey;
       this.logger.info(
-        `Export for assessment ${assessment.id} to PDF finished`
+        `Export for assessment ${assessment.id} to PDF finished`,
       );
     } catch (e) {
       this.logger.error(
         `Failed to export PDF for assessment ${assessment.id}`,
-        e
+        e,
       );
       assessmentExport.status = AssessmentFileExportStatus.ERRORED;
       assessmentExport.error =
@@ -115,5 +115,5 @@ export const tokenExportPDFUseCase = createInjectionToken<ExportPDFUseCase>(
   'ExportWellArchitectedToolUseCase',
   {
     useClass: ExportPDFUseCaseImpl,
-  }
+  },
 );

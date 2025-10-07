@@ -17,5 +17,5 @@ export class FakeOrganizationRepository implements OrganizationRepository {
 export const tokenFakeOrganizationRepository =
   createInjectionToken<FakeOrganizationRepository>(
     'FakeOrganizationRepository',
-    { useClass: FakeOrganizationRepository }
+    { useClass: FakeOrganizationRepository },
   );

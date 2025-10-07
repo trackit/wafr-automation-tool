@@ -29,7 +29,7 @@ export function NewAssessment({
       .string()
       .regex(
         /^arn:aws:iam::\d{12}:role\/[a-zA-Z0-9_+=,.@-]+$/,
-        'Invalid AWS role ARN format'
+        'Invalid AWS role ARN format',
       ),
     regions: z.array(z.enum(awsRegions)).optional(),
     workflows: z.array(z.string()).optional(),
@@ -52,7 +52,7 @@ export function NewAssessment({
 
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
   const [selectedWorkflows, setSelectedWorkflows] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function NewAssessment({
     setSelectedRegions((prev) =>
       prev.includes(region)
         ? prev.filter((r) => r !== region)
-        : [...prev, region]
+        : [...prev, region],
     );
   };
 
