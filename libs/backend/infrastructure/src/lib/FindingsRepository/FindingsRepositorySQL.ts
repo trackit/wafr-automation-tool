@@ -81,19 +81,37 @@ export class FindingsRepositorySQL implements FindingRepository {
     findings: Finding[];
   }): Promise<void> {
     const { assessmentId, organizationDomain, findings } = args;
-    const repo = await this.repo(FindingEntity, organizationDomain);
 
-    const entities = repo.create(
-      findings.map((finding) => ({
-        ...finding,
-        assessmentId,
-      })),
-    );
+    const findingRepo = await this.repo(FindingEntity, organizationDomain);
 
-    await repo.save(entities);
-    this.logger.info(
-      `${findings.length} findings saved for assessment: ${assessmentId}`,
-    );
+    await findingRepo.manager.transaction(async (trx) => {
+      const trxFindingRepo = trx.getRepository(FindingEntity);
+      const trxResourceRepo = trx.getRepository(FindingResourceEntity);
+
+      const findingEntities = findings.map((f) => {
+        const { resources: _resources, ...findingData } = f;
+        return trxFindingRepo.create({
+          ...findingData,
+          assessmentId,
+        });
+      });
+      await trxFindingRepo.save(findingEntities);
+
+      const allResourceEntities = findings.flatMap((f) => {
+        return f.resources.map((r) =>
+          trxResourceRepo.create({
+            ...r,
+            assessmentId,
+            findingId: f.id,
+          }),
+        );
+      });
+      await trxResourceRepo.save(allResourceEntities);
+
+      this.logger.info(
+        `${findingEntities.length} findings saved for assessment: ${assessmentId}`,
+      );
+    });
   }
 
   public async saveBestPracticeFindings(args: {
