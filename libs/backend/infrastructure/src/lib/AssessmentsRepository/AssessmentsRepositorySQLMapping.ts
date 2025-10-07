@@ -42,7 +42,7 @@ export function toDomainPillar(e: PillarEntity): Pillar {
     disabled: e.disabled,
     label: e.label,
     primaryId: e.primaryId,
-    questions: (e.questions ?? []).map((q) => toDomainQuestion(q)),
+    questions: e.questions.map((q) => toDomainQuestion(q)),
   };
 }
 
@@ -70,11 +70,11 @@ export function toDomainAssessment(
     createdAt: e.createdAt,
     name: e.name,
     questionVersion: e.questionVersion,
-    regions: e.regions ?? [],
+    regions: e.regions,
     ...(e.exportRegion && { exportRegion: e.exportRegion }),
     roleArn: e.roleArn,
     finished: e.finished,
-    workflows: e.workflows ?? [],
+    workflows: e.workflows,
     ...(e.error && { error: e.error }),
     pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
     fileExports: (e.fileExports ?? []).map((fileExport) =>

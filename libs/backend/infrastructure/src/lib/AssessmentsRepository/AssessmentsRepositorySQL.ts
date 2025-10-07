@@ -99,9 +99,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
         fileExports: true,
       },
     });
-    if (!entity) {
-      return undefined;
-    }
     return entity ? toDomainAssessment(entity, organizationDomain) : undefined;
   }
 
