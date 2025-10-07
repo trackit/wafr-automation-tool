@@ -51,7 +51,7 @@ describe('RescanAssessmentUseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    expect(findings).toBeUndefined();
+    expect(findings).toEqual([]);
   });
 
   it('should update executionArn to new value', async () => {
