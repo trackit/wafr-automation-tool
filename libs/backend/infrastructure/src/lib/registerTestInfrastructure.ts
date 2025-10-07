@@ -60,7 +60,7 @@ export const registerTestInfrastructure = () => {
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenTypeORMConfigCreator, {
-    useFactory: async () => Promise.resolve(testTypeORMConfig),
+    useFactory: async () => testTypeORMConfig,
   });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });

@@ -1524,11 +1524,7 @@ describe('FindingsRepositoryDynamoDB', () => {
 
 const setup = () => {
   reset();
-
-  register(tokenTypeORMConfigCreator, {
-    useFactory: async () => Promise.resolve(testTypeORMConfig),
-  });
-
+  registerTestInfrastructure();
   return {
     repository: new FindingsRepositorySQL(),
     assessmentsRepository: inject(tokenAssessmentsRepository),
