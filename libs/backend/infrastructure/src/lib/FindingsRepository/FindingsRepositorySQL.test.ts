@@ -7,14 +7,10 @@ import {
   QuestionMother,
   SeverityType,
 } from '@backend/models';
-import { inject, register, reset } from '@shared/di-container';
+import { inject, reset } from '@shared/di-container';
 
-import {
-  testTypeORMConfig,
-  tokenAssessmentsRepository,
-  tokenTypeORMClientManager,
-  tokenTypeORMConfigCreator,
-} from '../infrastructure';
+import { AssessmentsRepositorySQL } from '../AssessmentsRepository/AssessmentsRepositorySQL';
+import { tokenTypeORMClientManager } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './FindingsRepositoryGetBestPracticeFindingsArgsMother';
 import { FindingsRepositorySQL } from './FindingsRepositorySQL';
@@ -1527,6 +1523,6 @@ const setup = () => {
   registerTestInfrastructure();
   return {
     repository: new FindingsRepositorySQL(),
-    assessmentsRepository: inject(tokenAssessmentsRepository),
+    assessmentsRepository: new AssessmentsRepositorySQL(),
   };
 };
