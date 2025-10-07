@@ -88,7 +88,7 @@ const AIBadge = ({ className }: { className?: string }) => {
 
 const highlightText = (
   text: string | null | undefined,
-  searchQuery: string,
+  searchQuery: string
 ) => {
   if (!text || !searchQuery) return text || undefined;
   const regex = new RegExp(`(${searchQuery})`, 'gi');
@@ -119,7 +119,7 @@ function FindingItem({
   showCommentsFor: components['schemas']['Finding'] | null;
   onComment: (
     finding: components['schemas']['Finding'] | null,
-    e: React.MouseEvent<HTMLButtonElement>,
+    e: React.MouseEvent<HTMLButtonElement>
   ) => void;
   commentBtnRefs: RefObject<{ [id: string]: HTMLButtonElement | null }>;
 }) {
@@ -212,7 +212,7 @@ function FindingItem({
             <div className="break-all">
               {highlightText(
                 resource.name || resource.uid || 'N/A',
-                searchQuery,
+                searchQuery
               )}
             </div>
           </div>
@@ -275,7 +275,7 @@ function FindingsDetails({
   setBestPractice,
 }: FindingsDetailsProps & {
   setBestPractice: (
-    bestPractice: components['schemas']['BestPractice'] | null,
+    bestPractice: components['schemas']['BestPractice'] | null
   ) => void;
 }) {
   const queryClient = useQueryClient();
@@ -293,7 +293,7 @@ function FindingsDetails({
   const containerRef = useRef<HTMLDivElement>(null);
   const commentBtnRefs = useRef<{ [id: string]: HTMLButtonElement | null }>({});
   const [deletingCommentIds, setDeletingCommentIds] = useState<Set<string>>(
-    () => new Set(),
+    () => new Set()
   );
   const [username, setUsername] = useState('');
 
@@ -312,32 +312,28 @@ function FindingsDetails({
 
   function handleCommentClick(
     e: React.MouseEvent<HTMLButtonElement>,
-    finding: components['schemas']['Finding'] | null,
+    finding: components['schemas']['Finding'] | null
   ) {
     if (!containerRef.current) return;
     if (!finding) {
       setShowCommentsFor(null);
       setCommentPos(null);
     } else {
-      const findingClone: components['schemas']['Finding'] = {
-        ...finding,
-        comments: finding.comments ? [...finding.comments] : [],
-      };
-      setShowCommentsFor(findingClone);
+      setShowCommentsFor(finding);
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const btnRect = e.currentTarget.getBoundingClientRect();
+
+      const y = btnRect.top - containerRect.top + btnRect.height / 2;
+
+      const maxHeight = window.innerHeight - btnRect.bottom;
+
+      const cardEl = e.currentTarget.closest('.w-full');
+      const cardHeight = cardEl
+        ? (cardEl as HTMLElement).getBoundingClientRect().height
+        : 150;
+
+      setCommentPos({ y, maxHeight, minHeight: cardHeight });
     }
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const btnRect = e.currentTarget.getBoundingClientRect();
-
-    const y = btnRect.top - containerRect.top + btnRect.height / 2;
-
-    const maxHeight = window.innerHeight - btnRect.bottom;
-
-    const cardEl = e.currentTarget.closest('.w-full');
-    const cardHeight = cardEl
-      ? (cardEl as HTMLElement).getBoundingClientRect().height
-      : 150;
-
-    setCommentPos({ y, maxHeight, minHeight: cardHeight });
   }
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -360,7 +356,7 @@ function FindingsDetails({
           100,
           debouncedSearchQuery,
           showHidden,
-          pageParam,
+          pageParam
         ),
       getNextPageParam: (lastPage) => lastPage.nextToken,
       initialPageParam: '',
@@ -421,7 +417,7 @@ function FindingsDetails({
 
       // Create a deep copy of the data
       const newData = JSON.parse(
-        JSON.stringify(previousData),
+        JSON.stringify(previousData)
       ) as components['schemas']['BestPracticeExtra'];
 
       // Update the finding's hidden status
@@ -434,7 +430,7 @@ function FindingsDetails({
                 ...finding,
                 hidden: hidden ?? finding.hidden,
               }
-            : finding,
+            : finding
         );
 
         // Create a new object that explicitly matches BestPracticeExtra type
@@ -446,7 +442,7 @@ function FindingsDetails({
         // Update the cache with our optimistic value
         queryClient.setQueryData(
           ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          updatedData,
+          updatedData
         );
       }
 
@@ -458,7 +454,7 @@ function FindingsDetails({
       if (context?.previousData) {
         queryClient.setQueryData(
           ['findings', assessmentId, pillarId, questionId, bestPractice.id],
-          context.previousData,
+          context.previousData
         );
       }
     },
@@ -492,20 +488,16 @@ function FindingsDetails({
       return response;
     },
     onMutate: ({ findingId, text, tempId }) => {
-      setShowCommentsFor((current) => {
-        if (!current || current.id !== findingId) return current;
-        const optimisticComment = {
-          id: tempId,
-          text,
-          authorEmail: username,
-          createdAt: new Date().toISOString(),
-        } as components['schemas']['Comment'];
-        const comments = [...(current.comments ?? []), optimisticComment];
-        return {
-          ...current,
-          comments,
-        } as components['schemas']['Finding'];
-      });
+      const finding = findings.find((f) => f.id === findingId);
+
+      const optimisticComment = {
+        id: tempId,
+        text,
+        authorEmail: username,
+        createdAt: new Date().toISOString(),
+      } as components['schemas']['Comment'];
+      finding?.comments?.push(optimisticComment);
+
       return { tempId, findingId };
     },
     onError: (err, _variables, context) => {
@@ -514,32 +506,33 @@ function FindingsDetails({
         message: 'Failed to add comment. Please try again later',
         variant: 'error',
       });
-      if (!context) return;
-      setShowCommentsFor((current) => {
-        if (!current || current.id !== context.findingId || !current.comments)
-          return current;
-        const comments = current.comments.filter(
-          (comment) => comment.id !== context.tempId,
-        );
-        return {
-          ...current,
-          comments,
-        } as components['schemas']['Finding'];
-      });
+      if (!context) {
+        throw new Error('Context not found');
+      }
+
+      const finding = findings.find((f) => f.id === context.findingId);
+      if (!finding) {
+        throw new Error('Finding not found');
+      }
+
+      finding.comments = finding.comments?.filter(
+        (comment) => comment.id !== context.tempId
+      );
     },
     onSuccess: (comment, _variables, context) => {
-      if (!context) return;
-      setShowCommentsFor((current) => {
-        if (!current || current.id !== context.findingId || !current.comments)
-          return current;
-        const comments = current.comments.map((existing) =>
-          existing.id === context.tempId ? comment : existing,
-        );
-        return {
-          ...current,
-          comments,
-        } as components['schemas']['Finding'];
-      });
+      if (!context) {
+        throw new Error('Context not found');
+      }
+
+      const finding = findings.find((f) => f.id === context.findingId);
+
+      const tempComment = finding?.comments?.find(
+        (c) => c.id === context.tempId
+      );
+      if (!tempComment) {
+        throw new Error('Temp comment not found');
+      }
+      Object.assign(tempComment, comment);
     },
   });
 
@@ -561,23 +554,17 @@ function FindingsDetails({
         });
       },
       onMutate: ({ findingId, commentId, text }) => {
-        let previousText: string | undefined;
-        setShowCommentsFor((current) => {
-          if (!current || current.id !== findingId || !current.comments)
-            return current;
-          const comments = current.comments.map((existing) => {
-            if (existing.id !== commentId) return existing;
-            previousText = existing.text;
-            return {
-              ...existing,
-              text,
-            } as components['schemas']['Comment'];
-          });
-          return {
-            ...current,
-            comments,
-          } as components['schemas']['Finding'];
-        });
+        const finding = findings.find((f) => f.id === findingId);
+
+        const updatedComment = finding?.comments?.find(
+          (c) => c.id === commentId
+        );
+        if (!updatedComment) {
+          throw new Error('Comment not found');
+        }
+        const previousText = updatedComment.text;
+        updatedComment.text = text;
+
         return { previousText, findingId, commentId };
       },
       onError: (err, _variables, context) => {
@@ -586,23 +573,20 @@ function FindingsDetails({
           message: 'Failed to update comment. Please try again later',
           variant: 'error',
         });
-        if (!context || context.previousText === undefined) return;
-        setShowCommentsFor((current) => {
-          if (!current || current.id !== context.findingId || !current.comments)
-            return current;
-          const comments = current.comments.map((existing) =>
-            existing.id === context.commentId
-              ? {
-                  ...existing,
-                  text: context.previousText,
-                }
-              : existing,
-          );
-          return {
-            ...current,
-            comments,
-          } as components['schemas']['Finding'];
-        });
+
+        if (!context || context.previousText === undefined) {
+          throw new Error('Context not found');
+        }
+
+        const finding = findings.find((f) => f.id === context.findingId);
+
+        const updatedComment = finding?.comments?.find(
+          (c) => c.id === context.commentId
+        );
+        if (!updatedComment) {
+          throw new Error('Comment not found');
+        }
+        updatedComment.text = context.previousText;
       },
     });
 
@@ -643,16 +627,15 @@ function FindingsDetails({
       }
     },
     onSuccess: (_commentId, variables) => {
-      const { findingId, commentId } = variables;
-      setShowCommentsFor((current) => {
-        if (!current || current.id !== findingId || !current.comments)
-          return current;
-        const comments = current.comments.filter((c) => c.id !== commentId);
-        return {
-          ...current,
-          comments,
-        } as components['schemas']['Finding'];
-      });
+      const { commentId, findingId } = variables;
+
+      const finding = findings.find((f) => f.id === findingId);
+
+      if (!finding) {
+        throw new Error('Finding not found');
+      }
+      finding.comments = finding.comments?.filter((c) => c.id !== commentId);
+
       setDeletingCommentIds((prev) => {
         const next = new Set(prev);
         next.delete(commentId);
@@ -720,7 +703,7 @@ function FindingsDetails({
       setCommentPos((prev) =>
         prev
           ? { y, maxHeight: availableBelow, minHeight: prev.minHeight }
-          : prev,
+          : prev
       );
     };
 
