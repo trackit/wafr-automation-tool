@@ -5,7 +5,7 @@ export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn?: string;
-  pillars?: Pillar[];
+  pillars: Pillar[];
   id: string;
   name: string;
   organization: string;
