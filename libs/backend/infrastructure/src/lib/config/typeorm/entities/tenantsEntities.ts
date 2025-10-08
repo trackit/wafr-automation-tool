@@ -21,6 +21,8 @@ export class OrganizationEntity implements Organization {
 
   @Column('int', { nullable: true })
   freeAssessmentsLeft?: number;
+
+  // TODO: ACE integration
 }
 
 @Entity('tenants')
