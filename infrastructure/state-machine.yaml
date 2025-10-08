@@ -471,30 +471,7 @@ Resources:
                               - Name: ROLE_ARN
                                 Value: '{% $roleArn %}'
                     End: true
-            Next: PrepareFindingsAssociationsUpdateStep
-            Catch:
-              - ErrorEquals:
-                  - States.ALL
-                Next: CleanupOnError
-                Output:
-                  assessmentId: '{% $assessmentId %}'
-                  organizationDomain: '{% $organizationDomain %}'
-                  error: '{% $states.errorOutput %}'
-          PrepareFindingsAssociationsUpdateStep:
-            Type: Task
-            Resource: arn:aws:states:::dynamodb:updateItem
-            Arguments:
-              TableName: !Ref DynamoDBArn
-              Key:
-                PK:
-                  S: '{% $organizationDomain %}'
-                SK:
-                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
-              UpdateExpression: SET step = :newStep
-              ExpressionAttributeValues:
-                ':newStep':
-                  S: 'PREPARING_ASSOCIATIONS'
-            Next: Prepare Findings Associations
+            Next: 'Prepare Findings Associations'
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -542,32 +519,8 @@ Resources:
                       regions: '{% $regions %}'
                       workflows: '{% $workflows %}'
                     End: true
-            Next: AssociateFindingsChunkToBestPracticesUpdateStep
-            Output: '{% [$spread($states.result)] %}'
-            Catch:
-              - ErrorEquals:
-                  - States.ALL
-                Next: CleanupOnError
-                Output:
-                  assessmentId: '{% $assessmentId %}'
-                  organizationDomain: '{% $organizationDomain %}'
-                  error: '{% $states.errorOutput %}'
-          AssociateFindingsChunkToBestPracticesUpdateStep:
-            Type: Task
-            Resource: arn:aws:states:::dynamodb:updateItem
-            Arguments:
-              TableName: !Ref DynamoDBArn
-              Key:
-                PK:
-                  S: '{% $organizationDomain %}'
-                SK:
-                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
-              UpdateExpression: SET step = :newStep
-              ExpressionAttributeValues:
-                ':newStep':
-                  S: 'ASSOCIATING_FINDINGS'
             Next: PromptMap
-            Output: '{% $states.input %}'
+            Output: '{% [$spread($states.result)] %}'
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -621,30 +574,7 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
-            Next: 'FinishUpdateStep'
-          FinishUpdateStep:
-            Type: Task
-            Resource: arn:aws:states:::dynamodb:updateItem
-            Arguments:
-              TableName: !Ref DynamoDBArn
-              Key:
-                PK:
-                  S: '{% $organizationDomain %}'
-                SK:
-                  S: "{% 'ASSESSMENT#' & $assessmentId %}"
-              UpdateExpression: SET step = :newStep
-              ExpressionAttributeValues:
-                ':newStep':
-                  S: 'FINISHED'
-            Next: Cleanup
-            Catch:
-              - ErrorEquals:
-                  - States.ALL
-                Next: CleanupOnError
-                Output:
-                  assessmentId: '{% $assessmentId %}'
-                  organizationDomain: '{% $organizationDomain %}'
-                  error: '{% $states.errorOutput %}'
+            Next: 'Cleanup'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
