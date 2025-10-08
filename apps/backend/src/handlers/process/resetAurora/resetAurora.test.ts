@@ -1,4 +1,5 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
+
 import { main } from './handler';
 
 describe('ResetAuroraHandler', () => {

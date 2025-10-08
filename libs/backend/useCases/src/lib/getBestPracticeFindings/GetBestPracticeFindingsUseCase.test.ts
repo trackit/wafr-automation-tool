@@ -12,7 +12,6 @@ import {
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
-import { getBestPracticeCustomId } from '@shared/utils';
 
 import {
   AssessmentNotFoundError,
