@@ -308,7 +308,7 @@ describe('AssessmentDetails', () => {
               bestPractices: [
                 {
                   ...mockAssessment.pillars[0].questions[0].bestPractices[0],
-                  results: [{ id: 'result-1', details: 'Test result' }],
+                  findingAmount: 1,
                 },
               ],
             },

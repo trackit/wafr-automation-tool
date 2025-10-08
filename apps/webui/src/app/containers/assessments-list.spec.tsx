@@ -12,7 +12,7 @@ import {
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
-import { deleteAssessment, getAssessments } from '@webui/api-client';
+import { deleteAssessment, getAssessments, getAssessmentStep } from '@webui/api-client';
 
 import AssessmentsList from './assessments-list';
 
@@ -20,6 +20,7 @@ import AssessmentsList from './assessments-list';
 vi.mock('@webui/api-client', () => ({
   getAssessments: vi.fn(),
   deleteAssessment: vi.fn(),
+  getAssessmentStep: vi.fn(),
 }));
 
 // Mock the router
@@ -72,6 +73,7 @@ describe('AssessmentsList', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (getAssessments as any).mockResolvedValue(mockAssessments);
+    (getAssessmentStep as any).mockResolvedValue('FINISHED');
   });
 
   it('renders loading state initially', () => {
@@ -207,7 +209,6 @@ describe('AssessmentsList', () => {
         {
           id: '3',
           name: 'Test Assessment 3',
-          step: 'FINISHED',
           roleArn: 'arn:aws:iam::111111111111:role/test-role',
           createdAt: '2024-01-03T00:00:00Z',
         },
