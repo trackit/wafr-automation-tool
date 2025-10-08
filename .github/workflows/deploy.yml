@@ -50,4 +50,4 @@ jobs:
         run: pnpm run deploy:backend -- --no-confirm-changeset
 
       - name: Deploy Frontend
-        run: pnpm run deploy:webui:production -- --skip-nx-cache
+        run: pnpm run deploy:webui:production
