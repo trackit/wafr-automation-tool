@@ -12,6 +12,10 @@ import {
 } from './AssessmentsStateMachine';
 import { tokenCognitoService, tokenFakeCognitoService } from './CognitoService';
 import {
+  tokenCostExplorerService,
+  tokenFakeCostExplorerService,
+} from './CostExplorerService';
+import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,
 } from './FeatureToggleRepository';
@@ -110,6 +114,9 @@ export const registerTestInfrastructure = () => {
   });
   register(tokenPartnerCentralSellingService, {
     useFactory: () => inject(tokenFakePartnerCentralSellingService),
+  });
+  register(tokenCostExplorerService, {
+    useFactory: () => inject(tokenFakeCostExplorerService),
   });
   register(tokenTypeORMConfigCreator, {
     useFactory: () => {

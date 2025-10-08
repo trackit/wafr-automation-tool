@@ -4,7 +4,10 @@
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-scan-task"
+        "AWS": [
+          "arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-scan-task",
+          "arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-billing-info-role"
+        ]
       },
       "Action": "sts:AssumeRole"
     }

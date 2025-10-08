@@ -1,3 +1,4 @@
+import { type BillingInformation } from '../BillingInformation';
 import type { Pillar } from '../Pillar';
 import { type Assessment, type AssessmentFileExport } from './Assessment';
 
@@ -117,6 +118,13 @@ export class AssessmentMother {
     opportunityCreatedAt: Date | undefined,
   ): AssessmentMother {
     this.data.opportunityCreatedAt = opportunityCreatedAt;
+    return this;
+  }
+
+  public withBillingInformation(
+    billingInformation: BillingInformation | undefined,
+  ): AssessmentMother {
+    this.data.billingInformation = billingInformation;
     return this;
   }
 

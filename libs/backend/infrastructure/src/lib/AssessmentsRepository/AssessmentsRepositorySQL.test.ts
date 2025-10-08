@@ -941,6 +941,135 @@ describe('AssessmentsRepositorySQL', () => {
       expect(result).toBe(1);
     });
   });
+
+  describe('updateBillingInformation', () => {
+    it('should create new billing information when it does not exist', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withBillingInformation(undefined)
+        .build();
+      await repository.save(assessment);
+
+      const newBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '123.45',
+        servicesCost: [
+          { serviceName: 'AWS EC2', cost: '50.00' },
+          { serviceName: 'AWS S3', cost: '73.45' },
+        ],
+      };
+
+      await repository.updateBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: newBillingInformation,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation).toEqual(
+        newBillingInformation,
+      );
+    });
+
+    it('should update existing billing information', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const existingBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 60 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        totalCost: '50.00',
+        servicesCost: [{ serviceName: 'AWS EC2', cost: '50.00' }],
+      };
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withBillingInformation(existingBillingInformation)
+        .build();
+      await repository.save(assessment);
+
+      const updatedBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '150.75',
+        servicesCost: [
+          { serviceName: 'AWS EC2', cost: '100.00' },
+          { serviceName: 'AWS Lambda', cost: '50.75' },
+        ],
+      };
+
+      await repository.updateBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: updatedBillingInformation,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation).toEqual(
+        updatedBillingInformation,
+      );
+      expect(updatedAssessment?.billingInformation?.totalCost).toBe('150.75');
+      expect(updatedAssessment?.billingInformation?.servicesCost).toHaveLength(
+        2,
+      );
+    });
+
+    it('should handle empty services cost array', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const billingInformationWithEmptyServices = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '0.00',
+        servicesCost: [],
+      };
+
+      await repository.updateBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: billingInformationWithEmptyServices,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation?.servicesCost).toEqual([]);
+      expect(updatedAssessment?.billingInformation?.totalCost).toBe('0.00');
+    });
+  });
 });
 
 const setup = () => {

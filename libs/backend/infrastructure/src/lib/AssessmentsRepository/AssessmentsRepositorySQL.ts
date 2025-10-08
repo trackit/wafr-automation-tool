@@ -12,6 +12,7 @@ import {
   type AssessmentBody,
   type AssessmentFileExport,
   type BestPracticeBody,
+  type BillingInformation,
   type PillarBody,
   type QuestionBody,
 } from '@backend/models';
@@ -22,13 +23,17 @@ import { decodeNextToken, encodeNextToken } from '@shared/utils';
 import {
   AssessmentEntity,
   BestPracticeEntity,
+  BillingInformationEntity,
   FileExportEntity,
   PillarEntity,
   QuestionEntity,
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
+import {
+  billingDomainToEntity,
+  toDomainAssessment,
+} from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -47,7 +52,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
   public async save(assessment: Assessment): Promise<void> {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
-    const entity = repo.create(assessment);
+    const entity = repo.create({
+      ...assessment,
+      billingInformation: billingDomainToEntity(
+        assessment.id,
+        assessment.billingInformation,
+      ),
+    });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
   }
@@ -85,6 +96,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
           },
         },
         fileExports: true,
+        billingInformation: true,
       },
     });
     if (!entity) return undefined;
@@ -287,5 +299,29 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
         createdAt: Between(startDate, endDate),
       },
     });
+  }
+
+  public async updateBillingInformation(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    billingInformation: BillingInformation;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, billingInformation } = args;
+
+    const billingRepo = await this.repo(
+      BillingInformationEntity,
+      organizationDomain,
+    );
+    const billingEntity = billingDomainToEntity(
+      assessmentId,
+      billingInformation,
+    );
+    if (billingEntity) {
+      await billingRepo.save(billingEntity);
+    }
+
+    this.logger.info(
+      `Billing information updated for assessment: ${assessmentId}`,
+    );
   }
 }

@@ -83,5 +83,37 @@ export function toDomainAssessment(
     ...(e.opportunityCreatedAt && {
       opportunityCreatedAt: e.opportunityCreatedAt,
     }),
+    ...(e.billingInformation && {
+      billingInformation: billingEntityToDomain(e.billingInformation),
+    }),
+  };
+}
+
+export function billingEntityToDomain(
+  entity?: BillingInformationEntity | null,
+): BillingInformation | undefined {
+  if (!entity) return undefined;
+  return {
+    billingPeriodStartDate: entity.billingPeriodStartDate,
+    billingPeriodEndDate: entity.billingPeriodEndDate,
+    totalCost: entity.totalCost,
+    servicesCost: entity.servicesCost ?? [],
+  };
+}
+
+export function billingDomainToEntity(
+  assessmentId: string,
+  billingInformation?: BillingInformation,
+): Partial<BillingInformationEntity> | undefined {
+  if (!billingInformation) return undefined;
+  return {
+    assessmentId,
+    billingPeriodStartDate: billingInformation.billingPeriodStartDate,
+    billingPeriodEndDate: billingInformation.billingPeriodEndDate,
+    totalCost: billingInformation.totalCost,
+    servicesCost: billingInformation.servicesCost.map((s: ServiceCost) => ({
+      serviceName: s.serviceName,
+      cost: s.cost,
+    })),
   };
 }

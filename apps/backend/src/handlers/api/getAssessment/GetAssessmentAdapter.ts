@@ -72,6 +72,15 @@ export class GetAssessmentAdapter {
       error: assessment.error,
       wafrWorkloadArn: assessment.wafrWorkloadArn,
       opportunityId: assessment.opportunityId,
+      billingInformation: assessment.billingInformation
+        ? {
+            ...assessment.billingInformation,
+            billingPeriodStartDate:
+              assessment.billingInformation.billingPeriodStartDate.toISOString(),
+            billingPeriodEndDate:
+              assessment.billingInformation.billingPeriodEndDate.toISOString(),
+          }
+        : undefined,
     };
   }
 

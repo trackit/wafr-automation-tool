@@ -1,3 +1,4 @@
+import { type BillingInformation } from '../BillingInformation';
 import type { Pillar } from '../Pillar';
 
 export interface Assessment {
@@ -19,6 +20,7 @@ export interface Assessment {
   wafrWorkloadArn?: string;
   opportunityId?: string;
   opportunityCreatedAt?: Date;
+  billingInformation?: BillingInformation;
 }
 
 export enum AssessmentStep {

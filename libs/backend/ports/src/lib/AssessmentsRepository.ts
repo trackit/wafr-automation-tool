@@ -3,6 +3,7 @@ import type {
   AssessmentBody,
   AssessmentFileExport,
   BestPracticeBody,
+  BillingInformation,
   PillarBody,
   QuestionBody,
 } from '@backend/models';
@@ -78,4 +79,9 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     year: number;
   }): Promise<number>;
+  updateBillingInformation(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    billingInformation: BillingInformation;
+  }): Promise<void>;
 }
