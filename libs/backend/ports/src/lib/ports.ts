@@ -14,5 +14,7 @@ export * from './OrganizationRepository';
 export * from './PartnerCentralSellingPort';
 export * from './PDFServicePort';
 export * from './QuestionSetPort';
+export * from './SecretsManager';
 export * from './STSPort';
+export * from './TypeORMClientManager';
 export * from './WellArchitectedToolPort';
