@@ -14,10 +14,12 @@ import {
   AssessmentFileExport,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
+  AssessmentGraphData,
   AssessmentStep,
   BestPractice,
   Pillar,
   Question,
+  ScanningTool,
   SeverityType,
 } from '@backend/models';
 
@@ -79,6 +81,9 @@ export class AssessmentEntity
     cascade: true,
   })
   fileExports!: FileExportEntity[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  rawGraphData?: Record<ScanningTool, AssessmentGraphData>;
 }
 
 @Entity('pillars')

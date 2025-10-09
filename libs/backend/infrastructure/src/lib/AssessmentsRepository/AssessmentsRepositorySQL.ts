@@ -192,7 +192,21 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     scanningTool: ScanningTool;
     graphData: AssessmentGraphData;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, scanningTool, graphData } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+    const assessment = await repo.findOne({ where: { id: assessmentId } });
+    await repo.update(
+      { id: assessmentId },
+      {
+        rawGraphData: {
+          ...assessment?.rawGraphData,
+          [scanningTool]: graphData,
+        },
+      },
+    );
+    this.logger.info(
+      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`,
+    );
   }
 
   public async updateFileExport(args: {
