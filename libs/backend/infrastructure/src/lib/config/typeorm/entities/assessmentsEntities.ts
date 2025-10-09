@@ -80,10 +80,19 @@ export class AssessmentEntity
   @OneToMany(() => FileExportEntity, (fileExport) => fileExport.assessment, {
     cascade: true,
   })
-  fileExports!: FileExportEntity[];
+  fileExports?: FileExportEntity[];
 
   @Column({ type: 'jsonb', nullable: true })
   rawGraphData?: Record<ScanningTool, AssessmentGraphData>;
+
+  @Column({ type: 'jsonb', nullable: true })
+  graphData?: AssessmentGraphData;
+
+  @Column('varchar', { nullable: true })
+  wafrWorkloadArn?: string;
+
+  @Column('varchar', { nullable: true })
+  opportunityId?: string;
 }
 
 @Entity('pillars')
@@ -217,7 +226,7 @@ export class FileExportEntity implements AssessmentFileExport {
     onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
-  assessment!: AssessmentEntity;
+  assessment?: AssessmentEntity;
 
   @Column({ type: 'enum', enum: AssessmentFileExportStatus })
   status!: AssessmentFileExportStatus;

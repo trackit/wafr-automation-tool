@@ -59,10 +59,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
             })),
           })),
         })) ?? [],
-      fileExports: assessment.fileExports?.pdf?.map((fileExport) => ({
-        ...fileExport,
-        type: AssessmentFileExportType.PDF,
-      })),
+      fileExports: this.mapFileExportsToEntities(
+        assessment.id,
+        assessment.fileExports ?? {},
+      ),
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
@@ -194,48 +194,21 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(AssessmentEntity, organizationDomain);
     const existing = await repo.findOne({
       where: { id: assessmentId },
-      relations: [
-        'pillars',
-        'pillars.questions',
-        'pillars.questions.bestPractices',
-      ],
     });
     if (!existing) {
       throw new Error(`Assessment not found: ${assessmentId}`);
     }
-    if (assessmentBody.name !== undefined) {
-      existing.name = assessmentBody.name;
-    }
-    if (assessmentBody.rawGraphData !== undefined) {
-      existing.rawGraphData = {
-        ...existing.rawGraphData,
-        ...Object.fromEntries(
-          Object.entries(assessmentBody.rawGraphData ?? {}).filter(
-            ([, value]) => value !== undefined,
-          ),
-        ),
-      } as Record<ScanningTool, AssessmentGraphData>;
-    }
-    if (assessmentBody.step !== undefined) {
-      existing.step = assessmentBody.step;
-    }
-    if (assessmentBody.questionVersion !== undefined) {
-      existing.questionVersion = assessmentBody.questionVersion;
-    }
-    if (assessmentBody.exportRegion !== undefined) {
-      existing.exportRegion = assessmentBody.exportRegion;
-    }
-    if (assessmentBody.error !== undefined) {
-      existing.error = assessmentBody.error;
-    }
-    if (assessmentBody.pillars !== undefined) {
-      existing.pillars = this.mapPillarsToEntities(
-        assessmentId,
-        assessmentBody.pillars,
-      );
-    }
-
-    await repo.save(existing);
+    const { pillars, fileExports, ...rest } = assessmentBody;
+    await repo.save({
+      ...existing,
+      ...rest,
+      ...(pillars && {
+        pillars: this.mapPillarsToEntities(assessmentId, pillars),
+      }),
+      ...(fileExports && {
+        fileExports: this.mapFileExportsToEntities(assessmentId, fileExports),
+      }),
+    });
     this.logger.info(`Assessment updated: ${assessmentId}`);
   }
 
@@ -459,5 +432,34 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     bpEntity.results = Array.from(bp.results);
 
     return bpEntity;
+  }
+
+  private mapFileExportsToEntities(
+    assessmentId: string,
+    fileExports: Partial<
+      Record<AssessmentFileExportType, AssessmentFileExport[]>
+    >,
+  ): FileExportEntity[] {
+    return Object.entries(fileExports).flatMap(([type, exports]) =>
+      exports.map((fileExport) =>
+        this.mapFileExportToEntity(
+          assessmentId,
+          type as AssessmentFileExportType,
+          fileExport,
+        ),
+      ),
+    );
+  }
+
+  private mapFileExportToEntity(
+    assessmentId: string,
+    type: AssessmentFileExportType,
+    fileExport: AssessmentFileExport,
+  ): FileExportEntity {
+    return {
+      assessmentId,
+      type,
+      ...fileExport,
+    };
   }
 }

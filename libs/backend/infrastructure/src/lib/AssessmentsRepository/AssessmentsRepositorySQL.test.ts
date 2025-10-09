@@ -518,6 +518,19 @@ describe('AssessmentsRepositorySQL', () => {
             .withSeverities({})
             .build(),
         })
+        .withFileExports({})
+        .withStep(AssessmentStep.SCANNING_STARTED)
+        .withExportRegion('us-east-1')
+        .withOpportunityId('old-opportunity-id')
+        .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
+        .withGraphData(
+          AssessmentGraphDataMother.basic()
+            .withFindings(0)
+            .withRegions({})
+            .withResourceTypes({})
+            .withSeverities({})
+            .build(),
+        )
         .build();
       await repository.save(assessment);
 
@@ -552,6 +565,18 @@ describe('AssessmentsRepositorySQL', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          error: { cause: 'An error occurred', error: 'InternalError' },
+          exportRegion: 'us-west-2',
+          opportunityId: 'new-opportunity-id',
+          step: AssessmentStep.FINISHED,
+          wafrWorkloadArn:
+            'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
+          fileExports: {
+            [AssessmentFileExportType.PDF]: [
+              AssessmentFileExportMother.basic().withId('pdf-export').build(),
+            ],
+          },
+          graphData: updatedProwlerGraphData,
         },
       });
 
@@ -583,6 +608,18 @@ describe('AssessmentsRepositorySQL', () => {
           rawGraphData: {
             [ScanningTool.PROWLER]: updatedProwlerGraphData,
           },
+          error: { cause: 'An error occurred', error: 'InternalError' },
+          exportRegion: 'us-west-2',
+          opportunityId: 'new-opportunity-id',
+          step: AssessmentStep.FINISHED,
+          wafrWorkloadArn:
+            'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
+          fileExports: {
+            [AssessmentFileExportType.PDF]: [
+              expect.objectContaining({ id: 'pdf-export' }),
+            ],
+          },
+          graphData: updatedProwlerGraphData,
         }),
       );
     });

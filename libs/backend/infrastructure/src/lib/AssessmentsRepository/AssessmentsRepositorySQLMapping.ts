@@ -80,40 +80,42 @@ export function toDomainAssessment(
     workflows: e.workflows,
     ...(e.error && { error: e.error }),
     pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
-    graphData: Object.values(e.rawGraphData ?? {}).reduce(
-      (acc, data) => {
-        acc.findings += data.findings;
-        acc.regions = Object.entries(data.regions).reduce(
-          (accRegions, [region, count]) => {
-            accRegions[region] = (accRegions[region] ?? 0) + count;
-            return accRegions;
-          },
-          acc.regions,
-        );
-        acc.resourceTypes = Object.entries(data.resourceTypes).reduce(
-          (accResourceTypes, [type, count]) => {
-            accResourceTypes[type] = (accResourceTypes[type] ?? 0) + count;
-            return accResourceTypes;
-          },
-          acc.resourceTypes,
-        );
-        acc.severities = Object.entries(data.severities).reduce(
-          (accSeverities, [_severity, count]) => {
-            const severity = _severity as SeverityType;
-            accSeverities[severity] = (accSeverities[severity] ?? 0) + count;
-            return accSeverities;
-          },
-          acc.severities,
-        );
-        return acc;
-      },
-      {
-        findings: 0,
-        regions: {},
-        resourceTypes: {},
-        severities: {},
-      },
-    ),
+    graphData:
+      e.graphData ??
+      Object.values(e.rawGraphData ?? {}).reduce(
+        (acc, data) => {
+          acc.findings += data.findings;
+          acc.regions = Object.entries(data.regions).reduce(
+            (accRegions, [region, count]) => {
+              accRegions[region] = (accRegions[region] ?? 0) + count;
+              return accRegions;
+            },
+            acc.regions,
+          );
+          acc.resourceTypes = Object.entries(data.resourceTypes).reduce(
+            (accResourceTypes, [type, count]) => {
+              accResourceTypes[type] = (accResourceTypes[type] ?? 0) + count;
+              return accResourceTypes;
+            },
+            acc.resourceTypes,
+          );
+          acc.severities = Object.entries(data.severities).reduce(
+            (accSeverities, [_severity, count]) => {
+              const severity = _severity as SeverityType;
+              accSeverities[severity] = (accSeverities[severity] ?? 0) + count;
+              return accSeverities;
+            },
+            acc.severities,
+          );
+          return acc;
+        },
+        {
+          findings: 0,
+          regions: {},
+          resourceTypes: {},
+          severities: {},
+        },
+      ),
     fileExports: (e.fileExports ?? []).reduce(
       (acc, fileExport) => {
         if (acc[fileExport.type]) {
@@ -125,5 +127,7 @@ export function toDomainAssessment(
       },
       {} as Record<AssessmentFileExportType, AssessmentFileExport[]>,
     ),
+    ...(e.wafrWorkloadArn && { wafrWorkloadArn: e.wafrWorkloadArn }),
+    ...(e.opportunityId && { opportunityId: e.opportunityId }),
   };
 }
