@@ -16,7 +16,7 @@ import { inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { AssessmentEntity } from '../infrastructure';
+import { AssessmentEntity, FileExportEntity } from '../infrastructure';
 import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
@@ -166,6 +166,12 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, id } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
+
+    await repo.delete({ id, assessmentId });
+    this.logger.info(
+      `File export with id ${id} deleted successfully for assessment ${assessmentId}`,
+    );
   }
 }
