@@ -49,6 +49,19 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     this.logger.info(`Assessment saved: ${assessment.id}`);
   }
 
+  public async saveBestPracticesFindings(_args: {
+    assessmentId: string;
+    organizationDomain: string;
+    bestPracticesFindings: {
+      pillarId: string;
+      questionId: string;
+      bestPracticeId: string;
+      findingIds: Set<string>;
+    }[];
+  }) {
+    throw new Error('Method not implemented.');
+  }
+
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
