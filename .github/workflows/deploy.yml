@@ -15,6 +15,9 @@ jobs:
       STAGE: prod
       DEBUG: false
       INITIAL_USER_EMAIL: ${{ secrets.INITIAL_USER_EMAIL }}
+      LOG_RETENTION_IN_DAYS: 14
+      GEN_AI_MAX_RETRIES: 3
+      AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: 10
     steps:
       - uses: actions/checkout@v4
 
