@@ -94,9 +94,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       },
     });
     if (!entity) {
-      this.logger.error(
-        `Best practice with id ${bestPracticeId} not found for assessment ${assessmentId}`,
-      );
       throw new Error('Best practice not found');
     }
     const bestPracticeFindingArray = Array.from(bestPracticeFindingIds);
