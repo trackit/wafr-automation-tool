@@ -6,8 +6,11 @@ import {
   AssessmentFileExport,
   AssessmentFileExportType,
   AssessmentGraphData,
+  BestPractice,
   BestPracticeBody,
+  Pillar,
   PillarBody,
+  Question,
   QuestionBody,
   ScanningTool,
 } from '@backend/models';
@@ -189,7 +192,54 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     organizationDomain: string;
     assessmentBody: AssessmentBody;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, assessmentBody } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+    const existing = await repo.findOne({
+      where: { id: assessmentId },
+      relations: [
+        'pillars',
+        'pillars.questions',
+        'pillars.questions.bestPractices',
+        'fileExports',
+      ],
+    });
+    if (!existing) {
+      throw new Error(`Assessment not found: ${assessmentId}`);
+    }
+    if (assessmentBody.name !== undefined) {
+      existing.name = assessmentBody.name;
+    }
+    if (assessmentBody.rawGraphData !== undefined) {
+      existing.rawGraphData = {
+        ...existing.rawGraphData,
+        ...Object.fromEntries(
+          Object.entries(assessmentBody.rawGraphData ?? {}).filter(
+            ([, value]) => value !== undefined,
+          ),
+        ),
+      } as Record<ScanningTool, AssessmentGraphData>;
+    }
+    if (assessmentBody.step !== undefined) {
+      existing.step = assessmentBody.step;
+    }
+    if (assessmentBody.questionVersion !== undefined) {
+      existing.questionVersion = assessmentBody.questionVersion;
+    }
+    if (assessmentBody.exportRegion !== undefined) {
+      existing.exportRegion = assessmentBody.exportRegion;
+    }
+    if (assessmentBody.error !== undefined) {
+      existing.error = assessmentBody.error;
+    }
+    if (assessmentBody.pillars !== undefined) {
+      existing.pillars = this.mapPillarsToEntities(
+        assessmentId,
+        assessmentBody.pillars,
+      );
+    }
+
+    await repo.save(existing);
+    this.logger.info(`Assessment updated: ${assessmentId}`);
   }
 
   public async updatePillar(args: {
@@ -319,5 +369,98 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     this.logger.info(
       `File export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
+  }
+
+  private mapPillarsToEntities(
+    assessmentId: string,
+    pillars: Pillar[],
+  ): PillarEntity[] {
+    return pillars.map((pillar) =>
+      this.mapPillarToEntity(assessmentId, pillar),
+    );
+  }
+
+  private mapPillarToEntity(
+    assessmentId: string,
+    pillar: Pillar,
+  ): PillarEntity {
+    const pillarEntity = new PillarEntity();
+    pillarEntity.assessmentId = assessmentId;
+    pillarEntity.id = pillar.id;
+    pillarEntity.disabled = pillar.disabled;
+    pillarEntity.label = pillar.label;
+    pillarEntity.primaryId = pillar.primaryId;
+    pillarEntity.questions = this.mapQuestionsToEntities(
+      assessmentId,
+      pillar.id,
+      pillar.questions,
+    );
+
+    return pillarEntity;
+  }
+
+  private mapQuestionsToEntities(
+    assessmentId: string,
+    pillarId: string,
+    questions: Question[],
+  ): QuestionEntity[] {
+    return questions.map((question) =>
+      this.mapQuestionToEntity(assessmentId, pillarId, question),
+    );
+  }
+
+  private mapQuestionToEntity(
+    assessmentId: string,
+    pillarId: string,
+    question: Question,
+  ): QuestionEntity {
+    const questionEntity = new QuestionEntity();
+    questionEntity.assessmentId = assessmentId;
+    questionEntity.pillarId = pillarId;
+    questionEntity.id = question.id;
+    questionEntity.disabled = question.disabled;
+    questionEntity.label = question.label;
+    questionEntity.none = question.none;
+    questionEntity.primaryId = question.primaryId;
+    questionEntity.bestPractices = this.mapBestPracticesToEntities(
+      assessmentId,
+      pillarId,
+      question.id,
+      question.bestPractices,
+    );
+
+    return questionEntity;
+  }
+
+  private mapBestPracticesToEntities(
+    assessmentId: string,
+    pillarId: string,
+    questionId: string,
+    bestPractices: BestPractice[],
+  ): BestPracticeEntity[] {
+    return bestPractices.map((bp) =>
+      this.mapBestPracticeToEntity(assessmentId, pillarId, questionId, bp),
+    );
+  }
+
+  private mapBestPracticeToEntity(
+    assessmentId: string,
+    pillarId: string,
+    questionId: string,
+    bp: BestPractice,
+  ): BestPracticeEntity {
+    const bpEntity = new BestPracticeEntity();
+    bpEntity.assessmentId = assessmentId;
+    bpEntity.pillarId = pillarId;
+    bpEntity.questionId = questionId;
+    bpEntity.id = bp.id;
+    bpEntity.description = bp.description;
+    bpEntity.label = bp.label;
+    bpEntity.primaryId = bp.primaryId;
+    bpEntity.risk = bp.risk;
+    bpEntity.checked = bp.checked;
+    bpEntity.results = Array.from(bp.results);
+
+    return bpEntity;
   }
 }
