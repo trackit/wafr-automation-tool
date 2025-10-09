@@ -347,12 +347,14 @@ describe('AssessmentsRepositorySQL', () => {
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
       await repository.save(assessment1);
 
       const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
@@ -391,8 +393,7 @@ describe('AssessmentsRepositorySQL', () => {
       await repository.save(assessment2);
 
       const nextTokenAssessment = {
-        PK: assessment2.organization,
-        SK: `ASSESSMENT#${assessment2.id}`,
+        offset: 1,
       };
       const nextToken = encodeNextToken(nextTokenAssessment);
 

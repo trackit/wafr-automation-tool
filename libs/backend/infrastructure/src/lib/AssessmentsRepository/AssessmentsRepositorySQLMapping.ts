@@ -114,7 +114,7 @@ export function toDomainAssessment(
         severities: {},
       },
     ),
-    fileExports: e.fileExports.reduce(
+    fileExports: (e.fileExports ?? []).reduce(
       (acc, fileExport) => {
         if (acc[fileExport.type]) {
           acc[fileExport.type]!.push(toDomainFileExport(fileExport));

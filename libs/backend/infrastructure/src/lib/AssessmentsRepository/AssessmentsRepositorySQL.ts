@@ -13,6 +13,7 @@ import {
 } from '@backend/models';
 import { AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
+import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
 import {
   AssessmentEntity,
@@ -135,7 +136,39 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     search?: string;
     nextToken?: string;
   }): Promise<{ assessments: Assessment[]; nextToken?: string }> {
-    throw new Error('Method not implemented.');
+    const { organizationDomain, limit = 20, search, nextToken } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    const decoded = decodeNextToken(nextToken) as
+      | { offset?: number }
+      | undefined;
+    const offset = decoded?.offset ?? 0;
+
+    const qb = repo
+      .createQueryBuilder('a')
+      .orderBy('a.createdAt', 'DESC')
+      .skip(offset)
+      .take(limit);
+
+    if (search && search.trim()) {
+      qb.andWhere(
+        '(a.name ILIKE :term OR a.roleArn ILIKE :term OR a.id::text ILIKE :term)',
+        { term: `%${search}%` },
+      );
+    }
+
+    const [entities, total] = await qb
+      .leftJoinAndSelect('a.fileExports', 'fileExport')
+      .getManyAndCount();
+    const items = entities.map((e) =>
+      toDomainAssessment(e, organizationDomain),
+    );
+
+    const nextOffset = offset + items.length;
+    const nextTk =
+      nextOffset < total ? encodeNextToken({ offset: nextOffset }) : undefined;
+
+    return { assessments: items, nextToken: nextTk };
   }
 
   public async delete(args: {
