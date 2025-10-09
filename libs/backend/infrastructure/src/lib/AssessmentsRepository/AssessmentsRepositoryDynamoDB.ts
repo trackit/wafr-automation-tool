@@ -15,6 +15,7 @@ import { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import {
   buildUpdateExpression,
+  chunk,
   decodeNextToken,
   encodeNextToken,
   getAssessmentPK,
@@ -22,6 +23,7 @@ import {
 } from '@shared/utils';
 
 import {
+  tokenDynamoDBAssessmentBatchSize,
   tokenDynamoDBAssessmentTableName,
   tokenDynamoDBDocument,
 } from '../config/dynamodb/config';
@@ -38,6 +40,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   private readonly client = inject(tokenDynamoDBDocument);
   private readonly logger = inject(tokenLogger);
   private readonly tableName = inject(tokenDynamoDBAssessmentTableName);
+  private readonly batchSize = inject(tokenDynamoDBAssessmentBatchSize);
 
   public async save(assessment: Assessment): Promise<void> {
     const params = {
@@ -61,40 +64,47 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
   }) {
     const { assessmentId, organizationDomain, bestPracticesFindings } = args;
 
-    let updateExpression = 'ADD';
-    let index = 0;
-    const expressionAttributeNames: Record<string, string> = {};
-    const expressionAttributeValues: Record<string, unknown> = {};
-
-    for (const bestPracticesFinding of bestPracticesFindings) {
-      const { pillarId, questionId, bestPracticeId, findingIds } =
-        bestPracticesFinding;
-
-      updateExpression += ` pillars.#pillars${index}.questions.#questions${index}.bestPractices.#bestPractices${index}.results :newFindings${index},`;
-      expressionAttributeNames[`#pillars${index}`] = pillarId;
-      expressionAttributeNames[`#questions${index}`] = questionId;
-      expressionAttributeNames[`#bestPractices${index}`] = bestPracticeId;
-      expressionAttributeValues[`:newFindings${index}`] = findingIds;
-      index++;
-    }
-
-    updateExpression = updateExpression.slice(0, -1);
-
-    const params: UpdateCommandInput = {
-      TableName: this.tableName,
-      Key: {
-        PK: getAssessmentPK(organizationDomain),
-        SK: getAssessmentSK(assessmentId),
-      },
-      UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-    };
-
-    await this.client.update(params);
-    this.logger.info(
-      `Best practice findings updated successfully for assessment ${assessmentId}`,
+    const batchBestPracticesFindings = chunk(
+      bestPracticesFindings,
+      this.batchSize,
     );
+
+    for (const bestPracticesFindingsItem of batchBestPracticesFindings) {
+      let updateExpression = 'ADD';
+      let index = 0;
+      const expressionAttributeNames: Record<string, string> = {};
+      const expressionAttributeValues: Record<string, unknown> = {};
+
+      for (const bestPracticesFinding of bestPracticesFindingsItem) {
+        const { pillarId, questionId, bestPracticeId, findingIds } =
+          bestPracticesFinding;
+
+        updateExpression += ` pillars.#pillars${index}.questions.#questions${index}.bestPractices.#bestPractices${index}.results :newFindings${index},`;
+        expressionAttributeNames[`#pillars${index}`] = pillarId;
+        expressionAttributeNames[`#questions${index}`] = questionId;
+        expressionAttributeNames[`#bestPractices${index}`] = bestPracticeId;
+        expressionAttributeValues[`:newFindings${index}`] = findingIds;
+        index++;
+      }
+
+      updateExpression = updateExpression.slice(0, -1);
+
+      const params: UpdateCommandInput = {
+        TableName: this.tableName,
+        Key: {
+          PK: getAssessmentPK(organizationDomain),
+          SK: getAssessmentSK(assessmentId),
+        },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
+      };
+
+      await this.client.update(params);
+      this.logger.info(
+        `Best practice findings updated successfully for assessment ${assessmentId}`,
+      );
+    }
   }
 
   public async saveBestPracticeFindings(args: {
