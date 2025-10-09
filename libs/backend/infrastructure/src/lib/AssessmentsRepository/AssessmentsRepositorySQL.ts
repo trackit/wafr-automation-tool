@@ -38,6 +38,17 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
     const entity = repo.create({
       ...assessment,
+      pillars:
+        assessment.pillars?.map((p) => ({
+          ...p,
+          questions: p.questions.map((q) => ({
+            ...q,
+            bestPractices: q.bestPractices.map((bp) => ({
+              ...bp,
+              results: bp.results ? Array.from(bp.results) : [],
+            })),
+          })),
+        })) ?? [],
       fileExports: assessment.fileExports?.pdf,
     });
     await repo.save(entity);
