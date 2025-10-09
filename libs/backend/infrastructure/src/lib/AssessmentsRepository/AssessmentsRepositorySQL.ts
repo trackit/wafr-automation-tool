@@ -35,7 +35,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }
 
   public async save(assessment: Assessment): Promise<void> {
-    throw new Error('Method not implemented.');
+    const repo = await this.repo(AssessmentEntity, assessment.organization);
+    const entity = repo.create({
+      ...assessment,
+      fileExports: assessment.fileExports?.pdf,q
+    });
+    await repo.save(entity);
+    this.logger.info(`Assessment ${assessment.id} saved`);
   }
 
   public async saveBestPracticeFindings(args: {
