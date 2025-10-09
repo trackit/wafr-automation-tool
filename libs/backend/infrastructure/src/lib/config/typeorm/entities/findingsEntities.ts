@@ -26,7 +26,7 @@ import { BestPracticeEntity } from './assessmentsEntities';
 @Entity('findings')
 @Unique('uq_findings_pk', ['assessmentId', 'id'])
 @Index('ix_findings_assessment_id', ['assessmentId', 'id'])
-export class FindingEntity implements Finding {
+export class FindingEntity implements Omit<Finding, 'bestPractices'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
