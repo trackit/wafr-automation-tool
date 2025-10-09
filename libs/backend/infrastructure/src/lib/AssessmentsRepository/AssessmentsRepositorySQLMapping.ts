@@ -75,9 +75,7 @@ export function toDomainAssessment(
     regions: e.regions,
     ...(e.exportRegion && { exportRegion: e.exportRegion }),
     roleArn: e.roleArn,
-    step: e.finished
-      ? AssessmentStep.FINISHED
-      : AssessmentStep.SCANNING_STARTED,
+    step: e.step,
     rawGraphData: {}, //TODO : check this later
     workflows: e.workflows,
     ...(e.error && { error: e.error }),
