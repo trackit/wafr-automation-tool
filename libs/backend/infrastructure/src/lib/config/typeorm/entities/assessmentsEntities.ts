@@ -14,6 +14,7 @@ import {
   AssessmentFileExport,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
+  AssessmentStep,
   BestPractice,
   Pillar,
   Question,
@@ -23,15 +24,21 @@ import {
 @Entity('assessments')
 @Unique('uq_assessments_uuid', ['id'])
 @Index('ix_assessments_uuid', ['id'])
-export class AssessmentEntity implements Omit<Assessment, 'organization'> {
+export class AssessmentEntity
+  implements
+    Omit<
+      Assessment,
+      'organization' | 'fileExports' | 'rawGraphData' | 'graphData'
+    >
+{
   @PrimaryColumn('uuid')
   id!: string;
 
   @Column('varchar')
   createdBy!: string;
 
-  @Column('varchar', { nullable: true })
-  executionArn?: string;
+  @Column('varchar')
+  executionArn!: string;
 
   @Column('timestamptz', { default: () => 'now()' })
   createdAt!: Date;
@@ -59,6 +66,9 @@ export class AssessmentEntity implements Omit<Assessment, 'organization'> {
 
   @Column({ type: 'jsonb', nullable: true })
   error?: { cause: string; error: string };
+
+  @Column({ type: 'enum', enum: AssessmentStep })
+  step!: AssessmentStep;
 
   @OneToMany(() => PillarEntity, (pillar) => pillar.assessment, {
     cascade: true,
@@ -143,7 +153,7 @@ export class QuestionEntity implements Question {
 @Entity('bestPractices')
 @Unique('uq_bp_assessment', ['assessmentId', 'questionId', 'pillarId', 'id'])
 @Index('ix_bp_question', ['assessmentId', 'questionId', 'pillarId', 'id'])
-export class BestPracticeEntity implements BestPractice {
+export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
@@ -180,6 +190,9 @@ export class BestPracticeEntity implements BestPractice {
 
   @Column('boolean', { default: false })
   checked!: boolean;
+
+  @Column('array', { default: () => 'ARRAY[]::varchar[]' })
+  results!: string[];
 }
 
 @Entity('fileExports')
