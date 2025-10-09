@@ -24,7 +24,7 @@ export function toDomainBestPractice(e: BestPracticeEntity): BestPractice {
     primaryId: e.primaryId,
     risk: e.risk,
     checked: e.checked,
-    results: new Set(),
+    results: new Set(e.results),
   };
 }
 

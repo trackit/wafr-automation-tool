@@ -191,7 +191,7 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
   @Column('boolean', { default: false })
   checked!: boolean;
 
-  @Column('array', { default: () => 'ARRAY[]::varchar[]' })
+  @Column('varchar', { array: true, default: [] })
   results!: string[];
 }
 
