@@ -22,6 +22,31 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     this.assessments[key] = assessment;
   }
 
+  public async saveBestPracticesFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    bestPracticesFindings: {
+      pillarId: string;
+      questionId: string;
+      bestPracticeId: string;
+      findingIds: Set<string>;
+    }[];
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, bestPracticesFindings } = args;
+    await Promise.all(
+      bestPracticesFindings.map((bestPracticesFinding) =>
+        this.saveBestPracticeFindings({
+          assessmentId,
+          organizationDomain,
+          pillarId: bestPracticesFinding.pillarId,
+          questionId: bestPracticesFinding.questionId,
+          bestPracticeId: bestPracticesFinding.bestPracticeId,
+          bestPracticeFindingIds: bestPracticesFinding.findingIds,
+        }),
+      ),
+    );
+  }
+
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;

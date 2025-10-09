@@ -84,25 +84,30 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
       new Map<string, Set<string>>(),
     );
 
-    await Promise.all(
-      Array.from(bestPracticesFindingIds.entries()).map(([key, findingIds]) => {
-        const [pillarId, questionId, bestPracticeId] = key.split('#');
-        assertBestPracticeExists({
-          assessment,
-          pillarId,
-          questionId,
-          bestPracticeId,
-        });
-        return this.assessmentsRepository.saveBestPracticeFindings({
-          assessmentId: assessment.id,
-          organizationDomain,
-          pillarId,
-          questionId,
-          bestPracticeId,
-          bestPracticeFindingIds: findingIds,
-        });
-      }),
-    );
+    for (const [key] of Array.from(bestPracticesFindingIds.entries())) {
+      const [pillarId, questionId, bestPracticeId] = key.split('#');
+      assertBestPracticeExists({
+        assessment,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
+    }
+    await this.assessmentsRepository.saveBestPracticesFindings({
+      assessmentId: assessment.id,
+      organizationDomain,
+      bestPracticesFindings: Array.from(bestPracticesFindingIds.entries()).map(
+        ([key, findingIds]) => {
+          const [pillarId, questionId, bestPracticeId] = key.split('#');
+          return {
+            pillarId,
+            questionId,
+            bestPracticeId,
+            findingIds,
+          };
+        },
+      ),
+    });
   }
 
   public async storeFindingsAssociations(args: {
