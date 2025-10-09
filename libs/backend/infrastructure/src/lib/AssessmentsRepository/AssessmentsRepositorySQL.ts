@@ -38,7 +38,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
     const entity = repo.create({
       ...assessment,
-      fileExports: assessment.fileExports?.pdf,q
+      fileExports: assessment.fileExports?.pdf,
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
