@@ -217,6 +217,50 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).toBe(true);
     });
 
+    it('should add a finding to many best practices', async () => {
+      const { repository } = setup();
+
+      const bestPractices = [];
+      for (let i = 0; i < 100; i++) {
+        bestPractices.push(
+          BestPracticeMother.basic().withId(i.toString()).build(),
+        );
+      }
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices(bestPractices)
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticesFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        bestPracticesFindings: bestPractices.map((bestPractice) => ({
+          pillarId: pillar.id,
+          questionId: question.id,
+          bestPracticeId: bestPractice.id,
+          findingIds: new Set([`scanningTool#1`]),
+        })),
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      for (let i = 0; i < bestPractices.length; i++) {
+        expect(
+          updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[
+            i
+          ].results.has('scanningTool#1'),
+        ).toBe(true);
+      }
+    });
+
     it('should be able to add findings several times', async () => {
       const { repository } = setup();
 
@@ -334,7 +378,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
       ).toBe(true);
     });
 
-    it('should add 2 findings to a best practice', async () => {
+    it('should add several findings to a best practice', async () => {
       const { repository } = setup();
 
       const bestPractice = BestPracticeMother.basic().withId('0').build();
@@ -372,50 +416,6 @@ describe('AssessmentsRepositoryDynamoDB', () => {
           'scanningTool#2',
         ),
       ).toBe(true);
-    });
-
-    it('should add a finding to many best practices', async () => {
-      const { repository } = setup();
-
-      const bestPractices = [];
-      for (let i = 0; i < 100; i++) {
-        bestPractices.push(
-          BestPracticeMother.basic().withId(i.toString()).build(),
-        );
-      }
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices(bestPractices)
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
-      await repository.save(assessment);
-
-      await repository.saveBestPracticesFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        bestPracticesFindings: bestPractices.map((bestPractice) => ({
-          pillarId: pillar.id,
-          questionId: question.id,
-          bestPracticeId: bestPractice.id,
-          findingIds: new Set([`scanningTool#1`]),
-        })),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      for (let i = 0; i < bestPractices.length; i++) {
-        expect(
-          updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[
-            i
-          ].results.has('scanningTool#1'),
-        ).toBe(true);
-      }
     });
 
     it('should be able to add findings several times', async () => {
