@@ -14,7 +14,11 @@ import {
 import { AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 
-import { AssessmentEntity, FileExportEntity } from '../infrastructure';
+import {
+  AssessmentEntity,
+  BestPracticeEntity,
+  FileExportEntity,
+} from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
@@ -66,7 +70,44 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeFindingIds: Set<string>;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+    const repo = await this.repo(BestPracticeEntity, organizationDomain);
+    const entity = await repo.findOne({
+      where: {
+        id: bestPracticeId,
+        question: {
+          id: questionId,
+          pillar: {
+            id: pillarId,
+            assessment: {
+              id: assessmentId,
+            },
+          },
+        },
+      },
+    });
+    if (!entity) {
+      this.logger.error(
+        `Best practice with id ${bestPracticeId} not found for assessment ${assessmentId}`,
+      );
+      throw new Error('Best practice not found');
+    }
+    const bestPracticeFindingArray = Array.from(bestPracticeFindingIds);
+    entity.results = entity.results.concat(bestPracticeFindingArray);
+    await repo.update(
+      { id: bestPracticeId, questionId, pillarId, assessmentId },
+      entity,
+    );
+    this.logger.info(
+      `Best practice findings for best practice ${bestPracticeId} updated successfully`,
+    );
   }
 
   public async get(args: {
