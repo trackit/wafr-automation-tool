@@ -2,7 +2,6 @@ import {
   Assessment,
   AssessmentFileExport,
   AssessmentFileExportType,
-  AssessmentStep,
   BestPractice,
   Pillar,
   Question,
@@ -80,10 +79,22 @@ export function toDomainAssessment(
     workflows: e.workflows,
     ...(e.error && { error: e.error }),
     pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
-    fileExports: {
-      [AssessmentFileExportType.PDF]: (e.fileExports ?? []).map((fileExport) =>
-        toDomainFileExport(fileExport),
-      ),
+    graphData: {
+      findings: 0,
+      regions: {},
+      resourceTypes: {},
+      severities: {},
     },
+    fileExports: e.fileExports.reduce(
+      (acc, fileExport) => {
+        if (acc[fileExport.type]) {
+          acc[fileExport.type]!.push(toDomainFileExport(fileExport));
+        } else {
+          acc[fileExport.type] = [toDomainFileExport(fileExport)];
+        }
+        return acc;
+      },
+      {} as Record<AssessmentFileExportType, AssessmentFileExport[]>,
+    ),
   };
 }
