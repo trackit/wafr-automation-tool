@@ -175,7 +175,11 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     assessmentId: string;
     organizationDomain: string;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    await repo.delete({ id: assessmentId });
+    this.logger.info(`Assessment deleted: ${assessmentId}`);
   }
 
   public async update(args: {
