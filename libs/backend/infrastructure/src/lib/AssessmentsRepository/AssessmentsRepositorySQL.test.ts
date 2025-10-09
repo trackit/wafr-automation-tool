@@ -1,4 +1,3 @@
-
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
@@ -24,11 +23,17 @@ beforeAll(async () => {
   registerTestInfrastructure();
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
+  await clientManager.createClient('organization1');
+  await clientManager.createClient('organization2');
 });
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
+});
+
+afterAll(async () => {
+  const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
 
