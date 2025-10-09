@@ -160,7 +160,22 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, type, data } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
+
+    const fileExport = await repo.findOne({
+      where: { id: data.id, assessmentId },
+    });
+    if (!fileExport) {
+      await repo.save({ ...data, assessmentId, type });
+    } else {
+      await repo.update({ id: data.id, assessmentId }, { ...data });
+    }
+    this.logger.info(
+      `${type.toUpperCase()} file with id ${
+        data.id
+      } export updated successfully for assessment ${assessmentId}`,
+    );
   }
 
   public async deleteFileExport(args: {

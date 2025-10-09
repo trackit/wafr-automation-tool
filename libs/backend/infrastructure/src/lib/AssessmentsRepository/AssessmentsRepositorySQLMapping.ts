@@ -52,9 +52,9 @@ export function toDomainFileExport(e: FileExportEntity): AssessmentFileExport {
   return {
     id: e.id,
     status: e.status,
-    error: e.error ?? undefined,
+    ...(e.error && { error: e.error }),
     versionName: e.versionName,
-    objectKey: e.objectKey ?? undefined,
+    ...(e.objectKey && { objectKey: e.objectKey }),
     createdAt: e.createdAt,
   };
 }
