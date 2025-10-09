@@ -74,7 +74,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       },
     });
     if (!entity) return undefined;
-    return toDomainAssessment(entity, organizationDomain) : ;
+    return toDomainAssessment(entity, organizationDomain);
   }
 
   public async getAll(args: {
