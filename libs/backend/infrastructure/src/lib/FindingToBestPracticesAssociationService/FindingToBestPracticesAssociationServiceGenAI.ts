@@ -251,6 +251,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
           prefill: { text: '[' }, // Start with an opening bracket for JSON array
         });
 
+        this.logger.debug('stringifiedAIResponse', {
+          stringifiedAIResponse,
+          builtArray: '[' + stringifiedAIResponse.trim(),
+        });
+
         const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim()); // Add opening bracket for JSON array according to prefill
         const findingIdToBestPracticeIdAssociations =
           FindingIdToBestPracticeIdAssociationsSchema.parse(aiResponse);
