@@ -16,6 +16,7 @@ import { inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
+import { AssessmentEntity } from '../infrastructure';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -33,7 +34,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }
 
   public async save(assessment: Assessment): Promise<void> {
-    throw new Error('Method not implemented.');
+    const repo = await this.repo(AssessmentEntity, assessment.organization);
+    const entity = repo.create({
+      ...assessment,
+      fileExports: assessment.fileExports?.pdf,
+    });
+    await repo.save(entity);
+    this.logger.info(`Assessment ${assessment.id} saved`);
   }
 
   public async saveBestPracticeFindings(args: {
