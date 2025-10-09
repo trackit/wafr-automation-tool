@@ -1107,9 +1107,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [],
-      });
+      expect(updatedAssessment?.fileExports).toStrictEqual({});
     });
   });
 });

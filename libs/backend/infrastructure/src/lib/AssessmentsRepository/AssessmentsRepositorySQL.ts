@@ -49,7 +49,10 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
             })),
           })),
         })) ?? [],
-      fileExports: assessment.fileExports?.pdf,
+      fileExports: assessment.fileExports?.pdf?.map((fileExport) => ({
+        ...fileExport,
+        type: AssessmentFileExportType.PDF,
+      })),
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
