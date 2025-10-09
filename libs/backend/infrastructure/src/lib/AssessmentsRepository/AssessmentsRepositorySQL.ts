@@ -162,9 +162,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       );
     }
 
-    const [entities, total] = await qb
-      .leftJoinAndSelect('a.fileExports', 'fileExport')
-      .getManyAndCount();
+    const [entities, total] = await qb.getManyAndCount();
     const items = entities.map((e) =>
       toDomainAssessment(e, organizationDomain),
     );
@@ -200,7 +198,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
         'pillars',
         'pillars.questions',
         'pillars.questions.bestPractices',
-        'fileExports',
       ],
     });
     if (!existing) {
