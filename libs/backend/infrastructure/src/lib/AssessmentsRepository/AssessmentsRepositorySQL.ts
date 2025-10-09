@@ -14,9 +14,9 @@ import {
 import { AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 
+import { AssessmentEntity, FileExportEntity } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { AssessmentEntity, FileExportEntity } from '../infrastructure';
 import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
