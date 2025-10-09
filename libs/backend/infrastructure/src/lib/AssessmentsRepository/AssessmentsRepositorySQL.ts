@@ -19,6 +19,8 @@ import {
   AssessmentEntity,
   BestPracticeEntity,
   FileExportEntity,
+  PillarEntity,
+  QuestionEntity,
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
@@ -196,7 +198,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     pillarId: string;
     pillarBody: PillarBody;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, pillarId, pillarBody } = args;
+    const repo = await this.repo(PillarEntity, organizationDomain);
+
+    await repo.update({ id: pillarId, assessmentId }, pillarBody);
+    this.logger.info(
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`,
+    );
   }
 
   public async updateQuestion(args: {
@@ -206,7 +214,19 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     questionId: string;
     questionBody: QuestionBody;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      questionBody,
+    } = args;
+    const repo = await this.repo(QuestionEntity, organizationDomain);
+
+    await repo.update({ id: questionId, pillarId, assessmentId }, questionBody);
+    this.logger.info(
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`,
+    );
   }
 
   public async updateBestPractice(args: {
@@ -217,7 +237,23 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
   }): Promise<void> {
-    throw new Error('Method not implemented.');
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeBody,
+    } = args;
+    const repo = await this.repo(BestPracticeEntity, organizationDomain);
+
+    await repo.update(
+      { id: bestPracticeId, questionId, pillarId, assessmentId },
+      bestPracticeBody,
+    );
+    this.logger.info(
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`,
+    );
   }
 
   public async updateRawGraphDataForScanningTool(args: {
