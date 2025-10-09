@@ -12,7 +12,7 @@ import type {
   ScanningTool,
 } from '@backend/models';
 import { AssessmentsRepository } from '@backend/ports';
-import { createInjectionToken, inject } from '@shared/di-container';
+import { inject } from '@shared/di-container';
 import {
   buildUpdateExpression,
   decodeNextToken,
@@ -400,8 +400,3 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     );
   }
 }
-
-export const tokenAssessmentsRepository =
-  createInjectionToken<AssessmentsRepository>('AssessmentsRepository', {
-    useClass: AssessmentsRepositoryDynamoDB,
-  });
