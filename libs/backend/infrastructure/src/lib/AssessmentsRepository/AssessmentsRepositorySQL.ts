@@ -192,11 +192,14 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const { assessmentId, organizationDomain, scanningTool, graphData } = args;
     const repo = await this.repo(AssessmentEntity, organizationDomain);
     const assessment = await repo.findOne({ where: { id: assessmentId } });
+    if (!assessment) {
+      throw new Error('Assessment not found');
+    }
     await repo.update(
       { id: assessmentId },
       {
         rawGraphData: {
-          ...assessment?.rawGraphData,
+          ...assessment.rawGraphData,
           [scanningTool]: graphData,
         },
       },
