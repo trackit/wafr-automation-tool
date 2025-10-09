@@ -108,7 +108,10 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('0')
         .withQuestions([question])
         .build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
@@ -143,7 +146,10 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('0')
         .withQuestions([question])
         .build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
@@ -183,7 +189,10 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('0')
         .withQuestions([question])
         .build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await repository.save(assessment);
 
       await repository.saveBestPracticeFindings({
@@ -798,7 +807,10 @@ describe('AssessmentsRepositorySQL', () => {
     it('should update the raw graph data for a scanning tool', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic().withRawGraphData({}).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withRawGraphData({})
+        .build();
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
@@ -841,7 +853,10 @@ describe('AssessmentsRepositorySQL', () => {
     it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
       const { repository } = setup();
 
-      const assessment = AssessmentMother.basic().withRawGraphData({}).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withRawGraphData({})
+        .build();
       await repository.save(assessment);
 
       const graphData = AssessmentGraphDataMother.basic()
@@ -885,6 +900,7 @@ describe('AssessmentsRepositorySQL', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
         .withRawGraphData({
           [ScanningTool.CLOUD_CUSTODIAN]:
             AssessmentGraphDataMother.basic().build(),
@@ -1004,6 +1020,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
         .build();
       const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
         .withFileExports({
           [AssessmentFileExportType.PDF]: [assessmentFileExport],
         })
@@ -1036,6 +1053,7 @@ describe('AssessmentsRepositorySQL', () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
         .withFileExports({
           [AssessmentFileExportType.PDF]: [],
         })
@@ -1070,6 +1088,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
         .build();
       const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
         .withFileExports({
           [AssessmentFileExportType.PDF]: [assessmentFileExport],
         })
