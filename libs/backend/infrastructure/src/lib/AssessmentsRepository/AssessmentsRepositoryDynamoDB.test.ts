@@ -104,6 +104,200 @@ describe('AssessmentsRepositoryDynamoDB', () => {
     });
   });
 
+  describe('saveBestPracticesFindings', () => {
+    it('should add findings to their respective best practice', async () => {
+      const { repository } = setup();
+
+      const bestPractice1 = BestPracticeMother.basic().withId('0').build();
+      const bestPractice2 = BestPracticeMother.basic().withId('1').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice1, bestPractice2])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticesFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        bestPracticesFindings: [
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice1.id,
+            findingIds: new Set(['scanningTool#1']),
+          },
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice2.id,
+            findingIds: new Set(['scanningTool#2']),
+          },
+        ],
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[1].results.has(
+          'scanningTool#2',
+        ),
+      ).toBe(true);
+    });
+
+    it('should add several findings to their respective best practice', async () => {
+      const { repository } = setup();
+
+      const bestPractice1 = BestPracticeMother.basic().withId('0').build();
+      const bestPractice2 = BestPracticeMother.basic().withId('1').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice1, bestPractice2])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticesFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        bestPracticesFindings: [
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice1.id,
+            findingIds: new Set(['scanningTool#1', 'scanningTool#2']),
+          },
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice2.id,
+            findingIds: new Set(['scanningTool#3', 'scanningTool#4']),
+          },
+        ],
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#2',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[1].results.has(
+          'scanningTool#3',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[1].results.has(
+          'scanningTool#4',
+        ),
+      ).toBe(true);
+    });
+
+    it('should be able to add findings several times', async () => {
+      const { repository } = setup();
+
+      const bestPractice1 = BestPracticeMother.basic().withId('0').build();
+      const bestPractice2 = BestPracticeMother.basic().withId('1').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice1, bestPractice2])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      await repository.save(assessment);
+
+      await repository.saveBestPracticesFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        bestPracticesFindings: [
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice1.id,
+            findingIds: new Set(['scanningTool#1']),
+          },
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice2.id,
+            findingIds: new Set(['scanningTool#2']),
+          },
+        ],
+      });
+
+      await repository.saveBestPracticesFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        bestPracticesFindings: [
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice1.id,
+            findingIds: new Set(['scanningTool#3']),
+          },
+          {
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice2.id,
+            findingIds: new Set(['scanningTool#4']),
+          },
+        ],
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#3',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[1].results.has(
+          'scanningTool#2',
+        ),
+      ).toBe(true);
+      expect(
+        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[1].results.has(
+          'scanningTool#4',
+        ),
+      ).toBe(true);
+    });
+  });
+
   describe('saveBestPracticeFindings', () => {
     it('should add findings to a best practice', async () => {
       const { repository } = setup();
