@@ -70,11 +70,11 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       const { pillarId, questionId, bestPracticeId, findingIds } =
         bestPracticesFinding;
 
-      updateExpression += ` pillars.#pillars_${index}.questions.#questions_${index}.bestPractices.#bestPractices_${index}.results :newFindings_${index},`;
-      expressionAttributeNames[`pillars_${index}`] = pillarId;
-      expressionAttributeNames[`questions_${index}`] = questionId;
-      expressionAttributeNames[`bestPractices_${index}`] = bestPracticeId;
-      expressionAttributeValues[`newFindings_${index}`] = findingIds;
+      updateExpression += ` pillars.#pillars${index}.questions.#questions${index}.bestPractices.#bestPractices${index}.results :newFindings${index},`;
+      expressionAttributeNames[`#pillars${index}`] = pillarId;
+      expressionAttributeNames[`#questions${index}`] = questionId;
+      expressionAttributeNames[`#bestPractices${index}`] = bestPracticeId;
+      expressionAttributeValues[`:newFindings${index}`] = findingIds;
       index++;
     }
 
