@@ -49,7 +49,7 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
     this.logger.info(`Assessment saved: ${assessment.id}`);
   }
 
-  public async saveBestPracticesFindings(_args: {
+  public async saveBestPracticesFindings(args: {
     assessmentId: string;
     organizationDomain: string;
     bestPracticesFindings: {
@@ -59,7 +59,42 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       findingIds: Set<string>;
     }[];
   }) {
-    throw new Error('Method not implemented.');
+    const { assessmentId, organizationDomain, bestPracticesFindings } = args;
+
+    let updateExpression = 'ADD';
+    let index = 0;
+    const expressionAttributeNames: Record<string, string> = {};
+    const expressionAttributeValues: Record<string, unknown> = {};
+
+    for (const bestPracticesFinding of bestPracticesFindings) {
+      const { pillarId, questionId, bestPracticeId, findingIds } =
+        bestPracticesFinding;
+
+      updateExpression += ` pillars.#pillars_${index}.questions.#questions_${index}.bestPractices.#bestPractices_${index}.results :newFindings_${index},`;
+      expressionAttributeNames[`pillars_${index}`] = pillarId;
+      expressionAttributeNames[`questions_${index}`] = questionId;
+      expressionAttributeNames[`bestPractices_${index}`] = bestPracticeId;
+      expressionAttributeValues[`newFindings_${index}`] = findingIds;
+      index++;
+    }
+
+    updateExpression = updateExpression.slice(0, -1);
+
+    const params: UpdateCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        PK: getAssessmentPK(organizationDomain),
+        SK: getAssessmentSK(assessmentId),
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+    };
+
+    await this.client.update(params);
+    this.logger.info(
+      `Best practice findings updated successfully for assessment ${assessmentId}`,
+    );
   }
 
   public async saveBestPracticeFindings(args: {
