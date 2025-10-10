@@ -111,7 +111,7 @@ describe('CleanupUseCase', () => {
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
       });
-      expect(findings).toBeUndefined();
+      expect(findings).toEqual([]);
     });
 
     it('should not delete assessment findings if debug mode is enabled and error is defined', async () => {
