@@ -16,12 +16,12 @@ export class AIServiceBedrock implements AIService {
   private readonly logger = inject(tokenLogger);
 
   public async collectStreamedText(
-    response: ConverseStreamCommandOutput
+    response: ConverseStreamCommandOutput,
   ): Promise<string> {
     let result = '';
     if (!response.stream) {
       throw new Error(
-        `Failed to converse: ${response.$metadata.httpStatusCode}`
+        `Failed to converse: ${response.$metadata.httpStatusCode}`,
       );
     }
     for await (const item of response.stream) {
