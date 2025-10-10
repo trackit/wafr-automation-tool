@@ -4,8 +4,8 @@ import {
   FindingRemediation,
   FindingResource,
 } from '@backend/models';
+import { getBestPracticeCustomId } from '@shared/utils';
 
-import { toDomainBestPractice } from '../AssessmentsRepository/AssessmentsRepositorySQLMapping';
 import {
   FindingCommentEntity,
   FindingEntity,
@@ -49,10 +49,20 @@ export function toDomainFinding(e: FindingEntity): Finding {
     id: e.id,
     hidden: e.hidden,
     isAIAssociated: e.isAIAssociated,
-    bestPractices: (e.bestPractices ?? []).map((bp) =>
-      toDomainBestPractice(bp),
-    ),
-    eventCode: e.eventCode,
+    bestPractices: e.bestPractices
+      .map((bp) =>
+        getBestPracticeCustomId({
+          pillarId: bp.pillarId,
+          questionId: bp.questionId,
+          bestPracticeId: bp.id,
+        }),
+      )
+      .join(','),
+    ...(e.eventCode && {
+      metadata: {
+        eventCode: e.eventCode,
+      },
+    }),
     remediation: e.remediation
       ? toDomainFindingRemediation(e.remediation)
       : undefined,

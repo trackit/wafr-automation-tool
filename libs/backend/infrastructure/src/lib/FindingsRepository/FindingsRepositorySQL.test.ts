@@ -1,10 +1,15 @@
 import {
+  AssessmentMother,
+  BestPracticeMother,
   FindingCommentMother,
   FindingMother,
+  PillarMother,
+  QuestionMother,
   SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
+import { AssessmentsRepositorySQL } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './FindingsRepositoryGetBestPracticeFindingsArgsMother';
@@ -32,7 +37,22 @@ afterAll(async () => {
 describe('FindingsRepositorySQL', () => {
   describe('save', () => {
     it('should save a finding by scanningTool for an assessment by ID and organization', async () => {
-      const { repository } = setup();
+      const { repository, assessmentRepository } = setup();
+
+      const bestPractice = BestPracticeMother.basic().withId('0').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
+      await assessmentRepository.save(assessment);
 
       const finding = FindingMother.basic()
         .withBestPractices('0#0#0')
@@ -841,5 +861,8 @@ describe('FindingsRepositorySQL', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  return { repository: new FindingsRepositorySQL() };
+  return {
+    repository: new FindingsRepositorySQL(),
+    assessmentRepository: new AssessmentsRepositorySQL(),
+  };
 };

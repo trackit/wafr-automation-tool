@@ -11,9 +11,14 @@ import {
   FindingRepository,
 } from '@backend/ports';
 import { inject } from '@shared/di-container';
-import { decodeNextToken, encodeNextToken } from '@shared/utils';
+import {
+  decodeNextToken,
+  encodeNextToken,
+  getBestPracticeCustomId,
+} from '@shared/utils';
 
 import {
+  BestPracticeEntity,
   FindingCommentEntity,
   FindingEntity,
   FindingResourceEntity,
@@ -44,14 +49,57 @@ export class FindingsRepositorySQL implements FindingRepository {
     const { assessmentId, organizationDomain, finding } = args;
     const findingRepo = await this.repo(FindingEntity, organizationDomain);
 
-    const { resources = [], ...findingData } = finding;
+    const { resources = [], bestPractices, ...findingData } = finding;
 
     await findingRepo.manager.transaction(async (trx) => {
       const trxFindingRepo = trx.getRepository(FindingEntity);
       const trxResourceRepo = trx.getRepository(FindingResourceEntity);
+      const trxBestPracticeRepo = trx.getRepository(BestPracticeEntity);
+
+      const items = bestPractices
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => {
+          const [pillarId, questionId, bestPracticeId] = s.split('#');
+          return { pillarId, questionId, bestPracticeId };
+        });
+
+      const found = await trxBestPracticeRepo.find({
+        where: items.map(({ pillarId, questionId, bestPracticeId }) => ({
+          id: bestPracticeId,
+          assessmentId,
+          pillarId,
+          questionId,
+        })),
+      });
+
+      const bestPracticesEntities = items.map(
+        ({ pillarId, questionId, bestPracticeId }) => {
+          const key = getBestPracticeCustomId({
+            pillarId,
+            questionId,
+            bestPracticeId,
+          });
+          const entity = found.find(
+            (e) =>
+              e.id === bestPracticeId &&
+              e.pillarId === pillarId &&
+              e.questionId === questionId,
+          );
+          if (!entity) {
+            throw new Error(
+              `Best practice ${key} not found in assessment ${assessmentId}`,
+            );
+          }
+          return entity;
+        },
+      );
 
       const findingEntity = trxFindingRepo.create({
         ...findingData,
+        bestPractices: bestPracticesEntities,
+        eventCode: findingData.metadata?.eventCode,
         assessmentId,
       });
       await trxFindingRepo.save(findingEntity);
@@ -84,25 +132,73 @@ export class FindingsRepositorySQL implements FindingRepository {
     await findingRepo.manager.transaction(async (trx) => {
       const trxFindingRepo = trx.getRepository(FindingEntity);
       const trxResourceRepo = trx.getRepository(FindingResourceEntity);
+      const trxBestPracticeRepo = trx.getRepository(BestPracticeEntity);
 
-      const findingEntities = findings.map((f) => {
-        const { resources: _resources, ...findingData } = f;
-        return trxFindingRepo.create({
-          ...findingData,
-          assessmentId,
-        });
-      });
+      const findingEntities = await Promise.all(
+        findings.map(async (f) => {
+          const { resources: _resources, bestPractices, ...findingData } = f;
+
+          const items = bestPractices
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((s) => {
+              const [pillarId, questionId, bestPracticeId] = s.split('#');
+              return { pillarId, questionId, bestPracticeId };
+            });
+
+          const found = await trxBestPracticeRepo.find({
+            where: items.map(({ pillarId, questionId, bestPracticeId }) => ({
+              id: bestPracticeId,
+              assessmentId,
+              pillarId,
+              questionId,
+            })),
+          });
+
+          const bestPracticesEntities = items.map(
+            ({ pillarId, questionId, bestPracticeId }) => {
+              const key = getBestPracticeCustomId({
+                pillarId,
+                questionId,
+                bestPracticeId,
+              });
+              const entity = found.find(
+                (e) =>
+                  e.id === bestPracticeId &&
+                  e.pillarId === pillarId &&
+                  e.questionId === questionId,
+              );
+              if (!entity) {
+                throw new Error(
+                  `Best practice ${key} not found in assessment ${assessmentId}`,
+                );
+              }
+              return entity;
+            },
+          );
+
+          return trxFindingRepo.create({
+            ...findingData,
+            bestPractices: bestPracticesEntities,
+            eventCode: findingData.metadata?.eventCode,
+            assessmentId,
+          });
+        }),
+      );
       await trxFindingRepo.save(findingEntities);
 
-      const allResourceEntities = findings.flatMap((f) => {
-        return f.resources.map((r) =>
-          trxResourceRepo.create({
-            ...r,
-            assessmentId,
-            findingId: f.id,
-          }),
-        );
-      });
+      const allResourceEntities = findings
+        .filter((f) => f.resources)
+        .flatMap((f) => {
+          return f.resources!.map((r) =>
+            trxResourceRepo.create({
+              ...r,
+              assessmentId,
+              findingId: f.id,
+            }),
+          );
+        });
       await trxResourceRepo.save(allResourceEntities);
 
       this.logger.info(
@@ -244,27 +340,6 @@ export class FindingsRepositorySQL implements FindingRepository {
       findings: entities.map((e) => toDomainFinding(e)),
       nextToken: nextTk,
     };
-  }
-
-  private flattenAggregationFields(
-    fields: Record<string, unknown>,
-    prefix: string[] = [],
-  ): string[][] {
-    if (!fields) {
-      return [];
-    }
-    return Object.entries(fields).flatMap(([key, value]) => {
-      if (value === true) {
-        return [[...prefix, key]];
-      }
-      if (value && typeof value === 'object') {
-        return this.flattenAggregationFields(value as Record<string, unknown>, [
-          ...prefix,
-          key,
-        ]);
-      }
-      return [];
-    });
   }
 
   public async deleteAll(args: {
