@@ -5,7 +5,12 @@ import {
   tokenLogger,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import type { Assessment, Finding, ScanningTool } from '@backend/models';
+import {
+  type Assessment,
+  AssessmentStep,
+  type Finding,
+  type ScanningTool,
+} from '@backend/models';
 import { FindingToBestPracticesAssociation } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -143,6 +148,11 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
         organizationDomain,
       });
     }
+    await this.assessmentsRepository.update({
+      assessmentId,
+      organizationDomain,
+      assessmentBody: { step: AssessmentStep.ASSOCIATING_FINDINGS },
+    });
     const { pillars } = this.questionSetService.get();
     this.logger.info(
       `Associating findings to best practices for assessment ${assessmentId} and organization ${organizationDomain}`,

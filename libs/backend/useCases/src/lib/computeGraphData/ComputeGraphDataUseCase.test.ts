@@ -5,6 +5,7 @@ import {
 import {
   AssessmentGraphDataMother,
   AssessmentMother,
+  AssessmentStep,
   ScanningTool,
   SeverityType,
 } from '@backend/models';
@@ -105,6 +106,7 @@ describe('ComputeGraphDataUseCase', () => {
             Medium: 45,
           },
         })
+        .withStep(AssessmentStep.FINISHED)
         .build(),
     );
   });

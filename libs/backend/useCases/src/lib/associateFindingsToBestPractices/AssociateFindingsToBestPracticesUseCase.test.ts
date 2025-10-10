@@ -7,6 +7,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentStep,
   BestPracticeMother,
   FindingMother,
   PillarMother,
@@ -31,6 +32,26 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await expect(
       useCase.associateFindingsToBestPractices(input),
     ).rejects.toThrow(AssessmentNotFoundError);
+  });
+
+  it('should update assessment step to ASSOCIATING_FINDINGS', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
+    const assessment = AssessmentMother.basic().build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const input = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
+      .build();
+
+    await useCase.associateFindingsToBestPractices(input);
+
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+    });
+    expect(updatedAssessment?.step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
   });
 
   it('should call the association service with findings, scanningTool & pillars', async () => {
