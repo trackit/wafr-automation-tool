@@ -6,7 +6,11 @@ import {
   tokenFakeMarketplaceService,
   tokenFakeOrganizationRepository,
 } from '@backend/infrastructure';
-import { AssessmentStep, OrganizationMother, UserMother } from '@backend/models';
+import {
+  AssessmentStep,
+  OrganizationMother,
+  UserMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import {
