@@ -20,20 +20,21 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
 
   public async startAssessment(
     startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs,
-  ): Promise<void> {
+  ): Promise<string> {
     const command = new StartExecutionCommand({
       input: JSON.stringify(startAssessmentInput),
       stateMachineArn: this.stateMachineArn,
     });
 
     const response = await this.client.send(command);
-    if (response.$metadata.httpStatusCode !== 200) {
+    if (response.$metadata.httpStatusCode !== 200 || !response.executionArn) {
       throw new Error(JSON.stringify(response));
     }
     this.logger.info(
       `Started Assessment#${startAssessmentInput.assessmentId}`,
       startAssessmentInput,
     );
+    return response.executionArn;
   }
 
   public async cancelAssessment(executionId: string): Promise<void> {
