@@ -824,7 +824,10 @@ describe('FindingsRepositorySQL', () => {
       const comment = FindingCommentMother.basic()
         .withText('old-comment-text')
         .build();
-      const finding = FindingMother.basic().withComments([comment]).build();
+      const finding = FindingMother.basic()
+        .withBestPractices('')
+        .withComments([comment])
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
