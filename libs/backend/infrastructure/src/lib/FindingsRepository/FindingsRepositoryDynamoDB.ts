@@ -355,11 +355,20 @@ export class FindingsRepositoryDynamoDB implements FindingRepository {
       `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`,
     );
   }
+
+  public async saveAll(_args: {
+    assessmentId: string;
+    organizationDomain: string;
+    findings: Finding[];
+  }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
 }
 
-export const tokenFindingsRepository = createInjectionToken<FindingRepository>(
-  'FindingRepository',
-  {
-    useClass: FindingsRepositoryDynamoDB,
-  },
-);
+export const tokenFindingsRepositoryDynamoDB =
+  createInjectionToken<FindingsRepositoryDynamoDB>(
+    'FindingRepositoryDynamoDB',
+    {
+      useClass: FindingsRepositoryDynamoDB,
+    },
+  );
