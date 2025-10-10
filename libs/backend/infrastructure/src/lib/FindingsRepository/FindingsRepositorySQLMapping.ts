@@ -67,10 +67,10 @@ export function toDomainFinding(e: FindingEntity): Finding {
       ? toDomainFindingRemediation(e.remediation)
       : undefined,
     resources: (e.resources ?? []).map((r) => toDomainFindingResource(r)),
-    riskDetails: e.riskDetails,
+    riskDetails: e.riskDetails === '' ? undefined : e.riskDetails,
     severity: e.severity,
-    statusCode: e.statusCode,
-    statusDetail: e.statusDetail,
+    statusCode: e.statusCode === '' ? undefined : e.statusCode,
+    statusDetail: e.statusDetail === '' ? undefined : e.statusDetail,
     comments: (e.comments ?? []).map((c) => toDomainFindingComment(c)),
   };
 }

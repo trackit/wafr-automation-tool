@@ -133,7 +133,7 @@ describe('FindingsRepositorySQL', () => {
     it('should get finding for an assessment by ID and organization', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic().build();
+      const finding = FindingMother.basic().withBestPractices('').build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -164,14 +164,20 @@ describe('FindingsRepositorySQL', () => {
     it('should be scoped by organization', async () => {
       const { repository } = setup();
 
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
+      const finding1 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#1')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#2')
+        .build();
       await repository.save({
         assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
@@ -201,14 +207,20 @@ describe('FindingsRepositorySQL', () => {
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const organizationDomain = 'organization1';
 
-      const finding1 = FindingMother.basic().withId('tool#1').build();
+      const finding1 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('tool#1')
+        .build();
       await repository.save({
         assessmentId,
         organizationDomain,
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('tool#2').build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId,
         organizationDomain,
@@ -227,14 +239,20 @@ describe('FindingsRepositorySQL', () => {
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
 
-      const finding1 = FindingMother.basic().withId('tool#1').build();
+      const finding1 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('tool#1')
+        .build();
       await repository.save({
         assessmentId,
         organizationDomain: 'organization1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('tool#2').build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('tool#2')
+        .build();
       await repository.save({
         assessmentId,
         organizationDomain: 'organization2',
@@ -261,7 +279,22 @@ describe('FindingsRepositorySQL', () => {
 
   describe('getBestPracticeFindings', () => {
     it('should return all findings', async () => {
-      const { repository } = setup();
+      const { repository, assessmentRepository } = setup();
+
+      const bestPractice = BestPracticeMother.basic().withId('bp1').build();
+      const question = QuestionMother.basic()
+        .withId('question1')
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('pillar1')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
+      await assessmentRepository.save(assessment);
 
       const finding1 = FindingMother.basic()
         .withBestPractices('pillar1#question1#bp1')
@@ -627,14 +660,20 @@ describe('FindingsRepositorySQL', () => {
     it('should delete findings for an assessment by ID and organization', async () => {
       const { repository } = setup();
 
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
+      const finding1 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#1')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#2')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -664,14 +703,20 @@ describe('FindingsRepositorySQL', () => {
     it('should be scoped by organization', async () => {
       const { repository } = setup();
 
-      const finding1 = FindingMother.basic().withId('scanningTool#1').build();
+      const finding1 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#1')
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
         finding: finding1,
       });
 
-      const finding2 = FindingMother.basic().withId('scanningTool#2').build();
+      const finding2 = FindingMother.basic()
+        .withBestPractices('')
+        .withId('scanningTool#2')
+        .build();
       await repository.save({
         assessmentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization2',
