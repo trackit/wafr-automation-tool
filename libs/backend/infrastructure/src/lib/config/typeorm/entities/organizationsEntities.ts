@@ -38,7 +38,7 @@ export class OrganizationEntity implements Organization {
   aceIntegration?: AceIntegrationEntity;
 }
 
-@Entity('ace_integration')
+@Entity('aceIntegrations')
 export class AceIntegrationEntity {
   @PrimaryColumn('varchar')
   domain!: string;
@@ -67,7 +67,7 @@ export class AceIntegrationEntity {
   opportunityTeamMembers!: OpportunityTeamMemberEntity[];
 }
 
-@Entity('opportunity_team_members')
+@Entity('opportunityTeamMembers')
 export class OpportunityTeamMemberEntity {
   @PrimaryColumn('varchar')
   domain!: string;
