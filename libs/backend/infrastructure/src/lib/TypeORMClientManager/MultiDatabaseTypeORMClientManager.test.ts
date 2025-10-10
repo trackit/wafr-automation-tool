@@ -123,7 +123,7 @@ describe('MultiDatabaseTypeORMClientManager', () => {
       await clientManager.clearClients();
       for (const { tableNames, client } of clientsTableNames) {
         for (const tableName of tableNames) {
-          const results = await client.query(`SELECT * FROM ${tableName};`);
+          const results = await client.query(`SELECT * FROM "${tableName}";`);
           expect(results).toHaveLength(0);
         }
       }
