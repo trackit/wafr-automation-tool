@@ -84,7 +84,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
       new Map<string, Set<string>>(),
     );
 
-    for (const [key] of Array.from(bestPracticesFindingIds.entries())) {
+    for (const key of Array.from(bestPracticesFindingIds.keys())) {
       const [pillarId, questionId, bestPracticeId] = key.split('#');
       assertBestPracticeExists({
         assessment,
