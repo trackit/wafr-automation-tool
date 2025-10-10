@@ -5,6 +5,7 @@ import {
   FindingBody,
   FindingComment,
   FindingCommentBody,
+  SeverityType,
 } from '@backend/models';
 import {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
@@ -100,6 +101,11 @@ export class FindingsRepositorySQL implements FindingRepository {
         ...findingData,
         bestPractices: bestPracticesEntities,
         eventCode: findingData.metadata?.eventCode,
+        riskDetails: findingData.riskDetails ?? '',
+        statusCode: findingData.statusCode ?? '',
+        statusDetail: findingData.statusDetail ?? '',
+        severity: findingData.severity ?? SeverityType.Unknown,
+        comments: findingData.comments ?? [],
         assessmentId,
       });
       await trxFindingRepo.save(findingEntity);
@@ -182,6 +188,11 @@ export class FindingsRepositorySQL implements FindingRepository {
             ...findingData,
             bestPractices: bestPracticesEntities,
             eventCode: findingData.metadata?.eventCode,
+            riskDetails: findingData.riskDetails ?? '',
+            statusCode: findingData.statusCode ?? '',
+            statusDetail: findingData.statusDetail ?? '',
+            severity: findingData.severity ?? SeverityType.Unknown,
+            comments: findingData.comments ?? [],
             assessmentId,
           });
         }),

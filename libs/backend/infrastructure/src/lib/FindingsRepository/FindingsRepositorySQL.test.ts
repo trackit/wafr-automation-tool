@@ -96,7 +96,10 @@ describe('FindingsRepositorySQL', () => {
     it('should add a comment to a finding', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic().withComments([]).build();
+      const finding = FindingMother.basic()
+        .withBestPractices('')
+        .withComments([])
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
