@@ -750,6 +750,7 @@ describe('FindingsRepositorySQL', () => {
 
       const comment = FindingCommentMother.basic().build();
       const finding = FindingMother.basic()
+        .withBestPractices('')
         .withId('scanningTool#12345')
         .withComments([comment])
         .build();
