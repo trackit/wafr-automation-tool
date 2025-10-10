@@ -334,40 +334,10 @@ Resources:
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
-        StartAt: CreateAssessment
+        StartAt: Pass
         States:
-          CreateAssessment:
-            Type: Task
-            Resource: arn:aws:states:::dynamodb:putItem
-            Arguments:
-              TableName: !Ref DynamoDBArn
-              Item:
-                PK:
-                  S: '{% $states.input.organizationDomain %}'
-                SK:
-                  S: "{% 'ASSESSMENT#' & $states.input.assessmentId %}"
-                id:
-                  S: '{% $states.input.assessmentId %}'
-                createdBy:
-                  S: '{% $states.input.createdBy %}'
-                organization:
-                  S: '{% $states.input.organizationDomain %}'
-                name:
-                  S: '{% $states.input.name %}'
-                regions:
-                  L: '{% $states.input.regions %}'
-                roleArn:
-                  S: '{% $states.input.roleArn %}'
-                workflows:
-                  L: '{% $states.input.workflows %}'
-                step:
-                  S: 'SCANNING_STARTED'
-                rawGraphData:
-                  M: {}
-                executionArn:
-                  S: '{% $states.context.Execution.Id %}'
-                createdAt:
-                  S: '{% $states.input.createdAt %}'
+          Pass:
+            Type: Pass
             Assign:
               assessmentId: '{% $states.input.assessmentId %}'
               organizationDomain: '{% $states.input.organizationDomain %}'
@@ -375,14 +345,6 @@ Resources:
               roleArn: '{% $states.input.roleArn %}'
               workflows: '{% $states.input.workflows %}'
             Next: ScanningTools
-            Catch:
-              - ErrorEquals:
-                  - States.ALL
-                Next: CleanupOnError
-                Output:
-                  assessmentId: '{% $states.input.assessmentId %}'
-                  organizationDomain: '{% $states.input.organizationDomain %}'
-                  error: '{% $states.errorOutput %}'
           ScanningTools:
             Type: Parallel
             Branches:

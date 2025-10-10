@@ -1,12 +1,14 @@
 import {
+  tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
   tokenFeatureToggleRepository,
   tokenIdGenerator,
   tokenLogger,
   tokenMarketplaceService,
   tokenOrganizationRepository,
+  tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { User } from '@backend/models';
+import { Assessment, AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -32,7 +34,9 @@ export interface StartAssessmentUseCase {
 
 export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
+  private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly marketplaceService = inject(tokenMarketplaceService);
+  private readonly assessmentRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
     tokenFeatureToggleRepository,
@@ -97,6 +101,35 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     return false;
   }
 
+  private async createAssessment(
+    args: StartAssessmentUseCaseArgs,
+  ): Promise<Assessment> {
+    const { name, user, roleArn } = args;
+    const assessmentId = this.idGenerator.generate();
+    const workflows =
+      args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
+    const regions = args.regions ?? [];
+    const questionSet = this.questionSetService.get();
+
+    const assessment: Assessment = {
+      id: assessmentId,
+      name,
+      regions,
+      workflows,
+      roleArn,
+      createdAt: new Date(),
+      createdBy: user.id,
+      organization: user.organizationDomain,
+      questionVersion: questionSet.version,
+      pillars: questionSet.pillars,
+      step: AssessmentStep.SCANNING_STARTED,
+      executionArn: '',
+      rawGraphData: {},
+    };
+    await this.assessmentRepository.save(assessment);
+    return assessment;
+  }
+
   public async startAssessment(
     args: StartAssessmentUseCaseArgs,
   ): Promise<{ assessmentId: string }> {
@@ -111,7 +144,10 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
         domain: user.organizationDomain,
       });
     }
-    await this.stateMachine.startAssessment({
+
+    const assessment = await this.createAssessment(args);
+
+    const executionId = await this.stateMachine.startAssessment({
       name,
       regions,
       workflows,
@@ -121,7 +157,16 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       createdBy: user.id,
       organizationDomain: user.organizationDomain,
     });
-    return { assessmentId };
+
+    await this.assessmentRepository.update({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      assessmentBody: {
+        executionArn: executionId,
+      },
+    });
+
+    return { assessmentId: assessment.id };
   }
 }
 
