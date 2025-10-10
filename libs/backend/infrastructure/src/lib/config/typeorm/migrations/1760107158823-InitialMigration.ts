@@ -1,11 +1,14 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1759772737583 implements MigrationInterface {
-  name = 'InitialMigration1759772737583';
+export class InitialMigration1760107158823 implements MigrationInterface {
+  name = 'InitialMigration1760107158823';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "assessments" ("id" uuid NOT NULL, "createdBy" character varying NOT NULL, "executionArn" character varying, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "questionVersion" character varying, "regions" jsonb NOT NULL DEFAULT '[]', "exportRegion" character varying, "roleArn" character varying NOT NULL, "finished" boolean NOT NULL DEFAULT false, "workflows" jsonb NOT NULL DEFAULT '[]', "error" jsonb, CONSTRAINT "uq_assessments_uuid" UNIQUE ("id"), CONSTRAINT "PK_a3442bd80a00e9111cefca57f6c" PRIMARY KEY ("id"))`,
+      `CREATE TYPE "public"."assessments_step_enum" AS ENUM('SCANNING_STARTED', 'PREPARING_ASSOCIATIONS', 'ASSOCIATING_FINDINGS', 'FINISHED', 'ERRORED')`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "assessments" ("id" uuid NOT NULL, "createdBy" character varying NOT NULL, "executionArn" character varying NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "questionVersion" character varying, "regions" jsonb NOT NULL DEFAULT '[]', "exportRegion" character varying, "roleArn" character varying NOT NULL, "finished" boolean NOT NULL DEFAULT false, "workflows" jsonb NOT NULL DEFAULT '[]', "error" jsonb, "step" "public"."assessments_step_enum" NOT NULL, "rawGraphData" jsonb, "graphData" jsonb, "wafrWorkloadArn" character varying, "opportunityId" character varying, CONSTRAINT "uq_assessments_uuid" UNIQUE ("id"), CONSTRAINT "PK_a3442bd80a00e9111cefca57f6c" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE INDEX "ix_assessments_uuid" ON "assessments" ("id") `,
@@ -26,7 +29,7 @@ export class InitialMigration1759772737583 implements MigrationInterface {
       `CREATE TYPE "public"."bestPractices_risk_enum" AS ENUM('Unknown', 'Informational', 'Low', 'Medium', 'High', 'Critical', 'Fatal', 'Other')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "bestPractices" ("assessmentId" uuid NOT NULL, "questionId" character varying NOT NULL, "pillarId" character varying NOT NULL, "id" character varying NOT NULL, "description" text NOT NULL, "label" character varying NOT NULL, "primaryId" character varying NOT NULL, "risk" "public"."bestPractices_risk_enum" NOT NULL, "checked" boolean NOT NULL DEFAULT false, CONSTRAINT "uq_bp_assessment" UNIQUE ("assessmentId", "questionId", "pillarId", "id"), CONSTRAINT "PK_e73637d262c033b70565fe16fa1" PRIMARY KEY ("assessmentId", "questionId", "pillarId", "id"))`,
+      `CREATE TABLE "bestPractices" ("assessmentId" uuid NOT NULL, "questionId" character varying NOT NULL, "pillarId" character varying NOT NULL, "id" character varying NOT NULL, "description" text NOT NULL, "label" character varying NOT NULL, "primaryId" character varying NOT NULL, "risk" "public"."bestPractices_risk_enum" NOT NULL, "checked" boolean NOT NULL DEFAULT false, "results" character varying array NOT NULL DEFAULT '{}', CONSTRAINT "uq_bp_assessment" UNIQUE ("assessmentId", "questionId", "pillarId", "id"), CONSTRAINT "PK_e73637d262c033b70565fe16fa1" PRIMARY KEY ("assessmentId", "questionId", "pillarId", "id"))`,
     );
     await queryRunner.query(
       `CREATE INDEX "ix_bp_question" ON "bestPractices" ("assessmentId", "questionId", "pillarId", "id") `,
@@ -165,5 +168,6 @@ export class InitialMigration1759772737583 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "pillars"`);
     await queryRunner.query(`DROP INDEX "public"."ix_assessments_uuid"`);
     await queryRunner.query(`DROP TABLE "assessments"`);
+    await queryRunner.query(`DROP TYPE "public"."assessments_step_enum"`);
   }
 }
