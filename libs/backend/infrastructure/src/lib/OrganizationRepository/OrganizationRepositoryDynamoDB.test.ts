@@ -7,12 +7,10 @@ import { inject, reset } from '@shared/di-container';
 import {
   tokenDynamoDBClient,
   tokenDynamoDBDocument,
+  tokenDynamoDBOrganizationTableName,
 } from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import {
-  OrganizationRepositoryDynamoDB,
-  tokenDynamoDBOrganizationTableName,
-} from './OrganizationRepositoryDynamoDB';
+import { OrganizationRepositoryDynamoDB } from './OrganizationRepositoryDynamoDB';
 
 afterEach(async () => {
   const dynamoDBClient = inject(tokenDynamoDBClient);
