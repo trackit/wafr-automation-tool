@@ -531,6 +531,7 @@ describe('AssessmentsRepositorySQL', () => {
             .withSeverities({})
             .build(),
         )
+        .withExecutionArn('old-execution-arn')
         .build();
       await repository.save(assessment);
 
@@ -577,6 +578,7 @@ describe('AssessmentsRepositorySQL', () => {
             ],
           },
           graphData: updatedProwlerGraphData,
+          executionArn: 'new-execution-arn',
         },
       });
 
@@ -620,6 +622,7 @@ describe('AssessmentsRepositorySQL', () => {
             ],
           },
           graphData: updatedProwlerGraphData,
+          executionArn: 'new-execution-arn',
         }),
       );
     });
