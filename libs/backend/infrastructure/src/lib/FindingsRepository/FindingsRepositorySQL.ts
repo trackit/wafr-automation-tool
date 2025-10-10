@@ -14,7 +14,6 @@ import { inject } from '@shared/di-container';
 import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
 import {
-  BestPracticeEntity,
   FindingCommentEntity,
   FindingEntity,
   FindingResourceEntity,
@@ -110,42 +109,6 @@ export class FindingsRepositorySQL implements FindingRepository {
         `${findingEntities.length} findings saved for assessment: ${assessmentId}`,
       );
     });
-  }
-
-  public async saveBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void> {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-    const repo = await this.repo(BestPracticeEntity, organizationDomain);
-
-    await repo
-      .createQueryBuilder()
-      .insert()
-      .into('findingBestPractices')
-      .values(
-        [...bestPracticeFindingIds].map((fid) => ({
-          bp_assessment_id: assessmentId,
-          bp_question_id: questionId,
-          bp_pillar_id: pillarId,
-          bp_id: bestPracticeId,
-          finding_assessment_id: assessmentId,
-          finding_id: fid,
-        })),
-      )
-      .orIgnore()
-      .execute();
   }
 
   public async saveComment(args: {
@@ -302,145 +265,6 @@ export class FindingsRepositorySQL implements FindingRepository {
       }
       return [];
     });
-  }
-
-  private assignAggregationResult(
-    target: Record<string, unknown>,
-    path: string[],
-    counts: Record<string, number>,
-  ): void {
-    const [lastKey] = path.slice(-1);
-    if (!lastKey) {
-      return;
-    }
-    const parent = path
-      .slice(0, -1)
-      .reduce<Record<string, unknown>>((acc, segment) => {
-        if (!segment) {
-          return acc;
-        }
-        if (!acc[segment] || typeof acc[segment] !== 'object') {
-          acc[segment] = {};
-        }
-        return acc[segment] as Record<string, unknown>;
-      }, target);
-    parent[lastKey] = counts;
-  }
-
-  private async computeAggregationForPath(
-    repo: Repository<FindingEntity>,
-    assessmentId: string,
-    path: string[],
-  ): Promise<Record<string, number>> {
-    if (path.length === 0) {
-      return {};
-    }
-
-    const baseAlias = 'finding';
-    const qb = repo
-      .createQueryBuilder(baseAlias)
-      .where(`${baseAlias}.assessmentId = :assessmentId`, { assessmentId });
-
-    const currentAlias = path.slice(0, -1).reduce((alias, segment, index) => {
-      const relationAlias = `relation_${index}`;
-      qb.innerJoin(`${alias}.${segment}`, relationAlias);
-      return relationAlias;
-    }, baseAlias);
-
-    const column = `${currentAlias}.${path[path.length - 1]}`;
-    const selectExpression = `COALESCE(${column}::text, 'unknown')`;
-
-    const rows = await qb
-      .select(selectExpression, 'value')
-      .addSelect('COUNT(*)::int', 'count')
-      .groupBy(selectExpression)
-      .getRawMany<{ value: string | null; count: string | number }>();
-
-    return rows.reduce<Record<string, number>>((acc, row) => {
-      const key = this.normalizeAggregationKey(row.value);
-      acc[key] = Number(row.count ?? 0);
-      return acc;
-    }, {});
-  }
-
-  private normalizeAggregationKey(value: unknown): string {
-    const raw = String(value ?? 'unknown').trim();
-    if (!raw) {
-      return 'unknown';
-    }
-    return raw.toLowerCase();
-  }
-
-  public async aggregateAll<TFields extends FindingAggregationFields>(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    fields: TFields;
-  }): Promise<FindingAggregationResult<TFields>> {
-    const { assessmentId, organizationDomain, fields } = args;
-    const repo = await this.repo(FindingEntity, organizationDomain);
-
-    const fieldPaths = this.flattenAggregationFields(
-      fields as Record<string, unknown>,
-    );
-    if (fieldPaths.length === 0) {
-      return {} as FindingAggregationResult<TFields>;
-    }
-
-    const aggregations: Record<string, unknown> = {};
-    await Promise.all(
-      fieldPaths.map(async (path) => {
-        const counts = await this.computeAggregationForPath(
-          repo,
-          assessmentId,
-          path,
-        );
-        this.assignAggregationResult(aggregations, path, counts);
-      }),
-    );
-    return aggregations as FindingAggregationResult<TFields>;
-  }
-
-  public async countAll(args: {
-    assessmentId: string;
-    organizationDomain: string;
-  }): Promise<number> {
-    const { assessmentId, organizationDomain } = args;
-    const repo = await this.repo(FindingEntity, organizationDomain);
-
-    const qb = repo
-      .createQueryBuilder('f')
-      .where('f.assessmentId = :assessmentId', { assessmentId })
-      .select('COUNT(f.id)', 'count');
-
-    return parseInt((await qb.getRawOne())?.count) || 0;
-  }
-
-  public async countBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-  }): Promise<number> {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-    } = args;
-    const repo = await this.repo(FindingEntity, organizationDomain);
-
-    const qb = repo
-      .createQueryBuilder('f')
-      .innerJoin('f.bestPractices', 'bp')
-      .where('f.assessmentId = :assessmentId', { assessmentId })
-      .andWhere('bp.id = :bestPracticeId', { bestPracticeId })
-      .andWhere('bp.questionId = :questionId', { questionId })
-      .andWhere('bp.pillarId = :pillarId', { pillarId })
-      .select('COUNT(f.id)', 'count');
-
-    return parseInt((await qb.getRawOne())?.count) || 0;
   }
 
   public async deleteAll(args: {
