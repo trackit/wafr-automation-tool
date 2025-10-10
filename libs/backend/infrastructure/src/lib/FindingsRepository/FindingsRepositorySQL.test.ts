@@ -1,5 +1,3 @@
-import { DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
-
 import {
   FindingCommentMother,
   FindingMother,
@@ -7,35 +5,28 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import {
-  tokenDynamoDBAssessmentTableName,
-  tokenDynamoDBClient,
-} from '../config/dynamodb/config';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
-import { FindingsRepositoryDynamoDB } from './FindingsRepositoryDynamoDB';
+import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './FindingsRepositoryGetBestPracticeFindingsArgsMother';
+import { FindingsRepositorySQL } from './FindingsRepositorySQL';
+
+beforeAll(async () => {
+  reset();
+  registerTestInfrastructure();
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.initialize();
+  await clientManager.createClient('organization1');
+  await clientManager.createClient('organization2');
+});
 
 afterEach(async () => {
-  const dynamoDBClient = inject(tokenDynamoDBClient);
-  const tableName = inject(tokenDynamoDBAssessmentTableName);
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.clearClients();
+});
 
-  const scanResult = await dynamoDBClient.send(
-    new ScanCommand({ TableName: tableName }),
-  );
-
-  await Promise.all(
-    (scanResult.Items || []).map(async (item) => {
-      await dynamoDBClient.send(
-        new DeleteItemCommand({
-          TableName: tableName,
-          Key: {
-            PK: item.PK,
-            SK: item.SK,
-          },
-        }),
-      );
-    }),
-  );
+afterAll(async () => {
+  const clientManager = inject(tokenTypeORMClientManager);
+  await clientManager.closeConnections();
 });
 
 describe('FindingsRepositorySQL', () => {
@@ -850,5 +841,5 @@ describe('FindingsRepositorySQL', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  return { repository: new FindingsRepositoryDynamoDB() };
+  return { repository: new FindingsRepositorySQL() };
 };
