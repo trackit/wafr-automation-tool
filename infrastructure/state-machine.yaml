@@ -50,6 +50,16 @@ Parameters:
   AIFindingsAssociationChunkSize:
     Type: Number
     Default: 10
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+    Description: Private subnet IDs where Lambdas will run
+  LambdaSecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: Security group IDs to attach to Lambdas for VPC access
+  DBHost:
+    Type: String
+  DBCredentialsSecretArn:
+    Type: String
 
 Globals:
   Function:
@@ -68,6 +78,9 @@ Globals:
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
+    VpcConfig:
+      SubnetIds: !Ref PrivateSubnetIds
+      SecurityGroupIds: !Ref LambdaSecurityGroupIds
 
 Resources:
   PrepareFindingsAssociationsLogGroup:
@@ -84,6 +97,9 @@ Resources:
       Timeout: 600
       MemorySize: 1024
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -97,13 +113,6 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-                - dynamodb:PutItem
-              Resource:
-                - !Ref DynamoDBArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -126,6 +135,9 @@ Resources:
         Name: AssociateFindingsChunkToBestPracticesFunction
       Timeout: 900
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -145,13 +157,6 @@ Resources:
               Resource:
                 - 'arn:aws:bedrock:*:*:inference-profile/*'
                 - 'arn:aws:bedrock:*::foundation-model/*'
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:PutItem
-                - dynamodb:GetItem
-              Resource:
-                - !Ref DynamoDBArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -174,23 +179,11 @@ Resources:
       Tags:
         Name: CleanupFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:DeleteItem
-                - dynamodb:Query
-                - dynamodb:BatchWriteItem
-                - dynamodb:GetItem
-              Resource:
-                - !Ref DynamoDBArn
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-              Resource:
-                - !Ref OrganizationTableArn
             - Effect: Allow
               Action:
                 - s3:DeleteObject
@@ -219,6 +212,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   PrepareCustodianLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -248,6 +242,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   ComputeGraphDataLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -261,14 +256,9 @@ Resources:
       Tags:
         Name: ComputeGraphDataFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource:
-                - !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -278,6 +268,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -299,13 +290,6 @@ Resources:
                 - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*'
                 - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*'
                 - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*'
-        - Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:PutItem
-              Resource:
-                - !Ref DynamoDBArn
         - Statement:
             - Effect: Allow
               Action: iam:PassRole
@@ -330,7 +314,6 @@ Resources:
                 - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
-                - !GetAtt ComputeGraphDataFunction.Arn
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
