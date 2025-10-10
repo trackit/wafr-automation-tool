@@ -29,6 +29,17 @@ export class FakeFindingsRepository implements FindingRepository {
     this.findings[key].push(finding);
   }
 
+  public async saveAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    findings: Finding[];
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, findings } = args;
+    for (const finding of findings) {
+      await this.save({ assessmentId, organizationDomain, finding });
+    }
+  }
+
   public async saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
