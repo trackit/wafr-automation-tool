@@ -1,5 +1,7 @@
 import {
   registerTestInfrastructure,
+  toDynamoDBAssessmentItem,
+  toDynamoDBFindingItem,
   tokenDynamoDBAssessmentTableName,
   tokenDynamoDBDocument,
   tokenDynamoDBOrganizationTableName,
@@ -9,180 +11,21 @@ import {
   tokenTypeORMClientManager,
 } from '@backend/infrastructure';
 import {
-  Assessment,
-  AssessmentFileExport,
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
-  BestPractice,
   BestPracticeMother,
-  Finding,
-  FindingComment,
   FindingCommentMother,
   FindingMother,
   OrganizationMother,
-  Pillar,
   PillarMother,
-  Question,
   QuestionMother,
   SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import {
-  DynamoDBAssessment,
-  DynamoDBAssessmentFileExport,
-  DynamoDBBestPractice,
-  DynamoDBFinding,
-  DynamoDBFindingComment,
-  DynamoDBPillar,
-  DynamoDBQuestion,
-  MigrateDynamoAdapter,
-} from './MigrateDynamoAdapter';
-
-function toDynamoDBFindingComment(
-  comment: FindingComment,
-): DynamoDBFindingComment {
-  return {
-    id: comment.id,
-    authorId: comment.authorId,
-    text: comment.text,
-    createdAt: comment.createdAt.toISOString(),
-  };
-}
-
-function toDynamoDBFindingItem(
-  finding: Finding,
-  args: {
-    assessmentId: string;
-    organizationDomain: string;
-  },
-): DynamoDBFinding {
-  const { assessmentId, organizationDomain } = args;
-  return {
-    PK: `${organizationDomain}#${assessmentId}#FINDINGS`,
-    SK: finding.id,
-    bestPractices: '',
-    hidden: finding.hidden,
-    id: finding.id,
-    isAIAssociated: finding.isAIAssociated,
-    metadata: { eventCode: finding.eventCode },
-    remediation: finding.remediation,
-    resources: finding.resources,
-    riskDetails: finding.riskDetails,
-    severity: finding.severity,
-    statusCode: finding.statusCode,
-    statusDetail: finding.statusDetail,
-    ...(finding.comments && {
-      comments: Object.fromEntries(
-        finding.comments.map((comment) => [
-          comment.id,
-          toDynamoDBFindingComment(comment),
-        ]),
-      ),
-    }),
-  };
-}
-
-export function toDynamoDBBestPracticeItem(
-  bestPractice: BestPractice,
-): DynamoDBBestPractice {
-  return {
-    description: bestPractice.description,
-    id: bestPractice.id,
-    label: bestPractice.label,
-    primaryId: bestPractice.primaryId,
-    risk: bestPractice.risk,
-    checked: bestPractice.checked,
-    results: new Set<string>(['']),
-  };
-}
-
-export function toDynamoDBQuestionItem(question: Question): DynamoDBQuestion {
-  return {
-    bestPractices: question.bestPractices.reduce(
-      (bestPractices, bestPractice) => ({
-        ...bestPractices,
-        [bestPractice.id]: toDynamoDBBestPracticeItem(bestPractice),
-      }),
-      {},
-    ),
-    disabled: question.disabled,
-    id: question.id,
-    label: question.label,
-    none: question.none,
-    primaryId: question.primaryId,
-  };
-}
-
-export function toDynamoDBPillarItem(pillar: Pillar): DynamoDBPillar {
-  return {
-    disabled: pillar.disabled,
-    id: pillar.id,
-    label: pillar.label,
-    primaryId: pillar.primaryId,
-    questions: pillar.questions.reduce(
-      (questions, question) => ({
-        ...questions,
-        [question.id]: toDynamoDBQuestionItem(question),
-      }),
-      {},
-    ),
-  };
-}
-
-export function toDynamoDBAssessmentItem(
-  assessment: Assessment,
-): DynamoDBAssessment {
-  return {
-    PK: assessment.organization,
-    SK: `ASSESSMENT#${assessment.id}`,
-    createdAt: assessment.createdAt.toISOString(),
-    createdBy: assessment.createdBy,
-    executionArn: assessment.executionArn || '',
-    pillars: assessment.pillars?.reduce(
-      (pillars, pillar) => ({
-        ...pillars,
-        [pillar.id]: toDynamoDBPillarItem(pillar),
-      }),
-      {},
-    ),
-    graphData: AssessmentGraphDataMother.basic().build(),
-    id: assessment.id,
-    name: assessment.name,
-    organization: assessment.organization,
-    questionVersion: assessment.questionVersion,
-    rawGraphData: {},
-    regions: assessment.regions,
-    exportRegion: assessment.exportRegion,
-    roleArn: assessment.roleArn,
-    step: AssessmentStep.FINISHED,
-    workflows: assessment.workflows,
-    error: assessment.error,
-    ...(assessment.fileExports && {
-      fileExports: assessment.fileExports.reduce(
-        (fileExports, fileExport) => {
-          fileExports[fileExport.type][fileExport.id] =
-            toDynamoDBFileExportItem(fileExport);
-          return fileExports;
-        },
-        { [AssessmentFileExportType.PDF]: {} },
-      ),
-    }),
-  };
-}
-
-export function toDynamoDBFileExportItem(
-  assessmentFileExport: AssessmentFileExport,
-): DynamoDBAssessmentFileExport {
-  return {
-    ...assessmentFileExport,
-    createdAt: assessmentFileExport.createdAt.toISOString(),
-  };
-}
+import { MigrateDynamoAdapter } from './MigrateDynamoAdapter';
 
 beforeAll(async () => {
   reset();
@@ -221,14 +64,15 @@ beforeAll(async () => {
         .withName('assessment 1')
         .withOrganization('organization1')
         .withCreatedBy('user-id')
-        .withFileExports([
-          AssessmentFileExportMother.basic()
-            .withId('file-export-id-1')
-            .withType(AssessmentFileExportType.PDF)
-            .withStatus(AssessmentFileExportStatus.COMPLETED)
-            .withObjectKey('export-key-1')
-            .build(),
-        ])
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [
+            AssessmentFileExportMother.basic()
+              .withId('file-export-id-1')
+              .withStatus(AssessmentFileExportStatus.COMPLETED)
+              .withObjectKey('export-key-1')
+              .build(),
+          ],
+        })
         .withPillars([
           PillarMother.basic()
             .withDisabled(false)
@@ -596,28 +440,29 @@ describe('migrateDynamo adapter', () => {
         organizationDomain: 'organization1',
         assessmentId: 'cd2b1fb1-2b04-4408-8754-5ec3f25e963c',
       });
-      expect(org1Assessment1?.fileExports).toEqual([
-        expect.objectContaining({
-          id: 'file-export-id-1',
-          type: AssessmentFileExportType.PDF,
-          status: AssessmentFileExportStatus.COMPLETED,
-          objectKey: 'export-key-1',
-        }),
-      ]);
+      expect(org1Assessment1?.fileExports).toEqual({
+        [AssessmentFileExportType.PDF]: [
+          expect.objectContaining({
+            id: 'file-export-id-1',
+            status: AssessmentFileExportStatus.COMPLETED,
+            objectKey: 'export-key-1',
+          }),
+        ],
+      });
 
       // Validate Org 1 Assessment 2 File Exports
       const org1Assessment2 = await fakeAssessmentsRepository.get({
         organizationDomain: 'organization1',
         assessmentId: 'b0481fc6-8af4-42fd-b479-e99f471bff2a',
       });
-      expect(org1Assessment2?.fileExports).toEqual([]);
+      expect(org1Assessment2?.fileExports).toEqual({});
 
       // Validate Org 2 Assessment 1 File Exports
       const org2Assessment1 = await fakeAssessmentsRepository.get({
         organizationDomain: 'organization2',
         assessmentId: '957b4d8d-3e01-4798-8642-234e38bfefd8',
       });
-      expect(org2Assessment1?.fileExports).toEqual([]);
+      expect(org2Assessment1?.fileExports).toEqual({});
     });
 
     it('should migrate findings', async () => {
