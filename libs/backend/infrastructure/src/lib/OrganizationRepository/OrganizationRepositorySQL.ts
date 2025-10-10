@@ -7,6 +7,7 @@ import { inject } from '@shared/di-container';
 import { OrganizationEntity } from '../config/typeorm';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
+import { toDomainOrganization } from './OrganizationsRepositoryMappingSQL';
 
 export class OrganizationRepositorySQL implements OrganizationRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -36,8 +37,14 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
 
     const entity = await repo.findOne({
       where: { domain: organizationDomain },
+      relations: {
+        aceIntegration: {
+          opportunityTeamMembers: true,
+        },
+      },
     });
 
-    return entity ?? undefined;
+    if (!entity) return undefined;
+    return toDomainOrganization(entity);
   }
 }

@@ -1,3 +1,3 @@
 export * from './FakeOrganizationRepositoryDynamoDB';
-export * from './OrganizationRepository';
+export * from './OrganizationRepository.token';
 export * from './OrganizationRepositoryDynamoDB';

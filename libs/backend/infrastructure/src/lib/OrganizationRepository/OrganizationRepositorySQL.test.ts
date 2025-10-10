@@ -25,6 +25,20 @@ describe('OrganizationRepositorySQL', () => {
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
+        .withAssessmentExportRoleArn(
+          'arn:aws:iam::123456789012:role/ExportRole',
+        )
+        .withAceIntegration({
+          roleArn: 'arn:aws:iam::123456789012:role/testRole',
+          opportunityTeamMembers: [
+            {
+              firstName: 'John',
+              lastName: 'Doe',
+              email: 'johndoe@test.io',
+            },
+          ],
+          solutions: ['solution1', 'solution2'],
+        })
         .build();
       await repository.save(organization);
 
@@ -39,6 +53,20 @@ describe('OrganizationRepositorySQL', () => {
 
       const organization = OrganizationMother.basic()
         .withDomain('test.io')
+        .withAssessmentExportRoleArn(
+          'arn:aws:iam::123456789012:role/ExportRole',
+        )
+        .withAceIntegration({
+          roleArn: 'arn:aws:iam::123456789012:role/testRole',
+          opportunityTeamMembers: [
+            {
+              firstName: 'John',
+              lastName: 'Doe',
+              email: 'johndoe@test.io',
+            },
+          ],
+          solutions: ['solution1', 'solution2'],
+        })
         .build();
       await repository.save(organization);
 

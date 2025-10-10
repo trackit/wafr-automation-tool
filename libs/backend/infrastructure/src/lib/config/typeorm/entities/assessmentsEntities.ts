@@ -63,7 +63,7 @@ export class AssessmentEntity
   @Column('boolean', { default: false })
   finished!: boolean;
 
-  @Column({ type: 'jsonb', nullable: false, default: [] })
+  @Column({ type: 'jsonb', nullable: false, default: [] }) // TODO : check the json declararation
   workflows!: string[];
 
   @Column({ type: 'jsonb', nullable: true })
