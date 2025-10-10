@@ -739,7 +739,10 @@ describe('FindingsRepositorySQL', () => {
     it('should update the finding visibility', async () => {
       const { repository } = setup();
 
-      const finding = FindingMother.basic().withHidden(false).build();
+      const finding = FindingMother.basic()
+        .withBestPractices('')
+        .withHidden(false)
+        .build();
       await repository.save({
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         organizationDomain: 'organization1',
@@ -773,11 +776,13 @@ describe('FindingsRepositorySQL', () => {
       const { repository } = setup();
 
       const finding1 = FindingMother.basic()
+        .withBestPractices('')
         .withId('tool#1')
         .withHidden(false)
         .build();
       const finding2 = FindingMother.basic()
         .withId('tool#1')
+        .withBestPractices('')
         .withHidden(false)
         .build();
 
