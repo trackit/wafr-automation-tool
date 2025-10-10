@@ -6,6 +6,7 @@ import { inject } from '@shared/di-container';
 
 const OrganizationSchema = z.object({
   domain: z.string(),
+  name: z.string(),
   accountId: z.string().optional(),
   assessmentExportRoleArn: z.string().optional(),
   unitBasedAgreementId: z.string().optional(),
