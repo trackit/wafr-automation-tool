@@ -75,7 +75,7 @@ export class FakeFindingsRepository implements FindingRepository {
   }): Promise<Finding[]> {
     const { assessmentId, organizationDomain } = args;
     const key = `${assessmentId}#${organizationDomain}`;
-    return this.findings[key];
+    return this.findings[key] ?? [];
   }
 
   public async getBestPracticeFindings(
