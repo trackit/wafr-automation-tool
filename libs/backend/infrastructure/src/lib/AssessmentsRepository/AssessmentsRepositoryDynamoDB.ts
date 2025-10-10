@@ -69,13 +69,13 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       this.batchSize,
     );
 
-    for (const bestPracticesFindingsItem of batchBestPracticesFindings) {
+    for (const bestPracticesFindingsChunk of batchBestPracticesFindings) {
       let updateExpression = 'ADD';
       let index = 0;
       const expressionAttributeNames: Record<string, string> = {};
       const expressionAttributeValues: Record<string, unknown> = {};
 
-      for (const bestPracticesFinding of bestPracticesFindingsItem) {
+      for (const bestPracticesFinding of bestPracticesFindingsChunk) {
         const { pillarId, questionId, bestPracticeId, findingIds } =
           bestPracticesFinding;
 
