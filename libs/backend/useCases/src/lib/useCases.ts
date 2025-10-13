@@ -21,7 +21,6 @@ export * from './mapScanFindingsToBestPractices';
 export * from './prepareCustodian';
 export * from './prepareFindingsAssociations';
 export * from './rescanAssessment';
-export * from './runDatabaseMigrations';
 export * from './startAssessment';
 export * from './startPDFExport';
 export * from './storeFindingsToAssociate';
