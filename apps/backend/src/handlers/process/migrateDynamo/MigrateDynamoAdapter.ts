@@ -4,19 +4,18 @@ import {
   tokenFindingsRepository,
   tokenFindingsRepositoryDynamoDB,
   tokenLogger,
+  tokenOrganizationRepository,
   tokenOrganizationRepositoryDynamoDB,
+  tokenTypeORMClientManager,
 } from '@backend/infrastructure';
 import { Assessment, Finding, Organization } from '@backend/models';
-import {
-  tokenCreateOrganizationUseCase,
-  tokenRunDatabaseMigrationsUseCase,
-} from '@backend/useCases';
 import { inject } from '@shared/di-container';
 import { getBestPracticeCustomId } from '@shared/utils';
 
 export class MigrateDynamoAdapter {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
+  private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly assessmentsRepositoryDynamoDB = inject(
     tokenAssessmentsRepositoryDynamoDB,
   );
@@ -26,12 +25,7 @@ export class MigrateDynamoAdapter {
   private readonly findingsRepositoryDynamoDB = inject(
     tokenFindingsRepositoryDynamoDB,
   );
-  private readonly runDatabaseMigrationsUseCase = inject(
-    tokenRunDatabaseMigrationsUseCase,
-  );
-  private readonly createOrganizationUseCase = inject(
-    tokenCreateOrganizationUseCase,
-  );
+  private readonly clientManager = inject(tokenTypeORMClientManager);
   private readonly logger = inject(tokenLogger);
 
   private async getAssessments(organization: string): Promise<Assessment[]> {
@@ -140,7 +134,9 @@ export class MigrateDynamoAdapter {
     this.logger.info('Starting migration from DynamoDB to SQL');
 
     // Create main database
-    await this.runDatabaseMigrationsUseCase.runDatabaseMigrations();
+    await this.clientManager.initialize();
+    const mainDataSource = await this.clientManager.getClient();
+    await mainDataSource.runMigrations();
     this.logger.info('Main database migrations ran successfully');
 
     // Recreate organizations
@@ -148,7 +144,7 @@ export class MigrateDynamoAdapter {
     this.logger.info(`Found ${organizations.length} organizations to migrate`);
     await Promise.all(
       organizations.map((org) =>
-        this.createOrganizationUseCase.createOrganization({
+        this.organizationRepository.save({
           ...org,
           name: org.name || org.domain,
         }),
@@ -174,5 +170,7 @@ export class MigrateDynamoAdapter {
     }
 
     this.logger.info('Migration from DynamoDB to SQL completed successfully');
+
+    await this.clientManager.closeConnections();
   }
 }
