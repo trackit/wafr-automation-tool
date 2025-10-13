@@ -1,12 +1,10 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Unique,
 } from 'typeorm';
 
 import {
@@ -24,8 +22,6 @@ import {
 } from '@backend/models';
 
 @Entity('assessments')
-@Unique('uq_assessments_uuid', ['id'])
-@Index('ix_assessments_uuid', ['id'])
 export class AssessmentEntity
   implements
     Omit<
@@ -96,8 +92,6 @@ export class AssessmentEntity
 }
 
 @Entity('pillars')
-@Unique('uq_pillars_assessment', ['assessmentId', 'id'])
-@Index('ix_pillars_assessment', ['assessmentId', 'id'])
 export class PillarEntity implements Omit<Pillar, 'organization'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -127,8 +121,6 @@ export class PillarEntity implements Omit<Pillar, 'organization'> {
 }
 
 @Entity('questions')
-@Unique('uq_questions_assessment', ['assessmentId', 'pillarId', 'id'])
-@Index('ix_questions_pillar', ['assessmentId', 'pillarId', 'id'])
 export class QuestionEntity implements Question {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -165,8 +157,6 @@ export class QuestionEntity implements Question {
 }
 
 @Entity('bestPractices')
-@Unique('uq_bp_assessment', ['assessmentId', 'questionId', 'pillarId', 'id'])
-@Index('ix_bp_question', ['assessmentId', 'questionId', 'pillarId', 'id'])
 export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -210,8 +200,6 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
 }
 
 @Entity('fileExports')
-@Unique('uq_fileExports_assessment', ['assessmentId', 'id'])
-@Index('ix_fileExports_assessment', ['assessmentId', 'id'])
 export class FileExportEntity implements AssessmentFileExport {
   @PrimaryColumn('uuid')
   assessmentId!: string;

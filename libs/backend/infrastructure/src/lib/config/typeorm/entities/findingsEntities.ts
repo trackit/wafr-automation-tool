@@ -10,7 +10,6 @@ import {
   OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
-  Unique,
 } from 'typeorm';
 
 import {
@@ -24,8 +23,6 @@ import {
 import { BestPracticeEntity } from './assessmentsEntities';
 
 @Entity('findings')
-@Unique('uq_findings_pk', ['assessmentId', 'id'])
-@Index('ix_findings_assessment_id', ['assessmentId', 'id'])
 export class FindingEntity implements Omit<Finding, 'bestPractices'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -88,8 +85,6 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
 }
 
 @Entity('findingRemediations')
-@Unique('uq_findingRemediations_pk', ['assessmentId', 'findingId'])
-@Index('ix_findingRemediations_fk', ['assessmentId', 'findingId'])
 export class FindingRemediationEntity implements FindingRemediation {
   @PrimaryColumn('uuid')
   assessmentId!: string;
@@ -112,7 +107,6 @@ export class FindingRemediationEntity implements FindingRemediation {
 }
 
 @Entity('findingResources')
-@Unique('uq_findingResources_pk', ['id'])
 @Index('ix_findingResources_fk', ['assessmentId', 'findingId'])
 export class FindingResourceEntity implements FindingResource {
   @PrimaryGeneratedColumn('uuid')
@@ -145,7 +139,6 @@ export class FindingResourceEntity implements FindingResource {
 }
 
 @Entity('findingComments')
-@Unique('uq_findingComments_pk', ['id'])
 @Index('ix_findingComments_fk', ['assessmentId', 'findingId'])
 export class FindingCommentEntity implements FindingComment {
   @PrimaryColumn('uuid')
