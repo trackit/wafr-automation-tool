@@ -34,14 +34,14 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
   @JoinTable({
     name: 'findingBestPractices',
     joinColumns: [
-      { name: 'finding_assessment_id', referencedColumnName: 'assessmentId' },
-      { name: 'finding_id', referencedColumnName: 'id' },
+      { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+      { name: 'findingId', referencedColumnName: 'id' },
     ],
     inverseJoinColumns: [
-      { name: 'bp_assessment_id', referencedColumnName: 'assessmentId' },
-      { name: 'bp_question_id', referencedColumnName: 'questionId' },
-      { name: 'bp_pillar_id', referencedColumnName: 'pillarId' },
-      { name: 'bp_id', referencedColumnName: 'id' },
+      { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+      { name: 'questionId', referencedColumnName: 'questionId' },
+      { name: 'pillarId', referencedColumnName: 'pillarId' },
+      { name: 'bestPracticeId', referencedColumnName: 'id' },
     ],
   })
   bestPractices!: BestPracticeEntity[];
