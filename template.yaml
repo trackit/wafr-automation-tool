@@ -129,6 +129,8 @@ Resources:
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
         DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+        DynamoDBArn: !GetAtt DynamoDB.Arn
+        OrganizationTableArn: !GetAtt OrganizationTable.Arn
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
