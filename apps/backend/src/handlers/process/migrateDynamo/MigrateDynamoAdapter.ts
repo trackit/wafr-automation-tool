@@ -12,6 +12,7 @@ import {
   tokenRunDatabaseMigrationsUseCase,
 } from '@backend/useCases';
 import { inject } from '@shared/di-container';
+import { getBestPracticeCustomId } from '@shared/utils';
 
 export class MigrateDynamoAdapter {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
@@ -103,7 +104,11 @@ export class MigrateDynamoAdapter {
     const findingsByBestPractice = new Map<string, Set<string>>();
     for (const finding of findings) {
       for (const bpRelation of finding.bestPracticesRelations) {
-        const key = `${bpRelation.pillarId}#${bpRelation.questionId}#${bpRelation.bestPracticeId}`;
+        const key = getBestPracticeCustomId({
+          pillarId: bpRelation.pillarId,
+          questionId: bpRelation.questionId,
+          bestPracticeId: bpRelation.bestPracticeId,
+        });
         if (!findingsByBestPractice.has(key)) {
           findingsByBestPractice.set(key, new Set());
         }
