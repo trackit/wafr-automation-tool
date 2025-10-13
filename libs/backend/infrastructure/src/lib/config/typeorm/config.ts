@@ -1,15 +1,11 @@
-import path, { dirname } from 'path';
+import path from 'path';
 import type { DataSourceOptions } from 'typeorm';
-import { fileURLToPath } from 'url';
 
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 
 import { tokenSecretsManager } from '../../infrastructure';
 import { entities, tenantsEntities } from './entities';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
 

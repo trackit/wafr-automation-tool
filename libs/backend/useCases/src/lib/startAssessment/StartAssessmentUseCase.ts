@@ -133,11 +133,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   public async startAssessment(
     args: StartAssessmentUseCaseArgs,
   ): Promise<{ assessmentId: string }> {
-    const { name, user, roleArn } = args;
-    const assessmentId = this.idGenerator.generate();
-    const workflows =
-      args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
-    const regions = args.regions ?? [];
+    const { user } = args;
 
     if (!(await this.canStartAssessment(args))) {
       throw new OrganizationNoActiveSubscriptionError({
@@ -148,12 +144,12 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const assessment = await this.createAssessment(args);
 
     const executionId = await this.stateMachine.startAssessment({
-      name,
-      regions,
-      workflows,
-      roleArn,
-      assessmentId,
-      createdAt: new Date(),
+      name: assessment.name,
+      regions: assessment.regions,
+      workflows: assessment.workflows,
+      roleArn: assessment.roleArn,
+      assessmentId: assessment.id,
+      createdAt: assessment.createdAt,
       createdBy: user.id,
       organizationDomain: user.organizationDomain,
     });

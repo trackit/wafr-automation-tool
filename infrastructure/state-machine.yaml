@@ -15,10 +15,6 @@ Parameters:
     AllowedValues:
       - true
       - false
-  DynamoDBArn:
-    Type: String
-  OrganizationTableArn:
-    Type: String
   S3BucketName:
     Type: String
   ECSCluster:
@@ -74,10 +70,10 @@ Globals:
       Variables:
         DEBUG: !Ref Debug
         S3_BUCKET: !Ref S3BucketName
-        DDB_TABLE: !Ref DynamoDBArn
-        ORGANIZATION_TABLE: !Ref OrganizationTableArn
         GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
         AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
+        DB_HOST: !Ref DBHost
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
       SecurityGroupIds: !Ref LambdaSecurityGroupIds
@@ -314,6 +310,7 @@ Resources:
                 - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
+                - !GetAtt ComputeGraphDataFunction.Arn
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
