@@ -1,7 +1,9 @@
-import { registerTestInfrastructure } from '@backend/infrastructure';
+import {
+  registerTestInfrastructure,
+  tokenFakeOrganizationRepository,
+} from '@backend/infrastructure';
 import { Organization, OrganizationMother } from '@backend/models';
-import { tokenCreateOrganizationUseCase } from '@backend/useCases';
-import { register, reset } from '@shared/di-container';
+import { inject, reset } from '@shared/di-container';
 
 import { CreateOrganizationAdapter } from './CreateOrganizationAdapter';
 
@@ -37,8 +39,8 @@ describe('CreateOrganizationAdapter', () => {
     await expect(adapter.handle(organization)).resolves.not.toThrow();
   });
 
-  it('should call createOrganization use case', async () => {
-    const { useCase, adapter } = setup();
+  it('should save organization', async () => {
+    const { fakeOrganizationRepository, adapter } = setup();
     const organization = OrganizationMother.basic()
       .withDomain('test.io')
       .withAccountId('account-id')
@@ -47,20 +49,18 @@ describe('CreateOrganizationAdapter', () => {
       .withFreeAssessmentsLeft(5)
       .build();
     await adapter.handle(organization);
-    expect(useCase.createOrganization).toHaveBeenCalledExactlyOnceWith(
-      organization,
-    );
+    expect(
+      fakeOrganizationRepository.organizations[organization.domain],
+    ).toEqual(organization);
   });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
-  const useCase = { createOrganization: vitest.fn() };
-  register(tokenCreateOrganizationUseCase, { useValue: useCase });
   const adapter = new CreateOrganizationAdapter();
   return {
-    useCase,
+    fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
     adapter,
   };
 };

@@ -4,7 +4,6 @@ export * from './cleanup';
 export * from './computeGraphData';
 export * from './createMilestone';
 export * from './createOpportunity';
-export * from './createOrganization';
 export * from './deleteAssessment';
 export * from './deleteComment';
 export * from './deletePDFExport';

@@ -24,7 +24,7 @@ describe('OrganizationRepositorySQL', () => {
       const { repository } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
+        .withDomain('organization1')
         .withAssessmentExportRoleArn(
           'arn:aws:iam::123456789012:role/ExportRole',
         )
@@ -45,6 +45,17 @@ describe('OrganizationRepositorySQL', () => {
       const savedOrganization = await repository.get(organization.domain);
       expect(savedOrganization).toEqual(organization);
     });
+
+    it('should create the organization database', async () => {
+      const { repository, clientManager } = setup();
+      const createClientSpy = vitest.spyOn(clientManager, 'createClient');
+      
+      const organization = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      await repository.save(organization);
+      expect(createClientSpy).toHaveBeenCalledWith('organization1');
+    });
   });
 
   describe('get', () => {
@@ -52,7 +63,7 @@ describe('OrganizationRepositorySQL', () => {
       const { repository } = setup();
 
       const organization = OrganizationMother.basic()
-        .withDomain('test.io')
+        .withDomain('organization1')
         .withAssessmentExportRoleArn(
           'arn:aws:iam::123456789012:role/ExportRole',
         )
@@ -70,14 +81,14 @@ describe('OrganizationRepositorySQL', () => {
         .build();
       await repository.save(organization);
 
-      const fetchedOrganization = await repository.get('test.io');
+      const fetchedOrganization = await repository.get('organization1');
       expect(fetchedOrganization).toEqual(organization);
     });
 
     it('should return undefined if organization does not exist', async () => {
       const { repository } = setup();
 
-      const fetchedOrganization = await repository.get('test.io');
+      const fetchedOrganization = await repository.get('organization1');
       expect(fetchedOrganization).toBeUndefined();
     });
   });
@@ -87,5 +98,8 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  return { repository: new OrganizationRepositorySQL() };
+  return {
+    repository: new OrganizationRepositorySQL(),
+    clientManager: inject(tokenTypeORMClientManager),
+  };
 };

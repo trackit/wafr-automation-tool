@@ -26,7 +26,10 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
 
     const entity = repo.create(organization);
 
-    await repo.save(entity);
+    await Promise.all([
+      repo.save(entity),
+      this.clientManager.createClient(organization.domain),
+    ]);
     this.logger.info(`Organization saved: ${organization.domain}`);
   }
 

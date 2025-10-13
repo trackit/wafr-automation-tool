@@ -1,7 +1,10 @@
 import z from 'zod';
 
+import {
+  tokenLogger,
+  tokenOrganizationRepository,
+} from '@backend/infrastructure';
 import { Organization } from '@backend/models';
-import { tokenCreateOrganizationUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 
 const OrganizationSchema = z.object({
@@ -14,10 +17,12 @@ const OrganizationSchema = z.object({
 }) satisfies z.ZodType<Organization>;
 
 export class CreateOrganizationAdapter {
-  private readonly useCase = inject(tokenCreateOrganizationUseCase);
+  private readonly organizationRepository = inject(tokenOrganizationRepository);
+  private readonly logger = inject(tokenLogger);
 
-  public async handle(params: Organization): Promise<void> {
-    OrganizationSchema.parse(params);
-    await this.useCase.createOrganization(params);
+  public async handle(organization: Organization): Promise<void> {
+    OrganizationSchema.parse(organization);
+    await this.organizationRepository.save(organization);
+    this.logger.info(`Organization ${organization.domain} created.`);
   }
 }
