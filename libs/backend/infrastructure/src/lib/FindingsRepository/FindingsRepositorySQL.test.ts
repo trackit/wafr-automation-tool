@@ -92,6 +92,86 @@ describe('FindingsRepositorySQL', () => {
     });
   });
 
+  describe('saveAll', () => {
+    it('should save multiple findings by scanningTool for an assessment by ID and organization', async () => {
+      const { repository, assessmentRepository } = setup();
+
+      const bestPractice = BestPracticeMother.basic().withId('0').build();
+      const question = QuestionMother.basic()
+        .withId('0')
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic()
+        .withId('0')
+        .withQuestions([question])
+        .build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
+      await assessmentRepository.save(assessment);
+
+      const finding = FindingMother.basic()
+        .withId('scanningTool#0')
+        .withBestPractices('0#0#0')
+        .withHidden(false)
+        .withIsAIAssociated(false)
+        .withMetadata({ eventCode: 'event1' })
+        .withRemediation({
+          desc: 'Remediation description',
+          references: ['ref1', 'ref2'],
+        })
+        .withResources([
+          {
+            name: 'resource1',
+            type: 'AWS::EC2::Instance',
+            uid: 'resource-id-1',
+            region: 'us-west-2',
+          },
+        ])
+        .withRiskDetails('Risk details for finding 1')
+        .withSeverity(SeverityType.High)
+        .withStatusCode('status-code-1')
+        .withStatusDetail('Status detail for finding 1')
+        .build();
+      const finding2 = FindingMother.basic()
+        .withId('scanningTool#1')
+        .withBestPractices('0#0#0')
+        .withHidden(false)
+        .withIsAIAssociated(false)
+        .withMetadata({ eventCode: 'event1' })
+        .withRemediation({
+          desc: 'Remediation description',
+          references: ['ref1', 'ref2'],
+        })
+        .withResources([
+          {
+            name: 'resource1',
+            type: 'AWS::EC2::Instance',
+            uid: 'resource-id-1',
+            region: 'us-west-2',
+          },
+        ])
+        .withRiskDetails('Risk details for finding 1')
+        .withSeverity(SeverityType.High)
+        .withStatusCode('status-code-1')
+        .withStatusDetail('Status detail for finding 1')
+        .build();
+      await repository.saveAll({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        findings: [finding, finding2],
+      });
+
+      const savedFindings = await repository.getAll({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(savedFindings).toEqual([finding, finding2]);
+    });
+  });
+
   describe('saveComment', () => {
     it('should add a comment to a finding', async () => {
       const { repository } = setup();
