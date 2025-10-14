@@ -8,6 +8,8 @@ export const main = async (): Promise<void> => {
   await client.query(
     `DROP DATABASE IF EXISTS "database_trackit_io" WITH (FORCE);`,
   );
+  await client.query('DROP TABLE IF EXISTS "opportunityTeamMembers";');
+  await client.query('DROP TABLE IF EXISTS "aceIntegrations";');
   await client.query(`DROP TABLE IF EXISTS "organizations" CASCADE;`);
   await client.query(`DROP TABLE IF EXISTS "tenants" CASCADE;`);
   await client.query(`DROP TABLE IF EXISTS "migrations" CASCADE;`);
