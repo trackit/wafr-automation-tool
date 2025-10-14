@@ -17,9 +17,9 @@ export class MigrationRunnerAdapter {
     const tenantRepo = mainDataSource.getRepository(Tenant);
     const tenants = await tenantRepo.find();
 
-    this.logger.log(`Migrating ${tenants.length} tenants`);
+    this.logger.info(`Migrating ${tenants.length} tenants`);
     for (const tenant of tenants) {
-      this.logger.log(
+      this.logger.info(
         `\n➡️  Migrating tenant ${tenant.id} (${tenant.databaseName})`,
       );
       const tenantDataSource = await this.clientManager.getClient(tenant.id);
@@ -28,7 +28,7 @@ export class MigrationRunnerAdapter {
         return null;
       });
       if (results) {
-        this.logger.log(
+        this.logger.info(
           `✅ Tenant ${tenant.id}: applied ${results.length} migrations`,
         );
       }
