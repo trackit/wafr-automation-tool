@@ -196,6 +196,22 @@ Resources:
           KeyType: HASH
       DeletionProtectionEnabled: !If [IsDebug, false, true]
 
+
+  AuroraClusterParameterGroup:
+    Type: 'AWS::RDS::DBClusterParameterGroup'
+    Properties:
+      Description: Custom parameter group to disable SSL in AuroraCluster
+      Family: aurora-postgresql17 
+      Parameters:
+        rds.force_ssl: '0'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraClusterParameterGroup
+
   AuroraCluster:
     Type: AWS::RDS::DBCluster
     Properties:
@@ -212,6 +228,7 @@ Resources:
       ServerlessV2ScalingConfiguration:
         MinCapacity: 0
         MaxCapacity: 5
+      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
       Tags:
         - Key: Project
           Value: !Ref Project
