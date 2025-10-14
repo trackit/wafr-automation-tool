@@ -14,7 +14,7 @@ build_files() {
   local src=$1
   local dest=".aws-sam/build/$2"
 
-  npx esbuild "$src" --outdir="$dest" --platform=node --format=cjs --sourcemap --target=es2022
+  npx esbuild "$src" --outdir="$dest" --platform=node --format=cjs --sourcemap --target=es2024
   echo "Built files from $src to $dest"
 }
 
