@@ -14,6 +14,19 @@ const OrganizationSchema = z.object({
   assessmentExportRoleArn: z.string().optional(),
   unitBasedAgreementId: z.string().optional(),
   freeAssessmentsLeft: z.number().optional(),
+  aceIntegration: z
+    .object({
+      roleArn: z.string(),
+      opportunityTeamMembers: z.array(
+        z.object({
+          email: z.string(),
+          firstName: z.string(),
+          lastName: z.string(),
+        }),
+      ),
+      solutions: z.array(z.string()),
+    })
+    .optional(),
 }) satisfies z.ZodType<Organization>;
 
 export class CreateOrganizationAdapter {

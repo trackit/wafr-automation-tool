@@ -23,8 +23,32 @@ describe('CreateOrganizationAdapter', () => {
       .withAssessmentExportRoleArn(undefined)
       .withUnitBasedAgreementId(undefined)
       .withFreeAssessmentsLeft(undefined)
+      .withAceIntegration(undefined)
       .build();
     await expect(adapter.handle(organization)).resolves.not.toThrow();
+  });
+
+  it('should throw if one of the ace integration fields is missing', async () => {
+    const { adapter } = setup();
+    const organization = OrganizationMother.basic()
+      .withDomain('test.io')
+      .withAccountId('account-id')
+      .withAssessmentExportRoleArn('arn:role')
+      .withUnitBasedAgreementId('unit-agreement-id')
+      .withFreeAssessmentsLeft(5)
+      .withAceIntegration({
+        roleArn: 'arn:role',
+        opportunityTeamMembers: [
+          { email: 'member1@test.io', firstName: 'Member', lastName: 'One' },
+          { email: 'member2@test.io', firstName: 'Member', lastName: 'Two' },
+        ],
+        solutions: ['solution1', 'solution2'],
+      })
+      .build();
+    // Remove roleArn to make it invalid
+    // @ts-expect-error Testing invalid input
+    delete organization.aceIntegration?.roleArn;
+    await expect(adapter.handle(organization)).rejects.toThrow();
   });
 
   it('should validate organization', async () => {
@@ -35,6 +59,14 @@ describe('CreateOrganizationAdapter', () => {
       .withAssessmentExportRoleArn('arn:role')
       .withUnitBasedAgreementId('unit-agreement-id')
       .withFreeAssessmentsLeft(5)
+      .withAceIntegration({
+        roleArn: 'arn:role',
+        opportunityTeamMembers: [
+          { email: 'member1@test.io', firstName: 'Member', lastName: 'One' },
+          { email: 'member2@test.io', firstName: 'Member', lastName: 'Two' },
+        ],
+        solutions: ['solution1', 'solution2'],
+      })
       .build();
     await expect(adapter.handle(organization)).resolves.not.toThrow();
   });
