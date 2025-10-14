@@ -1,4 +1,3 @@
-import path from 'path';
 import type { DataSourceOptions } from 'typeorm';
 
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -15,7 +14,7 @@ export const defaultTypeORMConfig: TypeORMConfig = {
   host: process.env.DB_HOST,
   database: 'postgres',
   entities,
-  migrations: [path.join(__dirname, 'migrations/*.js')], // In production, we use the compiled js files
+  migrations: ['./migrations/*.js'], // In production, we use the compiled js files
 };
 
 export const testTypeORMConfig: TypeORMConfig = {
@@ -34,7 +33,7 @@ export const tenantsTypeORMConfig: Pick<
 > = {
   database: 'postgres',
   entities: tenantsEntities,
-  migrations: [path.join(__dirname, 'tenantsMigrations/*.js')], // In production, we use the compiled js files
+  migrations: ['./tenantsMigrations/*.js'], // In production, we use the compiled js files
 };
 
 export const tokenTypeORMConfigCreator = createInjectionToken<

@@ -53,13 +53,13 @@ export class InitialMigration1760107158823 implements MigrationInterface {
       `CREATE INDEX "ix_findingComments_fk" ON "findingComments" ("assessmentId", "findingId") `,
     );
     await queryRunner.query(
-      `CREATE TABLE "findingBestPractices" ("finding_assessment_id" uuid NOT NULL, "finding_id" character varying NOT NULL, "bp_assessment_id" uuid NOT NULL, "bp_question_id" character varying NOT NULL, "bp_pillar_id" character varying NOT NULL, "bp_id" character varying NOT NULL, CONSTRAINT "PK_98c9eb276a7035da8efff372f80" PRIMARY KEY ("finding_assessment_id", "finding_id", "bp_assessment_id", "bp_question_id", "bp_pillar_id", "bp_id"))`,
+      `CREATE TABLE "findingBestPractices" ("findingAssessmentId" uuid NOT NULL, "findingId" character varying NOT NULL, "bestPracticeAssessmentId" uuid NOT NULL, "questionId" character varying NOT NULL, "pillarId" character varying NOT NULL, "bestPracticeId" character varying NOT NULL, CONSTRAINT "PK_5bfac9d42de24ef3e11ff26cb13" PRIMARY KEY ("findingAssessmentId", "findingId", "bestPracticeAssessmentId", "questionId", "pillarId", "bestPracticeId"))`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_80f11db6a0316dcd0d88f56a97" ON "findingBestPractices" ("finding_assessment_id", "finding_id") `,
+      `CREATE INDEX "IDX_b1535dec73c0c697e52c0f1fc0" ON "findingBestPractices" ("findingAssessmentId", "findingId") `,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_d6b5e0b659d288b22fa96a631f" ON "findingBestPractices" ("bp_assessment_id", "bp_question_id", "bp_pillar_id", "bp_id") `,
+      `CREATE INDEX "IDX_a3cb2221c3aab83c80e818d940" ON "findingBestPractices" ("bestPracticeAssessmentId", "questionId", "pillarId", "bestPracticeId") `,
     );
     await queryRunner.query(
       `ALTER TABLE "pillars" ADD CONSTRAINT "FK_b3bc8d4c88901dc8c5d3ba0470d" FOREIGN KEY ("assessmentId") REFERENCES "assessments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
@@ -83,19 +83,19 @@ export class InitialMigration1760107158823 implements MigrationInterface {
       `ALTER TABLE "findingComments" ADD CONSTRAINT "FK_1f9bc05746d55795105db974260" FOREIGN KEY ("findingId", "assessmentId") REFERENCES "findings"("id","assessmentId") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "findingBestPractices" ADD CONSTRAINT "FK_80f11db6a0316dcd0d88f56a972" FOREIGN KEY ("finding_assessment_id", "finding_id") REFERENCES "findings"("assessmentId","id") ON DELETE CASCADE ON UPDATE CASCADE`,
+      `ALTER TABLE "findingBestPractices" ADD CONSTRAINT "FK_b1535dec73c0c697e52c0f1fc07" FOREIGN KEY ("findingAssessmentId", "findingId") REFERENCES "findings"("assessmentId","id") ON DELETE CASCADE ON UPDATE CASCADE`,
     );
     await queryRunner.query(
-      `ALTER TABLE "findingBestPractices" ADD CONSTRAINT "FK_d6b5e0b659d288b22fa96a631fb" FOREIGN KEY ("bp_assessment_id", "bp_question_id", "bp_pillar_id", "bp_id") REFERENCES "bestPractices"("assessmentId","questionId","pillarId","id") ON DELETE CASCADE ON UPDATE CASCADE`,
+      `ALTER TABLE "findingBestPractices" ADD CONSTRAINT "FK_a3cb2221c3aab83c80e818d9407" FOREIGN KEY ("bestPracticeAssessmentId", "questionId", "pillarId", "bestPracticeId") REFERENCES "bestPractices"("assessmentId","questionId","pillarId","id") ON DELETE CASCADE ON UPDATE CASCADE`,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "findingBestPractices" DROP CONSTRAINT "FK_d6b5e0b659d288b22fa96a631fb"`,
+      `ALTER TABLE "findingBestPractices" DROP CONSTRAINT "FK_a3cb2221c3aab83c80e818d9407"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "findingBestPractices" DROP CONSTRAINT "FK_80f11db6a0316dcd0d88f56a972"`,
+      `ALTER TABLE "findingBestPractices" DROP CONSTRAINT "FK_b1535dec73c0c697e52c0f1fc07"`,
     );
     await queryRunner.query(
       `ALTER TABLE "findingComments" DROP CONSTRAINT "FK_1f9bc05746d55795105db974260"`,
@@ -119,10 +119,10 @@ export class InitialMigration1760107158823 implements MigrationInterface {
       `ALTER TABLE "pillars" DROP CONSTRAINT "FK_b3bc8d4c88901dc8c5d3ba0470d"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_d6b5e0b659d288b22fa96a631f"`,
+      `DROP INDEX "public"."IDX_a3cb2221c3aab83c80e818d940"`,
     );
     await queryRunner.query(
-      `DROP INDEX "public"."IDX_80f11db6a0316dcd0d88f56a97"`,
+      `DROP INDEX "public"."IDX_b1535dec73c0c697e52c0f1fc0"`,
     );
     await queryRunner.query(`DROP TABLE "findingBestPractices"`);
     await queryRunner.query(`DROP INDEX "public"."ix_findingComments_fk"`);

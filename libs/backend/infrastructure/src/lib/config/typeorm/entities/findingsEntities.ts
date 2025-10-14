@@ -34,11 +34,11 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
   @JoinTable({
     name: 'findingBestPractices',
     joinColumns: [
-      { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+      { name: 'findingAssessmentId', referencedColumnName: 'assessmentId' },
       { name: 'findingId', referencedColumnName: 'id' },
     ],
     inverseJoinColumns: [
-      { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+      { name: 'bestPracticeAssessmentId', referencedColumnName: 'assessmentId' },
       { name: 'questionId', referencedColumnName: 'questionId' },
       { name: 'pillarId', referencedColumnName: 'pillarId' },
       { name: 'bestPracticeId', referencedColumnName: 'id' },
