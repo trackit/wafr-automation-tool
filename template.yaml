@@ -196,12 +196,11 @@ Resources:
           KeyType: HASH
       DeletionProtectionEnabled: !If [IsDebug, false, true]
 
-
   AuroraClusterParameterGroup:
     Type: 'AWS::RDS::DBClusterParameterGroup'
     Properties:
       Description: Custom parameter group to disable SSL in AuroraCluster
-      Family: aurora-postgresql17 
+      Family: aurora-postgresql17
       Parameters:
         rds.force_ssl: '0'
       Tags:
@@ -289,7 +288,7 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: SsmJump
-  
+
   BackupRole:
     Condition: CreateBackups
     Type: AWS::IAM::Role

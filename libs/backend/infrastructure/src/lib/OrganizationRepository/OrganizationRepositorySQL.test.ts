@@ -49,7 +49,7 @@ describe('OrganizationRepositorySQL', () => {
     it('should create the organization database', async () => {
       const { repository, clientManager } = setup();
       const createClientSpy = vitest.spyOn(clientManager, 'createClient');
-      
+
       const organization = OrganizationMother.basic()
         .withDomain('organization1')
         .build();
