@@ -47,7 +47,7 @@ export class AssessmentEntity
   @Column('varchar', { nullable: true })
   questionVersion?: string;
 
-  @Column({ type: 'jsonb', nullable: false, default: [] })
+  @Column('varchar', { nullable: false, array: true, default: [] })
   regions!: string[];
 
   @Column('varchar', { nullable: true })
@@ -59,7 +59,7 @@ export class AssessmentEntity
   @Column('boolean', { default: false })
   finished!: boolean;
 
-  @Column({ type: 'jsonb', nullable: false, default: [] }) // TODO : check the json declararation
+  @Column('varchar', { nullable: false, array: true, default: [] })
   workflows!: string[];
 
   @Column({ type: 'jsonb', nullable: true })

@@ -8,7 +8,7 @@ export class InitialMigration1760107158823 implements MigrationInterface {
       `CREATE TYPE "public"."assessments_step_enum" AS ENUM('SCANNING_STARTED', 'PREPARING_ASSOCIATIONS', 'ASSOCIATING_FINDINGS', 'FINISHED', 'ERRORED')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "assessments" ("id" uuid NOT NULL, "createdBy" character varying NOT NULL, "executionArn" character varying NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "questionVersion" character varying, "regions" jsonb NOT NULL DEFAULT '[]', "exportRegion" character varying, "roleArn" character varying NOT NULL, "finished" boolean NOT NULL DEFAULT false, "workflows" jsonb NOT NULL DEFAULT '[]', "error" jsonb, "step" "public"."assessments_step_enum" NOT NULL, "rawGraphData" jsonb, "graphData" jsonb, "wafrWorkloadArn" character varying, "opportunityId" character varying, CONSTRAINT "PK_a3442bd80a00e9111cefca57f6c" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "assessments" ("id" uuid NOT NULL, "createdBy" character varying NOT NULL, "executionArn" character varying NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying NOT NULL, "questionVersion" character varying, "regions" character varying array NOT NULL DEFAULT '{}', "exportRegion" character varying, "roleArn" character varying NOT NULL, "finished" boolean NOT NULL DEFAULT false, "workflows" character varying array NOT NULL DEFAULT '{}', "error" jsonb, "step" "public"."assessments_step_enum" NOT NULL, "rawGraphData" jsonb, "graphData" jsonb, "wafrWorkloadArn" character varying, "opportunityId" character varying, CONSTRAINT "PK_a3442bd80a00e9111cefca57f6c" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "pillars" ("assessmentId" uuid NOT NULL, "id" character varying NOT NULL, "disabled" boolean NOT NULL DEFAULT false, "label" character varying NOT NULL, "primaryId" character varying NOT NULL, CONSTRAINT "PK_802c42f29f1ed0dfe066379c706" PRIMARY KEY ("assessmentId", "id"))`,
@@ -38,7 +38,7 @@ export class InitialMigration1760107158823 implements MigrationInterface {
       `CREATE TABLE "findings" ("assessmentId" uuid NOT NULL, "id" character varying NOT NULL, "hidden" boolean NOT NULL, "isAIAssociated" boolean NOT NULL, "eventCode" character varying, "riskDetails" text NOT NULL, "severity" "public"."findings_severity_enum" NOT NULL, "statusCode" character varying NOT NULL, "statusDetail" text NOT NULL, CONSTRAINT "PK_b39edcda0d7788c79c294bd1486" PRIMARY KEY ("assessmentId", "id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "findingRemediations" ("assessmentId" uuid NOT NULL, "findingId" character varying NOT NULL, "desc" text NOT NULL, "references" jsonb NOT NULL DEFAULT '[]', CONSTRAINT "PK_f09f37bc852d3d6adb9cc412ad4" PRIMARY KEY ("assessmentId", "findingId"))`,
+      `CREATE TABLE "findingRemediations" ("assessmentId" uuid NOT NULL, "findingId" character varying NOT NULL, "desc" text NOT NULL, "references" character varying array NOT NULL DEFAULT '{}', CONSTRAINT "PK_f09f37bc852d3d6adb9cc412ad4" PRIMARY KEY ("assessmentId", "findingId"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "findingResources" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "assessmentId" uuid NOT NULL, "findingId" character varying NOT NULL, "name" character varying, "region" character varying, "type" character varying, "uid" character varying, CONSTRAINT "PK_4123540a6fa7a271c64156be7c3" PRIMARY KEY ("id"))`,

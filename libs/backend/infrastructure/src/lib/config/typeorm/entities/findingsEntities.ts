@@ -38,7 +38,10 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
       { name: 'findingId', referencedColumnName: 'id' },
     ],
     inverseJoinColumns: [
-      { name: 'bestPracticeAssessmentId', referencedColumnName: 'assessmentId' },
+      {
+        name: 'bestPracticeAssessmentId',
+        referencedColumnName: 'assessmentId',
+      },
       { name: 'questionId', referencedColumnName: 'questionId' },
       { name: 'pillarId', referencedColumnName: 'pillarId' },
       { name: 'bestPracticeId', referencedColumnName: 'id' },
@@ -95,7 +98,7 @@ export class FindingRemediationEntity implements FindingRemediation {
   @Column('text')
   desc!: string;
 
-  @Column({ type: 'jsonb', nullable: false, default: [] })
+  @Column('varchar', { nullable: false, array: true, default: [] })
   references!: string[];
 
   @OneToOne(() => FindingEntity, (f) => f.remediation, { onDelete: 'CASCADE' })
