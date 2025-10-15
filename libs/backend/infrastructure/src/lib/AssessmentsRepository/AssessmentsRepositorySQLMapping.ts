@@ -131,3 +131,120 @@ export function toDomainAssessment(
     ...(e.opportunityId && { opportunityId: e.opportunityId }),
   };
 }
+
+export function mapPillarsToEntities(
+  assessmentId: string,
+  pillars: Pillar[],
+): PillarEntity[] {
+  return pillars.map((pillar) => mapPillarToEntity(assessmentId, pillar));
+}
+
+function mapPillarToEntity(assessmentId: string, pillar: Pillar): PillarEntity {
+  const pillarEntity = new PillarEntity();
+  pillarEntity.assessmentId = assessmentId;
+  pillarEntity.id = pillar.id;
+  pillarEntity.disabled = pillar.disabled;
+  pillarEntity.label = pillar.label;
+  pillarEntity.primaryId = pillar.primaryId;
+  pillarEntity.questions = mapQuestionsToEntities(
+    assessmentId,
+    pillar.id,
+    pillar.questions,
+  );
+
+  return pillarEntity;
+}
+
+function mapQuestionsToEntities(
+  assessmentId: string,
+  pillarId: string,
+  questions: Question[],
+): QuestionEntity[] {
+  return questions.map((question) =>
+    mapQuestionToEntity(assessmentId, pillarId, question),
+  );
+}
+
+function mapQuestionToEntity(
+  assessmentId: string,
+  pillarId: string,
+  question: Question,
+): QuestionEntity {
+  const questionEntity = new QuestionEntity();
+  questionEntity.assessmentId = assessmentId;
+  questionEntity.pillarId = pillarId;
+  questionEntity.id = question.id;
+  questionEntity.disabled = question.disabled;
+  questionEntity.label = question.label;
+  questionEntity.none = question.none;
+  questionEntity.primaryId = question.primaryId;
+  questionEntity.bestPractices = mapBestPracticesToEntities(
+    assessmentId,
+    pillarId,
+    question.id,
+    question.bestPractices,
+  );
+
+  return questionEntity;
+}
+
+function mapBestPracticesToEntities(
+  assessmentId: string,
+  pillarId: string,
+  questionId: string,
+  bestPractices: BestPractice[],
+): BestPracticeEntity[] {
+  return bestPractices.map((bp) =>
+    mapBestPracticeToEntity(assessmentId, pillarId, questionId, bp),
+  );
+}
+
+function mapBestPracticeToEntity(
+  assessmentId: string,
+  pillarId: string,
+  questionId: string,
+  bp: BestPractice,
+): BestPracticeEntity {
+  const bpEntity = new BestPracticeEntity();
+  bpEntity.assessmentId = assessmentId;
+  bpEntity.pillarId = pillarId;
+  bpEntity.questionId = questionId;
+  bpEntity.id = bp.id;
+  bpEntity.description = bp.description;
+  bpEntity.label = bp.label;
+  bpEntity.primaryId = bp.primaryId;
+  bpEntity.risk = bp.risk;
+  bpEntity.checked = bp.checked;
+  bpEntity.results = Array.from(bp.results);
+
+  return bpEntity;
+}
+
+export function mapFileExportsToEntities(
+  assessmentId: string,
+  fileExports: Partial<
+    Record<AssessmentFileExportType, AssessmentFileExport[]>
+  >,
+): FileExportEntity[] {
+  return Object.entries(fileExports).flatMap(([type, exports]) =>
+    exports.map((fileExport) =>
+      mapFileExportToEntity(
+        assessmentId,
+        type as AssessmentFileExportType,
+        fileExport,
+      ),
+    ),
+  );
+}
+
+function mapFileExportToEntity(
+  assessmentId: string,
+  type: AssessmentFileExportType,
+  fileExport: AssessmentFileExport,
+): FileExportEntity {
+  return {
+    assessmentId,
+    type,
+    ...fileExport,
+  };
+}
