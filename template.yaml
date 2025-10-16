@@ -61,14 +61,18 @@ Resources:
             6,
             !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
           ]
-        DynamoDBArn: !GetAtt DynamoDB.Arn
-        S3BucketName: !Ref S3Bucket
         InitialUserEmail: !Ref InitialUserEmail
         LogRetentionInDays: !Ref LogRetentionInDays
-        OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         ParentStackName: !Ref AWS::StackName
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+        S3BucketName: !Ref S3Bucket
+        DynamoDBArn: !GetAtt DynamoDB.Arn
+        OrganizationTableArn: !GetAtt OrganizationTable.Arn
   Network:
     Type: AWS::Serverless::Application
     Properties:
@@ -107,7 +111,6 @@ Resources:
         Project: !Ref Project
         ParentStackName: !Ref 'AWS::StackName'
         Debug: !Ref Debug
-        DynamoDBArn: !GetAtt DynamoDB.Arn
         S3BucketName: !Ref S3Bucket
         ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
         ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
@@ -115,14 +118,41 @@ Resources:
         ScanTaskRole: !GetAtt ScanningTools.Outputs.ScanTaskRole
         CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
         CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
-        Subnet: !GetAtt Network.Outputs.Subnet
-        SecurityGroup: !GetAtt Network.Outputs.SecurityGroup
+        Subnet: !GetAtt Network.Outputs.PublicSubnetEcsId
+        SecurityGroup: !GetAtt Network.Outputs.EcsSecurityGroupId
         LogRetentionInDays: !Ref LogRetentionInDays
-        OrganizationTableArn: !GetAtt OrganizationTable.Arn
         UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
         MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
         GenAIMaxRetries: !Ref GenAIMaxRetries
         AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-${AWS::AccountId}'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: S3 Bucket
+  Frontend:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/frontend.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: Frontend
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        ParentStackName: !Ref AWS::StackName
+
   DynamoDB:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -146,6 +176,119 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       DeletionProtectionEnabled: !If [IsDebug, false, true]
+  OrganizationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${AWS::StackName}-organization'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: OrganizationTable
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      DeletionProtectionEnabled: !If [IsDebug, false, true]
+
+  AuroraClusterParameterGroup:
+    Type: 'AWS::RDS::DBClusterParameterGroup'
+    Properties:
+      Description: Custom parameter group to disable SSL in AuroraCluster
+      Family: aurora-postgresql17
+      Parameters:
+        rds.force_ssl: '0'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraClusterParameterGroup
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      DBSubnetGroupName: !GetAtt Network.Outputs.AuroraDBSubnetGroupId
+      VpcSecurityGroupIds: [!GetAtt Network.Outputs.AuroraSecurityGroupId]
+      DeletionProtection: !If [CreateBackups, true, false]
+      BackupRetentionPeriod: !If [CreateBackups, 7, 1]
+      StorageEncrypted: true
+      Port: 5432
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0
+        MaxCapacity: 5
+      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraCluster
+
+  AuroraInstanceWriter:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraInstanceWriter
+
+  JumpInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+
+  JumpInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref JumpInstanceRole]
+
+  JumpInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-06a974f9b8a97ecf2
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref JumpInstanceProfile
+      SubnetId: !GetAtt Network.Outputs.PrivateSubnetAId
+      SecurityGroupIds:
+        - !GetAtt Network.Outputs.JumpSecurityGroupId
+      SourceDestCheck: true
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: SsmJump
+
   BackupRole:
     Condition: CreateBackups
     Type: AWS::IAM::Role
@@ -189,48 +332,6 @@ Resources:
         SelectionName: !Sub ${AWS::StackName}-select-ddb
         Resources:
           - !GetAtt DynamoDB.Arn
-  OrganizationTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub '${AWS::StackName}-organization'
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: OrganizationTable
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: PK
-          AttributeType: S
-      KeySchema:
-        - AttributeName: PK
-          KeyType: HASH
-      DeletionProtectionEnabled: !If [IsDebug, false, true]
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub '${AWS::StackName}-${AWS::AccountId}'
-      Tags:
-        - Key: Project
-          Value: !Ref Project
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Name
-          Value: S3 Bucket
-  Frontend:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: ./infrastructure/frontend.yaml
-      Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: Frontend
-      Parameters:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        ParentStackName: !Ref AWS::StackName
 
 Outputs:
   ApiEndpoint:
@@ -251,3 +352,6 @@ Outputs:
   CloudFrontDistributionId:
     Description: CloudFront Distribution ID
     Value: !GetAtt Frontend.Outputs.DistributionId
+  JumpInstanceId:
+    Description: EC2 instance id for SSM jump
+    Value: !Ref JumpInstance

@@ -51,7 +51,7 @@ describe('DeleteAssessmentUseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    expect(findings).toBeUndefined();
+    expect(findings).toEqual([]);
   });
 
   it('should delete assessment', async () => {

@@ -56,6 +56,7 @@ export interface AssessmentBody {
   fileExports?: AssessmentFileExports;
   wafrWorkloadArn?: string;
   opportunityId?: string;
+  executionArn?: string;
 }
 
 export enum AssessmentFileExportType {

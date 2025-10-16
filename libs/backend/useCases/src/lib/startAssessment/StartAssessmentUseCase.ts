@@ -1,12 +1,14 @@
 import {
+  tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
   tokenFeatureToggleRepository,
   tokenIdGenerator,
   tokenLogger,
   tokenMarketplaceService,
   tokenOrganizationRepository,
+  tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { User } from '@backend/models';
+import { Assessment, AssessmentStep, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -32,7 +34,9 @@ export interface StartAssessmentUseCase {
 
 export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
   private readonly stateMachine = inject(tokenAssessmentsStateMachine);
+  private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly marketplaceService = inject(tokenMarketplaceService);
+  private readonly assessmentRepository = inject(tokenAssessmentsRepository);
   private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly featureToggleRepository = inject(
     tokenFeatureToggleRepository,
@@ -97,31 +101,68 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     return false;
   }
 
-  public async startAssessment(
+  private async createAssessment(
     args: StartAssessmentUseCaseArgs,
-  ): Promise<{ assessmentId: string }> {
+  ): Promise<Assessment> {
     const { name, user, roleArn } = args;
     const assessmentId = this.idGenerator.generate();
     const workflows =
       args.workflows?.map((workflow) => workflow.toLowerCase()) ?? [];
     const regions = args.regions ?? [];
+    const questionSet = this.questionSetService.get();
+
+    const assessment: Assessment = {
+      id: assessmentId,
+      name,
+      regions,
+      workflows,
+      roleArn,
+      createdAt: new Date(),
+      createdBy: user.id,
+      organization: user.organizationDomain,
+      questionVersion: questionSet.version,
+      pillars: questionSet.pillars,
+      step: AssessmentStep.SCANNING_STARTED,
+      executionArn: '',
+      rawGraphData: {},
+    };
+    await this.assessmentRepository.save(assessment);
+    return assessment;
+  }
+
+  public async startAssessment(
+    args: StartAssessmentUseCaseArgs,
+  ): Promise<{ assessmentId: string }> {
+    const { user } = args;
 
     if (!(await this.canStartAssessment(args))) {
       throw new OrganizationNoActiveSubscriptionError({
         domain: user.organizationDomain,
       });
     }
-    await this.stateMachine.startAssessment({
-      name,
-      regions,
-      workflows,
-      roleArn,
-      assessmentId,
-      createdAt: new Date(),
+
+    const assessment = await this.createAssessment(args);
+
+    const executionId = await this.stateMachine.startAssessment({
+      name: assessment.name,
+      regions: assessment.regions,
+      workflows: assessment.workflows,
+      roleArn: assessment.roleArn,
+      assessmentId: assessment.id,
+      createdAt: assessment.createdAt,
       createdBy: user.id,
       organizationDomain: user.organizationDomain,
     });
-    return { assessmentId };
+
+    await this.assessmentRepository.update({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      assessmentBody: {
+        executionArn: executionId,
+      },
+    });
+
+    return { assessmentId: assessment.id };
   }
 }
 

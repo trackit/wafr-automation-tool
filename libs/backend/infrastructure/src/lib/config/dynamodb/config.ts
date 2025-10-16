@@ -57,6 +57,17 @@ export const tokenDynamoDBAssessmentTableName = createInjectionToken<string>(
   },
 );
 
+export const tokenDynamoDBOrganizationTableName = createInjectionToken<string>(
+  'DynamoDBOrganizationTableName',
+  {
+    useFactory: () => {
+      const tableName = process.env.ORGANIZATION_TABLE;
+      assertIsDefined(tableName, 'ORGANIZATION_TABLE is not defined');
+      return tableName;
+    },
+  },
+);
+
 export const tokenDynamoDBAssessmentBatchSize = createInjectionToken<number>(
   'DynamoDBAssessmentBatchSize',
   { useValue: 25 }, // Default batch size for DynamoDB operations

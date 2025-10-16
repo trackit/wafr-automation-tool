@@ -3,9 +3,11 @@ import z from 'zod';
 import { Organization } from '@backend/models';
 import { OrganizationRepository } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
-import { assertIsDefined } from '@shared/utils';
 
-import { tokenDynamoDBDocument } from '../config/dynamodb/config';
+import {
+  tokenDynamoDBDocument,
+  tokenDynamoDBOrganizationTableName,
+} from '../config/dynamodb/config';
 import { tokenLogger } from '../Logger';
 
 const OrganizationSchema = z.object({
@@ -30,7 +32,7 @@ const OrganizationSchema = z.object({
     .optional(),
 }) as z.ZodType<Organization>;
 
-export type DynamoDBOrganization = Organization & { PK: string };
+export type DynamoDBOrganization = Organization & { PK: string; name?: string };
 
 export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
   private readonly client = inject(tokenDynamoDBDocument);
@@ -68,22 +70,32 @@ export class OrganizationRepositoryDynamoDB implements OrganizationRepository {
       return undefined;
     }
     const { PK: _PK, ...organization } = dynamoOrganization;
-    return OrganizationSchema.parse(organization);
+    return OrganizationSchema.parse({
+      ...organization,
+      name: organization.name ?? organization.domain,
+    });
+  }
+
+  public async getAll(): Promise<Organization[]> {
+    const result = await this.client.scan({
+      TableName: this.tableName,
+      Limit: 1000,
+    });
+    const organizations =
+      (result.Items as DynamoDBOrganization[] | undefined) ?? [];
+    return organizations.map(({ PK: _PK, ...org }) =>
+      OrganizationSchema.parse({
+        ...org,
+        name: org.name ?? org.domain,
+      }),
+    );
   }
 }
 
-export const tokenOrganizationRepository =
-  createInjectionToken<OrganizationRepository>('OrganizationRepository', {
-    useClass: OrganizationRepositoryDynamoDB,
-  });
-
-export const tokenDynamoDBOrganizationTableName = createInjectionToken<string>(
-  'DynamoDBOrganizationTableName',
-  {
-    useFactory: () => {
-      const tableName = process.env.ORGANIZATION_TABLE;
-      assertIsDefined(tableName, 'ORGANIZATION_TABLE is not defined');
-      return tableName;
+export const tokenOrganizationRepositoryDynamoDB =
+  createInjectionToken<OrganizationRepositoryDynamoDB>(
+    'OrganizationRepositoryDynamoDB',
+    {
+      useClass: OrganizationRepositoryDynamoDB,
     },
-  },
-);
+  );

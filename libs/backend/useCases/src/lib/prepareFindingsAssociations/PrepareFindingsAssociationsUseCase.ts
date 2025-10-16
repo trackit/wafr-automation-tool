@@ -5,6 +5,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentGraphData,
+  AssessmentStep,
   Finding,
   Pillar,
   ScanFinding,
@@ -163,6 +164,11 @@ export class PrepareFindingsAssociationsUseCaseImpl
         organizationDomain,
       });
     }
+    await this.assessmentsRepository.update({
+      assessmentId,
+      organizationDomain,
+      assessmentBody: { step: AssessmentStep.PREPARING_ASSOCIATIONS },
+    });
     const scanFindings =
       await this.getScannedFindingsUseCase.getScannedFindings(args);
     const questionSet = this.questionSetService.get();

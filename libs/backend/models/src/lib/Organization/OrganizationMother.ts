@@ -48,7 +48,7 @@ export class OrganizationMother {
   }
 
   public withFreeAssessmentsLeft(
-    freeAssessmentsLeft: number,
+    freeAssessmentsLeft: number | undefined,
   ): OrganizationMother {
     this.data.freeAssessmentsLeft = freeAssessmentsLeft;
     return this;

@@ -13,7 +13,7 @@
       }
     },
     "build": {
-      "command": "sam build --cached && cp -R libs/backend/useCases/src/lib/prepareCustodian/policies .aws-sam/build/StateMachine/PrepareCustodianFunction/",
+      "command": "sh scripts/backend/build.sh",
       "options": {
         "cwd": "."
       }

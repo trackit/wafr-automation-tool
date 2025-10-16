@@ -28,6 +28,7 @@ import {
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
+import { testTypeORMConfig, tokenTypeORMConfigCreator } from './infrastructure';
 import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -52,6 +53,7 @@ import {
   tokenFakeQuestionSetService,
   tokenQuestionSetService,
 } from './QuestionSetService';
+import { tokenFakeSecretsManager, tokenSecretsManager } from './SecretsManager';
 import {
   tokenFakeWellArchitectedToolService,
   tokenWellArchitectedToolService,
@@ -105,7 +107,13 @@ export const registerTestInfrastructure = () => {
   register(tokenCognitoService, {
     useFactory: () => inject(tokenFakeCognitoService),
   });
+  register(tokenSecretsManager, {
+    useFactory: () => inject(tokenFakeSecretsManager),
+  });
   register(tokenPartnerCentralSellingService, {
     useFactory: () => inject(tokenFakePartnerCentralSellingService),
+  });
+  register(tokenTypeORMConfigCreator, {
+    useFactory: async () => testTypeORMConfig,
   });
 };

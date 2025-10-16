@@ -19,20 +19,30 @@ Parameters:
     Type: String
   StateMachineName:
     Type: String
-  DynamoDBArn:
-    Type: String
-  S3BucketName:
-    Type: String
   InitialUserEmail:
     Type: String
   LogRetentionInDays:
     Type: Number
     Default: 14
-  OrganizationTableArn:
-    Type: String
   UnitBasedPricingProductCode:
     Type: String
   MonthlySubscriptionProductCode:
+    Type: String
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+    Description: Private subnet IDs where Lambdas will run
+  LambdaSecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: Security group IDs to attach to Lambdas for VPC access
+  DBHost:
+    Type: String
+  DBCredentialsSecretArn:
+    Type: String
+  S3BucketName:
+    Type: String
+  DynamoDBArn:
+    Type: String
+  OrganizationTableArn:
     Type: String
 
 Conditions:
@@ -52,10 +62,16 @@ Globals:
       Project: !Ref Project
     Environment:
       Variables:
-        DDB_TABLE: !Ref DynamoDBArn
         STATE_MACHINE_ARN: !Ref StateMachineArn
+        DB_HOST: !Ref DBHost
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
+        DDB_TABLE: !Ref DynamoDBArn
         ORGANIZATION_TABLE: !Ref OrganizationTableArn
         DEBUG: !Ref Debug
+    VpcConfig:
+      SubnetIds: !Ref PrivateSubnetIds
+      SecurityGroupIds: !Ref LambdaSecurityGroupIds
+      Ipv6AllowedForDualStack: true
 
 Resources:
   UserPool:
@@ -93,6 +109,7 @@ Resources:
           Value: true
       Username: !Ref InitialUserEmail
       UserPoolId: !Ref UserPool
+
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -115,18 +132,16 @@ Resources:
       AllowedOAuthFlows:
         - code
       PreventUserExistenceErrors: ENABLED
+
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
       IdentityPoolName: !Sub '${AWS::StackName}'
       AllowUnauthenticatedIdentities: false
       CognitoIdentityProviders:
-        - ClientId:
-            Ref: UserPoolClient
-          ProviderName:
-            Fn::GetAtt:
-              - UserPool
-              - ProviderName
+        - ClientId: !Ref UserPoolClient
+          ProviderName: !GetAtt UserPool.ProviderName
+
   CognitoAuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
@@ -142,12 +157,129 @@ Resources:
                 cognito-identity.amazonaws.com:aud: !Ref IdentityPool
               'ForAnyValue:StringLike':
                 cognito-identity.amazonaws.com:amr: authenticated
+
   IdentityPoolRoleAttachment:
     Type: AWS::Cognito::IdentityPoolRoleAttachment
     Properties:
       IdentityPoolId: !Ref IdentityPool
       Roles:
         authenticated: !GetAtt CognitoAuthenticatedRole.Arn
+
+  MigrationRunnerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${MigrationRunnerFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  MigrationRunnerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 900
+      ReservedConcurrentExecutions: 1
+      CodeUri: ../apps/backend/src/handlers/process/migrationRunner
+      Tags:
+        Name: MigrationRunnerFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  CreateOrganizationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CreateOrganizationFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  CreateOrganizationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/process/createOrganization
+      Tags:
+        Name: CreateOrganizationFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  # TODO: Delete it when migration is done
+  ResetAuroraLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsDebug
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ResetAuroraFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ResetAuroraFunction:
+    Type: AWS::Serverless::Function
+    Condition: IsDebug
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/process/resetAurora
+      Tags:
+        Name: ResetAuroraFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  # TODO: Delete it when migration is done
+  MigrateDynamoLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${MigrateDynamoFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  MigrateDynamoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/process/migrateDynamo
+      Tags:
+        Name: MigrateDynamoFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Scan
+                - dynamodb:Query
+              Resource:
+                - !Ref DynamoDBArn
+                - !Ref OrganizationTableArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -171,6 +303,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${StartAssessmentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   StartAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -178,16 +311,14 @@ Resources:
       Tags:
         Name: StartAssessmentFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
-            - Effect: Allow
-              Action: dynamodb:GetItem
-              Resource:
-                - !Ref DynamoDBArn
-                - !Ref OrganizationTableArn
             - Effect: Allow
               Action:
                 - aws-marketplace:GetEntitlements
@@ -219,6 +350,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${GetAssessmentsFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   GetAssessmentsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -226,13 +358,9 @@ Resources:
       Tags:
         Name: GetAssessmentsFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         GetAssessments:
           Type: Api
@@ -255,6 +383,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${GetAssessmentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   GetAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -262,12 +391,9 @@ Resources:
       Tags:
         Name: GetAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         RetrieveProcessStep:
           Type: Api
@@ -290,6 +416,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${DeleteAssessmentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   DeleteAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -297,18 +424,14 @@ Resources:
       Tags:
         Name: DeleteAssessmentFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action: states:StopExecution
               Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
-            - Effect: Allow
-              Action:
-                - dynamodb:DeleteItem
-                - dynamodb:Query
-                - dynamodb:GetItem
-                - dynamodb:BatchWriteItem
-              Resource: !Ref DynamoDBArn
       Events:
         DeleteAssessment:
           Type: Api
@@ -331,6 +454,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdateAssessmentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdateAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -338,13 +462,9 @@ Resources:
       Tags:
         Name: UpdateAssessmentFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateAssessment:
           Type: Api
@@ -367,6 +487,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${RescanAssessmentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   RescanAssessmentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -374,15 +495,11 @@ Resources:
       Tags:
         Name: RescanAssessmentFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:DeleteItem
-                - dynamodb:GetItem
-                - dynamodb:BatchWriteItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action: states:StartExecution
               Resource: !Ref StateMachineArn
@@ -405,6 +522,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   DefaultExportRole:
     Type: AWS::IAM::Role
     Properties:
@@ -434,6 +552,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${ExportAssessmentWellArchitectedToolFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   ExportAssessmentRole:
     Type: AWS::IAM::Role
     Properties:
@@ -447,28 +566,26 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
+        - PolicyName: SecretsManagerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DBCredentialsSecretArn
         - PolicyName: BedrockPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:DeleteItem
-                  - dynamodb:GetItem
-                  - dynamodb:BatchWriteItem
-                  - dynamodb:Query
-                  - dynamodb:UpdateItem
-                Resource: !Ref DynamoDBArn
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                Resource: !Ref OrganizationTableArn
-              - Effect: Allow
-                Action:
                   - sts:AssumeRole
                 Resource:
                   - arn:aws:iam::*:role/*
+
   ExportAssessmentWellArchitectedToolFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -507,14 +624,11 @@ Resources:
       Tags:
         Name: ExportAssessmentToPDFFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:PutObject
@@ -544,13 +658,11 @@ Resources:
       Tags:
         Name: StartPDFExportFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
@@ -580,6 +692,7 @@ Resources:
     Properties:
       LogGroupName: !Sub /aws/lambda/${CreateMilestoneFunction}
       RetentionInDays: !Ref LogRetentionInDays
+
   CreateMilestoneFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -616,12 +729,9 @@ Resources:
       Tags:
         Name: ListPDFExportsFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         ListPDFExports:
           Type: Api
@@ -644,6 +754,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${GetMilestonesFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   GetMilestonesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -680,13 +791,11 @@ Resources:
       Tags:
         Name: GeneratePDFExportURLFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:GetObject
@@ -720,6 +829,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${GetMilestoneFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   GetMilestoneFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -756,13 +866,11 @@ Resources:
       Tags:
         Name: DeletePDFExportFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - s3:DeleteObject
@@ -792,6 +900,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdatePillarFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdatePillarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -799,13 +908,9 @@ Resources:
       Tags:
         Name: UpdatePillarFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdatePillar:
           Type: Api
@@ -822,11 +927,13 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   UpdateQuestionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdateQuestionFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdateQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -834,13 +941,9 @@ Resources:
       Tags:
         Name: UpdateQuestionFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateQuestion:
           Type: Api
@@ -863,6 +966,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${GetBestPracticeFindingsFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   GetBestPracticeFindingsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -870,13 +974,11 @@ Resources:
       Tags:
         Name: GetBestPracticeFindingsFunction
       Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
         - Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:Query
-              Resource: !Ref DynamoDBArn
             - Effect: Allow
               Action:
                 - cognito-idp:ListUsers
@@ -900,11 +1002,13 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   UpdateBestPracticeLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdateBestPracticeFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdateBestPracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -912,13 +1016,9 @@ Resources:
       Tags:
         Name: UpdateBestPracticeFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateBestPractice:
           Type: Api
@@ -941,6 +1041,7 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdateFindingFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdateFindingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -948,13 +1049,9 @@ Resources:
       Tags:
         Name: UpdateFindingFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateFinding:
           Type: Api
@@ -971,11 +1068,13 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   AddCommentLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${AddCommentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   AddCommentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -983,13 +1082,9 @@ Resources:
       Tags:
         Name: AddCommentFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         AddComment:
           Type: Api
@@ -1009,11 +1104,13 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   UpdateCommentLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${UpdateCommentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   UpdateCommentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1021,13 +1118,9 @@ Resources:
       Tags:
         Name: UpdateCommentFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         UpdateComment:
           Type: Api
@@ -1044,11 +1137,13 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
   DeleteCommentLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/lambda/${DeleteCommentFunction}'
       RetentionInDays: !Ref LogRetentionInDays
+
   DeleteCommentFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1056,13 +1151,9 @@ Resources:
       Tags:
         Name: DeleteCommentFunction
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
-              Resource: !Ref DynamoDBArn
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
       Events:
         DeleteComment:
           Type: Api
@@ -1097,6 +1188,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
         - PolicyName: Policy
           PolicyDocument:
@@ -1104,13 +1196,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:GetItem
-                  - dynamodb:UpdateItem
-                Resource: !Ref DynamoDBArn
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                Resource: !Ref OrganizationTableArn
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DBCredentialsSecretArn
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
@@ -1139,6 +1226,7 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
 Outputs:
   ApiEndpoint:
     Description: API Endpoint

@@ -1,11 +1,16 @@
 import {
   registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
   tokenFakeAssessmentsStateMachine,
   tokenFakeFeatureToggleRepository,
   tokenFakeMarketplaceService,
   tokenFakeOrganizationRepository,
 } from '@backend/infrastructure';
-import { OrganizationMother, UserMother } from '@backend/models';
+import {
+  AssessmentStep,
+  OrganizationMother,
+  UserMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import {
@@ -90,6 +95,48 @@ describe('StartAssessmentUseCase', () => {
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           workflows: ['workflow-1', 'workflow-2'],
+        }),
+      );
+    });
+
+    it('should create an assessment in the repository', async () => {
+      const {
+        useCase,
+        fakeAssessmentsRepository,
+        fakeAssessmentsStateMachine,
+      } = setup();
+
+      vitest.spyOn(useCase, 'canStartAssessment').mockResolvedValueOnce(true);
+      vitest
+        .spyOn(fakeAssessmentsStateMachine, 'startAssessment')
+        .mockResolvedValueOnce('test-execution-arn');
+
+      const input = StartAssessmentUseCaseArgsMother.basic()
+        .withName('Test Assessment')
+        .withRegions(['us-west-1', 'us-west-2'])
+        .withWorkflows(['workflow-1', 'workflow-2'])
+        .withRoleArn('arn:aws:iam::123456789012:role/test-role')
+        .build();
+
+      const { assessmentId } = await useCase.startAssessment(input);
+
+      const assessment = await fakeAssessmentsRepository.get({
+        assessmentId,
+        organizationDomain: input.user.organizationDomain,
+      });
+
+      expect(assessment).toEqual(
+        expect.objectContaining({
+          id: assessmentId,
+          name: input.name,
+          regions: input.regions,
+          workflows: ['workflow-1', 'workflow-2'],
+          roleArn: input.roleArn,
+          createdBy: input.user.id,
+          organization: input.user.organizationDomain,
+          step: AssessmentStep.SCANNING_STARTED,
+          executionArn: 'test-execution-arn',
+          pillars: expect.any(Array),
         }),
       );
     });
@@ -360,6 +407,7 @@ const setup = () => {
     fakeAssessmentsStateMachine,
     fakeMarketplaceService,
     date,
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
     fakeFeatureToggleRepository: inject(tokenFakeFeatureToggleRepository),
   };

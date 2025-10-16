@@ -34,6 +34,7 @@ describe('AssessmentsStateMachineSfn', () => {
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
         $metadata: { httpStatusCode: 200 },
+        executionArn: 'test-execution-arn',
       });
       await assessmentsStateMachineSfn.startAssessment(input);
 
@@ -90,6 +91,7 @@ describe('AssessmentsStateMachineSfn', () => {
       sfnClientMock.on(StartExecutionCommand).resolves({
         startDate: new Date(),
         $metadata: { httpStatusCode: 200 },
+        executionArn: 'test-execution-arn',
       });
       await assessmentsStateMachineSfn.startAssessment(input);
 

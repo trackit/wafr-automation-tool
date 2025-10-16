@@ -1,4 +1,4 @@
-import { FactoryFunction } from './FactoryFunction';
+import type { FactoryFunction } from './FactoryFunction';
 
 export type Provider<T = any> =
   | ClassProvider<T>
