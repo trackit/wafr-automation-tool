@@ -254,6 +254,7 @@ Resources:
   MigrateDynamoFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Timeout: 900
       CodeUri: ../apps/backend/src/handlers/process/migrateDynamo
       Tags:
         Name: MigrateDynamoFunction
