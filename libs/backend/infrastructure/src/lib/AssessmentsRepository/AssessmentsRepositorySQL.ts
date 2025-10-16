@@ -89,17 +89,21 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const entity = await repo.findOne({
       where: {
         id: bestPracticeId,
+        questionId: questionId,
+        pillarId: pillarId,
         assessmentId: assessmentId,
       },
     });
     if (!entity) {
       throw new Error('Best practice not found');
     }
-    const bestPracticeFindingArray = Array.from(bestPracticeFindingIds);
-    entity.results = entity.results.concat(bestPracticeFindingArray);
+    const updatedResults = entity.results.concat(
+      Array.from(bestPracticeFindingIds),
+    );
+    entity.results = Array.from(new Set(updatedResults));
     await repo.update(
       { id: bestPracticeId, questionId, pillarId, assessmentId },
-      entity,
+      { results: entity.results },
     );
     this.logger.info(
       `Best practice findings for best practice ${bestPracticeId} updated successfully`,

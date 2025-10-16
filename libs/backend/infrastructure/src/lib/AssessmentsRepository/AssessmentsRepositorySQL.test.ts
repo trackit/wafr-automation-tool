@@ -104,21 +104,28 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('0')
         .withBestPractices([bestPractice])
         .build();
+      const question2 = QuestionMother.basic()
+        .withId('2')
+        .withBestPractices([bestPractice])
+        .build();
       const pillar = PillarMother.basic()
         .withId('0')
         .withQuestions([question])
         .build();
+      const pillar2 = PillarMother.basic()
+        .withId('2')
+        .withQuestions([question2])
+        .build();
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withPillars([pillar])
+        .withPillars([pillar, pillar2])
         .build();
       await repository.save(assessment);
-
       await repository.saveBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
+        pillarId: pillar2.id,
+        questionId: question2.id,
         bestPracticeId: bestPractice.id,
         bestPracticeFindingIds: new Set(['scanningTool#1']),
       });
@@ -129,6 +136,11 @@ describe('AssessmentsRepositorySQL', () => {
       });
       expect(
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
+          'scanningTool#1',
+        ),
+      ).toBe(false);
+      expect(
+        updatedAssessment?.pillars?.[1].questions?.[0].bestPractices?.[0].results.has(
           'scanningTool#1',
         ),
       ).toBe(true);
