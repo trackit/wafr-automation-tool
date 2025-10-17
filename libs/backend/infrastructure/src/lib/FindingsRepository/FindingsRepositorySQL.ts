@@ -115,7 +115,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     const findingEntity = repositories.finding.create({
       ...findingData,
       bestPractices: bestPracticesEntities,
-      eventCode: findingData.metadata?.eventCode,
+      eventCode: findingData.eventCode ?? '',
       riskDetails: findingData.riskDetails ?? '',
       statusCode: findingData.statusCode ?? '',
       statusDetail: findingData.statusDetail ?? '',

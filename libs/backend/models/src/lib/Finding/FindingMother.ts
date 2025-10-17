@@ -1,7 +1,6 @@
 import {
   type Finding,
   FindingComment,
-  type FindingMetadata,
   type FindingRemediation,
   type FindingResource,
   SeverityType,
@@ -20,7 +19,7 @@ export class FindingMother {
       hidden: false,
       id: 'finding-id',
       isAIAssociated: false,
-      metadata: { eventCode: 'event-code' },
+      eventCode: 'event-code',
       remediation: {
         desc: 'This is a remediation description.',
         references: [],
@@ -51,8 +50,8 @@ export class FindingMother {
     return this;
   }
 
-  public withMetadata(metadata: FindingMetadata): FindingMother {
-    this.data.metadata = metadata;
+  public withEventCode(eventCode?: string): FindingMother {
+    this.data.eventCode = eventCode;
     return this;
   }
 

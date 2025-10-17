@@ -7,17 +7,13 @@ export interface Finding extends ScanFinding {
 
 export interface ScanFinding {
   id: string;
-  metadata?: FindingMetadata;
+  eventCode?: string;
   remediation?: FindingRemediation;
   resources?: FindingResource[];
   riskDetails?: string;
   severity?: SeverityType;
   statusCode?: string;
   statusDetail?: string;
-}
-
-export interface FindingMetadata {
-  eventCode?: string;
 }
 
 export interface FindingRemediation {

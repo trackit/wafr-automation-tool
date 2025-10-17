@@ -2,7 +2,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentStep,
-  FindingMetadata,
   FindingRemediation,
   FindingResource,
   ScanningTool,
@@ -63,7 +62,7 @@ export interface DynamoDBFinding {
   id: string;
   isAIAssociated: boolean;
   comments?: Record<string, DynamoDBFindingComment>;
-  metadata: FindingMetadata;
+  eventCode?: string;
   remediation?: FindingRemediation;
   resources?: FindingResource[];
   riskDetails?: string;

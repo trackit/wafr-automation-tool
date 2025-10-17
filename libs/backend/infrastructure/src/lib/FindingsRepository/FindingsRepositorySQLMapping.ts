@@ -59,9 +59,7 @@ export function toDomainFinding(e: FindingEntity): Finding {
       )
       .join(','),
     ...(e.eventCode && {
-      metadata: {
-        eventCode: e.eventCode,
-      },
+      eventCode: e.eventCode,
     }),
     remediation: e.remediation
       ? toDomainFindingRemediation(e.remediation)

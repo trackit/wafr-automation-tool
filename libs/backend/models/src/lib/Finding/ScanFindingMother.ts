@@ -1,5 +1,4 @@
 import {
-  type FindingMetadata,
   type FindingRemediation,
   type FindingResource,
   type ScanFinding,
@@ -24,8 +23,8 @@ export class ScanFindingMother {
     return this;
   }
 
-  public withMetadata(metadata: FindingMetadata): ScanFindingMother {
-    this.data.metadata = metadata;
+  public withEventCode(eventCode?: string): ScanFindingMother {
+    this.data.eventCode = eventCode;
     return this;
   }
 
