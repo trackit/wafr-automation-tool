@@ -10,7 +10,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   FindingMother,
   OrganizationMother,
 } from '@backend/models';
@@ -165,7 +164,7 @@ describe('CleanupUseCase', () => {
         error: 'test-error',
         cause: 'test-cause',
       });
-      expect(updatedAssessment?.step).toEqual(AssessmentStep.ERRORED);
+      expect(updatedAssessment?.finished).toEqual(true);
     });
   });
 

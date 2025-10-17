@@ -14,13 +14,14 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 
 import {
   deleteAssessment,
   getAssessments,
+  getAssessmentStep,
   rescanAssessment,
 } from '@webui/api-client';
 import { ConfirmationModal, StatusBadge } from '@webui/ui';
@@ -71,6 +72,30 @@ function AssessmentsList() {
     const match = roleArn.match(/arn:aws:iam::(\d+):/);
     return match ? match[1] : '';
   };
+
+  const [assessmentSteps, setAssessmentSteps] = useState<
+    Record<string, string>
+  >({});
+
+  const fetchStep = useCallback(
+    async (id: string) => {
+      if (assessmentSteps[id]) return;
+      const step = await getAssessmentStep(id);
+      setAssessmentSteps((prev) => ({ ...prev, [id]: step }));
+    },
+    [assessmentSteps],
+  );
+
+  useEffect(() => {
+    if (!data?.pages) return;
+    const ids = data.pages.flatMap(
+      (page) => page.assessments?.map((a) => a.id).filter(Boolean) ?? [],
+    );
+    for (const id of ids) {
+      if (!id || assessmentSteps[id]) continue;
+      void fetchStep(id);
+    }
+  }, [data, fetchStep, assessmentSteps]);
 
   const { mutate: deleteAssessmentMutation } = useMutation({
     mutationFn: (id: string) => deleteAssessment({ assessmentId: id }),
@@ -170,10 +195,14 @@ function AssessmentsList() {
                     {assessment.name}
                   </div>
                   <div className="flex flex-row items-center gap-1 flex-1 flex-grow justify-end">
-                    <StatusBadge
-                      status={assessment.step}
-                      className="badge-sm flex-shrink-0 "
-                    />
+                    {assessmentSteps[assessment.id!] ? (
+                      <StatusBadge
+                        status={assessmentSteps[assessment.id!]}
+                        className="badge-sm flex-shrink-0 "
+                      />
+                    ) : (
+                      <span className="loading loading-dots loading-xs text-base-content"></span>
+                    )}
                     <div
                       className="dropdown dropdown-end"
                       onClick={(e) => {

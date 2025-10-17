@@ -13,7 +13,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentGraphData,
-  AssessmentStep,
   BestPractice,
   Pillar,
   Question,
@@ -64,9 +63,6 @@ export class AssessmentEntity
 
   @Column({ type: 'jsonb', nullable: true })
   error?: { cause: string; error: string };
-
-  @Column({ type: 'enum', enum: AssessmentStep })
-  step!: AssessmentStep;
 
   @OneToMany(() => PillarEntity, (pillar) => pillar.assessment, {
     cascade: true,

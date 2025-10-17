@@ -1,9 +1,4 @@
-import {
-  type Assessment,
-  AssessmentStep,
-  Organization,
-  Pillar,
-} from '@backend/models';
+import { type Assessment, Organization, Pillar } from '@backend/models';
 
 import {
   AssessmentExportRegionNotSetError,
@@ -16,12 +11,12 @@ export function assertAssessmentIsReadyForExport(
   exportRegion?: string,
 ): asserts assessment is Assessment & {
   pillars: Pillar;
-  step: AssessmentStep.FINISHED;
+  finished: true;
 } {
   if (
     !assessment.pillars ||
     assessment.pillars.length === 0 ||
-    assessment.step !== AssessmentStep.FINISHED
+    !assessment.finished
   ) {
     throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
   }

@@ -4,7 +4,6 @@ import {
   AssessmentFileExportType,
   AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -80,7 +79,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(false)
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 
@@ -90,7 +89,6 @@ describe('AssessmentsRepositorySQL', () => {
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
       });
-
       expect(savedAssessment).toEqual(assessment);
     });
   });
@@ -550,7 +548,7 @@ describe('AssessmentsRepositorySQL', () => {
             AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
           ],
         })
-        .withStep(AssessmentStep.SCANNING_STARTED)
+        .withFinished(false)
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
         .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
@@ -600,7 +598,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          step: AssessmentStep.FINISHED,
+          finished: true,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {
@@ -644,7 +642,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          step: AssessmentStep.FINISHED,
+          finished: true,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {

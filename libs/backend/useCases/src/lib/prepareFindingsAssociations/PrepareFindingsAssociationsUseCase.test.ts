@@ -7,7 +7,6 @@ import {
 import {
   AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -34,32 +33,6 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     await expect(useCase.prepareFindingsAssociations(input)).rejects.toThrow(
       AssessmentNotFoundError,
     );
-  });
-
-  it('should update assessment step to PREPARING_ASSOCIATIONS', async () => {
-    const {
-      useCase,
-      getScannedFindingsUseCase,
-      mapScanFindingsToBestPracticesUseCase,
-      fakeAssessmentsRepository,
-    } = setup();
-    const assessment = AssessmentMother.basic().build();
-    await fakeAssessmentsRepository.save(assessment);
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([]);
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      [],
-    );
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
-      .build();
-    await useCase.prepareFindingsAssociations(input);
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    expect(updatedAssessment).toBeDefined();
-    expect(updatedAssessment?.step).toBe(AssessmentStep.PREPARING_ASSOCIATIONS);
   });
 
   it('should get scanned findings with args', async () => {

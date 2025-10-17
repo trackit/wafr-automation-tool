@@ -1,3 +1,5 @@
+import { AssessmentStep } from '@backend/models';
+
 export type AssessmentsStateMachineStartAssessmentArgs = {
   name: string;
   regions: string[];
@@ -14,4 +16,5 @@ export interface AssessmentsStateMachine {
     args: AssessmentsStateMachineStartAssessmentArgs,
   ): Promise<string>;
   cancelAssessment(executionId: string): Promise<void>;
+  getAssessmentStep(executionArn: string): Promise<AssessmentStep>;
 }

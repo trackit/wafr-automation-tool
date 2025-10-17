@@ -1,7 +1,6 @@
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -130,7 +129,7 @@ describe('getAssessment adapter', () => {
         })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinished(true)
         .withWorkflows([])
         .withWAFRWorkloadArn('wafr-workload-arn')
         .withOpportunityId('O1234567')
@@ -177,7 +176,7 @@ describe('getAssessment adapter', () => {
         questionVersion: assessment.questionVersion,
         regions: assessment.regions,
         roleArn: assessment.roleArn,
-        step: assessment.step,
+        finished: assessment.finished,
         workflows: assessment.workflows,
         wafrWorkloadArn: assessment.wafrWorkloadArn,
         opportunityId: assessment.opportunityId,

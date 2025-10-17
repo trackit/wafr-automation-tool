@@ -48,7 +48,7 @@ export class GetAssessmentsAdapter {
       wafrWorkloadArn: assessment.wafrWorkloadArn,
       opportunityId: assessment.opportunityId,
       createdAt: assessment.createdAt.toISOString(),
-      step: assessment.step,
+      finished: assessment.finished,
       ...(assessment.error && {
         error: {
           cause: assessment.error.cause,

@@ -8,7 +8,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
   UserMother,
 } from '@backend/models';
@@ -41,7 +40,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -99,7 +98,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -121,7 +120,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .withFinished(false)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -142,7 +141,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinished(true)
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

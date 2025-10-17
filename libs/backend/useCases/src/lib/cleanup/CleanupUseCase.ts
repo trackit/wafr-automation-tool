@@ -8,7 +8,6 @@ import {
   tokenObjectsStorage,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
-import { AssessmentStep } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -68,7 +67,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       assessmentBody: {
-        step: AssessmentStep.ERRORED,
+        finished: true,
         error: args.error
           ? {
               error: args.error.Error,

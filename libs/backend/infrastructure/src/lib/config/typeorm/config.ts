@@ -36,6 +36,17 @@ export const tenantsTypeORMConfig: Pick<
   migrations: ['./tenantsMigrations/*.js'], // In production, we use the compiled js files
 };
 
+export const testTenantsTypeORMConfig: TypeORMConfig = {
+  type: 'postgres',
+  ...tenantsTypeORMConfig,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  host: '127.0.0.1',
+  synchronize: true,
+  logging: true,
+  migrations: [],
+};
+
 export const tokenTypeORMConfigCreator = createInjectionToken<
   Promise<TypeORMConfig>
 >('TypeORMConfig', {

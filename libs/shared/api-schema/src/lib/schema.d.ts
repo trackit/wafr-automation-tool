@@ -15,7 +15,6 @@ export interface paths {
          * Retrieve a list of all assessments
          * @description Retrieves all assessments that have been created in the system.
          *     Useful for monitoring and managing multiple assessments in one place.
-         *
          */
         get: operations["getAssessments"];
         put?: never;
@@ -23,7 +22,6 @@ export interface paths {
          * Start a new assessment process
          * @description Initiates a new assessment for a given role.
          *     You can specify a role ARN for the assessment, or a default role will be used.
-         *
          */
         post: operations["startAssessment"];
         delete?: never;
@@ -43,28 +41,44 @@ export interface paths {
          * Retrieve details of a specific assessment
          * @description Retrieves detailed information about a specific assessment,
          *     including associated findings, questions, and any current errors.
-         *
          */
         get: operations["getAssessment"];
         /**
          * Update the details of a specific assessment
          * @description Updates the details of a specific assessment, such as the name or role ARN.
-         *
          */
         put: operations["updateAssessment"];
         /**
          * Rescan an assessment
          * @description Rescans an assessment, updating the findings and best practices.
-         *
          */
         post: operations["rescanAssessment"];
         /**
          * Delete a specific assessment
          * @description Deletes an assessment from the system.
          *     Once deleted, the assessment cannot be recovered.
-         *
          */
         delete: operations["deleteAssessment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}/step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve the current step for a specific assessment
+         * @description Fetches the current step in the assessment process.
+         */
+        get: operations["getAssessmentStep"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -80,7 +94,6 @@ export interface paths {
         /**
          * Retrieve all milestones for a specific assessment
          * @description Fetches all milestones associated with a specific assessment.
-         *
          */
         get: operations["getMilestones"];
         put?: never;
@@ -101,7 +114,6 @@ export interface paths {
         /**
          * Retrieve a specific milestone
          * @description Fetches all details associated with a specific milestone.
-         *
          */
         get: operations["getMilestone"];
         put?: never;
@@ -124,7 +136,6 @@ export interface paths {
         /**
          * Create a milestone for the assessment
          * @description Creates a milestone for the assessment.
-         *
          */
         post: operations["createMilestone"];
         delete?: never;
@@ -145,7 +156,6 @@ export interface paths {
         /**
          * Export the assessment to Well Architected Tool
          * @description Exports the assessment to Well Architected Tool.
-         *
          */
         post: operations["exportWellArchitectedTool"];
         delete?: never;
@@ -164,14 +174,12 @@ export interface paths {
         /**
          * List the PDF exports of an assessment
          * @description Lists the PDF exports of an assessment.
-         *
          */
         get: operations["listPDFExports"];
         put?: never;
         /**
          * Starts a PDF export for the specified assessment
          * @description Starts a PDF export for the specified assessment.
-         *
          */
         post: operations["startPDFExport"];
         delete?: never;
@@ -190,7 +198,6 @@ export interface paths {
         /**
          * Generate a pre-signed URL for a specific PDF export of an assessment
          * @description Generates a pre-signed URL for a specific PDF export of an assessment.
-         *
          */
         get: operations["generatePDFExportURL"];
         put?: never;
@@ -214,7 +221,6 @@ export interface paths {
         /**
          * Delete a specific PDF export of an assessment
          * @description Deletes a specific PDF export of an assessment.
-         *
          */
         delete: operations["deletePDFExport"];
         options?: never;
@@ -233,7 +239,6 @@ export interface paths {
         /**
          * Update the details of a specific pillar
          * @description Updates the details of a specific pillar.
-         *
          */
         put: operations["updatePillar"];
         post?: never;
@@ -254,7 +259,6 @@ export interface paths {
         /**
          * Update the details of a specific question
          * @description Updates the details of a specific question.
-         *
          */
         put: operations["updateQuestion"];
         post?: never;
@@ -274,13 +278,11 @@ export interface paths {
         /**
          * Retrieve all findings for a specific best practice
          * @description Fetches all the findings associated with a specific best practice within a question in a given pillar for a specific assessment.
-         *
          */
         get: operations["getBestPracticeFindings"];
         /**
          * Update the details of a specific best practice
          * @description Updates the details of a specific best practice.
-         *
          */
         put: operations["updateBestPractice"];
         post?: never;
@@ -301,13 +303,11 @@ export interface paths {
          * Retrieve the details of a specific finding
          * @description Fetches detailed information about a specific finding related to an assessment,
          *     including severity, status, and recommended remediation steps.
-         *
          */
         get: operations["getFinding"];
         /**
          * Update the details of a specific finding
          * @description Updates the details of a specific finding.
-         *
          */
         put: operations["updateFinding"];
         post?: never;
@@ -329,7 +329,6 @@ export interface paths {
         /**
          * Add a comment to a specific finding
          * @description Adds a comment to a specific finding.
-         *
          */
         post: operations["addComment"];
         delete?: never;
@@ -349,14 +348,12 @@ export interface paths {
         /**
          * Update the details of a specific comment
          * @description Updates the details of a specific comment.
-         *
          */
         put: operations["updateComment"];
         post?: never;
         /**
          * Delete a specific comment
          * @description Deletes a specific comment.
-         *
          */
         delete: operations["deleteComment"];
         options?: never;
@@ -376,7 +373,6 @@ export interface paths {
         /**
          * Create an opportunity for specific assessment
          * @description Add an ACE opportunity to the assessment.
-         *
          */
         post: operations["createOpportunity"];
         delete?: never;
@@ -398,9 +394,10 @@ export interface components {
             createdBy?: string;
             /** @description Organization associated with the assessment */
             organization?: string;
-            /** @description List of regions to scan
+            /**
+             * @description List of regions to scan
              *     If empty, all regions will be scanned
-             *      */
+             */
             regions?: string[];
             /** @description Region where the assessment is exported */
             exportRegion?: string;
@@ -414,11 +411,8 @@ export interface components {
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
             createdAt?: string;
-            /**
-             * @description Current step in the assessment process
-             * @enum {string}
-             */
-            step?: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
+            /** @description Whether the assessment has finished scanning and processing */
+            finished?: boolean;
             error?: components["schemas"]["AssessmentError"];
         };
         AssessmentContent: components["schemas"]["Assessment"] & {
@@ -598,9 +592,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         assessments?: components["schemas"]["Assessment"][];
-                        /** @description Token for pagination. If there are more assessments than can be returned in a single response,
+                        /**
+                         * @description Token for pagination. If there are more assessments than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
-                         *      */
+                         */
                         nextToken?: string;
                     };
                 };
@@ -633,17 +628,20 @@ export interface operations {
                 "application/json": {
                     /** @description Name of the assessment to be created */
                     name: string;
-                    /** @description List of regions to scan
+                    /**
+                     * @description List of regions to scan
                      *     If empty, all regions will be scanned
-                     *      */
+                     */
                     regions?: string[];
-                    /** @description The role ARN to associate with the assessment.
+                    /**
+                     * @description The role ARN to associate with the assessment.
                      *     If not provided, a default role will be used.
-                     *      */
+                     */
                     roleArn: string;
-                    /** @description The workflows to associate with the assessment.
+                    /**
+                     * @description The workflows to associate with the assessment.
                      *     If not provided, no workflows will be associated.
-                     *      */
+                     */
                     workflows?: string[];
                 };
             };
@@ -851,6 +849,56 @@ export interface operations {
             };
         };
     };
+    getAssessmentStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve milestones for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The current step for the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Current step in the assessment process
+                         * @enum {string}
+                         */
+                        step: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getMilestones: {
         parameters: {
             query?: {
@@ -878,9 +926,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         milestones: components["schemas"]["MilestoneSummary"][];
-                        /** @description Token for pagination. If there are more milestones than can be returned in a single response,
+                        /**
+                         * @description Token for pagination. If there are more milestones than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
-                         *      */
+                         */
                         nextToken?: string;
                     };
                 };
@@ -1376,9 +1425,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         items?: components["schemas"]["Finding"][];
-                        /** @description Token for pagination. If there are more findings than can be returned in a single response,
+                        /**
+                         * @description Token for pagination. If there are more findings than can be returned in a single response,
                          *     this token will allow you to retrieve the next set of results.
-                         *      */
+                         */
                         nextToken?: string;
                     };
                 };
