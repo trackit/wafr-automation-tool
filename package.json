@@ -107,7 +107,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.2.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "jsdom": "~27.0.0",
+    "jsdom": "~27.0.1",
     "jsonc-eslint-parser": "^2.4.1",
     "nx": "21.6.2",
     "openapi-typescript": "^7.9.1",
