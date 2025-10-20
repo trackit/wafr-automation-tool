@@ -35,7 +35,7 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
     const events = historyResponse.events || [];
 
     const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
-      Pass: AssessmentStep.SCANNING_STARTED,
+      AssignVariables: AssessmentStep.SCANNING_STARTED,
       ScanningTools: AssessmentStep.SCANNING_STARTED,
       ProwlerScan: AssessmentStep.SCANNING_STARTED,
       PrepareCustodian: AssessmentStep.SCANNING_STARTED,

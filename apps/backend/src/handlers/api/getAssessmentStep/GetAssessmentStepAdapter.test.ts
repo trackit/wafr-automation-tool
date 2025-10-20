@@ -70,6 +70,7 @@ describe('GetAssessmentStepAdapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);
     });
+
     it('should return an object with the assessment step from use case', async () => {
       const { adapter, useCase } = setup();
 

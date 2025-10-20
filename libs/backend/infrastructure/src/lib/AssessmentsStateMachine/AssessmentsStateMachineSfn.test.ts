@@ -177,12 +177,12 @@ describe('AssessmentsStateMachineSfn', () => {
   });
 
   describe('getAssessmentStep', () => {
-    it('should return SCANNING_STARTED for Pass state', async () => {
+    it('should return SCANNING_STARTED for AssignVariables state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
-            stateEnteredEventDetails: { name: 'Pass' },
+            stateEnteredEventDetails: { name: 'AssignVariables' },
             timestamp: new Date(),
             type: undefined,
             id: 1,
