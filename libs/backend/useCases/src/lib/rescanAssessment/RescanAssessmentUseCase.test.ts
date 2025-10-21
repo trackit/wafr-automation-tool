@@ -11,6 +11,8 @@ import { AssessmentNotFoundError } from '../../errors';
 import { RescanAssessmentUseCaseImpl } from './RescanAssessmentUseCase';
 import { RescanAssessmentUseCaseArgsMother } from './RescanAssessmentUseCaseArgsMother';
 
+vitest.useFakeTimers();
+
 describe('RescanAssessmentUseCase', () => {
   it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
@@ -55,14 +57,18 @@ describe('RescanAssessmentUseCase', () => {
   });
 
   it('should delete assessment', async () => {
-    const { useCase, fakeAssessmentsRepository } = setup();
+    const { date, useCase, fakeAssessmentsRepository } = setup();
 
     const user = UserMother.basic().build();
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
+      .withCreatedAt(date)
+      .withExecutionArn('initial-execution-arn')
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    vitest.advanceTimersByTime(30);
 
     const input = RescanAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -74,7 +80,18 @@ describe('RescanAssessmentUseCase', () => {
     const assessments = await fakeAssessmentsRepository.getAll({
       organizationDomain: assessment.organization,
     });
-    expect(assessments.assessments).toEqual([]);
+    expect(assessments.assessments.length).toBe(1);
+
+    const recreatedAssessment = assessments.assessments[0];
+
+    expect(recreatedAssessment.id).toEqual(assessment.id);
+    expect(recreatedAssessment.createdAt.getTime()).toBeGreaterThan(
+      date.getTime(),
+    );
+    expect(recreatedAssessment.executionArn).not.toEqual(
+      'initial-execution-arn',
+    );
+    expect(recreatedAssessment.name).toEqual(assessment.name);
   });
 
   it('should cancel old state machine execution', async () => {

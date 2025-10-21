@@ -4,7 +4,7 @@ import {
   tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import type { User } from '@backend/models';
+import { type Assessment, AssessmentStep, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -41,6 +41,26 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     });
   }
 
+  private async createAssessment(args: Assessment): Promise<Assessment> {
+    const assessment: Assessment = {
+      id: args.id,
+      name: args.name,
+      regions: args.regions,
+      workflows: args.workflows,
+      roleArn: args.roleArn,
+      createdAt: new Date(),
+      createdBy: args.createdBy,
+      organization: args.organization,
+      questionVersion: args.questionVersion,
+      pillars: args.pillars,
+      step: AssessmentStep.SCANNING_STARTED,
+      executionArn: '',
+      rawGraphData: {},
+    };
+    await this.assessmentsRepository.save(assessment);
+    return assessment;
+  }
+
   public async rescanAssessment(
     args: RescanAssessmentUseCaseArgs,
   ): Promise<void> {
@@ -63,7 +83,9 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       organizationDomain: args.user.organizationDomain,
     });
 
-    await this.assessmentsStateMachine.startAssessment({
+    await this.createAssessment(assessment);
+
+    const executionId = await this.assessmentsStateMachine.startAssessment({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,
       createdAt: new Date(),
@@ -73,6 +95,15 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
     });
+
+    await this.assessmentsRepository.update({
+      assessmentId: args.assessmentId,
+      organizationDomain: args.user.organizationDomain,
+      assessmentBody: {
+        executionArn: executionId,
+      },
+    });
+
     this.logger.info(
       `Assessment#${args.assessmentId} rescan started successfully`,
     );
