@@ -67,7 +67,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       assessmentBody: {
-        finished: true,
+        finishedAt: new Date(),
         error: args.error
           ? {
               error: args.error.Error,

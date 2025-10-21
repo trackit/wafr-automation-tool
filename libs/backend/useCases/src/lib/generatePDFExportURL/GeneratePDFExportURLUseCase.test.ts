@@ -33,7 +33,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withFileExports({
         [AssessmentFileExportType.PDF]: [assessmentFileExport],

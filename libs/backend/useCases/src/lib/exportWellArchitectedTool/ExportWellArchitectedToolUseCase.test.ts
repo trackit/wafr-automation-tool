@@ -41,7 +41,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -87,7 +87,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -130,7 +130,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(false)
+      .withFinishedAt(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -150,7 +150,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
     const user = UserMother.basic().build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
@@ -180,7 +180,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
@@ -208,7 +208,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();
@@ -236,7 +236,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();

@@ -259,14 +259,7 @@ paths:
                   - step
                 properties:
                   step:
-                    type: string
-                    description: Current step in the assessment process
-                    enum:
-                      - SCANNING_STARTED
-                      - PREPARING_ASSOCIATIONS
-                      - ASSOCIATING_FINDINGS
-                      - FINISHED
-                      - ERRORED
+                    $ref: '#/components/schemas/AssessmentStep'
         '400':
           description: An issue occurred while trying to retrieve the organization of the user
         '404':
@@ -1085,11 +1078,20 @@ components:
         createdAt:
           type: string
           description: ISO-formatted date when the assessment was created
-        finished:
-          type: boolean
-          description: Whether the assessment has finished scanning and processing
+        finishedAt:
+          type: string
+          description: ISO-formatted date when the assessment has finished scanning and processing
         error:
           $ref: '#/components/schemas/AssessmentError'
+    AssessmentStep:
+      type: string
+      description: Current step in the assessment process
+      enum:
+        - SCANNING_STARTED
+        - PREPARING_ASSOCIATIONS
+        - ASSOCIATING_FINDINGS
+        - FINISHED
+        - ERRORED
     AssessmentContent:
       type: object
       allOf:

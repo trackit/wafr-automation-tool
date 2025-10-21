@@ -23,7 +23,7 @@ export interface DynamoDBAssessment {
   regions: string[];
   exportRegion?: string;
   roleArn: string;
-  finished: boolean;
+  finishedAt?: string;
   workflows: string[];
   error?: DynamoDBAssessmentError;
   fileExports?: DynamoDBAssessmentFileExports;

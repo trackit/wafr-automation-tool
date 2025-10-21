@@ -36,6 +36,8 @@ afterAll(async () => {
   await clientManager.closeConnections();
 });
 
+vi.useFakeTimers();
+
 describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
     it('should save an assessment to SQL', async () => {
@@ -79,7 +81,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withFinished(false)
+        .withFinishedAt(undefined)
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 
@@ -363,6 +365,8 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment1);
 
+      vi.advanceTimersByTime(1);
+
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
@@ -394,6 +398,8 @@ describe('AssessmentsRepositorySQL', () => {
         .build();
 
       await repository.save(assessment1);
+
+      vi.advanceTimersByTime(1);
 
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -512,7 +518,7 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('update', () => {
     it('should update the assessment', async () => {
-      const { repository } = setup();
+      const { repository, date } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -548,7 +554,7 @@ describe('AssessmentsRepositorySQL', () => {
             AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
           ],
         })
-        .withFinished(false)
+        .withFinishedAt(undefined)
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
         .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
@@ -598,7 +604,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          finished: true,
+          finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {
@@ -642,7 +648,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          finished: true,
+          finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {
@@ -1216,5 +1222,8 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  return { repository: new AssessmentsRepositorySQL() };
+  const date = new Date();
+  vitest.setSystemTime(date);
+
+  return { repository: new AssessmentsRepositorySQL(), date };
 };

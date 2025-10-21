@@ -38,7 +38,7 @@ describe('exportPDF UseCase', () => {
       .withStatus(AssessmentFileExportStatus.NOT_STARTED)
       .build();
     const assessment = AssessmentMother.basic()
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withFileExports({
         [AssessmentFileExportType.PDF]: [assessmentFileExport],
@@ -99,7 +99,9 @@ describe('exportPDF UseCase', () => {
   it('should throw AssessmentNotFinishedError if the assessment is not finished', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic().withFinished(false).build();
+    const assessment = AssessmentMother.basic()
+      .withFinishedAt(undefined)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
 
     const input = ExportPDFUseCaseArgsMother.basic()
@@ -115,7 +117,7 @@ describe('exportPDF UseCase', () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

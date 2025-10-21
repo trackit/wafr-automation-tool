@@ -88,7 +88,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withFinished(true)
+        .withFinishedAt(new Date())
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 

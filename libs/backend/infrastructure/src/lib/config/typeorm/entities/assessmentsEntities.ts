@@ -55,8 +55,8 @@ export class AssessmentEntity
   @Column('varchar')
   roleArn!: string;
 
-  @Column('boolean', { default: false })
-  finished!: boolean;
+  @Column('timestamptz', { nullable: true })
+  finishedAt?: Date;
 
   @Column('varchar', { nullable: false, array: true, default: [] })
   workflows!: string[];

@@ -129,7 +129,7 @@ describe('getAssessment adapter', () => {
         })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
-        .withFinished(true)
+        .withFinishedAt(new Date())
         .withWorkflows([])
         .withWAFRWorkloadArn('wafr-workload-arn')
         .withOpportunityId('O1234567')

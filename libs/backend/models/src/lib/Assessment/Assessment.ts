@@ -16,8 +16,8 @@ export interface Assessment {
   regions: string[];
   exportRegion?: string;
   roleArn: string;
-  finished: boolean;
   workflows: string[];
+  finishedAt?: Date;
   error?: AssessmentError;
   fileExports?: AssessmentFileExports;
   wafrWorkloadArn?: string;
@@ -48,7 +48,7 @@ export interface AssessmentBody {
   name?: string;
   graphData?: AssessmentGraphData;
   error?: AssessmentError;
-  finished?: boolean;
+  finishedAt?: Date;
   rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
   pillars?: Pillar[];
   questionVersion?: string;

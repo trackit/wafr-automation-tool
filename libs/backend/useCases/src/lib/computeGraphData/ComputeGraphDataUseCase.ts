@@ -73,7 +73,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
       organizationDomain: assessment.organization,
       assessmentBody: {
         graphData: assessmentGraphData,
-        finished: true,
+        finishedAt: new Date(),
       },
     });
   }

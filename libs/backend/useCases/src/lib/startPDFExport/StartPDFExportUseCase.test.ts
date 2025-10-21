@@ -40,7 +40,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -98,7 +98,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -120,7 +120,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(false)
+      .withFinishedAt(undefined)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -141,7 +141,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

@@ -411,10 +411,15 @@ export interface components {
             workflows?: string[];
             /** @description ISO-formatted date when the assessment was created */
             createdAt?: string;
-            /** @description Whether the assessment has finished scanning and processing */
-            finished?: boolean;
+            /** @description ISO-formatted date when the assessment has finished scanning and processing */
+            finishedAt?: string;
             error?: components["schemas"]["AssessmentError"];
         };
+        /**
+         * @description Current step in the assessment process
+         * @enum {string}
+         */
+        AssessmentStep: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
         AssessmentContent: components["schemas"]["Assessment"] & {
             /** @description The assessment pillars including questions and best practices */
             pillars?: components["schemas"]["Pillar"][];
@@ -868,11 +873,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /**
-                         * @description Current step in the assessment process
-                         * @enum {string}
-                         */
-                        step: "SCANNING_STARTED" | "PREPARING_ASSOCIATIONS" | "ASSOCIATING_FINDINGS" | "FINISHED" | "ERRORED";
+                        step: components["schemas"]["AssessmentStep"];
                     };
                 };
             };

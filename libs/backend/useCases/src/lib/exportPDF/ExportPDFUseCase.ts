@@ -49,7 +49,7 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     if (
       !assessment.pillars ||
       assessment.pillars.length === 0 ||
-      !assessment.finished
+      !assessment.finishedAt
     ) {
       throw new AssessmentNotFinishedError({
         assessmentId,

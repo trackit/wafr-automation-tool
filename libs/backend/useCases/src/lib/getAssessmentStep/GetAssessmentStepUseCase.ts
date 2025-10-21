@@ -39,7 +39,7 @@ export class GetAssessmentStepUseCaseImpl implements GetAssessmentStepUseCase {
     if (assessment.error) {
       return AssessmentStep.ERRORED;
     }
-    if (assessment.finished) {
+    if (assessment.finishedAt) {
       return AssessmentStep.FINISHED;
     }
     if (!assessment.executionArn) {

@@ -4,7 +4,7 @@ export function StatusBadge({
   status,
   className,
 }: {
-  status: components['schemas']['Assessment']['step'];
+  status: components['schemas']['AssessmentStep'];
   className?: string;
 }) {
   const statusMap = {

@@ -105,7 +105,7 @@ describe('ComputeGraphDataUseCase', () => {
             Medium: 45,
           },
         })
-        .withFinished(true)
+        .withFinishedAt(new Date())
         .build(),
     );
   });

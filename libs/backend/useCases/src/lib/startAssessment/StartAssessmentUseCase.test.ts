@@ -132,7 +132,7 @@ describe('StartAssessmentUseCase', () => {
           organization: input.user.organizationDomain,
           executionArn: 'test-execution-arn',
           pillars: expect.any(Array),
-          finished: false,
+          finishedAt: undefined,
         }),
       );
     });

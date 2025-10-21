@@ -42,7 +42,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -91,7 +91,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -121,7 +121,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -151,7 +151,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -173,7 +173,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -204,7 +204,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -235,7 +235,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinished(true)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();

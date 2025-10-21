@@ -33,7 +33,7 @@ export class AssessmentMother {
       rawGraphData: {},
       regions: [],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
-      finished: false,
+      finishedAt: undefined,
       workflows: [],
       fileExports: {},
     });
@@ -130,8 +130,8 @@ export class AssessmentMother {
     return this;
   }
 
-  public withFinished(finished: boolean): AssessmentMother {
-    this.data.finished = finished;
+  public withFinishedAt(finishedAt: Date | undefined): AssessmentMother {
+    this.data.finishedAt = finishedAt;
     return this;
   }
 

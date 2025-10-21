@@ -124,7 +124,7 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       pillars: questionSet.pillars,
       executionArn: '',
       rawGraphData: {},
-      finished: false,
+      finishedAt: undefined,
     };
     await this.assessmentRepository.save(assessment);
     return assessment;
