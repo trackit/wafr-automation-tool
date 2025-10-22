@@ -859,7 +859,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The unique ID of the assessment to retrieve milestones for */
+                /** @description The unique ID of the assessment to retrieve step for */
                 assessmentId: string;
             };
             cookie?: never;

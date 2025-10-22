@@ -244,7 +244,7 @@ paths:
       parameters:
         - name: assessmentId
           in: path
-          description: The unique ID of the assessment to retrieve milestones for
+          description: The unique ID of the assessment to retrieve step for
           required: true
           schema:
             type: string

@@ -1247,10 +1247,9 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action: states:DescribeExecution
-              Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
-            - Effect: Allow
-              Action: states:GetExecutionHistory
+              Action:
+                - states:DescribeExecution
+                - states:GetExecutionHistory
               Resource: !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${StateMachineName}:*
       Events:
         GetAssessmentStep:

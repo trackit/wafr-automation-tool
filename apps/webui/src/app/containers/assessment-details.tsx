@@ -82,7 +82,11 @@ export function AssessmentDetails() {
   const stepQuery = useQuery({
     queryKey: ['assessmentStep', id],
     queryFn: () => (id ? getAssessmentStep(id) : null),
-    refetchInterval: isMilestone ? false : 15000,
+    refetchInterval: (query) => {
+      const step = query.state.data as string | undefined;
+      if (step === 'FINISHED' || step === 'ERRORED') return false;
+      return isMilestone ? false : 15000;
+    },
   });
   const assessmentQuery = useQuery<
     components['schemas']['AssessmentContent'] | null

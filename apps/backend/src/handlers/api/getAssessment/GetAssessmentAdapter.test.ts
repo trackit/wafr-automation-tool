@@ -176,7 +176,7 @@ describe('getAssessment adapter', () => {
         questionVersion: assessment.questionVersion,
         regions: assessment.regions,
         roleArn: assessment.roleArn,
-        finished: assessment.finished,
+        finishedAt: assessment.finishedAt?.toISOString(),
         workflows: assessment.workflows,
         wafrWorkloadArn: assessment.wafrWorkloadArn,
         opportunityId: assessment.opportunityId,
