@@ -23,7 +23,7 @@ import {
 } from './StartPDFExportUseCase';
 import { StartPDFExportUseCaseArgsMother } from './StartPDFExportUseCaseArgsMother';
 
-vi.useFakeTimers();
+vitest.useFakeTimers();
 
 describe('startPDFExport UseCase', () => {
   it('should start the PDF export', async () => {

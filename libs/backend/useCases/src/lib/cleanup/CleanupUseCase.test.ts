@@ -24,7 +24,7 @@ import {
 import { CleanupUseCaseImpl } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
 
-vi.useFakeTimers();
+vitest.useFakeTimers();
 
 describe('CleanupUseCase', () => {
   describe('cleanup', () => {

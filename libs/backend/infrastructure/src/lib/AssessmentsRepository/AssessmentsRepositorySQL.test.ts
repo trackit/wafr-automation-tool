@@ -36,7 +36,7 @@ afterAll(async () => {
   await clientManager.closeConnections();
 });
 
-vi.useFakeTimers();
+vitest.useFakeTimers();
 
 describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
@@ -365,7 +365,7 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment1);
 
-      vi.advanceTimersByTime(1);
+      vitest.advanceTimersByTime(1);
 
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -399,7 +399,7 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment1);
 
-      vi.advanceTimersByTime(1);
+      vitest.advanceTimersByTime(1);
 
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
