@@ -14,7 +14,7 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 
@@ -76,24 +76,47 @@ function AssessmentsList() {
   const [assessmentSteps, setAssessmentSteps] = useState<
     Record<string, string>
   >({});
+  const knownRef = useRef<Record<string, boolean>>({});
+  const pendingRef = useRef<Record<string, boolean>>({});
 
-  const fetchStep = useCallback(
-    async (id: string) => {
-      if (assessmentSteps[id]) return;
+  useEffect(() => {
+    knownRef.current = Object.fromEntries(
+      Object.keys(assessmentSteps).map((k) => [k, true]),
+    );
+  }, [assessmentSteps]);
+
+  const fetchStep = useCallback(async (id: string) => {
+    if (knownRef.current[id] || pendingRef.current[id]) return;
+    pendingRef.current[id] = true;
+    try {
       const step = await getAssessmentStep(id);
-      setAssessmentSteps((prev) => ({ ...prev, [id]: step }));
-    },
-    [assessmentSteps],
-  );
+      if (step) setAssessmentSteps((prev) => ({ ...prev, [id]: step }));
+    } finally {
+      delete pendingRef.current[id];
+    }
+  }, []);
 
   useEffect(() => {
     if (!data?.pages) return;
-    const ids = data.pages.flatMap(
-      (page) => page.assessments?.map((a) => a.id).filter(Boolean) ?? [],
-    );
-    for (const id of ids) {
-      if (!id || assessmentSteps[id]) continue;
-      void fetchStep(id);
+
+    for (const page of data.pages) {
+      for (const a of page.assessments ?? []) {
+        const id = a?.id;
+        if (!id) continue;
+
+        if (knownRef.current[id] || pendingRef.current[id]) continue;
+
+        if (a.error || a.finishedAt) {
+          knownRef.current[id] = true;
+          setAssessmentSteps((prev) => ({
+            ...prev,
+            [id]: a.error ? 'ERRORED' : 'FINISHED',
+          }));
+        }
+        if (!assessmentSteps[id] && !pendingRef.current[id]) {
+          void fetchStep(id);
+        }
+      }
     }
   }, [data, fetchStep, assessmentSteps]);
 

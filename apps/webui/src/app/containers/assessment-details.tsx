@@ -79,15 +79,6 @@ export function AssessmentDetails() {
   const [progress, setProgress] = useState<number>(0);
 
   const isMilestone = Boolean(milestoneId);
-  const stepQuery = useQuery({
-    queryKey: ['assessmentStep', id],
-    queryFn: () => (id ? getAssessmentStep(id) : null),
-    refetchInterval: (query) => {
-      const step = query.state.data as string | undefined;
-      if (step === 'FINISHED' || step === 'ERRORED') return false;
-      return isMilestone ? false : 15000;
-    },
-  });
   const assessmentQuery = useQuery<
     components['schemas']['AssessmentContent'] | null
   >({
@@ -106,8 +97,28 @@ export function AssessmentDetails() {
   });
 
   const assessmentData = assessmentQuery.data;
+  const isAssessmentReady =
+    assessmentQuery.isSuccess || assessmentQuery.isFetched;
   const milestoneData = milestoneQuery.data;
-  const step = stepQuery.data as string | undefined;
+  const stepQuery = useQuery({
+    queryKey: ['assessmentStep', id],
+    queryFn: () => (id ? getAssessmentStep(id) : null),
+    refetchInterval: (query) => {
+      const step = query.state.data as string | undefined;
+      if (step === 'FINISHED' || step === 'ERRORED') return false;
+      return isMilestone ? false : 15000;
+    },
+    enabled:
+      !!id &&
+      isAssessmentReady &&
+      !assessmentData?.error &&
+      !assessmentData?.finishedAt,
+  });
+  const step = useMemo(() => {
+    if (assessmentData?.error) return 'ERRORED';
+    if (assessmentData?.finishedAt) return 'FINISHED';
+    return stepQuery.data as string | undefined;
+  }, [assessmentData, stepQuery.data]);
   const isLoading = isMilestone
     ? milestoneQuery.isLoading || assessmentQuery.isLoading
     : assessmentQuery.isLoading || stepQuery.isLoading;
