@@ -88,16 +88,21 @@ And with the following [Trust Policy](../webui/src/assets/trust-policy-scan.json
 
 #### Create organization
 
-You must create a new organization in the Aurora database using SSM:
+You must create the organization related to the account which will interact with the tool.
+To do so, you can use the CreateOrganization lambda.
 
 ```shell
-$ aws ssm start-session \
-  --target <EC2_INSTANCE_ID> \
-  --document-name AWS-StartPortForwardingSessionToRemoteHost \
-  --parameters '{"host":["mydb-cluster.cluster-xxxxxx.us-west-2.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5432"]}'
+$ payload=`echo '{ \
+  "domain": "domain.com", \
+  "name": "Organization Name", \
+  "accountId": "999999999999", \
+  "assessmentExportRoleArn": "arn:aws:iam::999999999999:role/export-role", \
+  "freeAssessmentsLeft": 9999, \
+}' | openssl base64`
+$ aws lambda invoke --function-name="<CREATE_ORGANIZATION_LAMBDA_NAME>" --payload="$payload" /dev/null
 ```
 
-Then using a postgres client, connect to the database (you will need to retrieve the password through AWS Secrets Manager), create the organization in the `organizations` table in the `postgres` database :
+The `<CREATE_ORGANIZATION_LAMBDA_NAME>` is the name of the lambda that you can get on the AWS Console and the payload values are as follows:
 
 | Key | Type | Value |
 | ------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
@@ -107,6 +112,17 @@ Then using a postgres client, connect to the database (you will need to retrieve
 | `assessmentExportRoleArn` | String | Arn of the role that will be used to export. [Create assessment export role.](#create-assessment-export-role) |
 | `freeAssessmentsLeft` | Number | How many free assessments are left |
 | `unitBasedAgreementId` | String | The id of the agreement for the unit-based subscription (not mandatory for monthly subscription) |
+
+Alternatively you can connect to the database directly using SSM:
+
+```shell
+$ aws ssm start-session \
+  --target <EC2_INSTANCE_ID> \
+  --document-name AWS-StartPortForwardingSessionToRemoteHost \
+  --parameters '{"host":["mydb-cluster.cluster-xxxxxx.us-west-2.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5432"]}'
+```
+
+Then using a postgres client, connect to the database (you will need to retrieve the password through AWS Secrets Manager), create the organization in the `organizations` table in the `postgres` database.
 
 #### Create a custom mapping
 
