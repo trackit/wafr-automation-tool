@@ -42,18 +42,18 @@ paths:
               schema:
                 type: object
                 required:
-                  - totalAssessments
+                  - currentYearTotalAssessments
                   - opportunitiesPerMonth
                 properties:
-                  totalAssessments:
+                  currentYearTotalAssessments:
                     type: integer
-                    description: Total number of assessments associated with the organization
+                    description: Total number of assessments during the current year associated with the organization
                   opportunitiesPerMonth:
                     type: object
                     additionalProperties:
                       type: integer
                     description: |
-                      A map where each key is a month and the value is the number of ACE opportunities in that month.
+                      A map where each key is the month, formatted as a two-digit, zero-padded string (e.g., '01', '02'), and the value is the number of ACE opportunities in that month.
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '500':

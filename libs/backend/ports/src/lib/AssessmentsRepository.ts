@@ -84,7 +84,12 @@ export interface AssessmentsRepository {
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void>;
-  getOpportunities(args: {
+  getOpportunitiesByYear(args: {
     organizationDomain: string;
+    year: number;
   }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>>;
+  countAssessmentsByYear(args: {
+    organizationDomain: string;
+    year: number;
+  }): Promise<number>;
 }

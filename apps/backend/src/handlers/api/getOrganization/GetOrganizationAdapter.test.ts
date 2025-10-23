@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from 'vitest';
-
 import { registerTestInfrastructure } from '@backend/infrastructure';
 import { UserMother } from '@backend/models';
 import { tokenGetOrganizationUseCase } from '@backend/useCases';
@@ -69,7 +67,7 @@ const setup = () => {
     getOrganizationDetails: vi.fn(),
   };
   useCase.getOrganizationDetails.mockResolvedValue({
-    totalAssessments: 0,
+    currentYearTotalAssessments: 0,
     ACEOpportunitiesPerMonth: {},
   });
 

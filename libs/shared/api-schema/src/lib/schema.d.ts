@@ -609,9 +609,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @description Total number of assessments associated with the organization */
-                        totalAssessments: number;
-                        /** @description A map where each key is a month and the value is the number of ACE opportunities in that month. */
+                        /** @description Total number of assessments during the current year associated with the organization */
+                        currentYearTotalAssessments: number;
+                        /** @description A map where each key is the month, formatted as a two-digit, zero-padded string (e.g., '01', '02'), and the value is the number of ACE opportunities in that month. */
                         opportunitiesPerMonth: {
                             [key: string]: number;
                         };

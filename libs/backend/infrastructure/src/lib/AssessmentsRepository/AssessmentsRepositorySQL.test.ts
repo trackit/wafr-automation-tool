@@ -1217,9 +1217,9 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
-  describe('GetOpportunities', () => {
+  describe('GetOpportunitiesByYear', () => {
     it('should return an empty array if no assessments with non-undefined opportunityId and opportunityCreatedAt', async () => {
-      const { repository } = setup();
+      const { repository, date } = setup();
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -1239,8 +1239,9 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment2);
 
-      const result = await repository.getOpportunities({
+      const result = await repository.getOpportunitiesByYear({
         organizationDomain: assessment1.organization,
+        year: date.getFullYear(),
       });
       expect(result).toEqual([]);
     });
@@ -1251,7 +1252,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withOpportunityId(undefined)
-        .withOpportunityCreatedAt(undefined)
+        .withOpportunityCreatedAt(date)
         .build();
 
       await repository.save(assessment1);
@@ -1260,7 +1261,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withOpportunityId('opp2')
-        .withOpportunityCreatedAt(date)
+        .withOpportunityCreatedAt(undefined)
         .build();
 
       await repository.save(assessment2);
@@ -1274,45 +1275,142 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment3);
 
-      const result = await repository.getOpportunities({
+      const result = await repository.getOpportunitiesByYear({
         organizationDomain: assessment1.organization,
+        year: date.getFullYear(),
       });
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
       expect(result).toEqual([
-        { opportunityId: 'opp2', opportunityCreatedAt: date },
         { opportunityId: 'opp3', opportunityCreatedAt: date },
       ]);
     });
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
       const { repository, date } = setup();
-      const date1 = date;
-      const assessment2 = AssessmentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withOpportunityId('opp2')
-        .withOpportunityCreatedAt(date)
-        .build();
-
-      await repository.save(assessment2);
-
-      vitest.advanceTimersByTime(1);
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withOpportunityId('opp1')
-        .withOpportunityCreatedAt(date1)
+        .withOpportunityCreatedAt(date)
         .build();
 
       await repository.save(assessment1);
 
-      const result = await repository.getOpportunities({
+      vitest.advanceTimersByTime(1);
+      const date1 = new Date();
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp2')
+        .withOpportunityCreatedAt(date1)
+        .build();
+
+      await repository.save(assessment2);
+
+      const result = await repository.getOpportunitiesByYear({
         organizationDomain: assessment1.organization,
+        year: date.getFullYear(),
       });
       expect(result).toHaveLength(2);
-      expect(result[0].opportunityCreatedAt).toEqual(date);
-      expect(result[1].opportunityCreatedAt).toEqual(date1);
+      expect(result[0].opportunityCreatedAt).toEqual(date1);
+      expect(result[1].opportunityCreatedAt).toEqual(date);
+    });
+  });
+
+  describe('countAssessmentsByYear', () => {
+    it('should return 0 if no assessments exist for the given year', async () => {
+      const { repository, date } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(
+          new Date(`${date.getFullYear() - 1}-06-15T00:00:00.000Z`),
+        )
+        .build();
+
+      await repository.save(assessment);
+
+      const result = await repository.countAssessmentsByYear({
+        organizationDomain: 'organization1',
+        year: date.getFullYear(),
+      });
+
+      expect(result).toBe(0);
+    });
+
+    it('should count all assessments created in the given year', async () => {
+      const { repository, date } = setup();
+      const year = date.getFullYear();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year}-01-15T00:00:00.000Z`))
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year}-06-20T00:00:00.000Z`))
+        .build();
+
+      await repository.save(assessment2);
+
+      const assessment3 = AssessmentMother.basic()
+        .withId('3b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year}-12-31T23:59:59.999Z`))
+        .build();
+
+      await repository.save(assessment3);
+
+      const result = await repository.countAssessmentsByYear({
+        organizationDomain: 'organization1',
+        year,
+      });
+
+      expect(result).toBe(3);
+    });
+
+    it('should not count assessments from different years', async () => {
+      const { repository, date } = setup();
+      const year = date.getFullYear();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year}-01-01T00:00:00.000Z`))
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year - 1}-12-31T23:59:59.999Z`))
+        .build();
+
+      await repository.save(assessment2);
+
+      const assessment3 = AssessmentMother.basic()
+        .withId('3b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withCreatedAt(new Date(`${year + 1}-01-01T00:00:00.000Z`))
+        .build();
+
+      await repository.save(assessment3);
+
+      const result = await repository.countAssessmentsByYear({
+        organizationDomain: 'organization1',
+        year,
+      });
+
+      expect(result).toBe(1);
     });
   });
 });

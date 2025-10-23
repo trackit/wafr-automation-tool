@@ -8,7 +8,7 @@ export type GetOrganizationUseCaseArgs = {
   organizationDomain: string;
 };
 type OrganizationDetails = {
-  totalAssessments: number;
+  currentYearTotalAssessments: number;
   opportunitiesPerMonth: {
     [month: string]: number;
   };
@@ -27,45 +27,40 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
     args: GetOrganizationUseCaseArgs,
   ): Promise<OrganizationDetails> {
     const { organizationDomain } = args;
-    let totalAssessments = 0;
     const currentYear = new Date().getFullYear();
-    let nextToken: string | undefined = undefined;
-    do {
-      const { assessments, nextToken: newNextToken } =
-        await this.assessmentsRepository.getAll({
-          organizationDomain,
-          limit: 100,
-          nextToken,
-        });
-      totalAssessments += assessments.filter(
-        (a) => a.createdAt.getFullYear() === currentYear,
-      ).length;
-      nextToken = newNextToken;
-    } while (nextToken);
-    const opportunities = await this.assessmentsRepository.getOpportunities({
-      organizationDomain,
-    });
-    const currentYearOpportunities = opportunities.filter(
-      (o) => o.opportunityCreatedAt.getFullYear() === currentYear,
-    );
-    const opportunitiesPerMonth: { [month: string]: number } = {};
-    for (let m = 1; m <= 12; m++) {
-      const key = m.toString().padStart(2, '0');
-      opportunitiesPerMonth[key] = 0;
-    }
 
-    for (const opp of currentYearOpportunities) {
-      const month = (opp.opportunityCreatedAt.getMonth() + 1)
-        .toString()
-        .padStart(2, '0');
-      opportunitiesPerMonth[month]++;
-    }
-    const ans = {
-      totalAssessments,
+    const currentYearTotalAssessments =
+      await this.assessmentsRepository.countAssessmentsByYear({
+        organizationDomain,
+        year: currentYear,
+      });
+
+    const currentYearOpportunities =
+      await this.assessmentsRepository.getOpportunitiesByYear({
+        organizationDomain,
+        year: currentYear,
+      });
+
+    const opportunitiesPerMonth = currentYearOpportunities.reduce(
+      (acc, opp) => {
+        const month = (opp.opportunityCreatedAt.getMonth() + 1)
+          .toString()
+          .padStart(2, '0');
+        acc[month]++;
+        return acc;
+      },
+      Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => [
+          (i + 1).toString().padStart(2, '0'),
+          0,
+        ]),
+      ),
+    );
+
+    return {
+      currentYearTotalAssessments,
       opportunitiesPerMonth,
     };
-    this.logger.info(`${JSON.stringify(ans)}`);
-    return ans;
   }
 }
 

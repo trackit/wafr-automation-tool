@@ -41,7 +41,7 @@ describe('GetOrganizationUseCase', () => {
       const args = GetOrganizationUseCaseArgsMother.basic().build();
       const result = await useCase.getOrganizationDetails(args);
 
-      expect(result.totalAssessments).toBe(2);
+      expect(result.currentYearTotalAssessments).toBe(2);
     });
 
     it('should paginate through all assessments', async () => {
@@ -58,41 +58,23 @@ describe('GetOrganizationUseCase', () => {
         );
       }
 
-      const assessmentsPage2: Assessment[] = [];
-      for (let i = 100; i < 150; i++) {
-        assessmentsPage2.push(
-          AssessmentMother.basic()
-            .withId(`assessment-${i}`)
-            .withOrganization('organization1')
-            .withCreatedAt(date)
-            .build(),
-        );
-      }
+      vitest
+        .spyOn(fakeAssessmentsRepository, 'countAssessmentsByYear')
+        .mockResolvedValueOnce(100);
 
       vitest
-        .spyOn(fakeAssessmentsRepository, 'getAll')
-        .mockResolvedValueOnce({
-          assessments: assessmentsPage1,
-          nextToken: 'next-token-1',
-        })
-        .mockResolvedValueOnce({
-          assessments: assessmentsPage2,
-          nextToken: undefined,
-        });
-
-      vitest
-        .spyOn(fakeAssessmentsRepository, 'getOpportunities')
+        .spyOn(fakeAssessmentsRepository, 'getOpportunitiesByYear')
         .mockResolvedValue([]);
 
       const result = await useCase.getOrganizationDetails({
         organizationDomain: 'organization1',
       });
 
-      expect(result.totalAssessments).toBe(150);
+      expect(result.currentYearTotalAssessments).toBe(100);
     });
   });
 
-  describe('should call AssessmentsRepository to extract opportunities (Id, createdAt)', () => {
+  describe('should call AssessmentsRepository to extract opportunities (id, createdAt)', () => {
     it('should fetch opportunities for the organization', async () => {
       const { useCase, fakeAssessmentsRepository, date } = setup();
       const currentYear = date.getFullYear();
@@ -195,7 +177,7 @@ describe('GetOrganizationUseCase', () => {
   });
 
   describe('should return organization details', () => {
-    it('should return correct structure with totalAssessments and opportunitiesPerMonth', async () => {
+    it('should return correct structure with currentYearTotalAssessments and opportunitiesPerMonth', async () => {
       const { useCase, fakeAssessmentsRepository, date } = setup();
       const currentYear = date.getFullYear();
 
@@ -236,7 +218,7 @@ describe('GetOrganizationUseCase', () => {
       const result = await useCase.getOrganizationDetails(args);
 
       expect(result).toEqual({
-        totalAssessments: 4,
+        currentYearTotalAssessments: 4,
         opportunitiesPerMonth: {
           '01': 2,
           '02': 0,
@@ -260,7 +242,7 @@ describe('GetOrganizationUseCase', () => {
       const args = GetOrganizationUseCaseArgsMother.basic().build();
       const result = await useCase.getOrganizationDetails(args);
 
-      expect(result.totalAssessments).toBe(0);
+      expect(result.currentYearTotalAssessments).toBe(0);
       expect(
         Object.values(result.opportunitiesPerMonth).every((v) => v === 0),
       ).toBe(true);
