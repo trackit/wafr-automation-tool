@@ -135,6 +135,13 @@ export class AssessmentMother {
     return this;
   }
 
+  public withOpportunityCreatedAt(
+    opportunityCreatedAt: Date | undefined,
+  ): AssessmentMother {
+    this.data.opportunityCreatedAt = opportunityCreatedAt;
+    return this;
+  }
+
   public build(): Assessment {
     return this.data;
   }

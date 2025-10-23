@@ -350,4 +350,20 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       `File export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
   }
+
+  public async getOpportunities(args: {
+    organizationDomain: string;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+    const { organizationDomain } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    return repo
+      .createQueryBuilder('a')
+      .select('a.opportunityId', 'opportunityId')
+      .addSelect(' a.opportunityCreatedAt', 'opportunityCreatedAt')
+      .where(' a.opportunityId IS NOT NULL')
+      .andWhere('a.opportunityCreatedAt IS NOT NULL')
+      .orderBy(' a.opportunityCreatedAt', 'DESC')
+      .getRawMany();
+  }
 }

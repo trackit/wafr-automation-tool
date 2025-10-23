@@ -29,6 +29,7 @@ export interface DynamoDBAssessment {
   fileExports?: DynamoDBAssessmentFileExports;
   wafrWorkloadArn?: string;
   opportunityId?: string;
+  opportunityCreatedAt?: string;
 }
 
 export interface DynamoDBAssessmentGraphData {

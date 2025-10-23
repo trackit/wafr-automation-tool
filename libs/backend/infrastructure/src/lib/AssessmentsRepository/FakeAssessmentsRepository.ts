@@ -278,6 +278,28 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       (fileExport) => fileExport.id !== id,
     );
   }
+
+  public async getOpportunities(args: {
+    organizationDomain: string;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+    const { organizationDomain } = args;
+
+    return Object.values(this.assessments)
+      .filter((assessment) => assessment.organization === organizationDomain)
+      .filter(
+        (assessment) =>
+          assessment.opportunityId !== undefined &&
+          assessment.opportunityCreatedAt !== undefined,
+      )
+      .map((assessment) => ({
+        opportunityId: assessment.opportunityId!,
+        opportunityCreatedAt: assessment.opportunityCreatedAt!,
+      }))
+      .sort(
+        (a, b) =>
+          b.opportunityCreatedAt.getTime() - a.opportunityCreatedAt.getTime(),
+      );
+  }
 }
 
 export const tokenFakeAssessmentsRepository =

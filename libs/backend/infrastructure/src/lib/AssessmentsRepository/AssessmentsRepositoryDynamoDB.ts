@@ -399,6 +399,12 @@ export class AssessmentsRepositoryDynamoDB implements AssessmentsRepository {
       `${type.toUpperCase()} file export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
   }
+
+  getOpportunities(_args: {
+    organizationDomain: string;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+    throw new Error('Method not implemented.');
+  }
 }
 
 export const tokenAssessmentsRepositoryDynamoDB =

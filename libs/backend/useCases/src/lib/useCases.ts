@@ -16,6 +16,7 @@ export * from './getAssessmentStep';
 export * from './getBestPracticeFindings';
 export * from './getMilestone';
 export * from './getMilestones';
+export * from './getOrganization';
 export * from './getScannedFindings';
 export * from './listPDFExports';
 export * from './mapScanFindingsToBestPractices';

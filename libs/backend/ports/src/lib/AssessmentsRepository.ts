@@ -84,4 +84,7 @@ export interface AssessmentsRepository {
     type: AssessmentFileExportType;
     id: string;
   }): Promise<void>;
+  getOpportunities(args: {
+    organizationDomain: string;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>>;
 }

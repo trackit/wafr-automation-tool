@@ -22,6 +22,7 @@ export interface Assessment {
   fileExports?: AssessmentFileExports;
   wafrWorkloadArn?: string;
   opportunityId?: string;
+  opportunityCreatedAt?: Date;
 }
 
 export interface AssessmentGraphData {
@@ -57,6 +58,7 @@ export interface AssessmentBody {
   wafrWorkloadArn?: string;
   opportunityId?: string;
   executionArn?: string;
+  opportunityCreatedAt?: Date;
 }
 
 export enum AssessmentFileExportType {

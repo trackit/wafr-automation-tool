@@ -1216,6 +1216,105 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedAssessment?.fileExports).toStrictEqual({});
     });
   });
+
+  describe('GetOpportunities', () => {
+    it('should return an empty array if no assessments with non-undefined opportunityId and opportunityCreatedAt', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId(undefined)
+        .withOpportunityCreatedAt(undefined)
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp2')
+        .withOpportunityCreatedAt(undefined)
+        .build();
+
+      await repository.save(assessment2);
+
+      const result = await repository.getOpportunities({
+        organizationDomain: assessment1.organization,
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('should return only assessments with non-null opportunityId and opportunityCreatedAt', async () => {
+      const { repository, date } = setup();
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId(undefined)
+        .withOpportunityCreatedAt(undefined)
+        .build();
+
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp2')
+        .withOpportunityCreatedAt(date)
+        .build();
+
+      await repository.save(assessment2);
+
+      const assessment3 = AssessmentMother.basic()
+        .withId('3b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp3')
+        .withOpportunityCreatedAt(date)
+        .build();
+
+      await repository.save(assessment3);
+
+      const result = await repository.getOpportunities({
+        organizationDomain: assessment1.organization,
+      });
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        { opportunityId: 'opp2', opportunityCreatedAt: date },
+        { opportunityId: 'opp3', opportunityCreatedAt: date },
+      ]);
+    });
+
+    it('should return results ordered by opportunityCreatedAt DESC', async () => {
+      const { repository, date } = setup();
+      const date1 = date;
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp2')
+        .withOpportunityCreatedAt(date)
+        .build();
+
+      await repository.save(assessment2);
+
+      vitest.advanceTimersByTime(1);
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withOpportunityId('opp1')
+        .withOpportunityCreatedAt(date1)
+        .build();
+
+      await repository.save(assessment1);
+
+      const result = await repository.getOpportunities({
+        organizationDomain: assessment1.organization,
+      });
+      expect(result).toHaveLength(2);
+      expect(result[0].opportunityCreatedAt).toEqual(date);
+      expect(result[1].opportunityCreatedAt).toEqual(date1);
+    });
+  });
 });
 
 const setup = () => {

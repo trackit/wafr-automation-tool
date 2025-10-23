@@ -91,7 +91,10 @@ export class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
     await this.assessmentsRepository.update({
       assessmentId: assessment.id,
       organizationDomain: args.user.organizationDomain,
-      assessmentBody: { opportunityId: opportunityId },
+      assessmentBody: {
+        opportunityId: opportunityId,
+        opportunityCreatedAt: new Date(),
+      },
     });
     this.logger.info(
       `Assigned opportunity ${opportunityId} to assessment ${assessment.id}`,

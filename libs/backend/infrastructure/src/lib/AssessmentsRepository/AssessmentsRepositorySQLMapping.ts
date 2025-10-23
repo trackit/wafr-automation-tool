@@ -129,6 +129,9 @@ export function toDomainAssessment(
     ),
     ...(e.wafrWorkloadArn && { wafrWorkloadArn: e.wafrWorkloadArn }),
     ...(e.opportunityId && { opportunityId: e.opportunityId }),
+    ...(e.opportunityCreatedAt && {
+      opportunityCreatedAt: e.opportunityCreatedAt,
+    }),
   };
 }
 
