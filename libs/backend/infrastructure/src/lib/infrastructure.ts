@@ -3,7 +3,6 @@ export * from './AssessmentsRepository';
 export * from './AssessmentsStateMachine';
 export * from './CognitoService';
 export * from './config/debug';
-export * from './config/dynamodb/config';
 export * from './config/typeorm';
 export * from './FeatureToggleRepository';
 export * from './FindingsRepository';
