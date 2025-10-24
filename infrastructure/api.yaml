@@ -40,10 +40,6 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
-  DynamoDBArn:
-    Type: String
-  OrganizationTableArn:
-    Type: String
 
 Conditions:
   IsDebug:
@@ -65,8 +61,6 @@ Globals:
         STATE_MACHINE_ARN: !Ref StateMachineArn
         DB_HOST: !Ref DBHost
         DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
-        DDB_TABLE: !Ref DynamoDBArn
-        ORGANIZATION_TABLE: !Ref OrganizationTableArn
         DEBUG: !Ref Debug
     VpcConfig:
       SubnetIds: !Ref PrivateSubnetIds
@@ -235,42 +229,6 @@ Resources:
         - AWSLambdaVPCAccessExecutionRole
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Ref DBCredentialsSecretArn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: cjs
-        target: es2024
-        Minify: false
-        Sourcemap: true
-        EntryPoints:
-          - handler.ts
-
-  # TODO: Delete it when migration is done
-  MigrateDynamoLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${MigrateDynamoFunction}'
-      RetentionInDays: !Ref LogRetentionInDays
-  MigrateDynamoFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Timeout: 900
-      CodeUri: ../apps/backend/src/handlers/process/migrateDynamo
-      Tags:
-        Name: MigrateDynamoFunction
-      Policies:
-        - AWSLambdaVPCAccessExecutionRole
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref DBCredentialsSecretArn
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:Scan
-                - dynamodb:Query
-              Resource:
-                - !Ref DynamoDBArn
-                - !Ref OrganizationTableArn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
