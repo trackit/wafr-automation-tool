@@ -58,7 +58,7 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices('0#0#0')
         .withHidden(false)
         .withIsAIAssociated(false)
-        .withMetadata({ eventCode: 'event1' })
+        .withEventCode('event1')
         .withRemediation({
           desc: 'Remediation description',
           references: ['ref1', 'ref2'],
@@ -116,7 +116,7 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices('0#0#0')
         .withHidden(false)
         .withIsAIAssociated(false)
-        .withMetadata({ eventCode: 'event1' })
+        .withEventCode('event1')
         .withRemediation({
           desc: 'Remediation description',
           references: ['ref1', 'ref2'],
@@ -139,7 +139,7 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices('0#0#0')
         .withHidden(false)
         .withIsAIAssociated(false)
-        .withMetadata({ eventCode: 'event1' })
+        .withEventCode('event1')
         .withRemediation({
           desc: 'Remediation description',
           references: ['ref1', 'ref2'],

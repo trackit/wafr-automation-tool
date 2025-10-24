@@ -35,7 +35,7 @@ describe('GetScannedFindingsUseCase', () => {
           {
             risk_details: 'some risk details',
             status_detail: 'some status detail',
-            metadata: { event_code: 'event-code' },
+            event_code: 'event-code',
             remediation: {
               desc: 'remediation description',
               references: ['https://example.com'],
@@ -67,7 +67,7 @@ describe('GetScannedFindingsUseCase', () => {
           id: 'prowler#1',
           riskDetails: 'some risk details',
           statusDetail: 'some status detail',
-          metadata: { eventCode: 'event-code' },
+          eventCode: 'event-code',
           remediation: {
             desc: 'remediation description',
             references: ['https://example.com'],
@@ -342,7 +342,7 @@ describe('GetScannedFindingsUseCase', () => {
         {
           risk_details: 'wafr-automation-tool risk',
           status_detail: 'some status detail',
-          metadata: { event_code: 'event-code' },
+          event_code: 'event-code',
           remediation: {
             desc: 'remediation description',
             references: ['https://example.com'],
@@ -384,7 +384,7 @@ describe('GetScannedFindingsUseCase', () => {
         {
           risk_details: 'wafr-automation-tool risk',
           status_detail: 'some status detail',
-          metadata: { event_code: 'event-code' },
+          event_code: 'event-code',
           remediation: {
             desc: 'remediation description',
             references: ['https://example.com'],
@@ -426,7 +426,7 @@ describe('GetScannedFindingsUseCase', () => {
         {
           risk_details: 'risk details',
           status_detail: 'wafr-automation-tool some status detail',
-          metadata: { event_code: 'event-code' },
+          event_code: 'event-code',
           remediation: {
             desc: 'remediation description',
             references: ['https://example.com'],

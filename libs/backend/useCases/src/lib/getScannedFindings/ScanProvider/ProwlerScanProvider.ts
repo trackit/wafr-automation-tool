@@ -23,9 +23,7 @@ const ProwlerFindingSchema = z.object({
     })
     .optional(),
   risk_details: z.string().optional(),
-  metadata: z.object({
-    event_code: z.string().optional(),
-  }),
+  event_code: z.string().optional(),
   severity: z.enum(SeverityType).optional(),
   status_code: z.string().optional(),
   status_detail: z.string().optional(),
@@ -60,11 +58,9 @@ export class ProwlerScanProvider extends ScanProvider {
         },
       }),
       riskDetails: prowlerFinding.risk_details,
-      metadata: {
-        ...(prowlerFinding.metadata.event_code && {
-          eventCode: prowlerFinding.metadata.event_code,
-        }),
-      },
+      ...(prowlerFinding.event_code && {
+        eventCode: prowlerFinding.event_code,
+      }),
       severity: prowlerFinding.severity ?? SeverityType.Unknown,
       statusCode: prowlerFinding.status_code,
       statusDetail: prowlerFinding.status_detail,

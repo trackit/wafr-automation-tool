@@ -168,7 +168,7 @@ describe('getBestPracticeFindings adapter', () => {
           .withBestPractices('0#0#0')
           .withHidden(false)
           .withIsAIAssociated(false)
-          .withMetadata({ eventCode: 'event-code' })
+          .withEventCode('event-code')
           .withRemediation({
             desc: 'remediation description',
             references: ['ref1'],
