@@ -4,7 +4,7 @@ import {
   tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import { type Assessment, AssessmentStep, type User } from '@backend/models';
+import { type Assessment, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -53,7 +53,6 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       organization: args.organization,
       questionVersion: args.questionVersion,
       pillars: args.pillars,
-      step: AssessmentStep.SCANNING_STARTED,
       executionArn: '',
       rawGraphData: {},
     };
