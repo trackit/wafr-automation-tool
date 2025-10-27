@@ -109,7 +109,7 @@ $ payload=`echo '{ \
   "name": "Organization Name", \
   "accountId": "999999999999", \
   "assessmentExportRoleArn": "arn:aws:iam::999999999999:role/export-role", \
-  "freeAssessmentsLeft": 9999, \
+  "freeAssessmentsLeft": 9999 \
 }' | openssl base64`
 $ aws lambda invoke --function-name="<CREATE_ORGANIZATION_LAMBDA_NAME>" --payload="$payload" /dev/null
 ```
@@ -124,17 +124,6 @@ The `<CREATE_ORGANIZATION_LAMBDA_NAME>` is the name of the lambda that you can g
 | `assessmentExportRoleArn` | String | Arn of the role that will be used to export. [Create assessment export role.](#create-assessment-export-role) |
 | `freeAssessmentsLeft` | Number | How many free assessments are left |
 | `unitBasedAgreementId` | String | The id of the agreement for the unit-based subscription (not mandatory for monthly subscription) |
-
-Alternatively you can connect to the database directly using SSM:
-
-```shell
-$ aws ssm start-session \
-  --target <EC2_INSTANCE_ID> \
-  --document-name AWS-StartPortForwardingSessionToRemoteHost \
-  --parameters '{"host":["mydb-cluster.cluster-xxxxxx.us-west-2.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5432"]}'
-```
-
-Then using a postgres client, connect to the database (you will need to retrieve the password through AWS Secrets Manager), create the organization in the `organizations` table in the `postgres` database.
 
 #### Create a custom mapping
 
