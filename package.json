@@ -23,7 +23,8 @@
     "format:check": "nx format:check --all",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts --empty-objects-unknown",
     "typeorm": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/dataSource.ts",
-    "typeorm:tenant": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/tenantDataSource.ts"
+    "typeorm:tenant": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/tenantDataSource.ts",
+    "dbconnect": "tsx ./scripts/backend/dbConnect.ts"
   },
   "nx": {
     "includedScripts": []
