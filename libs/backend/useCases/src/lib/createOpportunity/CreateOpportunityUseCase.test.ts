@@ -19,6 +19,8 @@ import {
 import { CreateOpportunityUseCaseImpl } from './CreateOpportunityUseCase';
 import { CreateOpportunityUseCaseArgsMother } from './CreateOpportunityUseCaseArgsMother';
 
+vitest.useFakeTimers();
+
 describe('CreateOpportunity UseCase', () => {
   it('should call PartnerCentralSellingService and update assessment', async () => {
     const {
@@ -26,6 +28,7 @@ describe('CreateOpportunity UseCase', () => {
       fakePartnerCentralSellingService,
       fakeAssessmentsRepository,
       fakeOrganizationRepository,
+      date,
     } = setup();
 
     const organization = OrganizationMother.basic()
@@ -84,6 +87,7 @@ describe('CreateOpportunity UseCase', () => {
       organizationDomain: assessment.organization,
     });
     expect(updatedAssessment?.opportunityId).toBe(opportunityId);
+    expect(updatedAssessment?.opportunityCreatedAt).toEqual(date);
   });
 
   it('should throw AssessmentNotFoundError if the assessment does not exist', async () => {
@@ -178,7 +182,8 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  vitest.useFakeTimers();
+  const date = new Date();
+  vitest.setSystemTime(date);
 
   return {
     useCase: new CreateOpportunityUseCaseImpl(),
@@ -187,5 +192,6 @@ const setup = () => {
     ),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeOrganizationRepository: inject(tokenFakeOrganizationRepository),
+    date,
   };
 };

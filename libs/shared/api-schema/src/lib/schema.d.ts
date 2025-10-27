@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/organization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve details of organization of the user
+         * @description Retrieves relevant details about the organization of the connected user that will be included in the dashboard.
+         */
+        get: operations["getOrganization"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments": {
         parameters: {
             query?: never;
@@ -573,6 +593,47 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getOrganization: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Details of Organization retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Total number of assessments during the current year associated with the organization */
+                        currentYearTotalAssessments: number;
+                        /** @description A map where each key is the month, formatted as a two-digit, zero-padded string (e.g., '01', '02'), and the value is the number of ACE opportunities in that month. */
+                        opportunitiesPerMonth: {
+                            [key: string]: number;
+                        };
+                    };
+                };
+            };
+            /** @description A issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getAssessments: {
         parameters: {
             query?: {

@@ -1268,6 +1268,39 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GetOrganizationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetOrganizationFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  GetOrganizationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getOrganization
+      Tags:
+        Name: GetOrganizationFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        GetOrganization:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
 Outputs:
   ApiEndpoint:
     Description: API Endpoint

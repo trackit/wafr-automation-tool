@@ -1,4 +1,11 @@
-import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import {
+  Between,
+  EntityTarget,
+  IsNull,
+  Not,
+  ObjectLiteral,
+  Repository,
+} from 'typeorm';
 
 import {
   Assessment,
@@ -349,5 +356,47 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     this.logger.info(
       `File export with id ${id} deleted successfully for assessment ${assessmentId}`,
     );
+  }
+
+  public async getOpportunitiesByYear(args: {
+    organizationDomain: string;
+    year: number;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+    const { organizationDomain, year } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+    const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
+
+    const assessments = await repo.find({
+      select: ['opportunityId', 'opportunityCreatedAt'],
+      where: {
+        opportunityId: Not(IsNull()),
+        opportunityCreatedAt: Between(startDate, endDate),
+      },
+      order: {
+        opportunityCreatedAt: 'DESC',
+      },
+    });
+    return assessments.map((a) => ({
+      opportunityId: a.opportunityId!,
+      opportunityCreatedAt: a.opportunityCreatedAt!,
+    }));
+  }
+
+  public async countAssessmentsByYear(args: {
+    organizationDomain: string;
+    year: number;
+  }): Promise<number> {
+    const { organizationDomain, year } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+    const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+    const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
+
+    return repo.count({
+      where: {
+        createdAt: Between(startDate, endDate),
+      },
+    });
   }
 }

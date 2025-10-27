@@ -278,6 +278,51 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       (fileExport) => fileExport.id !== id,
     );
   }
+
+  public async getOpportunitiesByYear(args: {
+    organizationDomain: string;
+    year: number;
+  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+    const { organizationDomain, year } = args;
+
+    const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+    const endDate = new Date(`${year + 1}-01-01T00:00:00.000Z`);
+
+    return Object.values(this.assessments)
+      .filter((assessment) => assessment.organization === organizationDomain)
+      .filter(
+        (assessment) =>
+          assessment.opportunityId !== undefined &&
+          assessment.opportunityCreatedAt !== undefined &&
+          assessment.opportunityCreatedAt >= startDate &&
+          assessment.opportunityCreatedAt < endDate,
+      )
+      .map((assessment) => ({
+        opportunityId: assessment.opportunityId!,
+        opportunityCreatedAt: assessment.opportunityCreatedAt!,
+      }))
+      .sort(
+        (a, b) =>
+          b.opportunityCreatedAt.getTime() - a.opportunityCreatedAt.getTime(),
+      );
+  }
+
+  public async countAssessmentsByYear(args: {
+    organizationDomain: string;
+    year: number;
+  }): Promise<number> {
+    const { organizationDomain, year } = args;
+
+    const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+    const endDate = new Date(`${year + 1}-01-01T00:00:00.000Z`);
+
+    return Object.values(this.assessments)
+      .filter((assessment) => assessment.organization === organizationDomain)
+      .filter((assessment) => {
+        const createdAt = assessment.createdAt;
+        return createdAt >= startDate && createdAt < endDate;
+      }).length;
+  }
 }
 
 export const tokenFakeAssessmentsRepository =

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -21,6 +22,9 @@ import {
 } from '@backend/models';
 
 @Entity('assessments')
+@Index('idx_opportunity_created_at', ['opportunityCreatedAt'], {
+  where: '"opportunityCreatedAt" IS NOT NULL AND "opportunityId" IS NOT NULL',
+})
 export class AssessmentEntity
   implements
     Omit<
@@ -85,6 +89,9 @@ export class AssessmentEntity
 
   @Column('varchar', { nullable: true })
   opportunityId?: string;
+
+  @Column('timestamptz', { nullable: true })
+  opportunityCreatedAt?: Date;
 }
 
 @Entity('pillars')

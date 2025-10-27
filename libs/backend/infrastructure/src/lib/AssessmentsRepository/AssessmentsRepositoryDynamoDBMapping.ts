@@ -97,6 +97,7 @@ export function toDynamoDBAssessmentItem(
     error: assessment.error,
     wafrWorkloadArn: assessment.wafrWorkloadArn,
     opportunityId: assessment.opportunityId,
+    opportunityCreatedAt: assessment.opportunityCreatedAt,
     ...(assessment.fileExports && {
       fileExports: Object.fromEntries(
         Object.entries(assessment.fileExports).map(([k, v]) => [
