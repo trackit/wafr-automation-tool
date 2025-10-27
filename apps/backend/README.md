@@ -13,6 +13,7 @@
     - [Environment Variables](#environment-variables)
     - [Deployment Command](#deployment-command)
     - [Post deployment](#post-deployment)
+      - [Migration Runner](#migration-runner)
       - [Create assessment export role](#create-assessment-export-role)
         - [Local](#local)
         - [Remote](#remote)
@@ -68,6 +69,17 @@ $ npm run deploy:backend
 ```
 
 ### Post deployment
+
+#### Migration Runner
+
+The migration runner needs to be executed once at least for the tables in the database to be created.
+To do so you can use the MigrationRunner lambda.
+
+```shell
+$ aws lambda invoke --function-name="<MIGRATION_RUNNER_LAMBDA_NAME>" /dev/null
+```
+
+The `<MIGRATION_RUNNER_LAMBDA_NAME>` is the name of the lambda that you can get on the AWS Console.
 
 #### Create assessment export role
 
