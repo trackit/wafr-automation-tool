@@ -8,7 +8,7 @@ import {
   tokenOrganizationRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { Assessment, AssessmentStep, User } from '@backend/models';
+import { Assessment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -122,9 +122,9 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       organization: user.organizationDomain,
       questionVersion: questionSet.version,
       pillars: questionSet.pillars,
-      step: AssessmentStep.SCANNING_STARTED,
       executionArn: '',
       rawGraphData: {},
+      finishedAt: undefined,
     };
     await this.assessmentRepository.save(assessment);
     return assessment;

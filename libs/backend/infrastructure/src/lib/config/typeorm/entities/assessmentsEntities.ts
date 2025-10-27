@@ -13,7 +13,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentGraphData,
-  AssessmentStep,
   BestPractice,
   Pillar,
   Question,
@@ -56,17 +55,14 @@ export class AssessmentEntity
   @Column('varchar')
   roleArn!: string;
 
-  @Column('boolean', { default: false })
-  finished!: boolean;
+  @Column('timestamptz', { nullable: true })
+  finishedAt?: Date;
 
   @Column('varchar', { nullable: false, array: true, default: [] })
   workflows!: string[];
 
   @Column({ type: 'jsonb', nullable: true })
   error?: { cause: string; error: string };
-
-  @Column({ type: 'enum', enum: AssessmentStep })
-  step!: AssessmentStep;
 
   @OneToMany(() => PillarEntity, (pillar) => pillar.assessment, {
     cascade: true,

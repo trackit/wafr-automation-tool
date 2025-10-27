@@ -6,11 +6,7 @@ import {
   tokenFakeMarketplaceService,
   tokenFakeOrganizationRepository,
 } from '@backend/infrastructure';
-import {
-  AssessmentStep,
-  OrganizationMother,
-  UserMother,
-} from '@backend/models';
+import { OrganizationMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import {
@@ -134,9 +130,9 @@ describe('StartAssessmentUseCase', () => {
           roleArn: input.roleArn,
           createdBy: input.user.id,
           organization: input.user.organizationDomain,
-          step: AssessmentStep.SCANNING_STARTED,
           executionArn: 'test-execution-arn',
           pillars: expect.any(Array),
+          finishedAt: undefined,
         }),
       );
     });

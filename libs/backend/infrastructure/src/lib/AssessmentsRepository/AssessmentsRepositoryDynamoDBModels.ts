@@ -1,7 +1,6 @@
 import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentStep,
   FindingRemediation,
   FindingResource,
   ScanningTool,
@@ -24,7 +23,7 @@ export interface DynamoDBAssessment {
   regions: string[];
   exportRegion?: string;
   roleArn: string;
-  step: AssessmentStep;
+  finishedAt?: string;
   workflows: string[];
   error?: DynamoDBAssessmentError;
   fileExports?: DynamoDBAssessmentFileExports;

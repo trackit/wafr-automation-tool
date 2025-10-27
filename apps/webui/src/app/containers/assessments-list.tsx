@@ -14,13 +14,14 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounceValue } from 'usehooks-ts';
 
 import {
   deleteAssessment,
   getAssessments,
+  getAssessmentStep,
   rescanAssessment,
 } from '@webui/api-client';
 import { ConfirmationModal, StatusBadge } from '@webui/ui';
@@ -71,6 +72,53 @@ function AssessmentsList() {
     const match = roleArn.match(/arn:aws:iam::(\d+):/);
     return match ? match[1] : '';
   };
+
+  const [assessmentSteps, setAssessmentSteps] = useState<
+    Record<string, string>
+  >({});
+  const knownRef = useRef<Record<string, boolean>>({});
+  const pendingRef = useRef<Record<string, boolean>>({});
+
+  useEffect(() => {
+    knownRef.current = Object.fromEntries(
+      Object.keys(assessmentSteps).map((k) => [k, true]),
+    );
+  }, [assessmentSteps]);
+
+  const fetchStep = useCallback(async (id: string) => {
+    if (knownRef.current[id] || pendingRef.current[id]) return;
+    pendingRef.current[id] = true;
+    try {
+      const step = await getAssessmentStep(id);
+      if (step) setAssessmentSteps((prev) => ({ ...prev, [id]: step }));
+    } finally {
+      delete pendingRef.current[id];
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!data?.pages) return;
+
+    for (const page of data.pages) {
+      for (const a of page.assessments ?? []) {
+        const id = a?.id;
+        if (!id) continue;
+
+        if (knownRef.current[id] || pendingRef.current[id]) continue;
+
+        if (a.error || a.finishedAt) {
+          knownRef.current[id] = true;
+          setAssessmentSteps((prev) => ({
+            ...prev,
+            [id]: a.error ? 'ERRORED' : 'FINISHED',
+          }));
+        }
+        if (!assessmentSteps[id] && !pendingRef.current[id]) {
+          void fetchStep(id);
+        }
+      }
+    }
+  }, [data, fetchStep, assessmentSteps]);
 
   const { mutate: deleteAssessmentMutation } = useMutation({
     mutationFn: (id: string) => deleteAssessment({ assessmentId: id }),
@@ -170,10 +218,14 @@ function AssessmentsList() {
                     {assessment.name}
                   </div>
                   <div className="flex flex-row items-center gap-1 flex-1 flex-grow justify-end">
-                    <StatusBadge
-                      status={assessment.step}
-                      className="badge-sm flex-shrink-0 "
-                    />
+                    {assessmentSteps[assessment.id!] ? (
+                      <StatusBadge
+                        status={assessmentSteps[assessment.id!]}
+                        className="badge-sm flex-shrink-0 "
+                      />
+                    ) : (
+                      <span className="loading loading-dots loading-xs text-base-content"></span>
+                    )}
                     <div
                       className="dropdown dropdown-end"
                       onClick={(e) => {

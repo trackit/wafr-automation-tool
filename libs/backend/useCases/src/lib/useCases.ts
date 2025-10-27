@@ -12,6 +12,7 @@ export * from './exportWellArchitectedTool';
 export * from './generatePDFExportURL';
 export * from './getAssessment';
 export * from './getAssessments';
+export * from './getAssessmentStep';
 export * from './getBestPracticeFindings';
 export * from './getMilestone';
 export * from './getMilestones';

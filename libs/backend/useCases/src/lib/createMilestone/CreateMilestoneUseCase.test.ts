@@ -6,7 +6,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   OrganizationMother,
   PillarMother,
   UserMother,
@@ -43,7 +42,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -92,7 +91,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -122,7 +121,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -152,7 +151,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -174,7 +173,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -205,7 +204,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion('us-west-2')
       .build();
@@ -236,7 +235,7 @@ describe('CreateMilestoneUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withExportRegion(undefined)
       .build();

@@ -314,9 +314,9 @@ Resources:
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
-        StartAt: Pass
+        StartAt: AssignVariables
         States:
-          Pass:
+          AssignVariables:
             Type: Pass
             Assign:
               assessmentId: '{% $states.input.assessmentId %}'

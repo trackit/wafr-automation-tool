@@ -17,6 +17,7 @@ import { components } from '@shared/api-schema';
 import {
   deleteAssessment,
   getAssessment,
+  getAssessmentStep,
   getMilestone,
   rescanAssessment,
   updatePillar,
@@ -78,7 +79,6 @@ export function AssessmentDetails() {
   const [progress, setProgress] = useState<number>(0);
 
   const isMilestone = Boolean(milestoneId);
-
   const assessmentQuery = useQuery<
     components['schemas']['AssessmentContent'] | null
   >({
@@ -97,10 +97,31 @@ export function AssessmentDetails() {
   });
 
   const assessmentData = assessmentQuery.data;
+  const isAssessmentReady =
+    assessmentQuery.isSuccess || assessmentQuery.isFetched;
   const milestoneData = milestoneQuery.data;
+  const stepQuery = useQuery({
+    queryKey: ['assessmentStep', id],
+    queryFn: () => (id ? getAssessmentStep(id) : null),
+    refetchInterval: (query) => {
+      const step = query.state.data as string | undefined;
+      if (step === 'FINISHED' || step === 'ERRORED') return false;
+      return isMilestone ? false : 15000;
+    },
+    enabled:
+      !!id &&
+      isAssessmentReady &&
+      !assessmentData?.error &&
+      !assessmentData?.finishedAt,
+  });
+  const step = useMemo(() => {
+    if (assessmentData?.error) return 'ERRORED';
+    if (assessmentData?.finishedAt) return 'FINISHED';
+    return stepQuery.data as string | undefined;
+  }, [assessmentData, stepQuery.data]);
   const isLoading = isMilestone
     ? milestoneQuery.isLoading || assessmentQuery.isLoading
-    : assessmentQuery.isLoading;
+    : assessmentQuery.isLoading || stepQuery.isLoading;
   const refetch = assessmentQuery.refetch;
   const pillars = isMilestone
     ? milestoneData?.pillars
@@ -799,26 +820,25 @@ export function AssessmentDetails() {
     return [
       {
         text: 'Scanning your account',
-        loading: assessmentData?.step === 'SCANNING_STARTED',
-        completed: assessmentData?.step !== 'SCANNING_STARTED',
+        loading: step === 'SCANNING_STARTED',
+        completed: step !== 'SCANNING_STARTED',
       },
       {
         text: 'Preparing prompts',
-        loading: assessmentData?.step === 'PREPARING_ASSOCIATIONS',
+        loading: step === 'PREPARING_ASSOCIATIONS',
         completed:
-          assessmentData?.step !== 'PREPARING_ASSOCIATIONS' &&
-          assessmentData?.step !== 'SCANNING_STARTED',
+          step !== 'PREPARING_ASSOCIATIONS' && step !== 'SCANNING_STARTED',
       },
       {
         text: 'Invoking LLMs',
-        loading: assessmentData?.step === 'ASSOCIATING_FINDINGS',
+        loading: step === 'ASSOCIATING_FINDINGS',
         completed:
-          assessmentData?.step !== 'ASSOCIATING_FINDINGS' &&
-          assessmentData?.step !== 'PREPARING_ASSOCIATIONS' &&
-          assessmentData?.step !== 'SCANNING_STARTED',
+          step !== 'ASSOCIATING_FINDINGS' &&
+          step !== 'PREPARING_ASSOCIATIONS' &&
+          step !== 'SCANNING_STARTED',
       },
     ];
-  }, [assessmentData?.step]);
+  }, [step]);
 
   if (isLoading)
     return (
@@ -857,7 +877,7 @@ export function AssessmentDetails() {
               Milestone {milestoneData?.name}
             </span>
           ) : (
-            <StatusBadge status={assessmentData?.step || undefined} />
+            <StatusBadge status={step || undefined} />
           )}
           <div
             className="dropdown dropdown-end"
@@ -1162,13 +1182,13 @@ export function AssessmentDetails() {
       </div>
 
       {!isMilestone &&
-      (assessmentData?.step === 'SCANNING_STARTED' ||
-        assessmentData?.step === 'PREPARING_ASSOCIATIONS' ||
-        assessmentData?.step === 'ASSOCIATING_FINDINGS')
+      (step === 'SCANNING_STARTED' ||
+        step === 'PREPARING_ASSOCIATIONS' ||
+        step === 'ASSOCIATING_FINDINGS')
         ? loading
         : null}
-      {isMilestone || assessmentData?.step === 'FINISHED' ? details : null}
-      {!isMilestone && assessmentData?.step === 'ERRORED' ? (
+      {isMilestone || step === 'FINISHED' ? details : null}
+      {!isMilestone && step === 'ERRORED' ? (
         <ErrorPage {...assessmentData} />
       ) : null}
 

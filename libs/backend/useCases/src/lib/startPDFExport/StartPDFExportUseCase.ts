@@ -8,7 +8,6 @@ import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentStep,
   User,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
@@ -55,7 +54,7 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
     if (
       !assessment.pillars ||
       assessment.pillars.length === 0 ||
-      assessment.step !== AssessmentStep.FINISHED
+      !assessment.finishedAt
     ) {
       throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
     }

@@ -2,7 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import { AssessmentGraphDataMother, AssessmentStep } from '@backend/models';
+import { AssessmentGraphDataMother } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -73,7 +73,7 @@ export class ComputeGraphDataUseCaseImpl implements ComputeGraphDataUseCase {
       organizationDomain: assessment.organization,
       assessmentBody: {
         graphData: assessmentGraphData,
-        step: AssessmentStep.FINISHED,
+        finishedAt: new Date(),
       },
     });
   }

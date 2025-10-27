@@ -1,9 +1,13 @@
 import {
+  DescribeExecutionCommand,
+  ExecutionStatus,
+  GetExecutionHistoryCommand,
   SFNClient,
   StartExecutionCommand,
   StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 
+import { AssessmentStep } from '@backend/models';
 import type {
   AssessmentsStateMachine,
   AssessmentsStateMachineStartAssessmentArgs,
@@ -17,6 +21,51 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
   private readonly client = inject(tokenClientSfn);
   private readonly stateMachineArn = inject(tokenStateMachineArn);
   private readonly logger = inject(tokenLogger);
+
+  public async getAssessmentStep(
+    executionArn: string,
+  ): Promise<AssessmentStep> {
+    const historyResponse = await this.client.send(
+      new GetExecutionHistoryCommand({
+        executionArn,
+        maxResults: 100,
+        reverseOrder: true,
+      }),
+    );
+    const events = historyResponse.events || [];
+
+    const knownStateToAssessmentStep: Record<string, AssessmentStep> = {
+      AssignVariables: AssessmentStep.SCANNING_STARTED,
+      ScanningTools: AssessmentStep.SCANNING_STARTED,
+      ProwlerScan: AssessmentStep.SCANNING_STARTED,
+      PrepareCustodian: AssessmentStep.SCANNING_STARTED,
+      CloudSploitScan: AssessmentStep.SCANNING_STARTED,
+      PrepareFindingsAssociations: AssessmentStep.PREPARING_ASSOCIATIONS,
+      PromptMap: AssessmentStep.ASSOCIATING_FINDINGS,
+      AssociateFindingsChunkToBestPractices:
+        AssessmentStep.ASSOCIATING_FINDINGS,
+      ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
+      CleanupOnError: AssessmentStep.ERRORED,
+    };
+    for (const event of events) {
+      const stateName = event.stateEnteredEventDetails?.name;
+      const stateExitedName = event.stateExitedEventDetails?.name;
+      if (stateExitedName === 'Cleanup') {
+        return AssessmentStep.FINISHED;
+      }
+      if (stateName && knownStateToAssessmentStep[stateName]) {
+        return knownStateToAssessmentStep[stateName];
+      }
+    }
+
+    const describeResponse = await this.client.send(
+      new DescribeExecutionCommand({ executionArn }),
+    );
+    if (describeResponse.status === ExecutionStatus.RUNNING) {
+      return AssessmentStep.SCANNING_STARTED;
+    }
+    return AssessmentStep.ERRORED;
+  }
 
   public async startAssessment(
     startAssessmentInput: AssessmentsStateMachineStartAssessmentArgs,

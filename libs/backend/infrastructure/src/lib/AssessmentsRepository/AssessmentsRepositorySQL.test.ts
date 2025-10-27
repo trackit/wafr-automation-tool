@@ -4,7 +4,6 @@ import {
   AssessmentFileExportType,
   AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -36,6 +35,8 @@ afterAll(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
 });
+
+vitest.useFakeTimers();
 
 describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
@@ -80,7 +81,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinishedAt(undefined)
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 
@@ -90,7 +91,6 @@ describe('AssessmentsRepositorySQL', () => {
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
       });
-
       expect(savedAssessment).toEqual(assessment);
     });
   });
@@ -365,6 +365,8 @@ describe('AssessmentsRepositorySQL', () => {
 
       await repository.save(assessment1);
 
+      vitest.advanceTimersByTime(1);
+
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
@@ -396,6 +398,8 @@ describe('AssessmentsRepositorySQL', () => {
         .build();
 
       await repository.save(assessment1);
+
+      vitest.advanceTimersByTime(1);
 
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -514,7 +518,7 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('update', () => {
     it('should update the assessment', async () => {
-      const { repository } = setup();
+      const { repository, date } = setup();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -550,7 +554,7 @@ describe('AssessmentsRepositorySQL', () => {
             AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
           ],
         })
-        .withStep(AssessmentStep.SCANNING_STARTED)
+        .withFinishedAt(undefined)
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
         .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
@@ -600,7 +604,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          step: AssessmentStep.FINISHED,
+          finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {
@@ -644,7 +648,7 @@ describe('AssessmentsRepositorySQL', () => {
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          step: AssessmentStep.FINISHED,
+          finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
           fileExports: {
@@ -1218,5 +1222,8 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  return { repository: new AssessmentsRepositorySQL() };
+  const date = new Date();
+  vitest.setSystemTime(date);
+
+  return { repository: new AssessmentsRepositorySQL(), date };
 };

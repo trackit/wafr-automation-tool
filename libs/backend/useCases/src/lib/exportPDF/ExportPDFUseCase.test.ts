@@ -9,7 +9,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
@@ -39,7 +38,7 @@ describe('exportPDF UseCase', () => {
       .withStatus(AssessmentFileExportStatus.NOT_STARTED)
       .build();
     const assessment = AssessmentMother.basic()
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withFileExports({
         [AssessmentFileExportType.PDF]: [assessmentFileExport],
@@ -101,7 +100,7 @@ describe('exportPDF UseCase', () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .withFinishedAt(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -118,7 +117,7 @@ describe('exportPDF UseCase', () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
     const assessment = AssessmentMother.basic()
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

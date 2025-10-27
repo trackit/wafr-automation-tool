@@ -7,7 +7,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
   UserMother,
 } from '@backend/models';
@@ -34,7 +33,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .withFileExports({
         [AssessmentFileExportType.PDF]: [assessmentFileExport],

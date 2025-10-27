@@ -10,7 +10,6 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
-  AssessmentStep,
   FindingMother,
   OrganizationMother,
 } from '@backend/models';
@@ -24,6 +23,8 @@ import {
 } from '../../errors';
 import { CleanupUseCaseImpl } from './CleanupUseCase';
 import { CleanupUseCaseArgsMother } from './CleanupUseCaseArgsMother';
+
+vitest.useFakeTimers();
 
 describe('CleanupUseCase', () => {
   describe('cleanup', () => {
@@ -144,7 +145,7 @@ describe('CleanupUseCase', () => {
     });
 
     it('should update assessment error if error is defined', async () => {
-      const { useCase, fakeAssessmentsRepository } = setup(true);
+      const { date, useCase, fakeAssessmentsRepository } = setup(true);
 
       const assessment = AssessmentMother.basic().build();
       await fakeAssessmentsRepository.save(assessment);
@@ -165,7 +166,7 @@ describe('CleanupUseCase', () => {
         error: 'test-error',
         cause: 'test-cause',
       });
-      expect(updatedAssessment?.step).toEqual(AssessmentStep.ERRORED);
+      expect(updatedAssessment?.finishedAt).toEqual(date);
     });
   });
 
@@ -358,7 +359,11 @@ const setup = (debug = false) => {
   vitest.spyOn(fakeMarketplaceService, 'hasMonthlySubscription');
   vitest.spyOn(fakeMarketplaceService, 'hasUnitBasedSubscription');
 
+  const date = new Date();
+  vitest.setSystemTime(date);
+
   return {
+    date,
     useCase: new CleanupUseCaseImpl(),
     fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
     fakeFindingsRepository: inject(tokenFakeFindingsRepository),

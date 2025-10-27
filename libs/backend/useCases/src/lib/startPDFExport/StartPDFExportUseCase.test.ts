@@ -8,7 +8,6 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
-  AssessmentStep,
   PillarMother,
   UserMother,
 } from '@backend/models';
@@ -24,7 +23,7 @@ import {
 } from './StartPDFExportUseCase';
 import { StartPDFExportUseCaseArgsMother } from './StartPDFExportUseCaseArgsMother';
 
-vi.useFakeTimers();
+vitest.useFakeTimers();
 
 describe('startPDFExport UseCase', () => {
   it('should start the PDF export', async () => {
@@ -41,7 +40,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -99,7 +98,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -121,7 +120,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.PREPARING_ASSOCIATIONS)
+      .withFinishedAt(undefined)
       .withPillars([PillarMother.basic().build()])
       .build();
     await fakeAssessmentsRepository.save(assessment);
@@ -142,7 +141,7 @@ describe('startPDFExport UseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withStep(AssessmentStep.FINISHED)
+      .withFinishedAt(new Date())
       .withPillars([])
       .build();
     await fakeAssessmentsRepository.save(assessment);

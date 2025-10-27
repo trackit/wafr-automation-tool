@@ -233,6 +233,39 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
+  '/assessments/{assessmentId}/step':
+    get:
+      operationId: getAssessmentStep
+      tags:
+        - Assessments
+      summary: Retrieve the current step for a specific assessment
+      description: |
+        Fetches the current step in the assessment process.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to retrieve step for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current step for the specified assessment
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - step
+                properties:
+                  step:
+                    $ref: '#/components/schemas/AssessmentStep'
+        '400':
+          description: An issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
   '/assessments/{assessmentId}/milestones':
     get:
       operationId: getMilestones
@@ -1045,17 +1078,20 @@ components:
         createdAt:
           type: string
           description: ISO-formatted date when the assessment was created
-        step:
+        finishedAt:
           type: string
-          description: Current step in the assessment process
-          enum:
-            - SCANNING_STARTED
-            - PREPARING_ASSOCIATIONS
-            - ASSOCIATING_FINDINGS
-            - FINISHED
-            - ERRORED
+          description: ISO-formatted date when the assessment has finished scanning and processing
         error:
           $ref: '#/components/schemas/AssessmentError'
+    AssessmentStep:
+      type: string
+      description: Current step in the assessment process
+      enum:
+        - SCANNING_STARTED
+        - PREPARING_ASSOCIATIONS
+        - ASSOCIATING_FINDINGS
+        - FINISHED
+        - ERRORED
     AssessmentContent:
       type: object
       allOf:

@@ -6,7 +6,6 @@ import {
   AssessmentFileExportType,
   AssessmentGraphDataMother,
   AssessmentMother,
-  AssessmentStep,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -89,7 +88,7 @@ describe('AssessmentsRepositoryDynamoDB', () => {
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withStep(AssessmentStep.FINISHED)
+        .withFinishedAt(new Date())
         .withWorkflows(['workflow-1', 'workflow-2'])
         .build();
 

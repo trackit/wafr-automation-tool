@@ -92,7 +92,7 @@ export function toDynamoDBAssessmentItem(
     regions: assessment.regions,
     exportRegion: assessment.exportRegion,
     roleArn: assessment.roleArn,
-    step: assessment.step,
+    finishedAt: assessment.finishedAt?.toISOString(),
     workflows: assessment.workflows,
     error: assessment.error,
     wafrWorkloadArn: assessment.wafrWorkloadArn,
@@ -221,7 +221,9 @@ export function fromDynamoDBAssessmentItem(
     regions: assessment.regions,
     exportRegion: assessment.exportRegion,
     roleArn: assessment.roleArn,
-    step: assessment.step,
+    finishedAt: assessment.finishedAt
+      ? new Date(assessment.finishedAt)
+      : undefined,
     workflows: assessment.workflows,
     error: assessment.error,
     opportunityId: assessment.opportunityId,
