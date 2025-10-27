@@ -13,6 +13,7 @@
     - [Environment Variables](#environment-variables)
     - [Deployment Command](#deployment-command)
     - [Post deployment](#post-deployment)
+      - [Migration Runner](#migration-runner)
       - [Create assessment export role](#create-assessment-export-role)
         - [Local](#local)
         - [Remote](#remote)
@@ -29,13 +30,13 @@
 This AWS serverless backend offers a scalable and maintainable solution integrating API Gateway and Lambda functions to handle user requests.
 AWS Step Functions orchestrate the execution of ECS tools including Cloud Custodian, Prowler, and CloudSploit.
 
-The results produced by these tools are stored in Amazon S3 and DynamoDB, then analyzed using our manual mapping and Amazon Bedrock (LLM) to automatically map findings against AWS Well-Architected Framework Review (WAFR) best practices. This enables precise correlation of security and compliance findings with best practices, which can then be presented on the frontend interface.
+The results produced by these tools are stored in Amazon S3 and Amazon Aurora, then analyzed using a manual mapping and Amazon Bedrock (LLM) to automatically map findings against AWS Well-Architected Framework Review (WAFR) best practices. This enables precise correlation of security and compliance findings with best practices, which can then be presented on the frontend interface.
 
 ## Getting started
 
 ### Tests
 
-To run backend tests locally, we need to start the local dynamodb container, initialize the tables and then we can execute the tests.
+To run backend tests locally, we need to start the local postgres container, initialize test settings and then we can execute the tests.
 
 ```shell
 $ docker-compose up -d
@@ -49,12 +50,15 @@ $ npm run test:backend
 
 These environment variables need to be set for the backend to be deployed.
 
-| Variable             | Description                                                                                                                | Example                                           |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `STAGE`              | Defines the target deployment environment or context                                                                       | `dev` or `prod`                                   |
-| `DEBUG`              | Enable or disable debug mode (`true` or `false`)                                                                           | `false`                                           |
-| `REPOSITORY`         | URL of the backend repository                                                                                              | `https://github.com/trackit/wafr-automation-tool` |
-| `INITIAL_USER_EMAIL` | Email of the initial user created in the frontend. An email will be sent to this address containing the frontend password. | `example@example.com`                             |
+| Variable                              | Description                                                                                                                | Example                                           |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `STAGE`                               | Defines the target deployment environment or context                                                                       | `dev` or `prod`                                   |
+| `DEBUG`                               | Enable or disable debug mode (`true` or `false`)                                                                           | `false`                                           |
+| `REPOSITORY`                          | URL of the backend repository                                                                                              | `https://github.com/trackit/wafr-automation-tool` |
+| `INITIAL_USER_EMAIL`                  | Email of the initial user created in the frontend. An email will be sent to this address containing the frontend password. | `example@example.com`                             |
+| `LOG_RETENTION_IN_DAYS`               | Number of days to retain CloudWatch logs                                                                                   | `14`                                              |
+| `GEN_AI_MAX_RETRIES`                  | Maximum number of retries for GenAI API calls                                                                              | `3`                                               |
+| `AI_FINDINGS_ASSOCIATION_CHUNK_SIZE`  | Number of findings to process in each AI association batch                                                                 | `10`                                              |
 
 ### Deployment Command
 
@@ -65,6 +69,17 @@ $ npm run deploy:backend
 ```
 
 ### Post deployment
+
+#### Migration Runner
+
+The migration runner needs to be executed once at least for the tables in the database to be created.
+To do so you can use the MigrationRunner lambda.
+
+```shell
+$ aws lambda invoke --function-name="<MIGRATION_RUNNER_LAMBDA_NAME>" /dev/null
+```
+
+The `<MIGRATION_RUNNER_LAMBDA_NAME>` is the name of the lambda that you can get on the AWS Console.
 
 #### Create assessment export role
 
@@ -85,13 +100,30 @@ And with the following [Trust Policy](../webui/src/assets/trust-policy-scan.json
 
 #### Create organization
 
-You must create a new organization in your DynamoDB table named 'wafr-automation-tool-${STAGE}-organization'. Here is the template:
+You must create the organization related to the account which will interact with the tool.
+To do so, you can use the CreateOrganization lambda.
 
-| Key                       | Type   | Value                                                                                                         |
-| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
-| `PK`                      | String | Email domain of the organization                                                                              |
-| `domain`                  | String | Email domain of the organization                                                                              |
+```shell
+$ payload=`echo '{ \
+  "domain": "domain.com", \
+  "name": "Organization Name", \
+  "accountId": "999999999999", \
+  "assessmentExportRoleArn": "arn:aws:iam::999999999999:role/export-role", \
+  "freeAssessmentsLeft": 9999 \
+}' | openssl base64`
+$ aws lambda invoke --function-name="<CREATE_ORGANIZATION_LAMBDA_NAME>" --payload="$payload" /dev/null
+```
+
+The `<CREATE_ORGANIZATION_LAMBDA_NAME>` is the name of the lambda that you can get on the AWS Console and the payload values are as follows:
+
+| Key | Type | Value |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `domain` | String | Email domain of the organization |
+| `name` | String | Name of the organization |
+| `accountId` | String | The id of the account who bought the product |
 | `assessmentExportRoleArn` | String | Arn of the role that will be used to export. [Create assessment export role.](#create-assessment-export-role) |
+| `freeAssessmentsLeft` | Number | How many free assessments are left |
+| `unitBasedAgreementId` | String | The id of the agreement for the unit-based subscription (not mandatory for monthly subscription) |
 
 #### Create a custom mapping
 
