@@ -72,7 +72,7 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.51.0",
     "@nx/devkit": "21.6.2",
-    "@nx/eslint": "21.6.4",
+    "@nx/eslint": "22.0.1",
     "@nx/eslint-plugin": "21.6.5",
     "@nx/js": "21.6.2",
     "@nx/playwright": "21.6.2",
