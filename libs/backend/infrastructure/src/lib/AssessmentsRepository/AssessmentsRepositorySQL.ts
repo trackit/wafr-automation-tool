@@ -31,7 +31,6 @@ import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import {
   mapFileExportsToEntities,
-  mapPillarsToEntities,
   toDomainAssessment,
 } from './AssessmentsRepositorySQLMapping';
 
@@ -61,6 +60,25 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
+  }
+
+  public async saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fileExport: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, fileExport } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
+
+    const entity = repo.create({
+      ...fileExport,
+      assessmentId,
+      // TODO: REMOVE THIS LINE
+      type: AssessmentFileExportType.PDF,
+    });
+
+    await repo.save(entity);
+    this.logger.info(`File exports saved for assessment ${assessmentId}`);
   }
 
   public async get(args: {
@@ -141,37 +159,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     assessmentBody: AssessmentBody;
   }): Promise<void> {
     const { assessmentId, organizationDomain, assessmentBody } = args;
-    const assessmentRepo = await this.repo(
-      AssessmentEntity,
-      organizationDomain,
-    );
-    const existing = await assessmentRepo.findOne({
-      where: { id: assessmentId },
-    });
-    if (!existing) {
-      throw new Error(`Assessment not found: ${assessmentId}`);
-    }
-    const { pillars, fileExports, ...assessmentData } = assessmentBody;
-    if (pillars) {
-      const pillarRepo = await this.repo(PillarEntity, organizationDomain);
-      await pillarRepo.delete({ assessmentId });
-      const pillarEntities = mapPillarsToEntities(assessmentId, pillars);
-      await pillarRepo.save(pillarEntities);
-    }
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
 
-    if (fileExports) {
-      const fileExportRepo = await this.repo(
-        FileExportEntity,
-        organizationDomain,
-      );
-      const fileExportEntities = mapFileExportsToEntities(
-        assessmentId,
-        fileExports,
-      );
-      await fileExportRepo.delete({ assessmentId });
-      await fileExportRepo.save(fileExportEntities);
-    }
-    await assessmentRepo.update({ id: assessmentId }, assessmentData);
+    await repo.update({ id: assessmentId }, assessmentBody);
     this.logger.info(`Assessment updated: ${assessmentId}`);
   }
 
@@ -248,14 +238,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const { assessmentId, organizationDomain, type, data } = args;
     const repo = await this.repo(FileExportEntity, organizationDomain);
 
-    const fileExport = await repo.findOne({
-      where: { id: data.id, assessmentId },
-    });
-    if (!fileExport) {
-      await repo.save({ ...data, assessmentId, type });
-    } else {
-      await repo.update({ id: data.id, assessmentId }, { ...data });
-    }
+    await repo.update({ id: data.id, assessmentId }, data);
     this.logger.info(
       `${type.toUpperCase()} file with id ${
         data.id

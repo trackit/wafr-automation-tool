@@ -38,10 +38,8 @@ export interface AssessmentBody {
   name?: string;
   error?: AssessmentError;
   finishedAt?: Date;
-  pillars?: Pillar[];
   questionVersion?: string;
   exportRegion?: string;
-  fileExports?: AssessmentFileExports;
   wafrWorkloadArn?: string;
   opportunityId?: string;
   executionArn?: string;

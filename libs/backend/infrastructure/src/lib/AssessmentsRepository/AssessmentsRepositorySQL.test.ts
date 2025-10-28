@@ -409,21 +409,6 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
         assessmentBody: {
           name: 'New Name',
-          pillars: [
-            PillarMother.basic()
-              .withId('pillar-1')
-              .withQuestions([
-                QuestionMother.basic()
-                  .withId('question-1')
-                  .withBestPractices([
-                    BestPracticeMother.basic()
-                      .withId('best-practice-1')
-                      .build(),
-                  ])
-                  .build(),
-              ])
-              .build(),
-          ],
           questionVersion: '1.0',
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
@@ -431,11 +416,6 @@ describe('AssessmentsRepositorySQL', () => {
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              AssessmentFileExportMother.basic().withId('pdf-export').build(),
-            ],
-          },
           executionArn: 'new-execution-arn',
         },
       });
