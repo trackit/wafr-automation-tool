@@ -1,0 +1,37 @@
+{
+  "name": "webui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "sourceRoot": "apps/webui/src",
+  "projectType": "application",
+  "tags": ["scope:webui", "type:app"],
+  "// targets": "to see all targets run: nx show project webui --web",
+  "targets": {
+    "build-types": {
+      "command": "npm run generate-api-schema",
+      "options": {
+        "cwd": "."
+      }
+    },
+    "serve": {
+      "dependsOn": ["build-types"]
+    },
+    "generate-env-variables": {
+      "command": "sh scripts/frontend/generateEnvVariables.sh",
+      "configurations": {
+        "development": [],
+        "production": {
+          "args": ["production"]
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "build": {
+      "defaultConfiguration": "development"
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "command": "sh scripts/frontend/deploy.sh"
+    }
+  }
+}

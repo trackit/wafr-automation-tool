@@ -1,0 +1,62 @@
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { z, ZodType } from 'zod';
+
+import { tokenUpdateBestPracticeUseCase } from '@backend/useCases';
+import type { operations } from '@shared/api-schema';
+import { inject } from '@shared/di-container';
+
+import { getUserFromEvent } from '../../../utils/api/getUserFromEvent/getUserFromEvent';
+import { handleHttpRequest } from '../../../utils/api/handleHttpRequest';
+import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
+
+const UpdateBestPracticePathSchema = z.object({
+  assessmentId: z.uuid(),
+  pillarId: z.string().nonempty(),
+  questionId: z.string().nonempty(),
+  bestPracticeId: z.string().nonempty(),
+}) satisfies ZodType<operations['updateBestPractice']['parameters']['path']>;
+
+const UpdateBestPracticeBodySchema = z
+  .object({
+    checked: z.boolean(),
+  })
+  .partial()
+  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+    message: 'At least one property must be provided',
+  }) satisfies ZodType<
+  operations['updateBestPractice']['requestBody']['content']['application/json']
+>;
+
+export class UpdateBestPracticeAdapter {
+  private readonly useCase = inject(tokenUpdateBestPracticeUseCase);
+
+  public async handle(
+    event: APIGatewayProxyEvent,
+  ): Promise<APIGatewayProxyResult> {
+    return handleHttpRequest({
+      event,
+      func: this.processRequest.bind(this),
+      statusCode: 200,
+    });
+  }
+
+  private async processRequest(event: APIGatewayProxyEvent): Promise<void> {
+    const { pathParameters, body } = parseApiEvent(event, {
+      pathSchema: UpdateBestPracticePathSchema,
+      bodySchema: UpdateBestPracticeBodySchema,
+    });
+    const { assessmentId, pillarId, questionId, bestPracticeId } =
+      pathParameters;
+
+    const user = getUserFromEvent(event);
+
+    await this.useCase.updateBestPractice({
+      assessmentId,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      user,
+      bestPracticeBody: body,
+    });
+  }
+}

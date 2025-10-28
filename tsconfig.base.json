@@ -1,0 +1,32 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2024",
+    "module": "es2022",
+    "lib": ["ES2024", "DOM"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@backend/infrastructure": ["libs/backend/infrastructure/src/index.ts"],
+      "@backend/models": ["libs/backend/models/src/index.ts"],
+      "@backend/ports": ["libs/backend/ports/src/index.ts"],
+      "@backend/useCases": ["libs/backend/useCases/src/index.ts"],
+      "@shared/api-schema": ["libs/shared/api-schema/src/index.ts"],
+      "@shared/di-container": ["libs/shared/di-container/src/index.ts"],
+      "@shared/utils": ["libs/shared/utils/src/index.ts"],
+      "@webui/api-client": ["apps/webui/libs/api-client/src/index.ts"],
+      "@webui/forms": ["apps/webui/libs/forms/src/index.ts"],
+      "@webui/types": ["apps/webui/libs/types/src/index.ts"],
+      "@webui/ui": ["apps/webui/libs/ui/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

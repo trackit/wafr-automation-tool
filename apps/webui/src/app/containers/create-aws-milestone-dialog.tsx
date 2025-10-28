@@ -1,0 +1,105 @@
+import { useMutation } from '@tanstack/react-query';
+import { Milestone } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
+import { useState } from 'react';
+
+import { ApiError, createAWSMilestone } from '@webui/api-client';
+import { CreateAWSMilestone as CreateAWSMilestoneForm } from '@webui/forms';
+import { Modal } from '@webui/ui';
+
+type CreateAWSMilestoneDialogProps = {
+  assessmentId: string;
+  disabled: boolean;
+};
+
+export default function CreateAWSMilestoneDialog({
+  assessmentId,
+  disabled,
+}: CreateAWSMilestoneDialogProps) {
+  const [open, setOpen] = useState(false);
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: { assessmentId: string; name: string }) => {
+      await createAWSMilestone(
+        {
+          assessmentId: data.assessmentId,
+        },
+        {
+          name: data.name,
+        },
+      );
+    },
+    onMutate: () => {
+      enqueueSnackbar({
+        message: 'Creating AWS Milestone...',
+        variant: 'info',
+      });
+      setOpen(false);
+    },
+    onSuccess: () => {
+      enqueueSnackbar({
+        message: 'Milestone successfully created in AWS Console',
+        variant: 'success',
+      });
+    },
+    onError: (e: ApiError) => {
+      if (e.statusCode === 409) {
+        enqueueSnackbar({
+          message:
+            'No export role found to create AWS milestone, please contact support',
+          variant: 'error',
+        });
+      } else {
+        enqueueSnackbar({
+          message: 'Failed to create milestone, please contact support',
+          variant: 'error',
+        });
+      }
+    },
+  });
+
+  const onSubmit = (data: { name: string }) => {
+    mutate({
+      assessmentId,
+      name: data.name,
+    });
+  };
+
+  const button = (
+    <button
+      className={`flex flex-row gap-2 w-full text-left ${
+        disabled ? 'text-gray-400 cursor-not-allowed opacity-50' : ''
+      }`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(true);
+      }}
+      disabled={disabled}
+    >
+      <Milestone className="w-4 h-4" /> Create AWS Milestone
+    </button>
+  );
+
+  return (
+    <>
+      {disabled ? (
+        <div className="tooltip" data-tip="Please export to AWS first">
+          {button}
+        </div>
+      ) : (
+        button
+      )}
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        className="w-full max-w-2xl"
+      >
+        <div className="flex flex-col gap-4 px-6 py-4">
+          <h2 className="text-2xl font-bold">Create AWS Milestone</h2>
+          <hr />
+          <CreateAWSMilestoneForm onSubmit={onSubmit} disabled={isPending} />
+        </div>
+      </Modal>
+    </>
+  );
+}

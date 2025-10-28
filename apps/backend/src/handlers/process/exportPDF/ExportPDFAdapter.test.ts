@@ -1,0 +1,60 @@
+import { ZodError } from 'zod';
+
+import { registerTestInfrastructure } from '@backend/infrastructure';
+import { tokenExportPDFUseCase } from '@backend/useCases';
+import { register, reset } from '@shared/di-container';
+
+import { ExportPDFAdapter } from './ExportPDFAdapter';
+import { ExportPDFAdapterEventMother } from './ExportPDFAdapterEventMother';
+
+describe('exportPDF adapter', () => {
+  describe('args validation', () => {
+    it('should validate args', async () => {
+      const { adapter } = setup();
+
+      const event = ExportPDFAdapterEventMother.basic().build();
+
+      await expect(adapter.handle(event)).resolves.not.toThrow();
+    });
+
+    it('should throw a ZodError with invalid params', async () => {
+      const { adapter } = setup();
+
+      const event = { invalid: 'event' };
+
+      await expect(adapter.handle(event)).rejects.toThrow(ZodError);
+    });
+  });
+
+  describe('useCase and return value', () => {
+    it('should call useCase with the correct parameters', async () => {
+      const { adapter, useCase } = setup();
+
+      const event = ExportPDFAdapterEventMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganizationDomain('test.io')
+        .withFileExportId('file-export-id')
+        .build();
+
+      await adapter.handle(event);
+
+      expect(useCase.exportPDF).toHaveBeenCalledWith({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'test.io',
+        fileExportId: 'file-export-id',
+      });
+    });
+  });
+});
+
+const setup = () => {
+  reset();
+  registerTestInfrastructure();
+
+  const useCase = { exportPDF: vitest.fn() };
+  useCase.exportPDF.mockResolvedValueOnce(Promise.resolve());
+  register(tokenExportPDFUseCase, { useValue: useCase });
+
+  const adapter = new ExportPDFAdapter();
+  return { useCase, adapter };
+};

@@ -1,0 +1,13 @@
+export const env = {
+  DDB_TABLE: 'DDB_TABLE',
+  ORGANIZATION_TABLE: 'ORGANIZATION_TABLE',
+  AWS_SECRET_ACCESS_KEY: 'DUMMY_SECRET_KEY',
+  AWS_ACCESS_KEY_ID: 'DUMMYACCESSKEY',
+  AWS_REGION: 'us-west-2',
+  NODE_ENV: 'test',
+  UNIT_BASED_PRICING_PRODUCT_CODE: 'unit-based-product-code',
+  MONTHLY_SUBSCRIPTION_PRODUCT_CODE: 'monthly-subscription-product-code',
+  COGNITO_USER_POOL_ID: 'COGNITO_USER_POOL_ID',
+  DB_USERNAME: 'postgres',
+  DB_PASSWORD: 'postgres',
+};

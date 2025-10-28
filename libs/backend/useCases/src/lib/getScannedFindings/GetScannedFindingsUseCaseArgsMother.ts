@@ -1,0 +1,58 @@
+import { ScanningTool } from '@backend/models';
+
+import { GetScannedFindingsArgs } from './GetScannedFindingsUseCase';
+
+export class GetScannedFindingsUseCaseArgsMother {
+  private data: GetScannedFindingsArgs;
+
+  private constructor(data: GetScannedFindingsArgs) {
+    this.data = data;
+  }
+
+  public static basic(): GetScannedFindingsUseCaseArgsMother {
+    return new GetScannedFindingsUseCaseArgsMother({
+      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      organizationDomain: 'organization.io',
+      regions: [],
+      workflows: [],
+      scanningTool: ScanningTool.PROWLER,
+    });
+  }
+
+  public withAssessmentId(
+    assessmentId: string,
+  ): GetScannedFindingsUseCaseArgsMother {
+    this.data.assessmentId = assessmentId;
+    return this;
+  }
+
+  public withOrganizationDomain(
+    organizationDomain: string,
+  ): GetScannedFindingsUseCaseArgsMother {
+    this.data.organizationDomain = organizationDomain;
+    return this;
+  }
+
+  public withRegions(regions: string[]): GetScannedFindingsUseCaseArgsMother {
+    this.data.regions = regions;
+    return this;
+  }
+
+  public withWorkflows(
+    workflows: string[],
+  ): GetScannedFindingsUseCaseArgsMother {
+    this.data.workflows = workflows;
+    return this;
+  }
+
+  public withScanningTool(
+    scanningTool: ScanningTool,
+  ): GetScannedFindingsUseCaseArgsMother {
+    this.data.scanningTool = scanningTool;
+    return this;
+  }
+
+  public build(): GetScannedFindingsArgs {
+    return this.data;
+  }
+}

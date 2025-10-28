@@ -1,0 +1,357 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: wafr-automation-tool
+
+Parameters:
+  Owner:
+    Type: String
+  Project:
+    Type: String
+    Default: wafr-automation-tool
+  Debug:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+  InitialUserEmail:
+    Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+    Default: ''
+  MonthlySubscriptionProductCode:
+    Type: String
+    Default: ''
+  GenAIMaxRetries:
+    Type: Number
+    Default: 3
+  AIFindingsAssociationChunkSize:
+    Type: Number
+    Default: 10
+
+Conditions:
+  IsDebug:
+    Fn::Equals:
+      - !Ref Debug
+      - 'true'
+  CreateBackups:
+    Fn::Equals:
+      - !Ref Debug
+      - 'false'
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/api.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: API
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Debug: !Ref Debug
+        StateMachineArn: !GetAtt StateMachine.Outputs.StateMachineArn
+        StateMachineName:
+          !Select [
+            6,
+            !Split [':', !GetAtt StateMachine.Outputs.StateMachineArn],
+          ]
+        InitialUserEmail: !Ref InitialUserEmail
+        LogRetentionInDays: !Ref LogRetentionInDays
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        ParentStackName: !Ref AWS::StackName
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+        S3BucketName: !Ref S3Bucket
+        DynamoDBArn: !GetAtt DynamoDB.Arn
+        OrganizationTableArn: !GetAtt OrganizationTable.Arn
+  Network:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/network.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: Network
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+  ScanningTools:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/scanning-tools.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: Scanning Tools
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        ParentStackName: !Ref 'AWS::StackName'
+        S3BucketName: !Ref S3Bucket
+        LogRetentionInDays: !Ref LogRetentionInDays
+  StateMachine:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/state-machine.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: State Machine
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        ParentStackName: !Ref 'AWS::StackName'
+        Debug: !Ref Debug
+        S3BucketName: !Ref S3Bucket
+        ECSCluster: !GetAtt ScanningTools.Outputs.ECSCluster
+        ECSExecutionRole: !GetAtt ScanningTools.Outputs.ECSExecutionRole
+        ProwlerTaskDefinition: !GetAtt ScanningTools.Outputs.ProwlerTaskDefinition
+        ScanTaskRole: !GetAtt ScanningTools.Outputs.ScanTaskRole
+        CloudCustodianTaskDefinition: !GetAtt ScanningTools.Outputs.CloudCustodianTaskDefinition
+        CloudSploitTaskDefinition: !GetAtt ScanningTools.Outputs.CloudSploitTaskDefinition
+        Subnet: !GetAtt Network.Outputs.PublicSubnetEcsId
+        SecurityGroup: !GetAtt Network.Outputs.EcsSecurityGroupId
+        LogRetentionInDays: !Ref LogRetentionInDays
+        UnitBasedPricingProductCode: !Ref UnitBasedPricingProductCode
+        MonthlySubscriptionProductCode: !Ref MonthlySubscriptionProductCode
+        GenAIMaxRetries: !Ref GenAIMaxRetries
+        AIFindingsAssociationChunkSize: !Ref AIFindingsAssociationChunkSize
+        PrivateSubnetIds: !Sub '${Network.Outputs.PrivateSubnetAId},${Network.Outputs.PrivateSubnetBId}'
+        LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
+        DBHost: !GetAtt AuroraCluster.Endpoint.Address
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-${AWS::AccountId}'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: S3 Bucket
+  Frontend:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./infrastructure/frontend.yaml
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: Frontend
+      Parameters:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        ParentStackName: !Ref AWS::StackName
+
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref AWS::StackName
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: DynamoDB
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      DeletionProtectionEnabled: !If [IsDebug, false, true]
+  OrganizationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${AWS::StackName}-organization'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: OrganizationTable
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      DeletionProtectionEnabled: !If [IsDebug, false, true]
+
+  AuroraClusterParameterGroup:
+    Type: 'AWS::RDS::DBClusterParameterGroup'
+    Properties:
+      Description: Custom parameter group to disable SSL in AuroraCluster
+      Family: aurora-postgresql17
+      Parameters:
+        rds.force_ssl: '0'
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraClusterParameterGroup
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      DBSubnetGroupName: !GetAtt Network.Outputs.AuroraDBSubnetGroupId
+      VpcSecurityGroupIds: [!GetAtt Network.Outputs.AuroraSecurityGroupId]
+      DeletionProtection: !If [CreateBackups, true, false]
+      BackupRetentionPeriod: !If [CreateBackups, 7, 1]
+      StorageEncrypted: true
+      Port: 5432
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0
+        MaxCapacity: 5
+      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraCluster
+
+  AuroraInstanceWriter:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: AuroraInstanceWriter
+
+  JumpInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+
+  JumpInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref JumpInstanceRole]
+
+  JumpInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-06a974f9b8a97ecf2
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref JumpInstanceProfile
+      SubnetId: !GetAtt Network.Outputs.PrivateSubnetAId
+      SecurityGroupIds:
+        - !GetAtt Network.Outputs.JumpSecurityGroupId
+      SourceDestCheck: true
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: SsmJump
+
+  BackupRole:
+    Condition: CreateBackups
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: backup.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
+  BackupVault:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: !Sub ${AWS::StackName}-ddb-vault
+  BackupPlan:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupPlan
+    Properties:
+      BackupPlan:
+        BackupPlanName: !Sub ${AWS::StackName}-ddb-plan
+        BackupPlanRule:
+          - RuleName: daily-ddb
+            TargetBackupVault: !Ref BackupVault
+            ScheduleExpression: cron(0 1 * * ? *)
+            StartWindowMinutes: 60
+            CompletionWindowMinutes: 180
+            Lifecycle:
+              DeleteAfterDays: 15
+  BackupSelection:
+    Condition: CreateBackups
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref BackupPlan
+      BackupSelection:
+        IamRoleArn: !GetAtt BackupRole.Arn
+        SelectionName: !Sub ${AWS::StackName}-select-ddb
+        Resources:
+          - !GetAtt DynamoDB.Arn
+
+Outputs:
+  ApiEndpoint:
+    Description: API Endpoint
+    Value: !GetAtt Api.Outputs.ApiEndpoint
+  CognitoUserPoolId:
+    Description: User Pool ID
+    Value: !GetAtt Api.Outputs.UserPoolId
+  CognitoUserPoolClientId:
+    Description: User Pool Client ID
+    Value: !GetAtt Api.Outputs.UserPoolClientId
+  CognitoIdentityPoolId:
+    Description: Identity Pool ID
+    Value: !GetAtt Api.Outputs.IdentityPoolId
+  CloudFrontS3BucketName:
+    Description: CloudFront S3 Bucket Name
+    Value: !GetAtt Frontend.Outputs.S3BucketName
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !GetAtt Frontend.Outputs.DistributionId
+  JumpInstanceId:
+    Description: EC2 instance id for SSM jump
+    Value: !Ref JumpInstance

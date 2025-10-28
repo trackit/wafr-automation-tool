@@ -1,0 +1,21 @@
+import { components, operations } from '@shared/api-schema';
+
+import { apiClient } from './client';
+
+export const updateFinding = async ({
+  assessmentId,
+  findingId,
+  findingDto,
+}: {
+  assessmentId: string;
+  findingId: string;
+  findingDto: components['schemas']['FindingDto'];
+}) => {
+  const encodedFindingId = encodeURIComponent(findingId);
+
+  return apiClient.put<
+    operations['updateFinding']['responses']['200']['content']
+  >(`/assessments/${assessmentId}/findings/${encodedFindingId}`, findingDto);
+};
+
+export default updateFinding;

@@ -1,0 +1,56 @@
+name: Deploy to AWS
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      STAGE: prod
+      DEBUG: false
+      INITIAL_USER_EMAIL: ${{ secrets.INITIAL_USER_EMAIL }}
+      LOG_RETENTION_IN_DAYS: 14
+      GEN_AI_MAX_RETRIES: 3
+      AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node and cache dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: ./pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Backend
+        run: pnpm run build:backend
+      - name: Build Frontend
+        run: pnpm run build:webui
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Backend
+        run: pnpm run deploy:backend -- --no-confirm-changeset
+
+      - name: Deploy Frontend
+        run: pnpm run deploy:webui:production

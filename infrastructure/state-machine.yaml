@@ -1,0 +1,543 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: State Machine
+
+Parameters:
+  Owner:
+    Type: String
+  Project:
+    Type: String
+  ParentStackName:
+    Type: String
+  Debug:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  S3BucketName:
+    Type: String
+  ECSCluster:
+    Type: String
+  ECSExecutionRole:
+    Type: String
+  ProwlerTaskDefinition:
+    Type: String
+  ScanTaskRole:
+    Type: String
+  CloudCustodianTaskDefinition:
+    Type: String
+  CloudSploitTaskDefinition:
+    Type: String
+  Subnet:
+    Type: String
+  SecurityGroup:
+    Type: String
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
+  UnitBasedPricingProductCode:
+    Type: String
+  MonthlySubscriptionProductCode:
+    Type: String
+  GenAIMaxRetries:
+    Type: Number
+    Default: 3
+  AIFindingsAssociationChunkSize:
+    Type: Number
+    Default: 10
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+    Description: Private subnet IDs where Lambdas will run
+  LambdaSecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: Security group IDs to attach to Lambdas for VPC access
+  DBHost:
+    Type: String
+  DBCredentialsSecretArn:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 384
+    Handler: handler.main
+    Runtime: nodejs22.x
+    Tags:
+      Owner: !Ref Owner
+      Project: !Ref Project
+    Environment:
+      Variables:
+        DEBUG: !Ref Debug
+        S3_BUCKET: !Ref S3BucketName
+        GEN_AI_MAX_RETRIES: !Ref GenAIMaxRetries
+        AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: !Ref AIFindingsAssociationChunkSize
+        DB_HOST: !Ref DBHost
+        DB_CREDENTIALS_SECRET_ARN: !Ref DBCredentialsSecretArn
+    VpcConfig:
+      SubnetIds: !Ref PrivateSubnetIds
+      SecurityGroupIds: !Ref LambdaSecurityGroupIds
+
+Resources:
+  PrepareFindingsAssociationsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${PrepareFindingsAssociationsFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  PrepareFindingsAssociationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/prepareFindingsAssociations
+      Tags:
+        Name: PrepareFindingsAssociationsFunction
+      Timeout: 600
+      MemorySize: 1024
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+  AssociateFindingsChunkToBestPracticesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AssociateFindingsChunkToBestPracticesFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  AssociateFindingsChunkToBestPracticesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/associateFindingsChunkToBestPractices
+      Tags:
+        Name: AssociateFindingsChunkToBestPracticesFunction
+      Timeout: 900
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModelWithResponseStream
+              Resource:
+                - 'arn:aws:bedrock:*:*:inference-profile/*'
+                - 'arn:aws:bedrock:*::foundation-model/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  CleanupLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CleanupFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  CleanupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/cleanup
+      Tags:
+        Name: CleanupFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}'
+            - Effect: Allow
+              Action:
+                - aws-marketplace:GetEntitlements
+                - aws-marketplace:BatchMeterUsage
+              Resource: '*'
+      Environment:
+        Variables:
+          UNIT_BASED_PRICING_PRODUCT_CODE: !Ref UnitBasedPricingProductCode
+          MONTHLY_SUBSCRIPTION_PRODUCT_CODE: !Ref MonthlySubscriptionProductCode
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  PrepareCustodianLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${PrepareCustodianFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  PrepareCustodianFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/prepareCustodian
+      Tags:
+        Name: PrepareCustodianFunction
+      Timeout: 600
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:s3:::${S3BucketName}/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  ComputeGraphDataLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ComputeGraphDataFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ComputeGraphDataFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/computeGraphData
+      Timeout: 600
+      Tags:
+        Name: ComputeGraphDataFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  StateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub '${ParentStackName}-StateMachine'
+      Tags:
+        Owner: !Ref Owner
+        Project: !Ref Project
+        Name: StateMachine
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ParentStackName}-StateMachine'
+        - Statement:
+            - Effect: Allow
+              Action: ecs:RunTask
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-prowler:*'
+                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloud-custodian:*'
+                - !Sub 'arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ParentStackName}-cloudsploit:*'
+        - Statement:
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource:
+                - !Ref ECSExecutionRole
+                - !Ref ScanTaskRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutRule
+                - events:PutTargets
+                - events:DescribeRule
+                - events:DeleteRule
+                - events:RemoveTargets
+              Resource: '*'
+        - Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt PrepareFindingsAssociationsFunction.Arn
+                - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
+                - !GetAtt CleanupFunction.Arn
+                - !GetAtt PrepareCustodianFunction.Arn
+                - !GetAtt ComputeGraphDataFunction.Arn
+      Definition:
+        Comment: 'State Machine for WAFR Automation Tool'
+        QueryLanguage: JSONata
+        StartAt: AssignVariables
+        States:
+          AssignVariables:
+            Type: Pass
+            Assign:
+              assessmentId: '{% $states.input.assessmentId %}'
+              organizationDomain: '{% $states.input.organizationDomain %}'
+              regions: '{% $states.input.regions %}'
+              roleArn: '{% $states.input.roleArn %}'
+              workflows: '{% $states.input.workflows %}'
+            Next: ScanningTools
+          ScanningTools:
+            Type: Parallel
+            Branches:
+              - StartAt: ProwlerScan
+                States:
+                  ProwlerScan:
+                    Type: Task
+                    Resource: arn:aws:states:::ecs:runTask.sync
+                    Arguments:
+                      LaunchType: FARGATE
+                      Cluster: !Ref ECSCluster
+                      TaskDefinition: !Ref ProwlerTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: prowler-container
+                            Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: '{% $assessmentId %}'
+                              - Name: REGIONS
+                                Value: "{% $count($regions) > 0 ? '--filter-region ' & $join($regions, ' ') : '' %}"
+                              - Name: ROLE_ARN
+                                Value: '{% $roleArn %}'
+                    End: true
+              - StartAt: PrepareCustodian
+                States:
+                  PrepareCustodian:
+                    Type: Task
+                    Resource: !GetAtt PrepareCustodianFunction.Arn
+                    Next: CloudCustodianScan
+                  CloudCustodianScan:
+                    Type: Task
+                    Resource: arn:aws:states:::ecs:runTask.sync
+                    Arguments:
+                      LaunchType: FARGATE
+                      Cluster: !Ref ECSCluster
+                      TaskDefinition: !Ref CloudCustodianTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: cloud-custodian-container
+                            Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: '{% $assessmentId %}'
+                              - Name: REGIONS
+                                Value: "{% $join([$map($regions, function($r) { '--region ' & $r })], ' ') %}"
+                              - Name: POLICIES_URI
+                                Value: '{% $states.input %}'
+                              - Name: ROLE_ARN
+                                Value: '{% $roleArn %}'
+                    End: true
+              - StartAt: CloudSploitScan
+                States:
+                  CloudSploitScan:
+                    Type: Task
+                    Resource: arn:aws:states:::ecs:runTask.sync
+                    Arguments:
+                      LaunchType: FARGATE
+                      Cluster: !Ref ECSCluster
+                      TaskDefinition: !Ref CloudSploitTaskDefinition
+                      NetworkConfiguration:
+                        AwsvpcConfiguration:
+                          Subnets:
+                            - !Ref Subnet
+                          SecurityGroups:
+                            - !Ref SecurityGroup
+                          AssignPublicIp: ENABLED
+                      Overrides:
+                        ContainerOverrides:
+                          - Name: cloudsploit-container
+                            Environment:
+                              - Name: ASSESSMENT_ID
+                                Value: '{% $assessmentId %}'
+                              - Name: ROLE_ARN
+                                Value: '{% $roleArn %}'
+                    End: true
+            Next: 'Prepare Findings Associations'
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessmentId: '{% $assessmentId %}'
+                  organizationDomain: '{% $organizationDomain %}'
+                  error: '{% $states.errorOutput %}'
+          Prepare Findings Associations:
+            Type: Parallel
+            Branches:
+              - StartAt: Prepare Prowler Findings Associations
+                States:
+                  Prepare Prowler Findings Associations:
+                    Type: Task
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
+                    Arguments:
+                      assessmentId: '{% $assessmentId %}'
+                      organizationDomain: '{% $organizationDomain %}'
+                      scanningTool: 'prowler'
+                      regions: '{% $regions %}'
+                      workflows: '{% $workflows %}'
+                    End: true
+              - StartAt: Prepare Cloud Custodian Findings Associations
+                States:
+                  Prepare Cloud Custodian Findings Associations:
+                    Type: Task
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
+                    Arguments:
+                      assessmentId: '{% $assessmentId %}'
+                      organizationDomain: '{% $organizationDomain %}'
+                      scanningTool: 'cloud-custodian'
+                      regions: '{% $regions %}'
+                      workflows: '{% $workflows %}'
+                    End: true
+              - StartAt: Prepare CloudSploit Findings Associations
+                States:
+                  Prepare CloudSploit Findings Associations:
+                    Type: Task
+                    Resource: !GetAtt PrepareFindingsAssociationsFunction.Arn
+                    Arguments:
+                      assessmentId: '{% $assessmentId %}'
+                      organizationDomain: '{% $organizationDomain %}'
+                      scanningTool: 'cloudsploit'
+                      regions: '{% $regions %}'
+                      workflows: '{% $workflows %}'
+                    End: true
+            Next: PromptMap
+            Output: '{% [$spread($states.result)] %}'
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessmentId: '{% $assessmentId %}'
+                  organizationDomain: '{% $organizationDomain %}'
+                  error: '{% $states.errorOutput %}'
+          PromptMap:
+            Type: Map
+            MaxConcurrency: 5
+            ItemProcessor:
+              ProcessorConfig:
+                Mode: INLINE
+              StartAt: AssociateFindingsChunkToBestPractices
+              States:
+                AssociateFindingsChunkToBestPractices:
+                  Type: Task
+                  Resource: !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
+                  Arguments:
+                    assessmentId: '{% $assessmentId %}'
+                    organizationDomain: '{% $organizationDomain %}'
+                    findingsChunkURI: '{% $states.input %}'
+                  End: true
+                  Retry:
+                    - ErrorEquals:
+                        - States.TaskFailed
+                      BackoffRate: 2
+                      IntervalSeconds: 1
+                      MaxAttempts: 3
+            Next: ComputeGraphData
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessmentId: '{% $assessmentId %}'
+                  organizationDomain: '{% $organizationDomain %}'
+                  error: '{% $states.errorOutput %}'
+          ComputeGraphData:
+            Type: Task
+            Resource: !GetAtt ComputeGraphDataFunction.Arn
+            Arguments:
+              assessmentId: '{% $assessmentId %}'
+              organizationDomain: '{% $organizationDomain %}'
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessmentId: '{% $assessmentId %}'
+                  organizationDomain: '{% $organizationDomain %}'
+                  error: '{% $states.errorOutput %}'
+            Next: 'Cleanup'
+          Cleanup:
+            Type: Task
+            Resource: !GetAtt CleanupFunction.Arn
+            Arguments:
+              assessmentId: '{% $assessmentId %}'
+              organizationDomain: '{% $organizationDomain %}'
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CleanupOnError
+                Output:
+                  assessmentId: '{% $assessmentId %}'
+                  organizationDomain: '{% $organizationDomain %}'
+                  error: '{% $states.errorOutput %}'
+            End: true
+          CleanupOnError:
+            Type: Task
+            Resource: !GetAtt CleanupFunction.Arn
+            End: true
+
+Outputs:
+  StateMachineArn:
+    Description: State Machine Arn
+    Value: !Ref StateMachine
