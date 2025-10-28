@@ -7,7 +7,6 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
   PillarMother,
 } from '@backend/models';
@@ -40,9 +39,7 @@ describe('exportPDF UseCase', () => {
     const assessment = AssessmentMother.basic()
       .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -63,9 +60,7 @@ describe('exportPDF UseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    const objectKey =
-      updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]?.[0]
-        .objectKey;
+    const objectKey = updatedAssessment?.fileExports?.[0].objectKey;
     expect(objectKey).toBeDefined();
 
     const updatedObject = await fakeObjectsStorage.get(objectKey!);

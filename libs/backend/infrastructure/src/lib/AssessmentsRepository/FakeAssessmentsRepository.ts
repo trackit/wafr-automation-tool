@@ -1,12 +1,11 @@
-import {
-  type Assessment,
-  type AssessmentBody,
-  type AssessmentFileExport,
-  AssessmentFileExportType,
-  type BestPracticeBody,
-  type PillarBody,
-  type Question,
-  type QuestionBody,
+import type {
+  Assessment,
+  AssessmentBody,
+  AssessmentFileExport,
+  BestPracticeBody,
+  PillarBody,
+  Question,
+  QuestionBody,
 } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
@@ -18,32 +17,6 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async save(assessment: Assessment): Promise<void> {
     const key = `${assessment.id}#${assessment.organization}`;
     this.assessments[key] = assessment;
-  }
-
-  public async saveFileExport(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    fileExport: AssessmentFileExport;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain, fileExport } = args;
-
-    const assessmentKey = `${assessmentId}#${organizationDomain}`;
-    const assessment = this.assessments[assessmentKey];
-
-    if (!assessment.fileExports) {
-      assessment.fileExports = {};
-    }
-    const existingFileExport = assessment.fileExports[
-      AssessmentFileExportType.PDF
-    ]?.find((fileExport) => fileExport.id === fileExport.id);
-    if (!existingFileExport) {
-      if (!assessment.fileExports[AssessmentFileExportType.PDF]) {
-        assessment.fileExports[AssessmentFileExportType.PDF] = [];
-      }
-      assessment.fileExports[AssessmentFileExportType.PDF].push(fileExport);
-    } else {
-      Object.assign(existingFileExport, fileExport);
-    }
   }
 
   public async get(args: {
@@ -210,50 +183,62 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, data } = args;
+    const { assessmentId, organizationDomain, data } = args;
 
     const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
-      assessment.fileExports = {};
+      assessment.fileExports = [];
     }
-    const fileExports = assessment.fileExports;
-    if (!fileExports[type]) {
-      fileExports[type] = [];
-    }
-    const fileExportIndex = fileExports[type].findIndex(
+    const fileExportIndex = assessment.fileExports.findIndex(
       (fileExport) => fileExport.id === data.id,
     );
     if (fileExportIndex === -1) {
-      fileExports[type].push(data);
+      assessment.fileExports.push(data);
       return;
     }
-    Object.assign(fileExports[type][fileExportIndex], data);
+    Object.assign(assessment.fileExports[fileExportIndex], data);
   }
 
   public async deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, id } = args;
+    const { assessmentId, organizationDomain, id } = args;
 
     const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
-      assessment.fileExports = {};
+      assessment.fileExports = [];
     }
-    const fileExports = assessment.fileExports;
-    if (!fileExports[type]) {
-      fileExports[type] = [];
-    }
-    fileExports[type] = fileExports[type].filter(
+    assessment.fileExports = assessment.fileExports.filter(
       (fileExport) => fileExport.id !== id,
     );
+  }
+
+  public async saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fileExport: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, fileExport } = args;
+
+    const assessmentKey = `${assessmentId}#${organizationDomain}`;
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = [];
+    }
+    const fileExportIndex = assessment.fileExports.findIndex(
+      (fe) => fe.id === fileExport.id,
+    );
+    if (fileExportIndex === -1) {
+      assessment.fileExports.push(fileExport);
+      return;
+    }
+    Object.assign(assessment.fileExports[fileExportIndex], fileExport);
   }
 
   public async getOpportunitiesByYear(args: {

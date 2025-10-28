@@ -11,7 +11,6 @@ import {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
   BestPracticeBody,
   PillarBody,
   QuestionBody,
@@ -29,10 +28,7 @@ import {
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import {
-  mapFileExportsToEntities,
-  toDomainAssessment,
-} from './AssessmentsRepositorySQLMapping';
+import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -51,13 +47,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
   public async save(assessment: Assessment): Promise<void> {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
-    const entity = repo.create({
-      ...assessment,
-      fileExports: mapFileExportsToEntities(
-        assessment.id,
-        assessment.fileExports ?? {},
-      ),
-    });
+    const entity = repo.create(assessment);
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
   }
@@ -73,8 +63,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const entity = repo.create({
       ...fileExport,
       assessmentId,
-      // TODO: REMOVE THIS LINE
-      type: AssessmentFileExportType.PDF,
     });
 
     await repo.save(entity);
@@ -232,15 +220,14 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, data } = args;
+    const { assessmentId, organizationDomain, data } = args;
     const repo = await this.repo(FileExportEntity, organizationDomain);
 
     await repo.update({ id: data.id, assessmentId }, data);
     this.logger.info(
-      `${type.toUpperCase()} file with id ${
+      `${data.type.toUpperCase()} file with id ${
         data.id
       } export updated successfully for assessment ${assessmentId}`,
     );
@@ -249,7 +236,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
     const { assessmentId, organizationDomain, id } = args;

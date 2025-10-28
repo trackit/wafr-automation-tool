@@ -15,7 +15,7 @@ export interface Assessment {
   workflows: string[];
   finishedAt?: Date;
   error?: AssessmentError;
-  fileExports?: AssessmentFileExports;
+  fileExports?: AssessmentFileExport[];
   wafrWorkloadArn?: string;
   opportunityId?: string;
   opportunityCreatedAt?: Date;
@@ -50,10 +50,6 @@ export enum AssessmentFileExportType {
   PDF = 'pdf',
 }
 
-export type AssessmentFileExports = Partial<
-  Record<AssessmentFileExportType, AssessmentFileExport[]>
->;
-
 export enum AssessmentFileExportStatus {
   NOT_STARTED = 'NOT_STARTED',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -64,6 +60,7 @@ export enum AssessmentFileExportStatus {
 export interface AssessmentFileExport {
   id: string;
   status: AssessmentFileExportStatus;
+  type: AssessmentFileExportType;
   error?: string;
   versionName: string;
   objectKey?: string;

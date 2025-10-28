@@ -50,9 +50,9 @@ export class GeneratePDFExportURLUseCaseImpl
       });
     }
 
-    const assessmentExport = assessment.fileExports?.[
-      AssessmentFileExportType.PDF
-    ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
+    const assessmentExport = assessment.fileExports?.find(
+      (assessmentExport) => assessmentExport.id === fileExportId,
+    );
     if (!assessmentExport) {
       throw new AssessmentFileExportNotFoundError({
         assessmentId,

@@ -1,9 +1,5 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
-import {
-  AssessmentFileExport,
-  AssessmentFileExportType,
-  User,
-} from '@backend/models';
+import { AssessmentFileExport, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -38,7 +34,7 @@ export class ListPDFExportsUseCaseImpl implements ListPDFExportsUseCase {
       });
     }
 
-    const fileExports = assessment.fileExports?.[AssessmentFileExportType.PDF];
+    const fileExports = assessment.fileExports;
     if (!fileExports) {
       return [];
     }
