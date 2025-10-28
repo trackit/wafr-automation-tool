@@ -211,34 +211,6 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  # TODO: Delete it when migration is done
-  ResetAuroraLogGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: IsDebug
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${ResetAuroraFunction}'
-      RetentionInDays: !Ref LogRetentionInDays
-  ResetAuroraFunction:
-    Type: AWS::Serverless::Function
-    Condition: IsDebug
-    Properties:
-      CodeUri: ../apps/backend/src/handlers/process/resetAurora
-      Tags:
-        Name: ResetAuroraFunction
-      Policies:
-        - AWSLambdaVPCAccessExecutionRole
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref DBCredentialsSecretArn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: cjs
-        target: es2024
-        Minify: false
-        Sourcemap: true
-        EntryPoints:
-          - handler.ts
-
   Api:
     Type: AWS::Serverless::Api
     Properties:
