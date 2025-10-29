@@ -611,10 +611,13 @@ export interface operations {
                     "application/json": {
                         /** @description Total number of assessments during the current year associated with the organization */
                         currentYearTotalAssessments: number;
-                        /** @description A map where each key is the month, formatted as a two-digit, zero-padded string (e.g., '01', '02'), and the value is the number of ACE opportunities in that month. */
+                        /** @description Array of objects representing opportunities count per month for last 12 months */
                         opportunitiesPerMonth: {
-                            [key: string]: number;
-                        };
+                            /** @description Month formatted as MM-YYYY */
+                            month: string;
+                            /** @description Number of ACE opportunities in that month */
+                            opportunities: number;
+                        }[];
                     };
                 };
             };
