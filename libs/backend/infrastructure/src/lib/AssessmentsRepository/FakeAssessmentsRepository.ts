@@ -282,7 +282,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async getOpportunitiesByYear(args: {
     organizationDomain: string;
     year: number;
-  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+  }): Promise<Array<{ id: string; createdAt: Date }>> {
     const { organizationDomain, year } = args;
 
     const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
@@ -298,13 +298,10 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
           assessment.opportunityCreatedAt < endDate,
       )
       .map((assessment) => ({
-        opportunityId: assessment.opportunityId!,
-        opportunityCreatedAt: assessment.opportunityCreatedAt!,
+        id: assessment.opportunityId!,
+        createdAt: assessment.opportunityCreatedAt!,
       }))
-      .sort(
-        (a, b) =>
-          b.opportunityCreatedAt.getTime() - a.opportunityCreatedAt.getTime(),
-      );
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   public async countAssessmentsByYear(args: {

@@ -42,32 +42,35 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
         year: currentYear,
       });
 
-    const opportunityCurrYear =
+    const currentYearOpportunities =
       await this.assessmentsRepository.getOpportunitiesByYear({
         organizationDomain,
         year: currentYear,
       });
 
-    const opportunityPrevYear =
+    const previousYearOpportunities =
       await this.assessmentsRepository.getOpportunitiesByYear({
         organizationDomain,
         year: currentYear - 1,
       });
 
     const months = Array.from({ length: 12 }, (_, i) => {
-      const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
-      return `${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+      const date = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      return `${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
     });
 
     const map: Record<string, number> = Object.fromEntries(
       months.map((m) => [m, 0]),
     );
 
-    for (const opp of [...opportunityPrevYear, ...opportunityCurrYear]) {
-      const d = opp.opportunityCreatedAt;
-      if (d < start || d > now) continue;
+    for (const opportunity of [
+      ...previousYearOpportunities,
+      ...currentYearOpportunities,
+    ]) {
+      const opportunityCreatedAt = opportunity.createdAt;
+      if (opportunityCreatedAt < start || opportunityCreatedAt > now) continue;
 
-      const key = `${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+      const key = `${String(opportunityCreatedAt.getMonth() + 1).padStart(2, '0')}-${opportunityCreatedAt.getFullYear()}`;
       if (key in map) map[key]++;
     }
 
