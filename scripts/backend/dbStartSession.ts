@@ -31,7 +31,9 @@ export const main = (instanceId: string, auroraEndpoint: string) => {
 
 const [, , instanceId, auroraEndpoint] = process.argv;
 if (!instanceId || !auroraEndpoint) {
-  console.error('Usage: pnpm dbconnect <EC2_INSTANCE_ID> <AURORA_ENDPOINT>');
+  console.error(
+    'Usage: pnpm db:startSession <EC2_INSTANCE_ID> <AURORA_ENDPOINT>',
+  );
   process.exit(1);
 }
 main(instanceId, auroraEndpoint);
