@@ -1,7 +1,9 @@
+import { BestPractice } from '../BestPractice';
+
 export interface Finding extends ScanFinding {
   hidden: boolean;
   isAIAssociated: boolean;
-  bestPractices: string;
+  bestPractices: BestPractice[];
   comments?: FindingComment[];
 }
 
@@ -9,16 +11,16 @@ export interface ScanFinding {
   id: string;
   eventCode?: string;
   remediation?: FindingRemediation;
-  resources?: FindingResource[];
-  riskDetails?: string;
-  severity?: SeverityType;
-  statusCode?: string;
-  statusDetail?: string;
+  resources: FindingResource[];
+  riskDetails: string;
+  severity: SeverityType;
+  statusCode: string;
+  statusDetail: string;
 }
 
 export interface FindingRemediation {
   desc: string;
-  references?: string[];
+  references: string[];
 }
 
 export interface FindingResource {
