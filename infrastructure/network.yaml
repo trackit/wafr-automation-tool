@@ -399,23 +399,6 @@ Resources:
       SecurityGroupIds:
         - !Ref InterfaceEndpointSecurityGroup
 
-  DynamoDBGatewayEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VPC
-      VpcEndpointType: Gateway
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
-      RouteTableIds:
-        - !Ref PrivateRouteTableA
-        - !Ref PrivateRouteTableB
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal: '*'
-            Action: 'dynamodb:*'
-            Resource: '*'
-
   SsmInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:

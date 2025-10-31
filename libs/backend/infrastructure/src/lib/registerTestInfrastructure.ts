@@ -12,10 +12,6 @@ import {
 } from './AssessmentsStateMachine';
 import { tokenCognitoService, tokenFakeCognitoService } from './CognitoService';
 import {
-  testDynamoDbConfig,
-  tokenDynamoDBConfig,
-} from './config/dynamodb/config';
-import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,
 } from './FeatureToggleRepository';
@@ -62,7 +58,6 @@ import {
 export const registerTestInfrastructure = () => {
   register(tokenLogger, { useClass: FakeLogger });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
-  register(tokenDynamoDBConfig, { useValue: testDynamoDbConfig });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });
   register(tokenAssessmentsStateMachine, {
