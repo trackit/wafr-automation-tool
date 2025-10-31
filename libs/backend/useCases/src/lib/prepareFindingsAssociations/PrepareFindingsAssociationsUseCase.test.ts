@@ -236,6 +236,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       mapScanFindingsToBestPracticesUseCase,
       fakeAssessmentsRepository,
       fakeQuestionSetService,
+      fakeFindingsRepository,
     } = setup();
 
     const assessment = AssessmentMother.basic().build();
@@ -322,9 +323,22 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         questionVersion: questionSet.version,
       }),
     );
-    expect(
-      updatedAssessment?.pillars?.[0].questions[0].bestPractices[0].results,
-    ).toEqual(new Set([mockedScanFindings[0].id, mockedScanFindings[1].id]));
+    const bestPracticeFindings =
+      await fakeFindingsRepository.getBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: 'pillar-1',
+        questionId: 'question-1',
+        bestPracticeId: 'best-practice-1',
+      });
+
+    expect(bestPracticeFindings.findings).toHaveLength(2);
+    expect(bestPracticeFindings.findings.map((f) => f.id)).toEqual(
+      expect.arrayContaining([
+        mockedScanFindings[0].id,
+        mockedScanFindings[1].id,
+      ]),
+    );
   });
 
   it('should save scan findings with mapped best practices', async () => {
@@ -336,7 +350,12 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       fakeFindingsRepository,
     } = setup();
 
-    const assessment = AssessmentMother.basic().build();
+    const bestPractice = BestPracticeMother.basic().build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
     await fakeAssessmentsRepository.save(assessment);
 
     const scanFinding = ScanFindingMother.basic().build();
@@ -348,9 +367,9 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         scanFinding,
         bestPractices: [
           {
-            pillarId: 'pillar-1',
-            questionId: 'question-1',
-            bestPracticeId: 'best-practice-1',
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice.id,
           },
         ],
       },
@@ -377,7 +396,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     expect(finding).toEqual(
       expect.objectContaining({
         id: scanFinding.id,
-        bestPractices: 'pillar-1#question-1#best-practice-1',
+        bestPractices: [bestPractice],
         isAIAssociated: false,
         hidden: false,
       }),
@@ -436,7 +455,12 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       fakeAssessmentsRepository,
     } = setup();
 
-    const assessment = AssessmentMother.basic().build();
+    const bestPractice = BestPracticeMother.basic().build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
     await fakeAssessmentsRepository.save(assessment);
 
     const mockedScanFindings = [
@@ -455,9 +479,9 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         scanFinding: mockedScanFindings[1],
         bestPractices: [
           {
-            pillarId: 'pillar-1',
-            questionId: 'question-1',
-            bestPracticeId: 'best-practice-1',
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bestPractice.id,
           },
         ],
       },
@@ -518,324 +542,6 @@ describe('PrepareFindingsAssociationsUseCase', () => {
     const result = await useCase.prepareFindingsAssociations(input);
 
     expect(result).toEqual(URIs);
-  });
-
-  describe('formatPillarsForAssessmentUpdate', () => {
-    it('should format pillars using mapped scanned findings to best practices', () => {
-      const { useCase } = setup();
-
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic().build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-      ];
-
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
-
-    it('should format pillars with no mapped best practices', () => {
-      const { useCase } = setup();
-
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding: ScanFindingMother.basic()
-            .withId('scanningTool#1')
-            .build(),
-          bestPractices: [],
-        },
-      ];
-
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
-
-    it('should handle multiple mapped best practices for a single scan finding', () => {
-      const { useCase } = setup();
-
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-                BestPracticeMother.basic().withId('best-practice-2').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic().build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-2',
-            },
-          ],
-        },
-      ];
-
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[1].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
-
-    it('should handle multiple scan findings for a single best practice', () => {
-      const { useCase } = setup();
-
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-      const scanFinding = ScanFindingMother.basic()
-        .withId('scanningTool#1')
-        .build();
-      const scanFinding2 = ScanFindingMother.basic()
-        .withId('scanningTool#2')
-        .build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        {
-          scanFinding: scanFinding2,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-      ];
-
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id, scanFinding2.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
-
-    it('should handle multiple scan findings with different best practices', () => {
-      const { useCase } = setup();
-
-      const rawPillars = [
-        PillarMother.basic()
-          .withId('pillar-1')
-          .withQuestions([
-            QuestionMother.basic()
-              .withId('question-1')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-1').build(),
-              ])
-              .build(),
-            QuestionMother.basic()
-              .withId('question-2')
-              .withBestPractices([
-                BestPracticeMother.basic().withId('best-practice-2').build(),
-              ])
-              .build(),
-          ])
-          .build(),
-      ];
-
-      const scanFinding = ScanFindingMother.basic()
-        .withId('scanningTool#1')
-        .build();
-      const scanFinding2 = ScanFindingMother.basic()
-        .withId('scanningTool#2')
-        .build();
-      const scanFindingsToBestPractices = [
-        {
-          scanFinding,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-1',
-              bestPracticeId: 'best-practice-1',
-            },
-          ],
-        },
-        {
-          scanFinding: scanFinding2,
-          bestPractices: [
-            {
-              pillarId: 'pillar-1',
-              questionId: 'question-2',
-              bestPracticeId: 'best-practice-2',
-            },
-          ],
-        },
-      ];
-
-      const result = useCase.formatPillarsForAssessmentUpdate({
-        rawPillars,
-        scanFindingsToBestPractices,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          id: rawPillars[0].id,
-          questions: [
-            expect.objectContaining({
-              id: rawPillars[0].questions[0].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[0].bestPractices[0].id,
-                  results: new Set([scanFinding.id]),
-                }),
-              ],
-            }),
-            expect.objectContaining({
-              id: rawPillars[0].questions[1].id,
-              bestPractices: [
-                expect.objectContaining({
-                  id: rawPillars[0].questions[1].bestPractices[0].id,
-                  results: new Set([scanFinding2.id]),
-                }),
-              ],
-            }),
-          ],
-        }),
-      ]);
-    });
   });
 });
 

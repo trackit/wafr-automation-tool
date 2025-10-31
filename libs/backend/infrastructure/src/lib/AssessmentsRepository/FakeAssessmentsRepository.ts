@@ -22,41 +22,6 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     this.assessments[key] = assessment;
   }
 
-  public async saveBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void> {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString(),
-    );
-    const question = pillar?.questions.find(
-      (question) => question.id === questionId.toString(),
-    );
-    const bestPractice = question?.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
-    );
-    if (!bestPractice) {
-      throw new Error();
-    }
-    for (const findingId of bestPracticeFindingIds) {
-      bestPractice.results.add(findingId);
-    }
-  }
-
   public async get(args: {
     assessmentId: string;
     organizationDomain: string;

@@ -80,7 +80,7 @@ export class StoreFindingsToAssociateUseCaseImpl
       ...scanFinding,
       isAIAssociated: true,
       hidden: false,
-      bestPractices: '',
+      bestPractices: [],
       comments: [],
     }));
     const findingsChunks = chunk(findings, this.chunkSize);

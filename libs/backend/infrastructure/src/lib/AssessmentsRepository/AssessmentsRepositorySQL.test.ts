@@ -95,153 +95,6 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
-  describe('saveBestPracticeFindings', () => {
-    it('should add findings to a best practice', async () => {
-      const { repository } = setup();
-
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
-        .build();
-      const question2 = QuestionMother.basic()
-        .withId('2')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const pillar2 = PillarMother.basic()
-        .withId('2')
-        .withQuestions([question2])
-        .build();
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withPillars([pillar, pillar2])
-        .build();
-      await repository.save(assessment);
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar2.id,
-        questionId: question2.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(false);
-      expect(
-        updatedAssessment?.pillars?.[1].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-    });
-
-    it('should add several findings to a best practice', async () => {
-      const { repository } = setup();
-
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withPillars([pillar])
-        .build();
-      await repository.save(assessment);
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2',
-        ),
-      ).toBe(true);
-    });
-
-    it('should be able to add findings several times', async () => {
-      const { repository } = setup();
-
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withPillars([pillar])
-        .build();
-      await repository.save(assessment);
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
-      });
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2',
-        ),
-      ).toBe(true);
-    });
-  });
-
   describe('get', () => {
     it('should get an assessment by ID and organization', async () => {
       const { repository } = setup();
@@ -533,7 +386,6 @@ describe('AssessmentsRepositorySQL', () => {
                 .withBestPractices([
                   BestPracticeMother.basic()
                     .withId('old-best-practice-1')
-                    .withResults(new Set(['prowler#old']))
                     .build(),
                 ])
                 .build(),
@@ -590,7 +442,6 @@ describe('AssessmentsRepositorySQL', () => {
                   .withBestPractices([
                     BestPracticeMother.basic()
                       .withId('best-practice-1')
-                      .withResults(new Set(['prowler#1']))
                       .build(),
                   ])
                   .build(),
@@ -634,7 +485,6 @@ describe('AssessmentsRepositorySQL', () => {
                   bestPractices: [
                     expect.objectContaining({
                       id: 'best-practice-1',
-                      results: new Set(['prowler#1']),
                     }),
                   ],
                 }),

@@ -197,9 +197,6 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
 
   @Column('boolean', { default: false })
   checked!: boolean;
-
-  @Column('varchar', { array: true, default: [] })
-  results!: string[];
 }
 
 @Entity('fileExports')

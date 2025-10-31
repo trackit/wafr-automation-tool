@@ -551,7 +551,7 @@ export interface components {
             risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description: string;
             checked: boolean;
-            results: string[];
+            findingAmount: number;
         };
         /** @description Enhanced best practice information, including associated findings */
         BestPracticeExtra: components["schemas"]["BestPractice"] & {

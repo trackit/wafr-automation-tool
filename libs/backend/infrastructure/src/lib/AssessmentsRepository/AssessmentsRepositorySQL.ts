@@ -56,17 +56,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
     const entity = repo.create({
       ...assessment,
-      pillars:
-        assessment.pillars?.map((p) => ({
-          ...p,
-          questions: p.questions.map((q) => ({
-            ...q,
-            bestPractices: q.bestPractices.map((bp) => ({
-              ...bp,
-              results: bp.results ? Array.from(bp.results) : [],
-            })),
-          })),
-        })) ?? [],
       fileExports: mapFileExportsToEntities(
         assessment.id,
         assessment.fileExports ?? {},
@@ -74,47 +63,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
-  }
-
-  public async saveBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void> {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-    const repo = await this.repo(BestPracticeEntity, organizationDomain);
-    const entity = await repo.findOne({
-      where: {
-        id: bestPracticeId,
-        questionId: questionId,
-        pillarId: pillarId,
-        assessmentId: assessmentId,
-      },
-    });
-    if (!entity) {
-      throw new Error('Best practice not found');
-    }
-    const updatedResults = entity.results.concat(
-      Array.from(bestPracticeFindingIds),
-    );
-    entity.results = Array.from(new Set(updatedResults));
-    await repo.update(
-      { id: bestPracticeId, questionId, pillarId, assessmentId },
-      { results: entity.results },
-    );
-    this.logger.info(
-      `Best practice findings for best practice ${bestPracticeId} updated successfully`,
-    );
   }
 
   public async get(args: {

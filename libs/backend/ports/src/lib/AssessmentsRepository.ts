@@ -12,14 +12,6 @@ import type {
 
 export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
-  saveBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void>;
 
   get(args: {
     assessmentId: string;
