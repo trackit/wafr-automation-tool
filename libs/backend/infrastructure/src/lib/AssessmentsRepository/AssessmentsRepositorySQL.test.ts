@@ -1280,9 +1280,7 @@ describe('AssessmentsRepositorySQL', () => {
         year: date.getFullYear(),
       });
       expect(result).toHaveLength(1);
-      expect(result).toEqual([
-        { opportunityId: 'opp3', opportunityCreatedAt: date },
-      ]);
+      expect(result).toEqual([{ id: 'opp3', createdAt: date }]);
     });
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
@@ -1314,8 +1312,8 @@ describe('AssessmentsRepositorySQL', () => {
         year: date.getFullYear(),
       });
       expect(result).toHaveLength(2);
-      expect(result[0].opportunityCreatedAt).toEqual(date1);
-      expect(result[1].opportunityCreatedAt).toEqual(date);
+      expect(result[0].createdAt).toEqual(date1);
+      expect(result[1].createdAt).toEqual(date);
     });
   });
 

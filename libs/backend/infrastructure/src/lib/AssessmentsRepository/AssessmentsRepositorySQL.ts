@@ -361,7 +361,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async getOpportunitiesByYear(args: {
     organizationDomain: string;
     year: number;
-  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+  }): Promise<Array<{ id: string; createdAt: Date }>> {
     const { organizationDomain, year } = args;
     const repo = await this.repo(AssessmentEntity, organizationDomain);
 
@@ -379,8 +379,8 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       },
     });
     return assessments.map((a) => ({
-      opportunityId: a.opportunityId!,
-      opportunityCreatedAt: a.opportunityCreatedAt!,
+      id: a.opportunityId!,
+      createdAt: a.opportunityCreatedAt!,
     }));
   }
 

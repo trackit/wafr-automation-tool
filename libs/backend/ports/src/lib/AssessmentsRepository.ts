@@ -87,7 +87,7 @@ export interface AssessmentsRepository {
   getOpportunitiesByYear(args: {
     organizationDomain: string;
     year: number;
-  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>>;
+  }): Promise<Array<{ id: string; createdAt: Date }>>;
   countAssessmentsByYear(args: {
     organizationDomain: string;
     year: number;
