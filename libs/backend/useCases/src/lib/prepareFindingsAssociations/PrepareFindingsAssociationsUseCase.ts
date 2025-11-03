@@ -180,6 +180,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
           scanFindings,
         },
       );
+    await this.assessmentsRepository.update({
+      assessmentId,
+      organizationDomain,
+      assessmentBody: {
+        questionVersion: questionSet.version,
+      },
+    });
     await this.assessmentsRepository.updateRawGraphDataForScanningTool({
       assessmentId,
       organizationDomain,

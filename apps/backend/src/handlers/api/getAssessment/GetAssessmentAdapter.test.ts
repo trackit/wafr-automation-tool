@@ -198,7 +198,10 @@ describe('getAssessment adapter', () => {
       const event = GetAssessmentAdapterEventMother.basic().build();
 
       const assessment = AssessmentMother.basic().build();
-      useCase.getAssessment.mockResolvedValue(assessment);
+      useCase.getAssessment.mockResolvedValue({
+        assessment,
+        bestPracticesFindingsAmount: {},
+      });
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(200);

@@ -239,9 +239,6 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       fakeFindingsRepository,
     } = setup();
 
-    const assessment = AssessmentMother.basic().build();
-    await fakeAssessmentsRepository.save(assessment);
-
     const mockedScanFindings = [
       ScanFindingMother.basic()
         .withId('prowler#1')
@@ -302,6 +299,9 @@ describe('PrepareFindingsAssociationsUseCase', () => {
         .build(),
     ];
     const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
+
+    const assessment = AssessmentMother.basic().withPillars(pillars).build();
+    await fakeAssessmentsRepository.save(assessment);
     vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
 
     const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()

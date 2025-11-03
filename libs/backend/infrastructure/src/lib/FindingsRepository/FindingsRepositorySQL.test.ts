@@ -469,7 +469,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const { findings } = await repository.getBestPracticeFindings(
@@ -1160,7 +1163,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const finding = FindingMother.basic().withId('scanningTool#1').build();
@@ -1198,7 +1204,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const finding1 = FindingMother.basic().withId('scanningTool#1').build();
@@ -1244,7 +1253,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const finding1 = FindingMother.basic().withId('scanningTool#1').build();
@@ -1300,7 +1312,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const finding1 = FindingMother.basic()
@@ -1353,7 +1368,10 @@ describe('FindingsRepositorySQL', () => {
         .withBestPractices([bestPractice])
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
-      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withPillars([pillar])
+        .build();
       await assessmentRepository.save(assessment);
 
       const count = await repository.countBestPracticeFindings({
