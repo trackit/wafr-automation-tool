@@ -274,14 +274,43 @@ export class FakeFindingsRepository implements FindingRepository {
       }
     }
   }
-  public async countBestPracticeFindings(_args: {
+
+  public async countBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
   }): Promise<number> {
-    throw new Error('Method not implemented.');
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+
+    if (!bestPractice) {
+      return 0;
+    }
+
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    const count = findings.filter((finding) =>
+      finding.bestPractices?.some((bp) => bp === bestPractice),
+    ).length;
+
+    return count;
   }
 }
 

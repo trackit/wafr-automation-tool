@@ -88,8 +88,8 @@ export class FindingsRepositorySQL implements FindingRepository {
       const trxFindingRepo = trx.getRepository(FindingEntity);
       const trxResourceRepo = trx.getRepository(FindingResourceEntity);
 
-      const findingEntities = findings.map((f) => {
-        const { resources: _resources, ...findingData } = f;
+      const findingEntities = findings.map((finding) => {
+        const { resources: _resources, ...findingData } = finding;
         return trxFindingRepo.create({
           ...findingData,
           assessmentId,
@@ -98,9 +98,9 @@ export class FindingsRepositorySQL implements FindingRepository {
       await trxFindingRepo.save(findingEntities);
 
       const allResourceEntities = findings.flatMap((finding) => {
-        return finding.resources.map((r) =>
+        return finding.resources.map((resource) =>
           trxResourceRepo.create({
-            ...r,
+            ...resource,
             assessmentId,
             findingId: finding.id,
           }),

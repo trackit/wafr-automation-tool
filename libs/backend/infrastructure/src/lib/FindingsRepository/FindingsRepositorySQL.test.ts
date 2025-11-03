@@ -145,19 +145,12 @@ describe('FindingsRepositorySQL', () => {
         findings: [finding, finding2],
       });
 
-      const savedFinding1 = await repository.get({
+      const savedFindings = await repository.getAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        findingId: finding.id,
-      });
-      const savedFinding2 = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        findingId: finding2.id,
       });
 
-      expect(savedFinding1).toEqual(finding);
-      expect(savedFinding2).toEqual(finding2);
+      expect(savedFindings).toEqual([finding, finding2]);
     });
   });
 

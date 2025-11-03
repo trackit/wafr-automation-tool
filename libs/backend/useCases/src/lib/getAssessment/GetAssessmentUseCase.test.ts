@@ -6,6 +6,7 @@ import {
 import {
   AssessmentMother,
   BestPracticeMother,
+  FindingMother,
   PillarMother,
   QuestionMother,
 } from '@backend/models';
@@ -56,9 +57,30 @@ describe('GetAssessmentUseCase', () => {
 
     await fakeAssessmentsRepository.save(assessment);
 
-    vitest
-      .spyOn(fakeFindingsRepository, 'countBestPracticeFindings')
-      .mockResolvedValue(3);
+    const finding1 = FindingMother.basic().withId('finding#1').build();
+    const finding2 = FindingMother.basic().withId('finding#2').build();
+
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding: finding1,
+    });
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding: finding2,
+    });
+
+    await fakeFindingsRepository.saveBestPracticeFindings({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      pillarId: pillar.id,
+      questionId: question.id,
+      bestPracticeId: bestPractice.id,
+      bestPracticeFindingIds: new Set([finding1.id, finding2.id]),
+    });
+    finding1.bestPractices = [bestPractice];
+    finding2.bestPractices = [bestPractice];
 
     const input = GetAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -71,7 +93,7 @@ describe('GetAssessmentUseCase', () => {
       result.bestPracticesFindingsAmount[pillar.id][question.id][
         bestPractice.id
       ],
-    ).toBe(3);
+    ).toBe(2);
   });
 });
 
