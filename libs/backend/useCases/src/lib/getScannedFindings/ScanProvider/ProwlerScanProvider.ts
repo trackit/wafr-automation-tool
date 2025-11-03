@@ -37,6 +37,7 @@ export class ProwlerScanProvider extends ScanProvider {
     return `assessments/${assessmentId}/scans/prowler/json-ocsf/output.ocsf.json`;
   }
   private readonly logger = inject(tokenLogger);
+
   protected override async fetchFindings(): Promise<Omit<ScanFinding, 'id'>[]> {
     const scanOutput = await this.objectsStorage.get(
       ProwlerScanProvider.getScanKey(this.assessmentId),

@@ -553,10 +553,6 @@ export interface components {
             checked: boolean;
             findingAmount: number;
         };
-        /** @description Enhanced best practice information, including associated findings */
-        BestPracticeExtra: components["schemas"]["BestPractice"] & {
-            results?: components["schemas"]["Finding"][];
-        };
         BestPracticeDto: {
             checked?: boolean;
         };

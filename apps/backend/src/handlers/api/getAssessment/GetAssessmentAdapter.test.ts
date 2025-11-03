@@ -133,7 +133,6 @@ describe('getAssessment adapter', () => {
         .withWAFRWorkloadArn('wafr-workload-arn')
         .withOpportunityId('O1234567')
         .build();
-      useCase.getAssessment.mockResolvedValue(assessment);
 
       const event = GetAssessmentAdapterEventMother.basic()
         .withAssessmentId(assessment.id)

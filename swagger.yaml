@@ -1365,16 +1365,6 @@ components:
           type: boolean
         findingAmount:
           type: number
-    BestPracticeExtra:
-      type: object
-      description: 'Enhanced best practice information, including associated findings'
-      allOf:
-        - $ref: '#/components/schemas/BestPractice'
-        - properties:
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/Finding'
     BestPracticeDto:
       type: object
       properties:
