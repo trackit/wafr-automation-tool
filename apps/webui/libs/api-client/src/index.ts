@@ -13,6 +13,7 @@ export * from './lib/getAssessmentStep';
 export * from './lib/getFindings';
 export * from './lib/getMilestone';
 export * from './lib/getMilestones';
+export * from './lib/getOrganization';
 export * from './lib/listPDFExports';
 export * from './lib/postAssessment';
 export * from './lib/rescanAssessment';
