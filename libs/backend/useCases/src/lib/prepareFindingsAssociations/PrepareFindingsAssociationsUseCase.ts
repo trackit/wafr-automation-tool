@@ -108,7 +108,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
         }
       >
     >((acc, { scanFinding, bestPractices: mappedBestPractices }) => {
-      mappedBestPractices.forEach((bestPractice) => {
+      for (const bestPractice of mappedBestPractices) {
         const key = `${bestPractice.pillarId}:${bestPractice.questionId}:${bestPractice.bestPracticeId}`;
         let entry = acc.get(key);
         if (!entry) {
@@ -119,13 +119,13 @@ export class PrepareFindingsAssociationsUseCaseImpl
           acc.set(key, entry);
         }
         entry.findingIds.add(scanFinding.id);
-      });
+      }
       return acc;
     }, new Map());
 
     await Promise.all(
-      scanFindingsToBestPractices.map(async ({ scanFinding }) => {
-        await this.findingsRepository.save({
+      scanFindingsToBestPractices.map(({ scanFinding }) =>
+        this.findingsRepository.save({
           assessmentId,
           organizationDomain,
           finding: {
@@ -135,21 +135,19 @@ export class PrepareFindingsAssociationsUseCaseImpl
             comments: [],
             bestPractices: [],
           },
-        });
-      }),
+        }),
+      ),
     );
     await Promise.all(
-      Array.from(bestPractices.values()).map(
-        async ({ bestPractice, findingIds }) => {
-          await this.findingsRepository.saveBestPracticeFindings({
-            assessmentId,
-            organizationDomain,
-            pillarId: bestPractice.pillarId,
-            questionId: bestPractice.questionId,
-            bestPracticeId: bestPractice.bestPracticeId,
-            bestPracticeFindingIds: findingIds,
-          });
-        },
+      Array.from(bestPractices.values()).map(({ bestPractice, findingIds }) =>
+        this.findingsRepository.saveBestPracticeFindings({
+          assessmentId,
+          organizationDomain,
+          pillarId: bestPractice.pillarId,
+          questionId: bestPractice.questionId,
+          bestPracticeId: bestPractice.bestPracticeId,
+          bestPracticeFindingIds: findingIds,
+        }),
       ),
     );
   }

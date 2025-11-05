@@ -334,21 +334,21 @@ export class FindingsRepositorySQL implements FindingRepository {
       organizationDomain,
     );
 
-    const rows = [...bestPracticeFindingIds].map((findingId) => ({
-      findingAssessmentId: assessmentId,
-      findingId,
-      bestPracticeAssessmentId: assessmentId,
-      questionId,
-      pillarId,
-      bestPracticeId,
-    }));
-
     await bestPracticeRepo.manager.transaction(async (trx) => {
       await trx
         .createQueryBuilder()
         .insert()
         .into('findingBestPractices')
-        .values(rows)
+        .values(
+          [...bestPracticeFindingIds].map((findingId) => ({
+            findingAssessmentId: assessmentId,
+            findingId,
+            bestPracticeAssessmentId: assessmentId,
+            questionId,
+            pillarId,
+            bestPracticeId,
+          })),
+        )
         .orIgnore()
         .execute();
     });

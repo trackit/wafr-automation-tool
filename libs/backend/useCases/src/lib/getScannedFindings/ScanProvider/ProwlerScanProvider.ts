@@ -32,6 +32,7 @@ const ProwlerFindingSchema = z.object({
 });
 
 type ProwlerFinding = z.infer<typeof ProwlerFindingSchema>;
+
 export class ProwlerScanProvider extends ScanProvider {
   static getScanKey(assessmentId: string): string {
     return `assessments/${assessmentId}/scans/prowler/json-ocsf/output.ocsf.json`;
