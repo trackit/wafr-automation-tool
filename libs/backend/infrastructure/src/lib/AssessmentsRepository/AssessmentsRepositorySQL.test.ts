@@ -2,12 +2,10 @@ import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentGraphDataMother,
   AssessmentMother,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
-  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
@@ -393,14 +391,6 @@ describe('AssessmentsRepositorySQL', () => {
             .build(),
         ])
         .withQuestionVersion('0.1')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
-            .withFindings(0)
-            .withRegions({})
-            .withResourceTypes({})
-            .withSeverities({})
-            .build(),
-        })
         .withFileExports({
           [AssessmentFileExportType.PDF]: [
             AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
@@ -410,24 +400,10 @@ describe('AssessmentsRepositorySQL', () => {
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
         .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
-        .withGraphData(
-          AssessmentGraphDataMother.basic()
-            .withFindings(0)
-            .withRegions({})
-            .withResourceTypes({})
-            .withSeverities({})
-            .build(),
-        )
         .withExecutionArn('old-execution-arn')
         .build();
       await repository.save(assessment);
 
-      const updatedProwlerGraphData = AssessmentGraphDataMother.basic()
-        .withFindings(1)
-        .withRegions({ 'us-west-2': 1 })
-        .withResourceTypes({ 'aws-ec2': 1 })
-        .withSeverities({ [SeverityType.High]: 1 })
-        .build();
       await repository.update({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
@@ -449,9 +425,6 @@ describe('AssessmentsRepositorySQL', () => {
               .build(),
           ],
           questionVersion: '1.0',
-          rawGraphData: {
-            [ScanningTool.PROWLER]: updatedProwlerGraphData,
-          },
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
@@ -463,7 +436,6 @@ describe('AssessmentsRepositorySQL', () => {
               AssessmentFileExportMother.basic().withId('pdf-export').build(),
             ],
           },
-          graphData: updatedProwlerGraphData,
           executionArn: 'new-execution-arn',
         },
       });
@@ -492,9 +464,6 @@ describe('AssessmentsRepositorySQL', () => {
             }),
           ],
           questionVersion: '1.0',
-          rawGraphData: {
-            [ScanningTool.PROWLER]: updatedProwlerGraphData,
-          },
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
@@ -506,7 +475,6 @@ describe('AssessmentsRepositorySQL', () => {
               expect.objectContaining({ id: 'pdf-export' }),
             ],
           },
-          graphData: updatedProwlerGraphData,
           executionArn: 'new-execution-arn',
         }),
       );
@@ -756,215 +724,6 @@ describe('AssessmentsRepositorySQL', () => {
         updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0]
           .checked,
       ).toBe(true);
-    });
-  });
-
-  describe('updateRawGraphDataForScanningTool', () => {
-    it('should update the raw graph data for a scanning tool', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({})
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-      });
-    });
-
-    it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({})
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.CLOUD_CUSTODIAN,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.CLOUD_CUSTODIAN]: graphData,
-      });
-    });
-
-    it('should not overwrite existing raw graph data for other scanning tools', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({
-          [ScanningTool.CLOUD_CUSTODIAN]:
-            AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-        [ScanningTool.CLOUD_CUSTODIAN]: expect.any(Object),
-      });
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const assessment1 = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment1);
-
-      const assessment2 = AssessmentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization2')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment2);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment1.id,
-        organizationDomain: assessment1.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment1 = await repository.get({
-        assessmentId: assessment1.id,
-        organizationDomain: assessment1.organization,
-      });
-      const updatedAssessment2 = await repository.get({
-        assessmentId: assessment2.id,
-        organizationDomain: assessment2.organization,
-      });
-
-      expect(updatedAssessment1?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-      });
-      expect(updatedAssessment2?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: expect.any(Object),
-      });
     });
   });
 

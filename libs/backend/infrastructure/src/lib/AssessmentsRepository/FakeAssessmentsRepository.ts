@@ -3,12 +3,10 @@ import type {
   AssessmentBody,
   AssessmentFileExport,
   AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
   Question,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
@@ -181,18 +179,6 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     }
     bestPractice.checked =
       args.bestPracticeBody.checked ?? bestPractice.checked;
-  }
-
-  public async updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain, scanningTool, graphData } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    assessment.rawGraphData[scanningTool] = graphData;
   }
 
   public async updateFileExport(args: {

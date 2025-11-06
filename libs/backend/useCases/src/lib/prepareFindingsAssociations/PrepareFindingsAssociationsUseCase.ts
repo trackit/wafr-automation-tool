@@ -3,12 +3,7 @@ import {
   tokenFindingsRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import {
-  AssessmentGraphData,
-  ScanFinding,
-  ScanningTool,
-  SeverityType,
-} from '@backend/models';
+import { ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -48,43 +43,6 @@ export class PrepareFindingsAssociationsUseCaseImpl
   private readonly storeFindingsToAssociateUseCase = inject(
     tokenStoreFindingsToAssociateUseCase,
   );
-
-  private formatScanningToolGraphData(
-    findings: ScanFinding[],
-  ): AssessmentGraphData {
-    return {
-      findings: findings.length,
-      regions: findings.reduce<Record<string, number>>((regions, finding) => {
-        if (!finding.resources) return regions;
-        return finding.resources.reduce((regionsAcc, resource) => {
-          if (!resource.region) return regionsAcc;
-          regionsAcc[resource.region] = (regionsAcc[resource.region] ?? 0) + 1;
-          return regionsAcc;
-        }, regions);
-      }, {}),
-      resourceTypes: findings.reduce<Record<string, number>>(
-        (resourceTypes, finding) => {
-          if (!finding.resources) return resourceTypes;
-          return finding.resources.reduce((resourceTypesAcc, resource) => {
-            if (!resource.type) return resourceTypesAcc;
-            resourceTypesAcc[resource.type] =
-              (resourceTypesAcc[resource.type] ?? 0) + 1;
-            return resourceTypesAcc;
-          }, resourceTypes);
-        },
-        {},
-      ),
-      severities: findings.reduce<Partial<Record<SeverityType, number>>>(
-        (severities, finding) => {
-          if (!finding.severity) return severities;
-          severities[finding.severity] =
-            (severities[finding.severity] ?? 0) + 1;
-          return severities;
-        },
-        {},
-      ),
-    };
-  }
 
   private async storeMappedScanFindings(args: {
     assessmentId: string;
@@ -178,13 +136,6 @@ export class PrepareFindingsAssociationsUseCaseImpl
           scanFindings,
         },
       );
-
-    await this.assessmentsRepository.updateRawGraphDataForScanningTool({
-      assessmentId,
-      organizationDomain,
-      scanningTool,
-      graphData: this.formatScanningToolGraphData(scanFindings),
-    });
 
     const mappedScanFindingsToBestPractices =
       scanFindingsToBestPractices.filter(

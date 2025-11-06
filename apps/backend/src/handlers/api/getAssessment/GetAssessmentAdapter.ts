@@ -60,7 +60,6 @@ export class GetAssessmentAdapter {
             none: question.none,
           })),
         })) ?? [],
-      graphData: assessment.graphData,
       id: assessment.id,
       name: assessment.name,
       organization: assessment.organization,

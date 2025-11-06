@@ -324,27 +324,6 @@ describe('AssessmentsStateMachineSfn', () => {
       expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
     });
 
-    it('should return ASSOCIATING_FINDINGS for ComputeGraphData state', async () => {
-      const { assessmentsStateMachineSfn, sfnClientMock } = setup();
-      sfnClientMock.on(GetExecutionHistoryCommand).resolves({
-        events: [
-          {
-            stateEnteredEventDetails: { name: 'ComputeGraphData' },
-            timestamp: new Date(),
-            type: undefined,
-            id: 4,
-          },
-        ],
-      });
-      sfnClientMock.on(DescribeExecutionCommand).resolves({
-        status: ExecutionStatus.RUNNING,
-      });
-      const step = await assessmentsStateMachineSfn.getAssessmentStep(
-        'arn:aws:states:stateMachine',
-      );
-      expect(step).toBe(AssessmentStep.ASSOCIATING_FINDINGS);
-    });
-
     it('should return ASSOCIATING_FINDINGS for AssociateFindingsChunkToBestPractices state', async () => {
       const { assessmentsStateMachineSfn, sfnClientMock } = setup();
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
@@ -418,7 +397,9 @@ describe('AssessmentsStateMachineSfn', () => {
       sfnClientMock.on(GetExecutionHistoryCommand).resolves({
         events: [
           {
-            stateEnteredEventDetails: { name: 'ComputeGraphData' },
+            stateEnteredEventDetails: {
+              name: 'AssociateFindingsChunkToBestPractices',
+            },
             timestamp: new Date(),
             type: undefined,
             id: 5,
