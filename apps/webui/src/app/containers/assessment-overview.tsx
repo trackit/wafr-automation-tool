@@ -78,7 +78,7 @@ function AssessmentOverview({
   );
 
   const { data: assessmentGraph } = useQuery({
-    queryKey: ['assessments', assessment?.id, 'graph'],
+    queryKey: ['assessments', assessmentId, 'graph'],
     queryFn: () => getAssessmentGraph(assessmentId!),
     enabled: !!assessmentId,
     staleTime: 5 * 60 * 1000,

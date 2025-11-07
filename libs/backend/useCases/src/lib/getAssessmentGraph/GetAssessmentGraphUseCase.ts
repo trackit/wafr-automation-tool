@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenFindingsRepository,
+  tokenLogger,
 } from '@backend/infrastructure';
 import type {
   FindingAggregationFields,
@@ -36,6 +37,7 @@ export class GetAssessmentGraphUseCaseImpl
 {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly findingsRepository = inject(tokenFindingsRepository);
+  private readonly logger = inject(tokenLogger);
 
   public async getAssessmentGraph(
     args: GetAssessmentGraphUseCaseArgs,
@@ -61,6 +63,8 @@ export class GetAssessmentGraphUseCaseImpl
         organizationDomain: assessment.organization,
       }),
     ]);
+
+    this.logger.info('Assessment Graph retrieved successfully');
 
     return {
       ...aggregations,
