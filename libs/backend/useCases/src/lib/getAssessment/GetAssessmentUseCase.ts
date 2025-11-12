@@ -31,39 +31,33 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   private async getBestPracticeFindings(
     assessment: Assessment,
   ): Promise<BestPracticesFindingCounts> {
-    const accumulator: BestPracticesFindingCounts = {};
+    const bestPracticeFindingCounts: BestPracticesFindingCounts = {};
+    const allBestPractices =
+      assessment.pillars?.flatMap((pillar) =>
+        pillar.questions.flatMap((question) =>
+          question.bestPractices.map((bp) => ({
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bp.id,
+          })),
+        ),
+      ) ?? [];
+    for (const { pillarId, questionId, bestPracticeId } of allBestPractices) {
+      const count = await this.findingsRepository.countBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId,
+        questionId,
+        bestPracticeId,
+      });
 
-    const countPromises: Promise<void>[] = [];
-
-    for (const pillar of assessment.pillars ?? []) {
-      if (!accumulator[pillar.id]) accumulator[pillar.id] = {};
-      const pillarCounts = accumulator[pillar.id];
-
-      for (const question of pillar.questions) {
-        if (!pillarCounts[question.id]) pillarCounts[question.id] = {};
-        const questionCounts = pillarCounts[question.id];
-
-        for (const bestPractice of question.bestPractices) {
-          const promise = this.findingsRepository
-            .countBestPracticeFindings({
-              assessmentId: assessment.id,
-              organizationDomain: assessment.organization,
-              pillarId: pillar.id,
-              questionId: question.id,
-              bestPracticeId: bestPractice.id,
-            })
-            .then((count) => {
-              questionCounts[bestPractice.id] = count ?? 0;
-            });
-
-          countPromises.push(promise);
-        }
-      }
+      bestPracticeFindingCounts[pillarId] ??= {};
+      bestPracticeFindingCounts[pillarId][questionId] ??= {};
+      bestPracticeFindingCounts[pillarId][questionId][bestPracticeId] =
+        count ?? 0;
     }
 
-    await Promise.all(countPromises);
-
-    return accumulator;
+    return bestPracticeFindingCounts;
   }
 
   public async getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
