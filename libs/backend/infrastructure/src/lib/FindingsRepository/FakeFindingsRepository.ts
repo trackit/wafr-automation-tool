@@ -249,7 +249,7 @@ export class FakeFindingsRepository implements FindingRepository {
       (bestPractice) => bestPractice.id === bestPracticeId.toString(),
     );
     if (!bestPractice) {
-      throw new Error();
+      throw new Error(`Best Practice ${bestPracticeId} not found`);
     }
 
     for (const findingId of bestPracticeFindingIds) {
@@ -259,7 +259,7 @@ export class FakeFindingsRepository implements FindingRepository {
         findingId,
       });
       if (!finding) {
-        throw new Error();
+        throw new Error(`Finding ${findingId} not found`);
       }
       if (!finding.bestPractices) {
         finding.bestPractices = [];
