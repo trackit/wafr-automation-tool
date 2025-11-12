@@ -374,15 +374,18 @@ export class FindingsRepositorySQL implements FindingRepository {
     } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
-    const qb = repo
-      .createQueryBuilder('f')
-      .innerJoin('f.bestPractices', 'bp')
-      .where('f.assessmentId = :assessmentId', { assessmentId })
-      .andWhere('bp.id = :bestPracticeId', { bestPracticeId })
-      .andWhere('bp.questionId = :questionId', { questionId })
-      .andWhere('bp.pillarId = :pillarId', { pillarId })
-      .select('COUNT(f.id)', 'count');
+    const count = await repo.count({
+      where: {
+        assessmentId,
+        bestPractices: {
+          id: bestPracticeId,
+          questionId,
+          pillarId,
+        },
+      },
+      relations: ['bestPractices'],
+    });
 
-    return parseInt((await qb.getRawOne())?.count) || 0;
+    return count;
   }
 }

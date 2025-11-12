@@ -42,19 +42,27 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
           })),
         ),
       ) ?? [];
-    for (const { pillarId, questionId, bestPracticeId } of allBestPractices) {
+
+    const countPromises = allBestPractices.map(async (entry) => {
       const count = await this.findingsRepository.countBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        pillarId,
-        questionId,
-        bestPracticeId,
+        pillarId: entry.pillarId,
+        questionId: entry.questionId,
+        bestPracticeId: entry.bestPracticeId,
       });
 
+      return {
+        ...entry,
+        count: count ?? 0,
+      };
+    });
+    const counts = await Promise.all(countPromises);
+
+    for (const { pillarId, questionId, bestPracticeId, count } of counts) {
       bestPracticeFindingCounts[pillarId] ??= {};
       bestPracticeFindingCounts[pillarId][questionId] ??= {};
-      bestPracticeFindingCounts[pillarId][questionId][bestPracticeId] =
-        count ?? 0;
+      bestPracticeFindingCounts[pillarId][questionId][bestPracticeId] = count;
     }
 
     return bestPracticeFindingCounts;
