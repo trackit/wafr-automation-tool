@@ -77,4 +77,19 @@ export interface FindingRepository {
     commentId: string;
     commentBody: FindingCommentBody;
   }): Promise<void>;
+  saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void>;
+  countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number>;
 }

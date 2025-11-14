@@ -1342,7 +1342,7 @@ components:
         - risk
         - description
         - checked
-        - results
+        - findingAmount
       properties:
         id:
           type: string
@@ -1363,20 +1363,8 @@ components:
           type: string
         checked:
           type: boolean
-        results:
-          type: array
-          items:
-            type: string
-    BestPracticeExtra:
-      type: object
-      description: 'Enhanced best practice information, including associated findings'
-      allOf:
-        - $ref: '#/components/schemas/BestPractice'
-        - properties:
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/Finding'
+        findingAmount:
+          type: number
     BestPracticeDto:
       type: object
       properties:

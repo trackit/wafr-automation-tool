@@ -551,11 +551,7 @@ export interface components {
             risk: "Unknown" | "Informational" | "Low" | "Medium" | "High" | "Critical" | "Fatal" | "Other";
             description: string;
             checked: boolean;
-            results: string[];
-        };
-        /** @description Enhanced best practice information, including associated findings */
-        BestPracticeExtra: components["schemas"]["BestPractice"] & {
-            results?: components["schemas"]["Finding"][];
+            findingAmount: number;
         };
         BestPracticeDto: {
             checked?: boolean;

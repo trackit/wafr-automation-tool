@@ -24,7 +24,6 @@ export function toDomainBestPractice(e: BestPracticeEntity): BestPractice {
     primaryId: e.primaryId,
     risk: e.risk,
     checked: e.checked,
-    results: new Set(e.results),
   };
 }
 
@@ -218,7 +217,6 @@ function mapBestPracticeToEntity(
   bpEntity.primaryId = bp.primaryId;
   bpEntity.risk = bp.risk;
   bpEntity.checked = bp.checked;
-  bpEntity.results = Array.from(bp.results);
 
   return bpEntity;
 }

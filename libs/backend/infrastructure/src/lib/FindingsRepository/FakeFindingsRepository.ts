@@ -1,17 +1,20 @@
-import type {
-  Finding,
-  FindingBody,
-  FindingComment,
-  FindingCommentBody,
+import {
+  type BestPractice,
+  type Finding,
+  type FindingBody,
+  type FindingComment,
+  type FindingCommentBody,
 } from '@backend/models';
 import type {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
   FindingRepository,
 } from '@backend/ports';
-import { createInjectionToken } from '@shared/di-container';
-import { getBestPracticeCustomId } from '@shared/utils';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 
 export class FakeFindingsRepository implements FindingRepository {
+  private fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
   public findings: Record<string, Finding[]> = {};
 
   public async save(args: {
@@ -94,18 +97,25 @@ export class FakeFindingsRepository implements FindingRepository {
       searchTerm,
       showHidden,
     } = args;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+    if (!bestPractice) {
+      throw new Error();
+    }
+
     const key = `${assessmentId}#${organizationDomain}`;
     const findings =
       this.findings[key]
-        ?.filter((finding) =>
-          finding.bestPractices.includes(
-            getBestPracticeCustomId({
-              pillarId,
-              questionId,
-              bestPracticeId,
-            }),
-          ),
-        )
+        ?.filter((finding) => {
+          return finding.bestPractices.some((bp) => bp?.id === bestPracticeId);
+        })
         .filter((finding) => {
           if (!searchTerm) return true;
           return (
@@ -200,6 +210,107 @@ export class FakeFindingsRepository implements FindingRepository {
       throw new Error('Comment not found');
     }
     Object.assign(comment, commentBody);
+  }
+
+  public async saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+
+    if (!bestPracticeFindingIds || bestPracticeFindingIds.size === 0) return;
+
+    const key = `${assessmentId}#${organizationDomain}`;
+    const store = this.findings[key];
+    if (!store || store.length === 0) return;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const pillar = assessment?.pillars?.find(
+      (pillar) => pillar.id === pillarId.toString(),
+    );
+    const question = pillar?.questions.find(
+      (question) => question.id === questionId.toString(),
+    );
+    const bestPractice = question?.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
+    );
+    if (!bestPractice) {
+      throw new Error(`Best Practice ${bestPracticeId} not found`);
+    }
+
+    for (const findingId of bestPracticeFindingIds) {
+      const finding = await this.get({
+        assessmentId,
+        organizationDomain,
+        findingId,
+      });
+      if (!finding) {
+        throw new Error(`Finding ${findingId} not found`);
+      }
+      if (!finding.bestPractices) {
+        finding.bestPractices = [];
+      }
+      finding.bestPractices.push(bestPractice);
+      if (
+        !finding.bestPractices.some(
+          (bp: BestPractice) => bp.id === bestPracticeId,
+        )
+      ) {
+        finding.bestPractices.push(bestPractice);
+      }
+    }
+  }
+
+  public async countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+
+    if (!bestPractice) {
+      return 0;
+    }
+
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    const count = findings.filter((finding) =>
+      finding.bestPractices?.some((bp) => bp === bestPractice),
+    ).length;
+
+    return count;
   }
 }
 

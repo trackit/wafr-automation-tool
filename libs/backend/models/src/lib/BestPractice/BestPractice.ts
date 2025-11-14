@@ -5,7 +5,6 @@ export interface BestPractice {
   id: string;
   label: string;
   primaryId: string;
-  results: Set<string>;
   risk: SeverityType;
   checked: boolean;
 }

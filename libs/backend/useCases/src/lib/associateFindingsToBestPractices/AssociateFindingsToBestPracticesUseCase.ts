@@ -46,6 +46,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
     findingsAssociations: FindingToBestPracticesAssociation[];
   }): Promise<void> {
     const { assessmentId, organizationDomain, findingsAssociations } = args;
+
     await Promise.all(
       findingsAssociations
         .filter(({ bestPractices }) => bestPractices.length > 0)
@@ -55,12 +56,6 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
             organizationDomain,
             finding: {
               ...association.finding,
-              bestPractices: association.bestPractices
-                .map(
-                  ({ pillarId, questionId, bestPracticeId }) =>
-                    `${pillarId}#${questionId}#${bestPracticeId}`,
-                )
-                .join(','),
               isAIAssociated: true,
             },
           }),
@@ -97,7 +92,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
           questionId,
           bestPracticeId,
         });
-        return this.assessmentsRepository.saveBestPracticeFindings({
+        return this.findingsRepository.saveBestPracticeFindings({
           assessmentId: assessment.id,
           organizationDomain,
           pillarId,

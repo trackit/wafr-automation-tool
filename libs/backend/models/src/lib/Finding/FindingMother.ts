@@ -1,3 +1,4 @@
+import { BestPractice } from '../BestPractice';
 import {
   type Finding,
   FindingComment,
@@ -15,7 +16,7 @@ export class FindingMother {
 
   public static basic(): FindingMother {
     return new FindingMother({
-      bestPractices: '1#1#1',
+      bestPractices: [],
       hidden: false,
       id: 'finding-id',
       isAIAssociated: false,
@@ -25,12 +26,15 @@ export class FindingMother {
         references: [],
       },
       resources: [],
+      riskDetails: '',
       severity: SeverityType.Medium,
+      statusCode: '',
+      statusDetail: '',
       comments: [],
     });
   }
 
-  public withBestPractices(bestPractices: string): FindingMother {
+  public withBestPractices(bestPractices: BestPractice[]): FindingMother {
     this.data.bestPractices = bestPractices;
     return this;
   }
@@ -65,7 +69,7 @@ export class FindingMother {
     return this;
   }
 
-  public withRiskDetails(riskDetails?: string): FindingMother {
+  public withRiskDetails(riskDetails: string): FindingMother {
     this.data.riskDetails = riskDetails;
     return this;
   }
@@ -75,12 +79,12 @@ export class FindingMother {
     return this;
   }
 
-  public withStatusCode(statusCode?: string): FindingMother {
+  public withStatusCode(statusCode: string): FindingMother {
     this.data.statusCode = statusCode;
     return this;
   }
 
-  public withStatusDetail(statusDetail?: string): FindingMother {
+  public withStatusDetail(statusDetail: string): FindingMother {
     this.data.statusDetail = statusDetail;
     return this;
   }
