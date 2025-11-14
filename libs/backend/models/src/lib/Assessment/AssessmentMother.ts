@@ -1,10 +1,5 @@
 import type { Pillar } from '../Pillar';
-import type { ScanningTool } from '../ScanningTool';
-import {
-  type Assessment,
-  type AssessmentFileExports,
-  type AssessmentGraphData,
-} from './Assessment';
+import { type Assessment, type AssessmentFileExports } from './Assessment';
 
 export class AssessmentMother {
   private data: Assessment;
@@ -20,17 +15,10 @@ export class AssessmentMother {
       executionArn:
         'arn:aws:states:us-west-2:123456789012:execution:state-machine:execution-arn',
       pillars: [],
-      graphData: {
-        findings: 0,
-        regions: {},
-        resourceTypes: {},
-        severities: {},
-      },
       id: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       name: 'Test Assessment',
       organization: 'organization-id',
       questionVersion: '1.0',
-      rawGraphData: {},
       regions: [],
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       finishedAt: undefined,
@@ -59,11 +47,6 @@ export class AssessmentMother {
     return this;
   }
 
-  public withGraphData(graphData: AssessmentGraphData): AssessmentMother {
-    this.data.graphData = graphData;
-    return this;
-  }
-
   public withId(id: string): AssessmentMother {
     this.data.id = id;
     return this;
@@ -81,13 +64,6 @@ export class AssessmentMother {
 
   public withQuestionVersion(questionVersion: string): AssessmentMother {
     this.data.questionVersion = questionVersion;
-    return this;
-  }
-
-  public withRawGraphData(
-    rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>,
-  ): AssessmentMother {
-    this.data.rawGraphData = rawGraphData;
     return this;
   }
 

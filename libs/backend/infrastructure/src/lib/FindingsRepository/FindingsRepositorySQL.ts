@@ -2,6 +2,8 @@ import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 
 import {
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
@@ -387,5 +389,133 @@ export class FindingsRepositorySQL implements FindingRepository {
     });
 
     return count;
+  }
+
+  private flattenAggregationFields(
+    fields: Record<string, unknown>,
+    prefix: string[] = [],
+  ): string[][] {
+    if (!fields) {
+      return [];
+    }
+    return Object.entries(fields).flatMap(([key, value]) => {
+      if (value === true) {
+        return [[...prefix, key]];
+      }
+      if (value && typeof value === 'object') {
+        return this.flattenAggregationFields(value as Record<string, unknown>, [
+          ...prefix,
+          key,
+        ]);
+      }
+      return [];
+    });
+  }
+
+  private async computeAggregationForPath(
+    repo: Repository<FindingEntity>,
+    assessmentId: string,
+    path: string[],
+  ): Promise<Record<string, number>> {
+    if (path.length === 0) {
+      return {};
+    }
+
+    const baseAlias = 'finding';
+    const qb = repo
+      .createQueryBuilder(baseAlias)
+      .where(`${baseAlias}.assessmentId = :assessmentId`, { assessmentId });
+
+    const currentAlias = path.slice(0, -1).reduce((alias, segment, index) => {
+      const relationAlias = `relation_${index}`;
+      qb.innerJoin(`${alias}.${segment}`, relationAlias);
+      return relationAlias;
+    }, baseAlias);
+
+    const column = `${currentAlias}.${path[path.length - 1]}`;
+    const selectExpression = `COALESCE(${column}::text, 'unknown')`;
+
+    const rows = await qb
+      .select(selectExpression, 'value')
+      .addSelect('COUNT(*)::int', 'count')
+      .groupBy(selectExpression)
+      .getRawMany<{ value: string | null; count: string | number }>();
+
+    return rows.reduce<Record<string, number>>((acc, row) => {
+      let key = String(row.value ?? 'unknown').trim();
+      if (!key) key = 'unknown';
+
+      acc[key] = Number(row.count ?? 0);
+      return acc;
+    }, {});
+  }
+
+  private assignAggregationResult(
+    target: Record<string, unknown>,
+    path: string[],
+    counts: Record<string, number>,
+  ): void {
+    const [lastKey] = path.slice(-1);
+    if (!lastKey) {
+      return;
+    }
+    const parent = path
+      .slice(0, -1)
+      .reduce<Record<string, unknown>>((acc, segment) => {
+        if (!segment) {
+          return acc;
+        }
+        if (!acc[segment] || typeof acc[segment] !== 'object') {
+          acc[segment] = {};
+        }
+        return acc[segment] as Record<string, unknown>;
+      }, target);
+    parent[lastKey] = counts;
+  }
+
+  public async aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>> {
+    const { assessmentId, organizationDomain, fields } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const fieldPaths = this.flattenAggregationFields(
+      fields as Record<string, unknown>,
+    );
+
+    if (fieldPaths.length === 0) {
+      return {} as FindingAggregationResult<TFields>;
+    }
+
+    const aggregations: Record<string, unknown> = {};
+    await Promise.all(
+      fieldPaths.map(async (path) => {
+        const counts = await this.computeAggregationForPath(
+          repo,
+          assessmentId,
+          path,
+        );
+        this.assignAggregationResult(aggregations, path, counts);
+      }),
+    );
+    this.logger.info(`Aggregations computed for assessment: ${assessmentId}`);
+    return aggregations as FindingAggregationResult<TFields>;
+  }
+
+  public async countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<number> {
+    const { assessmentId, organizationDomain } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const qb = repo
+      .createQueryBuilder('f')
+      .where('f.assessmentId = :assessmentId', { assessmentId })
+      .select('COUNT(f.id)', 'count');
+
+    return parseInt((await qb.getRawOne())?.count) || 0;
   }
 }

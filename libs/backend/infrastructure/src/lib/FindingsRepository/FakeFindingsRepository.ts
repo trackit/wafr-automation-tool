@@ -1,9 +1,11 @@
-import {
-  type BestPractice,
-  type Finding,
-  type FindingBody,
-  type FindingComment,
-  type FindingCommentBody,
+import type {
+  BestPractice,
+  Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
+  FindingBody,
+  FindingComment,
+  FindingCommentBody,
 } from '@backend/models';
 import type {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
@@ -311,6 +313,141 @@ export class FakeFindingsRepository implements FindingRepository {
     ).length;
 
     return count;
+  }
+
+  private flattenAggregationFields(
+    fields: Record<string, unknown>,
+    prefix: string[] = [],
+  ): string[][] {
+    if (!fields) {
+      return [];
+    }
+
+    return Object.entries(fields).flatMap(([key, value]) => {
+      if (value === undefined || value === null) {
+        return [];
+      }
+      if (value === true) {
+        return [[...prefix, key]];
+      }
+      if (typeof value === 'object') {
+        return this.flattenAggregationFields(value as Record<string, unknown>, [
+          ...prefix,
+          key,
+        ]);
+      }
+      return [];
+    });
+  }
+
+  private assignAggregationResult(
+    target: Record<string, unknown>,
+    path: string[],
+    counts: Record<string, number>,
+  ): void {
+    const [lastKey] = path.slice(-1);
+    if (!lastKey) {
+      return;
+    }
+
+    const parent = path
+      .slice(0, -1)
+      .reduce<Record<string, unknown>>((acc, segment) => {
+        if (!segment) {
+          return acc;
+        }
+        if (!acc[segment] || typeof acc[segment] !== 'object') {
+          acc[segment] = {};
+        }
+        return acc[segment] as Record<string, unknown>;
+      }, target);
+
+    parent[lastKey] = counts;
+  }
+
+  private countByPath(
+    findings: Finding[],
+    path: string[],
+  ): Record<string, number> {
+    if (path.length === 0) {
+      return {};
+    }
+
+    return findings.reduce<Record<string, number>>((acc, finding) => {
+      const values = this.extractValuesForPath(finding, path, 0);
+      for (const value of values) {
+        let key = String(value ?? 'unknown')
+          .trim()
+          .toLowerCase();
+        if (!key) key = 'unknown';
+        acc[key] = (acc[key] ?? 0) + 1;
+      }
+      return acc;
+    }, {});
+  }
+
+  private extractValuesForPath(
+    source: unknown,
+    path: string[],
+    depth: number,
+  ): unknown[] {
+    if (depth >= path.length) {
+      return [source];
+    }
+
+    if (source === null || source === undefined) {
+      return [];
+    }
+
+    if (Array.isArray(source)) {
+      return source.flatMap((item) =>
+        this.extractValuesForPath(item, path, depth),
+      );
+    }
+
+    if (typeof source === 'object') {
+      const segment = path[depth];
+      const next = (source as Record<string, unknown>)[segment];
+      return this.extractValuesForPath(next, path, depth + 1);
+    }
+
+    return [];
+  }
+
+  public async aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>> {
+    const { assessmentId, organizationDomain, fields } = args;
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    const fieldPaths = this.flattenAggregationFields(
+      fields as Record<string, unknown>,
+    );
+    if (fieldPaths.length === 0) {
+      return {} as FindingAggregationResult<TFields>;
+    }
+
+    const aggregations: Record<string, unknown> = {};
+    for (const path of fieldPaths) {
+      const counts = this.countByPath(findings, path);
+      this.assignAggregationResult(aggregations, path, counts);
+    }
+
+    return aggregations as FindingAggregationResult<TFields>;
+  }
+
+  public async countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<number> {
+    const { assessmentId, organizationDomain } = args;
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    return findings.length;
   }
 }
 

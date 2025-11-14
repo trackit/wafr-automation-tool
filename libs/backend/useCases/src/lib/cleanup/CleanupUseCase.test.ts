@@ -188,6 +188,7 @@ describe('CleanupUseCase', () => {
         useCase,
         fakeOrganizationRepository,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic()
@@ -195,6 +196,11 @@ describe('CleanupUseCase', () => {
         .withFreeAssessmentsLeft(0)
         .build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
@@ -215,6 +221,7 @@ describe('CleanupUseCase', () => {
         useCase,
         fakeOrganizationRepository,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic()
@@ -222,6 +229,11 @@ describe('CleanupUseCase', () => {
         .withFreeAssessmentsLeft(0)
         .build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
@@ -238,12 +250,18 @@ describe('CleanupUseCase', () => {
     });
 
     it('should consume a free assessment trial if available', async () => {
-      const { useCase, fakeOrganizationRepository } = setup();
+      const { useCase, fakeOrganizationRepository, fakeAssessmentsRepository } =
+        setup();
 
       const organization = OrganizationMother.basic()
         .withFreeAssessmentsLeft(1)
         .build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -261,10 +279,16 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
@@ -288,10 +312,16 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
@@ -317,10 +347,16 @@ describe('CleanupUseCase', () => {
         fakeOrganizationRepository,
         fakeMarketplaceService,
         fakeFeatureToggleRepository,
+        fakeAssessmentsRepository,
       } = setup();
 
       const organization = OrganizationMother.basic().build();
       await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization(organization.domain)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
@@ -344,6 +380,47 @@ describe('CleanupUseCase', () => {
       ).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ accountId: organization.accountId }),
       );
+    });
+
+    it('should update the assessment with finishedAt', async () => {
+      const {
+        date,
+        fakeAssessmentsRepository,
+        fakeOrganizationRepository,
+        fakeFeatureToggleRepository,
+        fakeMarketplaceService,
+        useCase,
+      } = setup();
+
+      const organization = OrganizationMother.basic().build();
+      await fakeOrganizationRepository.save(organization);
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization(organization.domain)
+        .build();
+
+      await fakeAssessmentsRepository.save(assessment);
+
+      vitest
+        .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')
+        .mockReturnValue(true);
+      vitest
+        .spyOn(fakeMarketplaceService, 'hasMonthlySubscription')
+        .mockResolvedValue(true);
+
+      const input = CleanupUseCaseArgsMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganizationDomain(organization.domain)
+        .build();
+
+      await useCase.cleanupSuccessful(input);
+
+      const updatedAssessment = await fakeAssessmentsRepository.get({
+        assessmentId: assessment.id,
+        organizationDomain: organization.domain,
+      });
+      expect(updatedAssessment?.finishedAt).toEqual(date);
     });
   });
 });

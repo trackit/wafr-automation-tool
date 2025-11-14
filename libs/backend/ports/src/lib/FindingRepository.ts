@@ -1,5 +1,7 @@
 import {
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
@@ -23,11 +25,13 @@ export interface FindingRepository {
     organizationDomain: string;
     finding: Finding;
   }): Promise<void>;
+
   saveAll(args: {
     assessmentId: string;
     organizationDomain: string;
     findings: Finding[];
   }): Promise<void>;
+
   saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -57,6 +61,7 @@ export interface FindingRepository {
     assessmentId: string;
     organizationDomain: string;
   }): Promise<void>;
+
   deleteComment(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -70,6 +75,7 @@ export interface FindingRepository {
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void>;
+
   updateComment(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -91,5 +97,16 @@ export interface FindingRepository {
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
+  }): Promise<number>;
+
+  aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>>;
+
+  countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
   }): Promise<number>;
 }

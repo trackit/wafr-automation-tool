@@ -3,11 +3,9 @@ import type {
   AssessmentBody,
   AssessmentFileExport,
   AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 
 export interface AssessmentsRepository {
@@ -57,12 +55,6 @@ export interface AssessmentsRepository {
     questionId: string;
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
-  }): Promise<void>;
-  updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
   }): Promise<void>;
   updateFileExport(args: {
     assessmentId: string;

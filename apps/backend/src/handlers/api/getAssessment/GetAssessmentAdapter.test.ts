@@ -4,7 +4,6 @@ import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
-  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { tokenGetAssessmentUseCase } from '@backend/useCases';
@@ -109,23 +108,9 @@ describe('getAssessment adapter', () => {
             ])
             .build(),
         ])
-        .withGraphData({
-          findings: 2,
-          regions: { 'us-west-2': 2 },
-          resourceTypes: { type: 2 },
-          severities: { [SeverityType.Medium]: 2 },
-        })
         .withName('assessment name')
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: {
-            findings: 2,
-            regions: { 'us-west-2': 2 },
-            resourceTypes: { type: 2 },
-            severities: { [SeverityType.Medium]: 2 },
-          },
-        })
         .withRegions(['us-west-2'])
         .withRoleArn('role-arn')
         .withFinishedAt(new Date())
@@ -177,7 +162,6 @@ describe('getAssessment adapter', () => {
             ],
           },
         ],
-        graphData: assessment.graphData,
         id: assessment.id,
         name: assessment.name,
         organization: assessment.organization,

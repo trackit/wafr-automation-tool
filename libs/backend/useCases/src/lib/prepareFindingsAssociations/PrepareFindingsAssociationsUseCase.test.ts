@@ -5,7 +5,6 @@ import {
   tokenFakeQuestionSetService,
 } from '@backend/infrastructure';
 import {
-  AssessmentGraphDataMother,
   AssessmentMother,
   BestPracticeMother,
   PillarMother,
@@ -13,7 +12,6 @@ import {
   QuestionSetMother,
   ScanFindingMother,
   ScanningTool,
-  SeverityType,
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';
 
@@ -125,106 +123,6 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       expect.objectContaining({
         scanFindings: mockedScanFindings,
         pillars: pillars,
-      }),
-    );
-  });
-
-  it('should update assessment with rawGraphData', async () => {
-    const {
-      useCase,
-      getScannedFindingsUseCase,
-      mapScanFindingsToBestPracticesUseCase,
-      fakeQuestionSetService,
-      fakeAssessmentsRepository,
-    } = setup();
-
-    const cloudSploitGraphData = AssessmentGraphDataMother.basic()
-      .withFindings(8)
-      .withRegions({
-        'us-east-1': 5,
-        'us-west-2': 3,
-      })
-      .withResourceTypes({
-        AwsAccount: 1,
-        AwsEc2Instance: 2,
-        AwsIamUser: 3,
-        AwsS3Bucket: 1,
-        AwsS3BucketPolicy: 1,
-      })
-      .withSeverities({
-        [SeverityType.Critical]: 2,
-        [SeverityType.High]: 3,
-        [SeverityType.Medium]: 2,
-        [SeverityType.Low]: 1,
-      })
-      .build();
-
-    const assessment = AssessmentMother.basic()
-      .withRawGraphData({ [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData })
-      .build();
-    await fakeAssessmentsRepository.save(assessment);
-
-    const mockedScanFindings = [
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-1', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Low)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-      ScanFindingMother.basic()
-        .withSeverity(SeverityType.Medium)
-        .withResources([{ type: 'type-2', region: 'us-east-1' }])
-        .build(),
-    ];
-    getScannedFindingsUseCase.getScannedFindings.mockResolvedValue(
-      mockedScanFindings,
-    );
-    mapScanFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices.mockResolvedValue(
-      [],
-    );
-
-    const pillars = [
-      PillarMother.basic()
-        .withQuestions([
-          QuestionMother.basic()
-            .withBestPractices([BestPracticeMother.basic().build()])
-            .build(),
-        ])
-        .build(),
-    ];
-    const questionSet = QuestionSetMother.basic().withPillars(pillars).build();
-    vitest.spyOn(fakeQuestionSetService, 'get').mockReturnValue(questionSet);
-
-    const input = PrepareFindingsAssociationsUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
-      .withRegions(['us-east-1'])
-      .withWorkflows(['workflow-1'])
-      .withScanningTool(ScanningTool.PROWLER)
-      .build();
-
-    await useCase.prepareFindingsAssociations(input);
-
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    expect(updatedAssessment).toEqual(
-      expect.objectContaining({
-        rawGraphData: {
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
-            .withFindings(3)
-            .withRegions({ 'us-east-1': 3 })
-            .withResourceTypes({ 'type-1': 1, 'type-2': 2 })
-            .withSeverities({
-              [SeverityType.Medium]: 1,
-              [SeverityType.Low]: 2,
-            })
-            .build(),
-          [ScanningTool.CLOUDSPLOIT]: cloudSploitGraphData,
-        },
       }),
     );
   });

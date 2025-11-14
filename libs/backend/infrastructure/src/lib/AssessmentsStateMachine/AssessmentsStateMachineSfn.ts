@@ -44,7 +44,6 @@ export class AssessmentsStateMachineSfn implements AssessmentsStateMachine {
       PromptMap: AssessmentStep.ASSOCIATING_FINDINGS,
       AssociateFindingsChunkToBestPractices:
         AssessmentStep.ASSOCIATING_FINDINGS,
-      ComputeGraphData: AssessmentStep.ASSOCIATING_FINDINGS,
       CleanupOnError: AssessmentStep.ERRORED,
     };
     for (const event of events) {

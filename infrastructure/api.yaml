@@ -1231,6 +1231,39 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GetAssessmentGraphLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentGraphFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  GetAssessmentGraphFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getAssessmentGraph
+      Tags:
+        Name: GetAssessmentGraphFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        GetAssessmentGraph:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/graph
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
 Outputs:
   ApiEndpoint:
     Description: API Endpoint
