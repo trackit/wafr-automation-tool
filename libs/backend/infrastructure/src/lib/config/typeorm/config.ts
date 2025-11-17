@@ -95,17 +95,19 @@ export async function startPostgresContainer(
 }
 
 export const tokenTypeORMConfigCreator = createInjectionToken<
-  Promise<TypeORMConfig>
+  () => Promise<TypeORMConfig>
 >('TypeORMConfig', {
-  useFactory: async () => {
-    const secretsManager = inject(tokenSecretsManager);
-    const credentialsSecretValue =
-      await secretsManager.getDatabaseCredentialsSecret(
-        inject(tokenDBCredentialsSecretArn),
-      );
-    return {
-      ...defaultTypeORMConfig,
-      ...credentialsSecretValue,
+  useFactory: () => {
+    return async () => {
+      const secretsManager = inject(tokenSecretsManager);
+      const credentialsSecretValue =
+        await secretsManager.getDatabaseCredentialsSecret(
+          inject(tokenDBCredentialsSecretArn),
+        );
+      return {
+        ...defaultTypeORMConfig,
+        ...credentialsSecretValue,
+      };
     };
   },
 });

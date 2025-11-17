@@ -57,10 +57,7 @@ export const handleHttpRequest = async ({
       });
     }
     logger.error('Internal Server Error', e);
-    return buildResponse(500, {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'Internal Server Error.',
-      description: 'An unexpected error occurred.',
-    });
+
+    throw e;
   }
 };

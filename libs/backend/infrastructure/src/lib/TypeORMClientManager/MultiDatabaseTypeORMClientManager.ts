@@ -9,27 +9,71 @@ import {
   tokenTypeORMConfigCreator,
   type TypeORMConfig,
 } from '../config/typeorm';
+import { tokenLogger } from '../Logger';
 
 export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
   public clients: Record<string, DataSource> = {};
-  private baseConfigCreator: Promise<TypeORMConfig> = inject(
+  private baseConfigCreator: () => Promise<TypeORMConfig> = inject(
     tokenTypeORMConfigCreator,
   );
   private baseConfig: TypeORMConfig | null = null;
   public isInitialized = false;
+  private readonly logger = inject(tokenLogger);
+  private readonly MAX_REFRESH_RETRIES = 5;
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
-    const baseConfig = await this.baseConfigCreator;
-    this.baseConfig = baseConfig;
-    this.clients.default = new DataSource({
-      ...baseConfig,
-      ...tenantsTypeORMConfig,
-    });
-    await this.clients.default.initialize();
-    this.isInitialized = true;
+    let retries = 0;
+    while (retries < this.MAX_REFRESH_RETRIES) {
+      try {
+        const baseConfig = await this.baseConfigCreator();
+        this.baseConfig = baseConfig;
+
+        this.clients.default = new DataSource({
+          ...baseConfig,
+          ...tenantsTypeORMConfig,
+        });
+
+        await this.clients.default.initialize();
+        this.isInitialized = true;
+        return;
+      } catch (err: any) {
+        if (this.isAuthError(err) && retries < this.MAX_REFRESH_RETRIES - 1) {
+          retries++;
+
+          this.logger.warn(
+            `[DB] Initialize failed (attempt ${retries + 1}/${this.MAX_REFRESH_RETRIES}), refreshing credentials...`,
+          );
+
+          await this.refreshCredentials();
+
+          this.clients.default = new DataSource({
+            ...this.baseConfig!,
+            ...tenantsTypeORMConfig,
+          });
+          try {
+            await this.clients.default.initialize();
+            this.isInitialized = true;
+            this.logger.info(
+              `[DB] initialize succeeded after refresh (attempt ${retries})`,
+            );
+            return;
+          } catch (innerErr: any) {
+            this.logger.warn(
+              `[DB] retry initialize attempt ${retries} failed: ${innerErr?.message}`,
+            );
+          }
+        } else {
+          this.logger.error(
+            `[DB] Initialize failed after ${retries + 1} attempts`,
+          );
+
+          throw err;
+        }
+      }
+    }
   }
 
   public toDatabaseName(identifier: string): string {
@@ -49,10 +93,44 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
         database: this.toDatabaseName(id),
       });
     }
-    if (!this.clients[id].isInitialized) {
-      await this.clients[id].initialize();
+    let retries = 0;
+    while (retries < this.MAX_REFRESH_RETRIES) {
+      try {
+        if (!this.clients[id].isInitialized) {
+          await this.clients[id].initialize();
+        }
+        return this.clients[id];
+      } catch (err: any) {
+        if (this.isAuthError(err) && retries < this.MAX_REFRESH_RETRIES - 1) {
+          retries++;
+          await this.refreshCredentials();
+          this.clients[id] = new DataSource({
+            ...this.baseConfig!,
+            database: this.toDatabaseName(id),
+          });
+          try {
+            await this.clients[id].initialize();
+            this.logger.info(
+              `[DB] client ${id} initialized after refresh (attempt ${retries})`,
+            );
+            return this.clients[id];
+          } catch (innerErr: any) {
+            this.logger.warn(
+              `[DB] retry client.init(${id}) attempt ${retries} failed: ${innerErr?.message}`,
+            );
+          }
+        } else {
+          this.logger.error(
+            `[DB] Client init failed for ${id} after ${retries + 1} attempts`,
+          );
+          throw err;
+        }
+      }
     }
-    return this.clients[id];
+
+    throw new Error(
+      `Failed to init client ${id} after ${this.MAX_REFRESH_RETRIES} attempts`,
+    );
   }
 
   public async clearClients(): Promise<void> {
@@ -103,6 +181,20 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
       await client.runMigrations();
     }
     return client;
+  }
+
+  public async refreshCredentials(): Promise<void> {
+    this.baseConfig = await this.baseConfigCreator();
+  }
+
+  private isAuthError(err: any): boolean {
+    if (!err) return false;
+    const msg = String(err.message || '').toLowerCase();
+    return (
+      err.code === '28P01' ||
+      msg.includes('password') ||
+      msg.includes('authentication failed')
+    );
   }
 }
 

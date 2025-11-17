@@ -198,7 +198,12 @@ const setup = () => {
 
   const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
 
-  const useCase = { getAssessment: vitest.fn() };
+  const useCase = {
+    getAssessment: vitest.fn().mockResolvedValue({
+      assessment: AssessmentMother.basic().build(),
+      bestPracticesFindingsAmount: {},
+    }),
+  };
   register(tokenGetAssessmentUseCase, { useValue: useCase });
 
   const date = new Date();
