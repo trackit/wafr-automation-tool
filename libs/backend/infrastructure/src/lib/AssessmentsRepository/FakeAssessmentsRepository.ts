@@ -1,12 +1,12 @@
 import {
-  Assessment,
-  AssessmentBody,
-  AssessmentFileExport,
+  type Assessment,
+  type AssessmentBody,
+  type AssessmentFileExport,
   AssessmentFileExportType,
-  BestPracticeBody,
-  PillarBody,
-  Question,
-  QuestionBody,
+  type BestPracticeBody,
+  type PillarBody,
+  type Question,
+  type QuestionBody,
 } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
