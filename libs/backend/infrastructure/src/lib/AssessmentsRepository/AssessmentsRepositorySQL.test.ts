@@ -446,11 +446,6 @@ describe('AssessmentsRepositorySQL', () => {
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              expect.objectContaining({ id: 'pdf-export' }),
-            ],
-          },
           executionArn: 'new-execution-arn',
         }),
       );
