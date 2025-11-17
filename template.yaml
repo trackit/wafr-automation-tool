@@ -236,7 +236,7 @@ Resources:
         - Key: Name
           Value: AuroraCluster
         - Key: TrackitPersistent
-          Value: 'Yes'
+          Value: 'yes'
 
   AuroraInstanceWriter:
     Type: AWS::RDS::DBInstance
@@ -253,7 +253,7 @@ Resources:
         - Key: Name
           Value: AuroraInstanceWriter
         - Key: TrackitPersistent
-          Value: 'Yes'
+          Value: 'yes'
 
   JumpInstanceRole:
     Type: AWS::IAM::Role
@@ -293,7 +293,7 @@ Resources:
         - Key: Name
           Value: SsmJump
         - Key: TrackitPersistent
-          Value: 'Yes'
+          Value: 'yes'
 
   BackupRole:
     Condition: CreateBackups
