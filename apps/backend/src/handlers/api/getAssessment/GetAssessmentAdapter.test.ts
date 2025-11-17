@@ -198,9 +198,10 @@ const setup = () => {
 
   const parseSpy = vitest.spyOn(parseApiEventModule, 'parseApiEvent');
 
+  const defaultAssessment = AssessmentMother.basic().build();
   const useCase = {
     getAssessment: vitest.fn().mockResolvedValue({
-      assessment: AssessmentMother.basic().build(),
+      assessment: defaultAssessment,
       bestPracticesFindingsAmount: {},
     }),
   };
