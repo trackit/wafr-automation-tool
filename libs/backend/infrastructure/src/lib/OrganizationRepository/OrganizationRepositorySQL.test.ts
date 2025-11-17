@@ -92,6 +92,29 @@ describe('OrganizationRepositorySQL', () => {
       expect(fetchedOrganization).toBeUndefined();
     });
   });
+
+  describe('getAll', () => {
+    it('should get all organizations', async () => {
+      const { repository } = setup();
+
+      const organization1 = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      const organization2 = OrganizationMother.basic()
+        .withDomain('organization2')
+        .build();
+
+      await Promise.all([
+        repository.save(organization1),
+        repository.save(organization2),
+      ]);
+
+      const organizations = await repository.getAll();
+      expect(organizations).toEqual(
+        expect.arrayContaining([organization1, organization2]),
+      );
+    });
+  });
 });
 
 const setup = () => {
