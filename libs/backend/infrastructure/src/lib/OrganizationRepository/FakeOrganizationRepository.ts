@@ -13,8 +13,13 @@ export class FakeOrganizationRepository implements OrganizationRepository {
     return this.organizations[organizationDomain];
   }
 
-  async getAll(): Promise<Organization[]> {
-    return Object.values(this.organizations);
+  async getAll(args?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Organization[]> {
+    const { limit, offset = 0 } = args || {};
+    const organizations = Object.values(this.organizations);
+    return organizations.slice(offset, limit ? offset + limit : undefined);
   }
 }
 

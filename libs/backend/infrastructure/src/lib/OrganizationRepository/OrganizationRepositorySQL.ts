@@ -53,10 +53,16 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
     return toDomainOrganization(entity);
   }
 
-  public async getAll(): Promise<Organization[]> {
+  public async getAll(args?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Organization[]> {
+    const { limit = ORGANIZATIONS_GET_ALL_LIMIT, offset = 0 } = args || {};
     const repo = await this.repo();
     const entities = await repo.find({
-      take: ORGANIZATIONS_GET_ALL_LIMIT,
+      take: limit,
+      skip: offset,
+      order: { domain: 'ASC' },
     });
     return entities.map(toDomainOrganization);
   }
