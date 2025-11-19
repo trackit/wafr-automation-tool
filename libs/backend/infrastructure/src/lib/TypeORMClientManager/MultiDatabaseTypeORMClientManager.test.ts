@@ -1,3 +1,5 @@
+import { DataSource } from 'typeorm';
+
 import { inject, reset } from '@shared/di-container';
 
 import {
@@ -51,9 +53,13 @@ describe('MultiDatabaseTypeORMClientManager', () => {
     it('should return the same client for the same id', async () => {
       const { clientManager } = setup();
       await clientManager.initialize();
+
       const client1 = await clientManager.getClient('organization1');
+      const initializeSpy = vi.spyOn(DataSource.prototype, 'initialize');
       const client2 = await clientManager.getClient('organization1');
+
       expect(client1).toBe(client2);
+      expect(initializeSpy).not.toHaveBeenCalled();
     });
 
     it('should return existing initialized client without checking credentials', async () => {
@@ -189,21 +195,23 @@ describe('MultiDatabaseTypeORMClientManager', () => {
 
       const refreshSpy = vi.spyOn(clientManager, 'refreshCredentials');
 
-      // Mock refreshCredentials to always return bad credentials
-      refreshSpy.mockImplementation(async () => {
-        clientManager['baseConfig'] = {
-          ...clientManager['baseConfig']!,
-          password: 'always_invalid_password',
-        };
+      const mockInitialize = vi.fn().mockRejectedValue({
+        code: '28P01',
+        message: 'password authentication failed for user "postgres"',
       });
 
-      await clientManager.refreshCredentials();
+      vi.spyOn(DataSource.prototype, 'initialize').mockImplementation(
+        mockInitialize,
+      );
 
       await expect(clientManager.getClient('organization1')).rejects.toThrow(
         /password authentication failed/,
       );
 
-      expect(refreshSpy).toHaveBeenCalledTimes(5);
+      expect(mockInitialize).toHaveBeenCalledTimes(5);
+      expect(refreshSpy).toHaveBeenCalledTimes(4);
+
+      vi.restoreAllMocks();
     });
   });
 
@@ -294,6 +302,43 @@ describe('MultiDatabaseTypeORMClientManager', () => {
           expect(results).toHaveLength(0);
         }
       }
+    });
+  });
+
+  describe('getExistingHealthyClient', () => {
+    it('should return null for non-existent client', async () => {
+      const { clientManager } = setup();
+      await clientManager.initialize();
+
+      const result =
+        await clientManager.getExistingHealthyClient('nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('should return healthy client that passes health check', async () => {
+      const { clientManager } = setup();
+      await clientManager.initialize();
+      await clientManager.createClient('organization1');
+
+      const result =
+        await clientManager.getExistingHealthyClient('organization1');
+      expect(result).toBeDefined();
+      expect(result?.isInitialized).toBe(true);
+    });
+
+    it('should return null for client that fails health check', async () => {
+      const { clientManager } = setup();
+      await clientManager.initialize();
+      await clientManager.createClient('organization1');
+
+      const client = clientManager.clients['organization1'];
+      vi.spyOn(client, 'query').mockRejectedValue(
+        new Error('Connection failed'),
+      );
+
+      const result =
+        await clientManager.getExistingHealthyClient('organization1');
+      expect(result).toBeNull();
     });
   });
 });
