@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  WAFR Automation Tool
+
+  Role for managing ACE opportunities in Partner Central
+
+Resources:
+  AceOpportunityRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-create-opportunity'
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSPartnerCentralOpportunityManagement
+Outputs:
+  AceOpportunityRoleArn:
+    Description: ACE Opportunity Role
+    Value: !GetAtt AceOpportunityRole.Arn
