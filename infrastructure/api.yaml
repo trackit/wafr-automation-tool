@@ -211,6 +211,32 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  ListOrganizationNamesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ListOrganizationNamesFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ListOrganizationNamesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ParentStackName}-ListOrganizationNamesFunction
+      CodeUri: ../apps/backend/src/handlers/process/listOrganizationNames
+      Tags:
+        Name: ListOrganizationNamesFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   Api:
     Type: AWS::Serverless::Api
     Properties:

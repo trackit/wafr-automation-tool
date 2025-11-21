@@ -12,6 +12,15 @@ export class FakeOrganizationRepository implements OrganizationRepository {
   async get(organizationDomain: string): Promise<Organization | undefined> {
     return this.organizations[organizationDomain];
   }
+
+  async getAll(args?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Organization[]> {
+    const { limit, offset = 0 } = args || {};
+    const organizations = Object.values(this.organizations);
+    return organizations.slice(offset, limit ? offset + limit : undefined);
+  }
 }
 
 export const tokenFakeOrganizationRepository =
