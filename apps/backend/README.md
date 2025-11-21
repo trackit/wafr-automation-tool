@@ -114,7 +114,7 @@ Add ACE (Partner Central / ACE Opportunity) integration details in the organizat
 
 ###### Local
 
-The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-AssessmentExportRole."
+The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-Api-***-DefaultExportRole-************"
 
 ###### Remote
 
@@ -165,7 +165,7 @@ $ payload=`echo '{ \
       { \
         "firstName": "fNamecontact", \
         "lastName": "lNamecontact", \
-        "email": "emailcontact@organization.org" \
+        "email": "emailcontact@domain.com" \
       } \
     ] \
   } \
