@@ -11,9 +11,22 @@ import {
 } from '../config/typeorm';
 import { tokenLogger } from '../Logger';
 
+export const POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED = '28P01';
+
 interface DatabaseError {
   code?: string;
   message?: string;
+}
+
+function isAuthError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+
+  const dbError = err as DatabaseError;
+  const msg = String(dbError.message || '').toLowerCase();
+  return (
+    dbError.code === POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED ||
+    msg.includes('password authentication failed')
+  );
 }
 
 export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
@@ -127,17 +140,6 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
     this.baseConfig = await this.baseConfigCreator();
   }
 
-  private isAuthError(err: unknown): boolean {
-    if (!err || typeof err !== 'object') return false;
-
-    const dbError = err as DatabaseError;
-    const msg = String(dbError.message || '').toLowerCase();
-    console.log('DB Error:', dbError);
-    return (
-      dbError.code === '28P01' || msg.includes('password authentication failed')
-    );
-  }
-
   private async withRetry(
     operation: () => Promise<void>,
     operationName: string,
@@ -148,7 +150,7 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
       try {
         return await operation();
       } catch (err: unknown) {
-        if (!this.isAuthError(err)) {
+        if (!isAuthError(err)) {
           this.logger.error(`[DB] ${operationName} failed with non-auth error`);
           throw err;
         }

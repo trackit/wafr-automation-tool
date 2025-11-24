@@ -10,6 +10,7 @@ import {
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MultiDatabaseTypeORMClientManager,
+  POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED,
   tokenTypeORMClientManager,
 } from './MultiDatabaseTypeORMClientManager';
 let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
@@ -196,7 +197,7 @@ describe('MultiDatabaseTypeORMClientManager', () => {
       const refreshSpy = vi.spyOn(clientManager, 'refreshCredentials');
 
       const mockInitialize = vi.fn().mockRejectedValue({
-        code: '28P01',
+        code: POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED,
         message: 'password authentication failed for user "postgres"',
       });
 
