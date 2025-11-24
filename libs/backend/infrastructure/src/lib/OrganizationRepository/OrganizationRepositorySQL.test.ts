@@ -15,7 +15,7 @@ beforeAll(async () => {
 
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
-}, 30000);
+}, 20000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
