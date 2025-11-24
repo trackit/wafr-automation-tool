@@ -93,6 +93,37 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
+  describe('saveFileExport', () => {
+    it('should create the file export for an export type if it does not exist', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withFileExports({
+          [AssessmentFileExportType.PDF]: [],
+        })
+        .build();
+      await repository.save(assessment);
+
+      const fileExport = AssessmentFileExportMother.basic().build();
+
+      await repository.saveFileExport({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        fileExport,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.fileExports).toStrictEqual({
+        [AssessmentFileExportType.PDF]: [fileExport],
+      });
+    });
+  });
+
   describe('get', () => {
     it('should get an assessment by ID and organization', async () => {
       const { repository } = setup();
@@ -375,27 +406,7 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Old Name')
-        .withPillars([
-          PillarMother.basic()
-            .withId('old-pillar-1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('old-question-1')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('old-best-practice-1')
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
         .withQuestionVersion('0.1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
-          ],
-        })
         .withFinishedAt(undefined)
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
@@ -409,21 +420,6 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
         assessmentBody: {
           name: 'New Name',
-          pillars: [
-            PillarMother.basic()
-              .withId('pillar-1')
-              .withQuestions([
-                QuestionMother.basic()
-                  .withId('question-1')
-                  .withBestPractices([
-                    BestPracticeMother.basic()
-                      .withId('best-practice-1')
-                      .build(),
-                  ])
-                  .build(),
-              ])
-              .build(),
-          ],
           questionVersion: '1.0',
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
@@ -431,11 +427,6 @@ describe('AssessmentsRepositorySQL', () => {
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              AssessmentFileExportMother.basic().withId('pdf-export').build(),
-            ],
-          },
           executionArn: 'new-execution-arn',
         },
       });
@@ -448,21 +439,6 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedAssessment).toEqual(
         expect.objectContaining({
           name: 'New Name',
-          pillars: [
-            expect.objectContaining({
-              id: 'pillar-1',
-              questions: [
-                expect.objectContaining({
-                  id: 'question-1',
-                  bestPractices: [
-                    expect.objectContaining({
-                      id: 'best-practice-1',
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
           questionVersion: '1.0',
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
@@ -470,44 +446,9 @@ describe('AssessmentsRepositorySQL', () => {
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              expect.objectContaining({ id: 'pdf-export' }),
-            ],
-          },
           executionArn: 'new-execution-arn',
         }),
       );
-      expect(updatedAssessment?.pillars).toHaveLength(1);
-      expect(updatedAssessment?.pillars).not.toContainEqual(
-        expect.objectContaining({ id: 'old-pillar-1' }),
-      );
-      expect(updatedAssessment?.pillars?.[0]?.questions).not.toContainEqual(
-        expect.objectContaining({ id: 'old-question-1' }),
-      );
-      expect(
-        updatedAssessment?.pillars?.[0]?.questions[0]?.bestPractices,
-      ).not.toContainEqual(
-        expect.objectContaining({ id: 'old-best-practice-1' }),
-      );
-
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF],
-      ).toHaveLength(1);
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF],
-      ).not.toContainEqual(expect.objectContaining({ id: 'old-pdf-export' }));
-
-      expect(updatedAssessment?.pillars?.[0]?.id).toBe('pillar-1');
-      expect(updatedAssessment?.pillars?.[0]?.questions[0]?.id).toBe(
-        'question-1',
-      );
-      expect(
-        updatedAssessment?.pillars?.[0]?.questions[0]?.bestPractices[0]?.id,
-      ).toBe('best-practice-1');
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]?.[0]?.id,
-      ).toBe('pdf-export');
     });
 
     it('should be scoped by organization', async () => {
@@ -746,36 +687,6 @@ describe('AssessmentsRepositorySQL', () => {
         .withId(assessmentFileExport.id)
         .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
         .build();
-
-      await repository.updateFileExport({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
-        data: fileExport,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      });
-    });
-
-    it('should create the file export for an export type if it does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [],
-        })
-        .build();
-      await repository.save(assessment);
-
-      const fileExport = AssessmentFileExportMother.basic().build();
 
       await repository.updateFileExport({
         assessmentId: assessment.id,

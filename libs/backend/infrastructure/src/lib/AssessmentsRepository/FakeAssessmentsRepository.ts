@@ -1,12 +1,12 @@
-import type {
-  Assessment,
-  AssessmentBody,
-  AssessmentFileExport,
+import {
+  type Assessment,
+  type AssessmentBody,
+  type AssessmentFileExport,
   AssessmentFileExportType,
-  BestPracticeBody,
-  PillarBody,
-  Question,
-  QuestionBody,
+  type BestPracticeBody,
+  type PillarBody,
+  type Question,
+  type QuestionBody,
 } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
@@ -18,6 +18,32 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async save(assessment: Assessment): Promise<void> {
     const key = `${assessment.id}#${assessment.organization}`;
     this.assessments[key] = assessment;
+  }
+
+  public async saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fileExport: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, fileExport } = args;
+
+    const assessmentKey = `${assessmentId}#${organizationDomain}`;
+    const assessment = this.assessments[assessmentKey];
+
+    if (!assessment.fileExports) {
+      assessment.fileExports = {};
+    }
+    const existingFileExport = assessment.fileExports[
+      AssessmentFileExportType.PDF
+    ]?.find((fileExport) => fileExport.id === fileExport.id);
+    if (!existingFileExport) {
+      if (!assessment.fileExports[AssessmentFileExportType.PDF]) {
+        assessment.fileExports[AssessmentFileExportType.PDF] = [];
+      }
+      assessment.fileExports[AssessmentFileExportType.PDF].push(fileExport);
+    } else {
+      Object.assign(existingFileExport, fileExport);
+    }
   }
 
   public async get(args: {

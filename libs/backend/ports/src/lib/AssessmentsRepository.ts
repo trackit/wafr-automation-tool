@@ -10,6 +10,11 @@ import type {
 
 export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
+  saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fileExport: AssessmentFileExport;
+  }): Promise<void>;
 
   get(args: {
     assessmentId: string;
