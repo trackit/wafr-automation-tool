@@ -405,7 +405,8 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('update', () => {
     it('should update the assessment', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -739,7 +740,8 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('GetOpportunitiesByYear', () => {
     it('should return an empty array if no assessments with non-undefined opportunityId and opportunityCreatedAt', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -767,7 +769,8 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return only assessments with non-null opportunityId and opportunityCreatedAt', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
@@ -805,7 +808,8 @@ describe('AssessmentsRepositorySQL', () => {
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
       vitest.useFakeTimers();
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -841,7 +845,8 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('countAssessmentsByYear', () => {
     it('should return 0 if no assessments exist for the given year', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -862,7 +867,9 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should count all assessments created in the given year', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
+
       const year = date.getFullYear();
 
       const assessment1 = AssessmentMother.basic()
@@ -898,7 +905,8 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should not count assessments from different years', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
       const year = date.getFullYear();
 
       const assessment1 = AssessmentMother.basic()
@@ -939,7 +947,5 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  const date = new Date();
-
-  return { repository: new AssessmentsRepositorySQL(), date };
+  return { repository: new AssessmentsRepositorySQL() };
 };
