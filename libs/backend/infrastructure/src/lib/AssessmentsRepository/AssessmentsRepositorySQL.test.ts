@@ -11,13 +11,17 @@ import {
 import { inject, reset } from '@shared/di-container';
 import { encodeNextToken } from '@shared/utils';
 
+import { startPostgresContainer } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
 beforeAll(async () => {
   reset();
   registerTestInfrastructure();
+  pgContainer = await startPostgresContainer();
+
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
   await clientManager.createClient('organization1');
@@ -32,9 +36,8 @@ afterEach(async () => {
 afterAll(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
+  await pgContainer.stop();
 });
-
-vitest.useFakeTimers();
 
 describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
@@ -235,6 +238,7 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return all assessments within the limit', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -266,9 +270,11 @@ describe('AssessmentsRepositorySQL', () => {
         ],
         nextToken: expect.any(String),
       });
+      vitest.useRealTimers();
     });
 
     it('should return all assessments after the next token', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -301,6 +307,7 @@ describe('AssessmentsRepositorySQL', () => {
         assessments: [assessment1],
         nextToken: undefined,
       });
+      vitest.useRealTimers();
     });
 
     it('should return an empty list if assessments does not match the organization', async () => {
@@ -796,6 +803,7 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
+      vitest.useFakeTimers();
       const { repository, date } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -826,6 +834,7 @@ describe('AssessmentsRepositorySQL', () => {
       expect(result).toHaveLength(2);
       expect(result[0].createdAt).toEqual(date1);
       expect(result[1].createdAt).toEqual(date);
+      vitest.useRealTimers();
     });
   });
 
@@ -930,7 +939,6 @@ const setup = () => {
   registerTestInfrastructure();
 
   const date = new Date();
-  vitest.setSystemTime(date);
 
   return { repository: new AssessmentsRepositorySQL(), date };
 };
