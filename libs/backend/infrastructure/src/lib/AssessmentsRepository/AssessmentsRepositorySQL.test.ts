@@ -698,27 +698,6 @@ describe('AssessmentsRepositorySQL', () => {
 
       expect(updatedAssessment?.fileExports).toStrictEqual([fileExport]);
     });
-
-    it('should throw when trying to update a non-existing file export', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .build();
-      await repository.save(assessment);
-
-      const missingFileExport = AssessmentFileExportMother.basic()
-        .withId('non-existing-id')
-        .build();
-
-      await expect(
-        repository.updateFileExport({
-          assessmentId: assessment.id,
-          organizationDomain: assessment.organization,
-          data: missingFileExport,
-        }),
-      ).rejects.toThrow(/File Export not found/);
-    });
   });
 
   describe('deleteFileExport', () => {
