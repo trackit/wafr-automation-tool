@@ -1,5 +1,5 @@
 import type { Pillar } from '../Pillar';
-import { type Assessment, type AssessmentFileExports } from './Assessment';
+import { type Assessment, AssessmentFileExport } from './Assessment';
 
 export class AssessmentMother {
   private data: Assessment;
@@ -23,7 +23,7 @@ export class AssessmentMother {
       roleArn: 'arn:aws:iam::123456789012:role/test-role',
       finishedAt: undefined,
       workflows: [],
-      fileExports: {},
+      fileExports: [],
     });
   }
 
@@ -87,7 +87,9 @@ export class AssessmentMother {
     return this;
   }
 
-  public withFileExports(fileExports: AssessmentFileExports): AssessmentMother {
+  public withFileExports(
+    fileExports: AssessmentFileExport[],
+  ): AssessmentMother {
     this.data.fileExports = fileExports;
     return this;
   }

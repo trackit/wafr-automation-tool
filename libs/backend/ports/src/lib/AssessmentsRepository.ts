@@ -2,7 +2,6 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
   BestPracticeBody,
   PillarBody,
   QuestionBody,
@@ -64,13 +63,11 @@ export interface AssessmentsRepository {
   updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void>;
   deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void>;
   getOpportunitiesByYear(args: {

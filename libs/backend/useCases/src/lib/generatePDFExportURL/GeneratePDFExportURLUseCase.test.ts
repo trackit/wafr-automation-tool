@@ -5,7 +5,6 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
   PillarMother,
   UserMother,
@@ -35,9 +34,7 @@ describe('generatePDFExportURL UseCase', () => {
       .withOrganization(user.organizationDomain)
       .withFinishedAt(new Date())
       .withPillars([PillarMother.basic().build()])
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -90,9 +87,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
@@ -116,9 +111,7 @@ describe('generatePDFExportURL UseCase', () => {
       .build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withFileExports({
-        [AssessmentFileExportType.PDF]: [assessmentFileExport],
-      })
+      .withFileExports([assessmentFileExport])
       .build();
     await fakeAssessmentsRepository.save(assessment);
 

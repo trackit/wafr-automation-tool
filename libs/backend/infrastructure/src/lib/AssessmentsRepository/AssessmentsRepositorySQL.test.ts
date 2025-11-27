@@ -97,15 +97,14 @@ describe('AssessmentsRepositorySQL', () => {
     it('should create the file export for an export type if it does not exist', async () => {
       const { repository } = setup();
 
+      const fileExport = AssessmentFileExportMother.basic()
+        .withType(AssessmentFileExportType.PDF)
+        .build();
+
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [],
-        })
         .build();
       await repository.save(assessment);
-
-      const fileExport = AssessmentFileExportMother.basic().build();
 
       await repository.saveFileExport({
         assessmentId: assessment.id,
@@ -118,9 +117,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      });
+      expect(updatedAssessment?.fileExports).toStrictEqual([fileExport]);
     });
   });
 
@@ -674,24 +671,23 @@ describe('AssessmentsRepositorySQL', () => {
 
       const assessmentFileExport = AssessmentFileExportMother.basic()
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .withType(AssessmentFileExportType.PDF)
         .build();
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [assessmentFileExport],
-        })
+        .withFileExports([assessmentFileExport])
         .build();
       await repository.save(assessment);
 
       const fileExport = AssessmentFileExportMother.basic()
         .withId(assessmentFileExport.id)
         .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
+        .withType(AssessmentFileExportType.PDF)
         .build();
 
       await repository.updateFileExport({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
         data: fileExport,
       });
 
@@ -700,9 +696,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      });
+      expect(updatedAssessment?.fileExports).toStrictEqual([fileExport]);
     });
   });
 
@@ -712,19 +706,17 @@ describe('AssessmentsRepositorySQL', () => {
 
       const assessmentFileExport = AssessmentFileExportMother.basic()
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .withType(AssessmentFileExportType.PDF)
         .build();
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [assessmentFileExport],
-        })
+        .withFileExports([assessmentFileExport])
         .build();
       await repository.save(assessment);
 
       await repository.deleteFileExport({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
         id: assessmentFileExport.id,
       });
 
@@ -733,7 +725,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({});
+      expect(updatedAssessment?.fileExports).toStrictEqual([]);
     });
   });
 

@@ -1,7 +1,6 @@
 import {
   Assessment,
   AssessmentFileExport,
-  AssessmentFileExportType,
   BestPractice,
   Pillar,
   Question,
@@ -47,13 +46,14 @@ export function toDomainPillar(e: PillarEntity): Pillar {
   };
 }
 
-export function toDomainFileExport(e: FileExportEntity): AssessmentFileExport {
+function toDomainFileExport(e: FileExportEntity): AssessmentFileExport {
   return {
     id: e.id,
     status: e.status,
-    ...(e.error && { error: e.error }),
+    type: e.type,
+    error: e.error ?? undefined,
     versionName: e.versionName,
-    ...(e.objectKey && { objectKey: e.objectKey }),
+    objectKey: e.objectKey ?? undefined,
     createdAt: e.createdAt,
   };
 }
@@ -77,50 +77,11 @@ export function toDomainAssessment(
     workflows: e.workflows,
     ...(e.error && { error: e.error }),
     pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
-    fileExports: (e.fileExports ?? []).reduce(
-      (acc, fileExport) => {
-        if (acc[fileExport.type]) {
-          acc[fileExport.type]!.push(toDomainFileExport(fileExport));
-        } else {
-          acc[fileExport.type] = [toDomainFileExport(fileExport)];
-        }
-        return acc;
-      },
-      {} as Record<AssessmentFileExportType, AssessmentFileExport[]>,
-    ),
+    fileExports: (e.fileExports ?? []).map((fe) => toDomainFileExport(fe)),
     ...(e.wafrWorkloadArn && { wafrWorkloadArn: e.wafrWorkloadArn }),
     ...(e.opportunityId && { opportunityId: e.opportunityId }),
     ...(e.opportunityCreatedAt && {
       opportunityCreatedAt: e.opportunityCreatedAt,
     }),
-  };
-}
-
-export function mapFileExportsToEntities(
-  assessmentId: string,
-  fileExports: Partial<
-    Record<AssessmentFileExportType, AssessmentFileExport[]>
-  >,
-): FileExportEntity[] {
-  return Object.entries(fileExports).flatMap(([type, exports]) =>
-    exports.map((fileExport) =>
-      mapFileExportToEntity(
-        assessmentId,
-        type as AssessmentFileExportType,
-        fileExport,
-      ),
-    ),
-  );
-}
-
-function mapFileExportToEntity(
-  assessmentId: string,
-  type: AssessmentFileExportType,
-  fileExport: AssessmentFileExport,
-): FileExportEntity {
-  return {
-    assessmentId,
-    type,
-    ...fileExport,
   };
 }

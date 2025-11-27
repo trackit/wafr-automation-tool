@@ -59,9 +59,10 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
     }
 
-    const foundAssessmentExport = assessment.fileExports?.[
-      AssessmentFileExportType.PDF
-    ]?.find((assessmentExport) => assessmentExport.versionName === versionName);
+    const foundAssessmentExport = assessment.fileExports?.find(
+      (assessmentExport) => assessmentExport.versionName === versionName,
+    );
+
     if (foundAssessmentExport) {
       throw new AssessmentFileExportAlreadyExistsError({
         assessmentId: assessment.id,
@@ -75,7 +76,9 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       .withStatus(AssessmentFileExportStatus.NOT_STARTED)
       .withVersionName(versionName)
       .withCreatedAt(new Date())
+      .withType(AssessmentFileExportType.PDF)
       .build();
+
     await this.assessmentsRepository.saveFileExport({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
