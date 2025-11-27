@@ -707,40 +707,48 @@ function AssessmentOverview({
           </div>
         </div>
 
-        <div className="mt-4">
-          <h4 className="text-sm text-base-content/80 mb-2">Top services</h4>
-          <ul className="flex flex-col gap-2">
-            {topServices.length === 0 && (
-              <li className="text-sm text-base-content/60">
-                No services available
-              </li>
+        {billing && (
+          <div className="mt-4">
+            {topServices?.length > 0 ? (
+              <>
+                <h4 className="text-sm text-base-content/80 mb-2">
+                  Top services
+                </h4>
+                <ul className="flex flex-col gap-2">
+                  {topServices.map((s, idx) => (
+                    <li key={s.serviceName} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-md bg-base-200 flex items-center justify-center text-sm font-medium">
+                        {idx + 1}
+                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="text-md font-medium truncate">
+                          {s.serviceName}
+                        </div>
+                        <div className="text-sm text-base-content/80 tabular-nums">
+                          {formatCurrency(s.cost)}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                <li className="text-sm text-base-content/60">
+                  No billable services were used during this period
+                </li>
+              </ul>
             )}
 
-            {topServices.map((s, idx) => (
-              <li key={s.serviceName} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-base-200 flex items-center justify-center text-sm font-medium">
-                  {idx + 1}
-                </div>
-                <div className="flex items-center justify-between w-full">
-                  <div className="text-md font-medium truncate">
-                    {s.serviceName}
-                  </div>
-                  <div className="text-sm text-base-content/80 tabular-nums">
-                    {formatCurrency(s.cost)}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          {billing?.servicesCost &&
-            billing.servicesCost.length > maxServices && (
-              <p className="mt-3 text-xs text-base-content/60">
-                Showing top {maxServices} of {billing.servicesCost.length}{' '}
-                services
-              </p>
-            )}
-        </div>
+            {billing?.servicesCost &&
+              billing.servicesCost.length > maxServices && (
+                <p className="mt-3 text-xs text-base-content/60">
+                  Showing top {maxServices} of {billing.servicesCost.length}{' '}
+                  services
+                </p>
+              )}
+          </div>
+        )}
       </div>
     </div>
   );

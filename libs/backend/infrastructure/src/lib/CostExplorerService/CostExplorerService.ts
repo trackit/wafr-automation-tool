@@ -69,7 +69,7 @@ export class CostExplorerService implements CostExplorerPort {
     serviceValues: string[],
     regionValues: string[],
     accountId: string,
-  ) => {
+  ): Expression => {
     const andClauses: Expression[] = [
       {
         Dimensions: { Key: 'LINKED_ACCOUNT', Values: [accountId] },
@@ -78,7 +78,7 @@ export class CostExplorerService implements CostExplorerPort {
         Dimensions: { Key: 'SERVICE', Values: serviceValues },
       },
     ];
-    if (regionValues && regionValues.length > 0) {
+    if (regionValues?.length > 0) {
       andClauses.push({ Dimensions: { Key: 'REGION', Values: regionValues } });
     }
     return { And: andClauses };
