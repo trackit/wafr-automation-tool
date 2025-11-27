@@ -382,7 +382,7 @@ function AssessmentsList() {
       )}
 
       <div
-        className="grid gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
+        className="grid gap-4 rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
         style={{
           gridTemplateColumns: `repeat(auto-fit, minmax(300px, ${
             data?.pages?.[0]?.assessments?.length === 1 && isLargeScreen
