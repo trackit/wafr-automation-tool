@@ -942,7 +942,7 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
-  describe('updateBillingInformation', () => {
+  describe('saveBillingInformation', () => {
     it('should create new billing information when it does not exist', async () => {
       const { repository } = setup();
       const date = new Date();
@@ -965,7 +965,7 @@ describe('AssessmentsRepositorySQL', () => {
         ],
       };
 
-      await repository.updateBillingInformation({
+      await repository.saveBillingInformation({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
         billingInformation: newBillingInformation,
@@ -1015,7 +1015,7 @@ describe('AssessmentsRepositorySQL', () => {
         ],
       };
 
-      await repository.updateBillingInformation({
+      await repository.saveBillingInformation({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
         billingInformation: updatedBillingInformation,
@@ -1054,7 +1054,7 @@ describe('AssessmentsRepositorySQL', () => {
         servicesCost: [],
       };
 
-      await repository.updateBillingInformation({
+      await repository.saveBillingInformation({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
         billingInformation: billingInformationWithEmptyServices,

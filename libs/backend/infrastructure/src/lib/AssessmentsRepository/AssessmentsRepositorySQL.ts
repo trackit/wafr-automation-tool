@@ -301,7 +301,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     });
   }
 
-  public async updateBillingInformation(args: {
+  public async saveBillingInformation(args: {
     assessmentId: string;
     organizationDomain: string;
     billingInformation: BillingInformation;
@@ -312,10 +312,8 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       BillingInformationEntity,
       organizationDomain,
     );
-    const billingEntity = billingDomainToEntity(
-      assessmentId,
-      billingInformation,
-    );
+    const billingEntity = { ...billingInformation, assessmentId };
+
     if (billingEntity) {
       await billingRepo.save(billingEntity);
     }

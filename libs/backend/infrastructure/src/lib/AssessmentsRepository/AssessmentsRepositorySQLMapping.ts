@@ -2,6 +2,7 @@ import {
   type Assessment,
   type AssessmentFileExport,
   type BestPractice,
+  type BillingInformation,
   type Pillar,
   type Question,
 } from '@backend/models';
@@ -98,22 +99,5 @@ export function billingEntityToDomain(
     billingPeriodEndDate: entity.billingPeriodEndDate,
     totalCost: entity.totalCost,
     servicesCost: entity.servicesCost ?? [],
-  };
-}
-
-export function billingDomainToEntity(
-  assessmentId: string,
-  billingInformation?: BillingInformation,
-): Partial<BillingInformationEntity> | undefined {
-  if (!billingInformation) return undefined;
-  return {
-    assessmentId,
-    billingPeriodStartDate: billingInformation.billingPeriodStartDate,
-    billingPeriodEndDate: billingInformation.billingPeriodEndDate,
-    totalCost: billingInformation.totalCost,
-    servicesCost: billingInformation.servicesCost.map((s: ServiceCost) => ({
-      serviceName: s.serviceName,
-      cost: s.cost,
-    })),
   };
 }

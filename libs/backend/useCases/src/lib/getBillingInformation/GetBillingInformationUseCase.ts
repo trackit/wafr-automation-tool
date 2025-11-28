@@ -84,7 +84,7 @@ export class GetBillingInformationUseCaseImpl
       `Retrieved billing information for assessment ${args.assessmentId}`,
     );
 
-    await this.assessmentsRepository.updateBillingInformation({
+    await this.assessmentsRepository.saveBillingInformation({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       billingInformation: billingInformation,

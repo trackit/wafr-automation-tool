@@ -283,7 +283,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       }).length;
   }
 
-  public async updateBillingInformation(args: {
+  public async saveBillingInformation(args: {
     assessmentId: string;
     organizationDomain: string;
     billingInformation: BillingInformation;

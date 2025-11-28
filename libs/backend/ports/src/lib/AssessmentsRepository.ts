@@ -79,7 +79,7 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     year: number;
   }): Promise<number>;
-  updateBillingInformation(args: {
+  saveBillingInformation(args: {
     assessmentId: string;
     organizationDomain: string;
     billingInformation: BillingInformation;
