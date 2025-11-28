@@ -308,18 +308,13 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   }): Promise<void> {
     const { assessmentId, organizationDomain, billingInformation } = args;
 
-    const billingRepo = await this.repo(
-      BillingInformationEntity,
-      organizationDomain,
-    );
-    const billingEntity = { ...billingInformation, assessmentId };
+    const repo = await this.repo(BillingInformationEntity, organizationDomain);
+    const entity = repo.create({ ...billingInformation, assessmentId });
 
-    if (billingEntity) {
-      await billingRepo.save(billingEntity);
-    }
+    await repo.save(entity);
 
     this.logger.info(
-      `Billing information updated for assessment: ${assessmentId}`,
+      `Billing information saved for assessment: ${assessmentId}`,
     );
   }
 }

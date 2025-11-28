@@ -10,6 +10,7 @@ import {
 import {
   type AssessmentEntity,
   type BestPracticeEntity,
+  type BillingInformationEntity,
   type FileExportEntity,
   type PillarEntity,
   type QuestionEntity,
@@ -85,12 +86,12 @@ export function toDomainAssessment(
       opportunityCreatedAt: e.opportunityCreatedAt,
     }),
     ...(e.billingInformation && {
-      billingInformation: billingEntityToDomain(e.billingInformation),
+      billingInformation: toDomainBillingInformation(e.billingInformation),
     }),
   };
 }
 
-export function billingEntityToDomain(
+export function toDomainBillingInformation(
   entity?: BillingInformationEntity | null,
 ): BillingInformation | undefined {
   if (!entity) return undefined;
