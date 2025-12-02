@@ -3,6 +3,7 @@ import { JSX, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { useNavigate } from 'react-router';
 
+import AceOpportunityRoleAnswer from './answers/ace-opportunit-role';
 import AssessmentStagesAnswer from './answers/assessment-stages';
 import AssessmentTimeAnswer from './answers/assessment-time';
 import BestPracticesAnswer from './answers/best-practice';
@@ -57,6 +58,10 @@ export function FAQ() {
     {
       question: 'How do you create an export role?',
       answer: <ExportRoleAnswer />,
+    },
+    {
+      question: 'How do you create a partner central selling role?',
+      answer: <AceOpportunityRoleAnswer />,
     },
     {
       question: 'How long does an assessment last?',
