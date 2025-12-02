@@ -6,7 +6,7 @@ export class UpdateFinishedAt1764679823555 implements MigrationInterface {
       UPDATE assessments 
       SET "finishedAt" = "createdAt" 
       WHERE "finishedAt" IS NULL 
-      AND "createdAt" < NOW() - INTERVAL '1 day'
+      AND "createdAt" < '2025-10-28'::timestamp
     `);
   }
 
@@ -14,9 +14,8 @@ export class UpdateFinishedAt1764679823555 implements MigrationInterface {
     await queryRunner.query(`
       UPDATE assessments 
       SET "finishedAt" = NULL 
-      WHERE "finishedAt" IS NOT NULL 
-      AND "finishedAt" = "createdAt"
-      AND "finishedAt" > NOW() - INTERVAL '1 hour'
+      WHERE "finishedAt" = "createdAt"
+      AND "createdAt" < '2025-10-28'::timestamp
     `);
   }
 }
