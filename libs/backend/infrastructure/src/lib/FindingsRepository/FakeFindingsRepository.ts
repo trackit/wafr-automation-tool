@@ -1,5 +1,8 @@
 import type {
+  BestPractice,
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
@@ -8,10 +11,12 @@ import type {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
   FindingRepository,
 } from '@backend/ports';
-import { createInjectionToken } from '@shared/di-container';
-import { getBestPracticeCustomId } from '@shared/utils';
+import { createInjectionToken, inject } from '@shared/di-container';
+
+import { tokenFakeAssessmentsRepository } from '../AssessmentsRepository';
 
 export class FakeFindingsRepository implements FindingRepository {
+  private fakeAssessmentsRepository = inject(tokenFakeAssessmentsRepository);
   public findings: Record<string, Finding[]> = {};
 
   public async save(args: {
@@ -94,18 +99,25 @@ export class FakeFindingsRepository implements FindingRepository {
       searchTerm,
       showHidden,
     } = args;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+    if (!bestPractice) {
+      throw new Error();
+    }
+
     const key = `${assessmentId}#${organizationDomain}`;
     const findings =
       this.findings[key]
-        ?.filter((finding) =>
-          finding.bestPractices.includes(
-            getBestPracticeCustomId({
-              pillarId,
-              questionId,
-              bestPracticeId,
-            }),
-          ),
-        )
+        ?.filter((finding) => {
+          return finding.bestPractices.some((bp) => bp?.id === bestPracticeId);
+        })
         .filter((finding) => {
           if (!searchTerm) return true;
           return (
@@ -200,6 +212,242 @@ export class FakeFindingsRepository implements FindingRepository {
       throw new Error('Comment not found');
     }
     Object.assign(comment, commentBody);
+  }
+
+  public async saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+
+    if (!bestPracticeFindingIds || bestPracticeFindingIds.size === 0) return;
+
+    const key = `${assessmentId}#${organizationDomain}`;
+    const store = this.findings[key];
+    if (!store || store.length === 0) return;
+
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    const pillar = assessment?.pillars?.find(
+      (pillar) => pillar.id === pillarId.toString(),
+    );
+    const question = pillar?.questions.find(
+      (question) => question.id === questionId.toString(),
+    );
+    const bestPractice = question?.bestPractices.find(
+      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
+    );
+    if (!bestPractice) {
+      throw new Error(`Best Practice ${bestPracticeId} not found`);
+    }
+
+    for (const findingId of bestPracticeFindingIds) {
+      const finding = await this.get({
+        assessmentId,
+        organizationDomain,
+        findingId,
+      });
+      if (!finding) {
+        throw new Error(`Finding ${findingId} not found`);
+      }
+      if (!finding.bestPractices) {
+        finding.bestPractices = [];
+      }
+      finding.bestPractices.push(bestPractice);
+      if (
+        !finding.bestPractices.some(
+          (bp: BestPractice) => bp.id === bestPracticeId,
+        )
+      ) {
+        finding.bestPractices.push(bestPractice);
+      }
+    }
+  }
+
+  public async countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const assessment = await this.fakeAssessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+
+    const bestPractice = assessment?.pillars
+      ?.find((pillar) => pillar.id === pillarId)
+      ?.questions?.find((question) => question.id === questionId)
+      ?.bestPractices?.find((bp) => bp.id === bestPracticeId);
+
+    if (!bestPractice) {
+      return 0;
+    }
+
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    const count = findings.filter((finding) =>
+      finding.bestPractices?.some((bp) => bp === bestPractice),
+    ).length;
+
+    return count;
+  }
+
+  private flattenAggregationFields(
+    fields: Record<string, unknown>,
+    prefix: string[] = [],
+  ): string[][] {
+    if (!fields) {
+      return [];
+    }
+
+    return Object.entries(fields).flatMap(([key, value]) => {
+      if (value === undefined || value === null) {
+        return [];
+      }
+      if (value === true) {
+        return [[...prefix, key]];
+      }
+      if (typeof value === 'object') {
+        return this.flattenAggregationFields(value as Record<string, unknown>, [
+          ...prefix,
+          key,
+        ]);
+      }
+      return [];
+    });
+  }
+
+  private assignAggregationResult(
+    target: Record<string, unknown>,
+    path: string[],
+    counts: Record<string, number>,
+  ): void {
+    const [lastKey] = path.slice(-1);
+    if (!lastKey) {
+      return;
+    }
+
+    const parent = path
+      .slice(0, -1)
+      .reduce<Record<string, unknown>>((acc, segment) => {
+        if (!segment) {
+          return acc;
+        }
+        if (!acc[segment] || typeof acc[segment] !== 'object') {
+          acc[segment] = {};
+        }
+        return acc[segment] as Record<string, unknown>;
+      }, target);
+
+    parent[lastKey] = counts;
+  }
+
+  private countByPath(
+    findings: Finding[],
+    path: string[],
+  ): Record<string, number> {
+    if (path.length === 0) {
+      return {};
+    }
+
+    return findings.reduce<Record<string, number>>((acc, finding) => {
+      const values = this.extractValuesForPath(finding, path, 0);
+      for (const value of values) {
+        let key = String(value ?? 'unknown')
+          .trim()
+          .toLowerCase();
+        if (!key) key = 'unknown';
+        acc[key] = (acc[key] ?? 0) + 1;
+      }
+      return acc;
+    }, {});
+  }
+
+  private extractValuesForPath(
+    source: unknown,
+    path: string[],
+    depth: number,
+  ): unknown[] {
+    if (depth >= path.length) {
+      return [source];
+    }
+
+    if (source === null || source === undefined) {
+      return [];
+    }
+
+    if (Array.isArray(source)) {
+      return source.flatMap((item) =>
+        this.extractValuesForPath(item, path, depth),
+      );
+    }
+
+    if (typeof source === 'object') {
+      const segment = path[depth];
+      const next = (source as Record<string, unknown>)[segment];
+      return this.extractValuesForPath(next, path, depth + 1);
+    }
+
+    return [];
+  }
+
+  public async aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>> {
+    const { assessmentId, organizationDomain, fields } = args;
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    const fieldPaths = this.flattenAggregationFields(
+      fields as Record<string, unknown>,
+    );
+    if (fieldPaths.length === 0) {
+      return {} as FindingAggregationResult<TFields>;
+    }
+
+    const aggregations: Record<string, unknown> = {};
+    for (const path of fieldPaths) {
+      const counts = this.countByPath(findings, path);
+      this.assignAggregationResult(aggregations, path, counts);
+    }
+
+    return aggregations as FindingAggregationResult<TFields>;
+  }
+
+  public async countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<number> {
+    const { assessmentId, organizationDomain } = args;
+    const key = `${assessmentId}#${organizationDomain}`;
+    const findings = this.findings[key] ?? [];
+
+    return findings.length;
   }
 }
 

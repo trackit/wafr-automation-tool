@@ -13,11 +13,9 @@ import {
   AssessmentFileExport,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentGraphData,
   BestPractice,
   Pillar,
   Question,
-  ScanningTool,
   SeverityType,
 } from '@backend/models';
 
@@ -26,11 +24,7 @@ import {
   where: '"opportunityCreatedAt" IS NOT NULL AND "opportunityId" IS NOT NULL',
 })
 export class AssessmentEntity
-  implements
-    Omit<
-      Assessment,
-      'organization' | 'fileExports' | 'rawGraphData' | 'graphData'
-    >
+  implements Omit<Assessment, 'organization' | 'fileExports'>
 {
   @PrimaryColumn('uuid')
   id!: string;
@@ -77,12 +71,6 @@ export class AssessmentEntity
     cascade: true,
   })
   fileExports?: FileExportEntity[];
-
-  @Column({ type: 'jsonb', nullable: true })
-  rawGraphData?: Record<ScanningTool, AssessmentGraphData>;
-
-  @Column({ type: 'jsonb', nullable: true })
-  graphData?: AssessmentGraphData;
 
   @Column('varchar', { nullable: true })
   wafrWorkloadArn?: string;
@@ -197,9 +185,6 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
 
   @Column('boolean', { default: false })
   checked!: boolean;
-
-  @Column('varchar', { array: true, default: [] })
-  results!: string[];
 }
 
 @Entity('fileExports')

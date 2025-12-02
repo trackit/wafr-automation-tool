@@ -2,21 +2,18 @@ import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 
 import {
   Finding,
+  FindingAggregationFields,
+  FindingAggregationResult,
   FindingBody,
   FindingComment,
   FindingCommentBody,
-  SeverityType,
 } from '@backend/models';
 import {
   AssessmentsRepositoryGetBestPracticeFindingsArgs,
   FindingRepository,
 } from '@backend/ports';
 import { inject } from '@shared/di-container';
-import {
-  decodeNextToken,
-  encodeNextToken,
-  getBestPracticeCustomId,
-} from '@shared/utils';
+import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
 import {
   BestPracticeEntity,
@@ -26,12 +23,6 @@ import {
 } from '../config/typeorm';
 import { tokenLogger, tokenTypeORMClientManager } from '../infrastructure';
 import { toDomainFinding } from './FindingsRepositorySQLMapping';
-
-type BestPracticeDescriptor = {
-  pillarId: string;
-  questionId: string;
-  bestPracticeId: string;
-};
 
 export class FindingsRepositorySQL implements FindingRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -48,91 +39,6 @@ export class FindingsRepositorySQL implements FindingRepository {
     return dataSource.getRepository(entity);
   }
 
-  private async getBestPracticeEntities(
-    repo: Repository<BestPracticeEntity>,
-    assessmentId: string,
-    descriptors: BestPracticeDescriptor[],
-  ): Promise<BestPracticeEntity[]> {
-    if (!descriptors.length) {
-      return [];
-    }
-
-    const found = await repo.find({
-      where: descriptors.map(({ pillarId, questionId, bestPracticeId }) => ({
-        id: bestPracticeId,
-        assessmentId,
-        pillarId,
-        questionId,
-      })),
-    });
-
-    return descriptors.map((descriptor) => {
-      const { pillarId, questionId, bestPracticeId } = descriptor;
-      const entity = found.find(
-        (candidate) =>
-          candidate.id === bestPracticeId &&
-          candidate.pillarId === pillarId &&
-          candidate.questionId === questionId,
-      );
-      if (!entity) {
-        const key = getBestPracticeCustomId(descriptor);
-        throw new Error(
-          `Best practice ${key} not found in assessment ${assessmentId}`,
-        );
-      }
-      return entity;
-    });
-  }
-
-  private async createFindingEntities(
-    repositories: {
-      finding: Repository<FindingEntity>;
-      resource: Repository<FindingResourceEntity>;
-      bestPractice: Repository<BestPracticeEntity>;
-    },
-    assessmentId: string,
-    finding: Finding,
-  ): Promise<{
-    findingEntity: FindingEntity;
-    resourceEntities: FindingResourceEntity[];
-  }> {
-    const { resources = [], bestPractices, ...findingData } = finding;
-
-    const descriptors = bestPractices
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((s) => {
-        const [pillarId, questionId, bestPracticeId] = s.split('#');
-        return { pillarId, questionId, bestPracticeId };
-      });
-    const bestPracticesEntities = await this.getBestPracticeEntities(
-      repositories.bestPractice,
-      assessmentId,
-      descriptors,
-    );
-
-    const findingEntity = repositories.finding.create({
-      ...findingData,
-      bestPractices: bestPracticesEntities,
-      eventCode: findingData.eventCode ?? '',
-      riskDetails: findingData.riskDetails ?? '',
-      statusCode: findingData.statusCode ?? '',
-      statusDetail: findingData.statusDetail ?? '',
-      severity: findingData.severity ?? SeverityType.Unknown,
-      comments: findingData.comments ?? [],
-      assessmentId,
-    });
-    const resourceEntities = resources.map((resource) =>
-      repositories.resource.create({
-        ...resource,
-        assessmentId,
-        findingId: findingEntity.id,
-      }),
-    );
-    return { findingEntity, resourceEntities };
-  }
-
   public async save(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -141,25 +47,30 @@ export class FindingsRepositorySQL implements FindingRepository {
     const { assessmentId, organizationDomain, finding } = args;
     const findingRepo = await this.repo(FindingEntity, organizationDomain);
 
+    const { resources = [], ...findingData } = finding;
+
     await findingRepo.manager.transaction(async (trx) => {
       const trxFindingRepo = trx.getRepository(FindingEntity);
       const trxResourceRepo = trx.getRepository(FindingResourceEntity);
-      const trxBestPracticeRepo = trx.getRepository(BestPracticeEntity);
 
-      const { findingEntity, resourceEntities } =
-        await this.createFindingEntities(
-          {
-            finding: trxFindingRepo,
-            resource: trxResourceRepo,
-            bestPractice: trxBestPracticeRepo,
-          },
-          assessmentId,
-          finding,
-        );
+      const findingEntity = trxFindingRepo.create({
+        ...findingData,
+        assessmentId,
+      });
+
       await trxFindingRepo.save(findingEntity);
-      if (resourceEntities.length) {
-        await trxResourceRepo.save(resourceEntities);
-      }
+
+      const findingResources = resources.map((resource) => {
+        const resourceEntity = trxResourceRepo.create({
+          ...resource,
+          assessmentId,
+          findingId: findingEntity.id,
+        });
+        return resourceEntity;
+      });
+
+      await trxResourceRepo.save(findingResources);
+
       this.logger.info(
         `Finding saved: ${finding.id} for assessment: ${assessmentId}`,
       );
@@ -178,32 +89,26 @@ export class FindingsRepositorySQL implements FindingRepository {
     await findingRepo.manager.transaction(async (trx) => {
       const trxFindingRepo = trx.getRepository(FindingEntity);
       const trxResourceRepo = trx.getRepository(FindingResourceEntity);
-      const trxBestPracticeRepo = trx.getRepository(BestPracticeEntity);
 
-      const preparedFindings = await Promise.all(
-        findings.map((f) =>
-          this.createFindingEntities(
-            {
-              finding: trxFindingRepo,
-              resource: trxResourceRepo,
-              bestPractice: trxBestPracticeRepo,
-            },
-            assessmentId,
-            f,
-          ),
-        ),
-      );
-      const findingEntities = preparedFindings.map(
-        ({ findingEntity }) => findingEntity,
-      );
+      const findingEntities = findings.map((finding) => {
+        const { resources: _resources, ...findingData } = finding;
+        return trxFindingRepo.create({
+          ...findingData,
+          assessmentId,
+        });
+      });
       await trxFindingRepo.save(findingEntities);
 
-      const allResourceEntities = preparedFindings.flatMap(
-        ({ resourceEntities }) => resourceEntities,
-      );
-      if (allResourceEntities.length) {
-        await trxResourceRepo.save(allResourceEntities);
-      }
+      const allResourceEntities = findings.flatMap((finding) => {
+        return finding.resources.map((resource) =>
+          trxResourceRepo.create({
+            ...resource,
+            assessmentId,
+            findingId: finding.id,
+          }),
+        );
+      });
+      await trxResourceRepo.save(allResourceEntities);
 
       this.logger.info(
         `${findingEntities.length} findings saved for assessment: ${assessmentId}`,
@@ -407,5 +312,210 @@ export class FindingsRepositorySQL implements FindingRepository {
     this.logger.info(
       `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`,
     );
+  }
+
+  public async saveBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+    bestPracticeFindingIds: Set<string>;
+  }): Promise<void> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+      bestPracticeFindingIds,
+    } = args;
+
+    const bestPracticeRepo = await this.repo(
+      BestPracticeEntity,
+      organizationDomain,
+    );
+
+    await bestPracticeRepo.manager.transaction(async (trx) => {
+      await trx
+        .createQueryBuilder()
+        .insert()
+        .into('findingBestPractices')
+        .values(
+          [...bestPracticeFindingIds].map((findingId) => ({
+            findingAssessmentId: assessmentId,
+            findingId,
+            bestPracticeAssessmentId: assessmentId,
+            questionId,
+            pillarId,
+            bestPracticeId,
+          })),
+        )
+        .orIgnore()
+        .execute();
+    });
+
+    this.logger.info(
+      `Best practice findings for best practice ${bestPracticeId} updated successfully`,
+    );
+  }
+
+  public async countBestPracticeFindings(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    pillarId: string;
+    questionId: string;
+    bestPracticeId: string;
+  }): Promise<number> {
+    const {
+      assessmentId,
+      organizationDomain,
+      pillarId,
+      questionId,
+      bestPracticeId,
+    } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const count = await repo.count({
+      where: {
+        assessmentId,
+        bestPractices: {
+          id: bestPracticeId,
+          questionId,
+          pillarId,
+        },
+      },
+      relations: ['bestPractices'],
+    });
+
+    return count;
+  }
+
+  private flattenAggregationFields(
+    fields: Record<string, unknown>,
+    prefix: string[] = [],
+  ): string[][] {
+    if (!fields) {
+      return [];
+    }
+    return Object.entries(fields).flatMap(([key, value]) => {
+      if (value === true) {
+        return [[...prefix, key]];
+      }
+      if (value && typeof value === 'object') {
+        return this.flattenAggregationFields(value as Record<string, unknown>, [
+          ...prefix,
+          key,
+        ]);
+      }
+      return [];
+    });
+  }
+
+  private async computeAggregationForPath(
+    repo: Repository<FindingEntity>,
+    assessmentId: string,
+    path: string[],
+  ): Promise<Record<string, number>> {
+    if (path.length === 0) {
+      return {};
+    }
+
+    const baseAlias = 'finding';
+    const qb = repo
+      .createQueryBuilder(baseAlias)
+      .where(`${baseAlias}.assessmentId = :assessmentId`, { assessmentId });
+
+    const currentAlias = path.slice(0, -1).reduce((alias, segment, index) => {
+      const relationAlias = `relation_${index}`;
+      qb.innerJoin(`${alias}.${segment}`, relationAlias);
+      return relationAlias;
+    }, baseAlias);
+
+    const column = `${currentAlias}.${path[path.length - 1]}`;
+    const selectExpression = `COALESCE(${column}::text, 'unknown')`;
+
+    const rows = await qb
+      .select(selectExpression, 'value')
+      .addSelect('COUNT(*)::int', 'count')
+      .groupBy(selectExpression)
+      .getRawMany<{ value: string | null; count: string | number }>();
+
+    return rows.reduce<Record<string, number>>((acc, row) => {
+      let key = String(row.value ?? 'unknown').trim();
+      if (!key) key = 'unknown';
+
+      acc[key] = Number(row.count ?? 0);
+      return acc;
+    }, {});
+  }
+
+  private assignAggregationResult(
+    target: Record<string, unknown>,
+    path: string[],
+    counts: Record<string, number>,
+  ): void {
+    const [lastKey] = path.slice(-1);
+    if (!lastKey) {
+      return;
+    }
+    const parent = path
+      .slice(0, -1)
+      .reduce<Record<string, unknown>>((acc, segment) => {
+        if (!segment) {
+          return acc;
+        }
+        if (!acc[segment] || typeof acc[segment] !== 'object') {
+          acc[segment] = {};
+        }
+        return acc[segment] as Record<string, unknown>;
+      }, target);
+    parent[lastKey] = counts;
+  }
+
+  public async aggregateAll<TFields extends FindingAggregationFields>(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fields: TFields;
+  }): Promise<FindingAggregationResult<TFields>> {
+    const { assessmentId, organizationDomain, fields } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const fieldPaths = this.flattenAggregationFields(
+      fields as Record<string, unknown>,
+    );
+
+    if (fieldPaths.length === 0) {
+      return {} as FindingAggregationResult<TFields>;
+    }
+
+    const aggregations: Record<string, unknown> = {};
+    await Promise.all(
+      fieldPaths.map(async (path) => {
+        const counts = await this.computeAggregationForPath(
+          repo,
+          assessmentId,
+          path,
+        );
+        this.assignAggregationResult(aggregations, path, counts);
+      }),
+    );
+    this.logger.info(`Aggregations computed for assessment: ${assessmentId}`);
+    return aggregations as FindingAggregationResult<TFields>;
+  }
+
+  public async countAll(args: {
+    assessmentId: string;
+    organizationDomain: string;
+  }): Promise<number> {
+    const { assessmentId, organizationDomain } = args;
+    const repo = await this.repo(FindingEntity, organizationDomain);
+
+    const qb = repo
+      .createQueryBuilder('f')
+      .where('f.assessmentId = :assessmentId', { assessmentId })
+      .select('COUNT(f.id)', 'count');
+
+    return parseInt((await qb.getRawOne())?.count) || 0;
   }
 }

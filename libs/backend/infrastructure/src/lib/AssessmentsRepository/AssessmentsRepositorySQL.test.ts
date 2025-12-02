@@ -2,12 +2,10 @@ import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  AssessmentGraphDataMother,
   AssessmentMother,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
-  ScanningTool,
   SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
@@ -95,150 +93,31 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
-  describe('saveBestPracticeFindings', () => {
-    it('should add findings to a best practice', async () => {
+  describe('saveFileExport', () => {
+    it('should create the file export for an export type if it does not exist', async () => {
       const { repository } = setup();
 
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
+      const fileExport = AssessmentFileExportMother.basic()
+        .withType(AssessmentFileExportType.PDF)
         .build();
-      const question2 = QuestionMother.basic()
-        .withId('2')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const pillar2 = PillarMother.basic()
-        .withId('2')
-        .withQuestions([question2])
-        .build();
+
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withPillars([pillar, pillar2])
         .build();
       await repository.save(assessment);
-      await repository.saveBestPracticeFindings({
+
+      await repository.saveFileExport({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        pillarId: pillar2.id,
-        questionId: question2.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
+        fileExport,
       });
 
       const updatedAssessment = await repository.get({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
       });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(false);
-      expect(
-        updatedAssessment?.pillars?.[1].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-    });
 
-    it('should add several findings to a best practice', async () => {
-      const { repository } = setup();
-
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withPillars([pillar])
-        .build();
-      await repository.save(assessment);
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1', 'scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2',
-        ),
-      ).toBe(true);
-    });
-
-    it('should be able to add findings several times', async () => {
-      const { repository } = setup();
-
-      const bestPractice = BestPracticeMother.basic().withId('0').build();
-      const question = QuestionMother.basic()
-        .withId('0')
-        .withBestPractices([bestPractice])
-        .build();
-      const pillar = PillarMother.basic()
-        .withId('0')
-        .withQuestions([question])
-        .build();
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withPillars([pillar])
-        .build();
-      await repository.save(assessment);
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#1']),
-      });
-
-      await repository.saveBestPracticeFindings({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        pillarId: pillar.id,
-        questionId: question.id,
-        bestPracticeId: bestPractice.id,
-        bestPracticeFindingIds: new Set(['scanningTool#2']),
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#1',
-        ),
-      ).toBe(true);
-      expect(
-        updatedAssessment?.pillars?.[0].questions?.[0].bestPractices?.[0].results.has(
-          'scanningTool#2',
-        ),
-      ).toBe(true);
+      expect(updatedAssessment?.fileExports).toStrictEqual([fileExport]);
     });
   });
 
@@ -524,95 +403,27 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Old Name')
-        .withPillars([
-          PillarMother.basic()
-            .withId('old-pillar-1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withId('old-question-1')
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withId('old-best-practice-1')
-                    .withResults(new Set(['prowler#old']))
-                    .build(),
-                ])
-                .build(),
-            ])
-            .build(),
-        ])
         .withQuestionVersion('0.1')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic()
-            .withFindings(0)
-            .withRegions({})
-            .withResourceTypes({})
-            .withSeverities({})
-            .build(),
-        })
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [
-            AssessmentFileExportMother.basic().withId('old-pdf-export').build(),
-          ],
-        })
         .withFinishedAt(undefined)
         .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
         .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
-        .withGraphData(
-          AssessmentGraphDataMother.basic()
-            .withFindings(0)
-            .withRegions({})
-            .withResourceTypes({})
-            .withSeverities({})
-            .build(),
-        )
         .withExecutionArn('old-execution-arn')
         .build();
       await repository.save(assessment);
 
-      const updatedProwlerGraphData = AssessmentGraphDataMother.basic()
-        .withFindings(1)
-        .withRegions({ 'us-west-2': 1 })
-        .withResourceTypes({ 'aws-ec2': 1 })
-        .withSeverities({ [SeverityType.High]: 1 })
-        .build();
       await repository.update({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
         assessmentBody: {
           name: 'New Name',
-          pillars: [
-            PillarMother.basic()
-              .withId('pillar-1')
-              .withQuestions([
-                QuestionMother.basic()
-                  .withId('question-1')
-                  .withBestPractices([
-                    BestPracticeMother.basic()
-                      .withId('best-practice-1')
-                      .withResults(new Set(['prowler#1']))
-                      .build(),
-                  ])
-                  .build(),
-              ])
-              .build(),
-          ],
           questionVersion: '1.0',
-          rawGraphData: {
-            [ScanningTool.PROWLER]: updatedProwlerGraphData,
-          },
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              AssessmentFileExportMother.basic().withId('pdf-export').build(),
-            ],
-          },
-          graphData: updatedProwlerGraphData,
           executionArn: 'new-execution-arn',
         },
       });
@@ -625,71 +436,16 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedAssessment).toEqual(
         expect.objectContaining({
           name: 'New Name',
-          pillars: [
-            expect.objectContaining({
-              id: 'pillar-1',
-              questions: [
-                expect.objectContaining({
-                  id: 'question-1',
-                  bestPractices: [
-                    expect.objectContaining({
-                      id: 'best-practice-1',
-                      results: new Set(['prowler#1']),
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
           questionVersion: '1.0',
-          rawGraphData: {
-            [ScanningTool.PROWLER]: updatedProwlerGraphData,
-          },
           error: { cause: 'An error occurred', error: 'InternalError' },
           exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
           finishedAt: date,
           wafrWorkloadArn:
             'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          fileExports: {
-            [AssessmentFileExportType.PDF]: [
-              expect.objectContaining({ id: 'pdf-export' }),
-            ],
-          },
-          graphData: updatedProwlerGraphData,
           executionArn: 'new-execution-arn',
         }),
       );
-      expect(updatedAssessment?.pillars).toHaveLength(1);
-      expect(updatedAssessment?.pillars).not.toContainEqual(
-        expect.objectContaining({ id: 'old-pillar-1' }),
-      );
-      expect(updatedAssessment?.pillars?.[0]?.questions).not.toContainEqual(
-        expect.objectContaining({ id: 'old-question-1' }),
-      );
-      expect(
-        updatedAssessment?.pillars?.[0]?.questions[0]?.bestPractices,
-      ).not.toContainEqual(
-        expect.objectContaining({ id: 'old-best-practice-1' }),
-      );
-
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF],
-      ).toHaveLength(1);
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF],
-      ).not.toContainEqual(expect.objectContaining({ id: 'old-pdf-export' }));
-
-      expect(updatedAssessment?.pillars?.[0]?.id).toBe('pillar-1');
-      expect(updatedAssessment?.pillars?.[0]?.questions[0]?.id).toBe(
-        'question-1',
-      );
-      expect(
-        updatedAssessment?.pillars?.[0]?.questions[0]?.bestPractices[0]?.id,
-      ).toBe('best-practice-1');
-      expect(
-        updatedAssessment?.fileExports?.[AssessmentFileExportType.PDF]?.[0]?.id,
-      ).toBe('pdf-export');
     });
 
     it('should be scoped by organization', async () => {
@@ -909,239 +665,29 @@ describe('AssessmentsRepositorySQL', () => {
     });
   });
 
-  describe('updateRawGraphDataForScanningTool', () => {
-    it('should update the raw graph data for a scanning tool', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({})
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-      });
-    });
-
-    it('should update the raw graph data for a scanning tool containing dashes in its name', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({})
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.CLOUD_CUSTODIAN,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.CLOUD_CUSTODIAN]: graphData,
-      });
-    });
-
-    it('should not overwrite existing raw graph data for other scanning tools', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withRawGraphData({
-          [ScanningTool.CLOUD_CUSTODIAN]:
-            AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-        [ScanningTool.CLOUD_CUSTODIAN]: expect.any(Object),
-      });
-    });
-
-    it('should be scoped by organization', async () => {
-      const { repository } = setup();
-
-      const assessment1 = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization1')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment1);
-
-      const assessment2 = AssessmentMother.basic()
-        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withOrganization('organization2')
-        .withRawGraphData({
-          [ScanningTool.PROWLER]: AssessmentGraphDataMother.basic().build(),
-        })
-        .build();
-      await repository.save(assessment2);
-
-      const graphData = AssessmentGraphDataMother.basic()
-        .withFindings(100)
-        .withRegions({
-          'us-west-2': 50,
-          'us-east-1': 50,
-        })
-        .withResourceTypes({
-          AwsAccount: 5,
-          AwsEc2Instance: 10,
-          AwsIamUser: 20,
-          AwsS3Bucket: 30,
-        })
-        .withSeverities({
-          [SeverityType.Critical]: 10,
-          [SeverityType.High]: 20,
-          [SeverityType.Medium]: 30,
-          [SeverityType.Low]: 40,
-        })
-        .build();
-
-      await repository.updateRawGraphDataForScanningTool({
-        assessmentId: assessment1.id,
-        organizationDomain: assessment1.organization,
-        scanningTool: ScanningTool.PROWLER,
-        graphData,
-      });
-
-      const updatedAssessment1 = await repository.get({
-        assessmentId: assessment1.id,
-        organizationDomain: assessment1.organization,
-      });
-      const updatedAssessment2 = await repository.get({
-        assessmentId: assessment2.id,
-        organizationDomain: assessment2.organization,
-      });
-
-      expect(updatedAssessment1?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: graphData,
-      });
-      expect(updatedAssessment2?.rawGraphData).toEqual({
-        [ScanningTool.PROWLER]: expect.any(Object),
-      });
-    });
-  });
-
   describe('updateFileExport', () => {
     it('should update the file export for an export type', async () => {
       const { repository } = setup();
 
       const assessmentFileExport = AssessmentFileExportMother.basic()
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .withType(AssessmentFileExportType.PDF)
         .build();
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [assessmentFileExport],
-        })
+        .withFileExports([assessmentFileExport])
         .build();
       await repository.save(assessment);
 
       const fileExport = AssessmentFileExportMother.basic()
         .withId(assessmentFileExport.id)
         .withStatus(AssessmentFileExportStatus.IN_PROGRESS)
+        .withType(AssessmentFileExportType.PDF)
         .build();
 
       await repository.updateFileExport({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
         data: fileExport,
       });
 
@@ -1150,39 +696,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      });
-    });
-
-    it('should create the file export for an export type if it does not exist', async () => {
-      const { repository } = setup();
-
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [],
-        })
-        .build();
-      await repository.save(assessment);
-
-      const fileExport = AssessmentFileExportMother.basic().build();
-
-      await repository.updateFileExport({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
-        data: fileExport,
-      });
-
-      const updatedAssessment = await repository.get({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-      });
-
-      expect(updatedAssessment?.fileExports).toStrictEqual({
-        [AssessmentFileExportType.PDF]: [fileExport],
-      });
+      expect(updatedAssessment?.fileExports).toStrictEqual([fileExport]);
     });
   });
 
@@ -1192,19 +706,17 @@ describe('AssessmentsRepositorySQL', () => {
 
       const assessmentFileExport = AssessmentFileExportMother.basic()
         .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+        .withType(AssessmentFileExportType.PDF)
         .build();
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
-        .withFileExports({
-          [AssessmentFileExportType.PDF]: [assessmentFileExport],
-        })
+        .withFileExports([assessmentFileExport])
         .build();
       await repository.save(assessment);
 
       await repository.deleteFileExport({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        type: AssessmentFileExportType.PDF,
         id: assessmentFileExport.id,
       });
 
@@ -1213,7 +725,7 @@ describe('AssessmentsRepositorySQL', () => {
         organizationDomain: assessment.organization,
       });
 
-      expect(updatedAssessment?.fileExports).toStrictEqual({});
+      expect(updatedAssessment?.fileExports).toStrictEqual([]);
     });
   });
 
@@ -1280,9 +792,7 @@ describe('AssessmentsRepositorySQL', () => {
         year: date.getFullYear(),
       });
       expect(result).toHaveLength(1);
-      expect(result).toEqual([
-        { opportunityId: 'opp3', opportunityCreatedAt: date },
-      ]);
+      expect(result).toEqual([{ id: 'opp3', createdAt: date }]);
     });
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
@@ -1314,8 +824,8 @@ describe('AssessmentsRepositorySQL', () => {
         year: date.getFullYear(),
       });
       expect(result).toHaveLength(2);
-      expect(result[0].opportunityCreatedAt).toEqual(date1);
-      expect(result[1].opportunityCreatedAt).toEqual(date);
+      expect(result[0].createdAt).toEqual(date1);
+      expect(result[1].createdAt).toEqual(date);
     });
   });
 

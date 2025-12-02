@@ -54,7 +54,6 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       questionVersion: args.questionVersion,
       pillars: args.pillars,
       executionArn: '',
-      rawGraphData: {},
     };
     await this.assessmentsRepository.save(assessment);
     return assessment;

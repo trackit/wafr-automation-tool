@@ -14,7 +14,7 @@
     "deploy:webui": "nx generate-env-variables webui --skipNxCache && nx deploy webui --skipNxCache",
     "deploy:webui:production": "nx generate-env-variables webui --configuration production --skipNxCache && nx deploy webui --configuration production --skipNxCache",
     "test:backend": "nx run-many -t test -p tag:scope:backend tag:scope:backend-libs tag:scope:shared --no-file-parallelism --parallel=1",
-    "test:backend:init": "tsx ./scripts/backend/initLocalEnvironment.ts && tsx ./scripts/backend/initLocalDynamo.ts",
+    "test:backend:init": "tsx ./scripts/backend/initLocalEnvironment.ts",
     "lint:backend": "nx run-many -t lint -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "lint": "nx run-many -t lint --exclude di-container",
     "lint:fix": "nx run-many -t lint --fix --exclude di-container",
@@ -23,7 +23,8 @@
     "format:check": "nx format:check --all",
     "generate-api-schema": "openapi-typescript ./swagger.yaml -o libs/shared/api-schema/src/lib/schema.d.ts --empty-objects-unknown",
     "typeorm": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/dataSource.ts",
-    "typeorm:tenant": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/tenantDataSource.ts"
+    "typeorm:tenant": "dotenvx run -f .env.test -- tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d libs/backend/infrastructure/src/lib/config/typeorm/tenantDataSource.ts",
+    "db:startSession": "tsx ./scripts/backend/dbStartSession.ts"
   },
   "nx": {
     "includedScripts": []
@@ -32,7 +33,6 @@
     "@aws-amplify/ui-react": "^6.13.0",
     "@aws-sdk/client-bedrock-runtime": "^3.901.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.901.0",
-    "@aws-sdk/client-dynamodb": "^3.902.0",
     "@aws-sdk/client-lambda": "^3.901.0",
     "@aws-sdk/client-marketplace-agreement": "^3.917.0",
     "@aws-sdk/client-marketplace-entitlement-service": "^3.901.0",
@@ -43,7 +43,6 @@
     "@aws-sdk/client-sfn": "^3.901.0",
     "@aws-sdk/client-sts": "^3.913.0",
     "@aws-sdk/client-wellarchitected": "^3.901.0",
-    "@aws-sdk/lib-dynamodb": "^3.902.0",
     "@aws-sdk/middleware-logger": "^3.901.0",
     "@aws-sdk/s3-request-presigner": "^3.901.0",
     "@headlessui/react": "^2.2.9",

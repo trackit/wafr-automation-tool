@@ -58,23 +58,11 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
     ) {
       throw new AssessmentNotFinishedError({ assessmentId: assessment.id });
     }
-    if (!assessment.fileExports) {
-      assessment.fileExports = {
-        [AssessmentFileExportType.PDF]: [],
-      };
 
-      await this.assessmentsRepository.update({
-        assessmentId: assessment.id,
-        organizationDomain: assessment.organization,
-        assessmentBody: {
-          fileExports: assessment.fileExports,
-        },
-      });
-    }
+    const foundAssessmentExport = assessment.fileExports?.find(
+      (assessmentExport) => assessmentExport.versionName === versionName,
+    );
 
-    const foundAssessmentExport = assessment.fileExports[
-      AssessmentFileExportType.PDF
-    ]?.find((assessmentExport) => assessmentExport.versionName === versionName);
     if (foundAssessmentExport) {
       throw new AssessmentFileExportAlreadyExistsError({
         assessmentId: assessment.id,
@@ -88,12 +76,13 @@ export class StartPDFExportUseCaseImpl implements StartPDFExportUseCase {
       .withStatus(AssessmentFileExportStatus.NOT_STARTED)
       .withVersionName(versionName)
       .withCreatedAt(new Date())
+      .withType(AssessmentFileExportType.PDF)
       .build();
-    await this.assessmentsRepository.updateFileExport({
+
+    await this.assessmentsRepository.saveFileExport({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
-      type: AssessmentFileExportType.PDF,
-      data: fileExport,
+      fileExport,
     });
 
     await this.lambdaService.asyncInvokeLambda({

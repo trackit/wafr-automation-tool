@@ -11,12 +11,9 @@ import {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 import { AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
@@ -31,11 +28,7 @@ import {
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import {
-  mapFileExportsToEntities,
-  mapPillarsToEntities,
-  toDomainAssessment,
-} from './AssessmentsRepositorySQLMapping';
+import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -54,67 +47,26 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
   public async save(assessment: Assessment): Promise<void> {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
-    const entity = repo.create({
-      ...assessment,
-      pillars:
-        assessment.pillars?.map((p) => ({
-          ...p,
-          questions: p.questions.map((q) => ({
-            ...q,
-            bestPractices: q.bestPractices.map((bp) => ({
-              ...bp,
-              results: bp.results ? Array.from(bp.results) : [],
-            })),
-          })),
-        })) ?? [],
-      fileExports: mapFileExportsToEntities(
-        assessment.id,
-        assessment.fileExports ?? {},
-      ),
-    });
+    const entity = repo.create(assessment);
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
   }
 
-  public async saveBestPracticeFindings(args: {
+  public async saveFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
+    fileExport: AssessmentFileExport;
   }): Promise<void> {
-    const {
+    const { assessmentId, organizationDomain, fileExport } = args;
+    const repo = await this.repo(FileExportEntity, organizationDomain);
+
+    const entity = repo.create({
+      ...fileExport,
       assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-    const repo = await this.repo(BestPracticeEntity, organizationDomain);
-    const entity = await repo.findOne({
-      where: {
-        id: bestPracticeId,
-        questionId: questionId,
-        pillarId: pillarId,
-        assessmentId: assessmentId,
-      },
     });
-    if (!entity) {
-      throw new Error('Best practice not found');
-    }
-    const updatedResults = entity.results.concat(
-      Array.from(bestPracticeFindingIds),
-    );
-    entity.results = Array.from(new Set(updatedResults));
-    await repo.update(
-      { id: bestPracticeId, questionId, pillarId, assessmentId },
-      { results: entity.results },
-    );
-    this.logger.info(
-      `Best practice findings for best practice ${bestPracticeId} updated successfully`,
-    );
+
+    await repo.save(entity);
+    this.logger.info(`File exports saved for assessment ${assessmentId}`);
   }
 
   public async get(args: {
@@ -195,37 +147,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     assessmentBody: AssessmentBody;
   }): Promise<void> {
     const { assessmentId, organizationDomain, assessmentBody } = args;
-    const assessmentRepo = await this.repo(
-      AssessmentEntity,
-      organizationDomain,
-    );
-    const existing = await assessmentRepo.findOne({
-      where: { id: assessmentId },
-    });
-    if (!existing) {
-      throw new Error(`Assessment not found: ${assessmentId}`);
-    }
-    const { pillars, fileExports, ...assessmentData } = assessmentBody;
-    if (pillars) {
-      const pillarRepo = await this.repo(PillarEntity, organizationDomain);
-      await pillarRepo.delete({ assessmentId });
-      const pillarEntities = mapPillarsToEntities(assessmentId, pillars);
-      await pillarRepo.save(pillarEntities);
-    }
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
 
-    if (fileExports) {
-      const fileExportRepo = await this.repo(
-        FileExportEntity,
-        organizationDomain,
-      );
-      const fileExportEntities = mapFileExportsToEntities(
-        assessmentId,
-        fileExports,
-      );
-      await fileExportRepo.delete({ assessmentId });
-      await fileExportRepo.save(fileExportEntities);
-    }
-    await assessmentRepo.update({ id: assessmentId }, assessmentData);
+    await repo.update({ id: assessmentId }, assessmentBody);
     this.logger.info(`Assessment updated: ${assessmentId}`);
   }
 
@@ -293,51 +217,17 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     );
   }
 
-  public async updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain, scanningTool, graphData } = args;
-    const repo = await this.repo(AssessmentEntity, organizationDomain);
-    const assessment = await repo.findOne({ where: { id: assessmentId } });
-    if (!assessment) {
-      throw new Error('Assessment not found');
-    }
-    await repo.update(
-      { id: assessmentId },
-      {
-        rawGraphData: {
-          ...assessment.rawGraphData,
-          [scanningTool]: graphData,
-        },
-      },
-    );
-    this.logger.info(
-      `Raw graph data for scanning tool ${scanningTool} updated successfully for assessment ${assessmentId}`,
-    );
-  }
-
   public async updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, data } = args;
+    const { assessmentId, organizationDomain, data } = args;
     const repo = await this.repo(FileExportEntity, organizationDomain);
 
-    const fileExport = await repo.findOne({
-      where: { id: data.id, assessmentId },
-    });
-    if (!fileExport) {
-      await repo.save({ ...data, assessmentId, type });
-    } else {
-      await repo.update({ id: data.id, assessmentId }, { ...data });
-    }
+    await repo.update({ id: data.id, assessmentId }, data);
     this.logger.info(
-      `${type.toUpperCase()} file with id ${
+      `${data.type.toUpperCase()} file with id ${
         data.id
       } export updated successfully for assessment ${assessmentId}`,
     );
@@ -346,7 +236,6 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
     const { assessmentId, organizationDomain, id } = args;
@@ -361,7 +250,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async getOpportunitiesByYear(args: {
     organizationDomain: string;
     year: number;
-  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+  }): Promise<Array<{ id: string; createdAt: Date }>> {
     const { organizationDomain, year } = args;
     const repo = await this.repo(AssessmentEntity, organizationDomain);
 
@@ -379,8 +268,8 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       },
     });
     return assessments.map((a) => ({
-      opportunityId: a.opportunityId!,
-      opportunityCreatedAt: a.opportunityCreatedAt!,
+      id: a.opportunityId!,
+      createdAt: a.opportunityCreatedAt!,
     }));
   }
 

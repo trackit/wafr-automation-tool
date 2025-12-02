@@ -6,7 +6,6 @@ import {
 import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
-  AssessmentFileExportType,
   AssessmentMother,
   PillarMother,
   UserMother,
@@ -59,16 +58,14 @@ describe('startPDFExport UseCase', () => {
     });
     const fileExportId = 'fake-id-0';
     expect(updatedAssessment).toMatchObject({
-      fileExports: {
-        [AssessmentFileExportType.PDF]: [
-          AssessmentFileExportMother.basic()
-            .withId(fileExportId)
-            .withStatus(AssessmentFileExportStatus.NOT_STARTED)
-            .withVersionName('version-name')
-            .withCreatedAt(date)
-            .build(),
-        ],
-      },
+      fileExports: [
+        AssessmentFileExportMother.basic()
+          .withId(fileExportId)
+          .withStatus(AssessmentFileExportStatus.NOT_STARTED)
+          .withVersionName('version-name')
+          .withCreatedAt(date)
+          .build(),
+      ],
     });
     expect(fakeLambdaService.asyncInvokeLambda).toHaveBeenCalledExactlyOnceWith(
       {

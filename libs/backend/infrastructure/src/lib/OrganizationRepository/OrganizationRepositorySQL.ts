@@ -9,6 +9,8 @@ import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { toDomainOrganization } from './OrganizationsRepositoryMappingSQL';
 
+const ORGANIZATIONS_GET_ALL_LIMIT = 100;
+
 export class OrganizationRepositorySQL implements OrganizationRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
   private readonly logger = inject(tokenLogger);
@@ -49,5 +51,19 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
 
     if (!entity) return undefined;
     return toDomainOrganization(entity);
+  }
+
+  public async getAll(args?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Organization[]> {
+    const { limit = ORGANIZATIONS_GET_ALL_LIMIT, offset = 0 } = args || {};
+    const repo = await this.repo();
+    const entities = await repo.find({
+      take: limit,
+      skip: offset,
+      order: { domain: 'ASC' },
+    });
+    return entities.map(toDomainOrganization);
   }
 }

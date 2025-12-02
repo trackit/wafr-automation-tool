@@ -49,11 +49,20 @@ paths:
                     type: integer
                     description: Total number of assessments during the current year associated with the organization
                   opportunitiesPerMonth:
-                    type: object
-                    additionalProperties:
-                      type: integer
-                    description: |
-                      A map where each key is the month, formatted as a two-digit, zero-padded string (e.g., '01', '02'), and the value is the number of ACE opportunities in that month.
+                    type: array
+                    description: Array of objects representing opportunities count per month for last 12 months
+                    items:
+                      type: object
+                      required:
+                        - month
+                        - opportunities
+                      properties:
+                        month:
+                          type: string
+                          description: Month formatted as MM-YYYY
+                        opportunities:
+                          type: integer
+                          description: Number of ACE opportunities in that month
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '500':
@@ -259,6 +268,34 @@ paths:
       responses:
         '200':
           description: The assessment has been successfully deleted
+        '400':
+          description: A issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/graph':
+    get:
+      operationId: getAssessmentGraph
+      tags:
+        - Assessments
+      summary: Retrieve the graph of findings for a specific assessment
+      description: |
+        Fetches the graph of findings for a specific assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to retrieve the graph of findings for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The graph of findings for the specified assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentGraph'
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
@@ -1137,23 +1174,6 @@ components:
             questionVersion:
               type: string
               description: The version of questions that were used for the assessment
-            graphData:
-              type: object
-              description: Processed data from the scanning tools
-              additionalProperties: false
-              properties:
-                regions:
-                  type: object
-                  description: Regions where findings were found
-                resourceTypes:
-                  type: object
-                  description: Resource types where findings were found
-                severities:
-                  type: object
-                  description: Severity levels where findings were found
-                findings:
-                  type: integer
-                  description: Total number of findings
     AssessmentError:
       type: object
       nullable: true
@@ -1168,6 +1188,33 @@ components:
       properties:
         name:
           type: string
+    AssessmentGraph:
+      type: object
+      additionalProperties: false
+      required:
+        - severity
+        - resources
+        - findings
+      properties:
+        severity:
+          type: object
+          description: Severity levels where findings were found
+        resources:
+          type: object
+          description: Resource types where findings were found
+          required:
+            - region
+            - type
+          properties:
+            region:
+              type: object
+              description: Regions where findings were found
+            type:
+              type: object
+              description: Resource types where findings were found
+        findings:
+          type: integer
+          description: Total number of findings
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'
@@ -1333,7 +1380,7 @@ components:
         - risk
         - description
         - checked
-        - results
+        - findingAmount
       properties:
         id:
           type: string
@@ -1354,20 +1401,8 @@ components:
           type: string
         checked:
           type: boolean
-        results:
-          type: array
-          items:
-            type: string
-    BestPracticeExtra:
-      type: object
-      description: 'Enhanced best practice information, including associated findings'
-      allOf:
-        - $ref: '#/components/schemas/BestPractice'
-        - properties:
-            results:
-              type: array
-              items:
-                $ref: '#/components/schemas/Finding'
+        findingAmount:
+          type: number
     BestPracticeDto:
       type: object
       properties:

@@ -1,4 +1,7 @@
-import { tokenAssessmentsRepository } from '@backend/infrastructure';
+import {
+  tokenAssessmentsRepository,
+  tokenFindingsRepository,
+} from '@backend/infrastructure';
 import type { Assessment } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -9,16 +12,66 @@ export type GetAssessmentUseCaseArgs = {
   organizationDomain: string;
 };
 
+export type BestPracticesFindingCounts = Record<
+  string,
+  Record<string, Record<string, number>>
+>;
+
 export interface GetAssessmentUseCase {
-  getAssessment(args: GetAssessmentUseCaseArgs): Promise<Assessment>;
+  getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
+    assessment: Assessment;
+    bestPracticesFindingsAmount: BestPracticesFindingCounts;
+  }>;
 }
 
 export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly findingsRepository = inject(tokenFindingsRepository);
 
-  public async getAssessment(
-    args: GetAssessmentUseCaseArgs,
-  ): Promise<Assessment> {
+  private async getBestPracticeFindings(
+    assessment: Assessment,
+  ): Promise<BestPracticesFindingCounts> {
+    const bestPracticeFindingCounts: BestPracticesFindingCounts = {};
+    const allBestPractices =
+      assessment.pillars?.flatMap((pillar) =>
+        pillar.questions.flatMap((question) =>
+          question.bestPractices.map((bp) => ({
+            pillarId: pillar.id,
+            questionId: question.id,
+            bestPracticeId: bp.id,
+          })),
+        ),
+      ) ?? [];
+
+    const countPromises = allBestPractices.map(async (entry) => {
+      const count = await this.findingsRepository.countBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: entry.pillarId,
+        questionId: entry.questionId,
+        bestPracticeId: entry.bestPracticeId,
+      });
+
+      return {
+        ...entry,
+        count: count ?? 0,
+      };
+    });
+    const counts = await Promise.all(countPromises);
+
+    for (const { pillarId, questionId, bestPracticeId, count } of counts) {
+      bestPracticeFindingCounts[pillarId] ??= {};
+      bestPracticeFindingCounts[pillarId][questionId] ??= {};
+      bestPracticeFindingCounts[pillarId][questionId][bestPracticeId] = count;
+    }
+
+    return bestPracticeFindingCounts;
+  }
+
+  public async getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
+    assessment: Assessment;
+    bestPracticesFindingsAmount: BestPracticesFindingCounts;
+  }> {
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
       organizationDomain: args.organizationDomain,
@@ -29,7 +82,11 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
         organizationDomain: args.organizationDomain,
       });
     }
-    return assessment;
+
+    const bestPracticesFindingsAmount =
+      await this.getBestPracticeFindings(assessment);
+
+    return { assessment, bestPracticesFindingsAmount };
   }
 }
 

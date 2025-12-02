@@ -7,12 +7,17 @@ import { createInjectionToken, inject } from '@shared/di-container';
 export type GetOrganizationUseCaseArgs = {
   organizationDomain: string;
 };
+
+export type OpportunitiesPerMonthItem = {
+  month: string;
+  opportunities: number;
+};
+
 type OrganizationDetails = {
   currentYearTotalAssessments: number;
-  opportunitiesPerMonth: {
-    [month: string]: number;
-  };
+  opportunitiesPerMonth: OpportunitiesPerMonthItem[];
 };
+
 export interface GetOrganizationUseCase {
   getOrganizationDetails(
     args: GetOrganizationUseCaseArgs,
@@ -27,7 +32,9 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
     args: GetOrganizationUseCaseArgs,
   ): Promise<OrganizationDetails> {
     const { organizationDomain } = args;
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
     const currentYearTotalAssessments =
       await this.assessmentsRepository.countAssessmentsByYear({
@@ -41,21 +48,38 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
         year: currentYear,
       });
 
-    const opportunitiesPerMonth = currentYearOpportunities.reduce(
-      (acc, opp) => {
-        const month = (opp.opportunityCreatedAt.getMonth() + 1)
-          .toString()
-          .padStart(2, '0');
-        acc[month]++;
-        return acc;
-      },
-      Object.fromEntries(
-        Array.from({ length: 12 }, (_, i) => [
-          (i + 1).toString().padStart(2, '0'),
-          0,
-        ]),
-      ),
+    const previousYearOpportunities =
+      await this.assessmentsRepository.getOpportunitiesByYear({
+        organizationDomain,
+        year: currentYear - 1,
+      });
+
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const date = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      return `${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    });
+
+    const map: Record<string, number> = Object.fromEntries(
+      months.map((m) => [m, 0]),
     );
+
+    for (const opportunity of [
+      ...previousYearOpportunities,
+      ...currentYearOpportunities,
+    ]) {
+      const opportunityCreatedAt = opportunity.createdAt;
+      if (opportunityCreatedAt < start || opportunityCreatedAt > now) continue;
+
+      const key = `${String(opportunityCreatedAt.getMonth() + 1).padStart(2, '0')}-${opportunityCreatedAt.getFullYear()}`;
+      if (key in map) map[key]++;
+    }
+
+    const opportunitiesPerMonth = months.map((m) => ({
+      month: m,
+      opportunities: map[m],
+    }));
+
+    this.logger.info(`The organization details retrieved successfully`);
 
     return {
       currentYearTotalAssessments,

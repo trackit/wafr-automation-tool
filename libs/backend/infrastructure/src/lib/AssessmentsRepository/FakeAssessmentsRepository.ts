@@ -2,13 +2,10 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
   Question,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
@@ -20,41 +17,6 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async save(assessment: Assessment): Promise<void> {
     const key = `${assessment.id}#${assessment.organization}`;
     this.assessments[key] = assessment;
-  }
-
-  public async saveBestPracticeFindings(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
-  }): Promise<void> {
-    const {
-      assessmentId,
-      organizationDomain,
-      pillarId,
-      questionId,
-      bestPracticeId,
-      bestPracticeFindingIds,
-    } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    const pillar = assessment.pillars?.find(
-      (pillar) => pillar.id === pillarId.toString(),
-    );
-    const question = pillar?.questions.find(
-      (question) => question.id === questionId.toString(),
-    );
-    const bestPractice = question?.bestPractices.find(
-      (bestPractice) => bestPractice.id === bestPracticeId.toString(),
-    );
-    if (!bestPractice) {
-      throw new Error();
-    }
-    for (const findingId of bestPracticeFindingIds) {
-      bestPractice.results.add(findingId);
-    }
   }
 
   public async get(args: {
@@ -218,71 +180,71 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       args.bestPracticeBody.checked ?? bestPractice.checked;
   }
 
-  public async updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain, scanningTool, graphData } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    assessment.rawGraphData[scanningTool] = graphData;
-  }
-
   public async updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, data } = args;
+    const { assessmentId, organizationDomain, data } = args;
 
     const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
-      assessment.fileExports = {};
+      assessment.fileExports = [];
     }
-    const fileExports = assessment.fileExports;
-    if (!fileExports[type]) {
-      fileExports[type] = [];
-    }
-    const fileExportIndex = fileExports[type].findIndex(
+    const fileExportIndex = assessment.fileExports.findIndex(
       (fileExport) => fileExport.id === data.id,
     );
     if (fileExportIndex === -1) {
-      fileExports[type].push(data);
+      assessment.fileExports.push(data);
       return;
     }
-    Object.assign(fileExports[type][fileExportIndex], data);
+    Object.assign(assessment.fileExports[fileExportIndex], data);
   }
 
   public async deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, type, id } = args;
+    const { assessmentId, organizationDomain, id } = args;
 
     const assessmentKey = `${assessmentId}#${organizationDomain}`;
     const assessment = this.assessments[assessmentKey];
     if (!assessment.fileExports) {
-      assessment.fileExports = {};
+      assessment.fileExports = [];
     }
-    const fileExports = assessment.fileExports;
-    if (!fileExports[type]) {
-      fileExports[type] = [];
-    }
-    fileExports[type] = fileExports[type].filter(
+    assessment.fileExports = assessment.fileExports.filter(
       (fileExport) => fileExport.id !== id,
     );
+  }
+
+  public async saveFileExport(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    fileExport: AssessmentFileExport;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, fileExport } = args;
+
+    const assessmentKey = `${assessmentId}#${organizationDomain}`;
+    const assessment = this.assessments[assessmentKey];
+    if (!assessment.fileExports) {
+      assessment.fileExports = [];
+    }
+    const fileExportIndex = assessment.fileExports.findIndex(
+      (fe) => fe.id === fileExport.id,
+    );
+    if (fileExportIndex === -1) {
+      assessment.fileExports.push(fileExport);
+      return;
+    }
+    Object.assign(assessment.fileExports[fileExportIndex], fileExport);
   }
 
   public async getOpportunitiesByYear(args: {
     organizationDomain: string;
     year: number;
-  }): Promise<Array<{ opportunityId: string; opportunityCreatedAt: Date }>> {
+  }): Promise<Array<{ id: string; createdAt: Date }>> {
     const { organizationDomain, year } = args;
 
     const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
@@ -298,13 +260,10 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
           assessment.opportunityCreatedAt < endDate,
       )
       .map((assessment) => ({
-        opportunityId: assessment.opportunityId!,
-        opportunityCreatedAt: assessment.opportunityCreatedAt!,
+        id: assessment.opportunityId!,
+        createdAt: assessment.opportunityCreatedAt!,
       }))
-      .sort(
-        (a, b) =>
-          b.opportunityCreatedAt.getTime() - a.opportunityCreatedAt.getTime(),
-      );
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   public async countAssessmentsByYear(args: {

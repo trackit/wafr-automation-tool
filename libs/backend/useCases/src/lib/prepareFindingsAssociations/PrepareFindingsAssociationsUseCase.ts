@@ -3,14 +3,7 @@ import {
   tokenFindingsRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import {
-  AssessmentGraphData,
-  Finding,
-  Pillar,
-  ScanFinding,
-  ScanningTool,
-  SeverityType,
-} from '@backend/models';
+import { ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -51,75 +44,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
     tokenStoreFindingsToAssociateUseCase,
   );
 
-  private formatScanningToolGraphData(
-    findings: ScanFinding[],
-  ): AssessmentGraphData {
-    return {
-      findings: findings.length,
-      regions: findings.reduce<Record<string, number>>((regions, finding) => {
-        if (!finding.resources) return regions;
-        return finding.resources.reduce((regionsAcc, resource) => {
-          if (!resource.region) return regionsAcc;
-          regionsAcc[resource.region] = (regionsAcc[resource.region] ?? 0) + 1;
-          return regionsAcc;
-        }, regions);
-      }, {}),
-      resourceTypes: findings.reduce<Record<string, number>>(
-        (resourceTypes, finding) => {
-          if (!finding.resources) return resourceTypes;
-          return finding.resources.reduce((resourceTypesAcc, resource) => {
-            if (!resource.type) return resourceTypesAcc;
-            resourceTypesAcc[resource.type] =
-              (resourceTypesAcc[resource.type] ?? 0) + 1;
-            return resourceTypesAcc;
-          }, resourceTypes);
-        },
-        {},
-      ),
-      severities: findings.reduce<Partial<Record<SeverityType, number>>>(
-        (severities, finding) => {
-          if (!finding.severity) return severities;
-          severities[finding.severity] =
-            (severities[finding.severity] ?? 0) + 1;
-          return severities;
-        },
-        {},
-      ),
-    };
-  }
-
-  public formatPillarsForAssessmentUpdate(args: {
-    rawPillars: Pillar[];
-    scanFindingsToBestPractices: ScanFindingsBestPracticesMapping;
-  }): Pillar[] {
-    const { rawPillars, scanFindingsToBestPractices } = args;
-    return rawPillars.map((pillar) => ({
-      ...pillar,
-      questions: pillar.questions.map((question) => ({
-        ...question,
-        bestPractices: question.bestPractices.map((bestPractice) => {
-          const scanFindingsMatchingBestPractice = scanFindingsToBestPractices
-            .filter((scanFindingToBestPractices) =>
-              scanFindingToBestPractices.bestPractices.some(
-                (bp) =>
-                  bp.bestPracticeId === bestPractice.id &&
-                  bp.questionId === question.id &&
-                  bp.pillarId === pillar.id,
-              ),
-            )
-            .map(({ scanFinding }) => scanFinding);
-          return {
-            ...bestPractice,
-            results: new Set(
-              scanFindingsMatchingBestPractice.map(({ id }) => id),
-            ),
-          };
-        }),
-      })),
-    }));
-  }
-
-  private async saveMappedScanFindingsToBestPractices(args: {
+  private async storeMappedScanFindings(args: {
     assessmentId: string;
     organizationDomain: string;
     scanningTool: ScanningTool;
@@ -127,23 +52,59 @@ export class PrepareFindingsAssociationsUseCaseImpl
   }): Promise<void> {
     const { assessmentId, organizationDomain, scanFindingsToBestPractices } =
       args;
-    const findings = scanFindingsToBestPractices.map<Finding>(
-      ({ scanFinding, bestPractices }) => ({
-        ...scanFinding,
-        isAIAssociated: false,
-        bestPractices: bestPractices
-          .map((bp) => `${bp.pillarId}#${bp.questionId}#${bp.bestPracticeId}`)
-          .join(', '),
-        hidden: false,
-        comments: [],
-      }),
-    );
+
+    const bestPractices = scanFindingsToBestPractices.reduce<
+      Map<
+        string,
+        {
+          bestPractice: {
+            pillarId: string;
+            questionId: string;
+            bestPracticeId: string;
+          };
+          findingIds: Set<string>;
+        }
+      >
+    >((acc, { scanFinding, bestPractices: mappedBestPractices }) => {
+      for (const bestPractice of mappedBestPractices) {
+        const key = `${bestPractice.pillarId}:${bestPractice.questionId}:${bestPractice.bestPracticeId}`;
+        let entry = acc.get(key);
+        if (!entry) {
+          entry = {
+            bestPractice,
+            findingIds: new Set<string>(),
+          };
+          acc.set(key, entry);
+        }
+        entry.findingIds.add(scanFinding.id);
+      }
+      return acc;
+    }, new Map());
+
     await Promise.all(
-      findings.map((finding) =>
+      scanFindingsToBestPractices.map(({ scanFinding }) =>
         this.findingsRepository.save({
           assessmentId,
           organizationDomain,
-          finding,
+          finding: {
+            ...scanFinding,
+            isAIAssociated: false,
+            hidden: false,
+            comments: [],
+            bestPractices: [],
+          },
+        }),
+      ),
+    );
+    await Promise.all(
+      Array.from(bestPractices.values()).map(({ bestPractice, findingIds }) =>
+        this.findingsRepository.saveBestPracticeFindings({
+          assessmentId,
+          organizationDomain,
+          pillarId: bestPractice.pillarId,
+          questionId: bestPractice.questionId,
+          bestPracticeId: bestPractice.bestPracticeId,
+          bestPracticeFindingIds: findingIds,
         }),
       ),
     );
@@ -157,6 +118,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       assessmentId,
       organizationDomain,
     });
+
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
@@ -174,30 +136,6 @@ export class PrepareFindingsAssociationsUseCaseImpl
           scanFindings,
         },
       );
-    const updates = [
-      this.assessmentsRepository.updateRawGraphDataForScanningTool({
-        assessmentId,
-        organizationDomain,
-        scanningTool,
-        graphData: this.formatScanningToolGraphData(scanFindings),
-      }),
-    ];
-    if (scanningTool === ScanningTool.PROWLER) {
-      updates.push(
-        this.assessmentsRepository.update({
-          assessmentId,
-          organizationDomain,
-          assessmentBody: {
-            pillars: this.formatPillarsForAssessmentUpdate({
-              rawPillars: questionSet.pillars,
-              scanFindingsToBestPractices,
-            }),
-            questionVersion: questionSet.version,
-          },
-        }),
-      );
-    }
-    await Promise.all(updates);
 
     const mappedScanFindingsToBestPractices =
       scanFindingsToBestPractices.filter(
@@ -217,7 +155,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
         scanningTool,
         scanFindings: nonMappedScanFindings,
       }),
-      this.saveMappedScanFindingsToBestPractices({
+      this.storeMappedScanFindings({
         assessmentId,
         organizationDomain,
         scanningTool,

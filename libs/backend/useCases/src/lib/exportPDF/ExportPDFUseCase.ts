@@ -56,9 +56,9 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
       });
     }
 
-    const assessmentExport = assessment.fileExports?.[
-      AssessmentFileExportType.PDF
-    ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
+    const assessmentExport = assessment.fileExports?.find(
+      (assessmentExport) => assessmentExport.id === fileExportId,
+    );
     if (!assessmentExport) {
       throw new AssessmentFileExportNotFoundError({
         assessmentId,
@@ -71,7 +71,6 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
-      type: AssessmentFileExportType.PDF,
       data: assessmentExport,
     });
 
@@ -107,7 +106,6 @@ export class ExportPDFUseCaseImpl implements ExportPDFUseCase {
     await this.assessmentsRepository.updateFileExport({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
-      type: AssessmentFileExportType.PDF,
       data: assessmentExport,
     });
   }

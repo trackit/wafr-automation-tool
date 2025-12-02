@@ -92,6 +92,73 @@ describe('OrganizationRepositorySQL', () => {
       expect(fetchedOrganization).toBeUndefined();
     });
   });
+
+  describe('getAll', () => {
+    it('should get all organizations', async () => {
+      const { repository } = setup();
+
+      const organization1 = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      const organization2 = OrganizationMother.basic()
+        .withDomain('organization2')
+        .build();
+
+      await Promise.all([
+        repository.save(organization1),
+        repository.save(organization2),
+      ]);
+
+      const organizations = await repository.getAll();
+      expect(organizations).toEqual([organization1, organization2]);
+    });
+
+    it('should get organizations with offset', async () => {
+      const { repository } = setup();
+
+      const organization1 = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      const organization2 = OrganizationMother.basic()
+        .withDomain('organization2')
+        .build();
+      const organization3 = OrganizationMother.basic()
+        .withDomain('organization3')
+        .build();
+
+      await Promise.all([
+        repository.save(organization1),
+        repository.save(organization2),
+        repository.save(organization3),
+      ]);
+
+      const organizations = await repository.getAll({ offset: 1 });
+      expect(organizations).toEqual([organization2, organization3]);
+    });
+
+    it('should get organizations with limit', async () => {
+      const { repository } = setup();
+
+      const organization1 = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      const organization2 = OrganizationMother.basic()
+        .withDomain('organization2')
+        .build();
+      const organization3 = OrganizationMother.basic()
+        .withDomain('organization3')
+        .build();
+
+      await Promise.all([
+        repository.save(organization1),
+        repository.save(organization2),
+        repository.save(organization3),
+      ]);
+
+      const organizations = await repository.getAll({ limit: 2 });
+      expect(organizations).toEqual([organization1, organization2]);
+    });
+  });
 });
 
 const setup = () => {
