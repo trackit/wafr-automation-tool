@@ -130,6 +130,12 @@ export default [
       'no-void': ['error', { allowAsStatement: true }],
       'promise/no-return-wrap': 'error',
       'promise/valid-params': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          fixStyle: 'inline-type-imports',
+        },
+      ],
     },
   },
   {
