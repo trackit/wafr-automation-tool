@@ -30,10 +30,7 @@ import {
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import {
-  billingDomainToEntity,
-  toDomainAssessment,
-} from './AssessmentsRepositorySQLMapping';
+import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -54,10 +51,12 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
     const entity = repo.create({
       ...assessment,
-      billingInformation: billingDomainToEntity(
-        assessment.id,
-        assessment.billingInformation,
-      ),
+      billingInformation: assessment.billingInformation
+        ? {
+            ...assessment.billingInformation,
+            assessmentId: assessment.id,
+          }
+        : undefined,
     });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);

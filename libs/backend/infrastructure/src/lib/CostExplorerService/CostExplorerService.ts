@@ -15,6 +15,21 @@ import { createInjectionToken, inject } from '@shared/di-container';
 import { tokenLogger } from '../Logger';
 import { tokenSTSService } from '../STSService';
 
+function buildFilter(
+  serviceValues: string[],
+  regionValues: string[],
+  accountId: string,
+): Expression {
+  const andClauses: Expression[] = [
+    { Dimensions: { Key: 'LINKED_ACCOUNT', Values: [accountId] } },
+    { Dimensions: { Key: 'SERVICE', Values: serviceValues } },
+  ];
+  if (regionValues?.length > 0) {
+    andClauses.push({ Dimensions: { Key: 'REGION', Values: regionValues } });
+  }
+  return { And: andClauses };
+}
+
 export class CostExplorerService implements CostExplorerPort {
   private readonly logger = inject(tokenLogger);
 
@@ -65,25 +80,6 @@ export class CostExplorerService implements CostExplorerPort {
     return dimensionValues;
   }
 
-  private buildFilter = (
-    serviceValues: string[],
-    regionValues: string[],
-    accountId: string,
-  ): Expression => {
-    const andClauses: Expression[] = [
-      {
-        Dimensions: { Key: 'LINKED_ACCOUNT', Values: [accountId] },
-      },
-      {
-        Dimensions: { Key: 'SERVICE', Values: serviceValues },
-      },
-    ];
-    if (regionValues?.length > 0) {
-      andClauses.push({ Dimensions: { Key: 'REGION', Values: regionValues } });
-    }
-    return { And: andClauses };
-  };
-
   public async getBillingInformation({
     accountId,
     timePeriod,
@@ -98,7 +94,7 @@ export class CostExplorerService implements CostExplorerPort {
     const client = await this.createCostExplorerClient(roleArn);
     const services = await this.getDimensionValues({ client, timePeriod });
     const serviceResourceInput: GetCostAndUsageCommandInput = {
-      Filter: this.buildFilter(services, regions, accountId),
+      Filter: buildFilter(services, regions, accountId),
       Granularity: 'MONTHLY',
       TimePeriod: {
         Start: timePeriod.startDate,

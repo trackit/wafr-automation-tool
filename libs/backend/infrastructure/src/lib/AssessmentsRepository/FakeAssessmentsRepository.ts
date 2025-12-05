@@ -291,7 +291,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const { assessmentId, organizationDomain, billingInformation } = args;
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
-    assessment.billingInformation = { ...billingInformation };
+    assessment.billingInformation = billingInformation;
   }
 }
 
