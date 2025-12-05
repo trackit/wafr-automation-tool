@@ -1,4 +1,7 @@
-import { type CountryCode, type Industry } from '@aws-sdk/client-partnercentral-selling';
+import {
+  type CountryCode,
+  type Industry,
+} from '@aws-sdk/client-partnercentral-selling';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CirclePlus } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';

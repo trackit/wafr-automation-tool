@@ -1,4 +1,9 @@
-import { type Pillar, type Question, type QuestionSet, type SeverityType } from '@backend/models';
+import {
+  type Pillar,
+  type Question,
+  type QuestionSet,
+  type SeverityType,
+} from '@backend/models';
 import { type QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 

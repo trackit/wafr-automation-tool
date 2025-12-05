@@ -4,7 +4,11 @@ import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
 } from '@backend/infrastructure';
-import { type Finding, type ScanFinding, type ScanningTool } from '@backend/models';
+import {
+  type Finding,
+  type ScanFinding,
+  type ScanningTool,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
 

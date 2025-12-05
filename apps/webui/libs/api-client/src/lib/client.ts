@@ -1,7 +1,11 @@
 /// <reference types="vite/client" />
 
 import { fetchAuthSession } from 'aws-amplify/auth';
-import axios, { type AxiosError, type AxiosInstance, type CreateAxiosDefaults } from 'axios';
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type CreateAxiosDefaults,
+} from 'axios';
 import { enqueueSnackbar } from 'notistack';
 
 export class ApiError extends Error {

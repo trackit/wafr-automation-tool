@@ -1,4 +1,8 @@
-import { type EntityTarget, type ObjectLiteral, type Repository } from 'typeorm';
+import {
+  type EntityTarget,
+  type ObjectLiteral,
+  type Repository,
+} from 'typeorm';
 
 import {
   type Finding,

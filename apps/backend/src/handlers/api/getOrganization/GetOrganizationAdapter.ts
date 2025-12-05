@@ -1,4 +1,7 @@
-import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda';
+import {
+  type APIGatewayProxyEvent,
+  type APIGatewayProxyResult,
+} from 'aws-lambda';
 
 import { tokenGetOrganizationUseCase } from '@backend/useCases';
 import { type operations } from '@shared/api-schema';

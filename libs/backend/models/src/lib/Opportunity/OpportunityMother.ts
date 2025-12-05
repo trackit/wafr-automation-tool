@@ -1,4 +1,7 @@
-import { type CountryCode, type Industry } from '@aws-sdk/client-partnercentral-selling';
+import {
+  type CountryCode,
+  type Industry,
+} from '@aws-sdk/client-partnercentral-selling';
 
 import { CustomerType, type OpportunityDetails } from './Opportunity';
 

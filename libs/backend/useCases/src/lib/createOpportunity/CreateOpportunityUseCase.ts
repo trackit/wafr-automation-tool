@@ -4,7 +4,11 @@ import {
   tokenOrganizationRepository,
   tokenPartnerCentralSellingService,
 } from '@backend/infrastructure';
-import { CustomerType, type OpportunityDetails, type User } from '@backend/models';
+import {
+  CustomerType,
+  type OpportunityDetails,
+  type User,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
