@@ -1,5 +1,5 @@
 import type { Pillar } from '../Pillar';
-import { type Assessment, AssessmentFileExport } from './Assessment';
+import { type Assessment, type AssessmentFileExport } from './Assessment';
 
 export class AssessmentMother {
   private data: Assessment;

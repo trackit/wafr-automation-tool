@@ -1,4 +1,4 @@
-import { paths } from '@shared/api-schema';
+import { type paths } from '@shared/api-schema';
 
 import { apiClient } from './client';
 

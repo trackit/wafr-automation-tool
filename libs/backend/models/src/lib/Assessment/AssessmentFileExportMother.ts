@@ -1,5 +1,5 @@
 import {
-  AssessmentFileExport,
+  type AssessmentFileExport,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
 } from './Assessment';

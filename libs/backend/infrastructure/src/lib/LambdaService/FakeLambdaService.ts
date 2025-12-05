@@ -1,4 +1,4 @@
-import { LambdaServicePort } from '@backend/ports';
+import { type LambdaServicePort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 class FakeLambdaService implements LambdaServicePort {

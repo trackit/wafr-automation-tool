@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { tokenLogger, tokenObjectsStorage } from '@backend/infrastructure';
-import { Pillar, ScanFinding } from '@backend/models';
+import { type Pillar, type ScanFinding } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJsonObject } from '@shared/utils';
 

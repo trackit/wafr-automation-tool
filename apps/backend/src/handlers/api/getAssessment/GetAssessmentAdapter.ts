@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import type { Assessment } from '@backend/models';
 import {
-  BestPracticesFindingCounts,
+  type BestPracticesFindingCounts,
   tokenGetAssessmentUseCase,
 } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';

@@ -1,8 +1,8 @@
-import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
+import { type CountryCode, type Industry } from '@aws-sdk/client-partnercentral-selling';
 
-import { CustomerType, User, UserMother } from '@backend/models';
+import { CustomerType, type User, UserMother } from '@backend/models';
 
-import { CreateOpportunityUseCaseArgs } from './CreateOpportunityUseCase';
+import { type CreateOpportunityUseCaseArgs } from './CreateOpportunityUseCase';
 
 export class CreateOpportunityUseCaseArgsMother {
   private data: CreateOpportunityUseCaseArgs;

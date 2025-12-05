@@ -1,7 +1,7 @@
 import { Pen, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 
 interface CommentsPaneProps {
   finding: components['schemas']['Finding'];

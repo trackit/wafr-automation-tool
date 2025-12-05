@@ -9,7 +9,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import { ObjectsStorage } from '@backend/ports';
+import { type ObjectsStorage } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, type Readable, streamToString } from '@shared/utils';
 

@@ -1,4 +1,4 @@
-import { type Assessment, Organization, Pillar } from '@backend/models';
+import { type Assessment, type Organization, type Pillar } from '@backend/models';
 
 import {
   AssessmentExportRegionNotSetError,

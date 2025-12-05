@@ -1,4 +1,4 @@
-import { FeatureTogglePort } from '@backend/ports';
+import { type FeatureTogglePort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeFeatureToggleRepository implements FeatureTogglePort {

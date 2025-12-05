@@ -1,4 +1,4 @@
-import { Pillar } from '../Pillar';
+import { type Pillar } from '../Pillar';
 
 export interface QuestionSet {
   pillars: Pillar[];

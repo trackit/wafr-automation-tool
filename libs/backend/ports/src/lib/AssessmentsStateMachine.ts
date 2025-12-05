@@ -1,4 +1,4 @@
-import { AssessmentStep } from '@backend/models';
+import { type AssessmentStep } from '@backend/models';
 
 export type AssessmentsStateMachineStartAssessmentArgs = {
   name: string;

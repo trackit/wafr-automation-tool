@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { paths } from '@shared/api-schema';
+import { type paths } from '@shared/api-schema';
 import { postAssessment } from '@webui/api-client';
 import { NewAssessment } from '@webui/forms';
 import { Modal } from '@webui/ui';

@@ -1,4 +1,4 @@
-import { Organization } from '@backend/models';
+import { type Organization } from '@backend/models';
 
 export interface OrganizationRepository {
   save(organization: Organization): Promise<void>;

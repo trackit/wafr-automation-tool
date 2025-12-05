@@ -1,6 +1,6 @@
-import { Organization } from '@backend/models';
+import { type Organization } from '@backend/models';
 
-import { OrganizationEntity } from '../infrastructure';
+import { type OrganizationEntity } from '../infrastructure';
 
 export function toDomainOrganization(e: OrganizationEntity): Organization {
   return {

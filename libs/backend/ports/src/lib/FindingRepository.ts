@@ -1,10 +1,10 @@
 import {
-  Finding,
-  FindingAggregationFields,
-  FindingAggregationResult,
-  FindingBody,
-  FindingComment,
-  FindingCommentBody,
+  type Finding,
+  type FindingAggregationFields,
+  type FindingAggregationResult,
+  type FindingBody,
+  type FindingComment,
+  type FindingCommentBody,
 } from '@backend/models';
 
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {

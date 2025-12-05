@@ -1,6 +1,6 @@
-import { User, UserMother } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
-import { GeneratePDFExportURLUseCaseArgs } from './GeneratePDFExportURLUseCase';
+import { type GeneratePDFExportURLUseCaseArgs } from './GeneratePDFExportURLUseCase';
 
 export class GeneratePDFExportURLUseCaseArgsMother {
   private data: GeneratePDFExportURLUseCaseArgs;

@@ -3,13 +3,13 @@ import {
   tokenFindingsRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { ScanningTool } from '@backend/models';
+import { type ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
 import { tokenGetScannedFindingsUseCase } from '../getScannedFindings';
 import {
-  ScanFindingsBestPracticesMapping,
+  type ScanFindingsBestPracticesMapping,
   tokenMapScanFindingsToBestPracticesUseCase,
 } from '../mapScanFindingsToBestPractices';
 import { tokenStoreFindingsToAssociateUseCase } from '../storeFindingsToAssociate';

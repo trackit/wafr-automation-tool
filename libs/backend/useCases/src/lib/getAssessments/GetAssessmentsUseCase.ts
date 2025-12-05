@@ -1,5 +1,5 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
-import { Assessment, User } from '@backend/models';
+import { type Assessment, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 export type GetAssessmentsUseCaseArgs = {

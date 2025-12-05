@@ -7,7 +7,7 @@ import { register, reset } from '@shared/di-container';
 
 import {
   PrepareFindingsAssociationsAdapter,
-  PrepareFindingsAssociationsInput,
+  type PrepareFindingsAssociationsInput,
 } from './PrepareFindingsAssociationsAdapter';
 import { PrepareFindingsAssociationsAdapterEventMother } from './PrepareFindingsAssociationsAdapterEventMother';
 

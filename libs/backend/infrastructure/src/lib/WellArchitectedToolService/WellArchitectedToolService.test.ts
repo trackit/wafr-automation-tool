@@ -1,7 +1,7 @@
 import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import {
-  AnswerSummary,
-  Choice,
+  type AnswerSummary,
+  type Choice,
   CreateMilestoneCommand,
   CreateWorkloadCommand,
   GetAnswerCommand,
@@ -10,7 +10,7 @@ import {
   ListAnswersCommand,
   ListMilestonesCommand,
   ListWorkloadsCommand,
-  PillarReviewSummary,
+  type PillarReviewSummary,
   UpdateAnswerCommand,
   WellArchitectedClient,
   WorkloadEnvironment,

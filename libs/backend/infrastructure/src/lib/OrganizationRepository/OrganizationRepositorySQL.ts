@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
 
-import { Organization } from '@backend/models';
-import { OrganizationRepository } from '@backend/ports';
+import { type Organization } from '@backend/models';
+import { type OrganizationRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 
 import { OrganizationEntity } from '../config/typeorm';

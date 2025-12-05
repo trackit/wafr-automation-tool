@@ -1,4 +1,4 @@
-import { AssociateFindingsChunkToBestPracticesInput } from './AssociateFindingsChunkToBestPracticesAdapter';
+import { type AssociateFindingsChunkToBestPracticesInput } from './AssociateFindingsChunkToBestPracticesAdapter';
 
 export class AssociateFindingsChunkToBestPracticesAdapterEventMother {
   private data: AssociateFindingsChunkToBestPracticesInput;

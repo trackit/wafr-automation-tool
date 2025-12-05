@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { tokenLogger } from '@backend/infrastructure';
-import { ScanFinding, SeverityType } from '@backend/models';
+import { type ScanFinding, SeverityType } from '@backend/models';
 import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 

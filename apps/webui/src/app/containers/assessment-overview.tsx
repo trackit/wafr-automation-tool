@@ -27,7 +27,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 import { getAssessmentGraph } from '@webui/api-client';
 
 import {

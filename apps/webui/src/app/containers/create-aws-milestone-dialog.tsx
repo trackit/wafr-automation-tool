@@ -3,7 +3,7 @@ import { Milestone } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 
-import { ApiError, createAWSMilestone } from '@webui/api-client';
+import { type ApiError, createAWSMilestone } from '@webui/api-client';
 import { CreateAWSMilestone as CreateAWSMilestoneForm } from '@webui/forms';
 import { Modal } from '@webui/ui';
 

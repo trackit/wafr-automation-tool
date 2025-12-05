@@ -10,7 +10,7 @@ import {
   type Finding,
   type ScanningTool,
 } from '@backend/models';
-import { FindingToBestPracticesAssociation } from '@backend/ports';
+import { type FindingToBestPracticesAssociation } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';

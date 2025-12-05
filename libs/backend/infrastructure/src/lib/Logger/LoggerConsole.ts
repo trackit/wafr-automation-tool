@@ -1,4 +1,4 @@
-import { Logger } from '@backend/ports';
+import { type Logger } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class LoggerConsole implements Logger {

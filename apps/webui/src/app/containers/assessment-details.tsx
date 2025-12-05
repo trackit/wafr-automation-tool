@@ -13,7 +13,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 import {
   deleteAssessment,
   getAssessment,

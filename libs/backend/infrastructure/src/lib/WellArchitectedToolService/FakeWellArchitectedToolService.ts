@@ -1,4 +1,4 @@
-import { Assessment, Milestone, MilestoneSummary, User } from '@backend/models';
+import { type Assessment, type Milestone, type MilestoneSummary, type User } from '@backend/models';
 import type { WellArchitectedToolPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 

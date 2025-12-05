@@ -1,6 +1,6 @@
-import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
+import { type CountryCode, type Industry } from '@aws-sdk/client-partnercentral-selling';
 
-import { CustomerType, OpportunityDetails } from './Opportunity';
+import { CustomerType, type OpportunityDetails } from './Opportunity';
 
 export class OpportunityDetailsMother {
   private data: OpportunityDetails;

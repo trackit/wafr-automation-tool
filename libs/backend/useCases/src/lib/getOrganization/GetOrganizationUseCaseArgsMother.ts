@@ -1,4 +1,4 @@
-import { GetOrganizationUseCaseArgs } from './GetOrganizationUseCase';
+import { type GetOrganizationUseCaseArgs } from './GetOrganizationUseCase';
 
 export class GetOrganizationUseCaseArgsMother {
   private data: GetOrganizationUseCaseArgs;
