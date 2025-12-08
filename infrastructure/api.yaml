@@ -576,7 +576,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Timeout: 600
-      MemorySize: 9216
+      MemorySize: 10240
       CodeUri: ../apps/backend/src/handlers/process/exportPDF/
       Tags:
         Name: ExportAssessmentToPDFFunction

@@ -41,8 +41,6 @@ export class PDFService implements PDFServicePort {
       SeverityType.Critical,
       SeverityType.High,
       SeverityType.Medium,
-      SeverityType.Low,
-      SeverityType.Informational,
     ];
 
     const findings = await this.findingsRepository.getAll({
@@ -60,11 +58,13 @@ export class PDFService implements PDFServicePort {
       (a, b) => order.indexOf(a.severity!) - order.indexOf(b.severity!),
     );
 
+    this.logger.info(`Number of ordered findings found : ${filtered.length}`);
+
     const buffer = await this.renderToBuffer(
       this.assessmentDocument({
         assessmentName: assessment.name,
         versionName,
-        findings: filtered,
+        findings: filtered.slice(0, 750),
       }),
     );
     this.logger.info(
