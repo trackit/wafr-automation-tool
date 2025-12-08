@@ -12,12 +12,12 @@ Font.register({
   family: 'Inter',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50yjIw2boKoduKmMEVuLyfMZg.ttf',
+      src: './assets/Inter-regular.ttf',
       fontStyle: 'normal',
       fontWeight: 'normal',
     },
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
+      src: './assets/Inter-bold.ttf',
       fontStyle: 'normal',
       fontWeight: 'bold',
     },
@@ -53,6 +53,7 @@ export class PDFService implements PDFServicePort {
     const filtered = findings.filter(
       (f) => f.severity !== undefined && allowed.includes(f.severity),
     );
+    this.logger.info(`Number of findings found : ${filtered.length}`);
 
     const order = allowed;
     filtered.sort(
@@ -66,7 +67,9 @@ export class PDFService implements PDFServicePort {
         findings: filtered,
       }),
     );
-    this.logger.info(`Exporting assessment ${assessment.id} to PDF done`);
+    this.logger.info(
+      `Exporting assessment ${assessment.id} to PDF done for ${findings.length} findings`,
+    );
     return buffer;
   }
 }
