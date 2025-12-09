@@ -18,6 +18,8 @@ jobs:
       LOG_RETENTION_IN_DAYS: 14
       GEN_AI_MAX_RETRIES: 3
       AI_FINDINGS_ASSOCIATION_CHUNK_SIZE: 10
+      SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
     steps:
       - uses: actions/checkout@v4
 
