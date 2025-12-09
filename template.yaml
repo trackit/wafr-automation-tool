@@ -31,6 +31,14 @@ Parameters:
   AIFindingsAssociationChunkSize:
     Type: Number
     Default: 10
+  SlackWorkspaceId:
+    Type: String
+    Description: The ID of the Slack workspace authorized with AWS Chatbot (Required for Prod)
+    Default: ''
+  SlackChannelId:
+    Type: String
+    Description: The ID of the Slack channel for notifications (Required for Prod)
+    Default: ''
 
 Conditions:
   IsDebug:
@@ -67,6 +75,8 @@ Resources:
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
         DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
         S3BucketName: !Ref S3Bucket
+        SlackWorkspaceId: !Ref SlackWorkspaceId
+        SlackChannelId: !Ref SlackChannelId
   Network:
     Type: AWS::Serverless::Application
     Properties:
