@@ -7,10 +7,10 @@ import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { mockClient } from 'aws-sdk-client-mock';
 
 import {
-  AceIntegration,
+  type AceIntegration,
   AssessmentMother,
   CustomerType,
-  OpportunityDetails,
+  type OpportunityDetails,
   OpportunityDetailsMother,
 } from '@backend/models';
 import { inject, register, reset } from '@shared/di-container';

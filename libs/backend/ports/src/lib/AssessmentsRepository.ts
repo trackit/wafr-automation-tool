@@ -2,23 +2,17 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
-  AssessmentFileExportType,
-  AssessmentGraphData,
   BestPracticeBody,
   PillarBody,
   QuestionBody,
-  ScanningTool,
 } from '@backend/models';
 
 export interface AssessmentsRepository {
   save(assessment: Assessment): Promise<void>;
-  saveBestPracticeFindings(args: {
+  saveFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    pillarId: string;
-    questionId: string;
-    bestPracticeId: string;
-    bestPracticeFindingIds: Set<string>;
+    fileExport: AssessmentFileExport;
   }): Promise<void>;
 
   get(args: {
@@ -66,22 +60,14 @@ export interface AssessmentsRepository {
     bestPracticeId: string;
     bestPracticeBody: BestPracticeBody;
   }): Promise<void>;
-  updateRawGraphDataForScanningTool(args: {
-    assessmentId: string;
-    organizationDomain: string;
-    scanningTool: ScanningTool;
-    graphData: AssessmentGraphData;
-  }): Promise<void>;
   updateFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     data: AssessmentFileExport;
   }): Promise<void>;
   deleteFileExport(args: {
     assessmentId: string;
     organizationDomain: string;
-    type: AssessmentFileExportType;
     id: string;
   }): Promise<void>;
   getOpportunitiesByYear(args: {

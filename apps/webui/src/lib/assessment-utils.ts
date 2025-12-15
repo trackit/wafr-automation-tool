@@ -1,4 +1,4 @@
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 
 type Question = components['schemas']['Question'];
 type Pillar = components['schemas']['Pillar'];

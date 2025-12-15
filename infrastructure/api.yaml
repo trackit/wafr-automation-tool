@@ -211,6 +211,32 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  ListOrganizationNamesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ListOrganizationNamesFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  ListOrganizationNamesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ParentStackName}-ListOrganizationNamesFunction
+      CodeUri: ../apps/backend/src/handlers/process/listOrganizationNames
+      Tags:
+        Name: ListOrganizationNamesFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -549,8 +575,8 @@ Resources:
   ExportAssessmentToPDFFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Timeout: 300
-      MemorySize: 4096
+      Timeout: 600
+      MemorySize: 10240
       CodeUri: ../apps/backend/src/handlers/process/exportPDF/
       Tags:
         Name: ExportAssessmentToPDFFunction
@@ -1220,6 +1246,39 @@ Resources:
           Properties:
             RestApiId: !Ref Api
             Path: /organization
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  GetAssessmentGraphLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetAssessmentGraphFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  GetAssessmentGraphFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/getAssessmentGraph
+      Tags:
+        Name: GetAssessmentGraphFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        GetAssessmentGraph:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /assessments/{assessmentId}/graph
             Method: GET
     Metadata:
       BuildMethod: esbuild

@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { TagsInput } from '@webui/ui';
 
-import { awsRegions, Region } from './regions';
+import { awsRegions, type Region } from './regions';
 import WorkflowHintDialog from './workflow-hint-dialog';
 
 type NewAssessmentProps = {

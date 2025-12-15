@@ -88,6 +88,13 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     if (!organization) {
       throw new OrganizationNotFoundError({ domain: args.organizationDomain });
     }
+    await this.assessmentsRepository.update({
+      assessmentId: args.assessmentId,
+      organizationDomain: args.organizationDomain,
+      assessmentBody: {
+        finishedAt: new Date(),
+      },
+    });
     if (
       organization.freeAssessmentsLeft &&
       organization.freeAssessmentsLeft > 0

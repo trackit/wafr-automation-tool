@@ -1,6 +1,6 @@
 import {
-  AssessmentFileExport,
-  AssessmentFileExportType,
+  type AssessmentFileExport,
+  type AssessmentFileExportType,
 } from '@backend/models';
 import { BasicErrorType } from '@shared/utils';
 

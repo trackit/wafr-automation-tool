@@ -1,4 +1,8 @@
-import { AssessmentFileExport, AssessmentFileExportStatus } from './Assessment';
+import {
+  type AssessmentFileExport,
+  AssessmentFileExportStatus,
+  AssessmentFileExportType,
+} from './Assessment';
 
 export class AssessmentFileExportMother {
   private data: AssessmentFileExport;
@@ -11,8 +15,11 @@ export class AssessmentFileExportMother {
     return new AssessmentFileExportMother({
       id: 'file-export-id',
       status: AssessmentFileExportStatus.NOT_STARTED,
+      type: AssessmentFileExportType.PDF,
       versionName: 'version-name',
       createdAt: new Date(),
+      error: undefined,
+      objectKey: undefined,
     });
   }
 
@@ -40,6 +47,11 @@ export class AssessmentFileExportMother {
 
   public withCreatedAt(createdAt: Date): AssessmentFileExportMother {
     this.data.createdAt = createdAt;
+    return this;
+  }
+
+  public withType(type: AssessmentFileExportType): AssessmentFileExportMother {
+    this.data.type = type;
     return this;
   }
 

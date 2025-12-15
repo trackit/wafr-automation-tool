@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
-import { AssessmentFileExport } from '@backend/models';
+import { type AssessmentFileExport } from '@backend/models';
 import { tokenListPDFExportsUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
 import { inject } from '@shared/di-container';

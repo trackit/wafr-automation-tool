@@ -1,5 +1,10 @@
-import { Pillar, Question, QuestionSet, SeverityType } from '@backend/models';
-import { QuestionSetPort } from '@backend/ports';
+import {
+  type Pillar,
+  type Question,
+  type QuestionSet,
+  type SeverityType,
+} from '@backend/models';
+import { type QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -85,7 +90,6 @@ export class QuestionSetService implements QuestionSetPort {
             ...{ ...rawBestPractice, primaryId: undefined },
             id: bestPracticeId,
             primaryId: rawBestPractice.primaryId,
-            results: new Set(),
             checked: false,
           });
         }

@@ -1,6 +1,6 @@
 import { Font, renderToBuffer } from '@react-pdf/renderer';
 
-import { Assessment, SeverityType } from '@backend/models';
+import { type Assessment, SeverityType } from '@backend/models';
 import type { PDFServicePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -12,12 +12,12 @@ Font.register({
   family: 'Inter',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50yjIw2boKoduKmMEVuLyfMZg.ttf',
+      src: './assets/Inter-regular.ttf',
       fontStyle: 'normal',
       fontWeight: 'normal',
     },
     {
-      src: 'https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
+      src: './assets/Inter-bold.ttf',
       fontStyle: 'normal',
       fontWeight: 'bold',
     },
@@ -41,8 +41,6 @@ export class PDFService implements PDFServicePort {
       SeverityType.Critical,
       SeverityType.High,
       SeverityType.Medium,
-      SeverityType.Low,
-      SeverityType.Informational,
     ];
 
     const findings = await this.findingsRepository.getAll({
@@ -53,20 +51,25 @@ export class PDFService implements PDFServicePort {
     const filtered = findings.filter(
       (f) => f.severity !== undefined && allowed.includes(f.severity),
     );
+    this.logger.info(`Number of findings found : ${filtered.length}`);
 
     const order = allowed;
     filtered.sort(
       (a, b) => order.indexOf(a.severity!) - order.indexOf(b.severity!),
     );
 
+    this.logger.info(`Number of ordered findings found : ${filtered.length}`);
+
     const buffer = await this.renderToBuffer(
       this.assessmentDocument({
         assessmentName: assessment.name,
         versionName,
-        findings: filtered,
+        findings: filtered.slice(0, 750),
       }),
     );
-    this.logger.info(`Exporting assessment ${assessment.id} to PDF done`);
+    this.logger.info(
+      `Exporting assessment ${assessment.id} to PDF done for ${findings.length} findings`,
+    );
     return buffer;
   }
 }

@@ -1,7 +1,7 @@
 import { Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import React from 'react';
 
-import { Finding } from '@backend/models';
+import { type Finding } from '@backend/models';
 
 import { FindingDetail } from './FindingDetail';
 
@@ -79,17 +79,14 @@ export function FindingsPage({
           Well Architected Review Program: {assessmentName}
         </Text>
         <Image
-          src="https://trackit.io/wp-content/uploads/2023/02/AWS-Badge-Advanced-Services.png"
+          src="./assets/AWS-Badge-Advanced-Services.png"
           style={styles.headerRightImage}
         />
       </View>
 
       <View>
         <Text style={styles.title}>{assessmentName} review</Text>
-        <Image
-          src="https://trackit.io/wp-content/uploads/2023/09/Untitled-design.png"
-          style={styles.logo}
-        />
+        <Image src="./assets/TrackItLogo.png" style={styles.logo} />
       </View>
 
       {findings.map((finding, i) => (
@@ -97,10 +94,7 @@ export function FindingsPage({
       ))}
 
       <View style={styles.footerContainer} fixed>
-        <Image
-          src="https://trackit.io/wp-content/uploads/2023/09/Untitled-design.png"
-          style={styles.footerLogo}
-        />
+        <Image src="./assets/TrackItLogo.png" style={styles.footerLogo} />
         <Text
           style={styles.pageNumber}
           render={({ pageNumber }) => `${pageNumber - 1}`}

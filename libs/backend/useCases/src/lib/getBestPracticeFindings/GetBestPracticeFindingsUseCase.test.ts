@@ -12,7 +12,6 @@ import {
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
-import { getBestPracticeCustomId } from '@shared/utils';
 
 import {
   AssessmentNotFoundError,
@@ -155,51 +154,37 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    const finding = FindingMother.basic()
-      .withBestPractices(
-        getBestPracticeCustomId({
-          pillarId: pillar.id,
-          questionId: question.id,
-          bestPracticeId: bestPractice.id,
-        }),
-      )
-      .withId('finding-id')
-      .build();
+    const finding = FindingMother.basic().withId('finding-id').build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding,
     });
-    const finding2 = FindingMother.basic()
-      .withBestPractices(
-        getBestPracticeCustomId({
-          pillarId: pillar.id,
-          questionId: question.id,
-          bestPracticeId: bestPractice.id,
-        }),
-      )
-      .withId('other-finding-id')
-      .build();
+    const finding2 = FindingMother.basic().withId('other-finding-id').build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding: finding2,
     });
-    const finding3 = FindingMother.basic()
-      .withBestPractices(
-        getBestPracticeCustomId({
-          pillarId: pillar.id,
-          questionId: question.id,
-          bestPracticeId: bestPractice.id,
-        }),
-      )
-      .withId('another-finding-id')
-      .build();
+    const finding3 = FindingMother.basic().withId('another-finding-id').build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding: finding3,
     });
+
+    await fakeFindingsRepository.saveBestPracticeFindings({
+      assessmentId: assessment.id,
+      organizationDomain: user.organizationDomain,
+      pillarId: pillar.id,
+      questionId: question.id,
+      bestPracticeId: bestPractice.id,
+      bestPracticeFindingIds: new Set([finding.id, finding2.id, finding3.id]),
+    });
+
+    finding.bestPractices = [bestPractice];
+    finding2.bestPractices = [bestPractice];
+    finding3.bestPractices = [bestPractice];
 
     const input = GetBestPracticeFindingsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -210,12 +195,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
       .build();
 
     const { findings } = await useCase.getBestPracticeFindings(input);
-
-    expect(findings).toEqual([
-      expect.objectContaining({ id: finding.id }),
-      expect.objectContaining({ id: finding2.id }),
-      expect.objectContaining({ id: finding3.id }),
-    ]);
+    expect(findings).toEqual([finding, finding2, finding3]);
   });
 });
 

@@ -1,35 +1,24 @@
-import type { SeverityType } from '../Finding';
 import type { Pillar } from '../Pillar';
-import type { ScanningTool } from '../ScanningTool';
 
 export interface Assessment {
   createdAt: Date;
   createdBy: string;
   executionArn: string;
   pillars?: Pillar[];
-  graphData?: AssessmentGraphData;
   id: string;
   name: string;
   organization: string;
   questionVersion?: string;
-  rawGraphData: Partial<Record<ScanningTool, AssessmentGraphData>>;
   regions: string[];
   exportRegion?: string;
   roleArn: string;
   workflows: string[];
   finishedAt?: Date;
   error?: AssessmentError;
-  fileExports?: AssessmentFileExports;
+  fileExports?: AssessmentFileExport[];
   wafrWorkloadArn?: string;
   opportunityId?: string;
   opportunityCreatedAt?: Date;
-}
-
-export interface AssessmentGraphData {
-  findings: number;
-  regions: Record<string, number>;
-  resourceTypes: Record<string, number>;
-  severities: Partial<Record<SeverityType, number>>;
 }
 
 export enum AssessmentStep {
@@ -47,14 +36,10 @@ export interface AssessmentError {
 
 export interface AssessmentBody {
   name?: string;
-  graphData?: AssessmentGraphData;
   error?: AssessmentError;
   finishedAt?: Date;
-  rawGraphData?: Partial<Record<ScanningTool, AssessmentGraphData>>;
-  pillars?: Pillar[];
   questionVersion?: string;
   exportRegion?: string;
-  fileExports?: AssessmentFileExports;
   wafrWorkloadArn?: string;
   opportunityId?: string;
   executionArn?: string;
@@ -64,10 +49,6 @@ export interface AssessmentBody {
 export enum AssessmentFileExportType {
   PDF = 'pdf',
 }
-
-export type AssessmentFileExports = Partial<
-  Record<AssessmentFileExportType, AssessmentFileExport[]>
->;
 
 export enum AssessmentFileExportStatus {
   NOT_STARTED = 'NOT_STARTED',
@@ -79,6 +60,7 @@ export enum AssessmentFileExportStatus {
 export interface AssessmentFileExport {
   id: string;
   status: AssessmentFileExportStatus;
+  type: AssessmentFileExportType;
   error?: string;
   versionName: string;
   objectKey?: string;

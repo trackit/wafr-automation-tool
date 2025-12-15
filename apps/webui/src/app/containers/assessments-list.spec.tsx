@@ -25,6 +25,7 @@ vi.mock('@webui/api-client', () => ({
   getAssessments: vi.fn(),
   deleteAssessment: vi.fn(),
   getAssessmentStep: vi.fn(),
+  getOrganization: vi.fn(),
 }));
 
 // Mock the router

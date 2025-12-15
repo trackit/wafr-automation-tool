@@ -1,4 +1,4 @@
-import { Organization } from '@backend/models';
+import { type Organization } from '@backend/models';
 
 import { CreateOrganizationAdapter } from './CreateOrganizationAdapter';
 

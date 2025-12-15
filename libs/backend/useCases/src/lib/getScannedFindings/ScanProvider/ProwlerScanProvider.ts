@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-import { ScanFinding, SeverityType } from '@backend/models';
+import { tokenLogger } from '@backend/infrastructure';
+import { type ScanFinding, SeverityType } from '@backend/models';
+import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';
 
 import { ScanProvider } from './ScanProvider';
@@ -29,10 +31,13 @@ const ProwlerFindingSchema = z.object({
   status_detail: z.string().optional(),
 });
 
+type ProwlerFinding = z.infer<typeof ProwlerFindingSchema>;
+
 export class ProwlerScanProvider extends ScanProvider {
   static getScanKey(assessmentId: string): string {
     return `assessments/${assessmentId}/scans/prowler/json-ocsf/output.ocsf.json`;
   }
+  private readonly logger = inject(tokenLogger);
 
   protected override async fetchFindings(): Promise<Omit<ScanFinding, 'id'>[]> {
     const scanOutput = await this.objectsStorage.get(
@@ -43,7 +48,34 @@ export class ProwlerScanProvider extends ScanProvider {
     }
     const jsonOutput = parseJsonArray(scanOutput);
     const parsedFindings = ProwlerFindingSchema.array().parse(jsonOutput);
-    return parsedFindings.map((prowlerFinding) => ({
+    const invalidFindings: ProwlerFinding[] = [];
+    const validFindings = parsedFindings.filter(
+      (
+        prowlerFinding,
+      ): prowlerFinding is ProwlerFinding & {
+        risk_details: string;
+        status_code: string;
+        status_detail: string;
+      } => {
+        const hasRequiredFields =
+          prowlerFinding.risk_details !== undefined &&
+          prowlerFinding.status_code !== undefined &&
+          prowlerFinding.status_detail !== undefined;
+        if (!hasRequiredFields) {
+          invalidFindings.push(prowlerFinding);
+        }
+        return hasRequiredFields;
+      },
+    );
+
+    if (invalidFindings.length > 0) {
+      this.logger.warn('Dropping Prowler findings missing required fields', {
+        assessmentId: this.assessmentId,
+        invalidFindingsCount: invalidFindings.length,
+        invalidFindings: invalidFindings,
+      });
+    }
+    return validFindings.map((prowlerFinding) => ({
       resources:
         prowlerFinding.resources?.map((resource) => ({
           name: resource.name,
@@ -54,7 +86,7 @@ export class ProwlerScanProvider extends ScanProvider {
       ...(prowlerFinding.remediation && {
         remediation: {
           desc: prowlerFinding.remediation?.desc,
-          references: prowlerFinding.remediation?.references,
+          references: prowlerFinding.remediation?.references ?? [],
         },
       }),
       riskDetails: prowlerFinding.risk_details,

@@ -4,7 +4,7 @@ import {
   tokenLogger,
   tokenOrganizationRepository,
 } from '@backend/infrastructure';
-import { Organization } from '@backend/models';
+import { type Organization } from '@backend/models';
 import { inject } from '@shared/di-container';
 
 const OrganizationSchema = z.object({

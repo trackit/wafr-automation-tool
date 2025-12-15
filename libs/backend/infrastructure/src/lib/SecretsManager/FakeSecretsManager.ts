@@ -1,4 +1,4 @@
-import { DBCredentials, SecretsManager } from '@backend/ports';
+import { type DBCredentials, type SecretsManager } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeSecretsManager implements SecretsManager {

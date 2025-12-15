@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from 'typeorm';
 
 export class DropStepChangeFinished1761032481031 implements MigrationInterface {
   name = 'DropStepChangeFinished1761032481031';

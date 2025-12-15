@@ -186,6 +186,8 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: AuroraCluster
+        - Key: TrackitPersistent
+          Value: 'yes'
 
   AuroraInstanceWriter:
     Type: AWS::RDS::DBInstance
@@ -201,6 +203,8 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: AuroraInstanceWriter
+        - Key: TrackitPersistent
+          Value: 'yes'
 
   JumpInstanceRole:
     Type: AWS::IAM::Role
@@ -239,6 +243,8 @@ Resources:
           Value: !Ref Owner
         - Key: Name
           Value: SsmJump
+        - Key: TrackitPersistent
+          Value: 'yes'
 
 Outputs:
   ApiEndpoint:

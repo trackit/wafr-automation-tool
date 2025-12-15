@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import type { Milestone } from '@backend/models';
 import { tokenGetMilestoneUseCase } from '@backend/useCases';
@@ -46,8 +46,7 @@ export class GetMilestoneAdapter {
           ...question,
           bestPractices: question.bestPractices.map((bestPractice) => ({
             ...bestPractice,
-            // results need to be transformed from Set to Array
-            results: [...bestPractice.results],
+            findingAmount: 0,
           })),
         })),
       })),

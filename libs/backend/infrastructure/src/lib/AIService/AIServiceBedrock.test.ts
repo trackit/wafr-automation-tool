@@ -1,6 +1,6 @@
 import {
   ConverseStreamCommand,
-  ConverseStreamOutput,
+  type ConverseStreamOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 import { mockClient } from 'aws-sdk-client-mock';
 

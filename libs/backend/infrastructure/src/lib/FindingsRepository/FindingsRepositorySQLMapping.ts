@@ -1,16 +1,17 @@
 import {
-  Finding,
-  FindingComment,
-  FindingRemediation,
-  FindingResource,
+  type Finding,
+  type FindingComment,
+  type FindingRemediation,
+  type FindingResource,
 } from '@backend/models';
-import { getBestPracticeCustomId } from '@shared/utils';
 
+import { toDomainBestPractice } from '../AssessmentsRepository/AssessmentsRepositorySQLMapping';
 import {
-  FindingCommentEntity,
-  FindingEntity,
-  FindingRemediationEntity,
-  FindingResourceEntity,
+  type BestPracticeEntity,
+  type FindingCommentEntity,
+  type FindingEntity,
+  type FindingRemediationEntity,
+  type FindingResourceEntity,
 } from '../config/typeorm';
 
 export function toDomainFindingComment(
@@ -49,15 +50,9 @@ export function toDomainFinding(e: FindingEntity): Finding {
     id: e.id,
     hidden: e.hidden,
     isAIAssociated: e.isAIAssociated,
-    bestPractices: e.bestPractices
-      .map((bp) =>
-        getBestPracticeCustomId({
-          pillarId: bp.pillarId,
-          questionId: bp.questionId,
-          bestPracticeId: bp.id,
-        }),
-      )
-      .join(','),
+    bestPractices: (e.bestPractices ?? []).map((bp: BestPracticeEntity) =>
+      toDomainBestPractice(bp),
+    ),
     ...(e.eventCode && {
       eventCode: e.eventCode,
     }),
@@ -65,10 +60,10 @@ export function toDomainFinding(e: FindingEntity): Finding {
       ? toDomainFindingRemediation(e.remediation)
       : undefined,
     resources: (e.resources ?? []).map((r) => toDomainFindingResource(r)),
-    riskDetails: e.riskDetails === '' ? undefined : e.riskDetails,
+    riskDetails: e.riskDetails,
     severity: e.severity,
-    statusCode: e.statusCode === '' ? undefined : e.statusCode,
-    statusDetail: e.statusDetail === '' ? undefined : e.statusDetail,
+    statusCode: e.statusCode,
+    statusDetail: e.statusDetail,
     comments: (e.comments ?? []).map((c) => toDomainFindingComment(c)),
   };
 }

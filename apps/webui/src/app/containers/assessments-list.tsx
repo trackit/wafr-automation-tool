@@ -1,6 +1,7 @@
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
 import {
@@ -14,19 +15,34 @@ import {
   Server,
   Trash2,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Label,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { useDebounceValue } from 'usehooks-ts';
 
 import {
   deleteAssessment,
   getAssessments,
   getAssessmentStep,
+  getOrganization,
   rescanAssessment,
 } from '@webui/api-client';
 import { ConfirmationModal, StatusBadge } from '@webui/ui';
 
 import { formatACEOpportunity } from '../../lib/assessment-utils';
+import { getThemeColors } from '../../lib/theme-colors';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import CreateOpportunityDialog from './create-opportunity-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
@@ -40,6 +56,7 @@ function AssessmentsList() {
   const [search, setSearch] = useDebounceValue('', 500);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -66,6 +83,70 @@ function AssessmentsList() {
     getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
   });
+
+  const { data: organization } = useQuery({
+    queryKey: ['organization'],
+    queryFn: getOrganization,
+  });
+
+  const opportunitiesThisYear = useMemo(() => {
+    if (!organization?.opportunitiesPerMonth) return 0;
+    if (!Array.isArray(organization.opportunitiesPerMonth)) return 0;
+
+    const currentYear = new Date().getFullYear();
+
+    return organization.opportunitiesPerMonth
+      .filter((item: { month?: string; opportunities?: number }) => {
+        if (!item.month) return false;
+        const year = parseInt(item.month.split('-')[1], 10);
+        return year === currentYear;
+      })
+      .reduce(
+        (total: number, item: { opportunities?: number }) =>
+          total + (item.opportunities || 0),
+        0,
+      );
+  }, [organization?.opportunitiesPerMonth]);
+
+  // Transform opportunitiesPerMonth data for the chart
+  const opportunitiesChartData = useMemo(() => {
+    if (!organization?.opportunitiesPerMonth) return [];
+
+    let data: Array<{ month: string; opportunities: number }> = [];
+
+    if (Array.isArray(organization.opportunitiesPerMonth)) {
+      // If it's already an array, use it directly (sort if needed)
+      data = organization.opportunitiesPerMonth
+        .filter((item) => item.month) // Filter out invalid entries
+        .sort((a, b) => {
+          // Ensure sorting by month (assuming MM-YYYY format)
+          const monthA = parseInt(a.month.split('-')[0]);
+          const monthB = parseInt(b.month.split('-')[0]);
+          return monthA - monthB;
+        });
+    }
+
+    return data;
+  }, [organization?.opportunitiesPerMonth]);
+
+  // Pie chart data for assessments goal (10 assessments target)
+  const assessmentsPieChartData = useMemo(() => {
+    const goal = 10;
+    const current = organization?.currentYearTotalAssessments ?? 0;
+    const completed = Math.min(current, goal);
+    const remaining = Math.max(0, goal - completed);
+    const percentage = goal > 0 ? Math.round((completed / goal) * 100) : 0;
+
+    return {
+      data: [
+        { name: 'Completed', value: completed },
+        { name: 'Remaining', value: remaining },
+      ],
+      percentage,
+      completed,
+      goal,
+    };
+  }, [organization?.currentYearTotalAssessments]);
 
   const extractAccountId = (roleArn: string | undefined) => {
     if (!roleArn) return '';
@@ -159,7 +240,7 @@ function AssessmentsList() {
   return (
     <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
       <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
-        <h2 className="mt-0 mb-0 font-medium text-2xl">Assessments</h2>
+        <h2 className="mt-0 mb-0 font-medium text-2xl">Dashboard</h2>
         <div className="flex flex-row gap-4">
           <label className="input input-sm rounded-lg w-full max-w-xs">
             <Search className="w-4 h-4" />
@@ -174,9 +255,134 @@ function AssessmentsList() {
           <NewAssessmentDialog />
         </div>
       </div>
-      <div className="flex flex-row gap-4"></div>
+      {opportunitiesChartData.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="card bg-white border rounded-lg p-4 md:col-span-2 lg:col-span-2">
+            <h2 className="card-title mb-4">WAFR Opportunities per Month</h2>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart
+                data={opportunitiesChartData}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="month"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip
+                  content={({ payload }) => {
+                    if (payload && payload.length > 0) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                          <p className="font-medium">{data.month}</p>
+                          <p className="text-sm">
+                            Opportunities: {data.opportunities}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar
+                  dataKey="opportunities"
+                  fill={getThemeColors().primary}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="card bg-white border rounded-lg p-4">
+            <h2 className="card-title mb-4"> {currentYear} Assessments Goal</h2>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={assessmentsPieChartData.data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
+                >
+                  {assessmentsPieChartData.data.map((entry, index) => {
+                    const colors = getThemeColors();
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          entry.name === 'Completed'
+                            ? colors.success
+                            : '#e5e7eb'
+                        }
+                      />
+                    );
+                  })}
+                  <Label
+                    value={`${assessmentsPieChartData.percentage}%`}
+                    position="center"
+                    style={{
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      fill: getThemeColors().baseContent,
+                    }}
+                  />
+                </Pie>
+                <Tooltip
+                  content={({ payload }) => {
+                    if (payload && payload.length > 0) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                          <p className="font-medium">{data.name}</p>
+                          <p className="text-sm">
+                            {data.value} assessment
+                            {data.value !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="text-center mt-2 text-sm text-base-content/70">
+              {assessmentsPieChartData.completed} of{' '}
+              {assessmentsPieChartData.goal} assessments
+            </div>
+          </div>
+          <div className="card bg-white border rounded-lg p-4 flex flex-col gap-4">
+            <h2 className="card-title text-center">{currentYear} Summary</h2>
+            <div className="flex sm:flex-row md:flex-col gap-4 h-full justify-center items-center">
+              <div className="text-center flex-1 flex flex-col justify-center items-center">
+                <div className="text-5xl font-bold text-primary font-light tracking-tighter">
+                  {organization?.currentYearTotalAssessments ?? 0}
+                </div>
+                <div className="text-sm text-base-content/70 mt-1">
+                  Total Assessments
+                </div>
+              </div>
+              <div className="text-center flex-1 flex flex-col justify-center items-center">
+                <div className="text-5xl font-bold text-success font-light tracking-tighter">
+                  {opportunitiesThisYear}
+                </div>
+                <div className="text-sm text-base-content/70 mt-1">
+                  Total Opportunities
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
-        className="grid gap-4 overflow-auto rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
+        className="grid gap-4 rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
         style={{
           gridTemplateColumns: `repeat(auto-fit, minmax(300px, ${
             data?.pages?.[0]?.assessments?.length === 1 && isLargeScreen

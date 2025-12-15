@@ -72,6 +72,9 @@ export class OpportunityTeamMemberEntity {
   @PrimaryColumn('varchar')
   domain!: string;
 
+  @PrimaryColumn('varchar', { nullable: false })
+  email!: string;
+
   @ManyToOne(
     () => AceIntegrationEntity,
     (aceIntegration) => aceIntegration.opportunityTeamMembers,
@@ -85,9 +88,6 @@ export class OpportunityTeamMemberEntity {
 
   @Column('varchar', { nullable: false })
   lastName!: string;
-
-  @Column('varchar', { nullable: false })
-  email!: string;
 }
 
 export const organizationsEntities = [

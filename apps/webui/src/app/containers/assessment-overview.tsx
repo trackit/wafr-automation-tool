@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import {
   Calendar,
   Computer,
@@ -26,7 +27,8 @@ import {
   YAxis,
 } from 'recharts';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
+import { getAssessmentGraph } from '@webui/api-client';
 
 import {
   calculateOverallCompletion,
@@ -55,28 +57,47 @@ const SEVERITIES = [
   'Other',
 ];
 
+const loadingDiv = (
+  <div className="flex items-center justify-center h-full">
+    <div
+      className="w-16 h-16 loading loading-ring loading-lg text-primary"
+      role="status"
+    ></div>
+  </div>
+);
+
 function AssessmentOverview({
   assessment,
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
 }) {
+  const assessmentId = assessment?.id;
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
   const [enabledResourceTypes, setEnabledResourceTypes] = useState<Set<string>>(
     new Set(),
   );
 
+  const { data: assessmentGraph } = useQuery({
+    queryKey: ['assessments', assessmentId, 'graph'],
+    queryFn: () => getAssessmentGraph(assessmentId!),
+    enabled: !!assessmentId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   // Consolidated useMemo for all data processing
   const processedData = useMemo(() => {
-    if (!assessment?.graphData) return null;
-
-    const { graphData } = assessment;
+    if (!assessmentGraph) return null;
 
     // Process regions data
-    const regions = graphData.regions
-      ? Object.entries(graphData.regions)
-          .sort((a, b) => (b[1] as number) - (a[1] as number))
-          .map(([name, value]) => ({ name, value: value as number }))
-      : [];
+    const regions = Object.entries(assessmentGraph.resources.region)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .map(([name, value]) => ({
+        name,
+        value: value as number,
+      }));
     const topN = 3;
     const top = regions.slice(0, topN);
     const rest = regions.slice(topN);
@@ -91,22 +112,21 @@ function AssessmentOverview({
       0,
     );
     // Process severities data
-    const severities = graphData.severities
-      ? Object.entries(graphData.severities)
-          .sort((a, b) => SEVERITIES.indexOf(a[0]) - SEVERITIES.indexOf(b[0]))
-          .map(([name, value]) => ({ name, value: value as number }))
-      : [];
+    const severities = Object.entries(assessmentGraph.severity)
+      .sort((a, b) => SEVERITIES.indexOf(a[0]) - SEVERITIES.indexOf(b[0]))
+      .map(([name, value]) => ({
+        name,
+        value: value as number,
+      }));
 
     // Process resource types data
-    const resourceTypes = graphData.resourceTypes
-      ? Object.entries(graphData.resourceTypes)
-          .sort((a, b) => (b[1] as number) - (a[1] as number))
-          .map(([name, value], index) => ({
-            name,
-            value: value as number,
-            color: getChartColorByIndex(index),
-          }))
-      : [];
+    const resourceTypes = Object.entries(assessmentGraph.resources.type)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .map(([name, value], index) => ({
+        name,
+        value: value as number,
+        color: getChartColorByIndex(index),
+      }));
 
     return {
       regions,
@@ -119,7 +139,7 @@ function AssessmentOverview({
         0,
       ),
     };
-  }, [assessment]);
+  }, [assessmentGraph]);
 
   // Extract processed data
   const {
@@ -237,9 +257,15 @@ function AssessmentOverview({
           <div className="card bg-white border rounded-lg p-4 w-1/2 flex flex-col">
             <h2 className="card-title text-center">Findings</h2>
             <div className="text-center flex-1 flex flex-col justify-center items-center">
-              <div className="text-5xl font-bold text-primary font-light tracking-tighter">
-                {assessment.graphData?.findings ?? 0}
-              </div>
+              {assessmentGraph ? (
+                <div className="text-5xl font-bold text-primary font-light tracking-tighter">
+                  {assessmentGraph.findings ?? 0}
+                </div>
+              ) : (
+                <span className="loading loading-dots loading-xs text-base-content text-5xl">
+                  0
+                </span>
+              )}
               <div className="text-sm text-base-content/70 mt-1">
                 Total Issues Found
               </div>
@@ -269,70 +295,74 @@ function AssessmentOverview({
                 <h2 className="card-title">Findings by Region</h2>
               </div>
               <div className="flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Legend
-                      wrapperStyle={{ fontSize: '12px' }}
-                      verticalAlign="top"
-                      align="center"
-                      content={() => (
-                        <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
-                          {assessmentProcessedRegions?.map((entry, index) => {
-                            const percentage =
-                              totalRegionsCount > 0
-                                ? (
-                                    ((entry.value || 0) / totalRegionsCount) *
-                                    100
-                                  ).toFixed(1)
-                                : '0.0';
+                {assessmentGraph ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Legend
+                        wrapperStyle={{ fontSize: '12px' }}
+                        verticalAlign="top"
+                        align="center"
+                        content={() => (
+                          <div className="flex flex-row flex-wrap w-full overflow-y-auto gap-x-4">
+                            {assessmentProcessedRegions?.map((entry, index) => {
+                              const percentage =
+                                totalRegionsCount > 0
+                                  ? (
+                                      ((entry.value || 0) / totalRegionsCount) *
+                                      100
+                                    ).toFixed(1)
+                                  : '0.0';
 
-                            return (
-                              <div
-                                key={`legend-${index}`}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 6,
-                                }}
-                              >
+                              return (
                                 <div
+                                  key={`legend-${index}`}
                                   style={{
-                                    width: 10,
-                                    height: 10,
-                                    backgroundColor:
-                                      getChartColorByIndex(index),
-                                    borderRadius: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6,
                                   }}
-                                />
-                                <span style={{ fontSize: '12px' }}>
-                                  {entry.name} ({percentage}%)
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    />
-                    <Pie
-                      data={assessmentProcessedRegions || []}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      innerRadius={60}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {assessmentProcessedRegions.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={getChartColorByIndex(index)}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                                >
+                                  <div
+                                    style={{
+                                      width: 10,
+                                      height: 10,
+                                      backgroundColor:
+                                        getChartColorByIndex(index),
+                                      borderRadius: 2,
+                                    }}
+                                  />
+                                  <span style={{ fontSize: '12px' }}>
+                                    {entry.name} ({percentage}%)
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      />
+                      <Pie
+                        data={assessmentProcessedRegions || []}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        innerRadius={60}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {assessmentProcessedRegions.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={getChartColorByIndex(index)}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  loadingDiv
+                )}
               </div>
             </div>
           </div>
@@ -342,73 +372,77 @@ function AssessmentOverview({
                 <h2 className="card-title">Findings by Severity</h2>
               </div>
               <div className="flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Legend
-                      verticalAlign="top"
-                      align="center"
-                      wrapperStyle={{ fontSize: '12px' }}
-                      content={({ payload }) => (
-                        <div className="flex flex-row flex-wrap w-full overflow-y-auto">
-                          {payload?.map((entry, index) => {
-                            const item = assessmentSeverities[index];
-                            const percentage =
-                              totalSeveritiesCount > 0
-                                ? (
-                                    ((item?.value || 0) /
-                                      totalSeveritiesCount) *
-                                    100
-                                  ).toFixed(1)
-                                : '0.0';
+                {assessmentGraph ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Legend
+                        verticalAlign="top"
+                        align="center"
+                        wrapperStyle={{ fontSize: '12px' }}
+                        content={({ payload }) => (
+                          <div className="flex flex-row flex-wrap w-full overflow-y-auto">
+                            {payload?.map((entry, index) => {
+                              const item = assessmentSeverities[index];
+                              const percentage =
+                                totalSeveritiesCount > 0
+                                  ? (
+                                      ((item?.value || 0) /
+                                        totalSeveritiesCount) *
+                                      100
+                                    ).toFixed(1)
+                                  : '0.0';
 
-                            return (
-                              <div
-                                key={`legend-${index}`}
-                                style={{
-                                  width: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 6,
-                                }}
-                              >
+                              return (
                                 <div
+                                  key={`legend-${index}`}
                                   style={{
-                                    width: 10,
-                                    height: 10,
-                                    backgroundColor: entry.color,
-                                    borderRadius: 2,
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6,
                                   }}
-                                />
-                                <span style={{ fontSize: '12px' }}>
-                                  {entry.value} ({percentage}%)
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    />
-                    <Pie
-                      data={assessmentSeverities}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      innerRadius={60}
-                      paddingAngle={5}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {assessmentSeverities.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={getSeverityColor(entry.name)}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                                >
+                                  <div
+                                    style={{
+                                      width: 10,
+                                      height: 10,
+                                      backgroundColor: entry.color,
+                                      borderRadius: 2,
+                                    }}
+                                  />
+                                  <span style={{ fontSize: '12px' }}>
+                                    {entry.value} ({percentage}%)
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      />
+                      <Pie
+                        data={assessmentSeverities}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        innerRadius={60}
+                        paddingAngle={5}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {assessmentSeverities.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={getSeverityColor(entry.name)}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  loadingDiv
+                )}
               </div>
             </div>
           </div>
@@ -466,134 +500,143 @@ function AssessmentOverview({
       <div className="flex-[2] card bg-white border rounded-lg p-4 mb-10">
         <div className="flex justify-between items-center mb-4">
           <h2 className="card-title">Findings by Resource Type</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-base-content/70">Bar Chart</span>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="toggle toggle-xs"
-                checked={chartType === 'treemap'}
-                onChange={() =>
-                  setChartType((prev) => (prev === 'bar' ? 'treemap' : 'bar'))
-                }
-              />
-            </label>
-            <span className="text-sm text-base-content/70">Treemap</span>
-          </div>
+          {assessmentGraph ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-base-content/70">Bar Chart</span>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-xs"
+                  checked={chartType === 'treemap'}
+                  onChange={() =>
+                    setChartType((prev) => (prev === 'bar' ? 'treemap' : 'bar'))
+                  }
+                />
+              </label>
+              <span className="text-sm text-base-content/70">Treemap</span>
+            </div>
+          ) : null}
         </div>
-
-        {/* Bar Chart */}
-        {chartType === 'bar' && (
-          <div className="mb-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart
-                data={filteredResourceTypes}
-                margin={{ top: 0, right: 0, left: 0, bottom: 55 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip
-                  content={({ payload }) => {
-                    if (payload && payload.length > 0) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
-                          <p className="font-medium">{data.name}</p>
-                          <p className="text-sm">Count: {data.value}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar
-                  dataKey="value"
-                  fill={getThemeColors().primary}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {chartType === 'treemap' && (
-          <div className="mb-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <Treemap
-                data={filteredResourceTypes}
-                dataKey="value"
-                aspectRatio={4 / 3}
-                fill={lightenColor(getThemeColors().primary, 20)}
-                stroke={'white'}
-              >
-                {filteredResourceTypes.map((entry) => (
-                  <Cell key={entry.name} />
-                ))}
-                <Tooltip
-                  content={({ payload }) => {
-                    if (payload && payload.length > 0) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
-                          <p className="font-medium">{data.name}</p>
-                          <p className="text-sm">Count: {data.value}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-              </Treemap>
-            </ResponsiveContainer>
-          </div>
-        )}
-        {/* Legend for resource types */}
-        <div className="mt-4">
-          <p className="text-sm text-base-content/50 mb-2">
-            Click to toggle resource type visibility
-          </p>
-          <div className="flex flex-row flex-wrap w-full gap-2">
-            {assessmentResourceTypes.map((item, index) => {
-              const isEnabled = enabledResourceTypes.has(item.name);
-              return (
-                <button
-                  key={index}
-                  onClick={() => toggleResourceType(item.name)}
-                  className={`flex items-center gap-2 border rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-                    isEnabled
-                      ? 'bg-base-100 border-base-300'
-                      : 'bg-base-200 border-base-200 opacity-50'
-                  }`}
-                  title={`Click to ${isEnabled ? 'hide' : 'show'} ${item.name}`}
-                >
-                  <span
-                    className={`text-sm font-medium ${
-                      isEnabled ? 'text-base-content' : 'text-base-content/50'
-                    }`}
+        {assessmentGraph ? (
+          <>
+            {/* Bar Chart */}
+            {chartType === 'bar' && (
+              <div className="mb-6">
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart
+                    data={filteredResourceTypes}
+                    margin={{ top: 0, right: 0, left: 0, bottom: 55 }}
                   >
-                    {item.name}
-                  </span>
-                  <span
-                    className={`text-sm ${
-                      isEnabled
-                        ? 'text-base-content/70'
-                        : 'text-base-content/30'
-                    }`}
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="name"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      content={({ payload }) => {
+                        if (payload && payload.length > 0) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium">{data.name}</p>
+                              <p className="text-sm">Count: {data.value}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill={getThemeColors().primary}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {chartType === 'treemap' && (
+              <div className="mb-6">
+                <ResponsiveContainer width="100%" height={350}>
+                  <Treemap
+                    data={filteredResourceTypes}
+                    dataKey="value"
+                    aspectRatio={4 / 3}
+                    fill={lightenColor(getThemeColors().primary, 20)}
+                    stroke={'white'}
                   >
-                    ({item.value})
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                    {filteredResourceTypes.map((entry) => (
+                      <Cell key={entry.name} />
+                    ))}
+                    <Tooltip
+                      content={({ payload }) => {
+                        if (payload && payload.length > 0) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-base-300 border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium">{data.name}</p>
+                              <p className="text-sm">Count: {data.value}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {/* Legend for resource types */}
+            <div className="mt-4">
+              <p className="text-sm text-base-content/50 mb-2">
+                Click to toggle resource type visibility
+              </p>
+              <div className="flex flex-row flex-wrap w-full gap-2">
+                {assessmentResourceTypes.map((item, index) => {
+                  const isEnabled = enabledResourceTypes.has(item.name);
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => toggleResourceType(item.name)}
+                      className={`flex items-center gap-2 border rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
+                        isEnabled
+                          ? 'bg-base-100 border-base-300'
+                          : 'bg-base-200 border-base-200 opacity-50'
+                      }`}
+                      title={`Click to ${isEnabled ? 'hide' : 'show'} ${item.name}`}
+                    >
+                      <span
+                        className={`text-sm font-medium ${
+                          isEnabled
+                            ? 'text-base-content'
+                            : 'text-base-content/50'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      <span
+                        className={`text-sm ${
+                          isEnabled
+                            ? 'text-base-content/70'
+                            : 'text-base-content/30'
+                        }`}
+                      >
+                        ({item.value})
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        ) : (
+          loadingDiv
+        )}
       </div>
     </div>
   );

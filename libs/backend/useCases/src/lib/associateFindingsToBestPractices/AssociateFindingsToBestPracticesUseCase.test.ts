@@ -175,6 +175,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       questionSetService,
       findingToBestPracticesAssociationService,
       fakeAssessmentsRepository,
+      fakeFindingsRepository,
     } = setup();
 
     const pillars = [
@@ -195,8 +196,14 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     const findings = [
-      FindingMother.basic().withId('prowler#1').build(),
-      FindingMother.basic().withId('prowler#2').build(),
+      FindingMother.basic()
+        .withId('prowler#1')
+        .withIsAIAssociated(true)
+        .build(),
+      FindingMother.basic()
+        .withId('prowler#2')
+        .withIsAIAssociated(true)
+        .build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -239,15 +246,15 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
 
     await useCase.associateFindingsToBestPractices(args);
 
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    const bestPractice =
-      updatedAssessment?.pillars?.[0].questions[0].bestPractices[0];
-    expect(bestPractice?.results).toEqual(
-      new Set([findings[0].id, findings[1].id]),
-    );
+    const { findings: associatedFindings } =
+      await fakeFindingsRepository.getBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillars[0].id,
+        questionId: pillars[0].questions[0].id,
+        bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+      });
+    expect(associatedFindings).toEqual(findings);
   });
 
   it('should update all best practices results with findings associations', async () => {
@@ -256,6 +263,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       questionSetService,
       findingToBestPracticesAssociationService,
       fakeAssessmentsRepository,
+      fakeFindingsRepository,
     } = setup();
 
     const pillars = [
@@ -277,8 +285,14 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     await fakeAssessmentsRepository.save(assessment);
 
     const findings = [
-      FindingMother.basic().withId('prowler#1').build(),
-      FindingMother.basic().withId('prowler#2').build(),
+      FindingMother.basic()
+        .withId('prowler#1')
+        .withIsAIAssociated(true)
+        .build(),
+      FindingMother.basic()
+        .withId('prowler#2')
+        .withIsAIAssociated(true)
+        .build(),
     ];
     const args = AssociateFindingsToBestPracticesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -326,18 +340,25 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
 
     await useCase.associateFindingsToBestPractices(args);
 
-    const updatedAssessment = await fakeAssessmentsRepository.get({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    const bestPractice1 =
-      updatedAssessment?.pillars?.[0].questions[0].bestPractices[0];
-    const bestPractice2 =
-      updatedAssessment?.pillars?.[0].questions[0].bestPractices[1];
-    expect(bestPractice1?.results).toEqual(new Set([findings[0].id]));
-    expect(bestPractice2?.results).toEqual(
-      new Set([findings[0].id, findings[1].id]),
-    );
+    const { findings: associatedFindings } =
+      await fakeFindingsRepository.getBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillars[0].id,
+        questionId: pillars[0].questions[0].id,
+        bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
+      });
+    expect(associatedFindings).toEqual([findings[0]]);
+
+    const { findings: associatedFindings2 } =
+      await fakeFindingsRepository.getBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        pillarId: pillars[0].id,
+        questionId: pillars[0].questions[0].id,
+        bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
+      });
+    expect(associatedFindings2).toEqual([findings[0], findings[1]]);
   });
 });
 

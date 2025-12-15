@@ -1,5 +1,5 @@
-import { Organization } from '@backend/models';
-import { OrganizationRepository } from '@backend/ports';
+import { type Organization } from '@backend/models';
+import { type OrganizationRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeOrganizationRepository implements OrganizationRepository {
@@ -11,6 +11,15 @@ export class FakeOrganizationRepository implements OrganizationRepository {
 
   async get(organizationDomain: string): Promise<Organization | undefined> {
     return this.organizations[organizationDomain];
+  }
+
+  async getAll(args?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<Organization[]> {
+    const { limit, offset = 0 } = args || {};
+    const organizations = Object.values(this.organizations);
+    return organizations.slice(offset, limit ? offset + limit : undefined);
   }
 }
 

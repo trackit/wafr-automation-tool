@@ -4,7 +4,11 @@ import {
   tokenAssessmentsRepository,
   tokenObjectsStorage,
 } from '@backend/infrastructure';
-import { Finding, ScanFinding, ScanningTool } from '@backend/models';
+import {
+  type Finding,
+  type ScanFinding,
+  type ScanningTool,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, chunk } from '@shared/utils';
 
@@ -80,7 +84,7 @@ export class StoreFindingsToAssociateUseCaseImpl
       ...scanFinding,
       isAIAssociated: true,
       hidden: false,
-      bestPractices: '',
+      bestPractices: [],
       comments: [],
     }));
     const findingsChunks = chunk(findings, this.chunkSize);

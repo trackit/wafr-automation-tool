@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ScanFinding } from '@backend/models';
+import { type ScanFinding, SeverityType } from '@backend/models';
 import { parseJsonArray } from '@shared/utils';
 
 import { ScanProvider } from './ScanProvider';
@@ -34,6 +34,7 @@ export class CloudSploitScanProvider extends ScanProvider {
       statusCode: finding.status,
       statusDetail: finding.message,
       riskDetails: finding.description,
+      severity: SeverityType.Unknown,
     }));
   }
 

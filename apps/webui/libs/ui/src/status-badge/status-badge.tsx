@@ -1,4 +1,4 @@
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 
 export function StatusBadge({
   status,

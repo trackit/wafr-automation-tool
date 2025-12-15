@@ -1,6 +1,6 @@
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 
-import { AssumedCredentials, STSPort } from '@backend/ports';
+import { type AssumedCredentials, type STSPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';

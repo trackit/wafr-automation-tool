@@ -1,4 +1,4 @@
-import { Assessment, Pillar, Question } from '@backend/models';
+import { type Assessment, type Pillar, type Question } from '@backend/models';
 
 import {
   BestPracticeNotFoundError,

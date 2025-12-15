@@ -1,7 +1,7 @@
-import { Pillar, SeverityType } from '@backend/models';
+import { type Pillar, SeverityType } from '@backend/models';
 import { reset } from '@shared/di-container';
 
-import { QuestionSetService, RawQuestionSet } from './QuestionSetService';
+import { QuestionSetService, type RawQuestionSet } from './QuestionSetService';
 
 describe('QuestionSetService', () => {
   describe('get', () => {
@@ -25,7 +25,6 @@ describe('QuestionSetService', () => {
                   label: 'best-practice-label',
                   risk: SeverityType.High,
                   description: 'best-practice-description',
-                  results: new Set(),
                   checked: false,
                 },
               ],

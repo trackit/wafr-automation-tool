@@ -6,7 +6,7 @@ import {
 import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  User,
+  type User,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -47,9 +47,9 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
       });
     }
 
-    const assessmentExport = assessment.fileExports?.[
-      AssessmentFileExportType.PDF
-    ]?.find((assessmentExport) => assessmentExport.id === fileExportId);
+    const assessmentExport = assessment.fileExports?.find(
+      (assessmentExport) => assessmentExport.id === fileExportId,
+    );
     if (!assessmentExport) {
       throw new AssessmentFileExportNotFoundError({
         assessmentId,
@@ -76,7 +76,6 @@ export class DeletePDFExportUseCaseImpl implements DeletePDFExportUseCase {
     await this.assessmentsRepository.deleteFileExport({
       assessmentId,
       organizationDomain: user.organizationDomain,
-      type: AssessmentFileExportType.PDF,
       id: fileExportId,
     });
     this.logger.info(

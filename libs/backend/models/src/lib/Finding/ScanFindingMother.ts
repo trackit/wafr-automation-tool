@@ -15,6 +15,11 @@ export class ScanFindingMother {
   public static basic(): ScanFindingMother {
     return new ScanFindingMother({
       id: 'tool#1',
+      resources: [],
+      severity: SeverityType.Medium,
+      riskDetails: '',
+      statusCode: '',
+      statusDetail: '',
     });
   }
 
@@ -38,7 +43,7 @@ export class ScanFindingMother {
     return this;
   }
 
-  public withRiskDetails(riskDetails?: string): ScanFindingMother {
+  public withRiskDetails(riskDetails: string): ScanFindingMother {
     this.data.riskDetails = riskDetails;
     return this;
   }
@@ -48,12 +53,12 @@ export class ScanFindingMother {
     return this;
   }
 
-  public withStatusCode(statusCode?: string): ScanFindingMother {
+  public withStatusCode(statusCode: string): ScanFindingMother {
     this.data.statusCode = statusCode;
     return this;
   }
 
-  public withStatusDetail(statusDetail?: string): ScanFindingMother {
+  public withStatusDetail(statusDetail: string): ScanFindingMother {
     this.data.statusDetail = statusDetail;
     return this;
   }

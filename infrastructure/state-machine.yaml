@@ -239,32 +239,6 @@ Resources:
         EntryPoints:
           - handler.ts
 
-  ComputeGraphDataLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${ComputeGraphDataFunction}'
-      RetentionInDays: !Ref LogRetentionInDays
-  ComputeGraphDataFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ../apps/backend/src/handlers/stateMachine/computeGraphData
-      Timeout: 600
-      Tags:
-        Name: ComputeGraphDataFunction
-      Policies:
-        - AWSLambdaVPCAccessExecutionRole
-        - AWSSecretsManagerGetSecretValuePolicy:
-            SecretArn: !Ref DBCredentialsSecretArn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: cjs
-        Target: es2024
-        Minify: false
-        Sourcemap: true
-        EntryPoints:
-          - handler.ts
-
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -310,7 +284,6 @@ Resources:
                 - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
-                - !GetAtt ComputeGraphDataFunction.Arn
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
@@ -493,7 +466,7 @@ Resources:
                       BackoffRate: 2
                       IntervalSeconds: 1
                       MaxAttempts: 3
-            Next: ComputeGraphData
+            Next: Cleanup
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -502,21 +475,6 @@ Resources:
                   assessmentId: '{% $assessmentId %}'
                   organizationDomain: '{% $organizationDomain %}'
                   error: '{% $states.errorOutput %}'
-          ComputeGraphData:
-            Type: Task
-            Resource: !GetAtt ComputeGraphDataFunction.Arn
-            Arguments:
-              assessmentId: '{% $assessmentId %}'
-              organizationDomain: '{% $organizationDomain %}'
-            Catch:
-              - ErrorEquals:
-                  - States.ALL
-                Next: CleanupOnError
-                Output:
-                  assessmentId: '{% $assessmentId %}'
-                  organizationDomain: '{% $organizationDomain %}'
-                  error: '{% $states.errorOutput %}'
-            Next: 'Cleanup'
           Cleanup:
             Type: Task
             Resource: !GetAtt CleanupFunction.Arn
