@@ -1,6 +1,6 @@
 import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import { CustomerType } from '@backend/models';
 import { tokenCreateOpportunityUseCase } from '@backend/useCases';

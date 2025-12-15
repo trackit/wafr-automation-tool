@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import {
-  RefObject,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -24,7 +24,7 @@ import {
   useState,
 } from 'react';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 import {
   addComment,
   deleteComment,

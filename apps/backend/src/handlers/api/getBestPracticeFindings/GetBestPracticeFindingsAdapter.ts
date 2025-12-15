@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import { tokenCognitoService } from '@backend/infrastructure';
 import type { Finding } from '@backend/models';

@@ -4,7 +4,7 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import z from 'zod';
 
-import { DBCredentials, SecretsManager } from '@backend/ports';
+import { type DBCredentials, type SecretsManager } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJsonObject } from '@shared/utils';
 

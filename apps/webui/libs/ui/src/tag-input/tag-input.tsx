@@ -1,4 +1,9 @@
-import { ChangeEvent, FocusEvent, KeyboardEvent, useState } from 'react';
+import {
+  type ChangeEvent,
+  type FocusEvent,
+  type KeyboardEvent,
+  useState,
+} from 'react';
 
 export function TagsInput({
   tags,

@@ -3,7 +3,7 @@ import {
   CachePointType,
   ConversationRole,
   ConverseStreamCommand,
-  ConverseStreamCommandOutput,
+  type ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
 import type { AIService, Prompt, TextComponent } from '@backend/ports';

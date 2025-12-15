@@ -1,17 +1,17 @@
 import {
-  Assessment,
-  AssessmentFileExport,
-  BestPractice,
-  Pillar,
-  Question,
+  type Assessment,
+  type AssessmentFileExport,
+  type BestPractice,
+  type Pillar,
+  type Question,
 } from '@backend/models';
 
 import {
-  AssessmentEntity,
-  BestPracticeEntity,
-  FileExportEntity,
-  PillarEntity,
-  QuestionEntity,
+  type AssessmentEntity,
+  type BestPracticeEntity,
+  type FileExportEntity,
+  type PillarEntity,
+  type QuestionEntity,
 } from '../config/typeorm';
 
 export function toDomainBestPractice(e: BestPracticeEntity): BestPractice {

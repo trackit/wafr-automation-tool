@@ -1,16 +1,20 @@
-import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import {
+  type EntityTarget,
+  type ObjectLiteral,
+  type Repository,
+} from 'typeorm';
 
 import {
-  Finding,
-  FindingAggregationFields,
-  FindingAggregationResult,
-  FindingBody,
-  FindingComment,
-  FindingCommentBody,
+  type Finding,
+  type FindingAggregationFields,
+  type FindingAggregationResult,
+  type FindingBody,
+  type FindingComment,
+  type FindingCommentBody,
 } from '@backend/models';
 import {
-  AssessmentsRepositoryGetBestPracticeFindingsArgs,
-  FindingRepository,
+  type AssessmentsRepositoryGetBestPracticeFindingsArgs,
+  type FindingRepository,
 } from '@backend/ports';
 import { inject } from '@shared/di-container';
 import { decodeNextToken, encodeNextToken } from '@shared/utils';

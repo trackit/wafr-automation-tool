@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import { tokenCreateMilestoneUseCase } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';

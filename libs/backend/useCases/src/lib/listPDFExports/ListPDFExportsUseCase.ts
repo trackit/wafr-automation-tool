@@ -1,5 +1,5 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
-import { AssessmentFileExport, User } from '@backend/models';
+import { type AssessmentFileExport, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';

@@ -1,5 +1,5 @@
 import { tokenAssessmentsRepository } from '@backend/infrastructure';
-import { ScanFinding, ScanningTool } from '@backend/models';
+import { type ScanFinding, ScanningTool } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -7,7 +7,7 @@ import {
   CloudCustodianScanProvider,
   CloudSploitScanProvider,
   ProwlerScanProvider,
-  ScanProvider,
+  type ScanProvider,
 } from './ScanProvider';
 
 export interface GetScannedFindingsArgs {

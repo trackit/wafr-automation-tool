@@ -2,7 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
 } from '@backend/infrastructure';
-import { AssessmentStep, User } from '@backend/models';
+import { AssessmentStep, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';

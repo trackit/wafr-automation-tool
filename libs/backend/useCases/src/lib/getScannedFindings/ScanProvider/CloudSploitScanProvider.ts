@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ScanFinding, SeverityType } from '@backend/models';
+import { type ScanFinding, SeverityType } from '@backend/models';
 import { parseJsonArray } from '@shared/utils';
 
 import { ScanProvider } from './ScanProvider';

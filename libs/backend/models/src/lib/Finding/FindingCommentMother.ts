@@ -1,4 +1,4 @@
-import { FindingComment } from './Finding';
+import { type FindingComment } from './Finding';
 
 export class FindingCommentMother {
   private data: FindingComment;

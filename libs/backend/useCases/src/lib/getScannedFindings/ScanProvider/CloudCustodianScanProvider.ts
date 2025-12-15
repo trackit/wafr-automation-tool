@@ -1,4 +1,4 @@
-import { ScanFinding } from '@backend/models';
+import { type ScanFinding } from '@backend/models';
 
 import { ScanProvider } from './ScanProvider';
 

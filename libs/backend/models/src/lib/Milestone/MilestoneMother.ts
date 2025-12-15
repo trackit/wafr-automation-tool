@@ -1,5 +1,5 @@
-import { Pillar } from '../models';
-import { Milestone } from './Milestone';
+import { type Pillar } from '../models';
+import { type Milestone } from './Milestone';
 
 export class MilestoneMother {
   private data: Milestone;

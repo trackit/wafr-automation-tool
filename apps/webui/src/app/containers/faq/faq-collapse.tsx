@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-import { FAQItem } from './faq';
+import { type FAQItem } from './faq';
 
 type FAQCollapseProps = {
   item: FAQItem;

@@ -1,6 +1,6 @@
 import { ScanningTool } from '@backend/models';
 
-import { GetScannedFindingsArgs } from './GetScannedFindingsUseCase';
+import { type GetScannedFindingsArgs } from './GetScannedFindingsUseCase';
 
 export class GetScannedFindingsUseCaseArgsMother {
   private data: GetScannedFindingsArgs;

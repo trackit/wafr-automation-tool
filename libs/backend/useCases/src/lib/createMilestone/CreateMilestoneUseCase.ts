@@ -4,7 +4,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { User } from '@backend/models';
+import { type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {

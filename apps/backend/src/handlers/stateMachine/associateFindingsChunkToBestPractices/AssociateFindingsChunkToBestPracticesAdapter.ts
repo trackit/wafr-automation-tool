@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { tokenObjectsStorage } from '@backend/infrastructure';
-import { Finding, ScanningTool } from '@backend/models';
+import { type Finding, ScanningTool } from '@backend/models';
 import { tokenAssociateFindingsToBestPracticesUseCase } from '@backend/useCases';
 import { inject } from '@shared/di-container';
 import { parseJsonArray } from '@shared/utils';

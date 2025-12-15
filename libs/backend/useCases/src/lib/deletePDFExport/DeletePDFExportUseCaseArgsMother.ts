@@ -1,6 +1,6 @@
-import { User, UserMother } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
-import { DeletePDFExportUseCaseArgs } from './DeletePDFExportUseCase';
+import { type DeletePDFExportUseCaseArgs } from './DeletePDFExportUseCase';
 
 export class DeletePDFExportUseCaseArgsMother {
   private data: DeletePDFExportUseCaseArgs;

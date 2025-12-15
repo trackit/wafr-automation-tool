@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 
-import { Row } from '@tanstack/react-table';
+import { type Row } from '@tanstack/react-table';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

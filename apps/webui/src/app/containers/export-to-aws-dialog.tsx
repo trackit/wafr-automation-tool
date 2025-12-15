@@ -3,7 +3,7 @@ import { ArrowRightFromLine } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 
-import { ApiError, exportToAWS } from '@webui/api-client';
+import { type ApiError, exportToAWS } from '@webui/api-client';
 import { ExportToAWS } from '@webui/forms';
 import { Modal } from '@webui/ui';
 

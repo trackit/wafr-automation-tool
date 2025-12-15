@@ -1,4 +1,4 @@
-import { AssessmentsRepository } from '@backend/ports';
+import { type AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';

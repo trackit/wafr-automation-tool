@@ -1,4 +1,4 @@
-import { components, operations } from '@shared/api-schema';
+import { type components, type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 

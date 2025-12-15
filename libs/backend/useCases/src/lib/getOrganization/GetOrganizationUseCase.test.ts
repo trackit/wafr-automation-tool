@@ -2,12 +2,12 @@ import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
-import { Assessment, AssessmentMother } from '@backend/models';
+import { type Assessment, AssessmentMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import {
   GetOrganizationUseCaseImpl,
-  OpportunitiesPerMonthItem,
+  type OpportunitiesPerMonthItem,
 } from './GetOrganizationUseCase';
 import { GetOrganizationUseCaseArgsMother } from './GetOrganizationUseCaseArgsMother';
 

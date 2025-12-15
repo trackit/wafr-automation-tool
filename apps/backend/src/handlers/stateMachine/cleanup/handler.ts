@@ -1,4 +1,4 @@
-import { CleanupAdapter, CleanupOutput } from './CleanupAdapter';
+import { CleanupAdapter, type CleanupOutput } from './CleanupAdapter';
 
 const adapter = new CleanupAdapter();
 

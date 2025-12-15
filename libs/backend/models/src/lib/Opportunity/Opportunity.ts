@@ -1,4 +1,7 @@
-import { CountryCode, Industry } from '@aws-sdk/client-partnercentral-selling';
+import {
+  type CountryCode,
+  type Industry,
+} from '@aws-sdk/client-partnercentral-selling';
 
 export interface OpportunityDetails {
   companyName: string;

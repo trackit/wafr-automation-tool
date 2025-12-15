@@ -1,4 +1,4 @@
-import { AceIntegration, Organization } from './Organization';
+import { type AceIntegration, type Organization } from './Organization';
 
 export class OrganizationMother {
   private data: Organization;

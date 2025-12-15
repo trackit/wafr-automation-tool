@@ -8,7 +8,7 @@ import {
 import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 
-import { components } from '@shared/api-schema';
+import { type components } from '@shared/api-schema';
 import {
   deletePDFExport,
   generatePDFExportURL,

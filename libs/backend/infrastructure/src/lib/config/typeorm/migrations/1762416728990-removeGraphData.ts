@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from 'typeorm';
 
 export class RemoveGraphData1762416728990 implements MigrationInterface {
   name = 'RemoveGraphData1762416728990';

@@ -1,4 +1,4 @@
-import { OrganizationRepository } from '@backend/ports';
+import { type OrganizationRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 import { OrganizationRepositorySQL } from './OrganizationRepositorySQL';

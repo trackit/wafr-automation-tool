@@ -1,5 +1,5 @@
-import { Organization } from '@backend/models';
-import { OrganizationRepository } from '@backend/ports';
+import { type Organization } from '@backend/models';
+import { type OrganizationRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeOrganizationRepository implements OrganizationRepository {

@@ -1,4 +1,4 @@
-import { User, UserMother } from '@backend/models';
+import { type User, UserMother } from '@backend/models';
 
 import type { StartAssessmentUseCaseArgs } from './StartAssessmentUseCase';
 
