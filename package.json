@@ -74,7 +74,7 @@
     "@nx/eslint": "22.0.1",
     "@nx/eslint-plugin": "21.6.5",
     "@nx/js": "21.6.2",
-    "@nx/playwright": "21.6.2",
+    "@nx/playwright": "22.2.5",
     "@nx/react": "21.6.4",
     "@nx/vite": "22.2.5",
     "@nx/web": "21.6.2",
