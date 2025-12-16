@@ -24,7 +24,10 @@ import {
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
-import { testTypeORMConfig, tokenTypeORMConfigCreator } from './infrastructure';
+import {
+  getTestTypeORMConfig,
+  tokenTypeORMConfigCreator,
+} from './infrastructure';
 import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -109,6 +112,8 @@ export const registerTestInfrastructure = () => {
     useFactory: () => inject(tokenFakePartnerCentralSellingService),
   });
   register(tokenTypeORMConfigCreator, {
-    useFactory: async () => testTypeORMConfig,
+    useFactory: async () => {
+      return getTestTypeORMConfig({ port: Number(process.env.DB_PORT) });
+    },
   });
 };

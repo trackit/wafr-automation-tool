@@ -1,23 +1,30 @@
 import { inject, reset } from '@shared/di-container';
 
-import { Tenant } from '../infrastructure';
+import { startPostgresContainer, Tenant } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   MultiDatabaseTypeORMClientManager,
   tokenTypeORMClientManager,
 } from './MultiDatabaseTypeORMClientManager';
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
 
 beforeAll(async () => {
+  pgContainer = await startPostgresContainer();
   const { clientManager } = setup();
+
   await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
-});
+}, 30000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
   await clientManager.closeConnections();
+});
+
+afterAll(async () => {
+  await pgContainer.stop();
 });
 
 describe('MultiDatabaseTypeORMClientManager', () => {

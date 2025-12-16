@@ -28,11 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Start docker compose
-        run: |
-          docker compose up -d
-          sleep 5
-
       - name: Prepare database
         run: pnpm run test:backend:init
 

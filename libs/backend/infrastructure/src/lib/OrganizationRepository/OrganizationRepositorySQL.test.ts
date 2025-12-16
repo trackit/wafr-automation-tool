@@ -1,21 +1,30 @@
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
+import { startPostgresContainer } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { OrganizationRepositorySQL } from './OrganizationRepositorySQL';
 
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
+
 beforeAll(async () => {
   reset();
+  pgContainer = await startPostgresContainer();
   registerTestInfrastructure();
+
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
-});
+}, 30000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
   await clientManager.closeConnections();
+});
+
+afterAll(async () => {
+  await pgContainer.stop();
 });
 
 describe('OrganizationRepositorySQL', () => {
