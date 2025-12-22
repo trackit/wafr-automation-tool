@@ -17,8 +17,13 @@ import { GetAssessmentAdapterEventMother } from './GetAssessmentAdapterEventMoth
 describe('getAssessment adapter', () => {
   describe('args validation', () => {
     it('should validate args', async () => {
-      const { adapter } = setup();
+      const { adapter, useCase } = setup();
 
+      const defaultAssessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue({
+        assessment: defaultAssessment,
+        bestPracticesFindingsAmount: {},
+      });
       const event = GetAssessmentAdapterEventMother.basic().build();
 
       const response = await adapter.handle(event);
@@ -26,7 +31,13 @@ describe('getAssessment adapter', () => {
     });
 
     it('should call parseApiEvent with the correct parameters', async () => {
-      const { adapter, parseSpy } = setup();
+      const { adapter, parseSpy, useCase } = setup();
+
+      const defaultAssessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue({
+        assessment: defaultAssessment,
+        bestPracticesFindingsAmount: {},
+      });
 
       const event = GetAssessmentAdapterEventMother.basic().build();
 
@@ -68,6 +79,12 @@ describe('getAssessment adapter', () => {
       const event = GetAssessmentAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
         .build();
+
+      const defaultAssessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue({
+        assessment: defaultAssessment,
+        bestPracticesFindingsAmount: {},
+      });
 
       await adapter.handle(event);
 

@@ -112,8 +112,10 @@ export const registerTestInfrastructure = () => {
     useFactory: () => inject(tokenFakePartnerCentralSellingService),
   });
   register(tokenTypeORMConfigCreator, {
-    useFactory: async () => {
-      return getTestTypeORMConfig({ port: Number(process.env.DB_PORT) });
+    useFactory: () => {
+      return async () => {
+        return getTestTypeORMConfig({ port: Number(process.env.DB_PORT) });
+      };
     },
   });
 };
