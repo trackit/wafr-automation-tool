@@ -1,8 +1,8 @@
 import { OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { startPostgresContainer } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { OrganizationRepositorySQL } from './OrganizationRepositorySQL';
 

@@ -9,11 +9,9 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import {
-  AssessmentsRepositorySQL,
-  startPostgresContainer,
-} from '../infrastructure';
+import { AssessmentsRepositorySQL } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './FindingsRepositoryGetBestPracticeFindingsArgsMother';
 import { FindingsRepositorySQL } from './FindingsRepositorySQL';

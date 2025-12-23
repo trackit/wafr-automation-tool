@@ -11,8 +11,8 @@ import {
 import { inject, reset } from '@shared/di-container';
 import { encodeNextToken } from '@shared/utils';
 
-import { startPostgresContainer } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
 
