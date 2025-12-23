@@ -12,6 +12,8 @@
         "backup:Get*",
         "bedrock:List*",
         "bedrock:Get*",
+        "ce:GetCostAndUsage",
+        "ce:GetDimensionValues",
         "cloudtrail:GetInsightSelectors",
         "codeartifact:List*",
         "codebuild:BatchGet*",

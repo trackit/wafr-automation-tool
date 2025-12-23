@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 
@@ -16,6 +17,7 @@ import {
   BestPractice,
   Pillar,
   Question,
+  ServiceCost,
   SeverityType,
 } from '@backend/models';
 
@@ -80,6 +82,13 @@ export class AssessmentEntity
 
   @Column('timestamptz', { nullable: true })
   opportunityCreatedAt?: Date;
+
+  @OneToOne(
+    () => BillingInformationEntity,
+    (billingInformation) => billingInformation.assessment,
+    { cascade: true, nullable: true },
+  )
+  billingInformation?: BillingInformationEntity;
 }
 
 @Entity('pillars')
@@ -220,10 +229,39 @@ export class FileExportEntity implements AssessmentFileExport {
   createdAt!: Date;
 }
 
+@Entity('billingInformation')
+export class BillingInformationEntity {
+  @PrimaryColumn('uuid')
+  assessmentId!: string;
+
+  @OneToOne(
+    () => AssessmentEntity,
+    (assessment) => assessment.billingInformation,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
+  assessment!: AssessmentEntity;
+
+  @Column('timestamptz')
+  billingPeriodStartDate!: Date;
+
+  @Column('timestamptz')
+  billingPeriodEndDate!: Date;
+
+  @Column('varchar')
+  totalCost!: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  servicesCost!: ServiceCost[];
+}
+
 export const assessmentsEntities = [
   AssessmentEntity,
   PillarEntity,
   QuestionEntity,
   BestPracticeEntity,
   FileExportEntity,
+  BillingInformationEntity,
 ];

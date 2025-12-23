@@ -4,6 +4,7 @@ export * from './AssessmentsStateMachine';
 export * from './CognitoService';
 export * from './config/debug';
 export * from './config/typeorm';
+export * from './CostExplorerService';
 export * from './FeatureToggleRepository';
 export * from './FindingsRepository';
 export * from './FindingToBestPracticesAssociationService';

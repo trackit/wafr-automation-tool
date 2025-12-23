@@ -2,7 +2,7 @@ import {
   tokenAssessmentsRepository,
   tokenFindingsRepository,
 } from '@backend/infrastructure';
-import type { Assessment } from '@backend/models';
+import type { Assessment, BillingInformation } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -68,6 +68,26 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
     return bestPracticeFindingCounts;
   }
 
+  private filterZeroCostServices(
+    billingInformation?: BillingInformation,
+  ): BillingInformation | undefined {
+    if (!billingInformation) {
+      return undefined;
+    }
+
+    const filteredServicesCost = billingInformation.servicesCost.filter(
+      (service) => {
+        const cost = parseFloat(service.cost);
+        return cost > 0;
+      },
+    );
+
+    return {
+      ...billingInformation,
+      servicesCost: filteredServicesCost,
+    };
+  }
+
   public async getAssessment(args: GetAssessmentUseCaseArgs): Promise<{
     assessment: Assessment;
     bestPracticesFindingsAmount: BestPracticesFindingCounts;
@@ -86,7 +106,15 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
     const bestPracticesFindingsAmount =
       await this.getBestPracticeFindings(assessment);
 
-    return { assessment, bestPracticesFindingsAmount };
+    return {
+      assessment: {
+        ...assessment,
+        billingInformation: this.filterZeroCostServices(
+          assessment?.billingInformation,
+        ),
+      },
+      bestPracticesFindingsAmount,
+    };
   }
 }
 

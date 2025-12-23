@@ -14,7 +14,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: 'arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-scan-task'
+              AWS:
+                - 'arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-scan-task'
+                - 'arn:aws:iam::<ACCOUNT_ID>:role/wafr-automation-tool-<ENV>-billing-info-role'
             Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: WAFRAutomationScanTaskPolicy
@@ -33,6 +35,8 @@ Resources:
                   - backup:Get*
                   - bedrock:List*
                   - bedrock:Get*
+                  - ce:GetCostAndUsage
+                  - ce:GetDimensionValues
                   - cloudtrail:GetInsightSelectors
                   - codeartifact:List*
                   - codebuild:BatchGet*

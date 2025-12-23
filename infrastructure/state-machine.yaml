@@ -56,6 +56,8 @@ Parameters:
     Type: String
   DBCredentialsSecretArn:
     Type: String
+  GetBillingInfoExecutionRoleArn:
+    Type: String
 
 Globals:
   Function:
@@ -239,6 +241,29 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  GetBillingInfoLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${GetBillingInfoFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+  GetBillingInfoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/stateMachine/getBillingInformation
+      Timeout: 600
+      Tags:
+        Name: GetBillingInfoFunction
+      Role: !Ref GetBillingInfoExecutionRoleArn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   StateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -284,6 +309,7 @@ Resources:
                 - !GetAtt AssociateFindingsChunkToBestPracticesFunction.Arn
                 - !GetAtt CleanupFunction.Arn
                 - !GetAtt PrepareCustodianFunction.Arn
+                - !GetAtt GetBillingInfoFunction.Arn
       Definition:
         Comment: 'State Machine for WAFR Automation Tool'
         QueryLanguage: JSONata
@@ -385,6 +411,15 @@ Resources:
                                 Value: '{% $assessmentId %}'
                               - Name: ROLE_ARN
                                 Value: '{% $roleArn %}'
+                    End: true
+              - StartAt: GetBillingInformation
+                States:
+                  GetBillingInformation:
+                    Type: Task
+                    Resource: !GetAtt GetBillingInfoFunction.Arn
+                    Arguments:
+                      assessmentId: '{% $assessmentId %}'
+                      organizationDomain: '{% $organizationDomain %}'
                     End: true
             Next: 'Prepare Findings Associations'
             Catch:

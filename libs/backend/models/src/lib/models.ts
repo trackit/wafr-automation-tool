@@ -1,5 +1,6 @@
 export * from './Assessment';
 export * from './BestPractice';
+export * from './BillingInformation';
 export * from './Finding';
 export * from './Milestone';
 export * from './Opportunity';

@@ -282,6 +282,17 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         return createdAt >= startDate && createdAt < endDate;
       }).length;
   }
+
+  public async saveBillingInformation(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    billingInformation: BillingInformation;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, billingInformation } = args;
+    const assessment =
+      this.assessments[`${assessmentId}#${organizationDomain}`];
+    assessment.billingInformation = billingInformation;
+  }
 }
 
 export const tokenFakeAssessmentsRepository =

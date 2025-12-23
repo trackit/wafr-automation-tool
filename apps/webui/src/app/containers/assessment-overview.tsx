@@ -57,6 +57,41 @@ const SEVERITIES = [
   'Other',
 ];
 
+export interface BillingInformation {
+  billingPeriodStartDate: string;
+  billingPeriodEndDate: string;
+  totalCost: string;
+  servicesCost: ServiceCost[];
+}
+interface ServiceCost {
+  serviceName: string;
+  cost: string;
+}
+
+const formatCurrency = (value: string) => {
+  const n = Number(value ?? 0);
+  if (Number.isNaN(n)) return value;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(n);
+};
+
+function formatShortDate(d?: string) {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return d;
+  }
+}
+
 const loadingDiv = (
   <div className="flex items-center justify-center h-full">
     <div
@@ -68,8 +103,10 @@ const loadingDiv = (
 
 function AssessmentOverview({
   assessment,
+  maxServices = 5,
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
+  maxServices?: number;
 }) {
   const assessmentId = assessment?.id;
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
@@ -222,6 +259,13 @@ function AssessmentOverview({
       return newSet;
     });
   }, []);
+
+  const billing = assessment?.billingInformation;
+
+  const topServices = (billing?.servicesCost ?? [])
+    .slice()
+    .sort((a, b) => Number(b.cost) - Number(a.cost))
+    .slice(0, maxServices);
 
   if (!assessment) return null;
   return (
@@ -636,6 +680,74 @@ function AssessmentOverview({
           </>
         ) : (
           loadingDiv
+        )}
+      </div>
+
+      <div className="card bg-white border rounded-lg p-4 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-base-content mb-1">
+              Billing and Cost Overview
+            </h3>
+            {billing ? (
+              <div className="flex items-center gap-8">
+                <h2 className="text-2xl font-semibold">
+                  {formatCurrency(billing.totalCost)}
+                </h2>
+                <p className="text-sm text-base-content/60">
+                  {formatShortDate(billing.billingPeriodStartDate)} —{' '}
+                  {formatShortDate(billing.billingPeriodEndDate)}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-base-content/60">
+                No billing information available
+              </p>
+            )}
+          </div>
+        </div>
+
+        {billing && (
+          <div className="mt-4">
+            {topServices?.length > 0 ? (
+              <>
+                <h4 className="text-sm text-base-content/80 mb-2">
+                  Top services
+                </h4>
+                <ul className="flex flex-col gap-2">
+                  {topServices.map((s, idx) => (
+                    <li key={s.serviceName} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-md bg-base-200 flex items-center justify-center text-sm font-medium">
+                        {idx + 1}
+                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="text-md font-medium truncate">
+                          {s.serviceName}
+                        </div>
+                        <div className="text-sm text-base-content/80 tabular-nums">
+                          {formatCurrency(s.cost)}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                <li className="text-sm text-base-content/60">
+                  No billable services were used during this period
+                </li>
+              </ul>
+            )}
+
+            {billing?.servicesCost &&
+              billing.servicesCost.length > maxServices && (
+                <p className="mt-3 text-xs text-base-content/60">
+                  Showing top {maxServices} of {billing.servicesCost.length}{' '}
+                  services
+                </p>
+              )}
+          </div>
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@ import {
   type Assessment,
   type AssessmentFileExport,
   type BestPractice,
+  type BillingInformation,
   type Pillar,
   type Question,
 } from '@backend/models';
@@ -9,6 +10,7 @@ import {
 import {
   type AssessmentEntity,
   type BestPracticeEntity,
+  type BillingInformationEntity,
   type FileExportEntity,
   type PillarEntity,
   type QuestionEntity,
@@ -83,5 +85,20 @@ export function toDomainAssessment(
     ...(e.opportunityCreatedAt && {
       opportunityCreatedAt: e.opportunityCreatedAt,
     }),
+    ...(e.billingInformation && {
+      billingInformation: toDomainBillingInformation(e.billingInformation),
+    }),
+  };
+}
+
+export function toDomainBillingInformation(
+  entity?: BillingInformationEntity | null,
+): BillingInformation | undefined {
+  if (!entity) return undefined;
+  return {
+    billingPeriodStartDate: entity.billingPeriodStartDate,
+    billingPeriodEndDate: entity.billingPeriodEndDate,
+    totalCost: entity.totalCost,
+    servicesCost: entity.servicesCost ?? [],
   };
 }
