@@ -1,8 +1,8 @@
 import {
   registerTestInfrastructure,
-  startPostgresContainer,
   tokenTypeORMClientManager,
 } from '@backend/infrastructure';
+import { startPostgresContainer } from '@backend/infrastructure-test';
 import { inject, reset } from '@shared/di-container';
 
 import { MigrationRunnerAdapter } from './MigrationRunnerAdapter';

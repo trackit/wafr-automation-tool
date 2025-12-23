@@ -2,12 +2,9 @@ import { DataSource } from 'typeorm';
 
 import { inject, reset } from '@shared/di-container';
 
-import {
-  AssessmentEntity,
-  startPostgresContainer,
-  Tenant,
-} from '../infrastructure';
+import { AssessmentEntity, Tenant } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import {
   MultiDatabaseTypeORMClientManager,
   POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED,
