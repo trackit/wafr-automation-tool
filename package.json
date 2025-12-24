@@ -79,7 +79,7 @@
     "@nx/react": "21.6.4",
     "@nx/vite": "22.2.5",
     "@nx/web": "21.6.2",
-    "@nx/workspace": "21.6.2",
+    "@nx/workspace": "22.3.3",
     "@playwright/test": "^1.55.1",
     "@swc-node/register": "^1.11.1",
     "@swc/core": "^1.13.20",
