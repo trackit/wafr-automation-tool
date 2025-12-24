@@ -13,6 +13,7 @@ export class UpdateFindingUseCaseArgsMother {
     return new UpdateFindingUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
+      version: 1,
       user: UserMother.basic().build(),
       findingBody: {},
     });
@@ -40,6 +41,11 @@ export class UpdateFindingUseCaseArgsMother {
 
   public withUser(user: User): UpdateFindingUseCaseArgsMother {
     this.data.user = user;
+    return this;
+  }
+
+  public withVersion(version: number): UpdateFindingUseCaseArgsMother {
+    this.data.version = version;
     return this;
   }
 

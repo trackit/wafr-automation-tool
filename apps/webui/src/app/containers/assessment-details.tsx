@@ -1204,6 +1204,7 @@ export function AssessmentDetails() {
       {bestPractice && (
         <FindingsDetails
           assessmentId={id}
+          assessmentVersion={assessmentData?.latestVersion ?? 1}
           pillarId={selectedPillar?.id || ''}
           questionId={activeQuestion?.id || ''}
           bestPractice={bestPractice}

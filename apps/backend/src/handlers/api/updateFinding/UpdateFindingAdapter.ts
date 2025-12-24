@@ -11,6 +11,7 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateFindingPathSchema = z.object({
   assessmentId: z.uuid(),
+  version: z.string().regex(/^\d+$/, 'version must be a number'),
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['updateFinding']['parameters']['path']>;
 
@@ -51,6 +52,7 @@ export class UpdateFindingAdapter {
 
     await this.useCase.updateFinding({
       assessmentId,
+      version: Number(pathParameters.version),
       findingId: decodeURIComponent(findingId),
       findingBody: body,
       user,

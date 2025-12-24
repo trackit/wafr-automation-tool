@@ -44,6 +44,7 @@ describe('AddCommentUseCase', () => {
     const input = AddCommentUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withText('This is a new comment')
       .withUser(user)
       .build();
@@ -54,6 +55,7 @@ describe('AddCommentUseCase', () => {
       assessmentId: input.assessmentId,
       organizationDomain: user.organizationDomain,
       findingId: input.findingId,
+      version: input.version,
     });
     expect(findingWithComment).toEqual(
       expect.objectContaining({
@@ -82,6 +84,7 @@ describe('AddCommentUseCase', () => {
     const input = AddCommentUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withText('This is a new comment')
       .withUser(user)
       .build();
@@ -92,6 +95,7 @@ describe('AddCommentUseCase', () => {
       assessmentId: input.assessmentId,
       organizationDomain: user.organizationDomain,
       findingId: input.findingId,
+      version: input.version,
     });
     expect(findingWithComment).toBeDefined();
     expect(findingWithComment?.comments).toBeDefined();

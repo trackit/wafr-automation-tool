@@ -30,11 +30,15 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
   @PrimaryColumn('varchar')
   id!: string;
 
+  @PrimaryColumn('int')
+  version!: number;
+
   @ManyToMany(() => BestPracticeEntity)
   @JoinTable({
     name: 'findingBestPractices',
     joinColumns: [
       { name: 'findingAssessmentId', referencedColumnName: 'assessmentId' },
+      { name: 'findingVersion', referencedColumnName: 'version' },
       { name: 'findingId', referencedColumnName: 'id' },
     ],
     inverseJoinColumns: [
@@ -42,6 +46,7 @@ export class FindingEntity implements Omit<Finding, 'bestPractices'> {
         name: 'bestPracticeAssessmentId',
         referencedColumnName: 'assessmentId',
       },
+      { name: 'bestPracticeVersion', referencedColumnName: 'version' },
       { name: 'questionId', referencedColumnName: 'questionId' },
       { name: 'pillarId', referencedColumnName: 'pillarId' },
       { name: 'bestPracticeId', referencedColumnName: 'id' },
@@ -92,6 +97,9 @@ export class FindingRemediationEntity implements FindingRemediation {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
+  @PrimaryColumn('int')
+  version!: number;
+
   @PrimaryColumn('varchar')
   findingId!: string;
 
@@ -105,15 +113,19 @@ export class FindingRemediationEntity implements FindingRemediation {
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+    { name: 'version', referencedColumnName: 'version' },
   ])
   finding!: FindingEntity;
 }
 
 @Entity('findingResources')
-@Index('ix_findingResources_fk', ['assessmentId', 'findingId'])
+@Index('ix_findingResources_fk', ['assessmentId', 'findingId', 'version'])
 export class FindingResourceEntity implements FindingResource {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @PrimaryColumn('int')
+  version!: number;
 
   @Column('uuid')
   assessmentId!: string;
@@ -137,15 +149,19 @@ export class FindingResourceEntity implements FindingResource {
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+    { name: 'version', referencedColumnName: 'version' },
   ])
   finding!: FindingEntity;
 }
 
 @Entity('findingComments')
-@Index('ix_findingComments_fk', ['assessmentId', 'findingId'])
+@Index('ix_findingComments_fk', ['assessmentId', 'findingId', 'version'])
 export class FindingCommentEntity implements FindingComment {
   @PrimaryColumn('uuid')
   id!: string;
+
+  @PrimaryColumn('int')
+  version!: number;
 
   @Column('uuid')
   assessmentId!: string;
@@ -157,6 +173,7 @@ export class FindingCommentEntity implements FindingComment {
   @JoinColumn([
     { name: 'findingId', referencedColumnName: 'id' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+    { name: 'version', referencedColumnName: 'version' },
   ])
   finding!: FindingEntity;
 

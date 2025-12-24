@@ -1,6 +1,7 @@
 import {
   type Assessment,
   type AssessmentFileExport,
+  type AssessmentVersion,
   type BestPractice,
   type BillingInformation,
   type Pillar,
@@ -9,6 +10,7 @@ import {
 
 import {
   type AssessmentEntity,
+  type AssessmentVersionEntity,
   type BestPracticeEntity,
   type BillingInformationEntity,
   type FileExportEntity,
@@ -60,34 +62,20 @@ function toDomainFileExport(e: FileExportEntity): AssessmentFileExport {
   };
 }
 
-export function toDomainAssessment(
-  e: AssessmentEntity,
-  organizationDomain: string,
-): Assessment {
+export function toDomainAssessmentVersion(
+  entity: AssessmentVersionEntity,
+): AssessmentVersion {
   return {
-    id: e.id,
-    organization: organizationDomain,
-    createdBy: e.createdBy,
-    executionArn: e.executionArn ?? '',
-    createdAt: e.createdAt,
-    name: e.name,
-    questionVersion: e.questionVersion,
-    regions: e.regions,
-    ...(e.exportRegion && { exportRegion: e.exportRegion }),
-    roleArn: e.roleArn,
-    ...(e.finishedAt && { finishedAt: e.finishedAt }),
-    workflows: e.workflows,
-    ...(e.error && { error: e.error }),
-    pillars: (e.pillars ?? []).map((p) => toDomainPillar(p)),
-    fileExports: (e.fileExports ?? []).map((fe) => toDomainFileExport(fe)),
-    ...(e.wafrWorkloadArn && { wafrWorkloadArn: e.wafrWorkloadArn }),
-    ...(e.opportunityId && { opportunityId: e.opportunityId }),
-    ...(e.opportunityCreatedAt && {
-      opportunityCreatedAt: e.opportunityCreatedAt,
-    }),
-    ...(e.billingInformation && {
-      billingInformation: toDomainBillingInformation(e.billingInformation),
-    }),
+    assessmentId: entity.assessmentId,
+    version: entity.version,
+    createdBy: entity.createdBy,
+    createdAt: entity.createdAt,
+    executionArn: entity.executionArn ?? '',
+    finishedAt: entity.finishedAt,
+    error: entity.error,
+    wafrWorkloadArn: entity.wafrWorkloadArn,
+    exportRegion: entity.exportRegion,
+    pillars: (entity.pillars ?? []).map((p) => toDomainPillar(p)),
   };
 }
 
@@ -100,5 +88,64 @@ export function toDomainBillingInformation(
     billingPeriodEndDate: entity.billingPeriodEndDate,
     totalCost: entity.totalCost,
     servicesCost: entity.servicesCost ?? [],
+  };
+}
+
+export function toDomainAssessmentWithVersion(
+  assessment: AssessmentEntity,
+  version: AssessmentVersionEntity,
+  organizationDomain: string,
+): Assessment {
+  return {
+    id: assessment.id,
+    name: assessment.name,
+    organization: organizationDomain,
+    questionVersion: assessment.questionVersion,
+    regions: assessment.regions,
+    roleArn: assessment.roleArn,
+    workflows: assessment.workflows,
+    fileExports: (assessment.fileExports ?? []).map((fe) =>
+      toDomainFileExport(fe),
+    ),
+    ...(assessment.opportunityId && {
+      opportunityId: assessment.opportunityId,
+    }),
+    ...(assessment.opportunityCreatedAt && {
+      opportunityCreatedAt: assessment.opportunityCreatedAt,
+    }),
+    latestVersionNumber: assessment.latestVersionNumber,
+    ...(assessment.billingInformation && {
+      billingInformation: toDomainBillingInformation(
+        assessment.billingInformation,
+      ),
+    }),
+
+    createdBy: version.createdBy,
+    createdAt: version.createdAt,
+    executionArn: version.executionArn ?? '',
+    ...(version.finishedAt && { finishedAt: version.finishedAt }),
+    ...(version.error && { error: version.error }),
+    ...(version.exportRegion && { exportRegion: version.exportRegion }),
+    ...(version.wafrWorkloadArn && {
+      wafrWorkloadArn: version.wafrWorkloadArn,
+    }),
+    pillars: (version.pillars ?? []).map((p) => toDomainPillar(p)),
+  };
+}
+
+export function mergeAssessmentWithVersion(
+  assessment: Assessment,
+  version: AssessmentVersion,
+): Assessment {
+  return {
+    ...assessment,
+    createdAt: version.createdAt ?? assessment.createdAt,
+    createdBy: version.createdBy ?? assessment.createdBy,
+    executionArn: version.executionArn ?? assessment.executionArn,
+    pillars: version.pillars ?? assessment.pillars,
+    finishedAt: version.finishedAt ?? assessment.finishedAt,
+    error: version.error ?? assessment.error,
+    wafrWorkloadArn: version.wafrWorkloadArn ?? assessment.wafrWorkloadArn,
+    exportRegion: version.exportRegion ?? assessment.exportRegion,
   };
 }

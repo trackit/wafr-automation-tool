@@ -56,11 +56,13 @@ export class GetAssessmentGraphUseCaseImpl
       this.findingsRepository.aggregateAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         fields: GRAPH_FIELDS,
       }),
       this.findingsRepository.countAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
       }),
     ]);
 

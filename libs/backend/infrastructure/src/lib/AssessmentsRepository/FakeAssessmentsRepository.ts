@@ -2,7 +2,10 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
+  AssessmentVersion,
+  AssessmentVersionBody,
   BestPracticeBody,
+  BillingInformation,
   PillarBody,
   Question,
   QuestionBody,
@@ -11,8 +14,11 @@ import type { AssessmentsRepository } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 import { decodeNextToken } from '@shared/utils';
 
+import { mergeAssessmentWithVersion } from './AssessmentsRepositorySQLMapping';
+
 export class FakeAssessmentsRepository implements AssessmentsRepository {
   public assessments: Record<string, Assessment> = {};
+  public versions: Record<string, AssessmentVersion> = {};
 
   public async save(assessment: Assessment): Promise<void> {
     const key = `${assessment.id}#${assessment.organization}`;
@@ -22,9 +28,25 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async get(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<Assessment | undefined> {
-    const { assessmentId, organizationDomain } = args;
-    return this.assessments[`${assessmentId}#${organizationDomain}`];
+    const { assessmentId, organizationDomain, version } = args;
+    const assessment =
+      this.assessments[`${assessmentId}#${organizationDomain}`];
+
+    if (!assessment) {
+      return undefined;
+    }
+
+    const latestVersion = await this.getVersion({
+      assessmentId,
+      version: version ?? assessment.latestVersionNumber,
+      organizationDomain,
+    });
+
+    return latestVersion
+      ? mergeAssessmentWithVersion(assessment, latestVersion)
+      : assessment;
   }
 
   public async getAll(args: {
@@ -96,12 +118,14 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     assessmentId: string;
     organizationDomain: string;
     pillarId: string;
+    version: number;
     pillarBody: PillarBody;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, pillarId, pillarBody } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    const pillar = assessment.pillars?.find(
+    const { assessmentId, organizationDomain, pillarId, pillarBody, version } =
+      args;
+    const assessmentVersion =
+      this.versions[`${assessmentId}#${organizationDomain}#${version}`];
+    const pillar = assessmentVersion.pillars?.find(
       (pillar) => pillar.id === pillarId.toString(),
     );
     if (!pillar) {
@@ -121,6 +145,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async updateQuestion(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
@@ -128,16 +153,22 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       questionBody,
     } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    const pillar = assessment.pillars?.find((pillar) => pillar.id === pillarId);
+    const assessmentVersion =
+      this.versions[`${assessmentId}#${organizationDomain}#${version}`];
+    const pillar = assessmentVersion.pillars?.find(
+      (pillar) => pillar.id === pillarId,
+    );
     const question = pillar?.questions.find(
       (question) => question.id === questionId,
     );
+    if (!question) {
+      throw new Error();
+    }
     for (const [key, value] of Object.entries(questionBody)) {
       this.updateQuestionBody(
         question as Question,
@@ -150,6 +181,7 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
   public async updateBestPractice(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -158,13 +190,14 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
     } = args;
-    const assessment =
-      this.assessments[`${assessmentId}#${organizationDomain}`];
-    const pillar = assessment.pillars?.find(
+    const assessmentVersion =
+      this.versions[`${assessmentId}#${organizationDomain}#${version}`];
+    const pillar = assessmentVersion.pillars?.find(
       (pillar) => pillar.id === pillarId.toString(),
     );
     const question = pillar?.questions.find(
@@ -292,6 +325,44 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const assessment =
       this.assessments[`${assessmentId}#${organizationDomain}`];
     assessment.billingInformation = billingInformation;
+  }
+
+  public async createVersion(args: {
+    assessmentVersion: AssessmentVersion;
+    organizationDomain: string;
+  }): Promise<void> {
+    const { assessmentVersion, organizationDomain } = args;
+    const versionKey = `${assessmentVersion.assessmentId}#${organizationDomain}#${assessmentVersion.version}`;
+    this.versions[versionKey] = assessmentVersion;
+  }
+
+  public async updateVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+    assessmentVersionBody: AssessmentVersionBody;
+  }): Promise<void> {
+    const { assessmentId, version, organizationDomain, assessmentVersionBody } =
+      args;
+    const versionKey = `${assessmentId}#${organizationDomain}#${version}`;
+    const existingVersion = this.versions[versionKey];
+
+    if (existingVersion) {
+      this.versions[versionKey] = {
+        ...existingVersion,
+        ...assessmentVersionBody,
+      };
+    }
+  }
+
+  public async getVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+  }): Promise<AssessmentVersion | undefined> {
+    const { assessmentId, version, organizationDomain } = args;
+    const versionKey = `${assessmentId}#${organizationDomain}#${version}`;
+    return this.versions[versionKey];
   }
 }
 

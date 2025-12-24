@@ -4,10 +4,12 @@ import { apiClient } from './client';
 
 export const addComment = async ({
   assessmentId,
+  assessmentVersion,
   findingId,
   text,
 }: {
   assessmentId: string;
+  assessmentVersion: number;
   findingId: string;
   text: string;
 }) => {
@@ -15,9 +17,12 @@ export const addComment = async ({
 
   return apiClient.post<
     operations['addComment']['responses']['200']['content']['application/json']
-  >(`/assessments/${assessmentId}/findings/${encodedFindingId}/comments`, {
-    text,
-  });
+  >(
+    `/assessments/${assessmentId}/versions/${assessmentVersion}/findings/${encodedFindingId}/comments`,
+    {
+      text,
+    },
+  );
 };
 
 export default addComment;

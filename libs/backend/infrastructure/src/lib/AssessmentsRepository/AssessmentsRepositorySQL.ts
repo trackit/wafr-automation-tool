@@ -11,6 +11,8 @@ import {
   type Assessment,
   type AssessmentBody,
   type AssessmentFileExport,
+  type AssessmentVersion,
+  type AssessmentVersionBody,
   type BestPracticeBody,
   type BillingInformation,
   type PillarBody,
@@ -22,6 +24,7 @@ import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
 import {
   AssessmentEntity,
+  AssessmentVersionEntity,
   BestPracticeEntity,
   BillingInformationEntity,
   FileExportEntity,
@@ -30,7 +33,10 @@ import {
 } from '../infrastructure';
 import { tokenLogger } from '../Logger';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
-import { toDomainAssessment } from './AssessmentsRepositorySQLMapping';
+import {
+  toDomainAssessmentVersion,
+  toDomainAssessmentWithVersion,
+} from './AssessmentsRepositorySQLMapping';
 
 export class AssessmentsRepositorySQL implements AssessmentsRepository {
   private readonly clientManager = inject(tokenTypeORMClientManager);
@@ -82,24 +88,39 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
   public async get(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<Assessment | undefined> {
-    const { assessmentId, organizationDomain } = args;
-    const repo = await this.repo(AssessmentEntity, organizationDomain);
+    const { assessmentId, organizationDomain, version } = args;
 
-    const entity = await repo.findOne({
+    const assessmentRepo = await this.repo(
+      AssessmentEntity,
+      organizationDomain,
+    );
+    const assessmentEntity = await assessmentRepo.findOne({
       where: { id: assessmentId },
-      relations: {
-        pillars: {
-          questions: {
-            bestPractices: true,
-          },
-        },
-        fileExports: true,
-        billingInformation: true,
-      },
+      relations: ['fileExports', 'billingInformation'],
     });
-    if (!entity) return undefined;
-    return toDomainAssessment(entity, organizationDomain);
+
+    if (!assessmentEntity) return undefined;
+
+    const assessmentVersionEntity = await this.getVersionEntity({
+      assessmentId,
+      version: version ?? assessmentEntity.latestVersionNumber,
+      organizationDomain,
+    });
+
+    if (!assessmentVersionEntity) {
+      this.logger.error(
+        `Version ${version} not found for assessment ${assessmentId}`,
+      );
+      return undefined;
+    }
+
+    return toDomainAssessmentWithVersion(
+      assessmentEntity,
+      assessmentVersionEntity,
+      organizationDomain,
+    );
   }
 
   public async getAll(args: {
@@ -118,6 +139,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
     const qb = repo
       .createQueryBuilder('a')
+      .leftJoinAndSelect('a.versions', 'v', 'v.version = a.latestVersionNumber')
       .orderBy('a.createdAt', 'DESC')
       .skip(offset)
       .take(limit);
@@ -130,9 +152,23 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     }
 
     const [entities, total] = await qb.getManyAndCount();
-    const items = entities.map((e) =>
-      toDomainAssessment(e, organizationDomain),
-    );
+
+    const items = entities.map((assessment) => {
+      const latestVersion = assessment.versions?.[0];
+
+      if (!latestVersion) {
+        this.logger.warn(
+          `Version ${assessment.latestVersionNumber} not found for assessment ${assessment.id}`,
+        );
+        throw new Error();
+      }
+
+      return toDomainAssessmentWithVersion(
+        assessment,
+        latestVersion,
+        organizationDomain,
+      );
+    });
 
     const nextOffset = offset + items.length;
     const nextTk =
@@ -168,20 +204,23 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     assessmentId: string;
     organizationDomain: string;
     pillarId: string;
+    version: number;
     pillarBody: PillarBody;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, pillarId, pillarBody } = args;
+    const { assessmentId, organizationDomain, pillarId, version, pillarBody } =
+      args;
     const repo = await this.repo(PillarEntity, organizationDomain);
 
-    await repo.update({ id: pillarId, assessmentId }, pillarBody);
+    await repo.update({ id: pillarId, assessmentId, version }, pillarBody);
     this.logger.info(
-      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}`,
+      `Pillar ${pillarId} updated successfully for assessment ${assessmentId}-${version}`,
     );
   }
 
   public async updateQuestion(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
@@ -189,21 +228,26 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       questionBody,
     } = args;
     const repo = await this.repo(QuestionEntity, organizationDomain);
 
-    await repo.update({ id: questionId, pillarId, assessmentId }, questionBody);
+    await repo.update(
+      { id: questionId, pillarId, assessmentId, version },
+      questionBody,
+    );
     this.logger.info(
-      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId} for organizationDomain ${organizationDomain} updated successfully`,
+      `Question ${questionId} in pillar ${pillarId} in assessment ${assessmentId}-${version} for organizationDomain ${organizationDomain} updated successfully`,
     );
   }
 
   public async updateBestPractice(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -212,6 +256,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -220,11 +265,11 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const repo = await this.repo(BestPracticeEntity, organizationDomain);
 
     await repo.update(
-      { id: bestPracticeId, questionId, pillarId, assessmentId },
+      { id: bestPracticeId, questionId, pillarId, assessmentId, version },
       bestPracticeBody,
     );
     this.logger.info(
-      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}`,
+      `Best practice ${bestPracticeId} updated successfully for assessment ${assessmentId}-${version}`,
     );
   }
 
@@ -315,5 +360,66 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     this.logger.info(
       `Billing information saved for assessment: ${assessmentId}`,
     );
+  }
+
+  public async createVersion(args: {
+    assessmentVersion: AssessmentVersion;
+    organizationDomain: string;
+  }): Promise<void> {
+    const { assessmentVersion, organizationDomain } = args;
+    const repo = await this.repo(AssessmentVersionEntity, organizationDomain);
+
+    const entity = repo.create(assessmentVersion);
+
+    await repo.save(entity);
+    this.logger.info(
+      `Version ${assessmentVersion.version} created for assessment ${assessmentVersion.assessmentId}`,
+    );
+  }
+
+  public async updateVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+    assessmentVersionBody: AssessmentVersionBody;
+  }): Promise<void> {
+    const { assessmentId, version, organizationDomain, assessmentVersionBody } =
+      args;
+    const repo = await this.repo(AssessmentVersionEntity, organizationDomain);
+
+    await repo.update({ assessmentId, version }, assessmentVersionBody);
+
+    this.logger.info(
+      `Version ${version} updated for assessment ${assessmentId}`,
+    );
+  }
+
+  public async getVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+  }): Promise<AssessmentVersion | undefined> {
+    const entity = await this.getVersionEntity(args);
+    return entity ? toDomainAssessmentVersion(entity) : undefined;
+  }
+
+  private async getVersionEntity(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+  }): Promise<AssessmentVersionEntity | null> {
+    const { assessmentId, version, organizationDomain } = args;
+    const repo = await this.repo(AssessmentVersionEntity, organizationDomain);
+
+    return repo.findOne({
+      where: { assessmentId, version },
+      relations: {
+        pillars: {
+          questions: {
+            bestPractices: true,
+          },
+        },
+      },
+    });
   }
 }

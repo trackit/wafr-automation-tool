@@ -4,6 +4,7 @@ import { apiClient } from './client';
 
 export const getFindings = async (
   assessmentId: string,
+  assessmentVersion: number,
   pillarId: string,
   questionId: string,
   bestPracticeId: string,
@@ -19,8 +20,8 @@ export const getFindings = async (
   if (nextToken) params.set('nextToken', nextToken);
 
   return apiClient.get<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
+    paths['/assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
   >(
-    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
+    `/assessments/${assessmentId}/versions/${assessmentVersion}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
   );
 };

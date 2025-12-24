@@ -4,6 +4,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -33,9 +34,19 @@ describe('UpdateBestPracticeUseCase', () => {
     const pillar = PillarMother.basic().withQuestions([question]).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -94,9 +105,19 @@ describe('UpdateBestPracticeUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -119,9 +140,19 @@ describe('UpdateBestPracticeUseCase', () => {
     const pillar = PillarMother.basic().build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -145,9 +176,19 @@ describe('UpdateBestPracticeUseCase', () => {
     const pillar = PillarMother.basic().withQuestions([question]).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateBestPracticeUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

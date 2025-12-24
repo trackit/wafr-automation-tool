@@ -11,6 +11,7 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     return new GetBestPracticeFindingsAssessmentsRepositoryArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       organizationDomain: 'test.io',
+      version: 1,
       pillarId: 'pillar-id',
       questionId: 'question-id',
       bestPracticeId: 'best-practice-id',
@@ -32,6 +33,13 @@ export class GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     organizationDomain: AssessmentsRepositoryGetBestPracticeFindingsArgs['organizationDomain'],
   ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
     this.data.organizationDomain = organizationDomain;
+    return this;
+  }
+
+  public withVersion(
+    version: AssessmentsRepositoryGetBestPracticeFindingsArgs['version'],
+  ): GetBestPracticeFindingsAssessmentsRepositoryArgsMother {
+    this.data.version = version;
     return this;
   }
 

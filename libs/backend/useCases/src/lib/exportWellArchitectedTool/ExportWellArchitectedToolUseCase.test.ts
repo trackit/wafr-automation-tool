@@ -6,6 +6,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   OrganizationMother,
   PillarMother,
   UserMother,
@@ -180,11 +181,18 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinishedAt(new Date())
+      .build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
       .withPillars([PillarMother.basic().build()])
+      .withFinishedAt(new Date())
       .withExportRegion(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -195,7 +203,7 @@ describe('ExportWellArchitectedToolUseCase', () => {
     await useCase.exportAssessment(input);
   });
 
-  it('should update the assessment export region if the region is provided and the assessment does not have one', async () => {
+  it('should update the assessment version export region if the region is provided and the assessment does not have one', async () => {
     const { useCase, fakeAssessmentsRepository, fakeOrganizationRepository } =
       setup();
 
@@ -208,11 +216,18 @@ describe('ExportWellArchitectedToolUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
-      .withFinishedAt(new Date())
+      .build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
       .withPillars([PillarMother.basic().build()])
+      .withFinishedAt(new Date())
       .withExportRegion(undefined)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const input = ExportWellArchitectedToolUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

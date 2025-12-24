@@ -41,6 +41,7 @@ describe('UpdateFindingUseCase', () => {
     const input = UpdateFindingUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withHidden(true)
       .withUser(user)
       .build();
@@ -51,6 +52,7 @@ describe('UpdateFindingUseCase', () => {
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       organizationDomain: user.organizationDomain,
       findingId: finding.id,
+      version: finding.version,
     });
     expect(updatedFinding).toBeDefined();
     expect(updatedFinding?.hidden).toBe(true);

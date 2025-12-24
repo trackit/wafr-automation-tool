@@ -13,6 +13,7 @@ export class AddCommentUseCaseArgsMother {
     return new AddCommentUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
+      version: 1,
       text: 'This is a comment',
       user: UserMother.basic().build(),
     });
@@ -35,6 +36,11 @@ export class AddCommentUseCaseArgsMother {
 
   public withUser(user: User): AddCommentUseCaseArgsMother {
     this.data.user = user;
+    return this;
+  }
+
+  public withVersion(version: number): AddCommentUseCaseArgsMother {
+    this.data.version = version;
     return this;
   }
 

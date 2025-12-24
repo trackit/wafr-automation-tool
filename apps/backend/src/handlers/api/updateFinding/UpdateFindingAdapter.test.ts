@@ -72,10 +72,12 @@ describe('updateFinding adapter', () => {
 
       const assessmentId = '14270881-e4b0-4f89-8941-449eed22071d';
       const findingId = 'scanning-tool#12345';
+      const version = 1;
       const findingBody = { hidden: true };
       const event = UpdateFindingAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
         .withFindingId(findingId)
+        .withVersion(String(version))
         .withHidden(findingBody.hidden)
         .build();
 
@@ -85,6 +87,7 @@ describe('updateFinding adapter', () => {
         expect.objectContaining({
           assessmentId,
           findingId,
+          version,
           findingBody,
         }),
       );

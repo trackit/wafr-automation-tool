@@ -6,6 +6,7 @@ import { FindingNotFoundError } from '../../errors';
 
 export type UpdateFindingUseCaseArgs = {
   assessmentId: string;
+  version: number;
   findingId: string;
   user: User;
   findingBody: FindingBody;
@@ -20,12 +21,13 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
   private readonly logger = inject(tokenLogger);
 
   public async updateFinding(args: UpdateFindingUseCaseArgs): Promise<void> {
-    const { assessmentId, findingId, user, findingBody } = args;
+    const { assessmentId, version, findingId, user, findingBody } = args;
     const { organizationDomain } = user;
 
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain,
+      version,
       findingId,
     });
     if (!finding) {
@@ -39,6 +41,7 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
     await this.findingsRepository.update({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
       findingBody,
     });

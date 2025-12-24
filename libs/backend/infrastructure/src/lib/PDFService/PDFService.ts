@@ -46,6 +46,7 @@ export class PDFService implements PDFServicePort {
     const findings = await this.findingsRepository.getAll({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
+      version: assessment.latestVersionNumber,
     });
 
     const filtered = findings.filter(

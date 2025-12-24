@@ -8,7 +8,11 @@ import {
   tokenOrganizationRepository,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
-import { type Assessment, type User } from '@backend/models';
+import {
+  type Assessment,
+  type AssessmentVersion,
+  type User,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -117,15 +121,28 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
       regions,
       workflows,
       roleArn,
-      createdAt: new Date(),
-      createdBy: user.id,
       organization: user.organizationDomain,
       questionVersion: questionSet.version,
-      pillars: questionSet.pillars,
+      latestVersionNumber: 1,
+      createdAt: new Date(),
+      createdBy: user.id,
       executionArn: '',
+    };
+
+    const assessmentVersion: AssessmentVersion = {
+      version: 1,
+      assessmentId,
+      createdAt: new Date(),
+      createdBy: user.id,
+      executionArn: '',
+      pillars: questionSet.pillars,
       finishedAt: undefined,
     };
     await this.assessmentRepository.save(assessment);
+    await this.assessmentRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
     return assessment;
   }
 
@@ -145,18 +162,19 @@ export class StartAssessmentUseCaseImpl implements StartAssessmentUseCase {
     const executionId = await this.stateMachine.startAssessment({
       name: assessment.name,
       regions: assessment.regions,
-      workflows: assessment.workflows,
       roleArn: assessment.roleArn,
+      workflows: assessment.workflows,
       assessmentId: assessment.id,
       createdAt: assessment.createdAt,
       createdBy: user.id,
       organizationDomain: user.organizationDomain,
     });
 
-    await this.assessmentRepository.update({
+    await this.assessmentRepository.updateVersion({
+      version: assessment.latestVersionNumber,
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
-      assessmentBody: {
+      assessmentVersionBody: {
         executionArn: executionId,
       },
     });

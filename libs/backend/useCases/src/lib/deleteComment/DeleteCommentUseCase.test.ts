@@ -53,6 +53,7 @@ describe('DeleteCommentUseCase', () => {
     const input = DeleteCommentUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withCommentId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed2')
       .withUser(user)
       .build();
@@ -82,6 +83,7 @@ describe('DeleteCommentUseCase', () => {
     const input = DeleteCommentUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withCommentId(comment.id)
       .withUser(user)
       .build();
@@ -107,6 +109,7 @@ describe('DeleteCommentUseCase', () => {
     const input = DeleteCommentUseCaseArgsMother.basic()
       .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
       .withFindingId(finding.id)
+      .withVersion(finding.version)
       .withCommentId(comment.id)
       .withUser(user)
       .build();
@@ -117,6 +120,7 @@ describe('DeleteCommentUseCase', () => {
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       organizationDomain: user.organizationDomain,
       findingId: finding.id,
+      version: finding.version,
     });
     expect(updatedFinding).toBeDefined();
     expect(updatedFinding?.comments).toBeDefined();

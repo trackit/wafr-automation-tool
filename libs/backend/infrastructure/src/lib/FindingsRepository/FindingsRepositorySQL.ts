@@ -59,6 +59,7 @@ export class FindingsRepositorySQL implements FindingRepository {
 
       const findingEntity = trxFindingRepo.create({
         ...findingData,
+        version: finding.version,
         assessmentId,
       });
 
@@ -68,6 +69,7 @@ export class FindingsRepositorySQL implements FindingRepository {
         const resourceEntity = trxResourceRepo.create({
           ...resource,
           assessmentId,
+          version: finding.version,
           findingId: findingEntity.id,
         });
         return resourceEntity;
@@ -98,6 +100,7 @@ export class FindingsRepositorySQL implements FindingRepository {
         const { resources: _resources, ...findingData } = finding;
         return trxFindingRepo.create({
           ...findingData,
+          version: finding.version,
           assessmentId,
         });
       });
@@ -108,6 +111,7 @@ export class FindingsRepositorySQL implements FindingRepository {
           trxResourceRepo.create({
             ...resource,
             assessmentId,
+            version: finding.version,
             findingId: finding.id,
           }),
         );
@@ -123,16 +127,19 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     comment: FindingComment;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingId, comment } = args;
+    const { assessmentId, organizationDomain, version, findingId, comment } =
+      args;
     const repo = await this.repo(FindingCommentEntity, organizationDomain);
 
     const entity = repo.create({
       ...comment,
       findingId: findingId,
       assessmentId,
+      version,
     });
 
     await repo.save(entity);
@@ -143,14 +150,15 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   public async get(args: {
     assessmentId: string;
+    version: number;
     organizationDomain: string;
     findingId: string;
   }): Promise<Finding | undefined> {
-    const { assessmentId, organizationDomain, findingId } = args;
+    const { assessmentId, organizationDomain, findingId, version } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
     const entity = await repo.findOne({
-      where: { id: findingId, assessmentId },
+      where: { id: findingId, version, assessmentId },
       relations: {
         comments: true,
         bestPractices: true,
@@ -163,13 +171,14 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   public async getAll(args: {
     assessmentId: string;
+    version: number;
     organizationDomain: string;
   }): Promise<Finding[]> {
-    const { assessmentId, organizationDomain } = args;
+    const { assessmentId, organizationDomain, version } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
     const entities = await repo.find({
-      where: { assessmentId },
+      where: { assessmentId, version },
       relations: {
         comments: true,
         bestPractices: true,
@@ -186,6 +195,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -204,10 +214,13 @@ export class FindingsRepositorySQL implements FindingRepository {
     const baseQb = repo
       .createQueryBuilder('f')
       .innerJoin('f.bestPractices', 'bp')
-      .where('f.assessmentId = :assessmentId', { assessmentId })
+      .where('f.assessmentId = :assessmentId AND f.version = :version', {
+        assessmentId,
+        version,
+      })
       .andWhere(
-        'bp.assessmentId = :assessmentId AND bp.id = :bestPracticeId AND bp.questionId = :questionId AND bp.pillarId = :pillarId',
-        { assessmentId, bestPracticeId, questionId, pillarId },
+        'bp.assessmentId = :assessmentId AND bp.version = :version AND bp.id = :bestPracticeId AND bp.questionId = :questionId AND bp.pillarId = :pillarId',
+        { assessmentId, version, bestPracticeId, questionId, pillarId },
       );
 
     if (!showHidden) {
@@ -241,6 +254,7 @@ export class FindingsRepositorySQL implements FindingRepository {
       .leftJoinAndSelect('f.comments', 'com')
       .leftJoinAndSelect('f.bestPractices', 'bp')
       .where('f.assessmentId = :assessmentId', { assessmentId })
+      .andWhere('f.version = :version', { version })
       .andWhere('f.id IN (:...ids)', { ids })
       .orderBy('f.severity', 'ASC')
       .getMany();
@@ -258,24 +272,39 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async deleteAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<void> {
-    const { assessmentId, organizationDomain } = args;
+    const { assessmentId, organizationDomain, version } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
-    await repo.delete({ assessmentId });
-    this.logger.info(`Findings deleted for assessment: ${assessmentId}`);
+    const where =
+      version !== undefined ? { assessmentId, version } : { assessmentId };
+
+    await repo.delete(where);
+
+    this.logger.info(
+      version !== undefined
+        ? `Findings deleted for assessment ${assessmentId}, version ${version}`
+        : `Findings deleted for assessment ${assessmentId} (all versions)`,
+    );
   }
 
   public async deleteComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingId, commentId } = args;
+    const { assessmentId, organizationDomain, version, findingId, commentId } =
+      args;
     const repo = await this.repo(FindingCommentEntity, organizationDomain);
 
-    await repo.delete({ id: commentId, findingId: findingId });
+    await repo.delete({
+      id: commentId,
+      findingId: findingId,
+      version,
+    });
     this.logger.info(
       `Finding comment deleted: ${findingId} for assessment: ${assessmentId}`,
     );
@@ -284,13 +313,20 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async update(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingId, findingBody } = args;
+    const {
+      assessmentId,
+      organizationDomain,
+      version,
+      findingId,
+      findingBody,
+    } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
-    await repo.update({ id: findingId, assessmentId }, findingBody);
+    await repo.update({ id: findingId, assessmentId, version }, findingBody);
     this.logger.info(
       `Finding successfully updated: ${findingId} for assessment: ${assessmentId}`,
     );
@@ -299,6 +335,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async updateComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
@@ -306,13 +343,14 @@ export class FindingsRepositorySQL implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       findingId,
       commentId,
       commentBody,
     } = args;
     const repo = await this.repo(FindingCommentEntity, organizationDomain);
 
-    await repo.update({ id: commentId, findingId }, commentBody);
+    await repo.update({ id: commentId, findingId, version }, commentBody);
     this.logger.info(
       `Comment ${commentId} in finding ${findingId} for assessment ${assessmentId} updated successfully`,
     );
@@ -321,6 +359,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -329,6 +368,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -350,6 +390,8 @@ export class FindingsRepositorySQL implements FindingRepository {
             findingAssessmentId: assessmentId,
             findingId,
             bestPracticeAssessmentId: assessmentId,
+            findingVersion: version,
+            bestPracticeVersion: version,
             questionId,
             pillarId,
             bestPracticeId,
@@ -367,6 +409,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   public async countBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -374,6 +417,7 @@ export class FindingsRepositorySQL implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -383,10 +427,12 @@ export class FindingsRepositorySQL implements FindingRepository {
     const count = await repo.count({
       where: {
         assessmentId,
+        version,
         bestPractices: {
           id: bestPracticeId,
           questionId,
           pillarId,
+          version,
         },
       },
       relations: ['bestPractices'],
@@ -419,6 +465,7 @@ export class FindingsRepositorySQL implements FindingRepository {
   private async computeAggregationForPath(
     repo: Repository<FindingEntity>,
     assessmentId: string,
+    version: number,
     path: string[],
   ): Promise<Record<string, number>> {
     if (path.length === 0) {
@@ -428,7 +475,10 @@ export class FindingsRepositorySQL implements FindingRepository {
     const baseAlias = 'finding';
     const qb = repo
       .createQueryBuilder(baseAlias)
-      .where(`${baseAlias}.assessmentId = :assessmentId`, { assessmentId });
+      .where(
+        `${baseAlias}.assessmentId = :assessmentId AND ${baseAlias}.version = :version`,
+        { assessmentId, version },
+      );
 
     const currentAlias = path.slice(0, -1).reduce((alias, segment, index) => {
       const relationAlias = `relation_${index}`;
@@ -479,10 +529,11 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   public async aggregateAll<TFields extends FindingAggregationFields>(args: {
     assessmentId: string;
+    version: number;
     organizationDomain: string;
     fields: TFields;
   }): Promise<FindingAggregationResult<TFields>> {
-    const { assessmentId, organizationDomain, fields } = args;
+    const { assessmentId, version, organizationDomain, fields } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
     const fieldPaths = this.flattenAggregationFields(
@@ -499,6 +550,7 @@ export class FindingsRepositorySQL implements FindingRepository {
         const counts = await this.computeAggregationForPath(
           repo,
           assessmentId,
+          version,
           path,
         );
         this.assignAggregationResult(aggregations, path, counts);
@@ -510,14 +562,16 @@ export class FindingsRepositorySQL implements FindingRepository {
 
   public async countAll(args: {
     assessmentId: string;
+    version: number;
     organizationDomain: string;
   }): Promise<number> {
-    const { assessmentId, organizationDomain } = args;
+    const { assessmentId, organizationDomain, version } = args;
     const repo = await this.repo(FindingEntity, organizationDomain);
 
     const qb = repo
       .createQueryBuilder('f')
       .where('f.assessmentId = :assessmentId', { assessmentId })
+      .andWhere('f.version = :version', { version })
       .select('COUNT(f.id)', 'count');
 
     return parseInt((await qb.getRawOne())?.count) || 0;

@@ -5,11 +5,13 @@ import { apiClient } from './client';
 export const updateComment = async ({
   assessmentId,
   findingId,
+  assessmentVersion,
   commentId,
   commentDto,
 }: {
   assessmentId: string;
   findingId: string;
+  assessmentVersion: number;
   commentId: string;
   commentDto: components['schemas']['CommentDto'];
 }) => {
@@ -18,7 +20,7 @@ export const updateComment = async ({
   return apiClient.put<
     operations['updateComment']['responses']['200']['content']
   >(
-    `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
+    `/assessments/${assessmentId}/versions/${assessmentVersion}/findings/${encodedFindingId}/comments/${commentId}`,
     commentDto,
   );
 };

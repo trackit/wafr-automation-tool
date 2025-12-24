@@ -10,6 +10,7 @@ import {
 
 export type DeleteCommentUseCaseArgs = {
   assessmentId: string;
+  version: number;
   findingId: string;
   commentId: string;
   user: User;
@@ -24,11 +25,12 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
   private readonly logger = inject(tokenLogger);
 
   public async deleteComment(args: DeleteCommentUseCaseArgs): Promise<void> {
-    const { assessmentId, findingId, commentId, user } = args;
+    const { assessmentId, version, findingId, commentId, user } = args;
 
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
     });
     if (!finding) {
@@ -60,6 +62,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
     await this.findingsRepository.deleteComment({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
       commentId,
     });

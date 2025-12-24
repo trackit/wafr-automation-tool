@@ -10,6 +10,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   FindingMother,
   OrganizationMother,
 } from '@backend/models';
@@ -90,14 +91,28 @@ describe('CleanupUseCase', () => {
       const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
         setup();
 
-      const assessment = AssessmentMother.basic().build();
+      const assessment = AssessmentMother.basic()
+        .withLatestVersionNumber(2)
+        .build();
       await fakeAssessmentsRepository.save(assessment);
 
-      const finding = FindingMother.basic().build();
+      const finding = FindingMother.basic()
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await fakeFindingsRepository.save({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
         finding,
+      });
+
+      const finding2 = FindingMother.basic()
+        .withId('other-finding-id')
+        .withVersion(1)
+        .build();
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding2,
       });
 
       const input = CleanupUseCaseArgsMother.basic()
@@ -111,8 +126,15 @@ describe('CleanupUseCase', () => {
       const findings = await fakeFindingsRepository.getAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: 2,
+      });
+      const nonAffectedFindings = await fakeFindingsRepository.getAll({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        version: 1,
       });
       expect(findings).toEqual([]);
+      expect(nonAffectedFindings).toEqual([finding2]);
     });
 
     it('should not delete assessment findings if debug mode is enabled and error is defined', async () => {
@@ -140,6 +162,7 @@ describe('CleanupUseCase', () => {
       const findings = await fakeFindingsRepository.getAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
       });
       expect(findings).toBeDefined();
     });
@@ -148,7 +171,14 @@ describe('CleanupUseCase', () => {
       const { date, useCase, fakeAssessmentsRepository } = setup(true);
 
       const assessment = AssessmentMother.basic().build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .build();
       await fakeAssessmentsRepository.save(assessment);
+      await fakeAssessmentsRepository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const input = CleanupUseCaseArgsMother.basic()
         .withAssessmentId(assessment.id)
@@ -399,8 +429,14 @@ describe('CleanupUseCase', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization(organization.domain)
         .build();
-
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .build();
       await fakeAssessmentsRepository.save(assessment);
+      await fakeAssessmentsRepository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       vitest
         .spyOn(fakeFeatureToggleRepository, 'marketplaceIntegration')

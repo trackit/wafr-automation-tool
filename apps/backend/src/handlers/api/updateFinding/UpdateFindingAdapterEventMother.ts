@@ -28,6 +28,7 @@ export class UpdateFindingAdapterEventMother {
       {
         assessmentId: '14270881-e4b0-4f89-8941-449eed22071d',
         findingId: 'scanning-tool#12345',
+        version: '1',
       },
       {
         hidden: false,
@@ -44,6 +45,11 @@ export class UpdateFindingAdapterEventMother {
 
   public withFindingId(findingId: string): UpdateFindingAdapterEventMother {
     this.pathParameters.findingId = findingId;
+    return this;
+  }
+
+  public withVersion(version: string): UpdateFindingAdapterEventMother {
+    this.pathParameters.version = version;
     return this;
   }
 

@@ -5,9 +5,11 @@ import { apiClient } from './client';
 export const updateFinding = async ({
   assessmentId,
   findingId,
+  assessmentVersion,
   findingDto,
 }: {
   assessmentId: string;
+  assessmentVersion: number;
   findingId: string;
   findingDto: components['schemas']['FindingDto'];
 }) => {
@@ -15,7 +17,10 @@ export const updateFinding = async ({
 
   return apiClient.put<
     operations['updateFinding']['responses']['200']['content']
-  >(`/assessments/${assessmentId}/findings/${encodedFindingId}`, findingDto);
+  >(
+    `/assessments/${assessmentId}/versions/${assessmentVersion}/findings/${encodedFindingId}`,
+    findingDto,
+  );
 };
 
 export default updateFinding;

@@ -36,6 +36,7 @@ import { CommentsPane, Modal } from '@webui/ui';
 
 interface FindingsDetailsProps {
   assessmentId: string;
+  assessmentVersion: number;
   bestPractice: components['schemas']['BestPractice'];
   pillarId: string;
   questionId: string;
@@ -269,6 +270,7 @@ function FindingItem({
 
 function FindingsDetails({
   assessmentId,
+  assessmentVersion,
   bestPractice,
   pillarId,
   questionId,
@@ -341,6 +343,7 @@ function FindingsDetails({
       queryKey: [
         'findings',
         assessmentId,
+        assessmentVersion,
         pillarId,
         questionId,
         bestPractice.id,
@@ -350,6 +353,7 @@ function FindingsDetails({
       queryFn: ({ pageParam }) =>
         getFindings(
           assessmentId,
+          assessmentVersion,
           pillarId,
           questionId,
           bestPractice.id || '',
@@ -386,6 +390,7 @@ function FindingsDetails({
       updateFinding({
         assessmentId,
         findingId,
+        assessmentVersion,
         findingDto: {
           ...(hidden ? { hidden } : {}),
         },
@@ -426,6 +431,7 @@ function FindingsDetails({
       const { findingId, text } = args;
       const response = await addComment({
         assessmentId,
+        assessmentVersion,
         findingId,
         text,
       });
@@ -491,6 +497,7 @@ function FindingsDetails({
         await updateComment({
           assessmentId,
           findingId,
+          assessmentVersion,
           commentId,
           commentDto: {
             text,
@@ -543,6 +550,7 @@ function FindingsDetails({
     mutationFn: async ({ findingId, commentId }) => {
       await deleteComment({
         assessmentId,
+        assessmentVersion,
         findingId,
         commentId,
       });

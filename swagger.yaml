@@ -715,7 +715,7 @@ paths:
           description: The specified assessment, pillar, or question could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
+  '/assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
     get:
       operationId: getBestPracticeFindings
       tags:
@@ -728,6 +728,12 @@ paths:
           in: path
           required: true
           description: The ID of the assessment
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
           schema:
             type: string
         - name: pillarId
@@ -790,6 +796,7 @@ paths:
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified best practice could not be found
+  '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
     put:
       operationId: updateBestPractice
       tags:
@@ -837,7 +844,7 @@ paths:
           description: The specified assessment, pillar, question, or best practice could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/findings/{findingId}':
+  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}':
     get:
       operationId: getFinding
       tags:
@@ -857,6 +864,12 @@ paths:
           in: path
           required: true
           description: The unique ID of the finding to retrieve
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
           schema:
             type: string
       responses:
@@ -892,6 +905,12 @@ paths:
           description: The unique ID of the finding to retrieve
           schema:
             type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -907,7 +926,7 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/findings/{findingId}/comments':
+  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments':
     post:
       operationId: addComment
       tags:
@@ -926,6 +945,12 @@ paths:
           in: path
           required: true
           description: The unique ID of the finding to add a comment to
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
           schema:
             type: string
       requestBody:
@@ -953,7 +978,7 @@ paths:
           description: The specified assessment or finding could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}':
+  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments/{commentId}':
     put:
       operationId: updateComment
       tags:
@@ -966,6 +991,12 @@ paths:
           in: path
           required: true
           description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
           schema:
             type: string
         - name: findingId
@@ -1007,6 +1038,12 @@ paths:
           in: path
           required: true
           description: The ID of the assessment to which the finding belongs
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          description: The version of the assessment
           schema:
             type: string
         - name: findingId
@@ -1117,6 +1154,9 @@ components:
         createdBy:
           type: string
           description: User who created the assessment
+        latestVersion:
+          type: integer
+          description: Latest version of the assessment
         organization:
           type: string
           description: Organization associated with the assessment
@@ -1225,6 +1265,9 @@ components:
         id:
           type: string
           description: Unique identifier of the finding
+        version:
+          type: integer
+          description: Version of the assessment the finding belongs to
         severity:
           type: string
           description: 'Severity level of the finding (e.g., Low, Medium, High)'

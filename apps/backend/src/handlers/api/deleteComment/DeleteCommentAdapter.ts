@@ -11,6 +11,7 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const DeleteCommentPathSchema = z.object({
   assessmentId: z.uuid(),
+  version: z.string().regex(/^\d+$/, 'version must be a number'),
   findingId: z.string().nonempty(),
   commentId: z.uuid(),
 }) satisfies ZodType<operations['deleteComment']['parameters']['path']>;
@@ -39,6 +40,7 @@ export class DeleteCommentAdapter {
 
     await this.useCase.deleteComment({
       assessmentId,
+      version: Number(pathParameters.version),
       findingId: decodeURIComponent(findingId),
       commentId,
       user,

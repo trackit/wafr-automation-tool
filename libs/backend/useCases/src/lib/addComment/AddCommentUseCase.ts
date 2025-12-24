@@ -11,6 +11,7 @@ import { FindingNotFoundError } from '../../errors';
 export type AddCommentUseCaseArgs = {
   assessmentId: string;
   findingId: string;
+  version: number;
   text: string;
   user: User;
 };
@@ -27,12 +28,13 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
   public async addComment(
     args: AddCommentUseCaseArgs,
   ): Promise<FindingComment> {
-    const { assessmentId, findingId, text, user } = args;
+    const { assessmentId, findingId, version, text, user } = args;
     const { organizationDomain } = user;
 
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain,
+      version,
       findingId,
     });
     if (!finding) {
@@ -48,6 +50,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
       await this.findingsRepository.update({
         assessmentId,
         organizationDomain,
+        version,
         findingId,
         findingBody: {
           comments: [],
@@ -64,6 +67,7 @@ export class AddCommentUseCaseImpl implements AddCommentUseCase {
     await this.findingsRepository.saveComment({
       assessmentId,
       organizationDomain,
+      version,
       findingId,
       comment,
     });

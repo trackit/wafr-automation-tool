@@ -32,6 +32,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
         pillarId: 'pillar-id',
         questionId: 'question-id',
         bestPracticeId: 'best-practice-id',
+        version: '1',
       },
     );
   }
@@ -66,6 +67,13 @@ export class GetBestPracticeFindingsAdapterEventMother {
     assessmentId: string,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.pathParameters.assessmentId = assessmentId;
+    return this;
+  }
+
+  public withVersion(
+    version: string,
+  ): GetBestPracticeFindingsAdapterEventMother {
+    this.pathParameters.version = version;
     return this;
   }
 

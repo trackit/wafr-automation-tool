@@ -10,6 +10,7 @@ import {
 
 export type UpdateCommentUseCaseArgs = {
   assessmentId: string;
+  version: number;
   findingId: string;
   commentId: string;
   user: User;
@@ -24,11 +25,13 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
 
   public async updateComment(args: UpdateCommentUseCaseArgs): Promise<void> {
-    const { assessmentId, findingId, commentId, user, commentBody } = args;
+    const { assessmentId, version, findingId, commentId, user, commentBody } =
+      args;
 
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
     });
     if (!finding) {
@@ -61,6 +64,7 @@ export class UpdateCommentUseCaseImpl implements UpdateCommentUseCase {
     await this.findingsRepository.updateComment({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
       commentId,
       commentBody,

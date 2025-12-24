@@ -12,6 +12,7 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const AddCommentPathSchema = z.object({
   assessmentId: z.uuid(),
+  version: z.string().regex(/^\d+$/, 'version must be a number'),
   findingId: z.string().nonempty(),
 }) satisfies ZodType<operations['addComment']['parameters']['path']>;
 
@@ -54,12 +55,14 @@ export class AddCommentAdapter {
       pathSchema: AddCommentPathSchema,
       bodySchema: AddCommentArgsSchema,
     });
+
     const { assessmentId, findingId } = pathParameters;
     const user = getUserFromEvent(event);
 
     const comment = await this.useCase.addComment({
       assessmentId,
       findingId: decodeURIComponent(findingId),
+      version: Number(pathParameters.version),
       text: body.text,
       user,
     });

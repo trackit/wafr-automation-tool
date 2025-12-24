@@ -945,7 +945,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
+            Path: /assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}
             Method: GET
       Environment:
         Variables:
@@ -1014,7 +1014,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}
+            Path: /assessments/{assessmentId}/versions/{version}/findings/{findingId}
             Method: PUT
     Metadata:
       BuildMethod: esbuild
@@ -1047,7 +1047,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}/comments
+            Path: /assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments
             Method: POST
       Environment:
         Variables:
@@ -1083,7 +1083,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
+            Path: /assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments/{commentId}
             Method: PUT
     Metadata:
       BuildMethod: esbuild
@@ -1116,7 +1116,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /assessments/{assessmentId}/findings/{findingId}/comments/{commentId}
+            Path: /assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments/{commentId}
             Method: DELETE
     Metadata:
       BuildMethod: esbuild

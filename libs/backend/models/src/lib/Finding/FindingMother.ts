@@ -19,6 +19,7 @@ export class FindingMother {
       bestPractices: [],
       hidden: false,
       id: 'finding-id',
+      version: 1,
       isAIAssociated: false,
       eventCode: 'event-code',
       remediation: {
@@ -91,6 +92,11 @@ export class FindingMother {
 
   public withComments(comments: FindingComment[] | undefined): FindingMother {
     this.data.comments = comments;
+    return this;
+  }
+
+  public withVersion(version: number): FindingMother {
+    this.data.version = version;
     return this;
   }
 

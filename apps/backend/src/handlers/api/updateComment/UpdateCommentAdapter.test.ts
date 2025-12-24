@@ -86,11 +86,13 @@ describe('updateComment adapter', () => {
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const findingId = 'finding-id';
+      const version = 1;
       const commentId = '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const text = 'comment-text';
       const event = UpdateCommentAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
         .withFindingId(findingId)
+        .withVersion(String(version))
         .withCommentId(commentId)
         .withText(text)
         .withUser(user)
@@ -101,6 +103,7 @@ describe('updateComment adapter', () => {
       expect(useCase.updateComment).toHaveBeenCalledWith({
         assessmentId,
         findingId,
+        version,
         commentId,
         commentBody: {
           text,

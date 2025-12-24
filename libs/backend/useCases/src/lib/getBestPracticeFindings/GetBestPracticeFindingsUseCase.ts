@@ -10,6 +10,7 @@ import { assertBestPracticeExists } from '../../services/asserts';
 
 export interface GetBestPracticeFindingsUseCaseArgs {
   assessmentId: string;
+  version: number;
   pillarId: string;
   questionId: string;
   bestPracticeId: string;
@@ -42,6 +43,7 @@ export class GetBestPracticeFindingsUseCaseImpl
     const {
       user,
       assessmentId,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -71,6 +73,7 @@ export class GetBestPracticeFindingsUseCaseImpl
 
     return await this.findingsRepository.getBestPracticeFindings({
       organizationDomain,
+      version,
       assessmentId,
       pillarId,
       questionId,

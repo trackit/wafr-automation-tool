@@ -25,7 +25,7 @@ export class FakeFindingsRepository implements FindingRepository {
     finding: Finding;
   }): Promise<void> {
     const { assessmentId, organizationDomain, finding } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const key = `${assessmentId}#${organizationDomain}#${finding.version}`;
 
     if (!this.findings[key]) {
       this.findings[key] = [];
@@ -48,11 +48,13 @@ export class FakeFindingsRepository implements FindingRepository {
   public async saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     comment: FindingComment;
   }): Promise<void> {
-    const { assessmentId, findingId, organizationDomain, comment } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, findingId, organizationDomain, comment, version } =
+      args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const finding = this.findings[key]?.find(
       (finding) => finding.id === findingId,
     );
@@ -67,19 +69,21 @@ export class FakeFindingsRepository implements FindingRepository {
   public async get(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
   }): Promise<Finding | undefined> {
-    const { assessmentId, findingId, organizationDomain } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, findingId, organizationDomain, version } = args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     return this.findings[key]?.find((finding) => finding.id === findingId);
   }
 
   public async getAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
   }): Promise<Finding[]> {
-    const { assessmentId, organizationDomain } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, organizationDomain, version } = args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     return this.findings[key] ?? [];
   }
 
@@ -92,6 +96,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -112,7 +117,7 @@ export class FakeFindingsRepository implements FindingRepository {
       throw new Error();
     }
 
-    const key = `${assessmentId}#${organizationDomain}`;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const findings =
       this.findings[key]
         ?.filter((finding) => {
@@ -136,19 +141,33 @@ export class FakeFindingsRepository implements FindingRepository {
   public async deleteAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<void> {
-    const { assessmentId, organizationDomain } = args;
-    delete this.findings[`${assessmentId}#${organizationDomain}`];
+    const { assessmentId, organizationDomain, version } = args;
+
+    if (version !== undefined) {
+      delete this.findings[`${assessmentId}#${organizationDomain}#${version}`];
+      return;
+    }
+
+    const prefix = `${assessmentId}#${organizationDomain}#`;
+    for (const key of Object.keys(this.findings)) {
+      if (key.startsWith(prefix)) {
+        delete this.findings[key];
+      }
+    }
   }
 
   public async deleteComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingId, commentId } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, organizationDomain, version, findingId, commentId } =
+      args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const finding = this.findings[key]?.find(
       (finding) => finding.id === findingId,
     );
@@ -171,11 +190,18 @@ export class FakeFindingsRepository implements FindingRepository {
   public async update(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingId, findingBody } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const {
+      assessmentId,
+      organizationDomain,
+      version,
+      findingId,
+      findingBody,
+    } = args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const finding = this.findings[key]?.find((f) => f.id === findingId);
     for (const [field, value] of Object.entries(findingBody)) {
       // Only update fields that exist on the finding object
@@ -190,6 +216,7 @@ export class FakeFindingsRepository implements FindingRepository {
   public async updateComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
@@ -197,11 +224,12 @@ export class FakeFindingsRepository implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       findingId,
       commentId,
       commentBody,
     } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const finding = this.findings[key]?.find(
       (finding) => finding.id === findingId,
     );
@@ -217,6 +245,7 @@ export class FakeFindingsRepository implements FindingRepository {
   public async saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -225,6 +254,7 @@ export class FakeFindingsRepository implements FindingRepository {
     const {
       assessmentId,
       organizationDomain,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -233,7 +263,7 @@ export class FakeFindingsRepository implements FindingRepository {
 
     if (!bestPracticeFindingIds || bestPracticeFindingIds.size === 0) return;
 
-    const key = `${assessmentId}#${organizationDomain}`;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const store = this.findings[key];
     if (!store || store.length === 0) return;
 
@@ -258,6 +288,7 @@ export class FakeFindingsRepository implements FindingRepository {
       const finding = await this.get({
         assessmentId,
         organizationDomain,
+        version,
         findingId,
       });
       if (!finding) {
@@ -280,6 +311,7 @@ export class FakeFindingsRepository implements FindingRepository {
   public async countBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -290,10 +322,12 @@ export class FakeFindingsRepository implements FindingRepository {
       pillarId,
       questionId,
       bestPracticeId,
+      version,
     } = args;
     const assessment = await this.fakeAssessmentsRepository.get({
       assessmentId,
       organizationDomain,
+      version,
     });
 
     const bestPractice = assessment?.pillars
@@ -305,7 +339,7 @@ export class FakeFindingsRepository implements FindingRepository {
       return 0;
     }
 
-    const key = `${assessmentId}#${organizationDomain}`;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const findings = this.findings[key] ?? [];
 
     const count = findings.filter((finding) =>
@@ -417,10 +451,11 @@ export class FakeFindingsRepository implements FindingRepository {
   public async aggregateAll<TFields extends FindingAggregationFields>(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     fields: TFields;
   }): Promise<FindingAggregationResult<TFields>> {
-    const { assessmentId, organizationDomain, fields } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, organizationDomain, version, fields } = args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const findings = this.findings[key] ?? [];
 
     const fieldPaths = this.flattenAggregationFields(
@@ -442,9 +477,10 @@ export class FakeFindingsRepository implements FindingRepository {
   public async countAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
   }): Promise<number> {
-    const { assessmentId, organizationDomain } = args;
-    const key = `${assessmentId}#${organizationDomain}`;
+    const { assessmentId, organizationDomain, version } = args;
+    const key = `${assessmentId}#${organizationDomain}#${version}`;
     const findings = this.findings[key] ?? [];
 
     return findings.length;

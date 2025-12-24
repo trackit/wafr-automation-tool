@@ -19,6 +19,7 @@ describe('getBestPracticeFindings adapter', () => {
 
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withVersion('1')
         .withPillarId('pillar-id')
         .withQuestionId('question-id')
         .withBestPracticeId('best-practice-id')
@@ -91,6 +92,7 @@ describe('getBestPracticeFindings adapter', () => {
         .withQueryStringParameters({})
         .withPathParameters({
           assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+          version: '1',
           pillarId: '1',
           questionId: '1',
           bestPracticeId: '1',
@@ -106,11 +108,13 @@ describe('getBestPracticeFindings adapter', () => {
       const { adapter, useCase } = setup();
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const version = 1;
       const pillarId = 'pillar-id';
       const questionId = 'question-id';
       const bestPracticeId = 'best-practice-id';
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
+        .withVersion(String(version))
         .withPillarId(pillarId)
         .withQuestionId(questionId)
         .withBestPracticeId(bestPracticeId)
@@ -120,6 +124,7 @@ describe('getBestPracticeFindings adapter', () => {
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
+          version,
           pillarId,
           questionId,
           bestPracticeId,

@@ -73,10 +73,12 @@ describe('deleteComment adapter', () => {
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const findingId = 'finding-id';
+      const version = 1;
       const commentId = '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const event = DeleteCommentAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
         .withFindingId(findingId)
+        .withVersion(String(version))
         .withCommentId(commentId)
         .withUser(user)
         .build();
@@ -86,6 +88,7 @@ describe('deleteComment adapter', () => {
       expect(useCase.deleteComment).toHaveBeenCalledWith({
         assessmentId,
         findingId,
+        version,
         commentId,
         user,
       });
