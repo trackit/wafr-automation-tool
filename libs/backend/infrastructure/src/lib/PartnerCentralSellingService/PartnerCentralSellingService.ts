@@ -94,6 +94,7 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
           Email: member.email,
           FirstName: member.firstName,
           LastName: member.lastName,
+          BusinessTitle: 'PartnerAccountManager',
         }),
       );
 
