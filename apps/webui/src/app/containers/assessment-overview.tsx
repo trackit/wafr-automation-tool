@@ -333,7 +333,7 @@ function AssessmentOverview({
 
       <div className="flex flex-[1] flex-col md:flex-row gap-6 lg:flex-nowrap flex-wrap">
         <div className="flex gap-6 w-full lg:w-1/2">
-          <div className="card bg-white border rounded-lg p-4 min-h-[300px] w-1/2 w-full">
+          <div className="card bg-white border rounded-lg p-4 min-h-[300px] md:min-h-[340px] w-1/2 w-full">
             <div className="flex flex-col h-full">
               <div className="">
                 <h2 className="card-title">Findings by Region</h2>
@@ -410,7 +410,7 @@ function AssessmentOverview({
               </div>
             </div>
           </div>
-          <div className="card  bg-white border rounded-lg p-4 min-h-[300px] w-1/2 w-full">
+          <div className="card bg-white border rounded-lg p-4 min-h-[300px] md:min-h-[340px] w-1/2 w-full">
             <div className="flex flex-col h-full">
               <div className="">
                 <h2 className="card-title">Findings by Severity</h2>
