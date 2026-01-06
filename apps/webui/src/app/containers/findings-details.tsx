@@ -390,7 +390,6 @@ function FindingsDetails({
       updateFinding({
         assessmentId,
         findingId,
-        assessmentVersion,
         findingDto: {
           ...(hidden ? { hidden } : {}),
         },
@@ -431,7 +430,6 @@ function FindingsDetails({
       const { findingId, text } = args;
       const response = await addComment({
         assessmentId,
-        assessmentVersion,
         findingId,
         text,
       });
@@ -497,7 +495,6 @@ function FindingsDetails({
         await updateComment({
           assessmentId,
           findingId,
-          assessmentVersion,
           commentId,
           commentDto: {
             text,
@@ -550,7 +547,6 @@ function FindingsDetails({
     mutationFn: async ({ findingId, commentId }) => {
       await deleteComment({
         assessmentId,
-        assessmentVersion,
         findingId,
         commentId,
       });

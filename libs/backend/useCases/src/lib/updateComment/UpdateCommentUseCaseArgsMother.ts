@@ -17,7 +17,6 @@ export class UpdateCommentUseCaseArgsMother {
     return new UpdateCommentUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
-      version: 1,
       commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       commentBody: {
         text: 'comment-text',
@@ -52,11 +51,6 @@ export class UpdateCommentUseCaseArgsMother {
 
   public withUser(user: User): UpdateCommentUseCaseArgsMother {
     this.data.user = user;
-    return this;
-  }
-
-  public withVersion(version: number): UpdateCommentUseCaseArgsMother {
-    this.data.version = version;
     return this;
   }
 

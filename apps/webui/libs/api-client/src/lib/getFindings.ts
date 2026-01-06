@@ -18,10 +18,11 @@ export const getFindings = async (
   if (search) params.set('search', search);
   if (showHidden) params.set('showHidden', 'true');
   if (nextToken) params.set('nextToken', nextToken);
+  if (assessmentVersion) params.set('version', assessmentVersion.toString());
 
   return apiClient.get<
-    paths['/assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
+    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
   >(
-    `/assessments/${assessmentId}/versions/${assessmentVersion}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
+    `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
   );
 };

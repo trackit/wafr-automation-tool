@@ -4,12 +4,10 @@ import { apiClient } from './client';
 
 export const deleteComment = async ({
   assessmentId,
-  assessmentVersion,
   findingId,
   commentId,
 }: {
   assessmentId: string;
-  assessmentVersion: number;
   findingId: string;
   commentId: string;
 }) => {
@@ -18,7 +16,7 @@ export const deleteComment = async ({
   return apiClient.delete<
     operations['deleteComment']['responses']['200']['content']
   >(
-    `/assessments/${assessmentId}/versions/${assessmentVersion}/findings/${encodedFindingId}/comments/${commentId}`,
+    `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
   );
 };
 

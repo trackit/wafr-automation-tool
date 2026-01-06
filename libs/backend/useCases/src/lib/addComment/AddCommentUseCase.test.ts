@@ -1,23 +1,39 @@
 import {
   registerTestInfrastructure,
+  tokenFakeAssessmentsRepository,
   tokenFakeFindingsRepository,
 } from '@backend/infrastructure';
 import {
+  AssessmentMother,
   FindingCommentMother,
   FindingMother,
   UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { FindingNotFoundError } from '../../errors';
+import { AssessmentNotFoundError, FindingNotFoundError } from '../../errors';
 import { AddCommentUseCaseImpl } from './AddCommentUseCase';
 import { AddCommentUseCaseArgsMother } from './AddCommentUseCaseArgsMother';
 
 describe('AddCommentUseCase', () => {
-  it('should throw FindingNotFoundError if finding does not exist', async () => {
+  it('should throw AssessmentNotFoundError if assessment does not exist', async () => {
     const { useCase } = setup();
 
+    const input = AddCommentUseCaseArgsMother.basic().build();
+
+    await expect(useCase.addComment(input)).rejects.toThrow(
+      AssessmentNotFoundError,
+    );
+  });
+
+  it('should throw FindingNotFoundError if finding does not exist', async () => {
+    const { useCase, fakeAssessmentsRepository } = setup();
+
     const user = UserMother.basic().build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = AddCommentUseCaseArgsMother.basic()
       .withFindingId('scanning-tool#finding-id')
@@ -30,21 +46,26 @@ describe('AddCommentUseCase', () => {
   });
 
   it('should handle backward compatibility if finding has no comments field', async () => {
-    const { useCase, fakeFindingsRepository } = setup();
+    const { useCase, fakeFindingsRepository, fakeAssessmentsRepository } =
+      setup();
 
     const user = UserMother.basic().build();
-
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .build();
     const finding = FindingMother.basic().withComments(undefined).build();
+
+    await fakeAssessmentsRepository.save(assessment);
     await fakeFindingsRepository.save({
-      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding,
     });
 
     const input = AddCommentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withAssessmentId(assessment.id)
       .withFindingId(finding.id)
-      .withVersion(finding.version)
+
       .withText('This is a new comment')
       .withUser(user)
       .build();
@@ -55,7 +76,7 @@ describe('AddCommentUseCase', () => {
       assessmentId: input.assessmentId,
       organizationDomain: user.organizationDomain,
       findingId: input.findingId,
-      version: input.version,
+      version: assessment.latestVersionNumber,
     });
     expect(findingWithComment).toEqual(
       expect.objectContaining({
@@ -69,22 +90,27 @@ describe('AddCommentUseCase', () => {
   });
 
   it('should add the comment', async () => {
-    const { useCase, fakeFindingsRepository } = setup();
+    const { useCase, fakeFindingsRepository, fakeAssessmentsRepository } =
+      setup();
 
     const user = UserMother.basic().build();
 
     const comment = FindingCommentMother.basic().withAuthorId(user.id).build();
     const finding = FindingMother.basic().withComments([comment]).build();
+    const assessment = AssessmentMother.basic()
+      .withOrganization(user.organizationDomain)
+      .build();
+
     await fakeFindingsRepository.save({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       organizationDomain: user.organizationDomain,
       finding,
     });
+    await fakeAssessmentsRepository.save(assessment);
 
     const input = AddCommentUseCaseArgsMother.basic()
-      .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+      .withAssessmentId(assessment.id)
       .withFindingId(finding.id)
-      .withVersion(finding.version)
       .withText('This is a new comment')
       .withUser(user)
       .build();
@@ -95,7 +121,7 @@ describe('AddCommentUseCase', () => {
       assessmentId: input.assessmentId,
       organizationDomain: user.organizationDomain,
       findingId: input.findingId,
-      version: input.version,
+      version: assessment.latestVersionNumber,
     });
     expect(findingWithComment).toBeDefined();
     expect(findingWithComment?.comments).toBeDefined();
@@ -112,5 +138,6 @@ const setup = () => {
   return {
     useCase: new AddCommentUseCaseImpl(),
     fakeFindingsRepository: inject(tokenFakeFindingsRepository),
+    fakeAssessmentsRepository: inject(tokenFakeAssessmentsRepository),
   };
 };

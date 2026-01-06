@@ -32,7 +32,6 @@ export class UpdateCommentAdapterEventMother {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
         commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-        version: '1',
       },
       {
         text: 'comment-text',
@@ -54,11 +53,6 @@ export class UpdateCommentAdapterEventMother {
 
   public withCommentId(commentId: string): UpdateCommentAdapterEventMother {
     this.pathParameters.commentId = commentId;
-    return this;
-  }
-
-  public withVersion(version: string): UpdateCommentAdapterEventMother {
-    this.pathParameters.version = version;
     return this;
   }
 

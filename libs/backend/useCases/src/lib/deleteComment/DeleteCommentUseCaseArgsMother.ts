@@ -13,7 +13,6 @@ export class DeleteCommentUseCaseArgsMother {
     return new DeleteCommentUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'tool#1',
-      version: 1,
       commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       user: UserMother.basic().build(),
     });
@@ -38,11 +37,6 @@ export class DeleteCommentUseCaseArgsMother {
 
   public withUser(user: User): DeleteCommentUseCaseArgsMother {
     this.data.user = user;
-    return this;
-  }
-
-  public withVersion(version: number): DeleteCommentUseCaseArgsMother {
-    this.data.version = version;
     return this;
   }
 

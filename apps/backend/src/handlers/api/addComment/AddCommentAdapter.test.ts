@@ -63,12 +63,10 @@ describe('addComment adapter', () => {
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
       const findingId = 'finding-id';
-      const version = 1;
       const text = 'This is a comment';
       const event = AddCommentAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
         .withFindingId(findingId)
-        .withVersion(String(version))
         .withText(text)
         .withUser(user)
         .build();
@@ -78,7 +76,6 @@ describe('addComment adapter', () => {
       expect(useCase.addComment).toHaveBeenCalledWith({
         assessmentId,
         findingId,
-        version,
         text,
         user,
       });

@@ -715,7 +715,7 @@ paths:
           description: The specified assessment, pillar, or question could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
+  '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
     get:
       operationId: getBestPracticeFindings
       tags:
@@ -728,12 +728,6 @@ paths:
           in: path
           required: true
           description: The ID of the assessment
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          description: The version of the assessment
           schema:
             type: string
         - name: pillarId
@@ -775,6 +769,11 @@ paths:
           description: Token for pagination.
           schema:
             type: string
+        - name: version
+          in: query
+          description: The version of the assessment
+          schema:
+            type: string
       responses:
         '200':
           description: A list of findings related to the specified best practice
@@ -796,7 +795,6 @@ paths:
           description: A issue occurred while trying to retrieve the organization of the user
         '404':
           description: The specified best practice could not be found
-  '/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}':
     put:
       operationId: updateBestPractice
       tags:
@@ -867,8 +865,7 @@ paths:
           schema:
             type: string
         - name: version
-          in: path
-          required: true
+          in: query
           description: The version of the assessment
           schema:
             type: string
@@ -906,8 +903,7 @@ paths:
           schema:
             type: string
         - name: version
-          in: path
-          required: true
+          in: query
           description: The version of the assessment
           schema:
             type: string
@@ -926,7 +922,7 @@ paths:
           description: The specified assessment could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments':
+  '/assessments/{assessmentId}/findings/{findingId}/comments':
     post:
       operationId: addComment
       tags:
@@ -945,12 +941,6 @@ paths:
           in: path
           required: true
           description: The unique ID of the finding to add a comment to
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          description: The version of the assessment
           schema:
             type: string
       requestBody:
@@ -978,7 +968,7 @@ paths:
           description: The specified assessment or finding could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments/{commentId}':
+  '/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}':
     put:
       operationId: updateComment
       tags:
@@ -991,12 +981,6 @@ paths:
           in: path
           required: true
           description: The ID of the assessment to which the finding belongs
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          description: The version of the assessment
           schema:
             type: string
         - name: findingId
@@ -1038,12 +1022,6 @@ paths:
           in: path
           required: true
           description: The ID of the assessment to which the finding belongs
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          description: The version of the assessment
           schema:
             type: string
         - name: findingId

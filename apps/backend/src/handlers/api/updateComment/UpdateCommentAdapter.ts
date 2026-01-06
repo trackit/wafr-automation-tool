@@ -11,7 +11,6 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const UpdateCommentPathSchema = z.object({
   assessmentId: z.uuid(),
-  version: z.string().regex(/^\d+$/, 'version must be a number'),
   findingId: z.string().nonempty(),
   commentId: z.uuid(),
 }) satisfies ZodType<operations['updateComment']['parameters']['path']>;
@@ -51,7 +50,6 @@ export class UpdateCommentAdapter {
 
     await this.useCase.updateComment({
       assessmentId,
-      version: Number(pathParameters.version),
       findingId: decodeURIComponent(findingId),
       commentId,
       user,

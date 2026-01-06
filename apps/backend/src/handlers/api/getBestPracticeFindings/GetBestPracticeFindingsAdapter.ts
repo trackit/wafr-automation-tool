@@ -13,7 +13,6 @@ import { parseApiEvent } from '../../../utils/api/parseApiEvent/parseApiEvent';
 
 const GetBestPracticeFindingsPathSchema = z.object({
   assessmentId: z.uuid(),
-  version: z.string().regex(/^\d+$/, 'version must be a number'),
   pillarId: z.string().nonempty(),
   questionId: z.string().nonempty(),
   bestPracticeId: z.string().nonempty(),
@@ -22,6 +21,7 @@ const GetBestPracticeFindingsPathSchema = z.object({
 >;
 
 const GetBestPracticeFindingsQueryArgsSchema = z.object({
+  version: z.string().regex(/^\d+$/, 'version must be a number').optional(),
   limit: z.coerce.number().int().min(1).optional(),
   search: z.string().nonempty().optional(),
   showHidden: z.coerce.boolean().optional(),
@@ -105,7 +105,7 @@ export class GetBestPracticeFindingsAdapter {
 
     const { findings, nextToken } = await this.useCase.getBestPracticeFindings({
       ...pathParameters,
-      version: Number(pathParameters.version),
+      version: Number(queryStringParameters.version),
       limit: queryStringParameters.limit,
       nextToken: queryStringParameters.nextToken,
       searchTerm: queryStringParameters.search,

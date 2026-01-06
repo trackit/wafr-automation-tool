@@ -22,7 +22,6 @@ export class DeleteCommentAdapterEventMother {
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
       findingId: 'finding-id',
       commentId: '2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      version: '1',
     });
   }
 
@@ -40,11 +39,6 @@ export class DeleteCommentAdapterEventMother {
 
   public withCommentId(commentId: string): DeleteCommentAdapterEventMother {
     this.pathParameters.commentId = commentId;
-    return this;
-  }
-
-  public withVersion(version: string): DeleteCommentAdapterEventMother {
-    this.pathParameters.version = version;
     return this;
   }
 

@@ -10,11 +10,11 @@ import { assertBestPracticeExists } from '../../services/asserts';
 
 export interface GetBestPracticeFindingsUseCaseArgs {
   assessmentId: string;
-  version: number;
   pillarId: string;
   questionId: string;
   bestPracticeId: string;
   user: User;
+  version?: number;
   limit?: number;
   nextToken?: string;
   searchTerm?: string;
@@ -73,7 +73,7 @@ export class GetBestPracticeFindingsUseCaseImpl
 
     return await this.findingsRepository.getBestPracticeFindings({
       organizationDomain,
-      version,
+      version: version ?? assessment.latestVersionNumber,
       assessmentId,
       pillarId,
       questionId,

@@ -28,7 +28,6 @@ export class AddCommentAdapterEventMother {
       {
         assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
         findingId: 'finding-id',
-        version: '1',
       },
       {
         text: 'comment-text',
@@ -43,11 +42,6 @@ export class AddCommentAdapterEventMother {
 
   public withFindingId(findingId: string): AddCommentAdapterEventMother {
     this.pathParameters.findingId = findingId;
-    return this;
-  }
-
-  public withVersion(version: string): AddCommentAdapterEventMother {
-    this.pathParameters.version = version;
     return this;
   }
 

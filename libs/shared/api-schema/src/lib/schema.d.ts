@@ -308,7 +308,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/versions/{version}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}": {
+    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -320,22 +320,6 @@ export interface paths {
          * @description Fetches all the findings associated with a specific best practice within a question in a given pillar for a specific assessment.
          */
         get: operations["getBestPracticeFindings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
         /**
          * Update the details of a specific best practice
          * @description Updates the details of a specific best practice.
@@ -373,7 +357,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments": {
+    "/assessments/{assessmentId}/findings/{findingId}/comments": {
         parameters: {
             query?: never;
             header?: never;
@@ -393,7 +377,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/versions/{version}/findings/{findingId}/comments/{commentId}": {
+    "/assessments/{assessmentId}/findings/{findingId}/comments/{commentId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1565,13 +1549,13 @@ export interface operations {
                 showHidden?: boolean;
                 /** @description Token for pagination. */
                 nextToken?: string;
+                /** @description The version of the assessment */
+                version?: string;
             };
             header?: never;
             path: {
                 /** @description The ID of the assessment */
                 assessmentId: string;
-                /** @description The version of the assessment */
-                version: string;
                 /** @description The ID of the pillar under which the question falls */
                 pillarId: string;
                 /** @description The ID of the question to retrieve the best practices to */
@@ -1669,15 +1653,16 @@ export interface operations {
     };
     getFinding: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The version of the assessment */
+                version?: string;
+            };
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
                 /** @description The unique ID of the finding to retrieve */
                 findingId: string;
-                /** @description The version of the assessment */
-                version: string;
             };
             cookie?: never;
         };
@@ -1717,15 +1702,16 @@ export interface operations {
     };
     updateFinding: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The version of the assessment */
+                version?: string;
+            };
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
                 /** @description The unique ID of the finding to retrieve */
                 findingId: string;
-                /** @description The version of the assessment */
-                version: string;
             };
             cookie?: never;
         };
@@ -1774,8 +1760,6 @@ export interface operations {
                 assessmentId: string;
                 /** @description The unique ID of the finding to add a comment to */
                 findingId: string;
-                /** @description The version of the assessment */
-                version: string;
             };
             cookie?: never;
         };
@@ -1827,8 +1811,6 @@ export interface operations {
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
-                /** @description The version of the assessment */
-                version: string;
                 /** @description The unique ID of the finding to which the comment belongs */
                 findingId: string;
                 /** @description The unique ID of the comment to update */
@@ -1879,8 +1861,6 @@ export interface operations {
             path: {
                 /** @description The ID of the assessment to which the finding belongs */
                 assessmentId: string;
-                /** @description The version of the assessment */
-                version: string;
                 /** @description The unique ID of the finding to which the comment belongs */
                 findingId: string;
                 /** @description The unique ID of the comment to delete */

@@ -92,7 +92,6 @@ describe('getBestPracticeFindings adapter', () => {
         .withQueryStringParameters({})
         .withPathParameters({
           assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-          version: '1',
           pillarId: '1',
           questionId: '1',
           bestPracticeId: '1',
@@ -108,13 +107,11 @@ describe('getBestPracticeFindings adapter', () => {
       const { adapter, useCase } = setup();
 
       const assessmentId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
-      const version = 1;
       const pillarId = 'pillar-id';
       const questionId = 'question-id';
       const bestPracticeId = 'best-practice-id';
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId(assessmentId)
-        .withVersion(String(version))
         .withPillarId(pillarId)
         .withQuestionId(questionId)
         .withBestPracticeId(bestPracticeId)
@@ -124,7 +121,6 @@ describe('getBestPracticeFindings adapter', () => {
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
-          version,
           pillarId,
           questionId,
           bestPracticeId,
@@ -132,13 +128,14 @@ describe('getBestPracticeFindings adapter', () => {
       );
     });
 
-    it('should call useCase with limit, search, showHidden and nextToken', async () => {
+    it('should call useCase with version, limit, search, showHidden and nextToken', async () => {
       const { adapter, useCase } = setup();
 
       const limit = 10;
       const searchTerm = 'search-term';
       const showHidden = true;
       const nextToken = 'YQ==';
+      const version = 1;
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withPillarId('pillar-id')
@@ -148,11 +145,13 @@ describe('getBestPracticeFindings adapter', () => {
         .withSearch(searchTerm)
         .withShowHidden(showHidden)
         .withNextToken(nextToken)
+        .withVersion(String(version))
         .build();
 
       await adapter.handle(event);
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
+          version,
           limit,
           searchTerm,
           showHidden,

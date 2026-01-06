@@ -1,4 +1,5 @@
 import {
+  tokenAssessmentsRepository,
   tokenFindingsRepository,
   tokenIdGenerator,
   tokenLogger,
@@ -6,12 +7,11 @@ import {
 import type { FindingComment, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { FindingNotFoundError } from '../../errors';
+import { AssessmentNotFoundError, FindingNotFoundError } from '../../errors';
 
 export type AddCommentUseCaseArgs = {
   assessmentId: string;
   findingId: string;
-  version: number;
   text: string;
   user: User;
 };
@@ -22,15 +22,26 @@ export interface AddCommentUseCase {
 
 export class AddCommentUseCaseImpl implements AddCommentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
+  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly idGenerator = inject(tokenIdGenerator);
   private readonly logger = inject(tokenLogger);
 
   public async addComment(
     args: AddCommentUseCaseArgs,
   ): Promise<FindingComment> {
-    const { assessmentId, findingId, version, text, user } = args;
+    const { assessmentId, findingId, text, user } = args;
     const { organizationDomain } = user;
-
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
+    }
+    const version = assessment.latestVersionNumber;
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain,
