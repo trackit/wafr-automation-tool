@@ -94,6 +94,11 @@ export interface AssessmentsRepository {
     assessmentVersion: AssessmentVersion;
     organizationDomain: string;
   }): Promise<void>;
+  createNextAssessmentVersion(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    assessmentVersion: Omit<AssessmentVersion, 'version' | 'assessmentId'>;
+  }): Promise<AssessmentVersion | undefined>;
   updateVersion(args: {
     assessmentId: string;
     version: number;

@@ -364,6 +364,32 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     const versionKey = `${assessmentId}#${organizationDomain}#${version}`;
     return this.versions[versionKey];
   }
+
+  public async createNextAssessmentVersion(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    assessmentVersion: Omit<AssessmentVersion, 'version' | 'assessmentId'>;
+  }): Promise<AssessmentVersion | undefined> {
+    const { assessmentId, organizationDomain, assessmentVersion } = args;
+    const assessment =
+      this.assessments[`${assessmentId}#${organizationDomain}`];
+
+    if (!assessment) {
+      return undefined;
+    }
+
+    const newVersion = assessment.latestVersionNumber + 1;
+    const nextVersion: AssessmentVersion = {
+      assessmentId,
+      version: newVersion,
+      ...assessmentVersion,
+    };
+
+    const versionKey = `${assessmentId}#${organizationDomain}#${newVersion}`;
+    this.versions[versionKey] = nextVersion;
+    assessment.latestVersionNumber = newVersion;
+    return nextVersion;
+  }
 }
 
 export const tokenFakeAssessmentsRepository =

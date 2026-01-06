@@ -32,24 +32,24 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     assessment: Assessment,
     createdBy: string,
   ): Promise<AssessmentVersion> {
-    const newVersion = assessment.latestVersionNumber + 1;
-    const assessmentVersion: AssessmentVersion = {
-      assessmentId: assessment.id,
-      version: newVersion,
-      createdAt: new Date(),
-      createdBy,
-      pillars: assessment.pillars,
-      executionArn: '',
-    };
-    await this.assessmentsRepository.createVersion({
-      organizationDomain: assessment.organization,
-      assessmentVersion,
-    });
-    await this.assessmentsRepository.update({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      assessmentBody: { latestVersionNumber: newVersion },
-    });
+    const assessmentVersion =
+      await this.assessmentsRepository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy,
+          createdAt: new Date(),
+          pillars: assessment.pillars,
+          executionArn: '',
+        },
+      });
+
+    if (!assessmentVersion) {
+      throw new Error(
+        `Failed to create next version for assessment ${assessment.id}`,
+      );
+    }
+
     return assessmentVersion;
   }
 

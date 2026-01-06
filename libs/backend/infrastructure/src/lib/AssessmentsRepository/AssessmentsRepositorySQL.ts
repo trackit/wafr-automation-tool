@@ -422,4 +422,47 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       },
     });
   }
+
+  public async createNextAssessmentVersion(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    assessmentVersion: Omit<AssessmentVersion, 'version' | 'assessmentId'>;
+  }): Promise<AssessmentVersion | undefined> {
+    const { assessmentId, organizationDomain, assessmentVersion } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+    const newAssessmentVersion = await repo.manager.transaction(async (trx) => {
+      const assessmentRepo = trx.getRepository(AssessmentEntity);
+      const versionRepo = trx.getRepository(AssessmentVersionEntity);
+
+      const assessment = await assessmentRepo.findOne({
+        where: { id: assessmentId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!assessment) {
+        return undefined;
+      }
+
+      const newVersion = assessment.latestVersionNumber + 1;
+
+      const assessmentVersionEntity = versionRepo.create({
+        assessmentId,
+        version: newVersion,
+        ...assessmentVersion,
+      });
+
+      await versionRepo.save(assessmentVersionEntity);
+      await assessmentRepo.update(
+        { id: assessmentId },
+        {
+          latestVersionNumber: newVersion,
+        },
+      );
+
+      return assessmentVersionEntity;
+    });
+    return newAssessmentVersion
+      ? toDomainAssessmentVersion(newAssessmentVersion)
+      : undefined;
+  }
 }

@@ -1610,6 +1610,131 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedVersion2?.executionArn).toBe('old-execution-arn');
     });
   });
+
+  describe('createNextAssessmentVersion', () => {
+    it('should create an assessment version with next number and update the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+
+      const created = await repository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy: 'user1',
+          createdAt: new Date(),
+          pillars: [],
+          executionArn: '',
+        },
+      });
+
+      expect(created).toBeDefined();
+      expect(created?.assessmentId).toBe(assessment.id);
+      expect(created?.version).toBe(2);
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment).toBeDefined();
+      expect(updatedAssessment?.latestVersionNumber).toBe(2);
+
+      const retrievedVersion = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(retrievedVersion).toBeDefined();
+      expect(retrievedVersion?.version).toBe(2);
+    });
+
+    it('should handle concurrent creations', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(0)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+
+      const assessmentVersionCreation1 = repository.createNextAssessmentVersion(
+        {
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          assessmentVersion: {
+            createdBy: 'user-a',
+            createdAt: new Date(),
+            pillars: [],
+            executionArn: '',
+          },
+        },
+      );
+      const assessmentVersionCreation2 = repository.createNextAssessmentVersion(
+        {
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          assessmentVersion: {
+            createdBy: 'user-b',
+            createdAt: new Date(),
+            pillars: [],
+            executionArn: '',
+          },
+        },
+      );
+
+      const [v1, v2] = await Promise.all([
+        assessmentVersionCreation1,
+        assessmentVersionCreation2,
+      ]);
+
+      expect(v1).toBeDefined();
+      expect(v2).toBeDefined();
+
+      const versions = [v1!.version, v2!.version].sort((a, b) => a - b);
+      expect(versions).toEqual([1, 2]);
+
+      const finalAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(finalAssessment?.latestVersionNumber).toBe(2);
+
+      const retrieved1 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+      });
+      const retrieved2 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+      expect(retrieved1).toBeDefined();
+      expect(retrieved2).toBeDefined();
+    });
+  });
 });
 
 const setup = () => {
