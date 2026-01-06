@@ -4,7 +4,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { type AssessmentBody, type User } from '@backend/models';
+import { AssessmentVersionBody, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -67,7 +67,7 @@ export class ExportWellArchitectedToolUseCaseImpl
         region: (args.region ?? assessment.exportRegion)!,
         user: args.user,
       });
-    const assessmentVersionBody: AssessmentBody = {
+    const assessmentVersionBody: AssessmentVersionBody = {
       wafrWorkloadArn: workloadArn,
     };
     if (!assessment.exportRegion) {

@@ -47,88 +47,91 @@ describe('GetAssessmentUseCase', () => {
 
   it('should return correct bestPracticesFindingsAmount', async () => {
     vitest.useFakeTimers();
-    const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
-      setup();
+    try {
+      const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+        setup();
 
-    const bestPractice = BestPracticeMother.basic().build();
-    const question = QuestionMother.basic()
-      .withBestPractices([bestPractice])
-      .build();
-    const pillar = PillarMother.basic().withQuestions([question]).build();
-    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
-    const assessmentVersion = AssessmentVersionMother.basic()
-      .withPillars([pillar])
-      .withVersion(assessment.latestVersionNumber)
-      .build();
-    await fakeAssessmentsRepository.save(assessment);
-    await fakeAssessmentsRepository.createVersion({
-      assessmentVersion,
-      organizationDomain: assessment.organization,
-    });
-    const finding1 = FindingMother.basic()
-      .withId('finding#1')
-      .withVersion(assessment.latestVersionNumber)
-      .build();
-    const finding2 = FindingMother.basic()
-      .withId('finding#2')
-      .withVersion(assessment.latestVersionNumber)
-      .build();
-    const finding3 = FindingMother.basic()
-      .withId('finding#3')
-      .withVersion(assessment.latestVersionNumber + 1)
-      .build();
+      const bestPractice = BestPracticeMother.basic().build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
+      const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withPillars([pillar])
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      await fakeAssessmentsRepository.save(assessment);
+      await fakeAssessmentsRepository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+      const finding1 = FindingMother.basic()
+        .withId('finding#1')
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      const finding2 = FindingMother.basic()
+        .withId('finding#2')
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      const finding3 = FindingMother.basic()
+        .withId('finding#3')
+        .withVersion(assessment.latestVersionNumber + 1)
+        .build();
 
-    await fakeFindingsRepository.save({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      finding: finding1,
-    });
-    await fakeFindingsRepository.save({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      finding: finding2,
-    });
-    await fakeFindingsRepository.save({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      finding: finding3,
-    });
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding1,
+      });
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding2,
+      });
+      await fakeFindingsRepository.save({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        finding: finding3,
+      });
 
-    await fakeFindingsRepository.saveBestPracticeFindings({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      version: assessment.latestVersionNumber,
-      pillarId: pillar.id,
-      questionId: question.id,
-      bestPracticeId: bestPractice.id,
-      bestPracticeFindingIds: new Set([finding1.id, finding2.id]),
-    });
-    await fakeFindingsRepository.saveBestPracticeFindings({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      version: assessment.latestVersionNumber + 1,
-      pillarId: pillar.id,
-      questionId: question.id,
-      bestPracticeId: bestPractice.id,
-      bestPracticeFindingIds: new Set([finding3.id]),
-    });
-    finding1.bestPractices = [bestPractice];
-    finding2.bestPractices = [bestPractice];
-    finding3.bestPractices = [bestPractice];
+      await fakeFindingsRepository.saveBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
+        bestPracticeFindingIds: new Set([finding1.id, finding2.id]),
+      });
+      await fakeFindingsRepository.saveBestPracticeFindings({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber + 1,
+        pillarId: pillar.id,
+        questionId: question.id,
+        bestPracticeId: bestPractice.id,
+        bestPracticeFindingIds: new Set([finding3.id]),
+      });
+      finding1.bestPractices = [bestPractice];
+      finding2.bestPractices = [bestPractice];
+      finding3.bestPractices = [bestPractice];
 
-    const input = GetAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
-      .build();
+      const input = GetAssessmentUseCaseArgsMother.basic()
+        .withAssessmentId(assessment.id)
+        .withOrganizationDomain(assessment.organization)
+        .build();
 
-    const result = await useCase.getAssessment(input);
-    expect(result.assessment).toEqual(assessment);
-    expect(
-      result.bestPracticesFindingsAmount[pillar.id][question.id][
-        bestPractice.id
-      ],
-    ).toBe(2);
-    vitest.useRealTimers();
+      const result = await useCase.getAssessment(input);
+      expect(result.assessment).toEqual(assessment);
+      expect(
+        result.bestPracticesFindingsAmount[pillar.id][question.id][
+          bestPractice.id
+        ],
+      ).toBe(2);
+    } finally {
+      vitest.useRealTimers();
+    }
   });
 });
 

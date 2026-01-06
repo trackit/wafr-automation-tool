@@ -144,21 +144,3 @@ export class AssessmentOpportunityAlreadyLinkedError extends UseCaseError {
     });
   }
 }
-
-export class AssessmentVersionNotFoundError extends UseCaseError {
-  public constructor(
-    args: {
-      assessmentId: string;
-      version: number;
-      organizationDomain: string;
-    },
-    description?: string,
-  ) {
-    const { assessmentId, version, organizationDomain } = args;
-    super({
-      type: BasicErrorType.NOT_FOUND,
-      message: `Version ${version} of assessment ${assessmentId} not found for organization with domain ${organizationDomain}`,
-      description,
-    });
-  }
-}
