@@ -24,7 +24,7 @@ describe('RescanAssessmentUseCase', () => {
     );
   });
 
-  it('should increment latestVersionNumber and create a new assessment record with newer createdAt', async () => {
+  it('should increment latestVersionNumber and create a new assessment record', async () => {
     const { useCase, fakeAssessmentsRepository, date } = setup();
 
     const user = UserMother.basic().build();
@@ -54,7 +54,7 @@ describe('RescanAssessmentUseCase', () => {
 
     expect(updatedAssessment?.id).toBe(assessment.id);
     expect(updatedAssessment?.latestVersionNumber).toBe(oldVersion + 1);
-    expect(updatedAssessment?.createdAt.getTime()).toBeGreaterThan(
+    expect(updatedAssessment?.createdAt.getTime()).toBe(
       assessment.createdAt.getTime(),
     );
   });

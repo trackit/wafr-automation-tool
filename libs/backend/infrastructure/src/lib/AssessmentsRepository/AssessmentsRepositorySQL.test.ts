@@ -257,7 +257,7 @@ describe('AssessmentsRepositorySQL', () => {
 
       expect(mergedAssessment).toBeDefined();
       expect(mergedAssessment?.createdBy).toBe('new-user');
-      expect(mergedAssessment?.createdAt).toEqual(new Date('2026-01-02'));
+      expect(mergedAssessment?.createdAt).toEqual(new Date('2026-01-01'));
       expect(mergedAssessment?.executionArn).toBe('new-arn');
       expect(mergedAssessment?.name).toBe('Test Assessment');
       expect(mergedAssessment?.regions).toEqual(['us-east-1']);
@@ -268,30 +268,34 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('getAll', () => {
     it('should return a list of assessment if it exists', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
+      try {
+        const assessment = AssessmentMother.basic()
+          .withOrganization('organization1')
+          .build();
 
-      const assessment = AssessmentMother.basic()
-        .withOrganization('organization1')
-        .build();
+        const assessmentVersion = AssessmentVersionMother.basic()
+          .withAssessmentId(assessment.id)
+          .withVersion(assessment.latestVersionNumber)
+          .build();
+        await repository.save(assessment);
+        await repository.createVersion({
+          assessmentVersion,
+          organizationDomain: assessment.organization,
+        });
 
-      const assessmentVersion = AssessmentVersionMother.basic()
-        .withAssessmentId(assessment.id)
-        .withVersion(assessment.latestVersionNumber)
-        .build();
-      await repository.save(assessment);
-      await repository.createVersion({
-        assessmentVersion,
-        organizationDomain: assessment.organization,
-      });
+        const fetchedAssessments = await repository.getAll({
+          organizationDomain: assessment.organization,
+        });
 
-      const fetchedAssessments = await repository.getAll({
-        organizationDomain: assessment.organization,
-      });
-
-      expect(fetchedAssessments).toEqual({
-        assessments: [assessment],
-        nextToken: undefined,
-      });
+        expect(fetchedAssessments).toEqual({
+          assessments: [assessment],
+          nextToken: undefined,
+        });
+      } finally {
+        vitest.useRealTimers();
+      }
     });
 
     it('should return all assessments with matched search criteria', async () => {

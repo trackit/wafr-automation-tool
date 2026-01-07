@@ -119,9 +119,8 @@ export function toDomainAssessmentWithVersion(
         assessment.billingInformation,
       ),
     }),
-
+    createdAt: assessment.createdAt,
     createdBy: version.createdBy,
-    createdAt: version.createdAt,
     executionArn: version.executionArn ?? '',
     ...(version.finishedAt && { finishedAt: version.finishedAt }),
     ...(version.error && { error: version.error }),
@@ -139,7 +138,6 @@ export function mergeAssessmentWithVersion(
 ): Assessment {
   return {
     ...assessment,
-    createdAt: version.createdAt ?? assessment.createdAt,
     createdBy: version.createdBy ?? assessment.createdBy,
     executionArn: version.executionArn ?? assessment.executionArn,
     pillars: version.pillars ?? assessment.pillars,
