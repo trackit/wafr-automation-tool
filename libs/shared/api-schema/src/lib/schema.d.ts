@@ -332,7 +332,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assessments/{assessmentId}/versions/{version}/findings/{findingId}": {
+    "/assessments/{assessmentId}/findings/{findingId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1550,7 +1550,7 @@ export interface operations {
                 /** @description Token for pagination. */
                 nextToken?: string;
                 /** @description The version of the assessment */
-                version?: string;
+                version?: number;
             };
             header?: never;
             path: {
@@ -1655,7 +1655,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description The version of the assessment */
-                version?: string;
+                version?: number;
             };
             header?: never;
             path: {
@@ -1702,10 +1702,7 @@ export interface operations {
     };
     updateFinding: {
         parameters: {
-            query?: {
-                /** @description The version of the assessment */
-                version?: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */

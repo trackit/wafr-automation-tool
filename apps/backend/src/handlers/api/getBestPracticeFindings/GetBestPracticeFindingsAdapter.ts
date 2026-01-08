@@ -21,7 +21,7 @@ const GetBestPracticeFindingsPathSchema = z.object({
 >;
 
 const GetBestPracticeFindingsQueryArgsSchema = z.object({
-  version: z.string().regex(/^\d+$/, 'version must be a number').optional(),
+  version: z.coerce.number().int().optional(),
   limit: z.coerce.number().int().min(1).optional(),
   search: z.string().nonempty().optional(),
   showHidden: z.coerce.boolean().optional(),
@@ -105,7 +105,7 @@ export class GetBestPracticeFindingsAdapter {
 
     const { findings, nextToken } = await this.useCase.getBestPracticeFindings({
       ...pathParameters,
-      version: Number(queryStringParameters.version),
+      version: queryStringParameters.version,
       limit: queryStringParameters.limit,
       nextToken: queryStringParameters.nextToken,
       searchTerm: queryStringParameters.search,

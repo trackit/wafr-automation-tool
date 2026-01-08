@@ -19,7 +19,7 @@ describe('getBestPracticeFindings adapter', () => {
 
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
-        .withVersion('1')
+        .withVersion(1)
         .withPillarId('pillar-id')
         .withQuestionId('question-id')
         .withBestPracticeId('best-practice-id')
@@ -145,7 +145,7 @@ describe('getBestPracticeFindings adapter', () => {
         .withSearch(searchTerm)
         .withShowHidden(showHidden)
         .withNextToken(nextToken)
-        .withVersion(String(version))
+        .withVersion(version)
         .build();
 
       await adapter.handle(event);

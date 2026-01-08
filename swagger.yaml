@@ -773,7 +773,7 @@ paths:
           in: query
           description: The version of the assessment
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: A list of findings related to the specified best practice
@@ -842,7 +842,7 @@ paths:
           description: The specified assessment, pillar, question, or best practice could not be found
         '500':
           description: Internal server error.
-  '/assessments/{assessmentId}/versions/{version}/findings/{findingId}':
+  '/assessments/{assessmentId}/findings/{findingId}':
     get:
       operationId: getFinding
       tags:
@@ -868,7 +868,7 @@ paths:
           in: query
           description: The version of the assessment
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: Detailed information about the specified finding
@@ -900,11 +900,6 @@ paths:
           in: path
           required: true
           description: The unique ID of the finding to retrieve
-          schema:
-            type: string
-        - name: version
-          in: query
-          description: The version of the assessment
           schema:
             type: string
       requestBody:
