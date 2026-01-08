@@ -10,7 +10,10 @@ import {
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { AssessmentNotFoundError } from '../../errors';
+import {
+  AssessmentNotFoundError,
+  AssessmentVersionCreationError,
+} from '../../errors';
 
 export type RescanAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -45,9 +48,9 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
       });
 
     if (!assessmentVersion) {
-      throw new Error(
-        `Failed to create next version for assessment ${assessment.id}`,
-      );
+      throw new AssessmentVersionCreationError({
+        assessmentId: assessment.id,
+      });
     }
 
     return assessmentVersion;
