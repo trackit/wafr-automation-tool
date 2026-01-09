@@ -64,9 +64,11 @@ export class ApiClient {
       });
       return response.data as T;
     } catch (error) {
-      enqueueSnackbar((error as Error).message, {
-        variant: 'error',
-      });
+      if (error instanceof ApiError && error.statusCode !== 503) {
+        enqueueSnackbar((error as Error).message, {
+          variant: 'error',
+        });
+      }
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         error instanceof Error ? error.message : 'An unknown error occurred',

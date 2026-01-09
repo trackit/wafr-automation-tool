@@ -9,6 +9,7 @@ const ErrorTypeResponseCode: Record<BasicErrorType, number> = {
   [BasicErrorType.FORBIDDEN]: 403,
   [BasicErrorType.NOT_FOUND]: 404,
   [BasicErrorType.CONFLICT]: 409,
+  [BasicErrorType.SERVICE_UNAVAILABLE]: 503,
 };
 
 const buildResponse = (

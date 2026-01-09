@@ -15,6 +15,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 
 import { type components } from '@shared/api-schema';
 import {
+  type ApiError,
   deleteAssessment,
   getAssessment,
   getAssessmentStep,
@@ -85,6 +86,18 @@ export function AssessmentDetails() {
     queryKey: ['assessment', id],
     queryFn: () => (id ? getAssessment(id) : null),
     refetchInterval: isMilestone ? false : 15000, // Don't auto-refetch for milestones
+    retry: (failureCount, error: ApiError) => {
+      if (error?.statusCode === 503 && failureCount < 3) {
+        return true;
+      }
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: ApiError) => {
+      if (error?.statusCode === 503) {
+        return 12000;
+      }
+      return Math.min(1000 * 2 ** attemptIndex, 24000);
+    },
   });
 
   const milestoneQuery = useQuery({

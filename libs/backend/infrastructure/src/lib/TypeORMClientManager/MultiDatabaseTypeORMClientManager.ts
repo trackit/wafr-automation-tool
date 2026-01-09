@@ -12,10 +12,15 @@ import {
 import { tokenLogger } from '../Logger';
 
 export const POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED = '28P01';
+export const NODE_ERROR_CODE_ETIMEDOUT = 'ETIMEDOUT';
+export const NODE_ERROR_CODE_ECONNREFUSED = 'ECONNREFUSED';
+export const NODE_ERRNO_ETIMEDOUT = -110;
+export const NODE_ERRNO_ECONNREFUSED = -111;
 
 interface DatabaseError {
   code?: string;
   message?: string;
+  errno?: number;
 }
 
 function isAuthError(err: unknown): boolean {
@@ -26,6 +31,18 @@ function isAuthError(err: unknown): boolean {
   return (
     dbError.code === POSTGRES_ERROR_CODE_AUTHENTICATION_FAILED ||
     msg.includes('password authentication failed')
+  );
+}
+
+export function isDatabaseUnavailableError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+
+  const dbError = err as DatabaseError;
+  return (
+    dbError.code === NODE_ERROR_CODE_ETIMEDOUT ||
+    dbError.code === NODE_ERROR_CODE_ECONNREFUSED ||
+    dbError.errno === NODE_ERRNO_ETIMEDOUT ||
+    dbError.errno === NODE_ERRNO_ECONNREFUSED
   );
 }
 
@@ -150,6 +167,13 @@ export class MultiDatabaseTypeORMClientManager implements TypeORMClientManager {
       try {
         return await operation();
       } catch (err: unknown) {
+        if (isDatabaseUnavailableError(err)) {
+          this.logger.error(
+            `[DB] ${operationName} failed - database unavailable`,
+          );
+          throw err;
+        }
+
         if (!isAuthError(err)) {
           this.logger.error(`[DB] ${operationName} failed with non-auth error`);
           throw err;

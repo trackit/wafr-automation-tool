@@ -12,7 +12,10 @@ import {
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
-import { AssessmentNotFoundError } from '../../errors';
+import {
+  AssessmentNotFoundError,
+  DatabaseUnavailableError,
+} from '../../errors';
 import { GetAssessmentUseCaseImpl } from './GetAssessmentUseCase';
 import { GetAssessmentUseCaseArgsMother } from './GetAssessmentUseCaseArgsMother';
 
@@ -24,6 +27,24 @@ describe('GetAssessmentUseCase', () => {
 
     await expect(useCase.getAssessment(input)).rejects.toThrow(
       AssessmentNotFoundError,
+    );
+  });
+
+  it('should throw DatabaseUnavailableError if database is unavailable', async () => {
+    const { useCase } = setup();
+    const connectionRefusedError = {
+      code: 'ECONNREFUSED',
+      errno: -111,
+      message: 'connect ECONNREFUSED',
+    };
+
+    vitest
+      .spyOn(useCase['assessmentsRepository'], 'get')
+      .mockRejectedValue(connectionRefusedError);
+    const input = GetAssessmentUseCaseArgsMother.basic().build();
+
+    await expect(useCase.getAssessment(input)).rejects.toThrow(
+      DatabaseUnavailableError,
     );
   });
 

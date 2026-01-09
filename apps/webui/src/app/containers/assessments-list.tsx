@@ -33,6 +33,7 @@ import {
 import { useDebounceValue } from 'usehooks-ts';
 
 import {
+  type ApiError,
   deleteAssessment,
   getAssessments,
   getAssessmentStep,
@@ -82,11 +83,35 @@ function AssessmentsList() {
       getAssessments({ limit: 24, search, nextToken: pageParam }),
     getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
+    retry: (failureCount, error: ApiError) => {
+      if (error?.statusCode === 503 && failureCount < 3) {
+        return true;
+      }
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: ApiError) => {
+      if (error?.statusCode === 503) {
+        return 12000;
+      }
+      return Math.min(1000 * 2 ** attemptIndex, 24000);
+    },
   });
 
   const { data: organization } = useQuery({
     queryKey: ['organization'],
     queryFn: getOrganization,
+    retry: (failureCount, error: ApiError) => {
+      if (error?.statusCode === 503 && failureCount < 3) {
+        return true;
+      }
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: ApiError) => {
+      if (error?.statusCode === 503) {
+        return 12000;
+      }
+      return Math.min(1000 * 2 ** attemptIndex, 24000);
+    },
   });
 
   const opportunitiesThisYear = useMemo(() => {

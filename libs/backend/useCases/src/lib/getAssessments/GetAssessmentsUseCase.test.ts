@@ -5,12 +5,31 @@ import {
 import { AssessmentMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
+import { DatabaseUnavailableError } from '../../errors';
 import { GetAssessmentsUseCaseImpl } from './GetAssessmentsUseCase';
 import { GetAssessmentsUseCaseArgsMother } from './GetAssessmentsUseCaseArgsMother';
 
 vitest.useFakeTimers();
 
 describe('GetAssessmentsUseCase', () => {
+  it('should throw DatabaseUnavailableError if database is unavailable', async () => {
+    const { useCase } = setup();
+    const connectionRefusedError = {
+      code: 'ECONNREFUSED',
+      errno: -111,
+      message: 'connect ECONNREFUSED',
+    };
+
+    vitest
+      .spyOn(useCase['assessmentsRepository'], 'getAll')
+      .mockRejectedValue(connectionRefusedError);
+    const input = GetAssessmentsUseCaseArgsMother.basic().build();
+
+    await expect(useCase.getAssessments(input)).rejects.toThrow(
+      DatabaseUnavailableError,
+    );
+  });
+
   it('should return all assessments', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
