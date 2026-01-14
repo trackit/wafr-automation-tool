@@ -1,4 +1,4 @@
-import { Assessment } from '@backend/models';
+import { type Assessment } from '@backend/models';
 
 export interface PDFServicePort {
   exportAssessment(args: {

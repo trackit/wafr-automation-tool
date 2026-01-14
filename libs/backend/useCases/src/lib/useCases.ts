@@ -14,6 +14,7 @@ export * from './getAssessmentGraph';
 export * from './getAssessments';
 export * from './getAssessmentStep';
 export * from './getBestPracticeFindings';
+export * from './getBillingInformation';
 export * from './getMilestone';
 export * from './getMilestones';
 export * from './getOrganization';

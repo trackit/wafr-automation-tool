@@ -8,6 +8,17 @@ import { entities, tenantsEntities } from './entities';
 
 export type TypeORMConfig = { type: 'postgres' } & DataSourceOptions;
 
+export type TestTypeORMConfigParameters = Partial<{
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  synchronize: boolean;
+  logging: boolean;
+  migrations: string[];
+}>;
+
 export const defaultTypeORMConfig: TypeORMConfig = {
   type: 'postgres',
   port: 5432,
@@ -15,16 +26,6 @@ export const defaultTypeORMConfig: TypeORMConfig = {
   database: 'postgres',
   entities,
   migrations: ['./migrations/*.js'], // In production, we use the compiled js files
-};
-
-export const testTypeORMConfig: TypeORMConfig = {
-  ...defaultTypeORMConfig,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  host: '127.0.0.1',
-  synchronize: true,
-  logging: true,
-  migrations: [],
 };
 
 export const tenantsTypeORMConfig: Pick<
@@ -47,18 +48,43 @@ export const testTenantsTypeORMConfig: TypeORMConfig = {
   migrations: [],
 };
 
+export function getTestTypeORMConfig(
+  params: TestTypeORMConfigParameters = {},
+): TypeORMConfig {
+  const host = params.host ?? process.env.DB_HOST ?? '127.0.0.1';
+  const port = params.port ?? 5432;
+  const username = params.username ?? process.env.DB_USERNAME;
+  const password = params.password ?? process.env.DB_PASSWORD;
+  const synchronize = params.synchronize ?? true;
+  const logging = params.logging ?? true;
+  const migrations = params.migrations ?? [];
+
+  return {
+    ...defaultTypeORMConfig,
+    host,
+    port,
+    username,
+    password,
+    synchronize,
+    logging,
+    migrations,
+  };
+}
+
 export const tokenTypeORMConfigCreator = createInjectionToken<
-  Promise<TypeORMConfig>
+  () => Promise<TypeORMConfig>
 >('TypeORMConfig', {
-  useFactory: async () => {
-    const secretsManager = inject(tokenSecretsManager);
-    const credentialsSecretValue =
-      await secretsManager.getDatabaseCredentialsSecret(
-        inject(tokenDBCredentialsSecretArn),
-      );
-    return {
-      ...defaultTypeORMConfig,
-      ...credentialsSecretValue,
+  useFactory: () => {
+    return async () => {
+      const secretsManager = inject(tokenSecretsManager);
+      const credentialsSecretValue =
+        await secretsManager.getDatabaseCredentialsSecret(
+          inject(tokenDBCredentialsSecretArn),
+        );
+      return {
+        ...defaultTypeORMConfig,
+        ...credentialsSecretValue,
+      };
     };
   },
 });

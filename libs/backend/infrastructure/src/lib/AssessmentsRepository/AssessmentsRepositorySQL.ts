@@ -1,27 +1,29 @@
 import {
   Between,
-  EntityTarget,
+  type EntityTarget,
   IsNull,
   Not,
-  ObjectLiteral,
-  Repository,
+  type ObjectLiteral,
+  type Repository,
 } from 'typeorm';
 
 import {
-  Assessment,
-  AssessmentBody,
-  AssessmentFileExport,
-  BestPracticeBody,
-  PillarBody,
-  QuestionBody,
+  type Assessment,
+  type AssessmentBody,
+  type AssessmentFileExport,
+  type BestPracticeBody,
+  type BillingInformation,
+  type PillarBody,
+  type QuestionBody,
 } from '@backend/models';
-import { AssessmentsRepository } from '@backend/ports';
+import { type AssessmentsRepository } from '@backend/ports';
 import { inject } from '@shared/di-container';
 import { decodeNextToken, encodeNextToken } from '@shared/utils';
 
 import {
   AssessmentEntity,
   BestPracticeEntity,
+  BillingInformationEntity,
   FileExportEntity,
   PillarEntity,
   QuestionEntity,
@@ -47,7 +49,15 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
 
   public async save(assessment: Assessment): Promise<void> {
     const repo = await this.repo(AssessmentEntity, assessment.organization);
-    const entity = repo.create(assessment);
+    const entity = repo.create({
+      ...assessment,
+      billingInformation: assessment.billingInformation
+        ? {
+            ...assessment.billingInformation,
+            assessmentId: assessment.id,
+          }
+        : undefined,
+    });
     await repo.save(entity);
     this.logger.info(`Assessment ${assessment.id} saved`);
   }
@@ -85,6 +95,7 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
           },
         },
         fileExports: true,
+        billingInformation: true,
       },
     });
     if (!entity) return undefined;
@@ -287,5 +298,22 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
         createdAt: Between(startDate, endDate),
       },
     });
+  }
+
+  public async saveBillingInformation(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    billingInformation: BillingInformation;
+  }): Promise<void> {
+    const { assessmentId, organizationDomain, billingInformation } = args;
+
+    const repo = await this.repo(BillingInformationEntity, organizationDomain);
+    const entity = repo.create({ ...billingInformation, assessmentId });
+
+    await repo.save(entity);
+
+    this.logger.info(
+      `Billing information saved for assessment: ${assessmentId}`,
+    );
   }
 }

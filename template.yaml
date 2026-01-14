@@ -92,6 +92,7 @@ Resources:
         ParentStackName: !Ref 'AWS::StackName'
         S3BucketName: !Ref S3Bucket
         LogRetentionInDays: !Ref LogRetentionInDays
+        DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
   StateMachine:
     Type: AWS::Serverless::Application
     Properties:
@@ -123,6 +124,7 @@ Resources:
         LambdaSecurityGroupIds: !Sub '${Network.Outputs.LambdaSecurityGroupId}'
         DBHost: !GetAtt AuroraCluster.Endpoint.Address
         DBCredentialsSecretArn: !GetAtt AuroraCluster.MasterUserSecret.SecretArn
+        GetBillingInfoExecutionRoleArn: !GetAtt ScanningTools.Outputs.GetBillingInfoExecutionRoleArn
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:

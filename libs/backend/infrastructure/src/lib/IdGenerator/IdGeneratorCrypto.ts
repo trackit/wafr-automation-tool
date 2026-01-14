@@ -1,4 +1,4 @@
-import { IdGenerator } from '@backend/ports';
+import { type IdGenerator } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class IdGeneratorCrypto implements IdGenerator {

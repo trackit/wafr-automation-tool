@@ -16,6 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@backend/infrastructure": ["libs/backend/infrastructure/src/index.ts"],
+      "@backend/infrastructure-test": [
+        "libs/backend/infrastructure/src/lib/testUtils.ts"
+      ],
       "@backend/models": ["libs/backend/models/src/index.ts"],
       "@backend/ports": ["libs/backend/ports/src/index.ts"],
       "@backend/useCases": ["libs/backend/useCases/src/index.ts"],

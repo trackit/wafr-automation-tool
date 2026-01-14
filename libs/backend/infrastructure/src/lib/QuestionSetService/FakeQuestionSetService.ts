@@ -1,5 +1,5 @@
-import { QuestionSet } from '@backend/models';
-import { QuestionSetPort } from '@backend/ports';
+import { type QuestionSet } from '@backend/models';
+import { type QuestionSetPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeQuestionSetService implements QuestionSetPort {

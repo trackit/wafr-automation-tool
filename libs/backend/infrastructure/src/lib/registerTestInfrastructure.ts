@@ -12,6 +12,10 @@ import {
 } from './AssessmentsStateMachine';
 import { tokenCognitoService, tokenFakeCognitoService } from './CognitoService';
 import {
+  tokenCostExplorerService,
+  tokenFakeCostExplorerService,
+} from './CostExplorerService';
+import {
   tokenFakeFeatureToggleRepository,
   tokenFeatureToggleRepository,
 } from './FeatureToggleRepository';
@@ -24,7 +28,10 @@ import {
   tokenFindingToBestPracticesAssociationService,
 } from './FindingToBestPracticesAssociationService';
 import { FakeIdGenerator, tokenIdGenerator } from './IdGenerator';
-import { testTypeORMConfig, tokenTypeORMConfigCreator } from './infrastructure';
+import {
+  getTestTypeORMConfig,
+  tokenTypeORMConfigCreator,
+} from './infrastructure';
 import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
 import { FakeLogger, tokenLogger } from './Logger';
 import {
@@ -108,7 +115,14 @@ export const registerTestInfrastructure = () => {
   register(tokenPartnerCentralSellingService, {
     useFactory: () => inject(tokenFakePartnerCentralSellingService),
   });
+  register(tokenCostExplorerService, {
+    useFactory: () => inject(tokenFakeCostExplorerService),
+  });
   register(tokenTypeORMConfigCreator, {
-    useFactory: async () => testTypeORMConfig,
+    useFactory: () => {
+      return async () => {
+        return getTestTypeORMConfig({ port: Number(process.env.DB_PORT) });
+      };
+    },
   });
 };

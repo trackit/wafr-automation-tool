@@ -1,4 +1,4 @@
-import { BestPractice } from '../BestPractice';
+import { type BestPractice } from '../BestPractice';
 
 export interface Finding extends ScanFinding {
   hidden: boolean;

@@ -1,18 +1,18 @@
 import {
   AssociateOpportunityCommand,
-  Contact,
+  type Contact,
   CreateOpportunityCommand,
   PartnerCentralSellingClient,
-  PartnerCentralSellingClientConfig,
-  RelatedEntityType,
+  type PartnerCentralSellingClientConfig,
+  type RelatedEntityType,
 } from '@aws-sdk/client-partnercentral-selling';
 
 import {
-  AceIntegration,
-  Assessment,
-  OpportunityDetails,
+  type AceIntegration,
+  type Assessment,
+  type OpportunityDetails,
 } from '@backend/models';
-import { PartnerCentralSellingPort } from '@backend/ports';
+import { type PartnerCentralSellingPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenDebug } from '../config/debug';
@@ -94,6 +94,7 @@ export class PartnerCentralSellingService implements PartnerCentralSellingPort {
           Email: member.email,
           FirstName: member.firstName,
           LastName: member.lastName,
+          BusinessTitle: 'PartnerAccountManager',
         }),
       );
 

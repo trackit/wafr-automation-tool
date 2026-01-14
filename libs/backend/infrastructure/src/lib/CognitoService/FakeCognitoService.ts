@@ -1,5 +1,5 @@
-import { User } from '@backend/models';
-import { CognitoPort } from '@backend/ports';
+import { type User } from '@backend/models';
+import { type CognitoPort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeCognitoService implements CognitoPort {

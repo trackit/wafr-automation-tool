@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { TagsInput } from '@webui/ui';
 
-import { awsRegions, Region } from './regions';
+import { awsRegions, type Region } from './regions';
 import WorkflowHintDialog from './workflow-hint-dialog';
 
 type NewAssessmentProps = {
@@ -148,24 +148,26 @@ export function NewAssessment({
                   : 'Select Regions'}
               </span>
             </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box mt-1 grid grid-flow-col grid-rows-5 gap-2"
-            >
-              {awsRegions.map((region) => (
-                <li key={region} className="m-0">
-                  <label className="label cursor-pointer flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-sm"
-                      checked={selectedRegions.includes(region)}
-                      onChange={() => toggleRegion(region)}
-                    />
-                    <span>{region}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
+            <div className="dropdown-content z-50">
+              <ul
+                tabIndex={0}
+                className="menu p-2 shadow bg-base-100 rounded-box mt-1 grid grid-flow-col grid-rows-5 gap-2 overflow-y-auto"
+              >
+                {awsRegions.map((region) => (
+                  <li key={region} className="m-0">
+                    <label className="label cursor-pointer flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-sm"
+                        checked={selectedRegions.includes(region)}
+                        onChange={() => toggleRegion(region)}
+                      />
+                      <span>{region}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           {errors.regions && (
             <p className="fieldset-label text-error">

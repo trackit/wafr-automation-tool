@@ -1,11 +1,11 @@
 import {
-  AttributeType,
+  type AttributeType,
   CognitoIdentityProviderClient,
   ListUsersCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
-import { User } from '@backend/models';
-import { CognitoPort } from '@backend/ports';
+import { type User } from '@backend/models';
+import { type CognitoPort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
 

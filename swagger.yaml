@@ -1174,6 +1174,8 @@ components:
             questionVersion:
               type: string
               description: The version of questions that were used for the assessment
+            billingInformation:
+              $ref: '#/components/schemas/BillingInformation'
     AssessmentError:
       type: object
       nullable: true
@@ -1468,3 +1470,37 @@ components:
           type: string
         createdAt:
           type: string
+    BillingInformation:
+      type: object
+      required:
+        - billingPeriodStartDate
+        - billingPeriodEndDate
+        - totalCost
+        - servicesCost
+      properties:
+        billingPeriodStartDate:
+          type: string
+          description: Start date of the billing period (ISO format)
+        billingPeriodEndDate:
+          type: string
+          description: End date of the billing period (ISO format)
+        totalCost:
+          type: string
+          description: Total cost for the billing period
+        servicesCost:
+          type: array
+          description: List of costs per AWS service
+          items:
+            $ref: '#/components/schemas/ServiceCost'
+    ServiceCost:
+      type: object
+      required:
+        - serviceName
+        - cost
+      properties:
+        serviceName:
+          type: string
+          description: Name of the AWS service
+        cost:
+          type: string
+          description: Cost for the service in the billing period

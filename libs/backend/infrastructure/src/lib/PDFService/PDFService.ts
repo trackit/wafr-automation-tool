@@ -1,6 +1,6 @@
 import { Font, renderToBuffer } from '@react-pdf/renderer';
 
-import { Assessment, SeverityType } from '@backend/models';
+import { type Assessment, SeverityType } from '@backend/models';
 import type { PDFServicePort } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 

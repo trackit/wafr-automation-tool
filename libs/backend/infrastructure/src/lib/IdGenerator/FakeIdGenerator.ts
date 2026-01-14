@@ -1,4 +1,4 @@
-import { IdGenerator } from '@backend/ports';
+import { type IdGenerator } from '@backend/ports';
 
 export class FakeIdGenerator implements IdGenerator {
   private id = 0;

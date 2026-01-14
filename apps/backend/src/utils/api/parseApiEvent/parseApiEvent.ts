@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import z, { ZodError, type ZodType } from 'zod';
+import type z from 'zod';
+import { ZodError, type ZodType } from 'zod';
 
 import { JSONParseError, parseJsonObject } from '@shared/utils';
 

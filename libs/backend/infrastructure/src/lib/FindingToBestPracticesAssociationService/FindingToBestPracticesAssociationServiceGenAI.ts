@@ -1,4 +1,4 @@
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import type {
   BestPractice,
@@ -8,9 +8,9 @@ import type {
   ScanningTool,
 } from '@backend/models';
 import {
-  FindingToBestPracticesAssociation,
-  FindingToBestPracticesAssociationService,
-  Prompt,
+  type FindingToBestPracticesAssociation,
+  type FindingToBestPracticesAssociationService,
+  type Prompt,
 } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';

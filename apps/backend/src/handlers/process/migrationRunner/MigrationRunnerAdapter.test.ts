@@ -2,21 +2,30 @@ import {
   registerTestInfrastructure,
   tokenTypeORMClientManager,
 } from '@backend/infrastructure';
+import { startPostgresContainer } from '@backend/infrastructure-test';
 import { inject, reset } from '@shared/di-container';
 
 import { MigrationRunnerAdapter } from './MigrationRunnerAdapter';
 
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
+
 beforeAll(async () => {
   reset();
   registerTestInfrastructure();
+  pgContainer = await startPostgresContainer();
+
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
-});
+}, 30000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.clearClients();
   await clientManager.closeConnections();
+});
+
+afterAll(async () => {
+  await pgContainer.stop();
 });
 
 describe('MigrationRunnerAdapter', () => {

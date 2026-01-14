@@ -1,4 +1,4 @@
-import z, { ZodError } from 'zod';
+import z, { type ZodError } from 'zod';
 
 import { BasicErrorType } from '@shared/utils';
 

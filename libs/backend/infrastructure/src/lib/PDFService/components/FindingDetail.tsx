@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from '@react-pdf/renderer';
 import React from 'react';
 
-import { Finding } from '@backend/models';
+import { type Finding } from '@backend/models';
 
 import { Bullet } from './Bullet';
 import { FindingTitle } from './FindingTitle';

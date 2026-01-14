@@ -1,6 +1,6 @@
-import z from 'zod';
+import type z from 'zod';
 
-import { ExportPDFSchema } from './ExportPDFAdapter';
+import { type ExportPDFSchema } from './ExportPDFAdapter';
 
 type ExportPDFParameters = z.infer<typeof ExportPDFSchema>;
 

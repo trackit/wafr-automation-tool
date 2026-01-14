@@ -1,5 +1,5 @@
 import { Home, Search } from 'lucide-react';
-import { JSX, useState } from 'react';
+import { type JSX, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { useNavigate } from 'react-router';
 

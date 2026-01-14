@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 
 import type { Assessment } from '@backend/models';
 import {
-  BestPracticesFindingCounts,
+  type BestPracticesFindingCounts,
   tokenGetAssessmentUseCase,
 } from '@backend/useCases';
 import type { operations } from '@shared/api-schema';
@@ -72,6 +72,15 @@ export class GetAssessmentAdapter {
       error: assessment.error,
       wafrWorkloadArn: assessment.wafrWorkloadArn,
       opportunityId: assessment.opportunityId,
+      billingInformation: assessment.billingInformation
+        ? {
+            ...assessment.billingInformation,
+            billingPeriodStartDate:
+              assessment.billingInformation.billingPeriodStartDate.toISOString(),
+            billingPeriodEndDate:
+              assessment.billingInformation.billingPeriodEndDate.toISOString(),
+          }
+        : undefined,
     };
   }
 

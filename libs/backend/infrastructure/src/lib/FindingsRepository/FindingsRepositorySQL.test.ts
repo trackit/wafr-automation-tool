@@ -11,18 +11,23 @@ import { inject, reset } from '@shared/di-container';
 
 import { AssessmentsRepositorySQL } from '../infrastructure';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { GetBestPracticeFindingsAssessmentsRepositoryArgsMother } from './FindingsRepositoryGetBestPracticeFindingsArgsMother';
 import { FindingsRepositorySQL } from './FindingsRepositorySQL';
 
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
+
 beforeAll(async () => {
   reset();
+  pgContainer = await startPostgresContainer();
   registerTestInfrastructure();
+
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
-});
+}, 30000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
@@ -32,6 +37,7 @@ afterEach(async () => {
 afterAll(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
+  await pgContainer.stop();
 });
 
 describe('FindingsRepositorySQL', () => {

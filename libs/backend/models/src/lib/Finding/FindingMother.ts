@@ -1,7 +1,7 @@
-import { BestPractice } from '../BestPractice';
+import { type BestPractice } from '../BestPractice';
 import {
   type Finding,
-  FindingComment,
+  type FindingComment,
   type FindingRemediation,
   type FindingResource,
   SeverityType,

@@ -1,5 +1,5 @@
 import { tokenObjectsStorage } from '@backend/infrastructure';
-import { ScanFinding } from '@backend/models';
+import { type ScanFinding } from '@backend/models';
 import { inject } from '@shared/di-container';
 
 const SELF_MADE_SIGNATURE = 'wafr-automation-tool';

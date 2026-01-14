@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { Logger } from '@backend/ports';
+import { type Logger } from '@backend/ports';
 
 export class FakeLogger implements Logger {
   debug(): void {}

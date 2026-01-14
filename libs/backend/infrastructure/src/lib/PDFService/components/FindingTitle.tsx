@@ -1,7 +1,7 @@
 import { StyleSheet, Text } from '@react-pdf/renderer';
 import React from 'react';
 
-import { Finding, SeverityType } from '@backend/models';
+import { type Finding, SeverityType } from '@backend/models';
 
 const styles = StyleSheet.create({
   title: {

@@ -12,17 +12,22 @@ import { inject, reset } from '@shared/di-container';
 import { encodeNextToken } from '@shared/utils';
 
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
+import { startPostgresContainer } from '../testUtils';
 import { tokenTypeORMClientManager } from '../TypeORMClientManager';
 import { AssessmentsRepositorySQL } from './AssessmentsRepositorySQL';
+
+let pgContainer: Awaited<ReturnType<typeof startPostgresContainer>>;
 
 beforeAll(async () => {
   reset();
   registerTestInfrastructure();
+  pgContainer = await startPostgresContainer();
+
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.initialize();
   await clientManager.createClient('organization1');
   await clientManager.createClient('organization2');
-});
+}, 30000);
 
 afterEach(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
@@ -32,9 +37,8 @@ afterEach(async () => {
 afterAll(async () => {
   const clientManager = inject(tokenTypeORMClientManager);
   await clientManager.closeConnections();
+  await pgContainer.stop();
 });
-
-vitest.useFakeTimers();
 
 describe('AssessmentsRepositorySQL', () => {
   describe('save', () => {
@@ -235,6 +239,7 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return all assessments within the limit', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -266,9 +271,11 @@ describe('AssessmentsRepositorySQL', () => {
         ],
         nextToken: expect.any(String),
       });
+      vitest.useRealTimers();
     });
 
     it('should return all assessments after the next token', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -301,6 +308,7 @@ describe('AssessmentsRepositorySQL', () => {
         assessments: [assessment1],
         nextToken: undefined,
       });
+      vitest.useRealTimers();
     });
 
     it('should return an empty list if assessments does not match the organization', async () => {
@@ -397,7 +405,8 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('update', () => {
     it('should update the assessment', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -731,7 +740,8 @@ describe('AssessmentsRepositorySQL', () => {
 
   describe('GetOpportunitiesByYear', () => {
     it('should return an empty array if no assessments with non-undefined opportunityId and opportunityCreatedAt', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -759,7 +769,8 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return only assessments with non-null opportunityId and opportunityCreatedAt', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
@@ -796,7 +807,9 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should return results ordered by opportunityCreatedAt DESC', async () => {
-      const { repository, date } = setup();
+      vitest.useFakeTimers();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -826,12 +839,14 @@ describe('AssessmentsRepositorySQL', () => {
       expect(result).toHaveLength(2);
       expect(result[0].createdAt).toEqual(date1);
       expect(result[1].createdAt).toEqual(date);
+      vitest.useRealTimers();
     });
   });
 
   describe('countAssessmentsByYear', () => {
     it('should return 0 if no assessments exist for the given year', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
 
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -852,7 +867,9 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should count all assessments created in the given year', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
+
       const year = date.getFullYear();
 
       const assessment1 = AssessmentMother.basic()
@@ -888,7 +905,8 @@ describe('AssessmentsRepositorySQL', () => {
     });
 
     it('should not count assessments from different years', async () => {
-      const { repository, date } = setup();
+      const { repository } = setup();
+      const date = new Date();
       const year = date.getFullYear();
 
       const assessment1 = AssessmentMother.basic()
@@ -923,14 +941,140 @@ describe('AssessmentsRepositorySQL', () => {
       expect(result).toBe(1);
     });
   });
+
+  describe('saveBillingInformation', () => {
+    it('should create new billing information when it does not exist', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withBillingInformation(undefined)
+        .build();
+      await repository.save(assessment);
+
+      const newBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '123.45',
+        servicesCost: [
+          { serviceName: 'AWS EC2', cost: '50.00' },
+          { serviceName: 'AWS S3', cost: '73.45' },
+        ],
+      };
+
+      await repository.saveBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: newBillingInformation,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation).toEqual(
+        newBillingInformation,
+      );
+    });
+
+    it('should update existing billing information', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const existingBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 60 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        totalCost: '50.00',
+        servicesCost: [{ serviceName: 'AWS EC2', cost: '50.00' }],
+      };
+
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withBillingInformation(existingBillingInformation)
+        .build();
+      await repository.save(assessment);
+
+      const updatedBillingInformation = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '150.75',
+        servicesCost: [
+          { serviceName: 'AWS EC2', cost: '100.00' },
+          { serviceName: 'AWS Lambda', cost: '50.75' },
+        ],
+      };
+
+      await repository.saveBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: updatedBillingInformation,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation).toEqual(
+        updatedBillingInformation,
+      );
+      expect(updatedAssessment?.billingInformation?.totalCost).toBe('150.75');
+      expect(updatedAssessment?.billingInformation?.servicesCost).toHaveLength(
+        2,
+      );
+    });
+
+    it('should handle empty services cost array', async () => {
+      const { repository } = setup();
+      const date = new Date();
+      const assessment = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const billingInformationWithEmptyServices = {
+        billingPeriodStartDate: new Date(
+          date.getTime() - 30 * 24 * 60 * 60 * 1000,
+        ),
+        billingPeriodEndDate: date,
+        totalCost: '0.00',
+        servicesCost: [],
+      };
+
+      await repository.saveBillingInformation({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        billingInformation: billingInformationWithEmptyServices,
+      });
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment?.billingInformation).toBeDefined();
+      expect(updatedAssessment?.billingInformation?.servicesCost).toEqual([]);
+      expect(updatedAssessment?.billingInformation?.totalCost).toBe('0.00');
+    });
+  });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
 
-  const date = new Date();
-  vitest.setSystemTime(date);
-
-  return { repository: new AssessmentsRepositorySQL(), date };
+  return { repository: new AssessmentsRepositorySQL() };
 };

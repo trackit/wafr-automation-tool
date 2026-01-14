@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { awsRegions, Region } from './regions';
+import { awsRegions, type Region } from './regions';
 
 type ExportToAWSProps = {
   onSubmit: (data: { region: Region }) => void;

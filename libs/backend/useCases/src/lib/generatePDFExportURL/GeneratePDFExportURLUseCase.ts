@@ -6,7 +6,7 @@ import {
 import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  User,
+  type User,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 

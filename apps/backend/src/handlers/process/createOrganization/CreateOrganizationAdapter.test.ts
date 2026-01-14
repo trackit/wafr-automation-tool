@@ -2,7 +2,7 @@ import {
   registerTestInfrastructure,
   tokenFakeOrganizationRepository,
 } from '@backend/infrastructure';
-import { Organization, OrganizationMother } from '@backend/models';
+import { type Organization, OrganizationMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import { CreateOrganizationAdapter } from './CreateOrganizationAdapter';

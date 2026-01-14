@@ -109,6 +109,31 @@ Resources:
           - 256
           - 64
 
+  NatGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: NatGatewayEIP
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnetEcs
+      Tags:
+        - Key: Project
+          Value: !Ref Project
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Name
+          Value: NatGateway
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -213,6 +238,20 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableB
       DestinationIpv6CidrBlock: ::/0
       EgressOnlyInternetGatewayId: !Ref EgressOnlyInternetGateway
+
+  PrivateRouteToNatA:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableA
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateRouteToNatB:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableB
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
 
   AuroraDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup

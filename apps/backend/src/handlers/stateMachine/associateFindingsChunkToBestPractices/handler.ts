@@ -1,6 +1,6 @@
 import {
   AssociateFindingsChunkToBestPracticesAdapter,
-  AssociateFindingsChunkToBestPracticesOutput,
+  type AssociateFindingsChunkToBestPracticesOutput,
 } from './AssociateFindingsChunkToBestPracticesAdapter';
 
 const adapter = new AssociateFindingsChunkToBestPracticesAdapter();

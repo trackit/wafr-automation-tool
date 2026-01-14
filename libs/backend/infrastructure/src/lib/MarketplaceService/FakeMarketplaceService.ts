@@ -1,4 +1,4 @@
-import { MarketplacePort } from '@backend/ports';
+import { type MarketplacePort } from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeMarketplaceService implements MarketplacePort {

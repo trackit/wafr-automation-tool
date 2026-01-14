@@ -1,17 +1,17 @@
 import {
-  Finding,
-  FindingComment,
-  FindingRemediation,
-  FindingResource,
+  type Finding,
+  type FindingComment,
+  type FindingRemediation,
+  type FindingResource,
 } from '@backend/models';
 
 import { toDomainBestPractice } from '../AssessmentsRepository/AssessmentsRepositorySQLMapping';
 import {
-  BestPracticeEntity,
-  FindingCommentEntity,
-  FindingEntity,
-  FindingRemediationEntity,
-  FindingResourceEntity,
+  type BestPracticeEntity,
+  type FindingCommentEntity,
+  type FindingEntity,
+  type FindingRemediationEntity,
+  type FindingResourceEntity,
 } from '../config/typeorm';
 
 export function toDomainFindingComment(

@@ -1,4 +1,4 @@
-import { Finding, Pillar, ScanningTool } from '@backend/models';
+import { type Finding, type Pillar, type ScanningTool } from '@backend/models';
 
 export interface FindingToBestPracticesAssociation {
   finding: Finding;

@@ -465,6 +465,7 @@ export interface components {
             pillars?: components["schemas"]["Pillar"][];
             /** @description The version of questions that were used for the assessment */
             questionVersion?: string;
+            billingInformation?: components["schemas"]["BillingInformation"];
         };
         /** @description Error details if an issue occurred during the assessment process. */
         AssessmentError: {
@@ -601,6 +602,22 @@ export interface components {
             error?: string;
             versionName: string;
             createdAt: string;
+        };
+        BillingInformation: {
+            /** @description Start date of the billing period (ISO format) */
+            billingPeriodStartDate: string;
+            /** @description End date of the billing period (ISO format) */
+            billingPeriodEndDate: string;
+            /** @description Total cost for the billing period */
+            totalCost: string;
+            /** @description List of costs per AWS service */
+            servicesCost: components["schemas"]["ServiceCost"][];
+        };
+        ServiceCost: {
+            /** @description Name of the AWS service */
+            serviceName: string;
+            /** @description Cost for the service in the billing period */
+            cost: string;
         };
     };
     responses: never;

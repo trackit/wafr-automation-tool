@@ -8,7 +8,7 @@ import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentFileExportType,
-  User,
+  type User,
 } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { assertIsDefined } from '@shared/utils';
