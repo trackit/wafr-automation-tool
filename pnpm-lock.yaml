@@ -208,8 +208,8 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@22.18.10)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.1)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.2))
       daisyui:
-        specifier: 5.2.5
-        version: 5.2.5
+        specifier: 5.5.14
+        version: 5.5.14
       esbuild:
         specifier: ^0.25.10
         version: 0.25.11
@@ -6240,8 +6240,8 @@ packages:
     resolution: {integrity: sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA==}
     engines: {node: '>=12'}
 
-  daisyui@5.2.5:
-    resolution: {integrity: sha512-TBsCRI8WA9t/Itr9NKSaDUx/FUFHmBVbtB0ZykFHGMQPwe+VV8GEqF6dKYZcXI+Ljhm3N56ncWTtCwnKDDbOXQ==}
+  daisyui@5.5.14:
+    resolution: {integrity: sha512-L47rvw7I7hK68TA97VB8Ee0woHew+/ohR6Lx6Ah/krfISOqcG4My7poNpX5Mo5/ytMxiR40fEaz6njzDi7cuSg==}
 
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -20130,7 +20130,7 @@ snapshots:
 
   d3-timer@3.0.1: {}
 
-  daisyui@5.2.5: {}
+  daisyui@5.5.14: {}
 
   damerau-levenshtein@1.0.8: {}
 
