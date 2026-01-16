@@ -10,10 +10,10 @@ export const updatePillar = async ({
   assessmentId: string;
   pillarId: string;
   disabled?: boolean;
-}) => {
-  return apiClient.put<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}']['put']['responses']['200']['content']
-  >(`/assessments/${assessmentId}/pillars/${pillarId}`, {
+}): Promise<
+  paths['/assessments/{assessmentId}/pillars/{pillarId}']['put']['responses']['200']['content']
+> => {
+  return apiClient.put(`/assessments/${assessmentId}/pillars/${pillarId}`, {
     disabled,
   });
 };

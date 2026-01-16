@@ -11,16 +11,16 @@ export const getFindings = async (
   search: string | undefined = undefined,
   showHidden: boolean | undefined = undefined,
   nextToken: string | undefined = undefined,
-) => {
+): Promise<
+  paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
+> => {
   const params = new URLSearchParams();
   if (limit) params.set('limit', limit.toString());
   if (search) params.set('search', search);
   if (showHidden) params.set('showHidden', 'true');
   if (nextToken) params.set('nextToken', nextToken);
 
-  return apiClient.get<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
-  >(
+  return apiClient.get(
     `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,
   );
 };

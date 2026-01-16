@@ -7,10 +7,10 @@ export const updateStatus = async (
   questionId: string,
   bestPracticeId: string,
   checked: boolean,
-) => {
-  return apiClient.put<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['put']['responses']['200']['content']
-  >(
+): Promise<
+  paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['put']['responses']['200']['content']
+> => {
+  return apiClient.put(
     `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}`,
     {
       checked,

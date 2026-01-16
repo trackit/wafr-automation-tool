@@ -4,7 +4,7 @@ import { apiClient } from './client';
 
 export function deleteAssessment({
   assessmentId,
-}: paths['/assessments/{assessmentId}']['delete']['parameters']['path']) {
+}: paths['/assessments/{assessmentId}']['delete']['parameters']['path']): Promise<void> {
   return apiClient.delete(`/assessments/${assessmentId}`);
 }
 

@@ -14,10 +14,10 @@ export const updateQuestion = async ({
   questionId: string;
   none?: boolean;
   disabled?: boolean;
-}) => {
-  return apiClient.put<
-    paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}']['put']['responses']['200']['content']
-  >(
+}): Promise<
+  paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}']['put']['responses']['200']['content']
+> => {
+  return apiClient.put(
     `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}`,
     {
       none,

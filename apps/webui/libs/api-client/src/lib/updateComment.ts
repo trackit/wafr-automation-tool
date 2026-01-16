@@ -12,12 +12,10 @@ export const updateComment = async ({
   findingId: string;
   commentId: string;
   commentDto: components['schemas']['CommentDto'];
-}) => {
+}): Promise<operations['updateComment']['responses']['200']['content']> => {
   const encodedFindingId = encodeURIComponent(findingId);
 
-  return apiClient.put<
-    operations['updateComment']['responses']['200']['content']
-  >(
+  return apiClient.put(
     `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
     commentDto,
   );

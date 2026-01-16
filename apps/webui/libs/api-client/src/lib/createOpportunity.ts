@@ -5,7 +5,7 @@ import { apiClient } from './client';
 export function createOpportunity(
   { assessmentId }: operations['createOpportunity']['parameters']['path'],
   body: operations['createOpportunity']['requestBody']['content']['application/json'],
-) {
+): Promise<operations['createOpportunity']['responses']['200']['content']> {
   return apiClient.post(`/assessments/${assessmentId}/opportunities`, body);
 }
 
