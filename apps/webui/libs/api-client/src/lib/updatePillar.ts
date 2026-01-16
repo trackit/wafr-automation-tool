@@ -1,4 +1,4 @@
-import { type paths } from '@shared/api-schema';
+import { type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 
@@ -10,9 +10,7 @@ export const updatePillar = async ({
   assessmentId: string;
   pillarId: string;
   disabled?: boolean;
-}): Promise<
-  paths['/assessments/{assessmentId}/pillars/{pillarId}']['put']['responses']['200']['content']
-> => {
+}): Promise<operations['updatePillar']['responses']['200']['content']> => {
   return apiClient.put(`/assessments/${assessmentId}/pillars/${pillarId}`, {
     disabled,
   });

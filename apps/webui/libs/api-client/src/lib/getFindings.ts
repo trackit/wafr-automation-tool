@@ -1,4 +1,4 @@
-import { type paths } from '@shared/api-schema';
+import { type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 
@@ -12,7 +12,7 @@ export const getFindings = async (
   showHidden: boolean | undefined = undefined,
   nextToken: string | undefined = undefined,
 ): Promise<
-  paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
+  operations['getBestPracticeFindings']['responses']['200']['content']['application/json']
 > => {
   const params = new URLSearchParams();
   if (limit) params.set('limit', limit.toString());

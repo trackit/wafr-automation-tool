@@ -1,4 +1,4 @@
-import { type paths } from '@shared/api-schema';
+import { type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 
@@ -7,7 +7,7 @@ export function postAssessment({
   roleArn,
   regions,
   workflows,
-}: paths['/assessments']['post']['requestBody']['content']['application/json']) {
+}: operations['startAssessment']['requestBody']['content']['application/json']) {
   return apiClient.post('/assessments', {
     name,
     roleArn,

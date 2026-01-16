@@ -1,12 +1,12 @@
-import { type paths } from '@shared/api-schema';
+import { type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 
 export function getMilestones(
-  pathParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['path'],
-  queryParams: paths['/assessments/{assessmentId}/milestones']['get']['parameters']['query'] = {},
+  pathParams: operations['getMilestones']['parameters']['path'],
+  queryParams: operations['getMilestones']['parameters']['query'] = {},
 ): Promise<
-  paths['/assessments/{assessmentId}/milestones']['get']['responses']['200']['content']['application/json']
+  operations['getMilestones']['responses']['200']['content']['application/json']
 > {
   const { assessmentId } = pathParams;
   const { region, limit = 10, nextToken } = queryParams;

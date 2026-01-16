@@ -1,4 +1,4 @@
-import { type paths } from '@shared/api-schema';
+import { type operations } from '@shared/api-schema';
 
 import { apiClient } from './client';
 export const updateStatus = async (
@@ -7,9 +7,7 @@ export const updateStatus = async (
   questionId: string,
   bestPracticeId: string,
   checked: boolean,
-): Promise<
-  paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['put']['responses']['200']['content']
-> => {
+): Promise<operations['updateBestPractice']['responses']['200']['content']> => {
   return apiClient.put(
     `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}`,
     {
