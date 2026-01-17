@@ -1,21 +1,28 @@
-import {
-  registerTestInfrastructure,
-  tokenFakeObjectsStorage,
-} from '@backend/infrastructure';
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
   ScanFindingMother,
 } from '@backend/models';
-import { inject, reset } from '@shared/di-container';
+import { reset } from '@shared/di-container';
 
 import { MapScanFindingsToBestPracticesUseCaseImpl } from './MapScanFindingsToBestPracticesUseCase';
 import { MapScanFindingsToBestPracticesUseCaseArgsMother } from './MapScanFindingsToBestPracticesUseCaseArgsMother';
 
+vi.mock('node:fs', () => ({
+  readFileSync: vi.fn(),
+}));
+
+import { readFileSync } from 'node:fs';
+const mockedReadFileSync = vi.mocked(readFileSync);
+
 describe('MapScanFindingsToBestPracticesUseCase', () => {
   it('should return empty best practices arrays if no mapping exists', async () => {
     const { useCase } = setup();
+    mockedReadFileSync.mockImplementation(() => {
+      throw new Error('File not found');
+    });
 
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('tool#1').build(),
@@ -35,7 +42,7 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
   });
 
   it('should map scan findings to best practices when it is possible', async () => {
-    const { useCase, fakeObjectsStorage } = setup();
+    const { useCase } = setup();
 
     const mockedScanFindings = [
       ScanFindingMother.basic()
@@ -52,9 +59,8 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
         .build(),
     ];
 
-    await fakeObjectsStorage.put({
-      key: MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
-      body: JSON.stringify({
+    mockedReadFileSync.mockReturnValue(
+      JSON.stringify({
         eventCode1: [
           {
             pillar: 'security',
@@ -75,7 +81,7 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
           },
         ],
       }),
-    });
+    );
 
     const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
       .withScanFindings(mockedScanFindings)
@@ -152,9 +158,9 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
 const setup = () => {
   reset();
   registerTestInfrastructure();
+  mockedReadFileSync.mockReset();
 
   return {
     useCase: new MapScanFindingsToBestPracticesUseCaseImpl(),
-    fakeObjectsStorage: inject(tokenFakeObjectsStorage),
   };
 };

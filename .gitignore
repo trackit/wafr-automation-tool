@@ -565,3 +565,6 @@ vitest.config.*.timestamp*
 .env.*
 
 .idea
+
+data/*
+!data/README.md
