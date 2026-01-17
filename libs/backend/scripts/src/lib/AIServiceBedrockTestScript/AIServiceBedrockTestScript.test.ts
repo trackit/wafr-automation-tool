@@ -1,36 +1,42 @@
-import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+import fs from 'fs';
+import path from 'path';
+
 import {
-  RetryErrorType,
-  tokenDynamoDBAssessmentTableName,
   tokenFakeLogger,
   tokenFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
   tokenLogger,
   tokenQuestionSetService,
-  tokenS3Bucket,
 } from '@backend/infrastructure';
-import { Finding, QuestionSet, ScanningTool } from '@backend/models';
-import { FindingToBestPracticesAssociation } from '@backend/ports';
+import { type Finding, type QuestionSet, ScanningTool } from '@backend/models';
 import {
-  ScanFindingsBestPracticesMapping,
+  type AIInferenceConfig,
+  type FindingToBestPracticesAssociation,
+} from '@backend/ports';
+import {
+  type ScanFindingsBestPracticesMapping,
   tokenMapScanFindingsToBestPracticesUseCase,
 } from '@backend/useCases';
 import { inject, register, reset } from '@shared/di-container';
-import { chunk, parseJsonArray, parseJsonObject } from '@shared/utils';
-import fs from 'fs';
-import path from 'path';
+import { chunk, parseJsonObject } from '@shared/utils';
+
+const TEST_CONFIG: TestCase = {
+  perProcess: 10,
+  limit: 100,
+  aiParameters: {},
+};
 
 interface TestCase {
   perProcess: number;
   limit: number;
-  aiParameters: InferenceConfiguration;
+  aiParameters: AIInferenceConfig;
 }
 
 interface TestCaseProcessResult {
   success: number;
   failed: FailData[];
   retries: {
-    errorType: RetryErrorType;
+    error: unknown;
     message: string;
   }[];
   promptLengths: number;
@@ -44,31 +50,25 @@ interface FailData {
   };
 }
 
-export class AIServiceBedrockTestScript {
+class AIServiceBedrockTestScript {
   private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly findingToBestPracticesAssociationService = inject(
-    tokenFindingToBestPracticesAssociationService
+    tokenFindingToBestPracticesAssociationService,
   );
   private readonly mapFindingsToBestPracticesUseCase = inject(
-    tokenMapScanFindingsToBestPracticesUseCase
+    tokenMapScanFindingsToBestPracticesUseCase,
   );
-
-  private getTestConfigs(): TestCase[] {
-    return parseJsonArray(
-      fs.readFileSync(path.join(__dirname, 'testConfig.json'), 'utf8')
-    ) as unknown as TestCase[];
-  }
 
   private getTestFindings(): Record<string, Finding[]> {
     return parseJsonObject(
-      fs.readFileSync(path.join(__dirname, 'testFindings.json'), 'utf8')
+      fs.readFileSync(path.join(__dirname, 'testFindings.json'), 'utf8'),
     ) as unknown as Record<string, Finding[]>;
   }
 
   private async runTestCaseProcess(
     questionSet: QuestionSet,
     testCase: TestCase,
-    findings: Finding[]
+    findings: Finding[],
   ): Promise<TestCaseProcessResult> {
     const fakeLogger = inject(tokenFakeLogger);
     const findingsAssociatedByMapping =
@@ -76,7 +76,7 @@ export class AIServiceBedrockTestScript {
         {
           scanFindings: findings,
           pillars: questionSet.pillars,
-        }
+        },
       );
     const findingsAssociatedByAI =
       await this.findingToBestPracticesAssociationService.associateFindingsToBestPractices(
@@ -85,7 +85,7 @@ export class AIServiceBedrockTestScript {
           findings,
           pillars: questionSet.pillars,
           inferenceConfig: testCase.aiParameters,
-        }
+        },
       );
 
     const promptLengths = fakeLogger.logs
@@ -94,7 +94,7 @@ export class AIServiceBedrockTestScript {
           log.level === 'info' &&
           log.data &&
           typeof log.data === 'object' &&
-          'prompt' in log.data
+          'prompt' in log.data,
       )
       .map((log) => {
         if (log.data && typeof log.data === 'object' && 'prompt' in log.data) {
@@ -104,25 +104,22 @@ export class AIServiceBedrockTestScript {
       });
     const promptLengthsSum = promptLengths.reduce(
       (total, current) => total + current,
-      0
+      0,
     );
     const retries = fakeLogger.logs
       .filter((log) => log.level === 'error')
-      .map((log) => {
-        return {
-          errorType: log.data as RetryErrorType,
-          message: log.message,
-        };
-      });
+      .map((log) => ({
+        error: log.data,
+        message: log.message,
+      }));
     fakeLogger.logs = [];
 
     let success = 0;
     const failed: FailData[] = [];
 
-    findingsAssociatedByAI.forEach((findingAI) => {
+    for (const findingAI of findingsAssociatedByAI) {
       const findingMapping = findingsAssociatedByMapping.find(
-        (findingMapping) =>
-          findingMapping.scanFinding.id === findingAI.finding.id
+        (fm) => fm.scanFinding.id === findingAI.finding.id,
       );
       if (!findingMapping) {
         throw new Error(`Finding ${findingAI.finding.id} not found in mapping`);
@@ -135,14 +132,14 @@ export class AIServiceBedrockTestScript {
             correctFinding: findingMapping,
           },
         });
-        return;
+        continue;
       }
-      findingAI.bestPractices.forEach((bestPractice) => {
+      for (const bestPractice of findingAI.bestPractices) {
         const bestPracticeMapping = findingMapping.bestPractices.find(
-          (bestPracticeMapping) =>
-            bestPracticeMapping.pillarId === bestPractice.pillarId &&
-            bestPracticeMapping.questionId === bestPractice.questionId &&
-            bestPracticeMapping.bestPracticeId === bestPractice.bestPracticeId
+          (bpm) =>
+            bpm.pillarId === bestPractice.pillarId &&
+            bpm.questionId === bestPractice.questionId &&
+            bpm.bestPracticeId === bestPractice.bestPracticeId,
         );
         if (bestPracticeMapping) {
           success++;
@@ -155,100 +152,76 @@ export class AIServiceBedrockTestScript {
             },
           });
         }
-      });
-    });
+      }
+    }
     return { success, failed, retries, promptLengths: promptLengthsSum };
   }
 
   private async runTestCase(
     questionSet: QuestionSet,
     testCase: TestCase,
-    testFindings: Record<string, Finding[]>
-  ): Promise<TestCaseProcessResult | undefined> {
+    testFindings: Record<string, Finding[]>,
+  ): Promise<TestCaseProcessResult> {
     const findings = Object.values(testFindings).flatMap((fList) =>
-      fList.slice(0, testCase.limit)
+      fList.slice(0, testCase.limit),
     );
     const perProcessFindings = chunk(findings, testCase.perProcess);
     const testCaseProcessResults: TestCaseProcessResult[] = await Promise.all(
-      perProcessFindings.map(async (findingsChunk) => {
-        return await this.runTestCaseProcess(
-          questionSet,
-          testCase,
-          findingsChunk
-        );
-      })
+      perProcessFindings.map((findingsChunk) =>
+        this.runTestCaseProcess(questionSet, testCase, findingsChunk),
+      ),
     );
-    return Object.values(testCaseProcessResults).reduce(
+    return testCaseProcessResults.reduce(
       (total, current) => ({
         success: total.success + current.success,
         failed: [...total.failed, ...current.failed],
         retries: [...total.retries, ...current.retries],
         promptLengths: total.promptLengths + current.promptLengths,
       }),
-      { success: 0, failed: [], retries: [], promptLengths: 0 }
+      { success: 0, failed: [], retries: [], promptLengths: 0 },
     );
   }
 
-  private generateReport(
-    testCaseProcessResults: Record<number, TestCaseProcessResult>
-  ): void {
-    console.log('\n=== AIServiceBedrockTestScript Report ===');
-    console.table(
-      Object.values(testCaseProcessResults).map(
-        ({ success, failed, retries }) => {
-          const total = success + failed.length;
-          const successRate =
-            total > 0 ? `${((success / total) * 100).toFixed(2)}%` : 'N/A';
-          return {
-            'Test Case #': failed.length > 0 ? ' FAILED' : ' PASSED',
-            Success: success,
-            Failed: failed.map(({ message, data }) => {
-              return `${message}
-              ${JSON.stringify(data)}`;
-            }),
-            Retries: retries,
-            'Success Rate': successRate,
-          };
-        }
-      )
-    );
+  private generateReport(result: TestCaseProcessResult): void {
+    const total = result.success + result.failed.length;
+    const successRate =
+      total > 0 ? `${((result.success / total) * 100).toFixed(2)}%` : 'N/A';
 
-    const report = Object.values(testCaseProcessResults).map(
-      ({ success, failed, retries, promptLengths }) => {
-        const total = success + failed.length;
-        const successRate =
-          total > 0 ? `${((success / total) * 100).toFixed(2)}%` : 'N/A';
-        return {
-          total,
-          success,
-          failed,
-          retries,
-          successRate,
-          promptLengths,
-        };
-      }
-    );
+    console.log('\n=== AIServiceBedrockTestScript Report ===');
+    console.table({
+      Status: result.failed.length > 0 ? 'FAILED' : 'PASSED',
+      Success: result.success,
+      Failed: result.failed.length,
+      Retries: result.retries.length,
+      'Success Rate': successRate,
+      'Prompt Lengths': result.promptLengths,
+    });
+
+    if (result.failed.length > 0) {
+      console.log('\nFailed findings:');
+      result.failed.forEach(({ message }) => console.log(`  - ${message}`));
+    }
+
+    const report = {
+      total,
+      success: result.success,
+      failed: result.failed,
+      retries: result.retries,
+      successRate,
+      promptLengths: result.promptLengths,
+    };
 
     fs.writeFileSync(
       path.join(__dirname, `report-${new Date().toISOString()}.json`),
-      JSON.stringify(report, null, 2)
+      JSON.stringify(report, null, 2),
     );
   }
 
   public async run(): Promise<void> {
     const questionSet = this.questionSetService.get();
-    const testConfigs = this.getTestConfigs();
     const testFindings = this.getTestFindings();
-
-    const testCaseProcessResults = Object.fromEntries(
-      await Promise.all(
-        Array.from(testConfigs).map(async (testCase, index) => [
-          index,
-          await this.runTestCase(questionSet, testCase, testFindings),
-        ])
-      )
-    ) as Record<number, TestCaseProcessResult>;
-    this.generateReport(testCaseProcessResults);
+    const result = await this.runTestCase(questionSet, TEST_CONFIG, testFindings);
+    this.generateReport(result);
   }
 }
 
@@ -259,11 +232,8 @@ describe('AIServiceBedrockTestScript', () => {
     register(tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries, {
       useValue: 3,
     });
-    register(tokenS3Bucket, {
-      useValue: 'wafr-automation-tool-antoine-576872909007',
-    });
-    register(tokenDynamoDBAssessmentTableName, { useValue: 'test-ddb-table' });
-    const aiServiceBedrockTestScript = new AIServiceBedrockTestScript();
-    await aiServiceBedrockTestScript.run();
+
+    const testScript = new AIServiceBedrockTestScript();
+    await testScript.run();
   });
 });

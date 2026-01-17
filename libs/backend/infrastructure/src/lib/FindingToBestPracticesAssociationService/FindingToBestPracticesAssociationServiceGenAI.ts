@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { type InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 import { z, type ZodType } from 'zod';
 
 import type {
@@ -11,6 +10,7 @@ import type {
   ScanningTool,
 } from '@backend/models';
 import {
+  type AIInferenceConfig,
   type FindingToBestPracticesAssociation,
   type FindingToBestPracticesAssociationService,
   type Prompt,
@@ -23,7 +23,7 @@ import { tokenLogger } from '../Logger';
 
 interface FindingIdToBestPracticeIdAssociation {
   findingId: string;
-  bestPracticeId: string; // "pillarId#questionId#bestPracticeId"
+  bestPracticeId: string;
 }
 
 const FindingIdToBestPracticeIdAssociationsSchema = z.array(
@@ -36,12 +36,6 @@ const FindingIdToBestPracticeIdAssociationsSchema = z.array(
 type FindingIdToBestPracticeIdAssociations = z.infer<
   typeof FindingIdToBestPracticeIdAssociationsSchema
 >;
-
-export enum RetryErrorType {
-  JSONParseError,
-  ZodError,
-  Error,
-}
 
 export class FindingToBestPracticesAssociationServiceGenAI
   implements FindingToBestPracticesAssociationService
@@ -121,7 +115,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
     return Object.entries(variables).reduce(
       (updatedPrompt, [key, value]) =>
         updatedPrompt.replace(
-          new RegExp(`{{${key}}}`, 'g'), // Replace all occurrences
+          new RegExp(`{{${key}}}`, 'g'),
           typeof value === 'string' ? value : JSON.stringify(value),
         ),
       prompt,
@@ -168,7 +162,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
     statusDetail: string | 'Unknown';
   }[] {
     return findings.map((finding) => {
-      // Finding id is expected to be in the format "tool#12345"
       if (!/^[a-zA-Z]+#[0-9]+$/.test(finding.id)) {
         throw new Error(`Invalid finding id format: ${finding.id}`);
       }
@@ -239,7 +232,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
     scanningTool: ScanningTool;
     findings: Finding[];
     pillars: Pillar[];
-    inferenceConfig?: InferenceConfiguration;
+    inferenceConfig?: AIInferenceConfig;
   }): Promise<FindingToBestPracticesAssociation[]> {
     const { scanningTool, findings, pillars, inferenceConfig } = args;
     const prompt = this.fetchPrompt();
@@ -268,7 +261,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
             pillars,
             findings: remainingFindings,
           }),
-          prefill: { text: '[' }, // Start with an opening bracket for JSON array
+          prefill: { text: '[' },
           inferenceConfig,
         });
 
@@ -277,7 +270,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
           builtArray: '[' + stringifiedAIResponse.trim(),
         });
 
-        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim()); // Add opening bracket for JSON array according to prefill
+        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim());
         const findingIdToBestPracticeIdAssociations =
           FindingIdToBestPracticeIdAssociationsSchema.parse(aiResponse);
 
@@ -291,7 +284,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
         remainingFindings = failed;
 
         if (failed.length === 0) {
-          // All findings processed successfully
           break;
         } else {
           this.logger.info(
@@ -304,17 +296,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
         }
       } catch (error) {
         if (error instanceof JSONParseError) {
-          this.logger.error(
-            `Failed to parse AI response: ${error.message}.`,
-            RetryErrorType.JSONParseError,
-          );
+          this.logger.error(`Failed to parse AI response: ${error.message}.`, error);
         } else if (error instanceof z.ZodError) {
-          this.logger.error(
-            `AI response validation failed: ${error.message}.`,
-            RetryErrorType.ZodError,
-          );
+          this.logger.error(`AI response validation failed: ${error.message}.`, error);
         } else if (error instanceof Error) {
-          this.logger.error(`AI error: ${error.message}`, RetryErrorType.Error);
+          this.logger.error(`AI error: ${error.message}`, error);
         }
       }
     }

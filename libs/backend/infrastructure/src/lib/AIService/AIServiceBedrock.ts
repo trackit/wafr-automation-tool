@@ -4,10 +4,9 @@ import {
   ConversationRole,
   ConverseStreamCommand,
   type ConverseStreamCommandOutput,
-  type InferenceConfiguration,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIService, Prompt, TextComponent } from '@backend/ports';
+import type { AIInferenceConfig, AIService, Prompt, TextComponent } from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
@@ -36,7 +35,7 @@ export class AIServiceBedrock implements AIService {
 
   public async converse(args: {
     prompt: Prompt;
-    inferenceConfig?: InferenceConfiguration;
+    inferenceConfig?: AIInferenceConfig;
     prefill?: TextComponent;
   }): Promise<string> {
     const { prompt, prefill, inferenceConfig } = args;
