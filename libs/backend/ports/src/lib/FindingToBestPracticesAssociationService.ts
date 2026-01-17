@@ -1,5 +1,6 @@
-import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
-import { Finding, Pillar, ScanningTool } from '@backend/models';
+import { type InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+
+import { type Finding, type Pillar, type ScanningTool } from '@backend/models';
 
 export interface FindingToBestPracticesAssociation {
   finding: Finding;

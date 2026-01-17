@@ -3,8 +3,8 @@ import {
   CachePointType,
   ConversationRole,
   ConverseStreamCommand,
-  ConverseStreamCommandOutput,
-  InferenceConfiguration,
+  type ConverseStreamCommandOutput,
+  type InferenceConfiguration,
 } from '@aws-sdk/client-bedrock-runtime';
 
 import type { AIService, Prompt, TextComponent } from '@backend/ports';

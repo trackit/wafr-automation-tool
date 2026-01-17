@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { type InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 import { z, type ZodType } from 'zod';
-import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 
 import type {
   BestPractice,

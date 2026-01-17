@@ -495,7 +495,7 @@ Resources:
                     organizationDomain: '{% $organizationDomain %}'
                     findingsChunkURI: '{% $states.input %}'
                   End: true
-            Next: ComputeGraphData
+            Next: Cleanup
             Catch:
               - ErrorEquals:
                   - States.ALL

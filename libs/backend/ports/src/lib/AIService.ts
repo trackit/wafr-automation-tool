@@ -1,4 +1,4 @@
-import { InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
+import { type InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
 
 export interface TextComponent {
   text: string;
