@@ -34,18 +34,23 @@ const MappingSchema = z.record(
   ),
 );
 
+export const tokenMapScanFindingsToBestPracticesMappingsDir =
+  createInjectionToken<string>('MapScanFindingsToBestPracticesMappingsDir', {
+    useValue: join(__dirname, 'mappings'),
+  });
+
 export class MapScanFindingsToBestPracticesUseCaseImpl
   implements MapScanFindingsToBestPracticesUseCase
 {
   private readonly logger = inject(tokenLogger);
-  static readonly mappingsDir = join(__dirname, 'mappings');
+  private readonly mappingsDir = inject(tokenMapScanFindingsToBestPracticesMappingsDir);
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
   private getMapping(): z.infer<typeof MappingSchema> {
     try {
       const rawMapping = readFileSync(
         join(
-          MapScanFindingsToBestPracticesUseCaseImpl.mappingsDir,
+          this.mappingsDir,
           MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
         ),
         'utf-8',

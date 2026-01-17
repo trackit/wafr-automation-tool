@@ -5,6 +5,7 @@ import {
   tokenFakeLogger,
   tokenFindingToBestPracticesAssociationService,
   tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
+  tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir,
   tokenLogger,
   tokenQuestionSetService,
 } from '@backend/infrastructure';
@@ -15,6 +16,7 @@ import {
 } from '@backend/ports';
 import {
   type ScanFindingsBestPracticesMapping,
+  tokenMapScanFindingsToBestPracticesMappingsDir,
   tokenMapScanFindingsToBestPracticesUseCase,
 } from '@backend/useCases';
 import { inject, register, reset } from '@shared/di-container';
@@ -231,6 +233,12 @@ describe('AIServiceBedrockTestScript', () => {
     register(tokenLogger, { useFactory: () => inject(tokenFakeLogger) });
     register(tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries, {
       useValue: 3,
+    });
+    register(tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir, {
+      useValue: path.join(process.cwd(), 'data', 'prompts'),
+    });
+    register(tokenMapScanFindingsToBestPracticesMappingsDir, {
+      useValue: path.join(process.cwd(), 'data', 'mappings'),
     });
 
     const testScript = new AIServiceBedrockTestScript();

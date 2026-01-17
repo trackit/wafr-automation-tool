@@ -45,8 +45,9 @@ export class FindingToBestPracticesAssociationServiceGenAI
   private readonly maxRetries = inject(
     tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
   );
-
-  static readonly promptsDir = join(__dirname, 'prompts');
+  private readonly promptsDir = inject(
+    tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir,
+  );
   static readonly staticPromptKey = 'static-prompt.txt';
   static readonly dynamicPromptKey = 'dynamic-prompt.txt';
 
@@ -57,14 +58,14 @@ export class FindingToBestPracticesAssociationServiceGenAI
     try {
       const staticPrompt = readFileSync(
         join(
-          FindingToBestPracticesAssociationServiceGenAI.promptsDir,
+          this.promptsDir,
           FindingToBestPracticesAssociationServiceGenAI.staticPromptKey,
         ),
         'utf-8',
       );
       const dynamicPrompt = readFileSync(
         join(
-          FindingToBestPracticesAssociationServiceGenAI.promptsDir,
+          this.promptsDir,
           FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey,
         ),
         'utf-8',
@@ -344,5 +345,13 @@ export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
           .positive('GEN_AI_MAX_RETRIES must be a positive number')
           .parse(genAIMaxRetries);
       },
+    },
+  );
+
+export const tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir =
+  createInjectionToken<string>(
+    'FindingToBestPracticesAssociationServiceGenAIPromptsDir',
+    {
+      useValue: join(__dirname, 'prompts'),
     },
   );

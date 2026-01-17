@@ -568,3 +568,5 @@ vitest.config.*.timestamp*
 
 data/*
 !data/README.md
+
+libs/backend/scripts/src/lib/AIServiceBedrockTestScript/report-*.json
