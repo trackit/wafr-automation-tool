@@ -21,6 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout private data repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/wafr-automation-tool-private
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          path: wafr-automation-tool-private
+
+      - name: Copy private data
+        run: |
+          cp -r wafr-automation-tool-private/* data/
+          rm -rf wafr-automation-tool-private
+
       - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
