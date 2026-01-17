@@ -222,7 +222,11 @@ class AIServiceBedrockTestScript {
   public async run(): Promise<void> {
     const questionSet = this.questionSetService.get();
     const testFindings = this.getTestFindings();
-    const result = await this.runTestCase(questionSet, TEST_CONFIG, testFindings);
+    const result = await this.runTestCase(
+      questionSet,
+      TEST_CONFIG,
+      testFindings,
+    );
     this.generateReport(result);
   }
 }

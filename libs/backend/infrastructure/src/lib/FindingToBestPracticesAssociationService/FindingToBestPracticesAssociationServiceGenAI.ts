@@ -297,9 +297,15 @@ export class FindingToBestPracticesAssociationServiceGenAI
         }
       } catch (error) {
         if (error instanceof JSONParseError) {
-          this.logger.error(`Failed to parse AI response: ${error.message}.`, error);
+          this.logger.error(
+            `Failed to parse AI response: ${error.message}.`,
+            error,
+          );
         } else if (error instanceof z.ZodError) {
-          this.logger.error(`AI response validation failed: ${error.message}.`, error);
+          this.logger.error(
+            `AI response validation failed: ${error.message}.`,
+            error,
+          );
         } else if (error instanceof Error) {
           this.logger.error(`AI error: ${error.message}`, error);
         }

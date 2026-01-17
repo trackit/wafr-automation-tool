@@ -43,7 +43,9 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
   implements MapScanFindingsToBestPracticesUseCase
 {
   private readonly logger = inject(tokenLogger);
-  private readonly mappingsDir = inject(tokenMapScanFindingsToBestPracticesMappingsDir);
+  private readonly mappingsDir = inject(
+    tokenMapScanFindingsToBestPracticesMappingsDir,
+  );
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
   private getMapping(): z.infer<typeof MappingSchema> {

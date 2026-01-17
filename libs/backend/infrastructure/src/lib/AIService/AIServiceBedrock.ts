@@ -6,7 +6,12 @@ import {
   type ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIInferenceConfig, AIService, Prompt, TextComponent } from '@backend/ports';
+import type {
+  AIInferenceConfig,
+  AIService,
+  Prompt,
+  TextComponent,
+} from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';

@@ -1,4 +1,9 @@
-import type { AIInferenceConfig, AIService, Prompt, TextComponent } from '@backend/ports';
+import type {
+  AIInferenceConfig,
+  AIService,
+  Prompt,
+  TextComponent,
+} from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeAIService implements AIService {

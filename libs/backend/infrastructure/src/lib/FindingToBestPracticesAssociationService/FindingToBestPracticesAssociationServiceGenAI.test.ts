@@ -424,10 +424,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
   describe('associateFindingsToBestPractices', () => {
     it('should associate findings to best practices', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
       mockedReadFileSync.mockImplementation((path) => {
         if (String(path).includes('static-prompt.txt')) {
           return 'This is a prompt.\n';
@@ -516,10 +514,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid JSON AI response', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
       mockedReadFileSync.mockImplementation((path) => {
         if (String(path).includes('static-prompt.txt')) {
           return 'This is a prompt.';
@@ -588,10 +584,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid AI response format', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
       mockedReadFileSync.mockImplementation((path) => {
         if (String(path).includes('static-prompt.txt')) {
           return 'This is a prompt.';
@@ -662,9 +656,7 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should return an empty array if no prompt is found', async () => {
-      const {
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
       mockedReadFileSync.mockImplementation(() => {
         throw new Error('File not found');
       });
@@ -680,10 +672,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry only failed findings and preserve successful ones', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
       mockedReadFileSync.mockImplementation((path) => {
         if (String(path).includes('static-prompt.txt')) {
           return 'This is a prompt.\n';
@@ -790,10 +780,8 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should return partial results when some findings continue to fail after max retries', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-      } = setup();
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
       mockedReadFileSync.mockImplementation((path) => {
         if (String(path).includes('static-prompt.txt')) {
           return 'This is a prompt.';
