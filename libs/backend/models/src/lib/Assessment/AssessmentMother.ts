@@ -128,6 +128,11 @@ export class AssessmentMother {
     return this;
   }
 
+  public withFolder(folder: string | undefined): AssessmentMother {
+    this.data.folder = folder;
+    return this;
+  }
+
   public build(): Assessment {
     return this.data;
   }

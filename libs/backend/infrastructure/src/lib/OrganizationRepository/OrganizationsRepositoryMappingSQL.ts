@@ -10,6 +10,7 @@ export function toDomainOrganization(e: OrganizationEntity): Organization {
     assessmentExportRoleArn: e.assessmentExportRoleArn,
     unitBasedAgreementId: e.unitBasedAgreementId,
     freeAssessmentsLeft: e.freeAssessmentsLeft,
+    folders: e.folders,
     aceIntegration: e.aceIntegration
       ? {
           roleArn: e.aceIntegration.roleArn,

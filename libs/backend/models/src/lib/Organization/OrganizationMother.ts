@@ -78,6 +78,11 @@ export class OrganizationMother {
     return this;
   }
 
+  public withFolders(folders: string[]): OrganizationMother {
+    this.data.folders = folders;
+    return this;
+  }
+
   private getAceIntegration(): AceIntegration {
     if (!this.data.aceIntegration) {
       this.data.aceIntegration = {

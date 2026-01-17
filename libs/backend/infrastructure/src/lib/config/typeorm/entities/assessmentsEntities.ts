@@ -89,6 +89,9 @@ export class AssessmentEntity
     { cascade: true, nullable: true },
   )
   billingInformation?: BillingInformationEntity;
+
+  @Column('varchar', { nullable: true })
+  folder?: string;
 }
 
 @Entity('pillars')

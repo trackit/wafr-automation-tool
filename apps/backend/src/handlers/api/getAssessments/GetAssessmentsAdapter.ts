@@ -49,6 +49,7 @@ export class GetAssessmentsAdapter {
       opportunityId: assessment.opportunityId,
       createdAt: assessment.createdAt.toISOString(),
       finishedAt: assessment.finishedAt?.toISOString(),
+      folder: assessment.folder,
       ...(assessment.error && {
         error: {
           cause: assessment.error.cause,

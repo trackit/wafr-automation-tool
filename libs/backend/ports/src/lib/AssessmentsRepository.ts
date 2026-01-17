@@ -84,4 +84,13 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     billingInformation: BillingInformation;
   }): Promise<void>;
+  updateAssessmentsByFolder(args: {
+    organizationDomain: string;
+    oldFolderName: string;
+    newFolderName: string;
+  }): Promise<void>;
+  clearAssessmentsFolder(args: {
+    organizationDomain: string;
+    folderName: string;
+  }): Promise<void>;
 }

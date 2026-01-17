@@ -72,6 +72,7 @@ export class GetAssessmentAdapter {
       error: assessment.error,
       wafrWorkloadArn: assessment.wafrWorkloadArn,
       opportunityId: assessment.opportunityId,
+      folder: assessment.folder,
       billingInformation: assessment.billingInformation
         ? {
             ...assessment.billingInformation,

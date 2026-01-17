@@ -36,6 +36,9 @@ export class OrganizationEntity implements Organization {
     { cascade: true, nullable: true },
   )
   aceIntegration?: AceIntegrationEntity;
+
+  @Column('varchar', { nullable: true, array: true, default: [] })
+  folders?: string[];
 }
 
 @Entity('aceIntegrations')

@@ -316,4 +316,31 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       `Billing information saved for assessment: ${assessmentId}`,
     );
   }
+
+  public async updateAssessmentsByFolder(args: {
+    organizationDomain: string;
+    oldFolderName: string;
+    newFolderName: string;
+  }): Promise<void> {
+    const { organizationDomain, oldFolderName, newFolderName } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    await repo.update({ folder: oldFolderName }, { folder: newFolderName });
+
+    this.logger.info(
+      `Updated assessments folder from "${oldFolderName}" to "${newFolderName}"`,
+    );
+  }
+
+  public async clearAssessmentsFolder(args: {
+    organizationDomain: string;
+    folderName: string;
+  }): Promise<void> {
+    const { organizationDomain, folderName } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    await repo.update({ folder: folderName }, { folder: undefined });
+
+    this.logger.info(`Cleared folder "${folderName}" from assessments`);
+  }
 }

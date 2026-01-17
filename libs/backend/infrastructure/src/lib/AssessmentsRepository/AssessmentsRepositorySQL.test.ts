@@ -1070,6 +1070,164 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedAssessment?.billingInformation?.totalCost).toBe('0.00');
     });
   });
+
+  describe('updateAssessmentsByFolder', () => {
+    it('should update folder name for all assessments with the old folder name', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Old Folder')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Old Folder')
+        .build();
+      await repository.save(assessment2);
+
+      const assessment3 = AssessmentMother.basic()
+        .withId('3b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Other Folder')
+        .build();
+      await repository.save(assessment3);
+
+      await repository.updateAssessmentsByFolder({
+        organizationDomain: 'organization1',
+        oldFolderName: 'Old Folder',
+        newFolderName: 'New Folder',
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: assessment1.id,
+        organizationDomain: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: assessment2.id,
+        organizationDomain: 'organization1',
+      });
+      const updatedAssessment3 = await repository.get({
+        assessmentId: assessment3.id,
+        organizationDomain: 'organization1',
+      });
+
+      expect(updatedAssessment1?.folder).toBe('New Folder');
+      expect(updatedAssessment2?.folder).toBe('New Folder');
+      expect(updatedAssessment3?.folder).toBe('Other Folder');
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Old Folder')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization2')
+        .withFolder('Old Folder')
+        .build();
+      await repository.save(assessment2);
+
+      await repository.updateAssessmentsByFolder({
+        organizationDomain: 'organization1',
+        oldFolderName: 'Old Folder',
+        newFolderName: 'New Folder',
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: assessment1.id,
+        organizationDomain: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: assessment2.id,
+        organizationDomain: 'organization2',
+      });
+
+      expect(updatedAssessment1?.folder).toBe('New Folder');
+      expect(updatedAssessment2?.folder).toBe('Old Folder');
+    });
+  });
+
+  describe('clearAssessmentsFolder', () => {
+    it('should clear folder for all assessments with the given folder name', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Folder To Clear')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Other Folder')
+        .build();
+      await repository.save(assessment2);
+
+      await repository.clearAssessmentsFolder({
+        organizationDomain: 'organization1',
+        folderName: 'Folder To Clear',
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: assessment1.id,
+        organizationDomain: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: assessment2.id,
+        organizationDomain: 'organization1',
+      });
+
+      expect(updatedAssessment1?.folder).toBeUndefined();
+      expect(updatedAssessment2?.folder).toBe('Other Folder');
+    });
+
+    it('should be scoped by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .withFolder('Folder To Clear')
+        .build();
+      await repository.save(assessment1);
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization2')
+        .withFolder('Folder To Clear')
+        .build();
+      await repository.save(assessment2);
+
+      await repository.clearAssessmentsFolder({
+        organizationDomain: 'organization1',
+        folderName: 'Folder To Clear',
+      });
+
+      const updatedAssessment1 = await repository.get({
+        assessmentId: assessment1.id,
+        organizationDomain: 'organization1',
+      });
+      const updatedAssessment2 = await repository.get({
+        assessmentId: assessment2.id,
+        organizationDomain: 'organization2',
+      });
+
+      expect(updatedAssessment1?.folder).toBeUndefined();
+      expect(updatedAssessment2?.folder).toBe('Folder To Clear');
+    });
+  });
 });
 
 const setup = () => {

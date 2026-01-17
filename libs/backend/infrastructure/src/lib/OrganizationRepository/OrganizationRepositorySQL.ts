@@ -66,4 +66,15 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
     });
     return entities.map(toDomainOrganization);
   }
+
+  public async update(args: {
+    organizationDomain: string;
+    organizationBody: Partial<Pick<Organization, 'folders'>>;
+  }): Promise<void> {
+    const { organizationDomain, organizationBody } = args;
+    const repo = await this.repo();
+
+    await repo.update({ domain: organizationDomain }, organizationBody);
+    this.logger.info(`Organization updated: ${organizationDomain}`);
+  }
 }

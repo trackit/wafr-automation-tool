@@ -1257,6 +1257,105 @@ Resources:
         EntryPoints:
           - handler.ts
 
+  CreateFolderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${CreateFolderFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  CreateFolderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/createFolder
+      Tags:
+        Name: CreateFolderFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        CreateFolder:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization/folders
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  UpdateFolderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${UpdateFolderFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  UpdateFolderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/updateFolder
+      Tags:
+        Name: UpdateFolderFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        UpdateFolder:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization/folders/{folderName}
+            Method: PUT
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
+  DeleteFolderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeleteFolderFunction}'
+      RetentionInDays: !Ref LogRetentionInDays
+
+  DeleteFolderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../apps/backend/src/handlers/api/deleteFolder
+      Tags:
+        Name: DeleteFolderFunction
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DBCredentialsSecretArn
+      Events:
+        DeleteFolder:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /organization/folders/{folderName}
+            Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: cjs
+        Target: es2024
+        Minify: false
+        Sourcemap: true
+        EntryPoints:
+          - handler.ts
+
   GetAssessmentGraphLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:

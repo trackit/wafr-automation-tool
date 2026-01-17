@@ -113,3 +113,37 @@ export class OrganizationAceDetailsNotFoundError extends UseCaseError {
     });
   }
 }
+
+export class FolderAlreadyExistsError extends UseCaseError {
+  public constructor(
+    args: {
+      folderName: string;
+      organizationDomain: string;
+    },
+    description?: string,
+  ) {
+    const { folderName, organizationDomain } = args;
+    super({
+      type: BasicErrorType.CONFLICT,
+      message: `Folder "${folderName}" already exists for organization ${organizationDomain}`,
+      description,
+    });
+  }
+}
+
+export class FolderNotFoundError extends UseCaseError {
+  public constructor(
+    args: {
+      folderName: string;
+      organizationDomain: string;
+    },
+    description?: string,
+  ) {
+    const { folderName, organizationDomain } = args;
+    super({
+      type: BasicErrorType.NOT_FOUND,
+      message: `Folder "${folderName}" not found for organization ${organizationDomain}`,
+      description,
+    });
+  }
+}

@@ -293,6 +293,37 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
       this.assessments[`${assessmentId}#${organizationDomain}`];
     assessment.billingInformation = billingInformation;
   }
+
+  public async updateAssessmentsByFolder(args: {
+    organizationDomain: string;
+    oldFolderName: string;
+    newFolderName: string;
+  }): Promise<void> {
+    const { organizationDomain, oldFolderName, newFolderName } = args;
+    for (const assessment of Object.values(this.assessments)) {
+      if (
+        assessment.organization === organizationDomain &&
+        assessment.folder === oldFolderName
+      ) {
+        assessment.folder = newFolderName;
+      }
+    }
+  }
+
+  public async clearAssessmentsFolder(args: {
+    organizationDomain: string;
+    folderName: string;
+  }): Promise<void> {
+    const { organizationDomain, folderName } = args;
+    for (const assessment of Object.values(this.assessments)) {
+      if (
+        assessment.organization === organizationDomain &&
+        assessment.folder === folderName
+      ) {
+        assessment.folder = undefined;
+      }
+    }
+  }
 }
 
 export const tokenFakeAssessmentsRepository =

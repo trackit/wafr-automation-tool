@@ -24,6 +24,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organization/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new folder for organizing assessments
+         * @description Creates a new folder that can be used to organize assessments.
+         */
+        post: operations["createFolder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organization/folders/{folderName}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Rename an existing folder
+         * @description Renames an existing folder and updates all assessments that belong to it.
+         */
+        put: operations["updateFolder"];
+        post?: never;
+        /**
+         * Delete a folder
+         * @description Deletes a folder and removes the folder assignment from all assessments in it.
+         */
+        delete: operations["deleteFolder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments": {
         parameters: {
             query?: never;
@@ -454,6 +498,8 @@ export interface components {
             /** @description ISO-formatted date when the assessment has finished scanning and processing */
             finishedAt?: string;
             error?: components["schemas"]["AssessmentError"];
+            /** @description Folder name for organizing assessments */
+            folder?: string;
         };
         /**
          * @description Current step in the assessment process
@@ -474,6 +520,8 @@ export interface components {
         } | null;
         AssessmentDto: {
             name?: string;
+            /** @description Folder name for organizing the assessment */
+            folder?: string;
         };
         AssessmentGraph: {
             /** @description Severity levels where findings were found */
@@ -653,11 +701,136 @@ export interface operations {
                             /** @description Number of ACE opportunities in that month */
                             opportunities: number;
                         }[];
+                        /** @description List of folder names for organizing assessments */
+                        folders?: string[];
                     };
                 };
             };
             /** @description A issue occurred while trying to retrieve the organization of the user */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createFolder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Name of the folder to create */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Folder created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or folder already exists */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateFolder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The current name of the folder to rename */
+                folderName: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description New name for the folder */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Folder renamed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or new folder name already exists */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Folder not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteFolder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The name of the folder to delete */
+                folderName: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Folder deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Folder not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

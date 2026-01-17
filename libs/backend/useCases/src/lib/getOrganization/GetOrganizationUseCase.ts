@@ -1,6 +1,7 @@
 import {
   tokenAssessmentsRepository,
   tokenLogger,
+  tokenOrganizationRepository,
 } from '@backend/infrastructure';
 import { createInjectionToken, inject } from '@shared/di-container';
 
@@ -16,6 +17,7 @@ export type OpportunitiesPerMonthItem = {
 type OrganizationDetails = {
   currentYearTotalAssessments: number;
   opportunitiesPerMonth: OpportunitiesPerMonthItem[];
+  folders?: string[];
 };
 
 export interface GetOrganizationUseCase {
@@ -26,6 +28,7 @@ export interface GetOrganizationUseCase {
 
 export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
+  private readonly organizationRepository = inject(tokenOrganizationRepository);
   private readonly logger = inject(tokenLogger);
 
   async getOrganizationDetails(
@@ -79,11 +82,16 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
       opportunities: map[m],
     }));
 
+    const organization =
+      await this.organizationRepository.get(organizationDomain);
+    const folders = organization?.folders ?? [];
+
     this.logger.info(`The organization details retrieved successfully`);
 
     return {
       currentYearTotalAssessments,
       opportunitiesPerMonth,
+      folders,
     };
   }
 }

@@ -6,6 +6,7 @@ export interface Organization {
   unitBasedAgreementId?: string;
   freeAssessmentsLeft?: number;
   aceIntegration?: AceIntegration;
+  folders?: string[];
 }
 export interface AceIntegration {
   roleArn: string;

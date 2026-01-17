@@ -15,14 +15,12 @@ const UpdateAssessmentPathSchema = z.object({
 
 const UpdateAssessmentBodySchema = z
   .object({
-    name: z.string().nonempty(),
+    name: z.string().nonempty().optional(),
+    folder: z.string().nonempty().nullish(),
   })
-  .partial()
-  .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
+  .refine((obj) => Object.keys(obj).length > 0, {
     message: 'At least one property must be provided',
-  }) satisfies ZodType<
-  operations['updateAssessment']['requestBody']['content']['application/json']
->;
+  });
 
 export class UpdateAssessmentAdapter {
   private readonly useCase = inject(tokenUpdateAssessmentUseCase);

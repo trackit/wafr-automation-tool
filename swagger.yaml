@@ -63,8 +63,97 @@ paths:
                         opportunities:
                           type: integer
                           description: Number of ACE opportunities in that month
+                  folders:
+                    type: array
+                    description: List of folder names for organizing assessments
+                    items:
+                      type: string
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
+        '500':
+          description: Internal server error.
+  /organization/folders:
+    post:
+      operationId: createFolder
+      tags:
+        - Organizations
+      summary: Create a new folder for organizing assessments
+      description: |
+        Creates a new folder that can be used to organize assessments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Name of the folder to create
+      responses:
+        '201':
+          description: Folder created successfully
+        '400':
+          description: Invalid request body or folder already exists
+        '500':
+          description: Internal server error.
+  '/organization/folders/{folderName}':
+    put:
+      operationId: updateFolder
+      tags:
+        - Organizations
+      summary: Rename an existing folder
+      description: |
+        Renames an existing folder and updates all assessments that belong to it.
+      parameters:
+        - name: folderName
+          in: path
+          description: The current name of the folder to rename
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: New name for the folder
+      responses:
+        '200':
+          description: Folder renamed successfully
+        '400':
+          description: Invalid request body or new folder name already exists
+        '404':
+          description: Folder not found
+        '500':
+          description: Internal server error.
+    delete:
+      operationId: deleteFolder
+      tags:
+        - Organizations
+      summary: Delete a folder
+      description: |
+        Deletes a folder and removes the folder assignment from all assessments in it.
+      parameters:
+        - name: folderName
+          in: path
+          description: The name of the folder to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Folder deleted successfully
+        '404':
+          description: Folder not found
         '500':
           description: Internal server error.
   /assessments:
@@ -1152,6 +1241,9 @@ components:
           description: ISO-formatted date when the assessment has finished scanning and processing
         error:
           $ref: '#/components/schemas/AssessmentError'
+        folder:
+          type: string
+          description: Folder name for organizing assessments
     AssessmentStep:
       type: string
       description: Current step in the assessment process
@@ -1190,6 +1282,9 @@ components:
       properties:
         name:
           type: string
+        folder:
+          type: string
+          description: Folder name for organizing the assessment
     AssessmentGraph:
       type: object
       additionalProperties: false

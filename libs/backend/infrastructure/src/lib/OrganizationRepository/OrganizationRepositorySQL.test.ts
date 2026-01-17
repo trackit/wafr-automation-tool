@@ -168,6 +168,43 @@ describe('OrganizationRepositorySQL', () => {
       expect(organizations).toEqual([organization1, organization2]);
     });
   });
+
+  describe('update', () => {
+    it('should update organization folders', async () => {
+      const { repository } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('organization1')
+        .build();
+      await repository.save(organization);
+
+      await repository.update({
+        organizationDomain: 'organization1',
+        organizationBody: { folders: ['Folder A', 'Folder B'] },
+      });
+
+      const updatedOrganization = await repository.get('organization1');
+      expect(updatedOrganization?.folders).toEqual(['Folder A', 'Folder B']);
+    });
+
+    it('should update folders to empty array', async () => {
+      const { repository } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('organization1')
+        .withFolders(['Folder A'])
+        .build();
+      await repository.save(organization);
+
+      await repository.update({
+        organizationDomain: 'organization1',
+        organizationBody: { folders: [] },
+      });
+
+      const updatedOrganization = await repository.get('organization1');
+      expect(updatedOrganization?.folders).toEqual([]);
+    });
+  });
 });
 
 const setup = () => {

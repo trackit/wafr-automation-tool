@@ -21,6 +21,17 @@ export class FakeOrganizationRepository implements OrganizationRepository {
     const organizations = Object.values(this.organizations);
     return organizations.slice(offset, limit ? offset + limit : undefined);
   }
+
+  async update(args: {
+    organizationDomain: string;
+    organizationBody: Partial<Pick<Organization, 'folders'>>;
+  }): Promise<void> {
+    const { organizationDomain, organizationBody } = args;
+    const organization = this.organizations[organizationDomain];
+    if (organization) {
+      Object.assign(organization, organizationBody);
+    }
+  }
 }
 
 export const tokenFakeOrganizationRepository =

@@ -88,6 +88,7 @@ export function toDomainAssessment(
     ...(e.billingInformation && {
       billingInformation: toDomainBillingInformation(e.billingInformation),
     }),
+    ...(e.folder && { folder: e.folder }),
   };
 }
 
