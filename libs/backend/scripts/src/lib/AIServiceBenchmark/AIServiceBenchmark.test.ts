@@ -37,11 +37,6 @@ interface BenchmarkConfig {
 interface BenchmarkProcessResult {
   success: number;
   failed: FailData[];
-}
-
-interface BenchmarkResult {
-  success: number;
-  failed: FailData[];
   retries: {
     error: unknown;
     message: string;
