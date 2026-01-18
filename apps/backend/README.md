@@ -50,6 +50,16 @@ $ npm run test:backend:init
 $ npm run test:backend
 ```
 
+#### AI Service Benchmark
+
+The AI Service Benchmark compares AI-generated best practice associations against the manual mapping. It is excluded from the standard test suite and CI/CD pipeline.
+
+To run it manually, ensure your terminal is connected to an AWS account with Bedrock access:
+
+```shell
+$ npx vitest run libs/backend/scripts/src/lib/AIServiceBenchmark/AIServiceBenchmark.test.ts
+```
+
 ## Deployment
 
 ### Environment Variables
