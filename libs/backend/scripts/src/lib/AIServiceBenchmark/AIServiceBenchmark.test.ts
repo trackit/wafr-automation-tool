@@ -22,19 +22,19 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 import { chunk, parseJsonObject } from '@shared/utils';
 
-const TEST_CONFIG: TestCase = {
-  perProcess: 10,
-  limit: 100,
+const BENCHMARK_CONFIG: BenchmarkConfig = {
+  batchSize: 10,
+  maxFindingsPerTool: 100,
   aiParameters: {},
 };
 
-interface TestCase {
-  perProcess: number;
-  limit: number;
+interface BenchmarkConfig {
+  batchSize: number;
+  maxFindingsPerTool: number;
   aiParameters: AIInferenceConfig;
 }
 
-interface TestCaseProcessResult {
+interface BenchmarkProcessResult {
   success: number;
   failed: FailData[];
   retries: {
@@ -52,7 +52,7 @@ interface FailData {
   };
 }
 
-class AIServiceBedrockTestScript {
+class AIServiceBenchmark {
   private readonly questionSetService = inject(tokenQuestionSetService);
   private readonly findingToBestPracticesAssociationService = inject(
     tokenFindingToBestPracticesAssociationService,
@@ -61,17 +61,17 @@ class AIServiceBedrockTestScript {
     tokenMapScanFindingsToBestPracticesUseCase,
   );
 
-  private getTestFindings(): Record<string, Finding[]> {
+  private getBenchmarkFindings(): Record<string, Finding[]> {
     return parseJsonObject(
-      fs.readFileSync(path.join(__dirname, 'testFindings.json'), 'utf8'),
+      fs.readFileSync(path.join(__dirname, 'benchmarkFindings.json'), 'utf8'),
     ) as unknown as Record<string, Finding[]>;
   }
 
-  private async runTestCaseProcess(
+  private async runBenchmarkProcess(
     questionSet: QuestionSet,
-    testCase: TestCase,
+    benchmarkConfig: BenchmarkConfig,
     findings: Finding[],
-  ): Promise<TestCaseProcessResult> {
+  ): Promise<BenchmarkProcessResult> {
     const fakeLogger = inject(tokenFakeLogger);
     const findingsAssociatedByMapping =
       await this.mapFindingsToBestPracticesUseCase.mapScanFindingsToBestPractices(
@@ -86,7 +86,7 @@ class AIServiceBedrockTestScript {
           scanningTool: ScanningTool.PROWLER,
           findings,
           pillars: questionSet.pillars,
-          inferenceConfig: testCase.aiParameters,
+          inferenceConfig: benchmarkConfig.aiParameters,
         },
       );
 
@@ -159,21 +159,21 @@ class AIServiceBedrockTestScript {
     return { success, failed, retries, promptLengths: promptLengthsSum };
   }
 
-  private async runTestCase(
+  private async runBenchmark(
     questionSet: QuestionSet,
-    testCase: TestCase,
-    testFindings: Record<string, Finding[]>,
-  ): Promise<TestCaseProcessResult> {
-    const findings = Object.values(testFindings).flatMap((fList) =>
-      fList.slice(0, testCase.limit),
+    benchmarkConfig: BenchmarkConfig,
+    benchmarkFindings: Record<string, Finding[]>,
+  ): Promise<BenchmarkProcessResult> {
+    const findings = Object.values(benchmarkFindings).flatMap((fList) =>
+      fList.slice(0, benchmarkConfig.maxFindingsPerTool),
     );
-    const perProcessFindings = chunk(findings, testCase.perProcess);
-    const testCaseProcessResults: TestCaseProcessResult[] = await Promise.all(
+    const perProcessFindings = chunk(findings, benchmarkConfig.batchSize);
+    const benchmarkProcessResults: BenchmarkProcessResult[] = await Promise.all(
       perProcessFindings.map((findingsChunk) =>
-        this.runTestCaseProcess(questionSet, testCase, findingsChunk),
+        this.runBenchmarkProcess(questionSet, benchmarkConfig, findingsChunk),
       ),
     );
-    return testCaseProcessResults.reduce(
+    return benchmarkProcessResults.reduce(
       (total, current) => ({
         success: total.success + current.success,
         failed: [...total.failed, ...current.failed],
@@ -184,12 +184,12 @@ class AIServiceBedrockTestScript {
     );
   }
 
-  private generateReport(result: TestCaseProcessResult): void {
+  private generateReport(result: BenchmarkProcessResult): void {
     const total = result.success + result.failed.length;
     const successRate =
       total > 0 ? `${((result.success / total) * 100).toFixed(2)}%` : 'N/A';
 
-    console.log('\n=== AIServiceBedrockTestScript Report ===');
+    console.log('\n=== AIServiceBenchmark Report ===');
     console.table({
       Status: result.failed.length > 0 ? 'FAILED' : 'PASSED',
       Success: result.success,
@@ -221,17 +221,17 @@ class AIServiceBedrockTestScript {
 
   public async run(): Promise<void> {
     const questionSet = this.questionSetService.get();
-    const testFindings = this.getTestFindings();
-    const result = await this.runTestCase(
+    const benchmarkFindings = this.getBenchmarkFindings();
+    const result = await this.runBenchmark(
       questionSet,
-      TEST_CONFIG,
-      testFindings,
+      BENCHMARK_CONFIG,
+      benchmarkFindings,
     );
     this.generateReport(result);
   }
 }
 
-describe('AIServiceBedrockTestScript', () => {
+describe('AIServiceBenchmark', () => {
   it('should run successfully', async () => {
     reset();
     register(tokenLogger, { useFactory: () => inject(tokenFakeLogger) });
@@ -245,7 +245,7 @@ describe('AIServiceBedrockTestScript', () => {
       useValue: path.join(process.cwd(), 'data', 'mappings'),
     });
 
-    const testScript = new AIServiceBedrockTestScript();
-    await testScript.run();
+    const benchmark = new AIServiceBenchmark();
+    await benchmark.run();
   });
 });

@@ -30,6 +30,7 @@ export default defineConfig(() => ({
     passWithNoTests: true,
     environment: 'node',
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['scripts/**'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/libs/backend',
