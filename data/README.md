@@ -28,4 +28,4 @@ See [Backend README](../apps/backend/README.md#configure-ai-prompts) for detaile
 
 ## Note
 
-All files in this directory (except `.gitkeep` and this README) are ignored by git to keep your data private.
+All files in this directory (except this README) are ignored by git to keep your data private.
