@@ -270,7 +270,7 @@ Return a JSON array with findingId and bestPracticeId for each association.
 
 ##### CI/CD Integration
 
-For automated deployments, you can store your prompts in a separate private repository and configure your CI/CD pipeline to copy them to `data/` before building. See the GitHub Actions workflows in `.github/workflows/` for reference
+For automated deployments, you can store your prompts in a separate private repository and configure your CI/CD pipeline to copy them to `data/` before building. See the GitHub Actions workflows in `.github/workflows/` for reference.
 
 ## Usage
 
