@@ -105,7 +105,13 @@ class AIServiceBenchmark {
       )
       .map((log) => {
         if (log.data && typeof log.data === 'object' && 'prompt' in log.data) {
-          return (log.data.prompt as string).length as number;
+          const prompt = log.data.prompt as { text?: string }[];
+          return prompt.reduce((total, component) => {
+            if ('text' in component && typeof component.text === 'string') {
+              return total + component.text.length;
+            }
+            return total;
+          }, 0);
         }
         throw new Error('Unexpected log format');
       });
