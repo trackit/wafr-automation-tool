@@ -63,9 +63,10 @@ export class AIServiceBedrock implements AIService {
           ? [{ role: ConversationRole.ASSISTANT, content: [prefill] }]
           : []),
       ],
-      inferenceConfig: inferenceConfig ?? {
+      inferenceConfig: {
         maxTokens: 4096,
         temperature: 0,
+        ...inferenceConfig,
       },
     });
 
