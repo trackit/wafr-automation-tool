@@ -37,6 +37,11 @@ interface BenchmarkConfig {
 interface BenchmarkProcessResult {
   success: number;
   failed: FailData[];
+}
+
+interface BenchmarkResult {
+  success: number;
+  failed: FailData[];
   retries: {
     error: unknown;
     message: string;
@@ -168,11 +173,15 @@ class AIServiceBenchmark {
       fList.slice(0, benchmarkConfig.maxFindingsPerTool),
     );
     const perProcessFindings = chunk(findings, benchmarkConfig.batchSize);
-    const benchmarkProcessResults: BenchmarkProcessResult[] = await Promise.all(
-      perProcessFindings.map((findingsChunk) =>
-        this.runBenchmarkProcess(questionSet, benchmarkConfig, findingsChunk),
-      ),
-    );
+    const benchmarkProcessResults: BenchmarkProcessResult[] = [];
+    for (const findingsChunk of perProcessFindings) {
+      const result = await this.runBenchmarkProcess(
+        questionSet,
+        benchmarkConfig,
+        findingsChunk,
+      );
+      benchmarkProcessResults.push(result);
+    }
     return benchmarkProcessResults.reduce(
       (total, current) => ({
         success: total.success + current.success,
