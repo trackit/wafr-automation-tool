@@ -104,9 +104,11 @@ const loadingDiv = (
 function AssessmentOverview({
   assessment,
   maxServices = 5,
+  pillars,
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
   maxServices?: number;
+  pillars: components['schemas']['Pillar'][];
 }) {
   const assessmentId = assessment?.id;
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
@@ -205,20 +207,20 @@ function AssessmentOverview({
 
   // Calculate pillar completion percentages
   const pillarCompletionData = useMemo(() => {
-    if (!assessment?.pillars) return [];
+    if (!pillars) return [];
 
-    return assessment.pillars
+    return pillars
       .filter((pillar) => !pillar.disabled) // Only include enabled pillars
       .map((pillar) => ({
         pillar: pillar.label || pillar.id || 'Unknown',
         completion: calculatePillarCompletion(pillar),
       }));
-  }, [assessment?.pillars]);
+  }, [pillars]);
 
   // Calculate overall completion percentage
   const overallCompletion = useMemo(() => {
-    return calculateOverallCompletion(assessment?.pillars);
-  }, [assessment]);
+    return calculateOverallCompletion(pillars);
+  }, [pillars]);
 
   // Get severity-specific colors for the pie chart
   const getSeverityColor = useMemo(() => {
