@@ -64,7 +64,7 @@ This project leverages a scalable serverless architecture using AWS technologies
 From the project root directory, run:
 
 ```shell
-$ npm install
+$ pnpm install
 ```
 
 ### Backend

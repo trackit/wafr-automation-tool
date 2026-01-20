@@ -53,7 +53,7 @@ The following environment variables must be configured for the frontend to funct
 With the environment variables configured, start the development server by running:
 
 ```shell
-$ npm run start:webui
+$ pnpm run start:webui
 ```
 
 The application will be available locally, typically at http://localhost:4200.
@@ -63,7 +63,7 @@ The application will be available locally, typically at http://localhost:4200.
 To build the frontend without deploying, run:
 
 ```shell
-$ npm run build:webui
+$ pnpm run build:webui
 ```
 
 This command generates static assets in the `dist/webui` folder, which can be served locally or deployed to any static hosting service.
@@ -73,7 +73,7 @@ This command generates static assets in the `dist/webui` folder, which can be se
 Run frontend tests locally with:
 
 ```shell
-$ npm run test:webui
+$ pnpm run test:webui
 ```
 
 ## Deployment

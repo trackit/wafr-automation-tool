@@ -46,9 +46,11 @@ To run backend tests locally, we need to start the local postgres container, ini
 
 ```shell
 $ docker-compose up -d
-$ npm run test:backend:init
-$ npm run test:backend
+$ pnpm run test:backend:init
+$ pnpm run test:backend
 ```
+
+The `docker-compose.yml` configuration is intended for local development only. It uses default database credentials to keep local setup simple. Production deployments use AWS Aurora with managed secrets.
 
 ## Deployment
 
@@ -71,7 +73,7 @@ These environment variables need to be set for the backend to be deployed.
 Deploy the backend using [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-deploying.html#serverless-sam-cli-using-package-and-deploy) through:
 
 ```shell
-$ npm run deploy:backend
+$ pnpm run deploy:backend
 ```
 
 ### Post deployment
