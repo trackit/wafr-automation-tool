@@ -21,6 +21,7 @@ export interface Assessment {
   opportunityId?: string;
   opportunityCreatedAt?: Date;
   billingInformation?: BillingInformation;
+  latestVersionNumber: number;
 }
 
 export enum AssessmentStep {
@@ -46,6 +47,7 @@ export interface AssessmentBody {
   opportunityId?: string;
   executionArn?: string;
   opportunityCreatedAt?: Date;
+  latestVersionNumber?: number;
 }
 
 export enum AssessmentFileExportType {

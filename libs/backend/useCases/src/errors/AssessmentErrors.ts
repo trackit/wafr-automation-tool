@@ -144,3 +144,19 @@ export class AssessmentOpportunityAlreadyLinkedError extends UseCaseError {
     });
   }
 }
+
+export class AssessmentVersionCreationError extends UseCaseError {
+  constructor(
+    args: {
+      assessmentId: string;
+    },
+    description?: string,
+  ) {
+    const { assessmentId } = args;
+    super({
+      type: BasicErrorType.CONFLICT,
+      message: `Failed to create new version for Assessment with id ${assessmentId}`,
+      description,
+    });
+  }
+}

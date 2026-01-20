@@ -2,7 +2,12 @@ import {
   registerTestInfrastructure,
   tokenFakeAssessmentsRepository,
 } from '@backend/infrastructure';
-import { AssessmentMother, PillarMother, UserMother } from '@backend/models';
+import {
+  AssessmentMother,
+  AssessmentVersionMother,
+  PillarMother,
+  UserMother,
+} from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import { AssessmentNotFoundError, PillarNotFoundError } from '../../errors';
@@ -18,9 +23,19 @@ describe('UpdatePillarUseCase', () => {
     const pillar = PillarMother.basic().withDisabled(false).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdatePillarUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -58,9 +73,19 @@ describe('UpdatePillarUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdatePillarUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

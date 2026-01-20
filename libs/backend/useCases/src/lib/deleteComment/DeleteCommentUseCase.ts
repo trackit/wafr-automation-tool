@@ -1,8 +1,13 @@
-import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
+import {
+  tokenAssessmentsRepository,
+  tokenFindingsRepository,
+  tokenLogger,
+} from '@backend/infrastructure';
 import type { User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
+  AssessmentNotFoundError,
   FindingCommentForbiddenError,
   FindingCommentNotFoundError,
   FindingNotFoundError,
@@ -21,14 +26,26 @@ export interface DeleteCommentUseCase {
 
 export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
+  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async deleteComment(args: DeleteCommentUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, commentId, user } = args;
-
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain: user.organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain: user.organizationDomain,
+      });
+    }
+    const version = assessment.latestVersionNumber;
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
     });
     if (!finding) {
@@ -60,6 +77,7 @@ export class DeleteCommentUseCaseImpl implements DeleteCommentUseCase {
     await this.findingsRepository.deleteComment({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version,
       findingId,
       commentId,
     });

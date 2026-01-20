@@ -8,6 +8,7 @@ import {
   AssessmentFileExportMother,
   AssessmentFileExportStatus,
   AssessmentMother,
+  AssessmentVersionMother,
   PillarMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
@@ -79,8 +80,16 @@ describe('exportPDF UseCase', () => {
   it('should throw AssessmentNotFinishedError if the assessment findings are undefined', async () => {
     const { useCase, fakeAssessmentsRepository } = setup();
 
-    const assessment = AssessmentMother.basic().withPillars(undefined).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withPillars(undefined)
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const input = ExportPDFUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

@@ -126,6 +126,7 @@ describe('getAssessment adapter', () => {
             .build(),
         ])
         .withName('assessment name')
+        .withLatestVersionNumber(2)
         .withOrganization('test.io')
         .withQuestionVersion('1.0.0')
         .withRegions(['us-west-2'])
@@ -181,6 +182,7 @@ describe('getAssessment adapter', () => {
         ],
         id: assessment.id,
         name: assessment.name,
+        latestVersion: assessment.latestVersionNumber,
         organization: assessment.organization,
         questionVersion: assessment.questionVersion,
         regions: assessment.regions,

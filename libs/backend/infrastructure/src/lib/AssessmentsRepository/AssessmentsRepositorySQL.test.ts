@@ -3,10 +3,10 @@ import {
   AssessmentFileExportStatus,
   AssessmentFileExportType,
   AssessmentMother,
+  AssessmentVersionMother,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
-  SeverityType,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 import { encodeNextToken } from '@shared/utils';
@@ -51,43 +51,30 @@ describe('AssessmentsRepositorySQL', () => {
         .withExecutionArn(
           'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1',
         )
-        .withPillars([
-          PillarMother.basic()
-            .withDisabled(false)
-            .withId('pillar1')
-            .withLabel('Pillar 1')
-            .withPrimaryId('primary1')
-            .withQuestions([
-              QuestionMother.basic()
-                .withBestPractices([
-                  BestPracticeMother.basic()
-                    .withDescription('Best practice 1')
-                    .withId('bp1')
-                    .withLabel('Best Practice 1')
-                    .withPrimaryId('bp1-primary')
-                    .withRisk(SeverityType.Medium)
-                    .withChecked(true)
-                    .build(),
-                ])
-                .withDisabled(false)
-                .withId('question1')
-                .withLabel('Question 1')
-                .withNone(false)
-                .withPrimaryId('question1-primary')
-                .build(),
-            ])
-            .build(),
-        ])
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .withName('Test Assessment')
         .withRegions(['us-west-1', 'us-west-2'])
         .withRoleArn('arn:aws:iam::123456789012:role/AssessmentRole')
-        .withFinishedAt(undefined)
         .withWorkflows(['workflow-1', 'workflow-2'])
+        .withQuestionVersion('0.3')
         .build();
 
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .withCreatedAt(new Date('2023-01-01T00:00:00Z'))
+        .withCreatedBy('user1')
+        .withExecutionArn(
+          'arn:aws:states:us-west-2:123456789012:execution:MyStateMachine:execution1',
+        )
+        .withFinishedAt(undefined)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const savedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -108,7 +95,15 @@ describe('AssessmentsRepositorySQL', () => {
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       await repository.saveFileExport({
         assessmentId: assessment.id,
@@ -134,7 +129,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const fetchedAssessment = await repository.get({
         assessmentId: assessment.id,
@@ -162,13 +165,29 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       const assessment2 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .build();
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       const assessment3 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
@@ -188,29 +207,99 @@ describe('AssessmentsRepositorySQL', () => {
       expect(fetchedAssessment1).toEqual(assessment1);
       expect(fetchedAssessment2).toBeUndefined();
     });
-  });
 
-  describe('getAll', () => {
-    it('should return a list of assessment if it exists', async () => {
+    it('should return assessment with its latest version', async () => {
       const { repository } = setup();
 
       const assessment = AssessmentMother.basic()
         .withOrganization('organization1')
+        .withName('Test Assessment')
+        .withRegions(['us-east-1'])
+        .withWorkflows(['workflow-1'])
+        .withFileExports([])
+        .withPillars([])
+        .withLatestVersionNumber(1)
+        .withCreatedBy('old-user')
+        .withCreatedAt(new Date('2026-01-01'))
+        .withFinishedAt(undefined)
+        .withWAFRWorkloadArn(undefined)
+        .withExportRegion(undefined)
         .build();
 
       await repository.save(assessment);
+      const bestPractice = BestPracticeMother.basic()
+        .withChecked(false)
+        .build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
 
-      const fetchedAssessments = await repository.getAll({
-        organizationDomain: assessment.organization,
+      const version = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .withCreatedBy('new-user')
+        .withCreatedAt(new Date('2026-01-02'))
+        .withExecutionArn('new-arn')
+        .withFinishedAt(new Date('2026-01-03'))
+        .withPillars([pillar])
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version,
+        organizationDomain: 'organization1',
       });
 
-      expect(fetchedAssessments).toEqual({
-        assessments: [assessment],
-        nextToken: undefined,
+      const mergedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: 'organization1',
       });
+
+      expect(mergedAssessment).toBeDefined();
+      expect(mergedAssessment?.createdBy).toBe('new-user');
+      expect(mergedAssessment?.createdAt).toEqual(new Date('2026-01-01'));
+      expect(mergedAssessment?.executionArn).toBe('new-arn');
+      expect(mergedAssessment?.name).toBe('Test Assessment');
+      expect(mergedAssessment?.regions).toEqual(['us-east-1']);
+      expect(mergedAssessment?.pillars).toHaveLength(1);
+      expect(mergedAssessment?.pillars?.[0].id).toBe(pillar.id);
+    });
+  });
+
+  describe('getAll', () => {
+    it('should return a list of assessment if it exists', async () => {
+      vitest.useFakeTimers();
+      const { repository } = setup();
+      try {
+        const assessment = AssessmentMother.basic()
+          .withOrganization('organization1')
+          .build();
+
+        const assessmentVersion = AssessmentVersionMother.basic()
+          .withAssessmentId(assessment.id)
+          .withVersion(assessment.latestVersionNumber)
+          .build();
+        await repository.save(assessment);
+        await repository.createVersion({
+          assessmentVersion,
+          organizationDomain: assessment.organization,
+        });
+
+        const fetchedAssessments = await repository.getAll({
+          organizationDomain: assessment.organization,
+        });
+
+        expect(fetchedAssessments).toEqual({
+          assessments: [assessment],
+          nextToken: undefined,
+        });
+      } finally {
+        vitest.useRealTimers();
+      }
     });
 
     it('should return all assessments with matched search criteria', async () => {
+      vitest.useFakeTimers();
       const { repository } = setup();
 
       const assessment1 = AssessmentMother.basic()
@@ -218,14 +307,30 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       const fetchedAssessments = await repository.getAll({
         organizationDomain: assessment1.organization,
@@ -236,6 +341,7 @@ describe('AssessmentsRepositorySQL', () => {
         assessments: [assessment1],
         nextToken: undefined,
       });
+      vitest.useRealTimers();
     });
 
     it('should return all assessments within the limit', async () => {
@@ -247,7 +353,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       vitest.advanceTimersByTime(1);
 
@@ -256,7 +370,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       const fetchedAssessments = await repository.getAll({
         organizationDomain: assessment1.organization,
@@ -283,7 +405,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       vitest.advanceTimersByTime(1);
 
@@ -292,7 +422,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .build();
 
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       const nextTokenAssessment = {
         offset: 1,
@@ -374,14 +512,30 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       const assessment2 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .build();
 
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       await repository.delete({
         assessmentId: assessment1.id,
@@ -413,13 +567,18 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withName('Old Name')
         .withQuestionVersion('0.1')
-        .withFinishedAt(undefined)
-        .withExportRegion('us-east-1')
         .withOpportunityId('old-opportunity-id')
-        .withWAFRWorkloadArn('arn:aws:wafr:us-east-1:123456789012:workload/old')
-        .withExecutionArn('old-execution-arn')
+        .withOpportunityCreatedAt(undefined)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
         .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       await repository.update({
         assessmentId: assessment.id,
@@ -427,13 +586,8 @@ describe('AssessmentsRepositorySQL', () => {
         assessmentBody: {
           name: 'New Name',
           questionVersion: '1.0',
-          error: { cause: 'An error occurred', error: 'InternalError' },
-          exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          finishedAt: date,
-          wafrWorkloadArn:
-            'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          executionArn: 'new-execution-arn',
+          opportunityCreatedAt: date,
         },
       });
 
@@ -446,13 +600,8 @@ describe('AssessmentsRepositorySQL', () => {
         expect.objectContaining({
           name: 'New Name',
           questionVersion: '1.0',
-          error: { cause: 'An error occurred', error: 'InternalError' },
-          exportRegion: 'us-west-2',
           opportunityId: 'new-opportunity-id',
-          finishedAt: date,
-          wafrWorkloadArn:
-            'arn:aws:wafr:us-west-2:123456789012:workload/abcd1234',
-          executionArn: 'new-execution-arn',
+          opportunityCreatedAt: date,
         }),
       );
     });
@@ -465,14 +614,30 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withName('Old Name')
         .build();
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       const assessment2 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
         .withName('Old Name')
         .build();
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       await repository.update({
         assessmentId: assessment1.id,
@@ -504,17 +669,25 @@ describe('AssessmentsRepositorySQL', () => {
 
       const pillar = PillarMother.basic().withDisabled(false).build();
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
+        .withLatestVersionNumber(0)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
         .withPillars([pillar])
         .build();
       await repository.save(assessment);
-
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
       await expect(
         repository.updatePillar({
           assessmentId: assessment.id,
           organizationDomain: assessment.organization,
           pillarId: pillar.id,
+          version: assessment.latestVersionNumber,
           pillarBody: {
             disabled: true,
           },
@@ -538,15 +711,23 @@ describe('AssessmentsRepositorySQL', () => {
         .build();
       const pillar = PillarMother.basic().withQuestions([question]).build();
       const assessment = AssessmentMother.basic()
-        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
         .withPillars([pillar])
         .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       await repository.updateQuestion({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: pillar.id,
         questionId: question.id,
         questionBody: {
@@ -580,9 +761,17 @@ describe('AssessmentsRepositorySQL', () => {
       const assessment1 = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
+        .build();
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
         .withPillars([pillar1])
         .build();
       await repository.save(assessment1);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment1.organization,
+      });
 
       const question2 = QuestionMother.basic()
         .withDisabled(false)
@@ -592,13 +781,22 @@ describe('AssessmentsRepositorySQL', () => {
       const assessment2 = AssessmentMother.basic()
         .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization2')
+        .build();
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
         .withPillars([pillar2])
         .build();
       await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment2.organization,
+      });
 
       await repository.updateQuestion({
         assessmentId: assessment1.id,
         organizationDomain: assessment1.organization,
+        version: assessment1.latestVersionNumber,
         pillarId: pillar1.id,
         questionId: question1.id,
         questionBody: {
@@ -647,14 +845,22 @@ describe('AssessmentsRepositorySQL', () => {
       const assessment = AssessmentMother.basic()
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
         .withPillars([pillar])
         .build();
       await repository.save(assessment);
-
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
       await expect(
         repository.updateBestPractice({
           assessmentId: assessment.id,
           organizationDomain: assessment.organization,
+          version: assessment.latestVersionNumber,
           pillarId: pillar.id,
           questionId: question.id,
           bestPracticeId: bestPractice.id,
@@ -686,7 +892,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withFileExports([assessmentFileExport])
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const fileExport = AssessmentFileExportMother.basic()
         .withId(assessmentFileExport.id)
@@ -721,7 +935,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withFileExports([assessmentFileExport])
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       await repository.deleteFileExport({
         assessmentId: assessment.id,
@@ -951,7 +1173,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withBillingInformation(undefined)
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const newBillingInformation = {
         billingPeriodStartDate: new Date(
@@ -1001,7 +1231,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withOrganization('organization1')
         .withBillingInformation(existingBillingInformation)
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const updatedBillingInformation = {
         billingPeriodStartDate: new Date(
@@ -1043,7 +1281,15 @@ describe('AssessmentsRepositorySQL', () => {
         .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withOrganization('organization1')
         .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
       await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
 
       const billingInformationWithEmptyServices = {
         billingPeriodStartDate: new Date(
@@ -1068,6 +1314,429 @@ describe('AssessmentsRepositorySQL', () => {
       expect(updatedAssessment?.billingInformation).toBeDefined();
       expect(updatedAssessment?.billingInformation?.servicesCost).toEqual([]);
       expect(updatedAssessment?.billingInformation?.totalCost).toBe('0.00');
+    });
+  });
+
+  describe('createVersion', () => {
+    it('should create a version for an assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withVersion(2)
+        .withCreatedBy('user1')
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion,
+        organizationDomain: 'organization1',
+      });
+
+      const retrievedVersion = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(retrievedVersion).toBeDefined();
+      expect(retrievedVersion?.version).toBe(2);
+      expect(retrievedVersion?.assessmentId).toBe(assessment.id);
+    });
+
+    it('should allow creating multiple versions for the same assessment', async () => {
+      vi.useFakeTimers();
+      const { repository } = setup();
+      const date = new Date();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const assessmentVersion1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(1)
+        .withCreatedBy('user1')
+        .withCreatedAt(date)
+        .build();
+
+      const assessmentVersion2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(2)
+        .withCreatedBy('user2')
+        .withCreatedAt(new Date(date.getTime() + 24 * 60 * 60 * 1000))
+        .withFinishedAt(new Date(date.getTime() + 24 * 60 * 60 * 2000))
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion1,
+        organizationDomain: assessment.organization,
+      });
+
+      await repository.createVersion({
+        assessmentVersion: assessmentVersion2,
+        organizationDomain: assessment.organization,
+      });
+
+      const retrievedVersion1 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+      });
+
+      const retrievedVersion2 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(retrievedVersion1?.version).toBe(1);
+      expect(retrievedVersion1?.createdBy).toBe('user1');
+      expect(retrievedVersion2?.version).toBe(2);
+      expect(retrievedVersion2?.createdBy).toBe('user2');
+      expect(retrievedVersion2?.finishedAt).toBeDefined();
+      vi.useRealTimers();
+    });
+
+    it('should scope versions by organization', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment1);
+
+      const version1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: assessment1.organization,
+      });
+
+      const fetchedAssessmentVersion1 = await repository.getVersion({
+        assessmentId: assessment1.id,
+        version: version1.version,
+        organizationDomain: assessment1.organization,
+      });
+      const fetchedAssessmentVersion2 = await repository.getVersion({
+        assessmentId: assessment1.id,
+        version: version1.version,
+        organizationDomain: 'organization2',
+      });
+
+      expect(fetchedAssessmentVersion1).toBeDefined();
+      expect(fetchedAssessmentVersion2).toBeUndefined();
+    });
+  });
+
+  describe('getVersion', () => {
+    it('should return undefined for non-existent version', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const version = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 999,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(version).toBeUndefined();
+    });
+
+    it('should return undefined for non-existent assessment', async () => {
+      const { repository } = setup();
+
+      const version = await repository.getVersion({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        version: 1,
+        organizationDomain: 'organization1',
+      });
+
+      expect(version).toBeUndefined();
+    });
+
+    it('should retrieve version', async () => {
+      const { repository } = setup();
+      const bestPractice = BestPracticeMother.basic()
+        .withChecked(false)
+        .build();
+      const question = QuestionMother.basic()
+        .withBestPractices([bestPractice])
+        .build();
+      const pillar = PillarMother.basic().withQuestions([question]).build();
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const version = AssessmentVersionMother.basic()
+        .withVersion(1)
+        .withAssessmentId(assessment.id)
+        .withPillars([pillar])
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version,
+        organizationDomain: assessment.organization,
+      });
+
+      const retrievedVersion = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(retrievedVersion).toBeDefined();
+      expect(retrievedVersion?.pillars).toHaveLength(1);
+      expect(retrievedVersion?.pillars?.[0].id).toBe(pillar.id);
+      expect(
+        retrievedVersion?.pillars?.[0].questions[0].bestPractices[0].id,
+      ).toBe(bestPractice.id);
+    });
+  });
+
+  describe('updateVersion', () => {
+    it('should update version fields', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .build();
+      await repository.save(assessment);
+
+      const version = AssessmentVersionMother.basic()
+        .withVersion(1)
+        .withAssessmentId(assessment.id)
+        .withExecutionArn('old-execution-arn')
+        .withFinishedAt(undefined)
+        .withExportRegion('old-region')
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version,
+        organizationDomain: assessment.organization,
+      });
+
+      await repository.updateVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+        assessmentVersionBody: {
+          executionArn: 'updated-execution-arn',
+          finishedAt: new Date('2024-01-01'),
+          error: { cause: 'Some error', error: 'Error details' },
+          wafrWorkloadArn: 'updated-workload-arn',
+          exportRegion: 'new-region',
+        },
+      });
+
+      const updatedVersion = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedVersion?.executionArn).toBe('updated-execution-arn');
+      expect(updatedVersion?.finishedAt).toEqual(new Date('2024-01-01'));
+      expect(updatedVersion?.error).toEqual({
+        cause: 'Some error',
+        error: 'Error details',
+      });
+      expect(updatedVersion?.wafrWorkloadArn).toBe('updated-workload-arn');
+      expect(updatedVersion?.exportRegion).toBe('new-region');
+    });
+
+    it('should not affect other versions when updating one', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+
+        .build();
+      await repository.save(assessment);
+
+      const version1 = AssessmentVersionMother.basic()
+        .withVersion(1)
+        .withAssessmentId(assessment.id)
+        .withExecutionArn('old-execution-arn')
+        .withCreatedBy('user1')
+        .build();
+
+      const version2 = AssessmentVersionMother.basic()
+        .withVersion(2)
+        .withAssessmentId(assessment.id)
+        .withExecutionArn('old-execution-arn')
+        .withCreatedBy('user2')
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: 'organization1',
+      });
+
+      await repository.createVersion({
+        assessmentVersion: version2,
+        organizationDomain: 'organization1',
+      });
+
+      await repository.updateVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: 'organization1',
+        assessmentVersionBody: {
+          executionArn: 'updated-execution-arn',
+        },
+      });
+
+      const updatedVersion1 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: 'organization1',
+      });
+
+      const updatedVersion2 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: 'organization1',
+      });
+
+      expect(updatedVersion1?.executionArn).toBe('updated-execution-arn');
+      expect(updatedVersion2?.executionArn).toBe('old-execution-arn');
+    });
+  });
+
+  describe('createNextAssessmentVersion', () => {
+    it('should create an assessment version with next number and update the assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+
+      const created = await repository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy: 'user1',
+          createdAt: new Date(),
+          pillars: [],
+          executionArn: '',
+        },
+      });
+
+      expect(created).toBeDefined();
+      expect(created?.assessmentId).toBe(assessment.id);
+      expect(created?.version).toBe(2);
+
+      const updatedAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(updatedAssessment).toBeDefined();
+      expect(updatedAssessment?.latestVersionNumber).toBe(2);
+
+      const retrievedVersion = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(retrievedVersion).toBeDefined();
+      expect(retrievedVersion?.version).toBe(2);
+    });
+
+    it('should handle concurrent creations', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(0)
+        .build();
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+
+      const assessmentVersionCreation1 = repository.createNextAssessmentVersion(
+        {
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          assessmentVersion: {
+            createdBy: 'user-a',
+            createdAt: new Date(),
+            pillars: [],
+            executionArn: '',
+          },
+        },
+      );
+      const assessmentVersionCreation2 = repository.createNextAssessmentVersion(
+        {
+          assessmentId: assessment.id,
+          organizationDomain: assessment.organization,
+          assessmentVersion: {
+            createdBy: 'user-b',
+            createdAt: new Date(),
+            pillars: [],
+            executionArn: '',
+          },
+        },
+      );
+
+      const [v1, v2] = await Promise.all([
+        assessmentVersionCreation1,
+        assessmentVersionCreation2,
+      ]);
+
+      expect(v1).toBeDefined();
+      expect(v2).toBeDefined();
+
+      const versions = [v1!.version, v2!.version].sort((a, b) => a - b);
+      expect(versions).toEqual([1, 2]);
+
+      const finalAssessment = await repository.get({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+      expect(finalAssessment?.latestVersionNumber).toBe(2);
+
+      const retrieved1 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 1,
+        organizationDomain: assessment.organization,
+      });
+      const retrieved2 = await repository.getVersion({
+        assessmentId: assessment.id,
+        version: 2,
+        organizationDomain: assessment.organization,
+      });
+      expect(retrieved1).toBeDefined();
+      expect(retrieved2).toBeDefined();
     });
   });
 });

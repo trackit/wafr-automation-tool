@@ -36,6 +36,7 @@ import { CommentsPane, Modal } from '@webui/ui';
 
 interface FindingsDetailsProps {
   assessmentId: string;
+  assessmentVersion: number;
   bestPractice: components['schemas']['BestPractice'];
   pillarId: string;
   questionId: string;
@@ -269,6 +270,7 @@ function FindingItem({
 
 function FindingsDetails({
   assessmentId,
+  assessmentVersion,
   bestPractice,
   pillarId,
   questionId,
@@ -341,6 +343,7 @@ function FindingsDetails({
       queryKey: [
         'findings',
         assessmentId,
+        assessmentVersion,
         pillarId,
         questionId,
         bestPractice.id,
@@ -350,6 +353,7 @@ function FindingsDetails({
       queryFn: ({ pageParam }) =>
         getFindings(
           assessmentId,
+          assessmentVersion,
           pillarId,
           questionId,
           bestPractice.id || '',

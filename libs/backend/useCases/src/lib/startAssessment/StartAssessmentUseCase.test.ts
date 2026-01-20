@@ -95,7 +95,7 @@ describe('StartAssessmentUseCase', () => {
       );
     });
 
-    it('should create an assessment in the repository', async () => {
+    it('should create an assessment and the first version in the repository', async () => {
       const {
         useCase,
         fakeAssessmentsRepository,
@@ -133,6 +133,22 @@ describe('StartAssessmentUseCase', () => {
           executionArn: 'test-execution-arn',
           pillars: expect.any(Array),
           finishedAt: undefined,
+        }),
+      );
+
+      const assessmentVersion = await fakeAssessmentsRepository.getVersion({
+        assessmentId,
+        version: assessment!.latestVersionNumber,
+        organizationDomain: input.user.organizationDomain,
+      });
+
+      expect(assessmentVersion).toEqual(
+        expect.objectContaining({
+          assessmentId,
+          version: 1,
+          createdBy: input.user.id,
+          executionArn: 'test-execution-arn',
+          pillars: expect.any(Array),
         }),
       );
     });

@@ -9,6 +9,7 @@ export interface Finding extends ScanFinding {
 
 export interface ScanFinding {
   id: string;
+  version: number;
   eventCode?: string;
   remediation?: FindingRemediation;
   resources: FindingResource[];

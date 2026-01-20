@@ -4,6 +4,7 @@ import { apiClient } from './client';
 
 export const getFindings = async (
   assessmentId: string,
+  assessmentVersion: number,
   pillarId: string,
   questionId: string,
   bestPracticeId: string,
@@ -19,6 +20,8 @@ export const getFindings = async (
   if (search) params.set('search', search);
   if (showHidden) params.set('showHidden', 'true');
   if (nextToken) params.set('nextToken', nextToken);
+  if (assessmentVersion != null)
+    params.set('version', assessmentVersion.toString());
 
   return apiClient.get(
     `/assessments/${assessmentId}/pillars/${pillarId}/questions/${questionId}/best-practices/${bestPracticeId}?${params.toString()}`,

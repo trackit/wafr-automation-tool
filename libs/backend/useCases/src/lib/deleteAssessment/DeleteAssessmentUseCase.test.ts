@@ -22,7 +22,7 @@ describe('DeleteAssessmentUseCase', () => {
     );
   });
 
-  it('should delete assessments findings', async () => {
+  it('should delete assessments findings with all its versions', async () => {
     const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
       setup();
 
@@ -33,25 +33,43 @@ describe('DeleteAssessmentUseCase', () => {
       .build();
     await fakeAssessmentsRepository.save(assessment);
 
-    const finding = FindingMother.basic().build();
+    const finding = FindingMother.basic()
+      .withId('finding-id')
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       finding,
+    });
+    const finding2 = FindingMother.basic()
+      .withId('other-finding-id')
+      .withVersion(assessment.latestVersionNumber + 1)
+      .build();
+    await fakeFindingsRepository.save({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      finding: finding2,
     });
 
     const input = DeleteAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
       .withUser(user)
       .build();
-
     await useCase.deleteAssessment(input);
 
-    const findings = await fakeFindingsRepository.getAll({
+    const findingsLatestVersion = await fakeFindingsRepository.getAll({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
+      version: assessment.latestVersionNumber + 1,
     });
-    expect(findings).toEqual([]);
+    const findingsSecondToLatestVersion = await fakeFindingsRepository.getAll({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      version: assessment.latestVersionNumber,
+    });
+    expect(findingsLatestVersion).toEqual([]);
+    expect(findingsSecondToLatestVersion).toEqual([]);
   });
 
   it('should delete assessment', async () => {

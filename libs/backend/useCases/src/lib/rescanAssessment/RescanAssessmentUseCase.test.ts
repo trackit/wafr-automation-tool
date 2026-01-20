@@ -4,7 +4,7 @@ import {
   tokenFakeAssessmentsStateMachine,
   tokenFakeFindingsRepository,
 } from '@backend/infrastructure';
-import { AssessmentMother, FindingMother, UserMother } from '@backend/models';
+import { AssessmentMother, UserMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
 import { AssessmentNotFoundError } from '../../errors';
@@ -24,74 +24,39 @@ describe('RescanAssessmentUseCase', () => {
     );
   });
 
-  it('should delete assessments findings', async () => {
-    const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
-      setup();
+  it('should increment latestVersionNumber and create a new assessment record', async () => {
+    const { useCase, fakeAssessmentsRepository, date } = setup();
 
     const user = UserMother.basic().build();
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .build();
-    await fakeAssessmentsRepository.save(assessment);
-
-    const finding = FindingMother.basic().build();
-    await fakeFindingsRepository.save({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      finding,
-    });
-
-    const input = RescanAssessmentUseCaseArgsMother.basic()
-      .withAssessmentId(assessment.id)
-      .withUser(user)
-      .build();
-
-    await useCase.rescanAssessment(input);
-
-    const findings = await fakeFindingsRepository.getAll({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-    });
-    expect(findings).toEqual([]);
-  });
-
-  it('should delete assessment', async () => {
-    const { date, useCase, fakeAssessmentsRepository } = setup();
-
-    const user = UserMother.basic().build();
-
-    const assessment = AssessmentMother.basic()
-      .withOrganization(user.organizationDomain)
+      .withLatestVersionNumber(2)
       .withCreatedAt(date)
-      .withExecutionArn('initial-execution-arn')
       .build();
+    const oldVersion = assessment.latestVersionNumber;
+
     await fakeAssessmentsRepository.save(assessment);
 
-    vitest.advanceTimersByTime(30);
-
+    vitest.advanceTimersByTime(1000);
     const input = RescanAssessmentUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
       .withUser(user)
       .build();
-
     await useCase.rescanAssessment(input);
 
-    const assessments = await fakeAssessmentsRepository.getAll({
+    const updatedAssessment = await fakeAssessmentsRepository.get({
+      assessmentId: assessment.id,
       organizationDomain: assessment.organization,
     });
-    expect(assessments.assessments.length).toBe(1);
 
-    const recreatedAssessment = assessments.assessments[0];
+    expect(updatedAssessment).toBeDefined();
 
-    expect(recreatedAssessment.id).toEqual(assessment.id);
-    expect(recreatedAssessment.createdAt.getTime()).toBeGreaterThan(
-      date.getTime(),
+    expect(updatedAssessment?.id).toBe(assessment.id);
+    expect(updatedAssessment?.latestVersionNumber).toBe(oldVersion + 1);
+    expect(updatedAssessment?.createdAt.getTime()).toBe(
+      assessment.createdAt.getTime(),
     );
-    expect(recreatedAssessment.executionArn).not.toEqual(
-      'initial-execution-arn',
-    );
-    expect(recreatedAssessment.name).toEqual(assessment.name);
   });
 
   it('should cancel old state machine execution', async () => {

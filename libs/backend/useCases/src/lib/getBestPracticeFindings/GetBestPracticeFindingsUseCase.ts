@@ -14,6 +14,7 @@ export interface GetBestPracticeFindingsUseCaseArgs {
   questionId: string;
   bestPracticeId: string;
   user: User;
+  version?: number;
   limit?: number;
   nextToken?: string;
   searchTerm?: string;
@@ -42,6 +43,7 @@ export class GetBestPracticeFindingsUseCaseImpl
     const {
       user,
       assessmentId,
+      version,
       pillarId,
       questionId,
       bestPracticeId,
@@ -71,6 +73,7 @@ export class GetBestPracticeFindingsUseCaseImpl
 
     return await this.findingsRepository.getBestPracticeFindings({
       organizationDomain,
+      version: version ?? assessment.latestVersionNumber,
       assessmentId,
       pillarId,
       questionId,

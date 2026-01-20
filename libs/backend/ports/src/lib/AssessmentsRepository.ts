@@ -2,6 +2,8 @@ import type {
   Assessment,
   AssessmentBody,
   AssessmentFileExport,
+  AssessmentVersion,
+  AssessmentVersionBody,
   BestPracticeBody,
   BillingInformation,
   PillarBody,
@@ -19,6 +21,7 @@ export interface AssessmentsRepository {
   get(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<Assessment | undefined>;
   getAll(args: {
     organizationDomain: string;
@@ -43,12 +46,14 @@ export interface AssessmentsRepository {
   updatePillar(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     pillarBody: PillarBody;
   }): Promise<void>;
   updateQuestion(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     questionBody: QuestionBody;
@@ -56,6 +61,7 @@ export interface AssessmentsRepository {
   updateBestPractice(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -84,4 +90,24 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     billingInformation: BillingInformation;
   }): Promise<void>;
+  createVersion(args: {
+    assessmentVersion: AssessmentVersion;
+    organizationDomain: string;
+  }): Promise<void>;
+  createNextAssessmentVersion(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    assessmentVersion: Omit<AssessmentVersion, 'version' | 'assessmentId'>;
+  }): Promise<AssessmentVersion | undefined>;
+  updateVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+    assessmentVersionBody: AssessmentVersionBody;
+  }): Promise<void>;
+  getVersion(args: {
+    assessmentId: string;
+    version: number;
+    organizationDomain: string;
+  }): Promise<AssessmentVersion | undefined>;
 }

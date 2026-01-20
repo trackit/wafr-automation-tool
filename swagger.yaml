@@ -769,6 +769,11 @@ paths:
           description: Token for pagination.
           schema:
             type: string
+        - name: version
+          in: query
+          description: The version of the assessment
+          schema:
+            type: integer
       responses:
         '200':
           description: A list of findings related to the specified best practice
@@ -859,6 +864,11 @@ paths:
           description: The unique ID of the finding to retrieve
           schema:
             type: string
+        - name: version
+          in: query
+          description: The version of the assessment
+          schema:
+            type: integer
       responses:
         '200':
           description: Detailed information about the specified finding
@@ -1117,6 +1127,9 @@ components:
         createdBy:
           type: string
           description: User who created the assessment
+        latestVersion:
+          type: integer
+          description: Latest version of the assessment
         organization:
           type: string
           description: Organization associated with the assessment
@@ -1225,6 +1238,9 @@ components:
         id:
           type: string
           description: Unique identifier of the finding
+        version:
+          type: integer
+          description: Version of the assessment the finding belongs to
         severity:
           type: string
           description: 'Severity level of the finding (e.g., Low, Medium, High)'

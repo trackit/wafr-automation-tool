@@ -25,6 +25,7 @@ export class AssessmentMother {
       finishedAt: undefined,
       workflows: [],
       fileExports: [],
+      latestVersionNumber: 1,
     });
   }
 
@@ -125,6 +126,13 @@ export class AssessmentMother {
     billingInformation: BillingInformation | undefined,
   ): AssessmentMother {
     this.data.billingInformation = billingInformation;
+    return this;
+  }
+
+  public withLatestVersionNumber(
+    latestVersionNumber: number,
+  ): AssessmentMother {
+    this.data.latestVersionNumber = latestVersionNumber;
     return this;
   }
 

@@ -47,6 +47,7 @@ export class UpdateQuestionUseCaseImpl implements UpdateQuestionUseCase {
     await this.assessmentsRepository.updateQuestion({
       assessmentId,
       organizationDomain,
+      version: assessment.latestVersionNumber,
       pillarId,
       questionId,
       questionBody,

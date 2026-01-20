@@ -4,7 +4,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import { type AssessmentBody, type User } from '@backend/models';
+import { type AssessmentVersionBody, type User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -67,20 +67,23 @@ export class ExportWellArchitectedToolUseCaseImpl
         region: (args.region ?? assessment.exportRegion)!,
         user: args.user,
       });
-    const assessmentBody: AssessmentBody = { wafrWorkloadArn: workloadArn };
+    const assessmentVersionBody: AssessmentVersionBody = {
+      wafrWorkloadArn: workloadArn,
+    };
     if (!assessment.exportRegion) {
-      assessmentBody.exportRegion = args.region;
+      assessmentVersionBody.exportRegion = args.region;
       this.logger.info(
-        `Updating export region for assessment ${assessment.id} to ${args.region}`,
+        `Updating export region for assessment ${assessment.id}-${assessment.latestVersionNumber} to ${args.region}`,
       );
     }
-    await this.assessmentsRepository.update({
+    await this.assessmentsRepository.updateVersion({
       assessmentId: assessment.id,
       organizationDomain: args.user.organizationDomain,
-      assessmentBody,
+      version: assessment.latestVersionNumber,
+      assessmentVersionBody,
     });
     this.logger.info(
-      `Export for assessment ${assessment.id} to the Well Architected Tool finished`,
+      `Export for assessment ${assessment.id}-${assessment.latestVersionNumber} to the Well Architected Tool finished`,
     );
   }
 }

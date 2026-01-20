@@ -43,9 +43,11 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
   public async storeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingsAssociations: FindingToBestPracticesAssociation[];
   }): Promise<void> {
-    const { assessmentId, organizationDomain, findingsAssociations } = args;
+    const { assessmentId, organizationDomain, version, findingsAssociations } =
+      args;
 
     await Promise.all(
       findingsAssociations
@@ -56,6 +58,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
             organizationDomain,
             finding: {
               ...association.finding,
+              version,
               isAIAssociated: true,
             },
           }),
@@ -95,6 +98,7 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
         return this.findingsRepository.saveBestPracticeFindings({
           assessmentId: assessment.id,
           organizationDomain,
+          version: assessment.latestVersionNumber,
           pillarId,
           questionId,
           bestPracticeId,
@@ -114,18 +118,17 @@ export class AssociateFindingsToBestPracticesUseCaseImpl
     this.logger.info(
       `Storing findings associations for assessment ${assessment.id} and organization ${organizationDomain}`,
     );
-    await Promise.all([
-      this.storeFindings({
-        assessmentId: assessment.id,
-        organizationDomain,
-        findingsAssociations,
-      }),
-      this.addFindingsToBestPractices({
-        assessment,
-        organizationDomain,
-        findingsAssociations,
-      }),
-    ]);
+    await this.storeFindings({
+      assessmentId: assessment.id,
+      version: assessment.latestVersionNumber,
+      organizationDomain,
+      findingsAssociations,
+    });
+    await this.addFindingsToBestPractices({
+      assessment,
+      organizationDomain,
+      findingsAssociations,
+    });
   }
 
   public async associateFindingsToBestPractices(

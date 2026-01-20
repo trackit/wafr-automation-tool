@@ -4,6 +4,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   PillarMother,
   QuestionMother,
   UserMother,
@@ -36,9 +37,19 @@ describe('UpdateQuestionUseCase', () => {
 
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateQuestionUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -60,9 +71,19 @@ describe('UpdateQuestionUseCase', () => {
     const pillar = PillarMother.basic().withQuestions([]).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateQuestionUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
@@ -89,9 +110,19 @@ describe('UpdateQuestionUseCase', () => {
     const pillar = PillarMother.basic().withQuestions([question]).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
-      .withPillars([pillar])
+      .withLatestVersionNumber(1)
       .build();
     await fakeAssessmentsRepository.save(assessment);
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: user.organizationDomain,
+    });
 
     const input = UpdateQuestionUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)

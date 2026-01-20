@@ -51,6 +51,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       const count = await this.findingsRepository.countBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: entry.pillarId,
         questionId: entry.questionId,
         bestPracticeId: entry.bestPracticeId,

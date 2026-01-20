@@ -1,13 +1,19 @@
 import {
   tokenAssessmentsRepository,
   tokenAssessmentsStateMachine,
-  tokenFindingsRepository,
   tokenLogger,
 } from '@backend/infrastructure';
-import { type Assessment, type User } from '@backend/models';
+import {
+  type Assessment,
+  type AssessmentVersion,
+  type User,
+} from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { AssessmentNotFoundError } from '../../errors';
+import {
+  AssessmentNotFoundError,
+  AssessmentVersionCreationError,
+} from '../../errors';
 
 export type RescanAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -23,40 +29,31 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     tokenAssessmentsStateMachine,
   );
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
-  private readonly findingsRepository = inject(tokenFindingsRepository);
   private readonly logger = inject(tokenLogger);
 
-  private async deleteAssessmentFromRepository(args: {
-    assessmentId: string;
-    organizationDomain: string;
-  }): Promise<void> {
-    const { assessmentId, organizationDomain } = args;
-    await this.findingsRepository.deleteAll({
-      assessmentId,
-      organizationDomain,
-    });
-    await this.assessmentsRepository.delete({
-      assessmentId,
-      organizationDomain,
-    });
-  }
+  private async createAssessmentVersion(
+    assessment: Assessment,
+    createdBy: string,
+  ): Promise<AssessmentVersion> {
+    const assessmentVersion =
+      await this.assessmentsRepository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy,
+          createdAt: new Date(),
+          pillars: assessment.pillars,
+          executionArn: '',
+        },
+      });
 
-  private async createAssessment(args: Assessment): Promise<Assessment> {
-    const assessment: Assessment = {
-      id: args.id,
-      name: args.name,
-      regions: args.regions,
-      workflows: args.workflows,
-      roleArn: args.roleArn,
-      createdAt: new Date(),
-      createdBy: args.createdBy,
-      organization: args.organization,
-      questionVersion: args.questionVersion,
-      pillars: args.pillars,
-      executionArn: '',
-    };
-    await this.assessmentsRepository.save(assessment);
-    return assessment;
+    if (!assessmentVersion) {
+      throw new AssessmentVersionCreationError({
+        assessmentId: assessment.id,
+      });
+    }
+
+    return assessmentVersion;
   }
 
   public async rescanAssessment(
@@ -76,28 +73,29 @@ export class RescanAssessmentUseCaseImpl implements RescanAssessmentUseCase {
     await this.assessmentsStateMachine.cancelAssessment(
       assessment.executionArn,
     );
-    await this.deleteAssessmentFromRepository({
-      assessmentId: args.assessmentId,
-      organizationDomain: args.user.organizationDomain,
-    });
 
-    await this.createAssessment(assessment);
+    const createdBy: string = args.user.id;
+    const assessmentVersion = await this.createAssessmentVersion(
+      assessment,
+      createdBy,
+    );
 
     const executionId = await this.assessmentsStateMachine.startAssessment({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,
       createdAt: new Date(),
-      createdBy: args.user.id,
+      createdBy,
       name: assessment.name,
       regions: assessment.regions,
       roleArn: assessment.roleArn,
       workflows: assessment.workflows,
     });
 
-    await this.assessmentsRepository.update({
+    await this.assessmentsRepository.updateVersion({
       assessmentId: args.assessmentId,
+      version: assessmentVersion.version,
       organizationDomain: args.user.organizationDomain,
-      assessmentBody: {
+      assessmentVersionBody: {
         executionArn: executionId,
       },
     });
