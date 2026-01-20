@@ -916,6 +916,7 @@ const setup = () => {
     useValue: 3,
   });
   mockedReadFileSync.mockReset();
+  FindingToBestPracticesAssociationServiceGenAI.clearPromptCache();
   const findingToBestPracticesAssociationServiceGenAI =
     new FindingToBestPracticesAssociationServiceGenAI();
   return {

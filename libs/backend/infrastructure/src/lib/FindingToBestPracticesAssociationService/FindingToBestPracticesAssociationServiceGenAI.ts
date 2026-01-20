@@ -51,10 +51,23 @@ export class FindingToBestPracticesAssociationServiceGenAI
   static readonly staticPromptKey = 'static-prompt.txt';
   static readonly dynamicPromptKey = 'dynamic-prompt.txt';
 
+  private static cachedPrompt: {
+    staticPrompt: string;
+    dynamicPrompt: string;
+  } | null = null;
+
+  public static clearPromptCache(): void {
+    FindingToBestPracticesAssociationServiceGenAI.cachedPrompt = null;
+  }
+
   public fetchPrompt(): {
     staticPrompt: string;
     dynamicPrompt: string;
   } | null {
+    if (FindingToBestPracticesAssociationServiceGenAI.cachedPrompt) {
+      return FindingToBestPracticesAssociationServiceGenAI.cachedPrompt;
+    }
+
     try {
       const staticPrompt = readFileSync(
         join(
@@ -70,10 +83,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
         ),
         'utf-8',
       );
-      return {
+      FindingToBestPracticesAssociationServiceGenAI.cachedPrompt = {
         staticPrompt,
         dynamicPrompt,
       };
+      return FindingToBestPracticesAssociationServiceGenAI.cachedPrompt;
     } catch (error) {
       this.logger.warn('Failed to read prompt files from filesystem', {
         error: error instanceof Error ? error.message : 'Unknown error',
