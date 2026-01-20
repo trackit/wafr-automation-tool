@@ -18,7 +18,7 @@ export const getFindings = async (
   if (search) params.set('search', search);
   if (showHidden) params.set('showHidden', 'true');
   if (nextToken) params.set('nextToken', nextToken);
-  if (assessmentVersion) params.set('version', assessmentVersion.toString());
+  if (assessmentVersion != null) params.set('version', assessmentVersion.toString());
 
   return apiClient.get<
     paths['/assessments/{assessmentId}/pillars/{pillarId}/questions/{questionId}/best-practices/{bestPracticeId}']['get']['responses']['200']['content']['application/json']
