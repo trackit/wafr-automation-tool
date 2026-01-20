@@ -109,6 +109,9 @@ export class AddVersioning1766597030261 implements MigrationInterface {
       `UPDATE "findingResources" SET "version" = 1 WHERE "version" IS NULL`,
     );
     await queryRunner.query(
+      `UPDATE "findingComments" SET "version" = 1 WHERE "version" IS NULL`,
+    );
+    await queryRunner.query(
       `UPDATE "findingBestPractices" SET "findingVersion"= 1 WHERE "findingVersion" IS NULL`,
     );
     await queryRunner.query(
