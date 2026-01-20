@@ -5,6 +5,7 @@ import {
 import { type Assessment, AssessmentMother } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
+import { DatabaseUnavailableError } from '../../errors';
 import {
   GetOrganizationUseCaseImpl,
   type OpportunitiesPerMonthItem,
@@ -251,6 +252,24 @@ describe('GetOrganizationUseCase', () => {
   });
 
   describe('should return organization details', () => {
+    it('should throw DatabaseUnavailableError if database is unavailable', async () => {
+      const { useCase } = setup();
+      const connectionRefusedError = {
+        code: 'ECONNREFUSED',
+        errno: -111,
+        message: 'connect ECONNREFUSED',
+      };
+
+      vitest
+        .spyOn(useCase['assessmentsRepository'], 'countAssessmentsByYear')
+        .mockRejectedValue(connectionRefusedError);
+      const input = GetOrganizationUseCaseArgsMother.basic().build();
+
+      await expect(useCase.getOrganizationDetails(input)).rejects.toThrow(
+        DatabaseUnavailableError,
+      );
+    });
+
     it('should return correct structure with currentYearTotalAssessments and opportunitiesPerMonth', async () => {
       const { useCase, fakeAssessmentsRepository, date } = setup();
       const months = buildLast12Months(date);

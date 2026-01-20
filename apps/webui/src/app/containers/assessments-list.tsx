@@ -33,6 +33,7 @@ import {
 import { useDebounceValue } from 'usehooks-ts';
 
 import {
+  type ApiError,
   deleteAssessment,
   getAssessments,
   getAssessmentStep,
@@ -57,6 +58,10 @@ function AssessmentsList() {
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const currentYear = new Date().getFullYear();
+  const HTTP_STATUS_SERVICE_UNAVAILABLE = 503;
+  const RETRY_DELAY_SERVICE_UNAVAILABLE_MS = 12000;
+  const RETRY_DELAY_BASE_MS = 1000;
+  const RETRY_DELAY_MAX_MS = 24000;
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -82,11 +87,47 @@ function AssessmentsList() {
       getAssessments({ limit: 24, search, nextToken: pageParam }),
     getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
+    retry: (failureCount, error: ApiError) => {
+      if (
+        error?.statusCode === HTTP_STATUS_SERVICE_UNAVAILABLE &&
+        failureCount < 3
+      ) {
+        return true;
+      }
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: ApiError) => {
+      if (error?.statusCode === HTTP_STATUS_SERVICE_UNAVAILABLE) {
+        return RETRY_DELAY_SERVICE_UNAVAILABLE_MS;
+      }
+      return Math.min(
+        RETRY_DELAY_BASE_MS * 2 ** attemptIndex,
+        RETRY_DELAY_MAX_MS,
+      );
+    },
   });
 
   const { data: organization } = useQuery({
     queryKey: ['organization'],
     queryFn: getOrganization,
+    retry: (failureCount, error: ApiError) => {
+      if (
+        error?.statusCode === HTTP_STATUS_SERVICE_UNAVAILABLE &&
+        failureCount < 3
+      ) {
+        return true;
+      }
+      return failureCount < 1;
+    },
+    retryDelay: (attemptIndex, error: ApiError) => {
+      if (error?.statusCode === HTTP_STATUS_SERVICE_UNAVAILABLE) {
+        return RETRY_DELAY_SERVICE_UNAVAILABLE_MS;
+      }
+      return Math.min(
+        RETRY_DELAY_BASE_MS * 2 ** attemptIndex,
+        RETRY_DELAY_MAX_MS,
+      );
+    },
   });
 
   const opportunitiesThisYear = useMemo(() => {
