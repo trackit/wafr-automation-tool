@@ -32,11 +32,12 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     limit?: number;
     search?: string;
     nextToken?: string;
+    folder?: string;
   }): Promise<{
     assessments: Assessment[];
     nextToken?: string;
   }> {
-    const { organizationDomain, limit, search, nextToken } = args;
+    const { organizationDomain, limit, search, nextToken, folder } = args;
     const assessments = Object.values(this.assessments)
       .filter((assessment) => assessment.organization === organizationDomain)
       .filter((assessment) => {
@@ -46,6 +47,15 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
             assessment.id.startsWith(search) ||
             assessment.roleArn.includes(search)
           );
+        }
+        return true;
+      })
+      .filter((assessment) => {
+        if (folder !== undefined) {
+          if (folder === '') {
+            return !assessment.folder;
+          }
+          return assessment.folder === folder;
         }
         return true;
       })
@@ -281,6 +291,22 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
         const createdAt = assessment.createdAt;
         return createdAt >= startDate && createdAt < endDate;
       }).length;
+  }
+
+  public async countAssessmentsByFolder(args: {
+    organizationDomain: string;
+  }): Promise<Record<string, number>> {
+    const { organizationDomain } = args;
+    const counts: Record<string, number> = {};
+
+    for (const assessment of Object.values(this.assessments)) {
+      if (assessment.organization === organizationDomain) {
+        const folder = assessment.folder ?? '';
+        counts[folder] = (counts[folder] || 0) + 1;
+      }
+    }
+
+    return counts;
   }
 
   public async saveBillingInformation(args: {

@@ -1,11 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FolderPlus } from 'lucide-react';
+import { enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 
-import { createFolder } from '@webui/api-client';
+import { createFolder, type getOrganization } from '@webui/api-client';
 import { Modal } from '@webui/ui';
 
-function NewFolderDialog() {
+type OrganizationData = Awaited<ReturnType<typeof getOrganization>>;
+
+interface NewFolderDialogProps {
+  compact?: boolean;
+}
+
+function NewFolderDialog({ compact = false }: NewFolderDialogProps) {
   const [open, setOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const queryClient = useQueryClient();
@@ -14,13 +21,46 @@ function NewFolderDialog() {
     mutationFn: async (name: string) => {
       await createFolder({ name });
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['organization'],
-        refetchType: 'all',
-      });
+    onMutate: async (name: string) => {
       setFolderName('');
       setOpen(false);
+
+      await queryClient.cancelQueries({ queryKey: ['organization'] });
+
+      const previousOrganization = queryClient.getQueryData<OrganizationData>([
+        'organization',
+      ]);
+
+      if (previousOrganization) {
+        const newFolders = [...(previousOrganization.folders ?? []), name].sort(
+          (a, b) => a.localeCompare(b),
+        );
+        queryClient.setQueryData<OrganizationData>(['organization'], {
+          ...previousOrganization,
+          folders: newFolders,
+          folderCounts: {
+            ...previousOrganization.folderCounts,
+            [name]: 0,
+          },
+        });
+      }
+
+      return { previousOrganization };
+    },
+    onError: (_err, _name, context) => {
+      if (context?.previousOrganization) {
+        queryClient.setQueryData(
+          ['organization'],
+          context.previousOrganization,
+        );
+      }
+      enqueueSnackbar({
+        message: 'Failed to create folder',
+        variant: 'error',
+      });
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['organization'] });
     },
   });
 
@@ -33,15 +73,25 @@ function NewFolderDialog() {
 
   return (
     <>
-      <div className="not-prose">
+      {compact ? (
         <button
-          className="btn btn-secondary btn-sm border-none rounded-lg font-semibold min-w-[140px]"
+          className="btn btn-ghost btn-xs p-1"
           onClick={() => setOpen(true)}
+          title="New Folder"
         >
           <FolderPlus className="w-4 h-4" />
-          New Folder
         </button>
-      </div>
+      ) : (
+        <div className="not-prose w-full">
+          <button
+            className="btn btn-ghost btn-sm w-full justify-start gap-2 text-base-content/70 hover:text-base-content"
+            onClick={() => setOpen(true)}
+          >
+            <FolderPlus className="w-4 h-4" />
+            New Folder
+          </button>
+        </div>
+      )}
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -66,7 +116,9 @@ function NewFolderDialog() {
           </div>
           {error && (
             <div className="text-error text-sm">
-              {error instanceof Error ? error.message : 'Failed to create folder'}
+              {error instanceof Error
+                ? error.message
+                : 'Failed to create folder'}
             </div>
           )}
           <div className="flex flex-row gap-2 justify-end">

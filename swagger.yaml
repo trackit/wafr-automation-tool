@@ -68,6 +68,11 @@ paths:
                     description: List of folder names for organizing assessments
                     items:
                       type: string
+                  folderCounts:
+                    type: object
+                    description: Count of assessments per folder. Key is folder name, value is count. Empty string key represents uncategorized assessments.
+                    additionalProperties:
+                      type: integer
         '400':
           description: A issue occurred while trying to retrieve the organization of the user
         '500':
@@ -180,6 +185,11 @@ paths:
         - name: nextToken
           in: query
           description: Token for pagination.
+          schema:
+            type: string
+        - name: folder
+          in: query
+          description: Filter assessments by folder name. Use empty string to filter for assessments without a folder.
           schema:
             type: string
       responses:

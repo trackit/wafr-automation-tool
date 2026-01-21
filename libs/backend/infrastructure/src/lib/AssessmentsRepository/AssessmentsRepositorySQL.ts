@@ -107,8 +107,9 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     limit?: number;
     search?: string;
     nextToken?: string;
+    folder?: string;
   }): Promise<{ assessments: Assessment[]; nextToken?: string }> {
-    const { organizationDomain, limit = 20, search, nextToken } = args;
+    const { organizationDomain, limit = 20, search, nextToken, folder } = args;
     const repo = await this.repo(AssessmentEntity, organizationDomain);
 
     const decoded = decodeNextToken(nextToken) as
@@ -127,6 +128,14 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
         '(a.name ILIKE :term OR a.roleArn ILIKE :term OR a.id::text ILIKE :term)',
         { term: `%${search}%` },
       );
+    }
+
+    if (folder !== undefined) {
+      if (folder === '') {
+        qb.andWhere('a.folder IS NULL');
+      } else {
+        qb.andWhere('a.folder = :folder', { folder });
+      }
     }
 
     const [entities, total] = await qb.getManyAndCount();
@@ -300,6 +309,27 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     });
   }
 
+  public async countAssessmentsByFolder(args: {
+    organizationDomain: string;
+  }): Promise<Record<string, number>> {
+    const { organizationDomain } = args;
+    const repo = await this.repo(AssessmentEntity, organizationDomain);
+
+    const results = await repo
+      .createQueryBuilder('a')
+      .select('COALESCE(a.folder, :empty)', 'folder')
+      .addSelect('COUNT(*)', 'count')
+      .setParameter('empty', '')
+      .groupBy('a.folder')
+      .getRawMany<{ folder: string; count: string }>();
+
+    const counts: Record<string, number> = {};
+    for (const row of results) {
+      counts[row.folder] = parseInt(row.count, 10);
+    }
+    return counts;
+  }
+
   public async saveBillingInformation(args: {
     assessmentId: string;
     organizationDomain: string;
@@ -339,7 +369,12 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
     const { organizationDomain, folderName } = args;
     const repo = await this.repo(AssessmentEntity, organizationDomain);
 
-    await repo.update({ folder: folderName }, { folder: undefined });
+    await repo
+      .createQueryBuilder()
+      .update(AssessmentEntity)
+      .set({ folder: () => 'NULL' })
+      .where('folder = :folderName', { folderName })
+      .execute();
 
     this.logger.info(`Cleared folder "${folderName}" from assessments`);
   }

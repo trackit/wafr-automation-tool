@@ -15,6 +15,7 @@ const GetAssessmentsQuerySchema = z
     limit: z.coerce.number().min(1, 'Limit must be greater than 0').optional(),
     search: z.string().nonempty().optional(),
     nextToken: z.base64().trim().nonempty().optional(),
+    folder: z.string().optional(),
   })
   .strict() satisfies ZodType<
   operations['getAssessments']['parameters']['query']

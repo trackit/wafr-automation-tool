@@ -21,7 +21,7 @@ export interface Assessment {
   opportunityId?: string;
   opportunityCreatedAt?: Date;
   billingInformation?: BillingInformation;
-  folder?: string;
+  folder?: string | null;
 }
 
 export enum AssessmentStep {

@@ -18,6 +18,7 @@ type OrganizationDetails = {
   currentYearTotalAssessments: number;
   opportunitiesPerMonth: OpportunitiesPerMonthItem[];
   folders?: string[];
+  folderCounts?: Record<string, number>;
 };
 
 export interface GetOrganizationUseCase {
@@ -86,12 +87,18 @@ export class GetOrganizationUseCaseImpl implements GetOrganizationUseCase {
       await this.organizationRepository.get(organizationDomain);
     const folders = organization?.folders ?? [];
 
+    const folderCounts =
+      await this.assessmentsRepository.countAssessmentsByFolder({
+        organizationDomain,
+      });
+
     this.logger.info(`The organization details retrieved successfully`);
 
     return {
       currentYearTotalAssessments,
       opportunitiesPerMonth,
       folders,
+      folderCounts,
     };
   }
 }

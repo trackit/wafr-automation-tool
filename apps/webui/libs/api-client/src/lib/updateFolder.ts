@@ -7,7 +7,10 @@ export function updateFolder({
   name,
 }: paths['/organization/folders/{folderName}']['put']['parameters']['path'] &
   paths['/organization/folders/{folderName}']['put']['requestBody']['content']['application/json']) {
-  return apiClient.put(`/organization/folders/${encodeURIComponent(folderName)}`, { name });
+  return apiClient.put(
+    `/organization/folders/${encodeURIComponent(folderName)}`,
+    { name },
+  );
 }
 
 export default updateFolder;

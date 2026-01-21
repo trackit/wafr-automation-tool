@@ -27,7 +27,10 @@ describe('UpdateFolderUseCase', () => {
     const updatedOrganization = await fakeOrganizationRepository.get(
       organization.domain,
     );
-    expect(updatedOrganization?.folders).toEqual(['New Folder', 'Other Folder']);
+    expect(updatedOrganization?.folders).toEqual([
+      'New Folder',
+      'Other Folder',
+    ]);
   });
 
   it('should update assessments with the old folder name', async () => {

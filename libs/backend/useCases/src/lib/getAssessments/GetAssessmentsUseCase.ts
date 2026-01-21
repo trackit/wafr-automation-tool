@@ -7,6 +7,7 @@ export type GetAssessmentsUseCaseArgs = {
   limit?: number;
   search?: string;
   nextToken?: string;
+  folder?: string;
 };
 
 export interface GetAssessmentsUseCase {

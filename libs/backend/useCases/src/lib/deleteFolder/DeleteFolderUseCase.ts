@@ -31,7 +31,7 @@ export class DeleteFolderUseCaseImpl implements DeleteFolderUseCase {
     if (!folders.includes(folderName)) {
       throw new FolderNotFoundError({ folderName, organizationDomain });
     }
-    
+
     const updatedFolders = folders.filter((f) => f !== folderName);
     await this.organizationRepository.update({
       organizationDomain,

@@ -25,6 +25,7 @@ export interface AssessmentsRepository {
     limit?: number;
     search?: string;
     nextToken?: string;
+    folder?: string;
   }): Promise<{
     assessments: Assessment[];
     nextToken?: string;
@@ -79,6 +80,9 @@ export interface AssessmentsRepository {
     organizationDomain: string;
     year: number;
   }): Promise<number>;
+  countAssessmentsByFolder(args: {
+    organizationDomain: string;
+  }): Promise<Record<string, number>>;
   saveBillingInformation(args: {
     assessmentId: string;
     organizationDomain: string;

@@ -46,9 +46,7 @@ describe('createFolder adapter', () => {
     it('should return a 400 status code with empty name', async () => {
       const { adapter } = setup();
 
-      const event = CreateFolderAdapterEventMother.basic()
-        .withName('')
-        .build();
+      const event = CreateFolderAdapterEventMother.basic().withName('').build();
 
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);

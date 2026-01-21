@@ -703,6 +703,10 @@ export interface operations {
                         }[];
                         /** @description List of folder names for organizing assessments */
                         folders?: string[];
+                        /** @description Count of assessments per folder. Key is folder name, value is count. Empty string key represents uncategorized assessments. */
+                        folderCounts?: {
+                            [key: string]: number;
+                        };
                     };
                 };
             };
@@ -854,6 +858,8 @@ export interface operations {
                 search?: string;
                 /** @description Token for pagination. */
                 nextToken?: string;
+                /** @description Filter assessments by folder name. Use empty string to filter for assessments without a folder. */
+                folder?: string;
             };
             header?: never;
             path?: never;

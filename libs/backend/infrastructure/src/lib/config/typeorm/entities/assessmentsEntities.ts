@@ -91,7 +91,7 @@ export class AssessmentEntity
   billingInformation?: BillingInformationEntity;
 
   @Column('varchar', { nullable: true })
-  folder?: string;
+  folder?: string | null;
 }
 
 @Entity('pillars')

@@ -1,24 +1,21 @@
-import { DndContext, DragOverlay, useDroppable, type DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import {
   type InfiniteData,
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { Calendar, Search, Server } from 'lucide-react';
 import { enqueueSnackbar } from 'notistack';
-import {
-  ArrowLeft,
-  Calendar,
-  Cell,
-  Computer,
-  Earth,
-  Folder,
-  Inbox,
-  LayoutDashboard,
-  Search,
-  Server,
-} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
@@ -44,69 +41,62 @@ import {
   rescanAssessment,
   updateAssessment,
 } from '@webui/api-client';
-import { ConfirmationModal, StatusBadge } from '@webui/ui';
+import { ConfirmationModal } from '@webui/ui';
 
-import { formatACEOpportunity } from '../../lib/assessment-utils';
 import { getThemeColors } from '../../lib/theme-colors';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import CreateOpportunityDialog from './create-opportunity-dialog';
 import DraggableAssessmentCard from './draggable-assessment-card';
 import ExportToAWSDialog from './export-to-aws-dialog';
-import FolderCard from './folder-card';
 import ListAWSMilestonesDialog from './list-aws-milestones-dialog';
 import NewAssessmentDialog from './new-assessment-dialog';
 import NewFolderDialog from './new-folder-dialog';
 import PDFExportsDialog from './pdf-exports-dialog';
-
-function UncategorizedDropZone() {
-  const { isOver, setNodeRef } = useDroppable({
-    id: 'uncategorized-zone',
-    data: { type: 'uncategorized' },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`
-        flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed
-        transition-all duration-200
-        ${isOver 
-          ? 'border-primary bg-primary/10 scale-105' 
-          : 'border-neutral-content/50 bg-base-200/50'}
-      `}
-    >
-      <Inbox className={`w-5 h-5 ${isOver ? 'text-primary' : 'text-base-content/60'}`} />
-      <span className={`text-sm font-medium ${isOver ? 'text-primary' : 'text-base-content/60'}`}>
-        Drop here to remove from folder
-      </span>
-    </div>
-  );
-}
+import SidebarFolderItem from './sidebar-folder-item';
 
 function AssessmentsList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useDebounceValue('', 500);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
-  const [openFolder, setOpenFolder] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [draggedAssessment, setDraggedAssessment] = useState<unknown>(null);
   const currentYear = new Date().getFullYear();
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+
   const [idToRescan, setIdToRescan] = useState<string | null>(null);
+  const folderFilter = selectedFolder ?? '';
+
   const {
     data,
     isLoading,
+    isPlaceholderData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['assessments', search],
+    queryKey: ['assessments', search, folderFilter],
     queryFn: ({ pageParam }) =>
-      getAssessments({ limit: 24, search, nextToken: pageParam }),
+      getAssessments({
+        limit: 24,
+        search,
+        nextToken: pageParam,
+        folder: folderFilter,
+      }),
     getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
+    placeholderData: keepPreviousData,
   });
+
+  const isLoadingAssessments = isLoading || isPlaceholderData;
 
   const { data: organization } = useQuery({
     queryKey: ['organization'],
@@ -251,6 +241,7 @@ function AssessmentsList() {
 
   type AssessmentsPage = Awaited<ReturnType<typeof getAssessments>>;
   type AssessmentsData = InfiniteData<AssessmentsPage>;
+  type OrganizationData = Awaited<ReturnType<typeof getOrganization>>;
 
   const updateFolderMutation = useMutation({
     mutationFn: ({
@@ -265,36 +256,72 @@ function AssessmentsList() {
         folder: folder as string | undefined,
       }),
     onMutate: async ({ assessmentId, folder }) => {
-      await queryClient.cancelQueries({ queryKey: ['assessments', search] });
+      await queryClient.cancelQueries({
+        queryKey: ['assessments', search, folderFilter],
+      });
+      await queryClient.cancelQueries({ queryKey: ['organization'] });
 
-      const previousData = queryClient.getQueryData<AssessmentsData>([
-        'assessments',
-        search,
-      ]);
+      const previousAssessmentsData = queryClient.getQueryData<AssessmentsData>(
+        ['assessments', search, folderFilter],
+      );
 
-      if (!previousData?.pages) {
-        return { previousData };
+      const previousOrganizationData =
+        queryClient.getQueryData<OrganizationData>(['organization']);
+
+      const oldFolder = previousAssessmentsData?.pages
+        ?.flatMap((p) => p.assessments ?? [])
+        ?.find((a) => a.id === assessmentId)?.folder;
+
+      const oldFolderKey = oldFolder ?? '';
+      const newFolderKey = folder ?? '';
+
+      if (previousAssessmentsData?.pages) {
+        const newAssessmentsData: AssessmentsData = {
+          ...previousAssessmentsData,
+          pages: previousAssessmentsData.pages.map((page) => ({
+            ...page,
+            assessments: page.assessments?.filter(
+              (assessment) => assessment.id !== assessmentId,
+            ),
+          })),
+        };
+        queryClient.setQueryData(
+          ['assessments', search, folderFilter],
+          newAssessmentsData,
+        );
       }
 
-      const newData: AssessmentsData = {
-        ...previousData,
-        pages: previousData.pages.map((page) => ({
-          ...page,
-          assessments: page.assessments?.map((assessment) =>
-            assessment.id === assessmentId
-              ? { ...assessment, folder: folder ?? undefined }
-              : assessment,
-          ),
-        })),
-      };
+      if (previousOrganizationData?.folderCounts) {
+        const newFolderCounts = { ...previousOrganizationData.folderCounts };
+        if (
+          newFolderCounts[oldFolderKey] !== undefined &&
+          newFolderCounts[oldFolderKey] > 0
+        ) {
+          newFolderCounts[oldFolderKey] = newFolderCounts[oldFolderKey] - 1;
+        }
+        newFolderCounts[newFolderKey] =
+          (newFolderCounts[newFolderKey] ?? 0) + 1;
 
-      queryClient.setQueryData(['assessments', search], newData);
+        queryClient.setQueryData<OrganizationData>(['organization'], {
+          ...previousOrganizationData,
+          folderCounts: newFolderCounts,
+        });
+      }
 
-      return { previousData };
+      return { previousAssessmentsData, previousOrganizationData };
     },
     onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(['assessments', search], context.previousData);
+      if (context?.previousAssessmentsData) {
+        queryClient.setQueryData(
+          ['assessments', search, folderFilter],
+          context.previousAssessmentsData,
+        );
+      }
+      if (context?.previousOrganizationData) {
+        queryClient.setQueryData(
+          ['organization'],
+          context.previousOrganizationData,
+        );
       }
       enqueueSnackbar({
         message: 'Failed to move assessment to folder',
@@ -303,6 +330,7 @@ function AssessmentsList() {
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      await queryClient.invalidateQueries({ queryKey: ['organization'] });
     },
   });
 
@@ -316,29 +344,8 @@ function AssessmentsList() {
     return data.pages.flatMap((page) => page.assessments ?? []);
   }, [data?.pages]);
 
-  // Filter assessments based on current view
-  const displayedAssessments = useMemo(() => {
-    if (openFolder === null) {
-      // Main view: show only uncategorized assessments
-      return allAssessments.filter((a) => !a.folder);
-    }
-    // Folder view: show assessments in the selected folder
-    return allAssessments.filter((a) => a.folder === openFolder);
-  }, [allAssessments, openFolder]);
-
-  // Count assessments per folder
-  const folderCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const assessment of allAssessments) {
-      if (assessment.folder) {
-        counts[assessment.folder] = (counts[assessment.folder] || 0) + 1;
-      }
-    }
-    return counts;
-  }, [allAssessments]);
-
   const folders = (organization?.folders ?? []).toSorted((a, b) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   );
 
   // Handle drag end
@@ -370,7 +377,9 @@ function AssessmentsList() {
     }
   };
 
-  const handleDragStart = (event: { active: { data: { current: unknown } } }) => {
+  const handleDragStart = (event: {
+    active: { data: { current: unknown } };
+  }) => {
     const activeData = event.active.data.current as
       | { assessment: unknown }
       | undefined;
@@ -386,46 +395,30 @@ function AssessmentsList() {
   };
 
   return (
-    <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+    <DndContext
+      sensors={sensors}
+      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart}
+    >
       <div className="container py-8 px-4 overflow-auto flex-1 flex flex-col gap-4">
         <div className="prose mb-2 w-full flex flex-row gap-4 justify-between items-center max-w-none">
-          {openFolder === null ? (
-            <h2 className="mt-0 mb-0 font-medium text-2xl">Dashboard</h2>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => setOpenFolder(null)}
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-              <h2 className="mt-0 mb-0 font-medium text-2xl flex items-center gap-2">
-                <Folder className="w-6 h-6" />
-                {openFolder}
-              </h2>
-              {draggedAssessment && (
-                <UncategorizedDropZone />
-              )}
-            </div>
-          )}
+          <h2 className="mt-0 mb-0 font-medium text-2xl">Dashboard</h2>
           <div className="flex flex-row gap-4">
             <label className="input input-sm rounded-lg w-full max-w-xs">
               <Search className="w-4 h-4" />
               <input
                 type="search"
                 className="grow"
-                placeholder="Search "
+                placeholder="Search"
                 defaultValue={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </label>
             <NewAssessmentDialog />
-            <NewFolderDialog />
           </div>
         </div>
 
-        {openFolder === null && opportunitiesChartData.length > 0 && (
+        {opportunitiesChartData.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="card bg-white border rounded-lg p-4 md:col-span-2 lg:col-span-2">
               <h2 className="card-title mb-4">WAFR Opportunities per Month</h2>
@@ -468,7 +461,10 @@ function AssessmentsList() {
               </ResponsiveContainer>
             </div>
             <div className="card bg-white border rounded-lg p-4">
-              <h2 className="card-title mb-4"> {currentYear} Assessments Goal</h2>
+              <h2 className="card-title mb-4">
+                {' '}
+                {currentYear} Assessments Goal
+              </h2>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
@@ -551,132 +547,158 @@ function AssessmentsList() {
           </div>
         )}
 
-        <div
-          className="grid gap-4 rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
-          style={{
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          }}
-        >
-          {isLoading ? (
-            <div className="flex flex-row gap-2 justify-center items-center w-full h-full col-span-full">
-              <div
-                className="loading loading-ring text-primary w-8 h-8"
-                role="status"
-              ></div>
-            </div>
-          ) : null}
+        <div className="flex flex-row gap-4 flex-1 items-stretch">
+          {data && (
+            <aside className="w-36 md:w-40 lg:w-44 h-full flex-shrink-0 rounded-lg border border-neutral-content bg-base-100 shadow-md flex flex-col">
+              <div className="p-2 border-b border-neutral-content flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-base-content">
+                  Folders
+                </h3>
+                <NewFolderDialog compact />
+              </div>
+              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1 min-h-0">
+                <SidebarFolderItem
+                  name="Main"
+                  assessmentCount={organization?.folderCounts?.[''] ?? 0}
+                  isActive={selectedFolder === null}
+                  onClick={() => setSelectedFolder(null)}
+                  isMain
+                />
+                {folders.map((folder) => (
+                  <SidebarFolderItem
+                    key={folder}
+                    name={folder}
+                    assessmentCount={organization?.folderCounts?.[folder] ?? 0}
+                    isActive={selectedFolder === folder}
+                    onClick={() => setSelectedFolder(folder)}
+                    onFolderDeleted={() => {
+                      if (selectedFolder === folder) {
+                        setSelectedFolder(null);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </aside>
+          )}
 
-          {/* Show folder cards only in main view */}
-          {openFolder === null &&
-            !isLoading &&
-            folders.map((folder) => (
-              <FolderCard
-                key={folder}
-                name={folder}
-                assessmentCount={folderCounts[folder] || 0}
-                onClick={() => setOpenFolder(folder)}
-              />
-            ))}
-
-          {displayedAssessments.length === 0 &&
-          !isLoading &&
-          (openFolder !== null || folders.length === 0) ? (
-            <div className="text-center text-base-content/80 col-span-full py-8">
-              {openFolder !== null
-                ? 'No assessments in this folder'
-                : 'No assessments found'}
-            </div>
-          ) : null}
-
-          {displayedAssessments.map((assessment) => (
-            <DraggableAssessmentCard
-              key={assessment.id}
-              assessment={assessment}
-              status={assessmentSteps[assessment.id!]}
-              onClick={() => navigate(`/assessments/${assessment.id}`)}
-              onRescan={() => setIdToRescan(assessment.id ?? null)}
-              onDelete={() => setIdToDelete(assessment.id ?? null)}
-              folders={folders}
-              onMoveToFolder={(folder) =>
-                updateFolderMutation.mutate({
-                  assessmentId: assessment.id!,
-                  folder,
-                })
-              }
-              renderDialogs={() => (
-                <>
-                  <li>
-                    <ExportToAWSDialog
-                      assessmentId={assessment.id ?? ''}
-                      askForRegion={!assessment.exportRegion}
-                      onSuccess={refetch}
-                    />
-                  </li>
-                  <li>
-                    <CreateAWSMilestoneDialog
-                      assessmentId={assessment.id ?? ''}
-                      disabled={!assessment.exportRegion}
-                    />
-                  </li>
-                  <li>
-                    <ListAWSMilestonesDialog
-                      assessmentId={assessment.id ?? ''}
-                      disabled={!assessment.exportRegion}
-                    />
-                  </li>
-                  <li>
-                    <PDFExportsDialog assessmentId={assessment.id!} />
-                  </li>
-                  <li>
-                    <CreateOpportunityDialog
-                      assessmentId={assessment.id!}
-                      hasOpportunityId={!!assessment.opportunityId}
-                      hasWafrWorkloadArn={!!assessment.wafrWorkloadArn}
-                    />
-                  </li>
-                </>
-              )}
-            />
-          ))}
-        </div>
-        {!isLoading && hasNextPage && (
-          <div className="flex flex-row gap-4 justify-center">
-            <button
-              className="btn btn-accent btn-soft text-sm"
-              onClick={() => fetchNextPage()}
-              disabled={!hasNextPage || isFetchingNextPage}
+          <div className="flex-1 flex flex-col gap-4 min-w-0">
+            <div
+              className="grid gap-4 rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full flex-1"
+              style={{
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                alignContent: 'start',
+              }}
             >
-              {isFetchingNextPage
-                ? 'Loading more...'
-                : hasNextPage
-                  ? 'Load More'
-                  : 'Nothing more to load'}
-            </button>
+              {isLoadingAssessments ? (
+                <div className="flex flex-row gap-2 justify-center items-center w-full h-full col-span-full">
+                  <div
+                    className="loading loading-ring text-primary w-8 h-8"
+                    role="status"
+                  ></div>
+                </div>
+              ) : null}
+
+              {allAssessments.length === 0 && !isLoadingAssessments ? (
+                <div className="text-center text-base-content/80 col-span-full py-8">
+                  {selectedFolder !== null
+                    ? 'No assessments in this folder'
+                    : 'No assessments found'}
+                </div>
+              ) : null}
+
+              {!isLoadingAssessments &&
+                allAssessments.map((assessment) => (
+                  <DraggableAssessmentCard
+                    key={assessment.id}
+                    assessment={assessment}
+                    status={assessmentSteps[assessment.id!]}
+                    onClick={() => navigate(`/assessments/${assessment.id}`)}
+                    onRescan={() => setIdToRescan(assessment.id ?? null)}
+                    onDelete={() => setIdToDelete(assessment.id ?? null)}
+                    folders={folders}
+                    onMoveToFolder={(folder) =>
+                      updateFolderMutation.mutate({
+                        assessmentId: assessment.id!,
+                        folder,
+                      })
+                    }
+                    renderDialogs={() => (
+                      <>
+                        <li>
+                          <ExportToAWSDialog
+                            assessmentId={assessment.id ?? ''}
+                            askForRegion={!assessment.exportRegion}
+                            onSuccess={refetch}
+                          />
+                        </li>
+                        <li>
+                          <CreateAWSMilestoneDialog
+                            assessmentId={assessment.id ?? ''}
+                            disabled={!assessment.exportRegion}
+                          />
+                        </li>
+                        <li>
+                          <ListAWSMilestonesDialog
+                            assessmentId={assessment.id ?? ''}
+                            disabled={!assessment.exportRegion}
+                          />
+                        </li>
+                        <li>
+                          <PDFExportsDialog assessmentId={assessment.id!} />
+                        </li>
+                        <li>
+                          <CreateOpportunityDialog
+                            assessmentId={assessment.id!}
+                            hasOpportunityId={!!assessment.opportunityId}
+                            hasWafrWorkloadArn={!!assessment.wafrWorkloadArn}
+                          />
+                        </li>
+                      </>
+                    )}
+                  />
+                ))}
+            </div>
+            {!isLoadingAssessments && hasNextPage && (
+              <div className="flex flex-row gap-4 justify-center">
+                <button
+                  className="btn btn-accent btn-soft text-sm"
+                  onClick={() => fetchNextPage()}
+                  disabled={!hasNextPage || isFetchingNextPage}
+                >
+                  {isFetchingNextPage
+                    ? 'Loading more...'
+                    : hasNextPage
+                      ? 'Load More'
+                      : 'Nothing more to load'}
+                </button>
+              </div>
+            )}
           </div>
-        )}
-        {idToDelete && (
-          <ConfirmationModal
-            title="Delete Assessment"
-            message="Are you sure you want to delete this assessment?"
-            onConfirm={() => handleDeleteAssessment(idToDelete)}
-            open={true}
-            onClose={() => setIdToDelete(null)}
-            onCancel={() => setIdToDelete(null)}
-          />
-        )}
-        {idToRescan && (
-          <ConfirmationModal
-            title="Rescan Assessment"
-            message="Are you sure you want to rescan this assessment? This might take a while."
-            onConfirm={() => rescanAssessmentMutation.mutate(idToRescan)}
-            open={true}
-            onClose={() => setIdToRescan(null)}
-            onCancel={() => setIdToRescan(null)}
-          />
-        )}
+        </div>
       </div>
 
-      {/* Drag overlay for visual feedback */}
+      {idToDelete && (
+        <ConfirmationModal
+          title="Delete Assessment"
+          message="Are you sure you want to delete this assessment?"
+          onConfirm={() => handleDeleteAssessment(idToDelete)}
+          open={true}
+          onClose={() => setIdToDelete(null)}
+          onCancel={() => setIdToDelete(null)}
+        />
+      )}
+      {idToRescan && (
+        <ConfirmationModal
+          title="Rescan Assessment"
+          message="Are you sure you want to rescan this assessment? This might take a while."
+          onConfirm={() => rescanAssessmentMutation.mutate(idToRescan)}
+          open={true}
+          onClose={() => setIdToRescan(null)}
+          onCancel={() => setIdToRescan(null)}
+        />
+      )}
+
       <DragOverlay>
         {draggedAssessment ? (
           <div className="border border-primary rounded-lg p-4 bg-base-100 shadow-xl opacity-90 w-[300px]">

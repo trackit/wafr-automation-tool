@@ -228,12 +228,6 @@ function DraggableAssessmentCard({
             <LayoutDashboard className="w-5 h-5" />
             ACE Opportunity: {formatACEOpportunity(assessment.opportunityId)}
           </div>
-          {assessment.folder && (
-            <div className="text-sm text-base-content flex flex-row gap-2 items-center">
-              <Folder className="w-4 h-4" />
-              Folder: {assessment.folder}
-            </div>
-          )}
         </div>
       </div>
     </div>
