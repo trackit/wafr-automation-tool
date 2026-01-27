@@ -212,6 +212,7 @@ const setup = () => {
   reset();
   registerTestInfrastructure();
   mockedReadFileSync.mockReset();
+  MapScanFindingsToBestPracticesUseCaseImpl.clearMappingCache();
 
   return {
     useCase: new MapScanFindingsToBestPracticesUseCaseImpl(),
