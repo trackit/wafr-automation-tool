@@ -1343,9 +1343,12 @@ Resources:
         - !Ref ErrorNotificationTopic
       LoggingLevel: ERROR
       Tags:
-        Owner: !Ref Owner
-        Project: !Ref Project
-        Name: SlackErrorAlertingChannel
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: SlackErrorAlertingChannel
 
   ListOrganizationNamesErrorAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -2047,7 +2050,7 @@ Resources:
         - Key: Project
           Value: !Ref Project
         - Key: Name
-          Value: DeleteCommentErrorAlarms
+          Value: DeleteCommentErrorAlarm
 
   CreateOpportunityErrorAlarm:
     Type: AWS::CloudWatch::Alarm
