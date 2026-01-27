@@ -49,21 +49,27 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
   private getMapping(): z.infer<typeof MappingSchema> {
+    let rawMapping: string;
     try {
-      const rawMapping = readFileSync(
+      rawMapping = readFileSync(
         join(
           this.mappingsDir,
           MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
         ),
         'utf-8',
       );
-      return MappingSchema.parse(parseJsonObject(rawMapping));
     } catch (error) {
-      this.logger.info('No mapping found, continuing with an empty one', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-      return {};
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      ) {
+        this.logger.info('No mapping file found, continuing with an empty one');
+        return {};
+      }
+      throw error;
     }
+    return MappingSchema.parse(parseJsonObject(rawMapping));
   }
 
   public async mapScanFindingsToBestPractices(args: {

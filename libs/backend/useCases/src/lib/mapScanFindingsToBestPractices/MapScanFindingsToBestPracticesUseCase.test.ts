@@ -18,10 +18,12 @@ import { readFileSync } from 'node:fs';
 const mockedReadFileSync = vi.mocked(readFileSync);
 
 describe('MapScanFindingsToBestPracticesUseCase', () => {
-  it('should return empty best practices arrays if no mapping exists', async () => {
+  it('should return empty best practices arrays if no mapping file exists', async () => {
     const { useCase } = setup();
+    const enoentError = new Error('ENOENT: no such file or directory');
+    (enoentError as NodeJS.ErrnoException).code = 'ENOENT';
     mockedReadFileSync.mockImplementation(() => {
-      throw new Error('File not found');
+      throw enoentError;
     });
 
     const mockedScanFindings = [
@@ -152,6 +154,57 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
         bestPractices: [],
       },
     ]);
+  });
+
+  it('should throw when mapping file contains invalid JSON', async () => {
+    const { useCase } = setup();
+    mockedReadFileSync.mockReturnValue('{ invalid json }');
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      /Failed to parse JSON/,
+    );
+  });
+
+  it('should throw when mapping file fails schema validation', async () => {
+    const { useCase } = setup();
+    mockedReadFileSync.mockReturnValue(
+      JSON.stringify({
+        eventCode1: [
+          {
+            pillar: 'security',
+          },
+        ],
+      }),
+    );
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      /invalid_type/,
+    );
+  });
+
+  it('should re-throw non-ENOENT file system errors', async () => {
+    const { useCase } = setup();
+    const permissionError = new Error('EACCES: permission denied');
+    (permissionError as NodeJS.ErrnoException).code = 'EACCES';
+    mockedReadFileSync.mockImplementation(() => {
+      throw permissionError;
+    });
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      'EACCES: permission denied',
+    );
   });
 });
 
