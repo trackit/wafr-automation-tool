@@ -120,7 +120,7 @@ export function CommentsPane({
                 }`}
               >
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span className="break-words">{username}</span>
+                  <span className="wrap-break-word">{username}</span>
                   <div className="flex items-center space-x-2">
                     {editingComment === c.id ? (
                       <button
@@ -172,7 +172,7 @@ export function CommentsPane({
                     }}
                   />
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap break-words flex-1">
+                  <p className="text-sm whitespace-pre-wrap wrap-break-word flex-1">
                     {c.text}
                   </p>
                 )}
