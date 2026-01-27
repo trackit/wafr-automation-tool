@@ -83,6 +83,10 @@ export class FindingToBestPracticesAssociationServiceGenAI
         ),
         'utf-8',
       );
+      if (!staticPrompt || !dynamicPrompt) {
+        this.logger.warn('One or both prompt files are empty');
+        return null;
+      }
       FindingToBestPracticesAssociationServiceGenAI.cachedPrompt = {
         staticPrompt,
         dynamicPrompt,
