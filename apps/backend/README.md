@@ -42,15 +42,11 @@ The results produced by these tools are stored in Amazon S3 and Amazon Aurora, t
 
 ### Tests
 
-To run backend tests locally, we need to start the local postgres container, initialize test settings and then we can execute the tests.
+To run backend tests locally, we rely on testContainers, which dynamically start isolated database containers at runtime. This removes the need for a locally running PostgreSQL instance or manual Docker Compose setup.
 
 ```shell
-$ docker-compose up -d
-$ pnpm run test:backend:init
-$ pnpm run test:backend
+$ npm run test:backend
 ```
-
-The `docker-compose.yml` configuration is intended for local development only. It uses default database credentials to keep local setup simple. Production deployments use AWS Aurora with managed secrets.
 
 ## Deployment
 
@@ -116,11 +112,11 @@ Add ACE (Partner Central / ACE Opportunity) integration details in the organizat
 
 ###### Local
 
-The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-Api-***-DefaultExportRole-************"
+The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-Api-\*\*\*-DefaultExportRole-\*\*\*\*\*\*\*\*\*\***"
 
 ###### Remote
 
-- In order to create ACE opportunities on an other account, this role must be created remotely in the target account with the following managed policy :
+In order to create ACE opportunities on an other account, this role must be created remotely in the target account with the following managed policy :
   `AWSPartnerCentralOpportunityManagement`
 
 And with the following [Trust Policy](../webui/src/assets/trust-policy-ace-opportunity.json), where you need to replace:
@@ -227,7 +223,7 @@ In order for them to be recognized by the system, you must include variables, na
 
 ## Usage
 
-In both cases, a complete analysis takes a long time, depending on the size of the account.
+In both cases, a complete analysis takes a long time, depending on the services used within the account.
 
 ### Requirements
 
