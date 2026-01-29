@@ -1371,7 +1371,6 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess
-        - arn:aws:iam::aws:policy/aws-service-role/AWSChatbotServiceLinkedRolePolicy
 
   SlackErrorAlertingChannel:
     Type: AWS::Chatbot::SlackChannelConfiguration
