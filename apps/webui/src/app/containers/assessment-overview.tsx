@@ -105,10 +105,12 @@ function AssessmentOverview({
   assessment,
   maxServices = 5,
   pillars,
+  version,
 }: {
   assessment: components['schemas']['AssessmentContent'] | null;
   maxServices?: number;
   pillars: components['schemas']['Pillar'][];
+  version: string | undefined;
 }) {
   const assessmentId = assessment?.id;
   const [chartType, setChartType] = useState<'bar' | 'treemap'>('bar');
@@ -118,7 +120,7 @@ function AssessmentOverview({
 
   const { data: assessmentGraph } = useQuery({
     queryKey: ['assessments', assessmentId, 'graph'],
-    queryFn: () => getAssessmentGraph(assessmentId!),
+    queryFn: () => getAssessmentGraph(assessmentId!, version ?? undefined),
     enabled: !!assessmentId,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

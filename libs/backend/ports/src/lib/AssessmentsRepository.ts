@@ -110,4 +110,13 @@ export interface AssessmentsRepository {
     version: number;
     organizationDomain: string;
   }): Promise<AssessmentVersion | undefined>;
+  getAllVersions(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    assessmentVersions: AssessmentVersion[];
+    nextToken?: string;
+  }>;
 }

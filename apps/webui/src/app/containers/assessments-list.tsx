@@ -44,6 +44,7 @@ import { ConfirmationModal, StatusBadge } from '@webui/ui';
 
 import { formatACEOpportunity } from '../../lib/assessment-utils';
 import { getThemeColors } from '../../lib/theme-colors';
+import AssessmentVersionsDialog from './assessment-versions-dialog';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import CreateOpportunityDialog from './create-opportunity-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
@@ -509,6 +510,11 @@ function AssessmentsList() {
                             assessmentId={assessment.id ?? ''}
                             askForRegion={!assessment.exportRegion}
                             onSuccess={refetch}
+                          />
+                        </li>
+                        <li>
+                          <AssessmentVersionsDialog
+                            assessmentId={assessment.id ?? ''}
                           />
                         </li>
                         <li>

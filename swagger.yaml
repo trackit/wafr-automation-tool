@@ -187,6 +187,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: version
+          in: query
+          description: The version of the assessment
+          schema:
+            type: integer
       responses:
         '200':
           description: Detailed information about the specified assessment
@@ -289,6 +294,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: version
+          in: query
+          description: The version of the assessment
+          schema:
+            type: integer
       responses:
         '200':
           description: The graph of findings for the specified assessment
@@ -329,6 +339,57 @@ paths:
                 properties:
                   step:
                     $ref: '#/components/schemas/AssessmentStep'
+        '400':
+          description: An issue occurred while trying to retrieve the organization of the user
+        '404':
+          description: The specified assessment could not be found
+        '500':
+          description: Internal server error.
+  '/assessments/{assessmentId}/versions':
+    get:
+      operationId: getAssessmentVersions
+      tags:
+        - Assessments
+      summary: Retrieve all versions for a specific assessment
+      description: |
+        Fetches all versions associated with a specific assessment.
+      parameters:
+        - name: assessmentId
+          in: path
+          description: The unique ID of the assessment to retrieve versions for
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of versions to return
+          schema:
+            type: integer
+            default: 10
+        - name: nextToken
+          in: query
+          description: Token for pagination.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of versions related to the specified assessment
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - versions
+                properties:
+                  versions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AssessmentVersionSummary'
+                  nextToken:
+                    type: string
+                    description: |
+                      Token for pagination. If there are more versions than can be returned in a single response,
+                      this token will allow you to retrieve the next set of results.
         '400':
           description: An issue occurred while trying to retrieve the organization of the user
         '404':
@@ -1230,6 +1291,35 @@ components:
         findings:
           type: integer
           description: Total number of findings
+    AssessmentVersionSummary:
+      title: AssessmentVersionSummary
+      type: object
+      required:
+        - version
+        - assessmentId
+        - createdAt
+        - createdBy
+      properties:
+        version:
+          type: integer
+        assessmentId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        executionArn:
+          type: string
+        finishedAt:
+          type: string
+          format: date-time
+        error:
+          $ref: '#/components/schemas/AssessmentError'
+        wafrWorkloadArn:
+          type: string
+        exportRegion:
+          type: string
     Finding:
       type: object
       description: 'A finding within an assessment, providing details on the issue found'

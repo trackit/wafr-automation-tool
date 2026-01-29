@@ -63,7 +63,7 @@ export class GetBestPracticeFindingsAdapterEventMother {
   }
 
   public withVersion(
-    version: number,
+    version?: number,
   ): GetBestPracticeFindingsAdapterEventMother {
     this.queryStringParameters.version = version;
     return this;

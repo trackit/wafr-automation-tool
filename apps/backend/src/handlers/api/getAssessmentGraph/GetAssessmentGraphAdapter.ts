@@ -13,6 +13,10 @@ const GetAssessmentGraphArgsSchema = z.object({
   assessmentId: z.uuid(),
 }) satisfies ZodType<operations['getAssessmentGraph']['parameters']['path']>;
 
+const GetAssessmentGraphQueryArgsSchema = z.object({
+  version: z.coerce.number().int().optional(),
+}) satisfies ZodType<operations['getAssessmentGraph']['parameters']['query']>;
+
 export class GetAssessmentGraphAdapter {
   private readonly useCase = inject(tokenGetAssessmentGraphUseCase);
 
@@ -31,14 +35,16 @@ export class GetAssessmentGraphAdapter {
   ): Promise<
     operations['getAssessmentGraph']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = parseApiEvent(event, {
+    const { pathParameters, queryStringParameters } = parseApiEvent(event, {
       pathSchema: GetAssessmentGraphArgsSchema,
+      querySchema: GetAssessmentGraphQueryArgsSchema,
     });
 
     const user = getUserFromEvent(event);
 
     return await this.useCase.getAssessmentGraph({
       ...pathParameters,
+      version: queryStringParameters?.version,
       user,
     });
   }

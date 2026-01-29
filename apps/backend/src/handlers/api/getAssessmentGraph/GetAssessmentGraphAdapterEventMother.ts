@@ -7,19 +7,34 @@ import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEv
 
 type GetAssessmentGraphParameters =
   operations['getAssessmentGraph']['parameters']['path'];
-
+type GetAssessmentQueryStringParameters = NonNullable<
+  operations['getAssessment']['parameters']['query']
+>;
 export class GetAssessmentGraphAdapterEventMother {
   private pathParameters: GetAssessmentGraphParameters;
+  private queryStringParameters: GetAssessmentQueryStringParameters;
   private user: Pick<User, 'id' | 'email'> = UserMother.basic().build();
 
-  private constructor(params: GetAssessmentGraphParameters) {
-    this.pathParameters = params;
+  private constructor(
+    queryStringParameters: GetAssessmentQueryStringParameters,
+    pathParams: GetAssessmentGraphParameters,
+  ) {
+    this.queryStringParameters = queryStringParameters;
+    this.pathParameters = pathParams;
   }
 
   public static basic(): GetAssessmentGraphAdapterEventMother {
-    return new GetAssessmentGraphAdapterEventMother({
-      assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-    });
+    return new GetAssessmentGraphAdapterEventMother(
+      {},
+      {
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      },
+    );
+  }
+
+  public withVersion(version?: number): GetAssessmentGraphAdapterEventMother {
+    this.queryStringParameters.version = version;
+    return this;
   }
 
   public withAssessmentId(
@@ -37,8 +52,15 @@ export class GetAssessmentGraphAdapterEventMother {
   }
 
   public build(): APIGatewayProxyEvent {
+    const queryStringParameters = Object.fromEntries(
+      Object.entries(this.queryStringParameters).map(([key, value]) => [
+        key,
+        value === undefined ? undefined : String(value),
+      ]),
+    );
     return APIGatewayProxyEventMother.basic()
       .withPathParameters(this.pathParameters)
+      .withQueryStringParameters(queryStringParameters)
       .withUserClaims({
         sub: this.user.id,
         email: this.user.email,

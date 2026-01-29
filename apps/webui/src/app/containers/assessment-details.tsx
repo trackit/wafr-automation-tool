@@ -6,6 +6,7 @@ import {
   CircleCheck,
   CircleMinus,
   EllipsisVertical,
+  History,
   InfoIcon,
   Milestone,
   RefreshCw,
@@ -40,6 +41,7 @@ import {
   calculateOverallCompletion,
 } from '../../lib/assessment-utils';
 import AssessmentOverview from './assessment-overview';
+import AssessmentVersionsDialog from './assessment-versions-dialog';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import CreateOpportunityDialog from './create-opportunity-dialog';
 import ErrorPage from './error-page';
@@ -76,16 +78,19 @@ export function AssessmentDetails() {
   const [bestPractice, setBestPractice] = useState<BestPractice | null>(null);
   const [bestPracticeDescription, setBestPracticeDescription] =
     useState<BestPractice | null>(null);
-  const { id, milestoneId } = useParams();
+  const { id, milestoneId, version } = useParams();
+
   const [progress, setProgress] = useState<number>(0);
 
   const isMilestone = Boolean(milestoneId);
+  const isVersion = Boolean(version);
+  const isReadOnly = isMilestone || isVersion;
   const assessmentQuery = useQuery<
     components['schemas']['AssessmentContent'] | null
   >({
-    queryKey: ['assessment', id],
-    queryFn: () => (id ? getAssessment(id) : null),
-    refetchInterval: isMilestone ? false : 15000, // Don't auto-refetch for milestones
+    queryKey: ['assessment', id, version],
+    queryFn: () => (id ? getAssessment(id, version ?? undefined) : null),
+    refetchInterval: isReadOnly ? false : 15000, // Don't auto-refetch for milestones or versions
     retry: (failureCount, error: ApiError) => {
       if (error?.statusCode === 503 && failureCount < 3) {
         return true;
@@ -156,7 +161,7 @@ export function AssessmentDetails() {
     }) =>
       updateStatus(assessmentId, pillarId, questionId, bestPracticeId, checked),
     onMutate: async ({ pillarId, questionId, bestPracticeId, checked }) => {
-      if (isMilestone) return { previousData: null };
+      if (isReadOnly) return { previousData: null };
 
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
@@ -244,7 +249,7 @@ export function AssessmentDetails() {
       }
     },
     onSettled: async () => {
-      if (!isMilestone) {
+      if (!isReadOnly) {
         console.log('Mutation settled, refetching data');
         // Always refetch after error or success to ensure data is in sync with server
         await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
@@ -455,7 +460,7 @@ export function AssessmentDetails() {
 
   const handleNoneQuestion = useCallback(
     (questionId: string, none: boolean) => {
-      if (isMilestone) return;
+      if (isReadOnly) return;
       updateQuestionMutation.mutate({
         assessmentId: id || '',
         pillarId: selectedPillar?.id || '',
@@ -463,12 +468,12 @@ export function AssessmentDetails() {
         none,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation, isMilestone],
+    [id, selectedPillar?.id, updateQuestionMutation, isReadOnly],
   );
 
   const handleDisabledQuestion = useCallback(
     (questionId: string, disabled: boolean) => {
-      if (isMilestone) return;
+      if (isReadOnly) return;
       updateQuestionMutation.mutate({
         assessmentId: id || '',
         pillarId: selectedPillar?.id || '',
@@ -476,19 +481,19 @@ export function AssessmentDetails() {
         disabled,
       });
     },
-    [id, selectedPillar?.id, updateQuestionMutation, isMilestone],
+    [id, selectedPillar?.id, updateQuestionMutation, isReadOnly],
   );
 
   const handleDisabledPillar = useCallback(
     (pillarId: string, disabled: boolean) => {
-      if (isMilestone) return;
+      if (isReadOnly) return;
       updatePillarMutation.mutate({
         assessmentId: id || '',
         pillarId,
         disabled,
       });
     },
-    [id, updatePillarMutation, isMilestone],
+    [id, updatePillarMutation, isReadOnly],
   );
 
   // Add effect to update active question when pillar changes
@@ -545,7 +550,7 @@ export function AssessmentDetails() {
 
   const handleUpdateStatus = useCallback(
     (bestPracticeId: string, checked: boolean) => {
-      if (!id || !selectedPillar?.id || !activeQuestion?.id || isMilestone)
+      if (!id || !selectedPillar?.id || !activeQuestion?.id || isReadOnly)
         return;
 
       updateStatusMutation.mutate({
@@ -561,7 +566,7 @@ export function AssessmentDetails() {
       selectedPillar?.id,
       activeQuestion?.id,
       updateStatusMutation,
-      isMilestone,
+      isReadOnly,
     ],
   );
 
@@ -584,7 +589,7 @@ export function AssessmentDetails() {
                   : info.row.original.checked || false
               }
               disabled={
-                isMilestone ||
+                isReadOnly ||
                 (activeQuestion?.none && info.row.original.id !== 'resolve')
               }
               onChange={(e) => {
@@ -706,7 +711,7 @@ export function AssessmentDetails() {
       activeQuestion?.none,
       handleNoneQuestion,
       activeQuestion?.id,
-      isMilestone,
+      isReadOnly,
     ],
   );
 
@@ -758,7 +763,7 @@ export function AssessmentDetails() {
       }`,
       id: pillar.id || `pillar-${index}`,
       disabled: pillar.disabled,
-      action: !isMilestone ? (
+      action: !isReadOnly ? (
         <div
           className="dropdown dropdown-end"
           onClick={(e) => {
@@ -811,7 +816,7 @@ export function AssessmentDetails() {
       id: 'overview',
     };
     return [overview, ...mappedPillars];
-  }, [pillars, handleDisabledPillar, isMilestone]);
+  }, [pillars, handleDisabledPillar, isReadOnly]);
 
   const timelineSteps = useMemo(() => {
     return [
@@ -873,6 +878,11 @@ export function AssessmentDetails() {
               <Milestone className="w-4 h-4" />
               Milestone {milestoneData?.name}
             </span>
+          ) : isVersion ? (
+            <span className="badge font-bold badge-soft badge-secondary min-h-fit">
+              <History className="w-4 h-4" />
+              Version {version}
+            </span>
           ) : (
             <StatusBadge status={step || undefined} />
           )}
@@ -894,7 +904,7 @@ export function AssessmentDetails() {
               tabIndex={0}
               className="dropdown-content menu bg-base-100 rounded-box z-50 w-60 p-2 shadow-sm"
             >
-              {isMilestone ? (
+              {isReadOnly ? (
                 <li>
                   <Link to={`/assessments/${id}`}>
                     <ArrowLeft className="w-4 h-4" /> Back to the current
@@ -924,6 +934,9 @@ export function AssessmentDetails() {
                       assessmentId={id ?? ''}
                       askForRegion={!assessmentData?.exportRegion}
                     />
+                  </li>
+                  <li>
+                    <AssessmentVersionsDialog assessmentId={id ?? ''} />
                   </li>
                   <li>
                     <CreateAWSMilestoneDialog
@@ -969,7 +982,11 @@ export function AssessmentDetails() {
       />
 
       {selectedPillar?.id === 'overview' && assessmentData && pillars ? (
-        <AssessmentOverview assessment={assessmentData} pillars={pillars} />
+        <AssessmentOverview
+          assessment={assessmentData}
+          pillars={pillars}
+          version={version}
+        />
       ) : null}
 
       <div className="flex flex-1 flex-row overflow-auto my-4 rounded-lg border border-neutral-content shadow-md">
@@ -1030,7 +1047,7 @@ export function AssessmentDetails() {
                     <span className="font-light">{activeQuestion?.label}</span>
                   </h3>
                   <div>
-                    {!isLastQuestion && !isMilestone && (
+                    {!isLastQuestion && !isReadOnly && (
                       <div
                         tabIndex={0}
                         role="button"
@@ -1044,7 +1061,7 @@ export function AssessmentDetails() {
                         <ChevronRight className="w-4 h-4 text-base-content/80" />
                       </div>
                     )}
-                    {!isMilestone && (
+                    {!isReadOnly && (
                       <div
                         className="dropdown dropdown-end"
                         onClick={(e) => {
@@ -1166,6 +1183,14 @@ export function AssessmentDetails() {
                   },
                 ]
               : []),
+            ...(isVersion
+              ? [
+                  {
+                    label: `Version ${version}`,
+                    to: `/assessments/${assessmentData?.id}/versions/${version}`,
+                  },
+                ]
+              : []),
           ].map((item, index, array) => (
             <li key={index}>
               {index !== array.length - 1 ? (
@@ -1178,14 +1203,14 @@ export function AssessmentDetails() {
         </ul>
       </div>
 
-      {!isMilestone &&
+      {!isReadOnly &&
       (step === 'SCANNING_STARTED' ||
         step === 'PREPARING_ASSOCIATIONS' ||
         step === 'ASSOCIATING_FINDINGS')
         ? loading
         : null}
-      {isMilestone || step === 'FINISHED' ? details : null}
-      {!isMilestone && step === 'ERRORED' ? (
+      {isReadOnly || step === 'FINISHED' ? details : null}
+      {!isReadOnly && step === 'ERRORED' ? (
         <ErrorPage {...assessmentData} />
       ) : null}
 
@@ -1200,11 +1225,14 @@ export function AssessmentDetails() {
       {bestPractice && (
         <FindingsDetails
           assessmentId={id}
-          assessmentVersion={assessmentData?.latestVersion ?? 1}
+          assessmentVersion={
+            isVersion ? Number(version) : (assessmentData?.latestVersion ?? 1)
+          }
           pillarId={selectedPillar?.id || ''}
           questionId={activeQuestion?.id || ''}
           bestPractice={bestPractice}
           setBestPractice={setBestPractice}
+          isReadOnly={Number(version) !== assessmentData?.latestVersion}
         />
       )}
       {bestPracticeDescription && (

@@ -70,7 +70,23 @@ describe('getAssessment adapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should pass without query parameters', async () => {
+      const { adapter, useCase } = setup();
+
+      const event = GetAssessmentAdapterEventMother.basic().build();
+
+      const defaultAssessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue({
+        assessment: defaultAssessment,
+        bestPracticesFindingsAmount: {},
+      });
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
+    });
   });
+
   describe('useCase and return value', () => {
     it('should call useCase with the correct parameters', async () => {
       const { adapter, useCase } = setup();
@@ -91,6 +107,29 @@ describe('getAssessment adapter', () => {
       expect(useCase.getAssessment).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
+        }),
+      );
+    });
+
+    it('should call useCase with version', async () => {
+      const { adapter, useCase } = setup();
+
+      const version = 1;
+      const event = GetAssessmentAdapterEventMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withVersion(version)
+        .build();
+
+      const defaultAssessment = AssessmentMother.basic().build();
+      useCase.getAssessment.mockResolvedValue({
+        assessment: defaultAssessment,
+        bestPracticesFindingsAmount: {},
+      });
+      await adapter.handle(event);
+
+      expect(useCase.getAssessment).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          version,
         }),
       );
     });
