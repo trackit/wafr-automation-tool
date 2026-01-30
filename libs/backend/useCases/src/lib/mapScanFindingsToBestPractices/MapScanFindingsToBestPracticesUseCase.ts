@@ -48,7 +48,17 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
   );
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
+  private static cachedMapping: z.infer<typeof MappingSchema> | null = null;
+
+  public static clearMappingCache(): void {
+    MapScanFindingsToBestPracticesUseCaseImpl.cachedMapping = null;
+  }
+
   private getMapping(): z.infer<typeof MappingSchema> {
+    if (MapScanFindingsToBestPracticesUseCaseImpl.cachedMapping) {
+      return MapScanFindingsToBestPracticesUseCaseImpl.cachedMapping;
+    }
+
     let rawMapping: string;
     try {
       rawMapping = readFileSync(
@@ -58,6 +68,9 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
         ),
         'utf-8',
       );
+      MapScanFindingsToBestPracticesUseCaseImpl.cachedMapping =
+        MappingSchema.parse(parseJsonObject(rawMapping));
+      return MapScanFindingsToBestPracticesUseCaseImpl.cachedMapping;
     } catch (error) {
       if (
         error instanceof Error &&
@@ -69,7 +82,6 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
       }
       throw error;
     }
-    return MappingSchema.parse(parseJsonObject(rawMapping));
   }
 
   public async mapScanFindingsToBestPractices(args: {

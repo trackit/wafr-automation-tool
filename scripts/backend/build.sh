@@ -2,6 +2,11 @@ copy_folder() {
   local src=$1
   local dest=".aws-sam/build/$2"
 
+  if [ ! -d "$dest" ]; then
+    echo "Error: Destination directory $dest does not exist. Lambda may have been renamed." >&2
+    exit 1
+  fi
+
   if [ -d "$src" ]; then
     cp -R "$src" "$dest"
     echo "Copied $src to $dest"
@@ -13,6 +18,11 @@ copy_folder() {
 build_files() {
   local src=$1
   local dest=".aws-sam/build/$2"
+
+  if [ ! -d "$dest" ]; then
+    echo "Error: Destination directory $dest does not exist. Lambda may have been renamed." >&2
+    exit 1
+  fi
 
   npx esbuild "$src"/*.ts --outdir="$dest" --platform=node --format=cjs --sourcemap --target=es2024
   echo "Built files from $src to $dest"

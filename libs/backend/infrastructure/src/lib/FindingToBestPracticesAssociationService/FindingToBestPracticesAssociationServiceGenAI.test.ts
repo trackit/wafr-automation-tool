@@ -671,6 +671,28 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       expect(result).toEqual([]);
     });
 
+    it('should return an empty array if prompt files are empty', async () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return '';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings: [],
+            pillars: [],
+          },
+        );
+      expect(result).toEqual([]);
+    });
+
     it('should retry only failed findings and preserve successful ones', async () => {
       const { aiService, findingToBestPracticesAssociationServiceGenAI } =
         setup();
@@ -916,6 +938,7 @@ const setup = () => {
     useValue: 3,
   });
   mockedReadFileSync.mockReset();
+  FindingToBestPracticesAssociationServiceGenAI.clearPromptCache();
   const findingToBestPracticesAssociationServiceGenAI =
     new FindingToBestPracticesAssociationServiceGenAI();
   return {
