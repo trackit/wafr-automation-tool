@@ -45,7 +45,7 @@ The results produced by these tools are stored in Amazon S3 and Amazon Aurora, t
 To run backend tests locally, we rely on testContainers, which dynamically start isolated database containers at runtime. This removes the need for a locally running PostgreSQL instance or manual Docker Compose setup.
 
 ```shell
-$ npm run test:backend
+$ pnpm run test:backend
 ```
 
 ## Deployment
