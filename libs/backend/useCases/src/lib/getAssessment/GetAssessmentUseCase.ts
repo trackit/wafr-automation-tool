@@ -1,11 +1,15 @@
 import {
+  isDatabaseUnavailableError,
   tokenAssessmentsRepository,
   tokenFindingsRepository,
 } from '@backend/infrastructure';
 import type { Assessment, BillingInformation } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { AssessmentNotFoundError } from '../../errors';
+import {
+  AssessmentNotFoundError,
+  DatabaseUnavailableError,
+} from '../../errors';
 
 export type GetAssessmentUseCaseArgs = {
   assessmentId: string;
@@ -47,6 +51,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       const count = await this.findingsRepository.countBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: entry.pillarId,
         questionId: entry.questionId,
         bestPracticeId: entry.bestPracticeId,
@@ -92,29 +97,36 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
     assessment: Assessment;
     bestPracticesFindingsAmount: BestPracticesFindingCounts;
   }> {
-    const assessment = await this.assessmentsRepository.get({
-      assessmentId: args.assessmentId,
-      organizationDomain: args.organizationDomain,
-    });
-    if (!assessment) {
-      throw new AssessmentNotFoundError({
+    try {
+      const assessment = await this.assessmentsRepository.get({
         assessmentId: args.assessmentId,
         organizationDomain: args.organizationDomain,
       });
+      if (!assessment) {
+        throw new AssessmentNotFoundError({
+          assessmentId: args.assessmentId,
+          organizationDomain: args.organizationDomain,
+        });
+      }
+
+      const bestPracticesFindingsAmount =
+        await this.getBestPracticeFindings(assessment);
+
+      return {
+        assessment: {
+          ...assessment,
+          billingInformation: this.filterZeroCostServices(
+            assessment?.billingInformation,
+          ),
+        },
+        bestPracticesFindingsAmount,
+      };
+    } catch (error) {
+      if (isDatabaseUnavailableError(error)) {
+        throw new DatabaseUnavailableError();
+      }
+      throw error;
     }
-
-    const bestPracticesFindingsAmount =
-      await this.getBestPracticeFindings(assessment);
-
-    return {
-      assessment: {
-        ...assessment,
-        billingInformation: this.filterZeroCostServices(
-          assessment?.billingInformation,
-        ),
-      },
-      bestPracticesFindingsAmount,
-    };
   }
 }
 

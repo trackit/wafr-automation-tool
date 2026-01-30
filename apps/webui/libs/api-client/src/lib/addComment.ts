@@ -10,14 +10,17 @@ export const addComment = async ({
   assessmentId: string;
   findingId: string;
   text: string;
-}) => {
+}): Promise<
+  operations['addComment']['responses']['200']['content']['application/json']
+> => {
   const encodedFindingId = encodeURIComponent(findingId);
 
-  return apiClient.post<
-    operations['addComment']['responses']['200']['content']['application/json']
-  >(`/assessments/${assessmentId}/findings/${encodedFindingId}/comments`, {
-    text,
-  });
+  return apiClient.post(
+    `/assessments/${assessmentId}/findings/${encodedFindingId}/comments`,
+    {
+      text,
+    },
+  );
 };
 
 export default addComment;

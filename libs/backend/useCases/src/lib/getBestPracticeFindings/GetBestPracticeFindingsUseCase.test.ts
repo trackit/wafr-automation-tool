@@ -5,6 +5,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   BestPracticeMother,
   FindingMother,
   PillarMother,
@@ -150,23 +151,39 @@ describe('GetBestPracticeFindingsUseCase', () => {
     const pillar = PillarMother.basic().withQuestions([question]).build();
     const assessment = AssessmentMother.basic()
       .withOrganization(user.organizationDomain)
+      .build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
       .withPillars([pillar])
       .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
-    const finding = FindingMother.basic().withId('finding-id').build();
+    const finding = FindingMother.basic()
+      .withId('finding-id')
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding,
     });
-    const finding2 = FindingMother.basic().withId('other-finding-id').build();
+    const finding2 = FindingMother.basic()
+      .withId('other-finding-id')
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
       finding: finding2,
     });
-    const finding3 = FindingMother.basic().withId('another-finding-id').build();
+    const finding3 = FindingMother.basic()
+      .withId('another-finding-id')
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeFindingsRepository.save({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
@@ -176,6 +193,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
     await fakeFindingsRepository.saveBestPracticeFindings({
       assessmentId: assessment.id,
       organizationDomain: user.organizationDomain,
+      version: assessment.latestVersionNumber,
       pillarId: pillar.id,
       questionId: question.id,
       bestPracticeId: bestPractice.id,
@@ -188,6 +206,7 @@ describe('GetBestPracticeFindingsUseCase', () => {
 
     const input = GetBestPracticeFindingsUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
+      .withVersion(assessment.latestVersionNumber)
       .withUser(user)
       .withPillarId(pillar.id)
       .withQuestionId(question.id)

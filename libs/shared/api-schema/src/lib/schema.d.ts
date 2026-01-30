@@ -432,6 +432,8 @@ export interface components {
             name?: string;
             /** @description User who created the assessment */
             createdBy?: string;
+            /** @description Latest version of the assessment */
+            latestVersion?: number;
             /** @description Organization associated with the assessment */
             organization?: string;
             /**
@@ -492,6 +494,8 @@ export interface components {
         Finding: {
             /** @description Unique identifier of the finding */
             id?: string;
+            /** @description Version of the assessment the finding belongs to */
+            version?: number;
             /** @description Severity level of the finding (e.g., Low, Medium, High) */
             severity?: string;
             /** @description The status of the finding (e.g., MANUAL, FAIL) */
@@ -1545,6 +1549,8 @@ export interface operations {
                 showHidden?: boolean;
                 /** @description Token for pagination. */
                 nextToken?: string;
+                /** @description The version of the assessment */
+                version?: number;
             };
             header?: never;
             path: {
@@ -1647,7 +1653,10 @@ export interface operations {
     };
     getFinding: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The version of the assessment */
+                version?: number;
+            };
             header?: never;
             path: {
                 /** @description The ID of the assessment to which the finding belongs */

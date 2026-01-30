@@ -56,6 +56,7 @@ export class UpdateBestPracticeUseCaseImpl
     await this.assessmentsRepository.updateBestPractice({
       organizationDomain: user.organizationDomain,
       assessmentId,
+      version: assessment.latestVersionNumber,
       pillarId,
       questionId,
       bestPracticeId,

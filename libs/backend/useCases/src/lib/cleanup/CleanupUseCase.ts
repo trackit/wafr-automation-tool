@@ -60,13 +60,17 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       await this.findingsRepository.deleteAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
       });
-      this.logger.info(`Deleting findings for assessment ${assessment.id}`);
+      this.logger.info(
+        `Deleting findings for assessment version ${assessment.id}-${assessment.latestVersionNumber}`,
+      );
     }
-    await this.assessmentsRepository.update({
+    await this.assessmentsRepository.updateVersion({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
-      assessmentBody: {
+      version: assessment.latestVersionNumber,
+      assessmentVersionBody: {
         finishedAt: new Date(),
         error: args.error
           ? {
@@ -77,7 +81,7 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
       },
     });
     this.logger.info(
-      `Updating assessment ${assessment.id} with error ${args.error?.Error} caused by ${args.error?.Cause}`,
+      `Updating assessment version ${assessment.id}-${assessment.latestVersionNumber} with error ${args.error?.Error} caused by ${args.error?.Cause}`,
     );
   }
 
@@ -88,10 +92,21 @@ export class CleanupUseCaseImpl implements CleanupUseCase {
     if (!organization) {
       throw new OrganizationNotFoundError({ domain: args.organizationDomain });
     }
-    await this.assessmentsRepository.update({
+    const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
       organizationDomain: args.organizationDomain,
-      assessmentBody: {
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId: args.assessmentId,
+        organizationDomain: args.organizationDomain,
+      });
+    }
+    await this.assessmentsRepository.updateVersion({
+      assessmentId: assessment.id,
+      organizationDomain: assessment.organization,
+      version: assessment.latestVersionNumber,
+      assessmentVersionBody: {
         finishedAt: new Date(),
       },
     });

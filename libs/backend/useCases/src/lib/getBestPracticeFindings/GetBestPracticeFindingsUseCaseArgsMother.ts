@@ -12,6 +12,7 @@ export class GetBestPracticeFindingsUseCaseArgsMother {
   public static basic(): GetBestPracticeFindingsUseCaseArgsMother {
     return new GetBestPracticeFindingsUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+      version: 1,
       pillarId: 'pillar-id',
       questionId: 'question-id',
       bestPracticeId: 'best-practice-id',
@@ -81,6 +82,13 @@ export class GetBestPracticeFindingsUseCaseArgsMother {
     showHidden: NonNullable<GetBestPracticeFindingsUseCaseArgs['showHidden']>,
   ): GetBestPracticeFindingsUseCaseArgsMother {
     this.data.showHidden = showHidden;
+    return this;
+  }
+
+  public withVersion(
+    version: number,
+  ): GetBestPracticeFindingsUseCaseArgsMother {
+    this.data.version = version;
     return this;
   }
 

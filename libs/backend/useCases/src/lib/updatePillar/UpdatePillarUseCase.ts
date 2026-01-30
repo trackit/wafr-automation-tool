@@ -42,6 +42,7 @@ export class UpdatePillarUseCaseImpl implements UpdatePillarUseCase {
       assessmentId,
       organizationDomain,
       pillarId,
+      version: assessment.latestVersionNumber,
       pillarBody,
     });
   }

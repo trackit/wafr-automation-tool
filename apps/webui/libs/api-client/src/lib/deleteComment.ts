@@ -1,5 +1,3 @@
-import { type operations } from '@shared/api-schema';
-
 import { apiClient } from './client';
 
 export const deleteComment = async ({
@@ -10,12 +8,10 @@ export const deleteComment = async ({
   assessmentId: string;
   findingId: string;
   commentId: string;
-}) => {
+}): Promise<void> => {
   const encodedFindingId = encodeURIComponent(findingId);
 
-  return apiClient.delete<
-    operations['deleteComment']['responses']['200']['content']
-  >(
+  return apiClient.delete(
     `/assessments/${assessmentId}/findings/${encodedFindingId}/comments/${commentId}`,
   );
 };

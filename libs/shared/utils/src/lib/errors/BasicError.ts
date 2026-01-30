@@ -3,6 +3,7 @@ export enum BasicErrorType {
   FORBIDDEN = 'FORBIDDEN',
   CONFLICT = 'CONFLICT',
   BAD_REQUEST = 'BAD_REQUEST',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
 }
 
 export type BasicErrorArgs = {

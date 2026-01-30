@@ -10,6 +10,7 @@ import {
 export interface AssessmentsRepositoryGetBestPracticeFindingsArgs {
   assessmentId: string;
   organizationDomain: string;
+  version: number;
   pillarId: string;
   questionId: string;
   bestPracticeId: string;
@@ -35,6 +36,7 @@ export interface FindingRepository {
   saveComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     comment: FindingComment;
   }): Promise<void>;
@@ -42,12 +44,14 @@ export interface FindingRepository {
   get(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
   }): Promise<Finding | undefined>;
 
   getAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
   }): Promise<Finding[]>;
 
   getBestPracticeFindings(
@@ -60,11 +64,13 @@ export interface FindingRepository {
   deleteAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version?: number;
   }): Promise<void>;
 
   deleteComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
   }): Promise<void>;
@@ -72,6 +78,7 @@ export interface FindingRepository {
   update(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     findingBody: FindingBody;
   }): Promise<void>;
@@ -79,6 +86,7 @@ export interface FindingRepository {
   updateComment(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     findingId: string;
     commentId: string;
     commentBody: FindingCommentBody;
@@ -86,6 +94,7 @@ export interface FindingRepository {
   saveBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -94,6 +103,7 @@ export interface FindingRepository {
   countBestPracticeFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     pillarId: string;
     questionId: string;
     bestPracticeId: string;
@@ -102,11 +112,13 @@ export interface FindingRepository {
   aggregateAll<TFields extends FindingAggregationFields>(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     fields: TFields;
   }): Promise<FindingAggregationResult<TFields>>;
 
   countAll(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
   }): Promise<number>;
 }

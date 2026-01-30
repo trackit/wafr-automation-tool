@@ -69,6 +69,14 @@ export class AssessmentEntity
   })
   pillars!: PillarEntity[];
 
+  @OneToMany(() => AssessmentVersionEntity, (version) => version.assessment, {
+    cascade: true,
+  })
+  versions!: AssessmentVersionEntity[];
+
+  @Column('int')
+  latestVersionNumber!: number;
+
   @OneToMany(() => FileExportEntity, (fileExport) => fileExport.assessment, {
     cascade: true,
   })
@@ -91,13 +99,70 @@ export class AssessmentEntity
   billingInformation?: BillingInformationEntity;
 }
 
+@Entity('assessmentVersions')
+export class AssessmentVersionEntity {
+  @PrimaryColumn('uuid')
+  assessmentId!: string;
+
+  @PrimaryColumn('int')
+  version!: number;
+
+  @ManyToOne(() => AssessmentEntity, (assessment) => assessment.versions, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'assessmentId', referencedColumnName: 'id' }])
+  assessment!: AssessmentEntity;
+
+  @Column('varchar')
+  createdBy!: string;
+
+  @Column('timestamptz', { default: () => 'now()' })
+  createdAt!: Date;
+
+  @OneToMany(() => PillarEntity, (pillar) => pillar.assessmentVersion, {
+    cascade: true,
+  })
+  pillars!: PillarEntity[];
+
+  @Column('varchar', { nullable: true })
+  executionArn?: string;
+
+  @Column('timestamptz', { nullable: true })
+  finishedAt?: Date;
+
+  @Column({ type: 'jsonb', nullable: true })
+  error?: { cause: string; error: string };
+
+  @Column('varchar', { nullable: true })
+  wafrWorkloadArn?: string;
+
+  @Column('varchar', { nullable: true })
+  exportRegion?: string;
+}
+
 @Entity('pillars')
 export class PillarEntity implements Omit<Pillar, 'organization'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
+  @PrimaryColumn('int')
+  version!: number;
+
   @PrimaryColumn('varchar')
   id!: string;
+
+  @ManyToOne(
+    () => AssessmentVersionEntity,
+    (assessmentVersion) => assessmentVersion.pillars,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn([
+    { name: 'assessmentId', referencedColumnName: 'assessmentId' },
+    { name: 'version', referencedColumnName: 'version' },
+  ])
+  assessmentVersion!: AssessmentVersionEntity;
 
   @ManyToOne(() => AssessmentEntity, (assessment) => assessment.pillars, {
     onDelete: 'CASCADE',
@@ -125,6 +190,9 @@ export class QuestionEntity implements Question {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
+  @PrimaryColumn('int')
+  version!: number;
+
   @PrimaryColumn('varchar')
   pillarId!: string;
 
@@ -136,6 +204,7 @@ export class QuestionEntity implements Question {
   })
   @JoinColumn([
     { name: 'pillarId', referencedColumnName: 'id' },
+    { name: 'version', referencedColumnName: 'version' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
   ])
   pillar!: PillarEntity;
@@ -161,6 +230,9 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
   @PrimaryColumn('uuid')
   assessmentId!: string;
 
+  @PrimaryColumn('int')
+  version!: number;
+
   @PrimaryColumn('varchar')
   questionId!: string;
 
@@ -176,6 +248,7 @@ export class BestPracticeEntity implements Omit<BestPractice, 'results'> {
   @JoinColumn([
     { name: 'questionId', referencedColumnName: 'id' },
     { name: 'pillarId', referencedColumnName: 'pillarId' },
+    { name: 'version', referencedColumnName: 'version' },
     { name: 'assessmentId', referencedColumnName: 'assessmentId' },
   ])
   question!: QuestionEntity;
@@ -264,4 +337,5 @@ export const assessmentsEntities = [
   BestPracticeEntity,
   FileExportEntity,
   BillingInformationEntity,
+  AssessmentVersionEntity,
 ];

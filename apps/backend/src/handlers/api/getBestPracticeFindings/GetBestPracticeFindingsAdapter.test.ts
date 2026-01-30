@@ -19,6 +19,7 @@ describe('getBestPracticeFindings adapter', () => {
 
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withVersion(1)
         .withPillarId('pillar-id')
         .withQuestionId('question-id')
         .withBestPracticeId('best-practice-id')
@@ -127,13 +128,14 @@ describe('getBestPracticeFindings adapter', () => {
       );
     });
 
-    it('should call useCase with limit, search, showHidden and nextToken', async () => {
+    it('should call useCase with version, limit, search, showHidden and nextToken', async () => {
       const { adapter, useCase } = setup();
 
       const limit = 10;
       const searchTerm = 'search-term';
       const showHidden = true;
       const nextToken = 'YQ==';
+      const version = 1;
       const event = GetBestPracticeFindingsAdapterEventMother.basic()
         .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
         .withPillarId('pillar-id')
@@ -143,11 +145,13 @@ describe('getBestPracticeFindings adapter', () => {
         .withSearch(searchTerm)
         .withShowHidden(showHidden)
         .withNextToken(nextToken)
+        .withVersion(version)
         .build();
 
       await adapter.handle(event);
       expect(useCase.getBestPracticeFindings).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
+          version,
           limit,
           searchTerm,
           showHidden,

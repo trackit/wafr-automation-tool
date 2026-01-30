@@ -10,12 +10,13 @@ export const updateFinding = async ({
   assessmentId: string;
   findingId: string;
   findingDto: components['schemas']['FindingDto'];
-}) => {
+}): Promise<operations['updateFinding']['responses']['200']['content']> => {
   const encodedFindingId = encodeURIComponent(findingId);
 
-  return apiClient.put<
-    operations['updateFinding']['responses']['200']['content']
-  >(`/assessments/${assessmentId}/findings/${encodedFindingId}`, findingDto);
+  return apiClient.put(
+    `/assessments/${assessmentId}/findings/${encodedFindingId}`,
+    findingDto,
+  );
 };
 
 export default updateFinding;

@@ -6,6 +6,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   BestPracticeMother,
   PillarMother,
   QuestionMother,
@@ -141,8 +142,16 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       .withBestPractices([bestPractice])
       .build();
     const pillar = PillarMother.basic().withQuestions([question]).build();
-    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withPillars([pillar])
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const scanFinding = ScanFindingMother.basic().build();
     getScannedFindingsUseCase.getScannedFindings.mockResolvedValue([
@@ -178,6 +187,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       findingId: scanFinding.id,
+      version: assessment.latestVersionNumber,
     });
     expect(finding).toEqual(
       expect.objectContaining({
@@ -228,6 +238,7 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
       findingId: scanFinding.id,
+      version: assessment.latestVersionNumber,
     });
     expect(finding).toBeUndefined();
   });
@@ -246,8 +257,16 @@ describe('PrepareFindingsAssociationsUseCase', () => {
       .withBestPractices([bestPractice])
       .build();
     const pillar = PillarMother.basic().withQuestions([question]).build();
-    const assessment = AssessmentMother.basic().withPillars([pillar]).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withPillars([pillar])
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('prowler#1').build(),

@@ -47,11 +47,16 @@ export class PrepareFindingsAssociationsUseCaseImpl
   private async storeMappedScanFindings(args: {
     assessmentId: string;
     organizationDomain: string;
+    version: number;
     scanningTool: ScanningTool;
     scanFindingsToBestPractices: ScanFindingsBestPracticesMapping;
   }): Promise<void> {
-    const { assessmentId, organizationDomain, scanFindingsToBestPractices } =
-      args;
+    const {
+      assessmentId,
+      organizationDomain,
+      scanFindingsToBestPractices,
+      version,
+    } = args;
 
     const bestPractices = scanFindingsToBestPractices.reduce<
       Map<
@@ -88,6 +93,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
           organizationDomain,
           finding: {
             ...scanFinding,
+            version,
             isAIAssociated: false,
             hidden: false,
             comments: [],
@@ -101,6 +107,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
         this.findingsRepository.saveBestPracticeFindings({
           assessmentId,
           organizationDomain,
+          version,
           pillarId: bestPractice.pillarId,
           questionId: bestPractice.questionId,
           bestPracticeId: bestPractice.bestPracticeId,
@@ -158,6 +165,7 @@ export class PrepareFindingsAssociationsUseCaseImpl
       this.storeMappedScanFindings({
         assessmentId,
         organizationDomain,
+        version: assessment.latestVersionNumber,
         scanningTool,
         scanFindingsToBestPractices: mappedScanFindingsToBestPractices,
       }),

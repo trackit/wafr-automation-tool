@@ -1,8 +1,12 @@
-import { tokenFindingsRepository, tokenLogger } from '@backend/infrastructure';
+import {
+  tokenAssessmentsRepository,
+  tokenFindingsRepository,
+  tokenLogger,
+} from '@backend/infrastructure';
 import type { FindingBody, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
-import { FindingNotFoundError } from '../../errors';
+import { AssessmentNotFoundError, FindingNotFoundError } from '../../errors';
 
 export type UpdateFindingUseCaseArgs = {
   assessmentId: string;
@@ -17,15 +21,26 @@ export interface UpdateFindingUseCase {
 
 export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
   private readonly findingsRepository = inject(tokenFindingsRepository);
+  private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
   private readonly logger = inject(tokenLogger);
 
   public async updateFinding(args: UpdateFindingUseCaseArgs): Promise<void> {
     const { assessmentId, findingId, user, findingBody } = args;
     const { organizationDomain } = user;
-
+    const assessment = await this.assessmentsRepository.get({
+      assessmentId,
+      organizationDomain,
+    });
+    if (!assessment) {
+      throw new AssessmentNotFoundError({
+        assessmentId,
+        organizationDomain,
+      });
+    }
     const finding = await this.findingsRepository.get({
       assessmentId,
       organizationDomain,
+      version: assessment.latestVersionNumber,
       findingId,
     });
     if (!finding) {
@@ -39,6 +54,7 @@ export class UpdateFindingUseCaseImpl implements UpdateFindingUseCase {
     await this.findingsRepository.update({
       assessmentId,
       organizationDomain: user.organizationDomain,
+      version: assessment.latestVersionNumber,
       findingId,
       findingBody,
     });

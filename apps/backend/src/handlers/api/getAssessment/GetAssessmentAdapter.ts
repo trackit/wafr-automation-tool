@@ -62,6 +62,7 @@ export class GetAssessmentAdapter {
         })) ?? [],
       id: assessment.id,
       name: assessment.name,
+      latestVersion: assessment.latestVersionNumber,
       organization: assessment.organization,
       questionVersion: assessment.questionVersion,
       regions: assessment.regions,

@@ -48,6 +48,7 @@ export function toDomainFindingRemediation(
 export function toDomainFinding(e: FindingEntity): Finding {
   return {
     id: e.id,
+    version: e.version,
     hidden: e.hidden,
     isAIAssociated: e.isAIAssociated,
     bestPractices: (e.bestPractices ?? []).map((bp: BestPracticeEntity) =>

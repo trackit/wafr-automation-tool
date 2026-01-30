@@ -7,6 +7,7 @@ import {
 } from '@backend/infrastructure';
 import {
   AssessmentMother,
+  AssessmentVersionMother,
   BestPracticeMother,
   FindingMother,
   PillarMother,
@@ -111,8 +112,16 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         .build(),
     ];
 
-    const assessment = AssessmentMother.basic().withPillars(pillars).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withPillars(pillars)
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const findings = [
       FindingMother.basic().withId('prowler#1').build(),
@@ -162,6 +171,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
     const associatedFindings = await fakeFindingsRepository.getAll({
       assessmentId: assessment.id,
       organizationDomain: assessment.organization,
+      version: assessment.latestVersionNumber,
     });
     expect(associatedFindings).toEqual([
       expect.objectContaining({ id: findings[0].id, isAIAssociated: true }),
@@ -192,8 +202,16 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         .build(),
     ];
 
-    const assessment = AssessmentMother.basic().withPillars(pillars).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withPillars(pillars)
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const findings = [
       FindingMother.basic()
@@ -250,6 +268,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       await fakeFindingsRepository.getBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: pillars[0].id,
         questionId: pillars[0].questions[0].id,
         bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
@@ -281,8 +300,16 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
         .build(),
     ];
 
-    const assessment = AssessmentMother.basic().withPillars(pillars).build();
+    const assessment = AssessmentMother.basic().build();
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withPillars(pillars)
+      .withVersion(assessment.latestVersionNumber)
+      .build();
     await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
 
     const findings = [
       FindingMother.basic()
@@ -344,6 +371,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       await fakeFindingsRepository.getBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: pillars[0].id,
         questionId: pillars[0].questions[0].id,
         bestPracticeId: pillars[0].questions[0].bestPractices[0].id,
@@ -354,6 +382,7 @@ describe('AssociateFindingsToBestPracticesUseCase', () => {
       await fakeFindingsRepository.getBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
+        version: assessment.latestVersionNumber,
         pillarId: pillars[0].id,
         questionId: pillars[0].questions[0].id,
         bestPracticeId: pillars[0].questions[0].bestPractices[1].id,
