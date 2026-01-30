@@ -3,7 +3,7 @@ import {
   tokenOrganizationRepository,
   tokenWellArchitectedToolService,
 } from '@backend/infrastructure';
-import type { Milestone } from '@backend/models';
+import type { Milestone, User } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import {
@@ -16,7 +16,7 @@ import { assertOrganizationHasExportRole } from '../../services';
 
 export interface GetMilestoneUseCaseArgs {
   assessmentId: string;
-  organizationDomain: string;
+  user: User;
   milestoneId: number;
   region?: string;
 }
@@ -33,21 +33,21 @@ export class GetMilestoneUseCaseImpl implements GetMilestoneUseCase {
   private readonly assessmentsRepository = inject(tokenAssessmentsRepository);
 
   public async getMilestone(args: GetMilestoneUseCaseArgs): Promise<Milestone> {
-    const { organizationDomain, assessmentId, region, milestoneId } = args;
+    const { user, assessmentId, region, milestoneId } = args;
     const [organization, assessment] = await Promise.all([
-      this.organizationRepository.get(organizationDomain),
+      this.organizationRepository.get(args.user.organizationDomain),
       this.assessmentsRepository.get({
         assessmentId,
-        organizationDomain,
+        organizationDomain: user.organizationDomain,
       }),
     ]);
     if (!organization) {
-      throw new OrganizationNotFoundError({ domain: organizationDomain });
+      throw new OrganizationNotFoundError({ domain: user.organizationDomain });
     }
     if (!assessment) {
       throw new AssessmentNotFoundError({
         assessmentId,
-        organizationDomain,
+        organizationDomain: user.organizationDomain,
       });
     }
     const milestonesRegion = region ?? assessment.exportRegion;

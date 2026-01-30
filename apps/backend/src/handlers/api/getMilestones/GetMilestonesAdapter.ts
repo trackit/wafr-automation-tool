@@ -47,11 +47,11 @@ export class GetMilestonesAdapter {
     const user = getUserFromEvent(event);
     const { milestones, nextToken: responseNextToken } =
       await this.useCase.getMilestones({
-        organizationDomain: user.organizationDomain,
         assessmentId,
         region,
         limit,
         nextToken,
+        user,
       });
     return {
       milestones: milestones.map((milestone) => ({

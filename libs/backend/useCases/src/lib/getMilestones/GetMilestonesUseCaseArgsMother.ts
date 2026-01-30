@@ -1,3 +1,5 @@
+import { type User, UserMother } from '@backend/models';
+
 import type { GetMilestonesUseCaseArgs } from './GetMilestonesUseCase';
 
 export class GetMilestonesUseCaseArgsMother {
@@ -10,8 +12,8 @@ export class GetMilestonesUseCaseArgsMother {
   public static basic(): GetMilestonesUseCaseArgsMother {
     return new GetMilestonesUseCaseArgsMother({
       assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
-      organizationDomain: 'test.io',
       region: 'us-west-2',
+      user: UserMother.basic().build(),
     });
   }
 
@@ -29,10 +31,8 @@ export class GetMilestonesUseCaseArgsMother {
     return this;
   }
 
-  public withOrganizationDomain(
-    organizationDomain: string,
-  ): GetMilestonesUseCaseArgsMother {
-    this.data.organizationDomain = organizationDomain;
+  public withUser(user: User): GetMilestonesUseCaseArgsMother {
+    this.data.user = user;
     return this;
   }
 

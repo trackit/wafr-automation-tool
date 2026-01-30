@@ -100,7 +100,7 @@ describe('getMilestone adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.getMilestone).toHaveBeenCalledWith({
-        organizationDomain: 'test.io',
+        user,
         assessmentId,
         milestoneId,
         region,
