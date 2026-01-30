@@ -15,6 +15,7 @@
     "deploy:webui:production": "nx generate-env-variables webui --configuration production --skipNxCache && nx deploy webui --configuration production --skipNxCache",
     "test:backend": "nx run-many -t test -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "test:backend:init": "tsx ./scripts/backend/initLocalEnvironment.ts",
+    "test:backend:ai-benchmark": "npx vitest run libs/backend/scripts/src/lib/AIServiceBenchmark/AIServiceBenchmark.test.ts",
     "lint:backend": "nx run-many -t lint -p tag:scope:backend tag:scope:backend-libs tag:scope:shared",
     "lint": "nx run-many -t lint --exclude di-container",
     "lint:fix": "nx run-many -t lint --fix --exclude di-container",

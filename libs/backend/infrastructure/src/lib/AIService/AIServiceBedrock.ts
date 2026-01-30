@@ -6,7 +6,12 @@ import {
   type ConverseStreamCommandOutput,
 } from '@aws-sdk/client-bedrock-runtime';
 
-import type { AIService, Prompt, TextComponent } from '@backend/ports';
+import type {
+  AIInferenceConfig,
+  AIService,
+  Prompt,
+  TextComponent,
+} from '@backend/ports';
 import { createInjectionToken, inject } from '@shared/di-container';
 
 import { tokenLogger } from '../Logger';
@@ -35,9 +40,10 @@ export class AIServiceBedrock implements AIService {
 
   public async converse(args: {
     prompt: Prompt;
+    inferenceConfig?: AIInferenceConfig;
     prefill?: TextComponent;
   }): Promise<string> {
-    const { prompt, prefill } = args;
+    const { prompt, prefill, inferenceConfig } = args;
 
     const command = new ConverseStreamCommand({
       modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
@@ -60,6 +66,7 @@ export class AIServiceBedrock implements AIService {
       inferenceConfig: {
         maxTokens: 4096,
         temperature: 0,
+        ...inferenceConfig,
       },
     });
 

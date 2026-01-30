@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { z, type ZodType } from 'zod';
 
 import type {
@@ -8,6 +10,7 @@ import type {
   ScanningTool,
 } from '@backend/models';
 import {
+  type AIInferenceConfig,
   type FindingToBestPracticesAssociation,
   type FindingToBestPracticesAssociationService,
   type Prompt,
@@ -17,11 +20,10 @@ import { assertIsDefined, JSONParseError, parseJsonArray } from '@shared/utils';
 
 import { tokenAIService } from '../AIService';
 import { tokenLogger } from '../Logger';
-import { tokenObjectsStorage } from '../ObjectsStorage';
 
 interface FindingIdToBestPracticeIdAssociation {
   findingId: string;
-  bestPracticeId: string; // "pillarId#questionId#bestPracticeId"
+  bestPracticeId: string;
 }
 
 const FindingIdToBestPracticeIdAssociationsSchema = z.array(
@@ -43,30 +45,41 @@ export class FindingToBestPracticesAssociationServiceGenAI
   private readonly maxRetries = inject(
     tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
   );
-  private readonly objectsStorage = inject(tokenObjectsStorage);
-
+  private readonly promptsDir = inject(
+    tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir,
+  );
   static readonly staticPromptKey = 'static-prompt.txt';
   static readonly dynamicPromptKey = 'dynamic-prompt.txt';
 
-  public async fetchPrompt(): Promise<{
+  public fetchPrompt(): {
     staticPrompt: string;
     dynamicPrompt: string;
-  } | null> {
-    const [staticPrompt, dynamicPrompt] = await Promise.all([
-      this.objectsStorage.get(
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey,
-      ),
-      this.objectsStorage.get(
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey,
-      ),
-    ]);
-    if (!staticPrompt || !dynamicPrompt) {
+  } | null {
+    try {
+      const staticPrompt = readFileSync(
+        join(
+          this.promptsDir,
+          FindingToBestPracticesAssociationServiceGenAI.staticPromptKey,
+        ),
+        'utf-8',
+      );
+      const dynamicPrompt = readFileSync(
+        join(
+          this.promptsDir,
+          FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey,
+        ),
+        'utf-8',
+      );
+      return {
+        staticPrompt,
+        dynamicPrompt,
+      };
+    } catch (error) {
+      this.logger.warn('Failed to read prompt files from filesystem', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
-    return {
-      staticPrompt,
-      dynamicPrompt,
-    };
   }
 
   public formatPrompt(args: {
@@ -103,7 +116,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
     return Object.entries(variables).reduce(
       (updatedPrompt, [key, value]) =>
         updatedPrompt.replace(
-          new RegExp(`{{${key}}}`, 'g'), // Replace all occurrences
+          new RegExp(`{{${key}}}`, 'g'),
           typeof value === 'string' ? value : JSON.stringify(value),
         ),
       prompt,
@@ -150,7 +163,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
     statusDetail: string | 'Unknown';
   }[] {
     return findings.map((finding) => {
-      // Finding id is expected to be in the format "tool#12345"
       if (!/^[a-zA-Z]+#[0-9]+$/.test(finding.id)) {
         throw new Error(`Invalid finding id format: ${finding.id}`);
       }
@@ -221,9 +233,11 @@ export class FindingToBestPracticesAssociationServiceGenAI
     scanningTool: ScanningTool;
     findings: Finding[];
     pillars: Pillar[];
+    inferenceConfig?: AIInferenceConfig;
   }): Promise<FindingToBestPracticesAssociation[]> {
-    const { scanningTool, findings, pillars } = args;
-    const prompt = await this.fetchPrompt();
+    const { scanningTool, findings, pillars, inferenceConfig } = args;
+    const prompt = this.fetchPrompt();
+
     if (!prompt) {
       this.logger.warn('Prompt not found, not associating findings.');
       return [];
@@ -248,7 +262,8 @@ export class FindingToBestPracticesAssociationServiceGenAI
             pillars,
             findings: remainingFindings,
           }),
-          prefill: { text: '[' }, // Start with an opening bracket for JSON array
+          prefill: { text: '[' },
+          inferenceConfig,
         });
 
         this.logger.debug('stringifiedAIResponse', {
@@ -256,7 +271,7 @@ export class FindingToBestPracticesAssociationServiceGenAI
           builtArray: '[' + stringifiedAIResponse.trim(),
         });
 
-        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim()); // Add opening bracket for JSON array according to prefill
+        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim());
         const findingIdToBestPracticeIdAssociations =
           FindingIdToBestPracticeIdAssociationsSchema.parse(aiResponse);
 
@@ -270,7 +285,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
         remainingFindings = failed;
 
         if (failed.length === 0) {
-          // All findings processed successfully
           break;
         } else {
           this.logger.info(
@@ -283,11 +297,17 @@ export class FindingToBestPracticesAssociationServiceGenAI
         }
       } catch (error) {
         if (error instanceof JSONParseError) {
-          this.logger.error(`Failed to parse AI response: ${error.message}.`);
+          this.logger.error(
+            `Failed to parse AI response: ${error.message}.`,
+            error,
+          );
         } else if (error instanceof z.ZodError) {
-          this.logger.error(`AI response validation failed: ${error.message}.`);
+          this.logger.error(
+            `AI response validation failed: ${error.message}.`,
+            error,
+          );
         } else if (error instanceof Error) {
-          this.logger.error(`AI error: ${error.message}`);
+          this.logger.error(`AI error: ${error.message}`, error);
         }
       }
     }
@@ -331,5 +351,13 @@ export const tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries =
           .positive('GEN_AI_MAX_RETRIES must be a positive number')
           .parse(genAIMaxRetries);
       },
+    },
+  );
+
+export const tokenFindingToBestPracticesAssociationServiceGenAIPromptsDir =
+  createInjectionToken<string>(
+    'FindingToBestPracticesAssociationServiceGenAIPromptsDir',
+    {
+      useValue: join(__dirname, 'prompts'),
     },
   );

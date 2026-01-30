@@ -25,7 +25,7 @@
         - [OpportunityTeamMembers](#opportunityteammembers)
       - [Create organization](#create-organization)
       - [Create a custom mapping](#create-a-custom-mapping)
-      - [Create your prompt](#create-your-prompt)
+      - [Configure AI prompts](#configure-ai-prompts)
   - [Usage](#usage)
     - [Requirements](#requirements)
     - [Local](#local-2)
@@ -46,6 +46,16 @@ To run backend tests locally, we rely on testContainers, which dynamically start
 
 ```shell
 $ pnpm run test:backend
+```
+
+#### AI Service Benchmark
+
+The AI Service Benchmark compares AI-generated best practice associations against the manual mapping. It is excluded from the standard test suite and CI/CD pipeline.
+
+To run it manually, ensure your terminal is connected to an AWS account with Bedrock access:
+
+```shell
+$ npx vitest run libs/backend/scripts/src/lib/AIServiceBenchmark/AIServiceBenchmark.test.ts
 ```
 
 ## Deployment
@@ -192,7 +202,7 @@ The `<CREATE_ORGANIZATION_LAMBDA_NAME>` is the name of the lambda that you can g
 
 By default, no mapping will be used and each association will be defined by the AI model. However, you can change this by creating your own mapping, which will allow you to define your own associations and ensure that the findings are associated with the best practices you want. Please note that only Prowler findings can be associated using this method.
 
-To create a custom mapping, you must create a new file named `scan-findings-to-best-practices-mapping.json` in the S3 bucket named `wafr-automation-tool-${STAGE}`. In this file, we associate an event code with several best practices. Here is the template:
+Create a file named `scan-findings-to-best-practices-mapping.json` in the `data/mappings/` directory. In this file, we associate an event code with several best practices. Here is the template:
 
 ```json
 {
@@ -213,13 +223,52 @@ To create a custom mapping, you must create a new file named `scan-findings-to-b
 | `QUESTION_ID`      | String | Question Primary ID for the best practice. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                   |
 | `BEST_PRACTICE_ID` | String | Best practice Primary ID. Can be found [here](./../../scripts/questions/questions_05072025.json)                                                                                    |
 
-#### Create your prompt
+#### Configure AI prompts
 
-By default there is no AI model. You need to specify the prompt if you want AI associations to be done.
+By default there is no AI model. You need to configure the prompts if you want AI associations to be done.
 The prompt is composed of 2 files, one static and one dynamic. The static part is used to cache what's not going to change through the different AI calls, it contains the best practices list, and the dynamic will contain the findings that we want to associate.
 
-You must create the files `static-prompt.txt` and `dynamic-prompt.txt` in the S3 bucket named `wafr-automation-tool-${STAGE}`.
-In order for them to be recognized by the system, you must include variables, namely `bestPractices` for the static part and `findings` for the dynamic part. The variables are enclosed by two curly brackets, for instance: `{{bestPractices}}` and `{{findings}}`
+##### Setup
+
+Create your prompt files in the `data/prompts/` directory:
+
+```
+data/
+  prompts/
+    static-prompt.txt
+    dynamic-prompt.txt
+```
+
+The `data/` directory is gitignored, so your prompts won't be committed to the repository.
+
+##### Prompt Format
+
+Your prompts must include specific variables that will be replaced at runtime:
+
+- **static-prompt.txt**: Must include `{{bestPractices}}` - Will be replaced with the list of WAFR best practices
+- **dynamic-prompt.txt**: Must include `{{findings}}` - Will be replaced with the security findings to analyze
+
+Example `static-prompt.txt`:
+```
+You are an AWS security expert. Analyze the following findings and associate them with the most relevant best practices.
+
+Best practices:
+{{bestPractices}}
+```
+
+Example `dynamic-prompt.txt`:
+```
+Associate each of the following findings with the appropriate best practices from the list above.
+
+Findings:
+{{findings}}
+
+Return a JSON array with findingId and bestPracticeId for each association.
+```
+
+##### CI/CD Integration
+
+For automated deployments, you can store your prompts in a separate private repository and configure your CI/CD pipeline to copy them to `data/` before building. See the GitHub Actions workflows in `.github/workflows/` for reference.
 
 ## Usage
 

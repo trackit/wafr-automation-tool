@@ -33,7 +33,7 @@ import {
   tokenTypeORMConfigCreator,
 } from './infrastructure';
 import { tokenFakeLambdaService, tokenLambdaService } from './LambdaService';
-import { FakeLogger, tokenLogger } from './Logger';
+import { tokenFakeLogger, tokenLogger } from './Logger';
 import {
   tokenFakeMarketplaceService,
   tokenMarketplaceService,
@@ -63,7 +63,7 @@ import {
 } from './WellArchitectedToolService';
 
 export const registerTestInfrastructure = () => {
-  register(tokenLogger, { useClass: FakeLogger });
+  register(tokenLogger, { useFactory: () => inject(tokenFakeLogger) });
   register(tokenIdGenerator, { useClass: FakeIdGenerator });
   register(tokenStateMachineArn, { useValue: 'arn:test-state-machine-arn' });
   register(tokenS3Bucket, { useValue: 'test-s3-bucket' });

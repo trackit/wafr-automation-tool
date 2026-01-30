@@ -1,15 +1,17 @@
-import { type InferenceConfiguration } from '@aws-sdk/client-bedrock-runtime';
-
-import type { AIService, Prompt, TextComponent } from '@backend/ports';
+import type {
+  AIInferenceConfig,
+  AIService,
+  Prompt,
+  TextComponent,
+} from '@backend/ports';
 import { createInjectionToken } from '@shared/di-container';
 
 export class FakeAIService implements AIService {
   async converse(_args: {
     prompt: Prompt;
     prefill?: TextComponent;
-    inferenceConfig?: InferenceConfiguration;
+    inferenceConfig?: AIInferenceConfig;
   }): Promise<string> {
-    // No-op for fake implementation
     return '';
   }
 }

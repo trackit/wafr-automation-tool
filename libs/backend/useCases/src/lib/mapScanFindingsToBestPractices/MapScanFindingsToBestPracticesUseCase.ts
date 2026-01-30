@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { z } from 'zod';
 
-import { tokenLogger, tokenObjectsStorage } from '@backend/infrastructure';
+import { tokenLogger } from '@backend/infrastructure';
 import { type Pillar, type ScanFinding } from '@backend/models';
 import { createInjectionToken, inject } from '@shared/di-container';
 import { parseJsonObject } from '@shared/utils';
@@ -32,20 +34,40 @@ const MappingSchema = z.record(
   ),
 );
 
+export const tokenMapScanFindingsToBestPracticesMappingsDir =
+  createInjectionToken<string>('MapScanFindingsToBestPracticesMappingsDir', {
+    useValue: join(__dirname, 'mappings'),
+  });
+
 export class MapScanFindingsToBestPracticesUseCaseImpl
   implements MapScanFindingsToBestPracticesUseCase
 {
-  private readonly objectsStorage = inject(tokenObjectsStorage);
   private readonly logger = inject(tokenLogger);
+  private readonly mappingsDir = inject(
+    tokenMapScanFindingsToBestPracticesMappingsDir,
+  );
   static readonly mappingKey = 'scan-findings-to-best-practices-mapping.json';
 
-  private async getMapping(): Promise<z.infer<typeof MappingSchema>> {
-    const rawMapping = await this.objectsStorage.get(
-      MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
-    );
-    if (!rawMapping) {
-      this.logger.info('No mapping found, continuing with an empty one');
-      return {};
+  private getMapping(): z.infer<typeof MappingSchema> {
+    let rawMapping: string;
+    try {
+      rawMapping = readFileSync(
+        join(
+          this.mappingsDir,
+          MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
+        ),
+        'utf-8',
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      ) {
+        this.logger.info('No mapping file found, continuing with an empty one');
+        return {};
+      }
+      throw error;
     }
     return MappingSchema.parse(parseJsonObject(rawMapping));
   }
@@ -56,7 +78,7 @@ export class MapScanFindingsToBestPracticesUseCaseImpl
   }): Promise<ScanFindingsBestPracticesMapping> {
     const { scanFindings, pillars } = args;
 
-    const mapping = await this.getMapping();
+    const mapping = this.getMapping();
     return scanFindings.map((finding) => {
       const eventCode = finding?.eventCode;
       const eventCodeBestPractices =
