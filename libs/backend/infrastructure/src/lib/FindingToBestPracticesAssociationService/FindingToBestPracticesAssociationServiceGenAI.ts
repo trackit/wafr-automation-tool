@@ -256,7 +256,6 @@ export class FindingToBestPracticesAssociationServiceGenAI
     const { scanningTool, findings, pillars, inferenceConfig } = args;
     const prompt = this.fetchPrompt();
 
-
     if (!prompt) {
       this.logger.warn('Prompt not found, not associating findings.');
       return [];
