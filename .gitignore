@@ -563,5 +563,6 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
 .env.*
+!.env.example
 
 .idea

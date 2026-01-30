@@ -10,6 +10,28 @@ By contributing code to WAFR Automation Tool, you warrant that you either have t
 
 Please read our [README](./README.md#getting-started) for information on getting setup to use and develop WAFR Automation Tool locally.
 
+## Development Setup
+
+- Install dependencies with `pnpm install`
+- Use `pnpm run start:webui` for the frontend dev server
+- Use `pnpm run test:backend:init` to initialize backend test settings
+
+## Code Style
+
+- Run `pnpm run lint` to check linting issues
+- Run `pnpm run format:check` to validate formatting
+- Run `pnpm run format` to apply formatting changes
+
+## Testing
+
+- Backend tests: `pnpm run test:backend`
+- Frontend tests: `pnpm run test:webui`
+- Full test suite: `pnpm run test`
+
+## Commit Messages
+
+Use concise, present-tense commit messages that describe the change. Example: `feat: add validation for assessment payload`.
+
 ## Questions?
 
 Please ask all questions in the form of GitHub issues.

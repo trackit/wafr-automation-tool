@@ -42,12 +42,10 @@ The results produced by these tools are stored in Amazon S3 and Amazon Aurora, t
 
 ### Tests
 
-To run backend tests locally, we need to start the local postgres container, initialize test settings and then we can execute the tests.
+To run backend tests locally, we rely on testContainers, which dynamically start isolated database containers at runtime. This removes the need for a locally running PostgreSQL instance or manual Docker Compose setup.
 
 ```shell
-$ docker-compose up -d
-$ npm run test:backend:init
-$ npm run test:backend
+$ pnpm run test:backend
 ```
 
 ## Deployment
@@ -71,7 +69,7 @@ These environment variables need to be set for the backend to be deployed.
 Deploy the backend using [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-deploying.html#serverless-sam-cli-using-package-and-deploy) through:
 
 ```shell
-$ npm run deploy:backend
+$ pnpm run deploy:backend
 ```
 
 ### Post deployment
@@ -114,11 +112,11 @@ Add ACE (Partner Central / ACE Opportunity) integration details in the organizat
 
 ###### Local
 
-The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-Api-***-DefaultExportRole-************"
+The role will be created automatically during the deployment, you don't need to create it. You can find it in the IAM roles under the name "wafr-automation-tool-${STAGE}-Api-\*\*\*-DefaultExportRole-\*\*\*\*\*\*\*\*\*\***"
 
 ###### Remote
 
-- In order to create ACE opportunities on an other account, this role must be created remotely in the target account with the following managed policy :
+In order to create ACE opportunities on an other account, this role must be created remotely in the target account with the following managed policy :
   `AWSPartnerCentralOpportunityManagement`
 
 And with the following [Trust Policy](../webui/src/assets/trust-policy-ace-opportunity.json), where you need to replace:
@@ -225,7 +223,7 @@ In order for them to be recognized by the system, you must include variables, na
 
 ## Usage
 
-In both cases, a complete analysis takes a long time, depending on the size of the account.
+In both cases, a complete analysis takes a long time, depending on the services used within the account.
 
 ### Requirements
 
