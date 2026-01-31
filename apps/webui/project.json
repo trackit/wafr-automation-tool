@@ -27,12 +27,6 @@
       "defaultConfiguration": "development"
     },
     "build": {
-      "inputs": [
-        "production",
-        "^production",
-        "{projectRoot}/.env.production",
-        "{projectRoot}/.env.development"
-      ],
       "defaultConfiguration": "development"
     },
     "deploy": {

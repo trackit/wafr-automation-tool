@@ -44,6 +44,18 @@
     }
   ],
   "targetDefaults": {
+    "build": {
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "runtime": "node -p 'try { require(\"fs\").readFileSync(\"apps/webui/.env.production\", \"utf8\") } catch { \"\" }'"
+        },
+        {
+          "runtime": "node -p 'try { require(\"fs\").readFileSync(\"apps/webui/.env.development\", \"utf8\") } catch { \"\" }'"
+        }
+      ]
+    },
     "e2e-ci--**/*": {
       "dependsOn": ["^build"]
     },
