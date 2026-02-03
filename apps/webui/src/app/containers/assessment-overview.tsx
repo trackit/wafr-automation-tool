@@ -3,6 +3,7 @@ import {
   Calendar,
   Computer,
   Earth,
+  Info,
   LayoutDashboard,
   Server,
 } from 'lucide-react';
@@ -689,8 +690,14 @@ function AssessmentOverview({
       <div className="card bg-white border rounded-lg p-4 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-base-content mb-1">
+            <h3 className="text-lg font-semibold text-base-content mb-1 flex items-center gap-2">
               Billing and Cost Overview
+              <div
+                className="tooltip tooltip-right"
+                data-tip="Costs include all AWS resources in the assessed regions, regardless of any workflow filters."
+              >
+                <Info className="w-4 h-4 text-base-content/50 cursor-help" />
+              </div>
             </h3>
             {billing ? (
               <div className="flex items-center gap-8">
