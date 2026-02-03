@@ -18,9 +18,12 @@ copy_folder() {
 build_files() {
   local src=$1
   local dest=".aws-sam/build/$2"
-
-  if [ ! -d "$dest" ]; then
-    echo "Error: Destination directory $dest does not exist. Lambda may have been renamed." >&2
+  
+  local lambda_dir=$(echo "$2" | cut -d'/' -f1-2)
+  local lambda_path=".aws-sam/build/$lambda_dir"
+  
+  if [ ! -d "$lambda_path" ]; then
+    echo "Error: Lambda directory $lambda_path does not exist. Lambda may have been renamed." >&2
     exit 1
   fi
 
