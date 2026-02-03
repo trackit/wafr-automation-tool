@@ -425,14 +425,13 @@ function AssessmentOverview({
                         verticalAlign="top"
                         align="center"
                         wrapperStyle={{ fontSize: '12px' }}
-                        content={({ payload }) => (
+                        content={() => (
                           <div className="flex flex-row flex-wrap w-full overflow-y-auto">
-                            {payload?.map((entry, index) => {
-                              const item = assessmentSeverities[index];
+                            {assessmentSeverities?.map((entry, index) => {
                               const percentage =
                                 totalSeveritiesCount > 0
                                   ? (
-                                      ((item?.value || 0) /
+                                      ((entry.value || 0) /
                                         totalSeveritiesCount) *
                                       100
                                     ).toFixed(1)
@@ -452,12 +451,14 @@ function AssessmentOverview({
                                     style={{
                                       width: 10,
                                       height: 10,
-                                      backgroundColor: entry.color,
+                                      backgroundColor: getSeverityColor(
+                                        entry.name,
+                                      ),
                                       borderRadius: 2,
                                     }}
                                   />
                                   <span style={{ fontSize: '12px' }}>
-                                    {entry.value} ({percentage}%)
+                                    {entry.name} ({percentage}%)
                                   </span>
                                 </div>
                               );
