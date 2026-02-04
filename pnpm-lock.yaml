@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@aws-amplify/ui-react':
-        specifier: ^6.13.0
-        version: 6.13.0(@aws-amplify/core@6.13.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(aws-amplify@6.15.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(xstate@4.38.3)
+        specifier: ^6.13.2
+        version: 6.13.2(@aws-amplify/core@6.13.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(aws-amplify@6.15.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(xstate@4.38.3)
       '@aws-sdk/client-bedrock-runtime':
         specifier: ^3.958.0
         version: 3.958.0
@@ -358,14 +358,14 @@ packages:
     peerDependencies:
       '@aws-amplify/core': ^6.1.0
 
-  '@aws-amplify/ui-react-core@3.4.5':
-    resolution: {integrity: sha512-bocYdgjBJaeoihLw7EEVewADEvQPyhA6qXCKMmIpb2j/hOTtdpwomYC7O07gQFMay0NhB+MNQ6nJ7W6RDAvsDQ==}
+  '@aws-amplify/ui-react-core@3.4.7':
+    resolution: {integrity: sha512-gMf5TleB9dYj9EyOE/ov81dfI2mc9VQMjIFHVC/+HKHr+vI8TD299BWQ5mEUrQ8m7WuQOWboyLMqeBjK9ri5QQ==}
     peerDependencies:
       aws-amplify: ^6.14.3
       react: ^16.14 || ^17 || ^18 || ^19
 
-  '@aws-amplify/ui-react@6.13.0':
-    resolution: {integrity: sha512-FVVIZ5tfCbFR6vfeAEU2MxQSB0xi9UjsYZzD835UwMGECOcwHD+TdDQjZ0NwpMbwheM8a0oCP9lBW76eug7AcA==}
+  '@aws-amplify/ui-react@6.13.2':
+    resolution: {integrity: sha512-c2srFjX+5TR7qkSQSebwsJ+xxHAB77aTbPj96qj0fNT12nL0nhOwObXCQkSxu8hspUeDXfVB6MDn998pXEnsBg==}
     peerDependencies:
       '@aws-amplify/core': '*'
       aws-amplify: ^6.14.3
@@ -375,8 +375,8 @@ packages:
       aws-amplify:
         optional: true
 
-  '@aws-amplify/ui@6.12.0':
-    resolution: {integrity: sha512-rgO1Jwhfw5LmJhS+zPHXCNcfB0AgtAkO3kZzk6XwYE85P0tiRMmn4Kto+qoiRLbG9hzUMQVYjletzxCr+eu1rA==}
+  '@aws-amplify/ui@6.13.0':
+    resolution: {integrity: sha512-8lN/ZrbtCls2Q6wcWnhUgLX141HOU6bRml0hcCSyuJSP6cl//MJZ1FaSc/3nYr76UTisWbYX3tEOVgKxzhfS9g==}
     peerDependencies:
       '@aws-amplify/core': '*'
       aws-amplify: ^6.14.3
@@ -2500,11 +2500,23 @@ packages:
   '@floating-ui/core@1.7.3':
     resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
 
+  '@floating-ui/core@1.7.4':
+    resolution: {integrity: sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg==}
+
   '@floating-ui/dom@1.7.4':
     resolution: {integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==}
 
+  '@floating-ui/dom@1.7.5':
+    resolution: {integrity: sha512-N0bD2kIPInNHUHehXhMke1rBGs1dwqvC9O9KYMyyjK7iXt7GAhnro7UlcuYcGdS/yYOlq0MAVgrow8IbWJwyqg==}
+
   '@floating-ui/react-dom@2.1.6':
     resolution: {integrity: sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  '@floating-ui/react-dom@2.1.7':
+    resolution: {integrity: sha512-0tLRojf/1Go2JgEVm+3Frg9A3IW8bJgKgdO0BN5RkF//ufuz2joZM63Npau2ff3J6lUVYgDSNzNkR+aH3IVfjg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -8150,6 +8162,9 @@ packages:
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
     engines: {node: '>=10'}
@@ -9122,6 +9137,12 @@ packages:
     peerDependencies:
       react: ^19.2.3
 
+  react-hook-form@7.53.2:
+    resolution: {integrity: sha512-YVel6fW5sOeedd1524pltpHX+jgU2u3DSDtXEaBORNdqiNrsX/nUI/iGXONegttg0mJVnfrIkiV0cmTU6Oo2xw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
+
   react-hook-form@7.65.0:
     resolution: {integrity: sha512-xtOzDz063WcXvGWaHgLNrNzlsdFgtUWcb32E6WFaGTd7kPZG3EeDusjdZfUsPwKCKVXy1ZlntifaHZ4l8pAsmw==}
     engines: {node: '>=18.0.0'}
@@ -9159,8 +9180,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-remove-scroll@2.7.1:
-    resolution: {integrity: sha512-HpMh8+oahmIdOuS5aFKKY6Pyog+FNaZV/XyJOq7b4YFwsFHe5yYfdbIalI4k3vU2nSDql7YskmUseHsRrJqIPA==}
+  react-remove-scroll@2.7.2:
+    resolution: {integrity: sha512-Iqb9NjCCTt6Hf+vOdNIZGdTiH1QSqr27H/Ek9sv/a97gfueI/5h1s3yRi1nngzMUaOOToin5dI1dXKdXiF+u0Q==}
     engines: {node: '>=10'}
     peerDependencies:
       '@types/react': '*'
@@ -10543,7 +10564,7 @@ snapshots:
     dependencies:
       '@aws-amplify/core': 6.13.3
       '@aws-sdk/types': 3.398.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.8.1
 
   '@aws-amplify/storage@6.10.0(@aws-amplify/core@6.13.3)':
@@ -10556,25 +10577,25 @@ snapshots:
       fast-xml-parser: 4.5.3
       tslib: 2.8.1
 
-  '@aws-amplify/ui-react-core@3.4.5(@aws-amplify/core@6.13.3)(@types/react@19.2.8)(aws-amplify@6.15.7)(react@19.2.3)':
+  '@aws-amplify/ui-react-core@3.4.7(@aws-amplify/core@6.13.3)(@types/react@19.2.8)(aws-amplify@6.15.7)(react@19.2.3)':
     dependencies:
-      '@aws-amplify/ui': 6.12.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)
+      '@aws-amplify/ui': 6.13.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)
       '@xstate/react': 3.2.2(@types/react@19.2.8)(react@19.2.3)(xstate@4.38.3)
       aws-amplify: 6.15.7
       lodash: 4.17.21
       react: 19.2.3
-      react-hook-form: 7.65.0(react@19.2.3)
+      react-hook-form: 7.53.2(react@19.2.3)
       xstate: 4.38.3
     transitivePeerDependencies:
       - '@aws-amplify/core'
       - '@types/react'
       - '@xstate/fsm'
 
-  '@aws-amplify/ui-react@6.13.0(@aws-amplify/core@6.13.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(aws-amplify@6.15.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(xstate@4.38.3)':
+  '@aws-amplify/ui-react@6.13.2(@aws-amplify/core@6.13.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(aws-amplify@6.15.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(xstate@4.38.3)':
     dependencies:
       '@aws-amplify/core': 6.13.3
-      '@aws-amplify/ui': 6.12.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)
-      '@aws-amplify/ui-react-core': 3.4.5(@aws-amplify/core@6.13.3)(@types/react@19.2.8)(aws-amplify@6.15.7)(react@19.2.3)
+      '@aws-amplify/ui': 6.13.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)
+      '@aws-amplify/ui-react-core': 3.4.7(@aws-amplify/core@6.13.3)(@types/react@19.2.8)(aws-amplify@6.15.7)(react@19.2.3)
       '@radix-ui/react-direction': 1.1.1(@types/react@19.2.8)(react@19.2.3)
       '@radix-ui/react-dropdown-menu': 2.1.16(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-slider': 1.3.6(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -10592,7 +10613,7 @@ snapshots:
       - '@xstate/fsm'
       - xstate
 
-  '@aws-amplify/ui@6.12.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)':
+  '@aws-amplify/ui@6.13.0(@aws-amplify/core@6.13.3)(aws-amplify@6.15.7)(xstate@4.38.3)':
     dependencies:
       '@aws-amplify/core': 6.13.3
       aws-amplify: 6.15.7
@@ -15688,14 +15709,29 @@ snapshots:
     dependencies:
       '@floating-ui/utils': 0.2.10
 
+  '@floating-ui/core@1.7.4':
+    dependencies:
+      '@floating-ui/utils': 0.2.10
+
   '@floating-ui/dom@1.7.4':
     dependencies:
       '@floating-ui/core': 1.7.3
       '@floating-ui/utils': 0.2.10
 
+  '@floating-ui/dom@1.7.5':
+    dependencies:
+      '@floating-ui/core': 1.7.4
+      '@floating-ui/utils': 0.2.10
+
   '@floating-ui/react-dom@2.1.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@floating-ui/dom': 1.7.4
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
+  '@floating-ui/react-dom@2.1.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@floating-ui/dom': 1.7.5
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
@@ -15822,7 +15858,7 @@ snapshots:
       '@rushstack/rig-package': 0.6.0
       '@rushstack/terminal': 0.19.1(@types/node@22.18.10)
       '@rushstack/ts-command-line': 5.1.1(@types/node@22.18.10)
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimatch: 10.0.3
       resolve: 1.22.10
       semver: 7.5.4
@@ -15850,7 +15886,7 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.17
       caniuse-lite: 1.0.30001762
-      lodash: 4.17.21
+      lodash: 4.17.23
       rslog: 1.2.11
 
   '@module-federation/bridge-react-webpack-plugin@0.18.4':
@@ -17420,14 +17456,14 @@ snapshots:
       aria-hidden: 1.2.6
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      react-remove-scroll: 2.7.1(@types/react@19.2.8)(react@19.2.3)
+      react-remove-scroll: 2.7.2(@types/react@19.2.8)(react@19.2.3)
     optionalDependencies:
       '@types/react': 19.2.8
       '@types/react-dom': 19.2.3(@types/react@19.2.8)
 
   '@radix-ui/react-popper@1.2.8(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
-      '@floating-ui/react-dom': 2.1.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@floating-ui/react-dom': 2.1.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-arrow': 1.1.7(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.8)(react@19.2.3)
       '@radix-ui/react-context': 1.1.2(@types/react@19.2.8)(react@19.2.3)
@@ -20586,7 +20622,7 @@ snapshots:
       graceful-fs: 4.2.11
       is-stream: 2.0.1
       lazystream: 1.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       normalize-path: 3.0.0
       readable-stream: 4.7.0
 
@@ -23105,6 +23141,8 @@ snapshots:
 
   lodash@4.17.21: {}
 
+  lodash@4.17.23: {}
+
   log-symbols@4.1.0:
     dependencies:
       chalk: 4.1.2
@@ -24343,6 +24381,10 @@ snapshots:
       react: 19.2.3
       scheduler: 0.27.0
 
+  react-hook-form@7.53.2(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+
   react-hook-form@7.65.0(react@19.2.3):
     dependencies:
       react: 19.2.3
@@ -24370,7 +24412,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.8
 
-  react-remove-scroll@2.7.1(@types/react@19.2.8)(react@19.2.3):
+  react-remove-scroll@2.7.2(@types/react@19.2.8)(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-remove-scroll-bar: 2.3.8(@types/react@19.2.8)(react@19.2.3)
