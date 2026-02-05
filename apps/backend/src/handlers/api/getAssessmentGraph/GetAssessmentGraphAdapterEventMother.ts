@@ -8,7 +8,7 @@ import { APIGatewayProxyEventMother } from '../../../utils/api/APIGatewayProxyEv
 type GetAssessmentGraphParameters =
   operations['getAssessmentGraph']['parameters']['path'];
 type GetAssessmentQueryStringParameters = NonNullable<
-  operations['getAssessment']['parameters']['query']
+  operations['getAssessmentGraph']['parameters']['query']
 >;
 export class GetAssessmentGraphAdapterEventMother {
   private pathParameters: GetAssessmentGraphParameters;
