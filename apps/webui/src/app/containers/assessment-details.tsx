@@ -1232,7 +1232,9 @@ export function AssessmentDetails() {
           questionId={activeQuestion?.id || ''}
           bestPractice={bestPractice}
           setBestPractice={setBestPractice}
-          isReadOnly={Number(version) !== assessmentData?.latestVersion}
+          isReadOnly={
+            isVersion && Number(version) !== assessmentData?.latestVersion
+          }
         />
       )}
       {bestPracticeDescription && (
