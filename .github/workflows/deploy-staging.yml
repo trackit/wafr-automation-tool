@@ -63,7 +63,10 @@ jobs:
           aws-region: ${{ secrets.STAGING_AWS_REGION }}
 
       - name: Deploy Backend
-        run: pnpm run deploy:backend -- --no-confirm-changeset
+        run: pnpm run deploy:backend:production -- --no-confirm-changeset
 
       - name: Deploy Frontend
         run: pnpm run deploy:webui:production
+
+      - name: Run Database Migrations
+        run: pnpm run migrate:backend

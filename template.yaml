@@ -270,3 +270,6 @@ Outputs:
   JumpInstanceId:
     Description: EC2 instance id for SSM jump
     Value: !Ref JumpInstance
+  MigrationRunnerFunctionArn:
+    Description: Migration Runner Lambda ARN
+    Value: !GetAtt Api.Outputs.MigrationRunnerFunctionArn
