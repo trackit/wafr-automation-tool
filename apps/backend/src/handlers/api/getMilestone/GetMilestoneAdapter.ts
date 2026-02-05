@@ -72,10 +72,10 @@ export class GetMilestoneAdapter {
 
     const user = getUserFromEvent(event);
     const milestone = await this.useCase.getMilestone({
-      organizationDomain: user.organizationDomain,
       assessmentId,
       milestoneId: milestoneIdNumber,
       region,
+      user,
     });
     return this.toGetMilestoneResponse(milestone);
   }

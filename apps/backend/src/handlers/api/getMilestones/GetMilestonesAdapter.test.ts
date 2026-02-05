@@ -94,7 +94,7 @@ describe('getMilestones adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.getMilestones).toHaveBeenCalledWith({
-        organizationDomain: 'test.io',
+        user,
         assessmentId,
         region,
         limit: undefined,
@@ -122,7 +122,7 @@ describe('getMilestones adapter', () => {
       await adapter.handle(event);
 
       expect(useCase.getMilestones).toHaveBeenCalledWith({
-        organizationDomain: 'test.io',
+        user,
         assessmentId,
         region,
         limit,

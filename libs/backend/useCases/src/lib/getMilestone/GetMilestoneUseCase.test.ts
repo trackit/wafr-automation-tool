@@ -9,6 +9,7 @@ import {
   MilestoneMother,
   OrganizationMother,
   PillarMother,
+  UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
@@ -36,6 +37,10 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .build();
@@ -55,12 +60,14 @@ describe('GetMilestoneUseCase', () => {
       .spyOn(fakeWellArchitectedToolService, 'getMilestone')
       .mockResolvedValue(milestone);
 
-    const result = await useCase.getMilestone({
-      assessmentId: assessment.id,
-      organizationDomain: assessment.organization,
-      milestoneId: milestone.id,
-      region: 'us-east-1',
-    });
+    const input = GetMilestoneUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withUser(user)
+      .withMilestoneId(milestone.id)
+      .withRegion('us-east-1')
+      .build();
+
+    const result = await useCase.getMilestone(input);
 
     expect(result).toEqual(milestone);
     expect(fakeWellArchitectedToolService.getMilestone).toHaveBeenCalledWith({
@@ -79,9 +86,11 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
-    const input = GetMilestoneUseCaseArgsMother.basic()
+    const user = UserMother.basic()
       .withOrganizationDomain(organization.domain)
       .build();
+
+    const input = GetMilestoneUseCaseArgsMother.basic().withUser(user).build();
 
     await expect(useCase.getMilestone(input)).rejects.toThrow(
       AssessmentNotFoundError,
@@ -97,6 +106,10 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .build();
@@ -104,7 +117,7 @@ describe('GetMilestoneUseCase', () => {
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(organization.domain)
+      .withUser(user)
       .withMilestoneId(1)
       .withRegion('us-east-1')
       .build();
@@ -122,7 +135,6 @@ describe('GetMilestoneUseCase', () => {
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
       .withMilestoneId(1)
       .withRegion('us-east-1')
       .build();
@@ -145,6 +157,10 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .withExportRegion('us-east-1')
@@ -157,7 +173,7 @@ describe('GetMilestoneUseCase', () => {
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
+      .withUser(user)
       .withMilestoneId(999)
       .withRegion('us-east-1')
       .build();
@@ -176,6 +192,10 @@ describe('GetMilestoneUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .withExportRegion(undefined)
@@ -184,7 +204,7 @@ describe('GetMilestoneUseCase', () => {
 
     const input = GetMilestoneUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
+      .withUser(user)
       .withMilestoneId(1)
       .build();
 

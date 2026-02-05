@@ -8,6 +8,7 @@ import {
   AssessmentMother,
   MilestoneMother,
   OrganizationMother,
+  UserMother,
 } from '@backend/models';
 import { inject, reset } from '@shared/di-container';
 
@@ -34,6 +35,10 @@ describe('GetMilestonesUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .build();
@@ -52,7 +57,7 @@ describe('GetMilestonesUseCase', () => {
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
+      .withUser(user)
       .withRegion('us-east-1')
       .build();
 
@@ -74,9 +79,13 @@ describe('GetMilestonesUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId('non-existent-assessment')
-      .withOrganizationDomain(organization.domain)
+      .withUser(user)
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
@@ -93,6 +102,10 @@ describe('GetMilestonesUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .build();
@@ -100,7 +113,7 @@ describe('GetMilestonesUseCase', () => {
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
+      .withUser(user)
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
@@ -116,7 +129,6 @@ describe('GetMilestonesUseCase', () => {
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
       .build();
 
     await expect(useCase.getMilestones(input)).rejects.toThrow(
@@ -133,6 +145,10 @@ describe('GetMilestonesUseCase', () => {
       .build();
     await fakeOrganizationRepository.save(organization);
 
+    const user = UserMother.basic()
+      .withOrganizationDomain(organization.domain)
+      .build();
+
     const assessment = AssessmentMother.basic()
       .withOrganization(organization.domain)
       .withExportRegion(undefined)
@@ -141,7 +157,7 @@ describe('GetMilestonesUseCase', () => {
 
     const input = GetMilestonesUseCaseArgsMother.basic()
       .withAssessmentId(assessment.id)
-      .withOrganizationDomain(assessment.organization)
+      .withUser(user)
       .withRegion(undefined)
       .build();
 
