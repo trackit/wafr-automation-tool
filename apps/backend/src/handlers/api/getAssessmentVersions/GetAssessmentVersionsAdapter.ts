@@ -55,9 +55,15 @@ export class GetAssessmentVersionsAdapter {
       });
     return {
       versions: versions.map((version) => ({
-        ...version,
+        version: version.version,
+        assessmentId: version.assessmentId,
         createdAt: version.createdAt.toISOString(),
+        createdBy: version.createdBy,
+        executionArn: version.executionArn,
         finishedAt: version.finishedAt?.toISOString(),
+        error: version.error,
+        wafrWorkloadArn: version.wafrWorkloadArn,
+        exportRegion: version.exportRegion,
       })),
       nextToken: responseNextToken,
     };
