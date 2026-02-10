@@ -57,7 +57,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "aws-amplify": "^6.16.2",
     "aws-sdk-client-mock": "^4.1.0",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "lucide-react": "^0.548.0",
     "notistack": "^3.0.2",
     "pg": "^8.16.3",
