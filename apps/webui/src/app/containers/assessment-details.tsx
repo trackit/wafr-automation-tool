@@ -165,13 +165,15 @@ export function AssessmentDetails() {
 
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ['assessment', id],
+        queryKey: ['assessment', id, version],
       });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData(['assessment', id]) as
-        | components['schemas']['AssessmentContent']
-        | undefined;
+      const previousData = queryClient.getQueryData([
+        'assessment',
+        id,
+        version,
+      ]) as components['schemas']['AssessmentContent'] | undefined;
 
       if (!previousData?.pillars) {
         console.log('No previous data found');
@@ -204,7 +206,7 @@ export function AssessmentDetails() {
       }
 
       // Update the cache with our optimistic value
-      queryClient.setQueryData(['assessment', id], newData);
+      queryClient.setQueryData(['assessment', id, version], newData);
 
       // Update local state optimistically if we're viewing the updated pillar/question
       if (
@@ -230,7 +232,10 @@ export function AssessmentDetails() {
       console.log('Error occurred, rolling back to:', context?.previousData);
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(['assessment', id], context.previousData);
+        queryClient.setQueryData(
+          ['assessment', id, version],
+          context.previousData,
+        );
 
         // Find the current pillar and question in the previous data
         if (context.previousData.pillars) {
@@ -252,7 +257,9 @@ export function AssessmentDetails() {
       if (!isReadOnly) {
         console.log('Mutation settled, refetching data');
         // Always refetch after error or success to ensure data is in sync with server
-        await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+        await queryClient.invalidateQueries({
+          queryKey: ['assessment', id, version],
+        });
       }
     },
   });
@@ -270,13 +277,15 @@ export function AssessmentDetails() {
     onMutate: async ({ pillarId, disabled }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ['assessment', id],
+        queryKey: ['assessment', id, version],
       });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData(['assessment', id]) as
-        | components['schemas']['AssessmentContent']
-        | undefined;
+      const previousData = queryClient.getQueryData([
+        'assessment',
+        id,
+        version,
+      ]) as components['schemas']['AssessmentContent'] | undefined;
 
       if (!previousData?.pillars) {
         console.log('No previous data found');
@@ -297,7 +306,7 @@ export function AssessmentDetails() {
       }
 
       // Update the cache with our optimistic value
-      queryClient.setQueryData(['assessment', id], newData);
+      queryClient.setQueryData(['assessment', id, version], newData);
 
       // Update local state optimistically if we're viewing the updated pillar
       if (selectedPillar?.id === pillarId) {
@@ -314,7 +323,10 @@ export function AssessmentDetails() {
       console.log('Error occurred, rolling back to:', context?.previousData);
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(['assessment', id], context.previousData);
+        queryClient.setQueryData(
+          ['assessment', id, version],
+          context.previousData,
+        );
 
         // Find the current pillar in the previous data
         if (context.previousData.pillars) {
@@ -330,7 +342,9 @@ export function AssessmentDetails() {
     onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({
+        queryKey: ['assessment', id, version],
+      });
     },
   });
 
@@ -352,13 +366,15 @@ export function AssessmentDetails() {
     onMutate: async ({ pillarId, questionId, none, disabled }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ['assessment', id],
+        queryKey: ['assessment', id, version],
       });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData(['assessment', id]) as
-        | components['schemas']['AssessmentContent']
-        | undefined;
+      const previousData = queryClient.getQueryData([
+        'assessment',
+        id,
+        version,
+      ]) as components['schemas']['AssessmentContent'] | undefined;
 
       if (!previousData?.pillars) {
         console.log('No previous data found');
@@ -391,7 +407,7 @@ export function AssessmentDetails() {
       }
 
       // Update the cache with our optimistic value
-      queryClient.setQueryData(['assessment', id], newData);
+      queryClient.setQueryData(['assessment', id, version], newData);
 
       // Update local state optimistically if we're viewing the updated question
       if (activeQuestion?.id === questionId) {
@@ -409,7 +425,10 @@ export function AssessmentDetails() {
       console.log('Error occurred, rolling back to:', context?.previousData);
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData) {
-        queryClient.setQueryData(['assessment', id], context.previousData);
+        queryClient.setQueryData(
+          ['assessment', id, version],
+          context.previousData,
+        );
 
         // Find the current question in the previous data
         if (context.previousData.pillars) {
@@ -430,7 +449,9 @@ export function AssessmentDetails() {
     onSettled: async () => {
       console.log('Mutation settled, refetching data');
       // Always refetch after error or success to ensure data is in sync with server
-      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({
+        queryKey: ['assessment', id, version],
+      });
     },
   });
 
@@ -438,10 +459,14 @@ export function AssessmentDetails() {
     mutationFn: () => rescanAssessment({ assessmentId: id || '' }),
     onMutate: async () => {
       setShowRescanModal(false);
-      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({
+        queryKey: ['assessment', id, version],
+      });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['assessment', id] });
+      await queryClient.invalidateQueries({
+        queryKey: ['assessment', id, version],
+      });
       await refetch();
       void navigate(`/`);
     },
