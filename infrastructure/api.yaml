@@ -40,12 +40,24 @@ Parameters:
     Type: String
   S3BucketName:
     Type: String
+  SlackWorkspaceId:
+    Type: String
+    Description: The ID of the Slack workspace authorized with AWS Chatbot (Required for Prod)
+    Default: ''
+  SlackChannelId:
+    Type: String
+    Description: The ID of the Slack channel for notifications (Required for Prod)
+    Default: ''
 
 Conditions:
   IsDebug:
     Fn::Equals:
       - !Ref Debug
       - 'true'
+  IsProd:
+    Fn::Equals:
+      - !Ref Owner
+      - 'prod'
 
 Globals:
   Function:
@@ -1289,6 +1301,863 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - handler.ts
+
+  ErrorNotificationTopic:
+    Type: AWS::SNS::Topic
+    Condition: IsProd
+    Properties:
+      DisplayName: !Sub '${AWS::StackName}-error-alerts'
+      TopicName: !Sub '${AWS::StackName}-error-alerts'
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: ErrorNotificationSNSTopic
+
+  ChatbotIamRole:
+    Type: AWS::IAM::Role
+    Condition: IsProd
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: chatbot.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess
+
+  SlackErrorAlertingChannel:
+    Type: AWS::Chatbot::SlackChannelConfiguration
+    Condition: IsProd
+    Properties:
+      ConfigurationName: !Sub '${AWS::StackName}-slack-config'
+      SlackChannelId: !Ref SlackChannelId
+      SlackWorkspaceId: !Ref SlackWorkspaceId
+      IamRoleArn: !GetAtt ChatbotIamRole.Arn
+      SnsTopicArns:
+        - !Ref ErrorNotificationTopic
+      LoggingLevel: ERROR
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: SlackErrorAlertingChannel
+
+  ListOrganizationNamesErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-ListOrgNames-Errors'
+      AlarmDescription: 'An alarm triggered when ListOrganizationNames function fails'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ListOrganizationNamesFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: ListOrganizationNamesErrorAlarm
+
+  MigrationRunnerErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-MigrationRunner-Errors'
+      AlarmDescription: 'An alarm triggered when MigrationRunner function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref MigrationRunnerFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: MigrationRunnerErrorAlarm
+
+  CreateOrganizationErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-CreateOrganization-Errors'
+      AlarmDescription: 'An alarm triggered when CreateOrganization function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref CreateOrganizationFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: CreateOrganizationErrorAlarm
+
+  StartAssessmentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-StartAssessment-Errors'
+      AlarmDescription: 'An alarm triggered when StartAssessment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref StartAssessmentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: StartAssessmentErrorAlarm
+
+  GetAssessmentsErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetAssessments-Errors'
+      AlarmDescription: 'An alarm triggered when GetAssessments function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetAssessmentsFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetAssessmentsErrorAlarm
+
+  GetAssessmentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetAssessment-Errors'
+      AlarmDescription: 'An alarm triggered when GetAssessment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetAssessmentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetAssessmentErrorAlarm
+
+  DeleteAssessmentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-DeleteAssessment-Errors'
+      AlarmDescription: 'An alarm triggered when DeleteAssessment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref DeleteAssessmentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: DeleteAssessmentErrorAlarm
+
+  UpdateAssessmentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdateAssessment-Errors'
+      AlarmDescription: 'An alarm triggered when UpdateAssessment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdateAssessmentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdateAssessmentErrorAlarm
+
+  RescanAssessmentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-RescanAssessment-Errors'
+      AlarmDescription: 'An alarm triggered when RescanAssessment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref RescanAssessmentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: RescanAssessmentErrorAlarm
+
+  ExportAssessmentWellArchitectedToolErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-ExportWAT-Errors'
+      AlarmDescription: 'An alarm triggered when ExportAssessmentWellArchitectedTool function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ExportAssessmentWellArchitectedToolFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: ExportAssessmentWellArchitectedToolErrorAlarm
+
+  ExportAssessmentToPDFErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-ExportPDF-Errors'
+      AlarmDescription: 'An alarm triggered when ExportAssessmentToPDF function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ExportAssessmentToPDFFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: ExportAssessmentToPDFErrorAlarm
+
+  StartPDFExportErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-StartPDFExport-Errors'
+      AlarmDescription: 'An alarm triggered when StartPDFExport function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref StartPDFExportFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: StartPDFExportErrorAlarm
+
+  ListPDFExportsErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-ListPDFExports-Errors'
+      AlarmDescription: ' An alarm triggered when ListPDFExports function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ListPDFExportsFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: ListPDFExportsErrorAlarm
+
+  GeneratePDFExportURLErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GeneratePDFExportURL-Errors'
+      AlarmDescription: ' An alarm triggered when GeneratePDFExportURL function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GeneratePDFExportURLFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GeneratePDFExportURLErrorAlarm
+
+  DeletePDFExportErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-DeletePDFExport-Errors'
+      AlarmDescription: 'An alarm triggered when DeletePDFExport function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref DeletePDFExportFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: DeletePDFExportErrorAlarm
+
+  CreateMilestoneErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-CreateMilestone-Errors'
+      AlarmDescription: ' An alarm triggered when CreateMilestone function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref CreateMilestoneFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: CreateMilestoneErrorAlarm
+
+  GetMilestonesErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetMilestones-Errors'
+      AlarmDescription: ' An alarm triggered when GetMilestones function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetMilestonesFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetMilestonesErrorAlarm
+
+  GetMilestoneErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetMilestone-Errors'
+      AlarmDescription: ' An alarm triggered when GetMilestone function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetMilestoneFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetMilestoneErrorAlarm
+
+  UpdatePillarErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdatePillar-Errors'
+      AlarmDescription: ' An alarm triggered when UpdatePillar function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdatePillarFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdatePillarErrorAlarm
+
+  UpdateQuestionErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdateQuestion-Errors'
+      AlarmDescription: ' An alarm triggered when UpdateQuestion function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdateQuestionFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdateQuestionErrorAlarm
+
+  GetBestPracticeFindingsErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetBestPracticeFindings-Errors'
+      AlarmDescription: ' An alarm triggered when GetBestPracticeFindings function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetBestPracticeFindingsFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetBestPracticeFindingsErrorAlarm
+
+  UpdateBestPracticeErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdateBestPractice-Errors'
+      AlarmDescription: ' An alarm triggered when UpdateBestPractice function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdateBestPracticeFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdateBestPracticeErrorAlarm
+
+  UpdateFindingErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdateFinding-Errors'
+      AlarmDescription: ' An alarm triggered when UpdateFinding function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdateFindingFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdateFindingErrorAlarm
+
+  AddCommentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-AddComment-Errors'
+      AlarmDescription: 'An alarm triggered when AddComment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AddCommentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: AddCommentErrorAlarm
+
+  UpdateCommentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-UpdateComment-Errors'
+      AlarmDescription: ' An alarm triggered when UpdateComment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref UpdateCommentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: UpdateCommentErrorAlarm
+
+  DeleteCommentErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-DeleteComment-Errors'
+      AlarmDescription: ' An alarm triggered when DeleteComment function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref DeleteCommentFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: DeleteCommentErrorAlarm
+
+  CreateOpportunityErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-CreateOpportunity-Errors'
+      AlarmDescription: ' An alarm triggered when CreateOpportunity function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref CreateOpportunityFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: CreateOpportunityErrorAlarm
+
+  GetAssessmentStepErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetAssessmentStep-Errors'
+      AlarmDescription: ' An alarm triggered when GetAssessmentStep function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetAssessmentStepFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetAssessmentStepErrorAlarm
+
+  GetOrganizationErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetOrganization-Errors'
+      AlarmDescription: ' An alarm triggered when GetOrganization function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetOrganizationFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetOrganizationErrorAlarm
+
+  GetAssessmentGraphErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-GetAssessmentGraph-Errors'
+      AlarmDescription: ' An alarm triggered when GetAssessmentGraph function fails.'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GetAssessmentGraphFunction
+      AlarmActions:
+        - !Ref ErrorNotificationTopic
+      Tags:
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref Project
+        - Key: Name
+          Value: GetAssessmentGraphErrorAlarm
 
 Outputs:
   ApiEndpoint:
