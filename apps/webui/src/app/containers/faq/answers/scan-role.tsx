@@ -4,8 +4,8 @@ import trustPolicyJSON from '../../../../assets/trust-policy-scan.json';
 const ScanRoleAnswer = () => {
   const inlinePolicy = JSON.stringify(inlinePolicyJSON, null, 2);
   const trustPolicy = JSON.stringify(trustPolicyJSON, null, 2)
-    .replace('<ACCOUNT_ID>', import.meta.env.VITE_ACCOUNT_ID)
-    .replace('<ENV>', import.meta.env.VITE_STAGE);
+    .replaceAll('<ACCOUNT_ID>', import.meta.env.VITE_ACCOUNT_ID)
+    .replaceAll('<ENV>', import.meta.env.VITE_STAGE);
 
   return (
     <div className="space-y-6">
