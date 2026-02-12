@@ -14,6 +14,7 @@ import {
 export type GetAssessmentUseCaseArgs = {
   assessmentId: string;
   organizationDomain: string;
+  version?: number;
 };
 
 export type BestPracticesFindingCounts = Record<
@@ -34,6 +35,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
 
   private async getBestPracticeFindings(
     assessment: Assessment,
+    version: number,
   ): Promise<BestPracticesFindingCounts> {
     const bestPracticeFindingCounts: BestPracticesFindingCounts = {};
     const allBestPractices =
@@ -51,7 +53,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       const count = await this.findingsRepository.countBestPracticeFindings({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        version: assessment.latestVersionNumber,
+        version,
         pillarId: entry.pillarId,
         questionId: entry.questionId,
         bestPracticeId: entry.bestPracticeId,
@@ -101,6 +103,7 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
       const assessment = await this.assessmentsRepository.get({
         assessmentId: args.assessmentId,
         organizationDomain: args.organizationDomain,
+        version: args.version,
       });
       if (!assessment) {
         throw new AssessmentNotFoundError({
@@ -109,8 +112,10 @@ export class GetAssessmentUseCaseImpl implements GetAssessmentUseCase {
         });
       }
 
-      const bestPracticesFindingsAmount =
-        await this.getBestPracticeFindings(assessment);
+      const bestPracticesFindingsAmount = await this.getBestPracticeFindings(
+        assessment,
+        args.version ?? assessment.latestVersionNumber,
+      );
 
       return {
         assessment: {

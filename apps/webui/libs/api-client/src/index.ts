@@ -11,6 +11,7 @@ export * from './lib/getAssessment';
 export * from './lib/getAssessmentGraph';
 export * from './lib/getAssessments';
 export * from './lib/getAssessmentStep';
+export * from './lib/getAssessmentVersions';
 export * from './lib/getFindings';
 export * from './lib/getMilestone';
 export * from './lib/getMilestones';

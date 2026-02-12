@@ -14,6 +14,7 @@ import { AssessmentNotFoundError } from '../../errors/AssessmentErrors';
 
 export type GetAssessmentGraphUseCaseArgs = {
   assessmentId: string;
+  version?: number;
   user: User;
 };
 
@@ -45,6 +46,7 @@ export class GetAssessmentGraphUseCaseImpl
     const assessment = await this.assessmentsRepository.get({
       assessmentId: args.assessmentId,
       organizationDomain: args.user.organizationDomain,
+      version: args.version,
     });
     if (!assessment) {
       throw new AssessmentNotFoundError({
@@ -52,17 +54,18 @@ export class GetAssessmentGraphUseCaseImpl
         organizationDomain: args.user.organizationDomain,
       });
     }
+    const version = args.version ?? assessment.latestVersionNumber;
     const [aggregations, totalFindings] = await Promise.all([
       this.findingsRepository.aggregateAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        version: assessment.latestVersionNumber,
+        version,
         fields: GRAPH_FIELDS,
       }),
       this.findingsRepository.countAll({
         assessmentId: assessment.id,
         organizationDomain: assessment.organization,
-        version: assessment.latestVersionNumber,
+        version,
       }),
     ]);
 

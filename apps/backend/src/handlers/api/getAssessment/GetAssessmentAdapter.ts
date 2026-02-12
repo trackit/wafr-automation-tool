@@ -17,6 +17,10 @@ const GetAssessmentPathSchema = z.object({
   assessmentId: z.uuid(),
 }) satisfies ZodType<operations['getAssessment']['parameters']['path']>;
 
+const GetAssessmentQueryArgsSchema = z.object({
+  version: z.coerce.number().int().optional(),
+}) satisfies ZodType<operations['getAssessment']['parameters']['query']>;
+
 export class GetAssessmentAdapter {
   private readonly useCase = inject(tokenGetAssessmentUseCase);
 
@@ -90,8 +94,9 @@ export class GetAssessmentAdapter {
   ): Promise<
     operations['getAssessment']['responses'][200]['content']['application/json']
   > {
-    const { pathParameters } = parseApiEvent(event, {
+    const { pathParameters, queryStringParameters } = parseApiEvent(event, {
       pathSchema: GetAssessmentPathSchema,
+      querySchema: GetAssessmentQueryArgsSchema,
     });
     const { assessmentId } = pathParameters;
 
@@ -101,6 +106,7 @@ export class GetAssessmentAdapter {
       await this.useCase.getAssessment({
         organizationDomain: user.organizationDomain,
         assessmentId,
+        version: queryStringParameters?.version,
       });
 
     return this.toGetAssessmentResponse(

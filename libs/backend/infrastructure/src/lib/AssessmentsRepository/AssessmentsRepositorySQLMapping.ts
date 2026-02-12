@@ -71,10 +71,10 @@ export function toDomainAssessmentVersion(
     createdBy: entity.createdBy,
     createdAt: entity.createdAt,
     executionArn: entity.executionArn ?? '',
-    finishedAt: entity.finishedAt,
-    error: entity.error,
-    wafrWorkloadArn: entity.wafrWorkloadArn,
-    exportRegion: entity.exportRegion,
+    finishedAt: entity.finishedAt ?? undefined,
+    error: entity.error ?? undefined,
+    wafrWorkloadArn: entity.wafrWorkloadArn ?? undefined,
+    exportRegion: entity.exportRegion ?? undefined,
     pillars: (entity.pillars ?? []).map((p) => toDomainPillar(p)),
   };
 }

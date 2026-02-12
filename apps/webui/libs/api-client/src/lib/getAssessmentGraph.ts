@@ -4,9 +4,11 @@ import { apiClient } from './client';
 
 export async function getAssessmentGraph(
   assessmentId: string,
+  version: string | undefined = undefined,
 ): Promise<components['schemas']['AssessmentGraph']> {
-  const response = await apiClient.get<
+  const params = new URLSearchParams();
+  if (version != null) params.set('version', version.toString());
+  return apiClient.get<
     operations['getAssessmentGraph']['responses'][200]['content']['application/json']
-  >(`/assessments/${assessmentId}/graph`);
-  return response;
+  >(`/assessments/${assessmentId}/graph?${params.toString()}`);
 }

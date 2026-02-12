@@ -30,6 +30,13 @@ export class GetAssessmentGraphUseCaseArgsMother {
     return this;
   }
 
+  public withVersion(
+    version: number | undefined,
+  ): GetAssessmentGraphUseCaseArgsMother {
+    this.data.version = version;
+    return this;
+  }
+
   public build(): GetAssessmentGraphUseCaseArgs {
     return this.data;
   }

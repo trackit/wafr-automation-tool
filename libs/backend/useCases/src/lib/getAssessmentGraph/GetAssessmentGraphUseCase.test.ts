@@ -116,6 +116,38 @@ describe('GetAssessmentGraphUseCase', () => {
       findings: 0,
     });
   });
+
+  it('calls repository with provided version when version is specified', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+      setup();
+
+    const assessment = AssessmentMother.basic()
+      .withLatestVersionNumber(3)
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+
+    const getSpy = vitest.spyOn(fakeAssessmentsRepository, 'get');
+    const aggregateSpy = vitest.spyOn(fakeFindingsRepository, 'aggregateAll');
+    const countSpy = vitest.spyOn(fakeFindingsRepository, 'countAll');
+
+    await useCase.getAssessmentGraph(
+      GetAssessmentGraphUseCaseArgsMother.basic()
+        .withAssessmentId(assessment.id)
+        .withOrganization(assessment.organization)
+        .withVersion(2)
+        .build(),
+    );
+
+    expect(getSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2 }),
+    );
+    expect(aggregateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2 }),
+    );
+    expect(countSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2 }),
+    );
+  });
 });
 
 const setup = () => {

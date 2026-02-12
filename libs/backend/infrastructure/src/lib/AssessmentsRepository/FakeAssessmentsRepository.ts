@@ -390,6 +390,26 @@ export class FakeAssessmentsRepository implements AssessmentsRepository {
     assessment.latestVersionNumber = newVersion;
     return nextVersion;
   }
+
+  public async getAllVersions(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{ assessmentVersions: AssessmentVersion[]; nextToken?: string }> {
+    const { assessmentId, organizationDomain, limit, nextToken } = args;
+    const keyPrefix = `${assessmentId}#${organizationDomain}#`;
+
+    const assessmentVersions = Object.entries(this.versions)
+      .filter(([key]) => key.startsWith(keyPrefix))
+      .map(([, version]) => version)
+      .sort((a, b) => b.version - a.version)
+      .slice(0, limit);
+    if (nextToken) {
+      decodeNextToken(nextToken);
+    }
+    return { assessmentVersions, nextToken };
+  }
 }
 
 export const tokenFakeAssessmentsRepository =
