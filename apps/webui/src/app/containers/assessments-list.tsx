@@ -44,6 +44,7 @@ import { ConfirmationModal, StatusBadge } from '@webui/ui';
 
 import { formatACEOpportunity } from '../../lib/assessment-utils';
 import { getThemeColors } from '../../lib/theme-colors';
+import AssessmentVersionsDialog from './assessment-versions-dialog';
 import CreateAWSMilestoneDialog from './create-aws-milestone-dialog';
 import CreateOpportunityDialog from './create-opportunity-dialog';
 import ExportToAWSDialog from './export-to-aws-dialog';
@@ -87,6 +88,7 @@ function AssessmentsList() {
       getAssessments({ limit: 24, search, nextToken: pageParam }),
     getNextPageParam: (lastPage) => lastPage.nextToken,
     initialPageParam: '',
+    refetchInterval: 30000,
     retry: (failureCount, error: ApiError) => {
       if (
         error?.statusCode === HTTP_STATUS_SERVICE_UNAVAILABLE &&
@@ -198,6 +200,47 @@ function AssessmentsList() {
   const [assessmentSteps, setAssessmentSteps] = useState<
     Record<string, string>
   >({});
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'completed' | 'errored' | 'ongoing'
+  >('all');
+
+  const filteredAssessments = useMemo(() => {
+    if (!data?.pages) return [];
+
+    return data.pages.map((page) => ({
+      ...page,
+      assessments: page.assessments?.filter((assessment) => {
+        if (statusFilter === 'all') return true;
+        if (statusFilter === 'errored') return !!assessment.error;
+        if (statusFilter === 'completed')
+          return !!assessment.finishedAt && !assessment.error;
+        if (statusFilter === 'ongoing')
+          return !assessment.finishedAt && !assessment.error;
+        return true;
+      }),
+    }));
+  }, [data, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    if (!data?.pages) return { all: 0, completed: 0, errored: 0, ongoing: 0 };
+
+    let all = 0;
+    let completed = 0;
+    let errored = 0;
+    let ongoing = 0;
+
+    data.pages.forEach((page) => {
+      page.assessments?.forEach((assessment) => {
+        all++;
+        if (assessment.error) errored++;
+        else if (assessment.finishedAt) completed++;
+        else ongoing++;
+      });
+    });
+
+    return { all, completed, errored, ongoing };
+  }, [data]);
+
   const knownRef = useRef<Record<string, boolean>>({});
   const pendingRef = useRef<Record<string, boolean>>({});
 
@@ -421,12 +464,41 @@ function AssessmentsList() {
           </div>
         </div>
       )}
-
+      <div className="flex flex-row gap-2 mb-4">
+        <button
+          className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary btn-soft' : 'btn-ghost'}`}
+          onClick={() => setStatusFilter('all')}
+        >
+          All
+          <span className="badge badge-sm ml-1">{statusCounts.all}</span>
+        </button>
+        <button
+          className={`btn btn-sm ${statusFilter === 'completed' ? 'btn-success btn-soft' : 'btn-ghost'}`}
+          onClick={() => setStatusFilter('completed')}
+        >
+          Completed
+          <span className="badge badge-sm ml-1">{statusCounts.completed}</span>
+        </button>
+        <button
+          className={`btn btn-sm ${statusFilter === 'errored' ? 'btn-error btn-soft' : 'btn-ghost'}`}
+          onClick={() => setStatusFilter('errored')}
+        >
+          Errored
+          <span className="badge badge-sm ml-1">{statusCounts.errored}</span>
+        </button>
+        <button
+          className={`btn btn-sm ${statusFilter === 'ongoing' ? 'btn-primary btn-soft' : 'btn-ghost'}`}
+          onClick={() => setStatusFilter('ongoing')}
+        >
+          Ongoing
+          <span className="badge badge-sm ml-1">{statusCounts.ongoing}</span>
+        </button>
+      </div>
       <div
         className="grid gap-4 rounded-lg border border-neutral-content bg-base-100 shadow-md p-4 w-full"
         style={{
           gridTemplateColumns: `repeat(auto-fit, minmax(300px, ${
-            data?.pages?.[0]?.assessments?.length === 1 && isLargeScreen
+            filteredAssessments[0]?.assessments?.length === 1 && isLargeScreen
               ? '50%'
               : '1fr'
           }))`,
@@ -440,13 +512,20 @@ function AssessmentsList() {
             ></div>
           </div>
         ) : null}
-        {data?.pages.length === 0 ||
-        data?.pages?.[0]?.assessments?.length === 0 ? (
+
+        {!isLoading &&
+        filteredAssessments.every(
+          (page) => !page.assessments || page.assessments.length === 0,
+        ) ? (
           <div className="text-center text-base-content/80 col-span-full">
-            No assessments found
+            {data?.pages.length === 0 ||
+            data?.pages?.[0]?.assessments?.length === 0
+              ? 'No assessments found'
+              : 'No assessments match the selected filter'}
           </div>
         ) : null}
-        {data?.pages.map((page) =>
+
+        {filteredAssessments.map((page) =>
           page.assessments?.map((assessment) => (
             <div
               className={`
@@ -509,6 +588,11 @@ function AssessmentsList() {
                             assessmentId={assessment.id ?? ''}
                             askForRegion={!assessment.exportRegion}
                             onSuccess={refetch}
+                          />
+                        </li>
+                        <li>
+                          <AssessmentVersionsDialog
+                            assessmentId={assessment.id ?? ''}
                           />
                         </li>
                         <li>

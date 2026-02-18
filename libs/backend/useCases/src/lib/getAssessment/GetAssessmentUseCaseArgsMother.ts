@@ -28,6 +28,13 @@ export class GetAssessmentUseCaseArgsMother {
     return this;
   }
 
+  public withVersion(
+    version: number | undefined,
+  ): GetAssessmentUseCaseArgsMother {
+    this.data.version = version;
+    return this;
+  }
+
   public build(): GetAssessmentUseCaseArgs {
     return this.data;
   }

@@ -40,6 +40,7 @@ interface FindingsDetailsProps {
   bestPractice: components['schemas']['BestPractice'];
   pillarId: string;
   questionId: string;
+  isReadOnly?: boolean;
 }
 
 export type Severity =
@@ -113,6 +114,7 @@ function FindingItem({
   showCommentsFor,
   onComment,
   commentBtnRefs,
+  isReadOnly,
 }: {
   finding: components['schemas']['Finding'];
   searchQuery: string;
@@ -123,6 +125,7 @@ function FindingItem({
     e: React.MouseEvent<HTMLButtonElement>,
   ) => void;
   commentBtnRefs: RefObject<{ [id: string]: HTMLButtonElement | null }>;
+  isReadOnly?: boolean;
 }) {
   const remediations = useMemo(() => {
     const isUrl = (str: string) => {
@@ -158,6 +161,7 @@ function FindingItem({
           {!finding.hidden && (
             <button
               className="tooltip tooltip-left btn btn-xs btn-primary btn-outline mt-[-0.5em]"
+              disabled={isReadOnly}
               data-tip="Force resolve"
               onClick={() => {
                 onHide(finding.id || '', !finding.hidden);
@@ -275,6 +279,7 @@ function FindingsDetails({
   pillarId,
   questionId,
   setBestPractice,
+  isReadOnly,
 }: FindingsDetailsProps & {
   setBestPractice: (
     bestPractice: components['schemas']['BestPractice'] | null,
@@ -386,14 +391,17 @@ function FindingsDetails({
     }: {
       findingId: string;
       hidden?: boolean;
-    }) =>
-      updateFinding({
+    }) => {
+      if (isReadOnly)
+        throw new Error('Cannot update findings in read-only mode');
+      return updateFinding({
         assessmentId,
         findingId,
         findingDto: {
           ...(hidden ? { hidden } : {}),
         },
-      }),
+      });
+    },
     onMutate: async () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
@@ -428,6 +436,8 @@ function FindingsDetails({
   >({
     mutationFn: async (args) => {
       const { findingId, text } = args;
+      if (isReadOnly)
+        throw new Error('Cannot update findings in read-only mode');
       const response = await addComment({
         assessmentId,
         findingId,
@@ -492,7 +502,9 @@ function FindingsDetails({
       { previousText?: string; findingId: string; commentId: string }
     >({
       mutationFn: async ({ findingId, commentId, text }) => {
-        await updateComment({
+        if (isReadOnly)
+          throw new Error('Cannot update findings in read-only mode');
+        return await updateComment({
           assessmentId,
           findingId,
           commentId,
@@ -545,6 +557,8 @@ function FindingsDetails({
     { commentId: string }
   >({
     mutationFn: async ({ findingId, commentId }) => {
+      if (isReadOnly)
+        throw new Error('Cannot update findings in read-only mode');
       await deleteComment({
         assessmentId,
         findingId,
@@ -730,6 +744,7 @@ function FindingsDetails({
                     showCommentsFor={showCommentsFor}
                     onComment={(f, e) => handleCommentClick(e, f)}
                     commentBtnRefs={commentBtnRefs}
+                    isReadOnly={isReadOnly}
                   />
                 </div>
               ))}
@@ -769,6 +784,7 @@ function FindingsDetails({
               maxHeight={commentPos.maxHeight}
               minHeight={commentPos.minHeight}
               isUpdateCommentPending={isUpdateCommentPending}
+              isReadOnly={isReadOnly}
               onAdded={(text: string) => {
                 mutateComment({
                   findingId: showCommentsFor.id ?? '',

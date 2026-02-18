@@ -465,4 +465,40 @@ export class AssessmentsRepositorySQL implements AssessmentsRepository {
       ? toDomainAssessmentVersion(newAssessmentVersion)
       : undefined;
   }
+
+  public async getAllVersions(args: {
+    assessmentId: string;
+    organizationDomain: string;
+    limit?: number;
+    nextToken?: string;
+  }): Promise<{
+    assessmentVersions: AssessmentVersion[];
+    nextToken?: string;
+  }> {
+    const { assessmentId, organizationDomain, limit = 20, nextToken } = args;
+    const repo = await this.repo(AssessmentVersionEntity, organizationDomain);
+
+    const decoded = decodeNextToken(nextToken) as
+      | { offset?: number }
+      | undefined;
+    const offset = decoded?.offset ?? 0;
+
+    const [entities, total] = await repo.findAndCount({
+      where: { assessmentId },
+      order: { version: 'DESC' },
+      skip: offset,
+      take: limit,
+    });
+
+    const items = entities.map((entity) => {
+      const result = toDomainAssessmentVersion(entity);
+      return result;
+    });
+
+    const nextOffset = offset + items.length;
+    const nextTk =
+      nextOffset < total ? encodeNextToken({ offset: nextOffset }) : undefined;
+
+    return { assessmentVersions: items, nextToken: nextTk };
+  }
 }

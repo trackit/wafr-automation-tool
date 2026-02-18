@@ -13,6 +13,7 @@ export * from './getAssessment';
 export * from './getAssessmentGraph';
 export * from './getAssessments';
 export * from './getAssessmentStep';
+export * from './getAssessmentVersions';
 export * from './getBestPracticeFindings';
 export * from './getBillingInformation';
 export * from './getMilestone';

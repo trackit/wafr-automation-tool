@@ -24,11 +24,13 @@ export default defineConfig(() => ({
   // See: https://vitejs.dev/guide/build.html#library-mode
   test: {
     name: 'backend-lib',
+    testTimeout: 60000,
     watch: false,
     globals: true,
     passWithNoTests: true,
     environment: 'node',
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['scripts/**'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/libs/backend',

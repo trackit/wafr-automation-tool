@@ -18,6 +18,10 @@ export function App() {
             path="/assessments/:id/milestones/:milestoneId"
             element={<AssessmentDetails />}
           />
+          <Route
+            path="/assessments/:id/versions/:version"
+            element={<AssessmentDetails />}
+          />
         </Routes>
       </div>
     </div>

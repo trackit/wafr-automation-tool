@@ -39,6 +39,15 @@ describe('GetAssessmentGraphAdapter', () => {
       const response = await adapter.handle(event);
       expect(response.statusCode).toBe(400);
     });
+
+    it('should pass without query parameters', async () => {
+      const { adapter } = setup();
+
+      const event = GetAssessmentGraphAdapterEventMother.basic().build();
+
+      const response = await adapter.handle(event);
+      expect(response.statusCode).toBe(200);
+    });
   });
 
   describe('useCase', () => {
@@ -55,6 +64,24 @@ describe('GetAssessmentGraphAdapter', () => {
       expect(useCase.getAssessmentGraph).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           assessmentId,
+        }),
+      );
+    });
+
+    it('should call useCase with version', async () => {
+      const { adapter, useCase } = setup();
+
+      const version = 1;
+      const event = GetAssessmentGraphAdapterEventMother.basic()
+        .withAssessmentId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withVersion(version)
+        .build();
+
+      await adapter.handle(event);
+
+      expect(useCase.getAssessmentGraph).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          version,
         }),
       );
     });

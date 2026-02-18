@@ -563,5 +563,11 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
 .env.*
+!.env.example
 
 .idea
+
+data/*
+!data/README.md
+
+libs/backend/scripts/src/lib/AIServiceBenchmark/report-*.json

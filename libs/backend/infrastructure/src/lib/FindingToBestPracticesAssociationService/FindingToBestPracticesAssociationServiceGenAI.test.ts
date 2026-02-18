@@ -8,12 +8,18 @@ import {
 import { inject, register, reset } from '@shared/di-container';
 
 import { tokenAIService } from '../AIService';
-import { tokenFakeObjectsStorage } from '../ObjectsStorage';
 import { registerTestInfrastructure } from '../registerTestInfrastructure';
 import {
   FindingToBestPracticesAssociationServiceGenAI,
   tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
 } from './FindingToBestPracticesAssociationServiceGenAI';
+
+vi.mock('node:fs', () => ({
+  readFileSync: vi.fn(),
+}));
+
+import { readFileSync } from 'node:fs';
+const mockedReadFileSync = vi.mocked(readFileSync);
 
 describe('FindingToBestPracticesAssociationServiceGenAI', () => {
   describe('replacePromptVariables', () => {
@@ -418,17 +424,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
 
   describe('associateFindingsToBestPractices', () => {
     it('should associate findings to best practices', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.\n';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.\n';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -508,17 +514,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid JSON AI response', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -578,17 +584,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry on invalid AI response format', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -650,11 +656,32 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should return an empty array if no prompt is found', async () => {
-      const {
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects = {};
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      mockedReadFileSync.mockImplementation(() => {
+        throw new Error('File not found');
+      });
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings: [],
+            pillars: [],
+          },
+        );
+      expect(result).toEqual([]);
+    });
+
+    it('should return an empty array if prompt files are empty', async () => {
+      const { findingToBestPracticesAssociationServiceGenAI } = setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return '';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const result =
         await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
           {
@@ -667,17 +694,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should retry only failed findings and preserve successful ones', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.\n';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.\n';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -775,17 +802,17 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
     });
 
     it('should return partial results when some findings continue to fail after max retries', async () => {
-      const {
-        aiService,
-        findingToBestPracticesAssociationServiceGenAI,
-        fakeObjectsStorage,
-      } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -860,14 +887,16 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
         aiService,
         findingToBestPracticesAssociationServiceGenAI,
         maxRetries,
-        fakeObjectsStorage,
       } = setup();
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.staticPromptKey
-      ] = 'This is a prompt.';
-      fakeObjectsStorage.objects[
-        FindingToBestPracticesAssociationServiceGenAI.dynamicPromptKey
-      ] = 'This is the dynamic part of the prompt.';
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
       const pillars = [
         PillarMother.basic()
           .withId('pillar-1')
@@ -908,6 +937,8 @@ const setup = () => {
   register(tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries, {
     useValue: 3,
   });
+  mockedReadFileSync.mockReset();
+  FindingToBestPracticesAssociationServiceGenAI.clearPromptCache();
   const findingToBestPracticesAssociationServiceGenAI =
     new FindingToBestPracticesAssociationServiceGenAI();
   return {
@@ -915,7 +946,6 @@ const setup = () => {
     maxRetries: inject(
       tokenFindingToBestPracticesAssociationServiceGenAIMaxRetries,
     ),
-    fakeObjectsStorage: inject(tokenFakeObjectsStorage),
     findingToBestPracticesAssociationServiceGenAI,
   };
 };

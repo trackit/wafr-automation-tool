@@ -154,6 +154,52 @@ describe('GetAssessmentUseCase', () => {
       vitest.useRealTimers();
     }
   });
+
+  it('calls repository with provided version when version is specified', async () => {
+    const { useCase, fakeAssessmentsRepository, fakeFindingsRepository } =
+      setup();
+
+    const bestPractice = BestPracticeMother.basic().build();
+    const question = QuestionMother.basic()
+      .withBestPractices([bestPractice])
+      .build();
+    const pillar = PillarMother.basic().withQuestions([question]).build();
+
+    const assessment = AssessmentMother.basic()
+      .withLatestVersionNumber(3)
+      .build();
+
+    const assessmentVersion = AssessmentVersionMother.basic()
+      .withAssessmentId(assessment.id)
+      .withVersion(2)
+      .withPillars([pillar])
+      .build();
+    await fakeAssessmentsRepository.save(assessment);
+    await fakeAssessmentsRepository.createVersion({
+      assessmentVersion,
+      organizationDomain: assessment.organization,
+    });
+
+    const getSpy = vitest.spyOn(fakeAssessmentsRepository, 'get');
+    const countBestPracticeFindingsSpy = vitest.spyOn(
+      fakeFindingsRepository,
+      'countBestPracticeFindings',
+    );
+    const input = GetAssessmentUseCaseArgsMother.basic()
+      .withAssessmentId(assessment.id)
+      .withOrganizationDomain(assessment.organization)
+      .withVersion(2)
+      .build();
+
+    await useCase.getAssessment(input);
+
+    expect(getSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2 }),
+    );
+    expect(countBestPracticeFindingsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2 }),
+    );
+  });
 });
 
 const setup = () => {

@@ -124,6 +124,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{assessmentId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve all versions for a specific assessment
+         * @description Fetches all versions associated with a specific assessment.
+         */
+        get: operations["getAssessmentVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}/milestones": {
         parameters: {
             query?: never;
@@ -490,6 +510,35 @@ export interface components {
             /** @description Total number of findings */
             findings: number;
         };
+        /** AssessmentVersion */
+        AssessmentVersion: {
+            version: number;
+            assessmentId: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string;
+            executionArn?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            error?: components["schemas"]["AssessmentError"];
+            wafrWorkloadArn?: string;
+            exportRegion?: string;
+            pillars: components["schemas"]["Pillar"][];
+        };
+        /** AssessmentVersionSummary */
+        AssessmentVersionSummary: {
+            version: number;
+            assessmentId: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string;
+            executionArn?: string;
+            /** Format: date-time */
+            finishedAt?: string;
+            error?: components["schemas"]["AssessmentError"];
+            wafrWorkloadArn?: string;
+            exportRegion?: string;
+        };
         /** @description A finding within an assessment, providing details on the issue found */
         Finding: {
             /** @description Unique identifier of the finding */
@@ -792,7 +841,10 @@ export interface operations {
     };
     getAssessment: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The version of the assessment */
+                version?: number;
+            };
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to retrieve */
@@ -959,7 +1011,10 @@ export interface operations {
     };
     getAssessmentGraph: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The version of the assessment */
+                version?: number;
+            };
             header?: never;
             path: {
                 /** @description The unique ID of the assessment to retrieve the graph of findings for */
@@ -1021,6 +1076,62 @@ export interface operations {
                 content: {
                     "application/json": {
                         step: components["schemas"]["AssessmentStep"];
+                    };
+                };
+            };
+            /** @description An issue occurred while trying to retrieve the organization of the user */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The specified assessment could not be found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getAssessmentVersions: {
+        parameters: {
+            query?: {
+                /** @description Maximum number of versions to return */
+                limit?: number;
+                /** @description Token for pagination. */
+                nextToken?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The unique ID of the assessment to retrieve versions for */
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of versions related to the specified assessment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        versions: components["schemas"]["AssessmentVersionSummary"][];
+                        /**
+                         * @description Token for pagination. If there are more versions than can be returned in a single response,
+                         *     this token will allow you to retrieve the next set of results.
+                         */
+                        nextToken?: string;
                     };
                 };
             };

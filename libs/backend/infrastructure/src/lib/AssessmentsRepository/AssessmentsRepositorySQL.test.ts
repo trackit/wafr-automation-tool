@@ -1739,6 +1739,229 @@ describe('AssessmentsRepositorySQL', () => {
       expect(retrieved2).toBeDefined();
     });
   });
+
+  describe('getAllVersions', () => {
+    it('should return a list of versions for an assessment', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+
+      const assessmentVersion = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion,
+        organizationDomain: assessment.organization,
+      });
+
+      const result = await repository.getAllVersions({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(result).toEqual({
+        assessmentVersions: [assessmentVersion],
+        nextToken: undefined,
+      });
+    });
+
+    it('should return versions ordered by version number descending', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+
+      await repository.save(assessment);
+
+      const version1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: assessment.organization,
+      });
+
+      await repository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy: 'user2',
+          createdAt: new Date(),
+          pillars: [],
+          executionArn: '',
+        },
+      });
+
+      const result = await repository.getAllVersions({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+      });
+
+      expect(result.assessmentVersions).toHaveLength(2);
+      expect(result.assessmentVersions[0].version).toBe(2);
+      expect(result.assessmentVersions[1].version).toBe(1);
+    });
+
+    it('should return versions within the limit', async () => {
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+
+      await repository.save(assessment);
+
+      const version1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: assessment.organization,
+      });
+
+      await repository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy: 'user1',
+          createdAt: new Date(),
+          pillars: [],
+          executionArn: '',
+        },
+      });
+
+      const result = await repository.getAllVersions({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        limit: 1,
+      });
+
+      expect(result.assessmentVersions).toHaveLength(1);
+      expect(result.assessmentVersions[0].version).toBe(2);
+      expect(result.nextToken).toBeDefined();
+    });
+
+    it('should return versions after the next token', async () => {
+      vitest.useFakeTimers();
+      const { repository } = setup();
+
+      const assessment = AssessmentMother.basic()
+        .withOrganization('organization1')
+        .withLatestVersionNumber(1)
+        .build();
+
+      const version1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment.id)
+        .withVersion(assessment.latestVersionNumber)
+        .build();
+
+      await repository.save(assessment);
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: assessment.organization,
+      });
+
+      vitest.advanceTimersByTime(1);
+
+      await repository.createNextAssessmentVersion({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        assessmentVersion: {
+          createdBy: 'user1',
+          createdAt: new Date(),
+          pillars: [],
+          executionArn: '',
+        },
+      });
+
+      const nextTokenAssessment = {
+        offset: 1,
+      };
+      const nextToken = encodeNextToken(nextTokenAssessment);
+
+      const result = await repository.getAllVersions({
+        assessmentId: assessment.id,
+        organizationDomain: assessment.organization,
+        nextToken,
+      });
+
+      expect(result.assessmentVersions).toHaveLength(1);
+      expect(result.assessmentVersions[0].version).toBe(1);
+      expect(result.nextToken).toBeUndefined();
+
+      vitest.useRealTimers();
+    });
+
+    it('should return empty list for non-existent assessment', async () => {
+      const { repository } = setup();
+
+      const result = await repository.getAllVersions({
+        assessmentId: '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed',
+        organizationDomain: 'organization1',
+      });
+
+      expect(result).toEqual({
+        assessmentVersions: [],
+        nextToken: undefined,
+      });
+    });
+
+    it('should only return versions for the specified assessment', async () => {
+      const { repository } = setup();
+
+      const assessment1 = AssessmentMother.basic()
+        .withId('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+
+      const assessment2 = AssessmentMother.basic()
+        .withId('2b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed')
+        .withOrganization('organization1')
+        .build();
+
+      const version1 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment1.id)
+        .withVersion(assessment1.latestVersionNumber)
+        .build();
+
+      const version2 = AssessmentVersionMother.basic()
+        .withAssessmentId(assessment2.id)
+        .withVersion(assessment2.latestVersionNumber)
+        .build();
+
+      await repository.save(assessment1);
+      await repository.save(assessment2);
+      await repository.createVersion({
+        assessmentVersion: version1,
+        organizationDomain: assessment1.organization,
+      });
+      await repository.createVersion({
+        assessmentVersion: version2,
+        organizationDomain: assessment2.organization,
+      });
+
+      const result = await repository.getAllVersions({
+        assessmentId: assessment1.id,
+        organizationDomain: assessment1.organization,
+      });
+
+      expect(result.assessmentVersions).toHaveLength(1);
+      expect(result.assessmentVersions[0].assessmentId).toBe(assessment1.id);
+    });
+  });
 });
 
 const setup = () => {

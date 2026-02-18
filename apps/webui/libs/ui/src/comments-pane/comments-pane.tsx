@@ -8,6 +8,7 @@ interface CommentsPaneProps {
   maxHeight: number;
   minHeight: number;
   isUpdateCommentPending: boolean;
+  isReadOnly?: boolean;
   deletingCommentIds: Set<string>;
   onCancel: () => void;
   onAdded: (text: string) => void;
@@ -34,6 +35,7 @@ export function CommentsPane({
   maxHeight,
   minHeight,
   isUpdateCommentPending,
+  isReadOnly,
   deletingCommentIds,
   onCancel,
   onAdded,
@@ -135,6 +137,7 @@ export function CommentsPane({
                         disabled={
                           isUpdateCommentPending || isPending || isDeleting
                         }
+                        hidden={isReadOnly}
                         className="text-gray-500 cursor-pointer"
                       >
                         <Pen className="w-4 h-4" />
@@ -143,6 +146,7 @@ export function CommentsPane({
                     <button
                       onClick={() => handleDelete(c.id)}
                       disabled={isDeleting || isPending}
+                      hidden={isReadOnly}
                       className="text-gray-500 cursor-pointer"
                     >
                       {isDeleting ? (
@@ -191,7 +195,7 @@ export function CommentsPane({
           );
         })}
       </div>
-      <div>
+      <div hidden={isReadOnly}>
         <textarea
           rows={1}
           className="textarea textarea-bordered rounded-xl w-full resize-none leading-snug py-1"

@@ -1,21 +1,30 @@
-import {
-  registerTestInfrastructure,
-  tokenFakeObjectsStorage,
-} from '@backend/infrastructure';
+import { registerTestInfrastructure } from '@backend/infrastructure';
 import {
   BestPracticeMother,
   PillarMother,
   QuestionMother,
   ScanFindingMother,
 } from '@backend/models';
-import { inject, reset } from '@shared/di-container';
+import { reset } from '@shared/di-container';
 
 import { MapScanFindingsToBestPracticesUseCaseImpl } from './MapScanFindingsToBestPracticesUseCase';
 import { MapScanFindingsToBestPracticesUseCaseArgsMother } from './MapScanFindingsToBestPracticesUseCaseArgsMother';
 
+vi.mock('node:fs', () => ({
+  readFileSync: vi.fn(),
+}));
+
+import { readFileSync } from 'node:fs';
+const mockedReadFileSync = vi.mocked(readFileSync);
+
 describe('MapScanFindingsToBestPracticesUseCase', () => {
-  it('should return empty best practices arrays if no mapping exists', async () => {
+  it('should return empty best practices arrays if no mapping file exists', async () => {
     const { useCase } = setup();
+    const enoentError = new Error('ENOENT: no such file or directory');
+    (enoentError as NodeJS.ErrnoException).code = 'ENOENT';
+    mockedReadFileSync.mockImplementation(() => {
+      throw enoentError;
+    });
 
     const mockedScanFindings = [
       ScanFindingMother.basic().withId('tool#1').build(),
@@ -35,7 +44,7 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
   });
 
   it('should map scan findings to best practices when it is possible', async () => {
-    const { useCase, fakeObjectsStorage } = setup();
+    const { useCase } = setup();
 
     const mockedScanFindings = [
       ScanFindingMother.basic()
@@ -52,9 +61,8 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
         .build(),
     ];
 
-    await fakeObjectsStorage.put({
-      key: MapScanFindingsToBestPracticesUseCaseImpl.mappingKey,
-      body: JSON.stringify({
+    mockedReadFileSync.mockReturnValue(
+      JSON.stringify({
         eventCode1: [
           {
             pillar: 'security',
@@ -75,7 +83,7 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
           },
         ],
       }),
-    });
+    );
 
     const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
       .withScanFindings(mockedScanFindings)
@@ -147,14 +155,66 @@ describe('MapScanFindingsToBestPracticesUseCase', () => {
       },
     ]);
   });
+
+  it('should throw when mapping file contains invalid JSON', async () => {
+    const { useCase } = setup();
+    mockedReadFileSync.mockReturnValue('{ invalid json }');
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      /Failed to parse JSON/,
+    );
+  });
+
+  it('should throw when mapping file fails schema validation', async () => {
+    const { useCase } = setup();
+    mockedReadFileSync.mockReturnValue(
+      JSON.stringify({
+        eventCode1: [
+          {
+            pillar: 'security',
+          },
+        ],
+      }),
+    );
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      /invalid_type/,
+    );
+  });
+
+  it('should re-throw non-ENOENT file system errors', async () => {
+    const { useCase } = setup();
+    const permissionError = new Error('EACCES: permission denied');
+    (permissionError as NodeJS.ErrnoException).code = 'EACCES';
+    mockedReadFileSync.mockImplementation(() => {
+      throw permissionError;
+    });
+
+    const input = MapScanFindingsToBestPracticesUseCaseArgsMother.basic()
+      .withScanFindings([ScanFindingMother.basic().withId('tool#1').build()])
+      .build();
+
+    await expect(useCase.mapScanFindingsToBestPractices(input)).rejects.toThrow(
+      'EACCES: permission denied',
+    );
+  });
 });
 
 const setup = () => {
   reset();
   registerTestInfrastructure();
+  mockedReadFileSync.mockReset();
+  MapScanFindingsToBestPracticesUseCaseImpl.clearMappingCache();
 
   return {
     useCase: new MapScanFindingsToBestPracticesUseCaseImpl(),
-    fakeObjectsStorage: inject(tokenFakeObjectsStorage),
   };
 };
