@@ -67,3 +67,6 @@ jobs:
 
       - name: Deploy Frontend
         run: pnpm run deploy:webui:production
+
+      - name: Run Database Migrations
+        run: pnpm run migrate:backend
