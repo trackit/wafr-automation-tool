@@ -31,6 +31,10 @@
         "cwd": "apps/backend"
       }
     },
+    "migrate": {
+      "command": "sh scripts/backend/migrate.sh",
+      "options": { "cwd": "." }
+    },
     "deploy": {
       "command": "sh scripts/backend/deploy.sh",
       "options": {

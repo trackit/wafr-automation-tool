@@ -10,6 +10,7 @@
     "test:webui": "nx run-many -t test -p tag:scope:webui tag:scope:webui-libs tag:scope:shared",
     "lint:webui": "nx run-many -t lint -p tag:scope:webui tag:scope:webui-libs tag:scope:shared",
     "build:backend": "nx build backend --skipNxCache",
+    "deploy:backend:dev": "nx deploy backend && nx run backend:migrate",
     "deploy:backend": "nx deploy backend",
     "deploy:webui": "nx generate-env-variables webui --skipNxCache && nx deploy webui --skipNxCache",
     "deploy:webui:production": "nx generate-env-variables webui --configuration production --skipNxCache && nx deploy webui --configuration production --skipNxCache",
