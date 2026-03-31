@@ -19,7 +19,7 @@
     "generate-env-variables": {
       "command": "sh scripts/frontend/generateEnvVariables.sh",
       "configurations": {
-        "development": [],
+        "development": {},
         "production": {
           "args": ["production"]
         }
@@ -30,7 +30,10 @@
       "defaultConfiguration": "development"
     },
     "deploy": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        { "target": "generate-env-variables", "params": "forward" },
+        { "target": "build", "params": "forward" }
+      ],
       "command": "sh scripts/frontend/deploy.sh"
     }
   }
