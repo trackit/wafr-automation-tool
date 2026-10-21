@@ -46,7 +46,7 @@ export class AIServiceBedrock implements AIService {
     const { prompt, prefill, inferenceConfig } = args;
 
     const command = new ConverseStreamCommand({
-      modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+      modelId: 'us.zai.glm-5.3',
       messages: [
         {
           role: ConversationRole.USER,
@@ -68,6 +68,7 @@ export class AIServiceBedrock implements AIService {
         temperature: 0,
         ...inferenceConfig,
       },
+      additionalModelRequestFields: { reasoning_effort: 'medium' },
     });
 
     const response = await this.client.send(command);
