@@ -276,7 +276,7 @@ In both cases, a complete analysis takes a long time, depending on the services 
 
 ### Requirements
 
-- Claude 4 enabled on your AWS account
+- Access to Z.AI GLM 5.3 on Amazon Bedrock enabled on your AWS account (model ID `zai.glm-5.3`, invoked through the `us.zai.glm-5.3` cross-Region inference profile)
 
 ### Local
 
