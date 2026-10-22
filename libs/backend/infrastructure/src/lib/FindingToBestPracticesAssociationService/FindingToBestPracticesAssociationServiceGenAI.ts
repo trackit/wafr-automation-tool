@@ -284,10 +284,13 @@ export class FindingToBestPracticesAssociationServiceGenAI
           inferenceConfig,
         });
 
-        const trimmedAIResponse = stringifiedAIResponse.trim();
-        const builtArray = trimmedAIResponse.startsWith('[')
-          ? trimmedAIResponse
-          : '[' + trimmedAIResponse;
+        const unfencedAIResponse = stringifiedAIResponse
+          .trim()
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```$/, '');
+        const builtArray = unfencedAIResponse.startsWith('[')
+          ? unfencedAIResponse
+          : '[' + unfencedAIResponse;
 
         this.logger.debug('stringifiedAIResponse', {
           stringifiedAIResponse,
