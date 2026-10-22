@@ -284,12 +284,17 @@ export class FindingToBestPracticesAssociationServiceGenAI
           inferenceConfig,
         });
 
+        const trimmedAIResponse = stringifiedAIResponse.trim();
+        const builtArray = trimmedAIResponse.startsWith('[')
+          ? trimmedAIResponse
+          : '[' + trimmedAIResponse;
+
         this.logger.debug('stringifiedAIResponse', {
           stringifiedAIResponse,
-          builtArray: '[' + stringifiedAIResponse.trim(),
+          builtArray,
         });
 
-        const aiResponse = parseJsonArray('[' + stringifiedAIResponse.trim());
+        const aiResponse = parseJsonArray(builtArray);
         const findingIdToBestPracticeIdAssociations =
           FindingIdToBestPracticeIdAssociationsSchema.parse(aiResponse);
 
