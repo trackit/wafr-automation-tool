@@ -576,6 +576,71 @@ describe('FindingToBestPracticesAssociationServiceGenAI', () => {
       ]);
     });
 
+    it('should handle an AI response wrapped in a markdown code fence', async () => {
+      const { aiService, findingToBestPracticesAssociationServiceGenAI } =
+        setup();
+      mockedReadFileSync.mockImplementation((path) => {
+        if (String(path).includes('static-prompt.txt')) {
+          return 'This is a prompt.\n';
+        }
+        if (String(path).includes('dynamic-prompt.txt')) {
+          return 'This is the dynamic part of the prompt.';
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      });
+      const pillars = [
+        PillarMother.basic()
+          .withId('pillar-1')
+          .withQuestions([
+            QuestionMother.basic()
+              .withId('question-1')
+              .withBestPractices([
+                BestPracticeMother.basic().withId('bp1').build(),
+              ])
+              .build(),
+          ])
+          .build(),
+      ];
+      const findings = [
+        FindingMother.basic()
+          .withId('prowler#1')
+          .withRiskDetails('risk details 1')
+          .withStatusDetail('status detail 1')
+          .build(),
+      ];
+      const converse = vi.spyOn(aiService, 'converse').mockResolvedValue(
+        '```json\n' +
+          JSON.stringify([
+            {
+              findingId: 'prowler#1',
+              bestPracticeId: 'pillar-1#question-1#bp1',
+            },
+          ]) +
+          '\n```',
+      );
+      const result =
+        await findingToBestPracticesAssociationServiceGenAI.associateFindingsToBestPractices(
+          {
+            scanningTool: ScanningTool.PROWLER,
+            findings,
+            pillars,
+          },
+        );
+      expect(converse).toHaveBeenCalledTimes(1);
+      expect(result).toEqual([
+        {
+          finding: findings[0],
+          bestPractices: [
+            {
+              pillarId: 'pillar-1',
+              questionId: 'question-1',
+              bestPracticeId: 'bp1',
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should retry on invalid JSON AI response', async () => {
       const { aiService, findingToBestPracticesAssociationServiceGenAI } =
         setup();
