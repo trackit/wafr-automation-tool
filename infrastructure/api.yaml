@@ -2241,3 +2241,6 @@ Outputs:
   IdentityPoolId:
     Description: Identity Pool ID
     Value: !Ref IdentityPool
+  MigrationRunnerFunctionArn:
+    Description: Migration Runner Lambda ARN
+    Value: !GetAtt MigrationRunnerFunction.Arn
