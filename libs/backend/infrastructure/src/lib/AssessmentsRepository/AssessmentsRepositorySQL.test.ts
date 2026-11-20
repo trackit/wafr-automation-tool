@@ -1965,8 +1965,7 @@ describe('AssessmentsRepositorySQL', () => {
 });
 
 const setup = () => {
-  reset();
-  registerTestInfrastructure();
-
+  // Reuse the client manager initialized in beforeAll: calling reset() here
+  // would create a new manager per test and leak its connection pools.
   return { repository: new AssessmentsRepositorySQL() };
 };
