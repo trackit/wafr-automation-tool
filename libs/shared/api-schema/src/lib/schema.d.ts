@@ -510,21 +510,6 @@ export interface components {
             /** @description Total number of findings */
             findings: number;
         };
-        /** AssessmentVersion */
-        AssessmentVersion: {
-            version: number;
-            assessmentId: string;
-            /** Format: date-time */
-            createdAt: string;
-            createdBy: string;
-            executionArn?: string;
-            /** Format: date-time */
-            finishedAt?: string;
-            error?: components["schemas"]["AssessmentError"];
-            wafrWorkloadArn?: string;
-            exportRegion?: string;
-            pillars: components["schemas"]["Pillar"][];
-        };
         /** AssessmentVersionSummary */
         AssessmentVersionSummary: {
             version: number;
