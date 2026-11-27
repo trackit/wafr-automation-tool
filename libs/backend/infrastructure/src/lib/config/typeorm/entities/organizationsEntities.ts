@@ -78,7 +78,9 @@ export class OpportunityTeamMemberEntity {
   @ManyToOne(
     () => AceIntegrationEntity,
     (aceIntegration) => aceIntegration.opportunityTeamMembers,
-    { onDelete: 'CASCADE' },
+    // domain is part of the primary key: a team member removed from the
+    // integration must be deleted, not have its domain set to null.
+    { onDelete: 'CASCADE', orphanedRowAction: 'delete' },
   )
   @JoinColumn({ name: 'domain', referencedColumnName: 'domain' })
   aceIntegration!: AceIntegrationEntity;

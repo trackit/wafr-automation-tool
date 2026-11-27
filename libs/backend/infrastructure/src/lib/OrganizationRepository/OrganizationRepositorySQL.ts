@@ -26,7 +26,26 @@ export class OrganizationRepositorySQL implements OrganizationRepository {
   public async save(organization: Organization): Promise<void> {
     const repo = await this.repo();
 
-    const entity = repo.create(organization);
+    // The domain model does not carry the domain on the ACE integration and
+    // its team members, but it is their primary key: set it explicitly so that
+    // re-saving an existing organization updates them instead of inserting
+    // rows with a null domain.
+    const { aceIntegration } = organization;
+    const entity = repo.create({
+      ...organization,
+      aceIntegration: aceIntegration
+        ? {
+            ...aceIntegration,
+            domain: organization.domain,
+            opportunityTeamMembers: aceIntegration.opportunityTeamMembers.map(
+              (opportunityTeamMember) => ({
+                ...opportunityTeamMember,
+                domain: organization.domain,
+              }),
+            ),
+          }
+        : undefined,
+    });
 
     await Promise.all([
       repo.save(entity),
