@@ -55,6 +55,85 @@ describe('OrganizationRepositorySQL', () => {
       expect(savedOrganization).toEqual(organization);
     });
 
+    it('should update an existing organization with opportunity team members', async () => {
+      const { repository } = setup();
+
+      const organization = OrganizationMother.basic()
+        .withDomain('organization1')
+        .withFreeAssessmentsLeft(2)
+        .withAceIntegration({
+          roleArn: 'arn:aws:iam::123456789012:role/testRole',
+          opportunityTeamMembers: [
+            {
+              firstName: 'John',
+              lastName: 'Doe',
+              email: 'johndoe@test.io',
+            },
+            {
+              firstName: 'Jane',
+              lastName: 'Doe',
+              email: 'janedoe@test.io',
+            },
+          ],
+          solutions: ['solution1'],
+        })
+        .build();
+      await repository.save(organization);
+
+      const existingOrganization = await repository.get(organization.domain);
+      if (!existingOrganization) {
+        throw new Error('Organization was not saved');
+      }
+      existingOrganization.freeAssessmentsLeft = 1;
+      await repository.save(existingOrganization);
+
+      const updatedOrganization = await repository.get(organization.domain);
+      expect(updatedOrganization).toEqual({
+        ...organization,
+        freeAssessmentsLeft: 1,
+      });
+    });
+
+    it('should remove opportunity team members missing from an updated organization', async () => {
+      const { repository } = setup();
+
+      const keptTeamMember = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'johndoe@test.io',
+      };
+      const removedTeamMember = {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'janedoe@test.io',
+      };
+      const organization = OrganizationMother.basic()
+        .withDomain('organization1')
+        .withAceIntegration({
+          roleArn: 'arn:aws:iam::123456789012:role/testRole',
+          opportunityTeamMembers: [keptTeamMember, removedTeamMember],
+          solutions: ['solution1'],
+        })
+        .build();
+      await repository.save(organization);
+
+      await repository.save(
+        OrganizationMother.basic()
+          .withDomain('organization1')
+          .withAceIntegration({
+            roleArn: 'arn:aws:iam::123456789012:role/testRole',
+            opportunityTeamMembers: [keptTeamMember],
+            solutions: ['solution1'],
+          })
+          .build(),
+      );
+
+      const updatedOrganization = await repository.get(organization.domain);
+      expect(
+        updatedOrganization?.aceIntegration?.opportunityTeamMembers,
+      ).toEqual([keptTeamMember]);
+    });
+
     it('should create the organization database', async () => {
       const { repository, clientManager } = setup();
       const createClientSpy = vitest.spyOn(clientManager, 'createClient');
